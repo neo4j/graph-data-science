@@ -100,7 +100,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         this.graph = graph;
         this.featureExtractors = featureExtractors;
         this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
-        this.randomSeed = randomSeed.orElseGet(System::nanoTime);
+        this.randomSeed = improveSeed(randomSeed.orElseGet(System::nanoTime));
         this.progressLogger = progressLogger;
 
         this.propertyVectors = new float[inputDimension][config.propertyDimension()];
@@ -293,6 +293,10 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         protected int next(int bits) {
             return (int) (nextLong() >>> (64-bits));
         }
+    }
+
+    private long improveSeed(long randomSeed) {
+        return new HighQualityRandom(randomSeed).nextLong();
     }
 
     private interface EmbeddingCombiner {
