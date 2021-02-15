@@ -60,6 +60,7 @@ class FastRPTest extends AlgoTestBase {
         .propertyDimension(DEFAULT_EMBEDDING_DIMENSION/2)
         .featureProperties(List.of("f1", "f2"))
         .addIterationWeight(1.0D)
+        .randomSeed(42L)
         .build();
 
     private static final String DB_CYPHER =
@@ -143,6 +144,53 @@ class FastRPTest extends AlgoTestBase {
         }
         l2Normalize(expected);
         assertArrayEquals(expected, embeddings.get(0));
+    }
+
+    @Test
+    void shouldBeIndpendentOfPartitioning() {
+        GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabel("Node1")
+            .addNodeLabel("Node2")
+            .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
+            .build();
+
+        Graph graph = graphLoader.graph();
+
+        FastRP fastRP = new FastRP(
+            graph,
+            DEFAULT_CONFIG,
+            defaultFeatureExtractors(graph),
+            progressLogger,
+            AllocationTracker.empty()
+        );
+
+        fastRP.compute();
+        HugeObjectArray<float[]> embeddings = fastRP.embeddings();
+
+        var sequentialConfig = FastRPBaseConfig.builder()
+            .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+            .propertyDimension(DEFAULT_EMBEDDING_DIMENSION/2)
+            .featureProperties(List.of("f1", "f2"))
+            .addIterationWeight(1.0D)
+            .concurrency(1)
+            .randomSeed(42L)
+            .build();
+
+        FastRP fastRPSeq = new FastRP(
+            graph,
+            sequentialConfig,
+            defaultFeatureExtractors(graph),
+            progressLogger,
+            AllocationTracker.empty()
+        );
+
+        fastRPSeq.compute();
+        HugeObjectArray<float[]> embeddingsSequential = fastRPSeq.embeddings();
+
+        for (int i = 0; i < graph.nodeCount(); i++) {
+            assertArrayEquals(embeddingsSequential.get(i), embeddings.get(i));
+        }
     }
 
     @Test

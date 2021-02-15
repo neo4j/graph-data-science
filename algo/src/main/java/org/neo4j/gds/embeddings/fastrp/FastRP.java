@@ -60,7 +60,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     private final HugeObjectArray<float[]> embeddingA;
     private final HugeObjectArray<float[]> embeddingB;
     private final EmbeddingCombiner embeddingCombiner;
-    private final Optional<Long> randomSeed;
+    private final long randomSeed;
 
     private final int embeddingDimension;
     private final int baseEmbeddingDimension;
@@ -86,7 +86,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
-        this(graph, config, featureExtractors, progressLogger, tracker, Optional.empty());
+        this(graph, config, featureExtractors, progressLogger, tracker, config.randomSeed());
     }
 
     public FastRP(
@@ -100,7 +100,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         this.graph = graph;
         this.featureExtractors = featureExtractors;
         this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
-        this.randomSeed = randomSeed;
+        this.randomSeed = randomSeed.orElseGet(System::nanoTime);
         this.progressLogger = progressLogger;
 
         this.propertyVectors = new float[inputDimension][config.propertyDimension()];
@@ -145,13 +145,11 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     void initPropertyVectors() {
         int propertyDimension = embeddingDimension - baseEmbeddingDimension;
         float entryValue = (float) Math.sqrt(SPARSITY) / (float) Math.sqrt(propertyDimension);
-        var random = randomSeed
-            .map(seed -> ThreadLocal.withInitial(() -> new HighQualityRandom(seed)))
-            .orElse(ThreadLocal.withInitial(HighQualityRandom::new));
+        var random = new HighQualityRandom(randomSeed);
         for (int i = 0; i < inputDimension; i++) {
             this.propertyVectors[i] = new float[propertyDimension];
             for (int d = 0; d < propertyDimension; d++) {
-                this.propertyVectors[i][d] = computeRandomEntry(random.get(), entryValue);
+                this.propertyVectors[i][d] = computeRandomEntry(random, entryValue);
             }
         }
     }
@@ -261,14 +259,16 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
     private static class HighQualityRandom extends Random {
         private long u;
-        private long v = 4101842887655102017L;
-        private long w = 1;
-
-        public HighQualityRandom() {
-            this(System.nanoTime() + (13 * Thread.currentThread().getId()));
-        }
+        private long v;
+        private long w;
 
         public HighQualityRandom(long seed) {
+            reseed(seed);
+        }
+
+        public void reseed(long seed) {
+            v = 4101842887655102017L;
+            w = 1;
             u = seed ^ v;
             nextLong();
             v = u;
@@ -316,7 +316,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
         @Override
         public void run() {
-            var random = randomSeed.map(HighQualityRandom::new).orElse(new HighQualityRandom());
+            var random = new HighQualityRandom(0);
             for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
                 int degree = graph.degree(nodeId);
                 float scaling = degree == 0
@@ -324,6 +324,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                     : (float) Math.pow(degree, normalizationStrength);
 
                 float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
+                random.reseed(randomSeed ^ nodeId);
                 float[] randomVector = computeRandomVector(nodeId, random, entryValue);
                 embeddingB.set(nodeId, randomVector);
                 embeddingA.set(nodeId, new float[embeddingDimension]);

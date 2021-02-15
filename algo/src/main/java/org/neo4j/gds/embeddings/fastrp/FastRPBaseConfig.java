@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -56,6 +57,8 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
     default float normalizationStrength() {
         return 0.0f;
     }
+
+    Optional<Long> randomSeed();
 
     static void validateCommon(List<? extends Number> iterationWeights) {
         if (iterationWeights.isEmpty()) {
