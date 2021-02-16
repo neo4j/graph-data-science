@@ -65,8 +65,10 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
     }
 
     private PrimitiveSyncDoubleQueues(
-        HugeObjectArray<double[]> currentQueues, HugeAtomicLongArray currentTails,
-        HugeObjectArray<double[]> prevQueues, HugeAtomicLongArray prevTails,
+        HugeObjectArray<double[]> currentQueues,
+        HugeAtomicLongArray currentTails,
+        HugeObjectArray<double[]> prevQueues,
+        HugeAtomicLongArray prevTails,
         HugeAtomicLongArray referenceCounts
     ) {
         super(currentQueues, currentTails, referenceCounts);
