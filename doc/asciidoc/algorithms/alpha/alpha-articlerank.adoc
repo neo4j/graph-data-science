@@ -115,8 +115,6 @@ ORDER BY score DESC
 |===
 --
 
-[role=query-example, no-result=true]
---
 .The following will run the algorithm and write back results:
 [source, cypher]
 ----
@@ -125,9 +123,9 @@ CALL gds.alpha.articleRank.write({
   relationshipProjection: 'CITES',
   maxIterations:20, dampingFactor:0.85,
   writeProperty: "pagerank"
-}) YIELD nodes
+}) YIELD
+  nodes, maxIterations, createMillis, computeMillis, writeMillis, dampingFactor, writeProperty
 ----
---
 
 Paper 0 is the most important paper, but it's only the 2nd most cited paper - Paper 1 has more citations.
 However, Paper 1 cites Paper 0, which lets us see that it's not only the number of incoming links that is important, but also the importance of the papers behind those links.
