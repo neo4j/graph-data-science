@@ -153,8 +153,8 @@ public abstract class PrimitiveDoubleQueues {
             if (refCount < 0) continue;
 
             // We increment the reference count by 1 to indicate that we
-            // want to a shared reference to the queue in order to insert
-            // our message.
+            // want to add a shared reference to the queue in order to
+            // insert our message.
             if (referenceCounts.compareAndSet(nodeId, refCount, refCount + 1)) {
                 break;
             }
