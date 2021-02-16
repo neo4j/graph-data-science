@@ -124,7 +124,7 @@ CALL gds.alpha.articleRank.write({
   maxIterations:20, dampingFactor:0.85,
   writeProperty: "pagerank"
 }) YIELD
-  nodes, maxIterations, createMillis, computeMillis, writeMillis, dampingFactor, writeProperty
+  nodes, iterations, createMillis, computeMillis, writeMillis, dampingFactor, writeProperty
 ----
 
 Paper 0 is the most important paper, but it's only the 2nd most cited paper - Paper 1 has more citations.
