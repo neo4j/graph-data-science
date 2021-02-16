@@ -94,6 +94,7 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
                        "  holdoutFraction: 0.2, " +
                        "  validationFolds: 5, " +
                        "  randomSeed: 2," +
+                       "  concurrency: 1," +
                        "  params: [" +
                        "    {penalty: 0.0625, maxIterations: 1000}, " +
                        "    {penalty: 0.125, maxIterations: 1000}, " +

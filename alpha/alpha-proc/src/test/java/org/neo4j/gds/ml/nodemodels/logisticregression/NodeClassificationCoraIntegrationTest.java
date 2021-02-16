@@ -164,6 +164,7 @@ class NodeClassificationCoraIntegrationTest {
             "  holdoutFraction: 0.2, " +
             "  validationFolds: 5, " +
             "  randomSeed: 2," +
+            "  concurrency: 1," +
             "  params: [" +
             "    {penalty: 9.999999999999991E-5, maxIterations: 1000}, " +
             "    {penalty: 7.742636826811261E-4, maxIterations: 1000}, " +

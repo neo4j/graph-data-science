@@ -226,6 +226,7 @@ public class NodeClassificationTrain
         var nlrConfig = MultiClassNLRTrainConfig.of(
             config.featureProperties(),
             config.targetProperty(),
+            config.concurrency(),
             modelParams
         );
         var train = new MultiClassNLRTrain(graph, trainSet, nlrConfig, log);

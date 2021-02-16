@@ -206,6 +206,7 @@ class LinkPredictionCoraIntegrationTest {
             "  validationFolds: 5, " +
             "  classRatio: 673.6," + // (2707 * 2706 - 10858) / 10858
             "  randomSeed: 2," +
+            "  concurrency: 1," +
             "  params: [" +
             "    {penalty: 9.999999999999991E-5, maxIterations: 1000}, " +
             "    {penalty: 0.3593813663804625, maxIterations: 1000}, " +

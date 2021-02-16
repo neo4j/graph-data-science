@@ -228,10 +228,15 @@ public class LinkPredictionTrain
         HugeLongArray trainSet,
         Map<String, Object> modelParams
     ) {
+        var llrConfig = LinkLogisticRegressionTrainConfig.of(
+            config.featureProperties(),
+            config.concurrency(),
+            modelParams
+        );
         var llrTrain = new LinkLogisticRegressionTrain(
             trainGraph,
             trainSet,
-            LinkLogisticRegressionTrainConfig.of(config.featureProperties(), modelParams),
+            llrConfig,
             log
         );
 

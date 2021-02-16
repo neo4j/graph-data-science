@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.math.L2Norm;
 
 import java.util.List;
 
@@ -61,6 +62,7 @@ class LinkLogisticRegressionTrainTest {
                 .featureProperties(List.of("a", "b"))
                 .maxIterations(100000)
                 .tolerance(1e-4)
+                .concurrency(1)
                 .build();
 
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
@@ -82,6 +84,41 @@ class LinkLogisticRegressionTrainTest {
     }
 
     @Test
+    void shouldComputeWithDefaultAdamOptimizerAndStreakStopperConcurrently() {
+        var config =
+            ImmutableLinkLogisticRegressionTrainConfig.builder()
+                .featureProperties(List.of("a", "b"))
+                .penalty(1.0)
+                .maxIterations(1000000)
+                .concurrency(4)
+                .sharedUpdater(false)
+                .tolerance(1e-10)
+                .build();
+
+        var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        trainSet.setAll(i -> i);
+        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, new TestLog());
+
+        var result = linearRegression.compute().modelData();
+
+        assertThat(result).isNotNull();
+
+        var trainedWeights = result.weights();
+        assertThat(trainedWeights.dimension(ROWS_INDEX)).isEqualTo(1);
+        assertThat(trainedWeights.dimension(COLUMNS_INDEX)).isEqualTo(3);
+
+        var trainedData = trainedWeights.data().data();
+        var expectedData = new double[]{-0.16207697085323056, 0.10360002113065836, 0.04906215177508012};
+
+        var deviation = new double[3];
+        for (int i = 0; i < 3; i++) {
+            deviation[i] = (trainedData[i] - expectedData[i]);
+        }
+        // could be flaky but passed 1327 times in a row
+        assertThat(L2Norm.l2Norm(deviation) / L2Norm.l2Norm(expectedData)).isLessThan(0.05);
+    }
+
+    @Test
     void usingPenaltyShouldGiveSmallerAbsoluteValueWeights() {
         var config =
             ImmutableLinkLogisticRegressionTrainConfig.builder()
@@ -89,6 +126,7 @@ class LinkLogisticRegressionTrainTest {
                 .penalty(1)
                 .maxIterations(100000)
                 .tolerance(1e-4)
+                .concurrency(1)
                 .build();
 
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());

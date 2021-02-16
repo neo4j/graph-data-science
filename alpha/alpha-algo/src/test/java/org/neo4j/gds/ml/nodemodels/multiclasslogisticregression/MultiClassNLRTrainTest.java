@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.math.L2Norm;
 
 import java.util.List;
 
@@ -58,6 +59,7 @@ class MultiClassNLRTrainTest {
             .featureProperties(List.of("a", "x"))
             .targetProperty("t")
             .penalty(NO_PENALTY)
+            .concurrency(1)
             .build();
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
@@ -87,6 +89,7 @@ class MultiClassNLRTrainTest {
             .targetProperty("t")
             .penalty(NO_PENALTY)
             .maxIterations(100000)
+            .concurrency(1)
             .tolerance(1e-4)
             .build();
 
@@ -116,5 +119,45 @@ class MultiClassNLRTrainTest {
         for (int i = 0; i < classes.length - 1; i++) {
             assertThat(classes[i]).isLessThan(classes[i+1]);
         }
+    }
+
+    @Test
+    void shouldComputeWithDefaultAdamOptimizerAndStreakStopperConcurrently() {
+        var config = ImmutableMultiClassNLRTrainConfig.builder()
+            .featureProperties(List.of("a", "b"))
+            .targetProperty("t")
+            .penalty(1.0)
+            .maxIterations(1000000)
+            .concurrency(4)
+            .sharedUpdater(false)
+            .tolerance(1e-10)
+            .build();
+
+        var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        nodeIds.setAll(i -> i);
+        var algo = new MultiClassNLRTrain(graph, nodeIds, config, new TestLog());
+
+        var result = algo.compute();
+
+        assertThat(result).isNotNull();
+
+        var trainedWeights = result.weights();
+        assertThat(trainedWeights.dimension(ROWS_INDEX)).isEqualTo(3);
+        assertThat(trainedWeights.dimension(COLUMNS_INDEX)).isEqualTo(3);
+
+        var trainedData = trainedWeights.data().data();
+        // print trainedData to find out expected
+        var expectedData = new double[] {
+            0.022915472581588624, -0.09767437979347163, -0.21143317671562675,
+            0.09183252837946605, -0.0575686740478883, 0.3521360232938111,
+            -0.11474625069183589, 0.15521199231546134, -0.42655763365466565
+        };
+        var deviation = new double[9];
+        for (int i = 0; i < 9; i++) {
+            deviation[i] = (trainedData[i] - expectedData[i]);
+        }
+
+        // could be flaky but passed 1212 times in a row
+        assertThat(L2Norm.l2Norm(deviation) / L2Norm.l2Norm(expectedData)).isLessThan(0.05);
     }
 }

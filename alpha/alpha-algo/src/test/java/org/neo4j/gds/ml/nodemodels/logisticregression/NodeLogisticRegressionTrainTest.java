@@ -56,6 +56,7 @@ class NodeLogisticRegressionTrainTest {
                 .maxIterations(100000)
                 .tolerance(1e-4)
                 .penalty(0.0)
+                .concurrency(1)
                 .build();
         var linearRegression = new NodeLogisticRegressionTrain(graph, config, new TestLog());
 

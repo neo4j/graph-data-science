@@ -20,8 +20,9 @@
 package org.neo4j.gds.ml;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.config.ConcurrencyConfig;
 
-public interface TrainingConfig {
+public interface TrainingConfig extends ConcurrencyConfig {
 
     @Value.Default
     default int batchSize() {

@@ -62,9 +62,8 @@ public class MultiClassNLRTrain {
             config.penalty()
         );
         var training = new Training(config, log, graph.nodeCount());
-        // TODO: concurrency?
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
-        training.train(objective, queueSupplier, 1);
+        training.train(objective, queueSupplier, config.concurrency());
 
         return objective.modelData();
     }

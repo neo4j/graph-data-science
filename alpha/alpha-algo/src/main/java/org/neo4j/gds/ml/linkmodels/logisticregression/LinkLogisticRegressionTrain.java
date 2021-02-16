@@ -60,8 +60,7 @@ public class LinkLogisticRegressionTrain {
         );
         var training = new Training(config, log, graph.nodeCount());
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
-        // TODO: concurrency
-        training.train(objective, queueSupplier, 1);
+        training.train(objective, queueSupplier, config.concurrency());
         return new LinkLogisticRegressionPredictor(objective.modelData);
     }
 }
