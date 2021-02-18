@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.MultiCSRGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.NodeProperty;
@@ -464,7 +465,7 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public CSRGraph getGraph(
+    public MultiCSRGraph getGraph(
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty
@@ -474,7 +475,7 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public CSRGraph getUnion() {
+    public MultiCSRGraph getUnion() {
         return UnionGraph.of(relationships
             .keySet()
             .stream()
@@ -597,55 +598,73 @@ public class CSRGraphStore implements GraphStore {
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
-        return createGraph(nodeLabels, singletonList(relationshipType), maybeRelationshipProperty);
+        Optional<NodeMapping> filteredNodes = getFilteredNodeMapping(nodeLabels);
+        Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(nodeLabels);
+        return createGraphFromRelType(filteredNodes, filteredNodeProperties, relationshipType, maybeRelationshipProperty);
     }
 
-    private CSRGraph createGraph(
+    private MultiCSRGraph createGraph(
         Collection<NodeLabel> filteredLabels,
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty
     ) {
-        boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
+        Optional<NodeMapping> filteredNodes = getFilteredNodeMapping(filteredLabels);
+        Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
 
-        Optional<NodeMapping> filteredNodes = loadAllNodes || nodes.containsOnlyAllNodesLabel()
-            ? Optional.empty()
-            : Optional.of(nodes.withFilteredLabels(filteredLabels, concurrency));
-
-        List<CSRGraph> filteredGraphs = relationships.entrySet().stream()
-            .filter(relTypeAndCSR -> relationshipTypes.contains(relTypeAndCSR.getKey()))
-            .map(relTypeAndCSR -> {
-                Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
-
-                RelationshipType relType = relTypeAndCSR.getKey();
-                var graphSchema = GraphSchema.of(
-                    schema().nodeSchema(),
-                    schema()
-                        .relationshipSchema()
-                        .singleTypeAndProperty(relTypeAndCSR.getKey(), maybeRelationshipProperty)
-                );
-
-                HugeGraph initialGraph = HugeGraph.create(
-                    nodes,
-                    graphSchema,
-                    filteredNodeProperties,
-                    relTypeAndCSR.getValue(),
-                    maybeRelationshipProperty.map(propertyKey -> relationshipProperties
-                        .get(relType)
-                        .get(propertyKey).values()),
-                    tracker
-                );
-
-                if (filteredNodes.isPresent()) {
-                    return new NodeFilteredGraph(initialGraph, filteredNodes.get());
-                } else {
-                    return initialGraph;
-                }
-            })
+        List<CSRGraph> filteredGraphs = relationships.keySet().stream()
+            .filter(relationshipTypes::contains)
+            .map(topology -> createGraphFromRelType(
+                filteredNodes,
+                filteredNodeProperties,
+                topology,
+                maybeRelationshipProperty
+            ))
             .collect(Collectors.toList());
 
         filteredGraphs.forEach(graph -> graph.canRelease(false));
         createdGraphs.addAll(filteredGraphs);
         return UnionGraph.of(filteredGraphs);
+    }
+
+    @NotNull
+    private Optional<NodeMapping> getFilteredNodeMapping(Collection<NodeLabel> filteredLabels) {
+        boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
+
+        return loadAllNodes || nodes.containsOnlyAllNodesLabel()
+            ? Optional.empty()
+            : Optional.of(nodes.withFilteredLabels(filteredLabels, concurrency));
+    }
+
+    private CSRGraph createGraphFromRelType(
+        Optional<NodeMapping> filteredNodes,
+        Map<String, NodeProperties> filteredNodeProperties,
+        RelationshipType relationshipType,
+        Optional<String> maybeRelationshipProperty
+    ) {
+        Relationships.Topology topology = relationships.get(relationshipType);
+        var graphSchema = GraphSchema.of(
+            schema().nodeSchema(),
+            schema()
+                .relationshipSchema()
+                .singleTypeAndProperty(relationshipType, maybeRelationshipProperty)
+        );
+
+        HugeGraph initialGraph = HugeGraph.create(
+            nodes,
+            graphSchema,
+            filteredNodeProperties,
+            topology,
+            maybeRelationshipProperty.map(propertyKey -> relationshipProperties
+                .get(relationshipType)
+                .get(propertyKey).values()),
+            tracker
+        );
+
+        if (filteredNodes.isPresent()) {
+            return new NodeFilteredGraph(initialGraph, filteredNodes.get());
+        } else {
+            return initialGraph;
+        }
     }
 
     private Map<String, NodeProperties> filterNodeProperties(Collection<NodeLabel> labels) {
