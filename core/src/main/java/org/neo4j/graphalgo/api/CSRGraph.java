@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphalgo.RelationshipType;
+
 /**
  * A subtype of {@link Graph} which exposes datastructures specific to the csr graph representation
  * such as {@link AdjacencyList} and {@link AdjacencyOffsets}.
@@ -26,6 +28,8 @@ package org.neo4j.graphalgo.api;
 public interface CSRGraph extends Graph {
 
     Relationships.Topology relationshipTopology();
+
+    RelationshipType relationshipType();
 
     @Override
     CSRGraph concurrentCopy();

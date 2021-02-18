@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphalgo.RelationshipType;
+
 public abstract class CSRFilterGraph extends FilterGraph implements CSRGraph {
 
     protected final CSRGraph graph;
@@ -26,6 +28,11 @@ public abstract class CSRFilterGraph extends FilterGraph implements CSRGraph {
     public CSRFilterGraph(CSRGraph graph) {
         super(graph);
         this.graph = graph;
+    }
+
+    @Override
+    public RelationshipType relationshipType() {
+        return graph.relationshipType();
     }
 
     @Override
