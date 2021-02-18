@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.loading;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.MultiCSRGraph;
@@ -593,7 +592,7 @@ public class CSRGraphStore implements GraphStore {
         });
     }
 
-    private CSRGraph createGraph(
+    private MultiCSRGraph createGraph(
         Collection<NodeLabel> nodeLabels,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
@@ -611,7 +610,7 @@ public class CSRGraphStore implements GraphStore {
         Optional<NodeMapping> filteredNodes = getFilteredNodeMapping(filteredLabels);
         Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
 
-        List<CSRGraph> filteredGraphs = relationships.keySet().stream()
+        List<MultiCSRGraph> filteredGraphs = relationships.keySet().stream()
             .filter(relationshipTypes::contains)
             .map(topology -> createGraphFromRelType(
                 filteredNodes,
@@ -635,7 +634,7 @@ public class CSRGraphStore implements GraphStore {
             : Optional.of(nodes.withFilteredLabels(filteredLabels, concurrency));
     }
 
-    private CSRGraph createGraphFromRelType(
+    private MultiCSRGraph createGraphFromRelType(
         Optional<NodeMapping> filteredNodes,
         Map<String, NodeProperties> filteredNodeProperties,
         RelationshipType relationshipType,

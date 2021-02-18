@@ -21,9 +21,10 @@ package org.neo4j.graphalgo.core.huge;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.CSRGraph;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.ImmutableTopology;
+import org.neo4j.graphalgo.api.MultiCSRGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -35,18 +36,21 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class UnionGraph implements CSRGraph {
+public final class UnionGraph implements MultiCSRGraph {
 
-    private final CSRGraph first;
-    private final List<? extends CSRGraph> graphs;
+    private final MultiCSRGraph first;
+    private final List<? extends MultiCSRGraph> graphs;
+    private final Map<RelationshipType, Relationships.Topology> relationshipTypeTopologies;
 
-    public static CSRGraph of(List<? extends CSRGraph> graphs) {
+    public static MultiCSRGraph of(List<? extends MultiCSRGraph> graphs) {
         if (graphs.isEmpty()) {
             throw new IllegalArgumentException("no graphs");
         }
@@ -56,9 +60,11 @@ public final class UnionGraph implements CSRGraph {
         return new UnionGraph(graphs);
     }
 
-    private UnionGraph(List<? extends CSRGraph> graphs) {
+    private UnionGraph(List<? extends MultiCSRGraph> graphs) {
         first = graphs.iterator().next();
         this.graphs = graphs;
+        this.relationshipTypeTopologies = new HashMap<>();
+        graphs.forEach(graph -> relationshipTypeTopologies.putAll(graph.relationshipTopologies()));
     }
 
     @Override
@@ -146,31 +152,58 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
-        for (Graph graph : graphs) {
-            graph.forEachRelationship(nodeId, consumer);
-        }
+    public Map<RelationshipType, Relationships.Topology> relationshipTopologies() {
+        return relationshipTypeTopologies;
     }
 
     @Override
-    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
-        for (Graph graph : graphs) {
-            graph.forEachRelationship(nodeId, fallbackValue, consumer);
-        }
+    public void forEachRelationship(
+        long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer
+    ) {
+        graphs
+            .stream()
+            .filter(graph -> relationshipTypes.containsAll(graph.relationshipTypes()))
+            .forEach(graph -> graph.forEachRelationship(nodeId, consumer));
     }
 
     @Override
-    public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
+    public void forEachRelationship(
+        long nodeId,
+        double fallbackValue,
+        Set<RelationshipType> relationshipTypes,
+        RelationshipWithPropertyConsumer consumer
+    ) {
+        graphs
+            .stream()
+            .filter(graph -> relationshipTypes.containsAll(graph.relationshipTypes()) || relationshipTypes.isEmpty())
+            .forEach(graph -> graph.forEachRelationship(nodeId, fallbackValue, consumer));
+    }
+
+    @Override
+    public Stream<RelationshipCursor> streamRelationships(
+        long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes
+    ) {
         return graphs
             .stream()
+            .filter(graph -> relationshipTypes.containsAll(graph.relationshipTypes()) || relationshipTypes.isEmpty())
             .flatMap(graph -> graph.streamRelationships(nodeId, fallbackValue));
+    }
+
+    @Override
+    public Set<RelationshipType> relationshipTypes(long source, long target) {
+        return null;
+    }
+
+    @Override
+    public Set<RelationshipType> availableRelationshipTypes() {
+        return null;
     }
 
     @Override
     public int degree(long nodeId) {
         int degree = 0;
 
-        for (CSRGraph graph : graphs) {
+        for (MultiCSRGraph graph : graphs) {
             degree += graph.degree(nodeId);
         }
 
@@ -188,8 +221,8 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public CSRGraph concurrentCopy() {
-        return of(graphs.stream().map(CSRGraph::concurrentCopy).collect(Collectors.toList()));
+    public MultiCSRGraph concurrentCopy() {
+        return of(graphs.stream().map(MultiCSRGraph::concurrentCopy).collect(Collectors.toList()));
     }
 
     /**
@@ -256,15 +289,16 @@ public final class UnionGraph implements CSRGraph {
         return true;
     }
 
-    @Override
     public Relationships.Topology relationshipTopology() {
         var adjacencyLists = graphs
             .stream()
-            .map(graph -> graph.relationshipTopology().list())
+            .flatMap(graph -> graph.relationshipTopologies().values().stream())
+            .map(Relationships.Topology::list)
             .collect(Collectors.toList());
         var adjacencyOffsets = graphs
             .stream()
-            .map(graph -> graph.relationshipTopology().offsets())
+            .flatMap(graph -> graph.relationshipTopologies().values().stream())
+            .map(Relationships.Topology::offsets)
             .collect(Collectors.toList());
 
         return ImmutableTopology.builder()

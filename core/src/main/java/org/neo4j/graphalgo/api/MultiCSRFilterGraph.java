@@ -24,14 +24,32 @@ import org.neo4j.graphalgo.RelationshipType;
 import java.util.Map;
 import java.util.Set;
 
-public interface MultiCSRGraph extends MultiGraph {
+public abstract class MultiCSRFilterGraph extends MultiFilterGraph implements MultiCSRGraph {
 
-    Map<RelationshipType, Relationships.Topology> relationshipTopologies();
+    protected final MultiCSRGraph graph;
+
+    public MultiCSRFilterGraph(MultiCSRGraph graph) {
+        super(graph);
+        this.graph = graph;
+    }
 
     @Override
-    MultiCSRGraph concurrentCopy();
+    public MultiCSRGraph concurrentCopy() {
+        return graph.concurrentCopy();
+    }
 
-    default Set<RelationshipType> relationshipTypes() {
-        return relationshipTopologies().keySet();
+    @Override
+    public Map<RelationshipType, Relationships.Topology> relationshipTopologies() {
+        return graph.relationshipTopologies();
+    }
+
+    @Override
+    public Set<RelationshipType> relationshipTypes(long source, long target) {
+        return graph.relationshipTypes();
+    }
+
+    @Override
+    public Set<RelationshipType> availableRelationshipTypes() {
+        return graph.availableRelationshipTypes();
     }
 }

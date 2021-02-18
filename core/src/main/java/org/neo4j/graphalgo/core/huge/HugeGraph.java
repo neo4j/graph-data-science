@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
-import org.neo4j.graphalgo.api.CSRGraph;
+import org.neo4j.graphalgo.api.MultiCSRGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.PropertyCursor;
@@ -47,6 +47,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.Cursor;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * Huge Graph contains two array like data structures.
@@ -82,7 +83,7 @@ import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.Cursor;
  * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">more abount vlong</a>
  * @see <a href="https://shipilev.net/jvm-anatomy-park/4-tlab-allocation/">more abount TLAB allocation</a>
  */
-public class HugeGraph implements CSRGraph {
+public class HugeGraph implements MultiCSRGraph {
 
     public static final double NO_PROPERTY_VALUE = Double.NaN;
     private static final int NO_SUCH_NODE = 0;
@@ -240,10 +241,8 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public RelationshipType relationshipType() {
-        return schema.relationshipSchema().properties().keySet().stream().findFirst().orElseThrow(
-            () -> new IllegalStateException("Missing relationship type")
-        );
+    public Set<RelationshipType> relationshipTypes() {
+        return schema.relationshipSchema().properties().keySet();
     }
 
     private double findPropertyValue(long fromId, long toId) {
@@ -296,6 +295,66 @@ public class HugeGraph implements CSRGraph {
             : AdjacencySpliterator.of(adjacencyCursor, propertyCursorForIteration(nodeId), nodeId);
 
         return StreamSupport.stream(spliterator, false);
+    }
+
+    @Override
+    public Map<RelationshipType, Relationships.Topology> relationshipTopologies() {
+        return Map.of(relationshipType(), relationshipTopology());
+    }
+
+    public Relationships.Topology relationshipTopology() {
+        return relationships().topology();
+    }
+
+    @Override
+    public void forEachRelationship(
+        long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer
+    ) {
+        assertSupportedRelationships(relationshipTypes);
+        forEachRelationship(nodeId, consumer);
+    }
+
+    @Override
+    public void forEachRelationship(
+        long nodeId,
+        double fallbackValue,
+        Set<RelationshipType> relationshipTypes,
+        RelationshipWithPropertyConsumer consumer
+    ) {
+        assertSupportedRelationships(relationshipTypes);
+        forEachRelationship(nodeId, fallbackValue, consumer);
+    }
+
+    @Override
+    public Stream<RelationshipCursor> streamRelationships(
+        long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes
+    ) {
+        assertSupportedRelationships(relationshipTypes);
+        return streamRelationships(nodeId, fallbackValue);
+    }
+
+    private void assertSupportedRelationships(Set<RelationshipType> relationshipTypes) {
+        if (!relationshipTypes.isEmpty() && (relationshipTypes.size() > 1 || !relationshipTypes.contains(relationshipType()))) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "One or more relationship types of %s in are not supported. This graph has a relationship of type %s.",
+                relationshipTypes,
+                relationshipType()
+            ));
+        }
+    }
+
+    private RelationshipType relationshipType() {
+        return relationshipTypes().iterator().next();
+    }
+
+    @Override
+    public Set<RelationshipType> relationshipTypes(long source, long target) {
+        return Set.of(relationshipType());
+    }
+
+    @Override
+    public Set<RelationshipType> availableRelationshipTypes() {
+        return Set.of(relationshipType());
     }
 
     @Override
@@ -482,11 +541,6 @@ public class HugeGraph implements CSRGraph {
             propertyOffsets,
             defaultPropertyValue
         );
-    }
-
-    @Override
-    public Relationships.Topology relationshipTopology() {
-        return relationships().topology();
     }
 
     @Override

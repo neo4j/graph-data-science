@@ -28,13 +28,15 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectConfig;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactory;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactoryLocator;
+import org.neo4j.graphalgo.api.MultiCSRFilterGraph;
+import org.neo4j.graphalgo.api.MultiCSRGraph;
 
-public class TestGraph extends CSRFilterGraph {
+public class TestGraph extends MultiCSRFilterGraph {
 
     private final IdFunction idFunction;
     private final String name;
 
-    public TestGraph(CSRGraph graph, IdFunction idFunction, String name) {
+    public TestGraph(MultiCSRGraph graph, IdFunction idFunction, String name) {
         super(graph);
         this.name = name;
         this.idFunction = idFunction;
@@ -63,7 +65,7 @@ public class TestGraph extends CSRFilterGraph {
     }
 
     @Override
-    public CSRGraph concurrentCopy() {
+    public MultiCSRGraph concurrentCopy() {
         return new TestGraph(graph.concurrentCopy(), idFunction, name);
     }
 

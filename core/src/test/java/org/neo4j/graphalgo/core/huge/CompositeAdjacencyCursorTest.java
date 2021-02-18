@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.huge;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
-import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -53,7 +52,7 @@ class CompositeAdjacencyCursorTest extends BaseTest {
 
     @BeforeEach
     void setup() {
-        adjacencyCursor = (CompositeAdjacencyCursor) ((CSRGraph)graph).relationshipTopology().list().decompressingCursor(0);
+        adjacencyCursor = (CompositeAdjacencyCursor) ((UnionGraph)graph).relationshipTopology().list().decompressingCursor(0);
     }
 
     @Test

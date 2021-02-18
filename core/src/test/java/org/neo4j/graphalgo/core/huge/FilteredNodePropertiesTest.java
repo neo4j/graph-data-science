@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.CSRGraph;
+import org.neo4j.graphalgo.api.MultiCSRGraph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -38,7 +38,7 @@ class FilteredNodePropertiesTest {
         " (b:A { doubleArray: [1.0, 2.22, 1.337], longArray: [1L, 222L, 1337L], floatArray: [1.0F, 2.22F, 1.337F] })";
 
     @Inject
-    private CSRGraph graph;
+    private MultiCSRGraph graph;
 
     @Inject
     private IdFunction idFunction;

@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -45,7 +44,7 @@ class CompositeAdjacencyListTest {
 
     @Test
     void shouldComputeCorrectDegree() {
-        var adjacencyList = ((CSRGraph) graph).relationshipTopology().list();
+        var adjacencyList = ((UnionGraph) graph).relationshipTopology().list();
         assertTrue(adjacencyList instanceof CompositeAdjacencyList);
         assertEquals(2, adjacencyList.degree(0));
         assertEquals(0, adjacencyList.degree(1));

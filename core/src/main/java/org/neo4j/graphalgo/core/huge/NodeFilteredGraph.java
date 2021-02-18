@@ -20,15 +20,13 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
-import org.neo4j.graphalgo.api.CSRFilterGraph;
-import org.neo4j.graphalgo.api.CSRGraph;
-import org.neo4j.graphalgo.api.ImmutableTopology;
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.MultiCSRFilterGraph;
+import org.neo4j.graphalgo.api.MultiCSRGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
@@ -37,11 +35,11 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
-public class NodeFilteredGraph extends CSRFilterGraph {
+public class NodeFilteredGraph extends MultiCSRFilterGraph {
 
     private final NodeMapping filteredIdMap;
 
-    public NodeFilteredGraph(CSRGraph graph, NodeMapping filteredIdMap) {
+    public NodeFilteredGraph(MultiCSRGraph graph, NodeMapping filteredIdMap) {
         super(graph);
         this.filteredIdMap = filteredIdMap;
     }
@@ -107,15 +105,18 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
-        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), (s, t) -> filterAndConsume(s, t, consumer));
+    public void forEachRelationship(long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer) {
+        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), relationshipTypes, (s, t) -> filterAndConsume(s, t, consumer));
     }
 
     @Override
     public void forEachRelationship(
-        long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer
+        long nodeId,
+        double fallbackValue,
+        Set<RelationshipType> relationshipTypes,
+        RelationshipWithPropertyConsumer consumer
     ) {
-        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue, (s, t, p) -> filterAndConsume(s, t, p, consumer));
+        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue, relationshipTypes, (s, t, p) -> filterAndConsume(s, t, p, consumer));
     }
 
     @Override
@@ -149,7 +150,7 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     }
 
     @Override
-    public CSRGraph concurrentCopy() {
+    public MultiCSRGraph concurrentCopy() {
         return new NodeFilteredGraph(graph.concurrentCopy(), filteredIdMap);
     }
 
@@ -180,21 +181,6 @@ public class NodeFilteredGraph extends CSRFilterGraph {
             return null;
         }
         return new FilteredNodeProperties(properties, this);
-    }
-
-    @Override
-    public Relationships.Topology relationshipTopology() {
-        Relationships.Topology topology = graph.relationshipTopology();
-
-        AdjacencyOffsets offsets = new TransientFilteredAdjacencyOffsets(
-            filteredIdMap,
-            topology.offsets()
-        );
-
-        return ImmutableTopology.builder()
-            .from(topology)
-            .offsets(offsets)
-            .build();
     }
 
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {
