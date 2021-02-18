@@ -21,17 +21,27 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.MultiGraph;
+import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -99,4 +109,29 @@ class UnionGraphTest {
         });
     }
 
+    @ParameterizedTest
+    @MethodSource("nodeRelCombinations")
+    void shouldSelectGivenRelationships(String sourceVariable, String relType, Collection<String> targetVariables) {
+        MultiGraph graph = multiRelTypeGraphStore.getUnion();
+
+        long[] actualTargets = graph
+            .streamRelationships(
+                multiRelTypeIdFunction.of(sourceVariable),
+                Double.NaN,
+                Set.of(RelationshipType.of(relType))
+            )
+            .mapToLong(RelationshipCursor::targetId).toArray();
+        long[] expectedTargets = targetVariables.stream().mapToLong(multiRelTypeIdFunction::of).toArray();
+
+        assertThat(actualTargets).containsExactlyInAnyOrder(expectedTargets);
+    }
+
+    static Stream<Arguments> nodeRelCombinations() {
+        return Stream.of(
+            Arguments.of("a", "REL1", List.of("b")),
+            Arguments.of("a", "REL2", List.of("c")),
+            Arguments.of("b", "REL1", List.of("a", "c")),
+            Arguments.of("c", "REL2", List.of("a", "b"))
+        );
+    }
 }
