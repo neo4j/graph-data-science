@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -146,7 +146,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
     private class WCCTask implements Runnable, RelationshipConsumer {
 
         final DisjointSetStruct struct;
-        final RelationshipIterator rels;
+        final MultiPartiteRelationshipIterator rels;
         private final long offset;
         private final long end;
 

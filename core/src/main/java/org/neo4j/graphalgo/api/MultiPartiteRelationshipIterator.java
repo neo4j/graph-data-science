@@ -24,10 +24,28 @@ import org.neo4j.graphalgo.RelationshipType;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public interface MultiPartiteRelationshipIterator extends RelationshipIterator {
+public interface MultiPartiteRelationshipIterator extends RelationshipPredicate {
 
+    /**
+     * Calls the given consumer function for every relationship of a given node.
+     *
+     * @param nodeId id of the node for which to iterate relationships
+     * @param relationshipTypes Set of relationship types to filter for
+     * @param consumer relationship consumer function
+     */
     void forEachRelationship(long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer);
 
+    /**
+     * Calls the given consumer function for every relationship of a given node.
+     * If the graph was loaded with a relationship property, the property value
+     * of the relationship will be passed into the consumer. Otherwise the given
+     * fallback value will be used.
+     *
+     * @param nodeId id of the node for which to iterate relationships
+     * @param fallbackValue value used as relationship property if no properties were loaded
+     * @param relationshipTypes Set of relationship types to filter for
+     * @param consumer relationship consumer function
+     */
     void forEachRelationship(
         long nodeId,
         double fallbackValue,
@@ -37,19 +55,16 @@ public interface MultiPartiteRelationshipIterator extends RelationshipIterator {
 
     Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes);
 
-    @Override
     default void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         forEachRelationship(nodeId, Set.of(), consumer);
     }
 
-    @Override
     default void forEachRelationship(
         long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer
     ) {
         forEachRelationship(nodeId, fallbackValue, Set.of(), consumer);
     }
 
-    @Override
     default Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         return streamRelationships(nodeId, fallbackValue, Set.of());
     }
@@ -57,5 +72,13 @@ public interface MultiPartiteRelationshipIterator extends RelationshipIterator {
     @Override
     default boolean exists(long sourceNodeId, long targetNodeId) {
         return false;
+    }
+
+    /**
+     * @return a copy of this iterator that reuses new cursors internally,
+     *         so that iterations happen independent from other iterations.
+     */
+    default MultiPartiteRelationshipIterator concurrentCopy() {
+        return this;
     }
 }

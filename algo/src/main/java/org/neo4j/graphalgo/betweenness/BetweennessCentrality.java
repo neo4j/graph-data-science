@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
@@ -91,7 +91,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
 
     final class BCTask implements Runnable {
 
-        private final RelationshipIterator localRelationshipIterator;
+        private final MultiPartiteRelationshipIterator localRelationshipIterator;
 
         private final HugeObjectArray<LongArrayList> predecessors;
         private final HugeCursor<LongArrayList[]> predecessorsCursor;

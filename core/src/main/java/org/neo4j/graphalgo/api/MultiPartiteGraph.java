@@ -19,5 +19,5 @@
  */
 package org.neo4j.graphalgo.api;
 
-public interface MultiPartiteGraph extends Graph, MultiPartiteRelationshipIterator, RelationshipMapping {
+public interface MultiPartiteGraph extends Graph {
 }

@@ -25,8 +25,8 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.beta.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.graphalgo.beta.k1coloring.K1Coloring;
@@ -240,7 +240,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     private static final class InitTask implements Runnable {
 
-        private final RelationshipIterator relationshipIterator;
+        private final MultiPartiteRelationshipIterator relationshipIterator;
 
         private final HugeLongArray currentCommunities;
 
@@ -255,7 +255,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         private double localSum;
 
         private InitTask(
-            RelationshipIterator relationshipIterator,
+            MultiPartiteRelationshipIterator relationshipIterator,
             HugeLongArray currentCommunities,
             HugeAtomicDoubleArray communityWeights,
             HugeDoubleArray cumulativeNodeWeights,
