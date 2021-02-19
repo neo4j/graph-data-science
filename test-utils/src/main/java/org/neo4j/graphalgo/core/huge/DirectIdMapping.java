@@ -39,12 +39,22 @@ public final class DirectIdMapping implements IdMapping {
     }
 
     @Override
+    public long toRootNodeId(long nodeId) {
+        return nodeId;
+    }
+
+    @Override
     public boolean contains(final long nodeId) {
         return nodeId < nodeCount;
     }
 
     @Override
     public long nodeCount() {
+        return nodeCount;
+    }
+
+    @Override
+    public long rootNodeCount() {
         return nodeCount;
     }
 }
