@@ -19,18 +19,19 @@
  */
 package org.neo4j.graphalgo.impl.spanningTrees;
 
-import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.MultiFilterGraph;
+import org.neo4j.graphalgo.api.MultiPartiteGraph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 
 import java.util.Arrays;
 
-public class SpanningGraph extends FilterGraph {
+public class SpanningGraph extends MultiFilterGraph {
 
     private final SpanningTree spanningTree;
 
-    public SpanningGraph(Graph graph, SpanningTree spanningTree) {
+    public SpanningGraph(MultiPartiteGraph graph, SpanningTree spanningTree) {
         super(graph);
         this.spanningTree = spanningTree;
     }
