@@ -162,7 +162,7 @@ public final class UnionGraph implements MultiCSRGraph {
     ) {
         graphs
             .stream()
-            .filter(graph -> relationshipTypes.containsAll(graph.relationshipTypes()))
+            .filter(graph -> relationshipTypes.containsAll(graph.relationshipTypes()) || relationshipTypes.isEmpty())
             .forEach(graph -> graph.forEachRelationship(nodeId, consumer));
     }
 

@@ -20,7 +20,9 @@
 package org.neo4j.graphalgo.similarity.nil;
 
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.MultiGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -42,7 +44,7 @@ import java.util.stream.Stream;
  * It makes it a bit easier to adapt those algorithms to the new API,
  * as we can override graph creation and inject a NullGraph.
  */
-public class NullGraph implements Graph {
+public class NullGraph implements MultiGraph {
 
     /*
      * The NullGraph doesn't have any nodes or rels, but it isn't empty because then the algo will not be run.
@@ -172,10 +174,38 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {}
+    public void forEachRelationship(
+        long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer
+    ) {
+
+    }
 
     @Override
-    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {}
+    public void forEachRelationship(
+        long nodeId,
+        double fallbackValue,
+        Set<RelationshipType> relationshipTypes,
+        RelationshipWithPropertyConsumer consumer
+    ) {
+
+    }
+
+    @Override
+    public Stream<RelationshipCursor> streamRelationships(
+        long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes
+    ) {
+        return null;
+    }
+
+    @Override
+    public Set<RelationshipType> relationshipTypes(long source, long target) {
+        return null;
+    }
+
+    @Override
+    public Set<RelationshipType> availableRelationshipTypes() {
+        return null;
+    }
 
     @Override
     public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {

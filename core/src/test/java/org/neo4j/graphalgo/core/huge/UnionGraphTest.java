@@ -111,14 +111,14 @@ class UnionGraphTest {
 
     @ParameterizedTest
     @MethodSource("nodeRelCombinations")
-    void shouldSelectGivenRelationships(String sourceVariable, String relType, Collection<String> targetVariables) {
+    void shouldSelectGivenRelationships(String sourceVariable, Set<RelationshipType> relTypes, Collection<String> targetVariables) {
         MultiGraph graph = multiRelTypeGraphStore.getUnion();
 
         long[] actualTargets = graph
             .streamRelationships(
                 multiRelTypeIdFunction.of(sourceVariable),
                 Double.NaN,
-                Set.of(RelationshipType.of(relType))
+                relTypes
             )
             .mapToLong(RelationshipCursor::targetId).toArray();
         long[] expectedTargets = targetVariables.stream().mapToLong(multiRelTypeIdFunction::of).toArray();
@@ -128,10 +128,11 @@ class UnionGraphTest {
 
     static Stream<Arguments> nodeRelCombinations() {
         return Stream.of(
-            Arguments.of("a", "REL1", List.of("b")),
-            Arguments.of("a", "REL2", List.of("c")),
-            Arguments.of("b", "REL1", List.of("a", "c")),
-            Arguments.of("c", "REL2", List.of("a", "b"))
+            Arguments.of("a", Set.of(RelationshipType.of("REL1")), List.of("b")),
+            Arguments.of("a", Set.of(RelationshipType.of("REL2")), List.of("c")),
+            Arguments.of("b", Set.of(RelationshipType.of("REL1")), List.of("a", "c")),
+            Arguments.of("c", Set.of(RelationshipType.of("REL2")), List.of("a", "b")),
+            Arguments.of("a", Set.of(), List.of("b", "c"))
         );
     }
 }
