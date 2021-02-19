@@ -28,12 +28,4 @@ public interface RelationshipMapping {
     Set<RelationshipType> relationshipTypes(long source, long target);
 
     Set<RelationshipType> availableRelationshipTypes();
-
-    default boolean hasType(long source, long target, RelationshipType relationshipType) {
-        return relationshipTypes(source, target).contains(relationshipType);
-    }
-
-    default boolean containsOnlyAllRelationshipsType() {
-        return availableRelationshipTypes().size() == 1 && availableRelationshipTypes().contains(RelationshipType.ALL_RELATIONSHIPS);
-    }
 }
