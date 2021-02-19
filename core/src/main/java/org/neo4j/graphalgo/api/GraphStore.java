@@ -133,19 +133,19 @@ public interface GraphStore {
 
     DeletionResult deleteRelationships(RelationshipType relationshipType);
 
-    default MultiPartiteGraph getGraph(RelationshipType... relationshipType) {
+    default Graph getGraph(RelationshipType... relationshipType) {
         return getGraph(nodeLabels(), Arrays.asList(relationshipType), Optional.empty());
     }
 
-    default MultiPartiteGraph getGraph(RelationshipType relationshipType, Optional<String> relationshipProperty) {
+    default Graph getGraph(RelationshipType relationshipType, Optional<String> relationshipProperty) {
         return getGraph(nodeLabels(), singletonList(relationshipType), relationshipProperty);
     }
 
-    default MultiPartiteGraph getGraph(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    default Graph getGraph(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         return getGraph(nodeLabels(), relationshipTypes, maybeRelationshipProperty);
     }
 
-    default MultiPartiteGraph getGraph(
+    default Graph getGraph(
         String nodeLabel,
         String relationshipType,
         Optional<String> maybeRelationshipProperty
@@ -153,7 +153,7 @@ public interface GraphStore {
         return getGraph(NodeLabel.of(nodeLabel), RelationshipType.of(relationshipType), maybeRelationshipProperty);
     }
 
-    default MultiPartiteGraph getGraph(
+    default Graph getGraph(
         NodeLabel nodeLabel,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
@@ -161,13 +161,13 @@ public interface GraphStore {
         return getGraph(List.of(nodeLabel), List.of(relationshipType), maybeRelationshipProperty);
     }
 
-    MultiPartiteGraph getGraph(
+    Graph getGraph(
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty
     );
 
-    MultiPartiteGraph getUnion();
+    Graph getUnion();
 
     void canRelease(boolean canRelease);
 

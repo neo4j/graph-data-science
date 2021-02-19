@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.similarity.nodesim;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.MultiPartiteGraph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
@@ -44,7 +43,7 @@ import java.util.stream.Stream;
 
 public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResult> {
 
-    private final MultiPartiteGraph graph;
+    private final Graph graph;
     private final NodeSimilarityBaseConfig config;
 
     private final ExecutorService executorService;
@@ -65,7 +64,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
-        this.graph = (MultiPartiteGraph) graph;
+        this.graph = graph;
         this.config = config;
         this.executorService = executorService;
         this.progressLogger = progressLogger;

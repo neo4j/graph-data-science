@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import java.util.Map;
 import java.util.Set;
 
-public interface CSRGraph extends MultiPartiteGraph {
+public interface CSRGraph extends Graph {
 
     Map<RelationshipType, Relationships.Topology> relationshipTopologies();
 
