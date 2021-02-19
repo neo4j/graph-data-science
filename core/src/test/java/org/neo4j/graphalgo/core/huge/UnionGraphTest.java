@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.MultiGraph;
+import org.neo4j.graphalgo.api.MultiPartiteGraph;
 import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -112,7 +112,7 @@ class UnionGraphTest {
     @ParameterizedTest
     @MethodSource("nodeRelCombinations")
     void shouldSelectGivenRelationships(String sourceVariable, Set<RelationshipType> relTypes, Collection<String> targetVariables) {
-        MultiGraph graph = multiRelTypeGraphStore.getUnion();
+        MultiPartiteGraph graph = multiRelTypeGraphStore.getUnion();
 
         long[] actualTargets = graph
             .streamRelationships(

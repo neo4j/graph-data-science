@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.core.huge;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.ImmutableTopology;
-import org.neo4j.graphalgo.api.MultiCSRGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -44,13 +44,13 @@ import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class UnionGraph implements MultiCSRGraph {
+public final class UnionGraph implements CSRGraph {
 
-    private final MultiCSRGraph first;
-    private final List<? extends MultiCSRGraph> graphs;
+    private final CSRGraph first;
+    private final List<? extends CSRGraph> graphs;
     private final Map<RelationshipType, Relationships.Topology> relationshipTypeTopologies;
 
-    public static MultiCSRGraph of(List<? extends MultiCSRGraph> graphs) {
+    public static CSRGraph of(List<? extends CSRGraph> graphs) {
         if (graphs.isEmpty()) {
             throw new IllegalArgumentException("no graphs");
         }
@@ -60,7 +60,7 @@ public final class UnionGraph implements MultiCSRGraph {
         return new UnionGraph(graphs);
     }
 
-    private UnionGraph(List<? extends MultiCSRGraph> graphs) {
+    private UnionGraph(List<? extends CSRGraph> graphs) {
         first = graphs.iterator().next();
         this.graphs = graphs;
         this.relationshipTypeTopologies = new HashMap<>();
@@ -203,7 +203,7 @@ public final class UnionGraph implements MultiCSRGraph {
     public int degree(long nodeId) {
         int degree = 0;
 
-        for (MultiCSRGraph graph : graphs) {
+        for (CSRGraph graph : graphs) {
             degree += graph.degree(nodeId);
         }
 
@@ -221,8 +221,8 @@ public final class UnionGraph implements MultiCSRGraph {
     }
 
     @Override
-    public MultiCSRGraph concurrentCopy() {
-        return of(graphs.stream().map(MultiCSRGraph::concurrentCopy).collect(Collectors.toList()));
+    public CSRGraph concurrentCopy() {
+        return of(graphs.stream().map(CSRGraph::concurrentCopy).collect(Collectors.toList()));
     }
 
     /**

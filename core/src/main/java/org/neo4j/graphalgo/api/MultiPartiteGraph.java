@@ -19,19 +19,5 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.RelationshipType;
-
-import java.util.Map;
-import java.util.Set;
-
-public interface MultiCSRGraph extends MultiGraph {
-
-    Map<RelationshipType, Relationships.Topology> relationshipTopologies();
-
-    @Override
-    MultiCSRGraph concurrentCopy();
-
-    default Set<RelationshipType> relationshipTypes() {
-        return relationshipTopologies().keySet();
-    }
+public interface MultiPartiteGraph extends Graph, MultiPartiteRelationshipIterator, RelationshipMapping {
 }

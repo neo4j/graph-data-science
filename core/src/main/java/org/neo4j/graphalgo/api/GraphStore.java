@@ -133,19 +133,19 @@ public interface GraphStore {
 
     DeletionResult deleteRelationships(RelationshipType relationshipType);
 
-    default MultiGraph getGraph(RelationshipType... relationshipType) {
+    default MultiPartiteGraph getGraph(RelationshipType... relationshipType) {
         return getGraph(nodeLabels(), Arrays.asList(relationshipType), Optional.empty());
     }
 
-    default MultiGraph getGraph(RelationshipType relationshipType, Optional<String> relationshipProperty) {
+    default MultiPartiteGraph getGraph(RelationshipType relationshipType, Optional<String> relationshipProperty) {
         return getGraph(nodeLabels(), singletonList(relationshipType), relationshipProperty);
     }
 
-    default MultiGraph getGraph(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    default MultiPartiteGraph getGraph(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
         return getGraph(nodeLabels(), relationshipTypes, maybeRelationshipProperty);
     }
 
-    default MultiGraph getGraph(
+    default MultiPartiteGraph getGraph(
         String nodeLabel,
         String relationshipType,
         Optional<String> maybeRelationshipProperty
@@ -153,7 +153,7 @@ public interface GraphStore {
         return getGraph(NodeLabel.of(nodeLabel), RelationshipType.of(relationshipType), maybeRelationshipProperty);
     }
 
-    default MultiGraph getGraph(
+    default MultiPartiteGraph getGraph(
         NodeLabel nodeLabel,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
@@ -161,13 +161,13 @@ public interface GraphStore {
         return getGraph(List.of(nodeLabel), List.of(relationshipType), maybeRelationshipProperty);
     }
 
-    MultiGraph getGraph(
+    MultiPartiteGraph getGraph(
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty
     );
 
-    MultiGraph getUnion();
+    MultiPartiteGraph getUnion();
 
     void canRelease(boolean canRelease);
 

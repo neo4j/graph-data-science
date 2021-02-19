@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.extension;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.graphalgo.api.CSRFilterGraph;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.CSRFilterGraph;
 import org.neo4j.graphalgo.api.CSRGraph;
@@ -31,12 +33,12 @@ import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactoryLocato
 import org.neo4j.graphalgo.api.MultiCSRFilterGraph;
 import org.neo4j.graphalgo.api.MultiCSRGraph;
 
-public class TestGraph extends MultiCSRFilterGraph {
+public class TestGraph extends CSRFilterGraph {
 
     private final IdFunction idFunction;
     private final String name;
 
-    public TestGraph(MultiCSRGraph graph, IdFunction idFunction, String name) {
+    public TestGraph(CSRGraph graph, IdFunction idFunction, String name) {
         super(graph);
         this.name = name;
         this.idFunction = idFunction;
@@ -65,7 +67,7 @@ public class TestGraph extends MultiCSRFilterGraph {
     }
 
     @Override
-    public MultiCSRGraph concurrentCopy() {
+    public CSRGraph concurrentCopy() {
         return new TestGraph(graph.concurrentCopy(), idFunction, name);
     }
 

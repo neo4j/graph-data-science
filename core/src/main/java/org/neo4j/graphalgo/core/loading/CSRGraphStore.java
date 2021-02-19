@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.core.loading;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.MultiCSRGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.NodeProperty;
@@ -464,7 +464,7 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public MultiCSRGraph getGraph(
+    public CSRGraph getGraph(
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty
@@ -474,7 +474,7 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public MultiCSRGraph getUnion() {
+    public CSRGraph getUnion() {
         return UnionGraph.of(relationships
             .keySet()
             .stream()
@@ -592,7 +592,7 @@ public class CSRGraphStore implements GraphStore {
         });
     }
 
-    private MultiCSRGraph createGraph(
+    private CSRGraph createGraph(
         Collection<NodeLabel> nodeLabels,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
@@ -602,7 +602,7 @@ public class CSRGraphStore implements GraphStore {
         return createGraphFromRelType(filteredNodes, filteredNodeProperties, relationshipType, maybeRelationshipProperty);
     }
 
-    private MultiCSRGraph createGraph(
+    private CSRGraph createGraph(
         Collection<NodeLabel> filteredLabels,
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty
@@ -610,7 +610,7 @@ public class CSRGraphStore implements GraphStore {
         Optional<NodeMapping> filteredNodes = getFilteredNodeMapping(filteredLabels);
         Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
 
-        List<MultiCSRGraph> filteredGraphs = relationships.keySet().stream()
+        List<CSRGraph> filteredGraphs = relationships.keySet().stream()
             .filter(relationshipTypes::contains)
             .map(topology -> createGraphFromRelType(
                 filteredNodes,
@@ -634,7 +634,7 @@ public class CSRGraphStore implements GraphStore {
             : Optional.of(nodes.withFilteredLabels(filteredLabels, concurrency));
     }
 
-    private MultiCSRGraph createGraphFromRelType(
+    private CSRGraph createGraphFromRelType(
         Optional<NodeMapping> filteredNodes,
         Map<String, NodeProperties> filteredNodeProperties,
         RelationshipType relationshipType,

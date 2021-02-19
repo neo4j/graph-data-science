@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.MultiCSRFilterGraph;
-import org.neo4j.graphalgo.api.MultiCSRGraph;
+import org.neo4j.graphalgo.api.CSRFilterGraph;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -35,11 +35,11 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
-public class NodeFilteredGraph extends MultiCSRFilterGraph {
+public class NodeFilteredGraph extends CSRFilterGraph {
 
     private final NodeMapping filteredIdMap;
 
-    public NodeFilteredGraph(MultiCSRGraph graph, NodeMapping filteredIdMap) {
+    public NodeFilteredGraph(CSRGraph graph, NodeMapping filteredIdMap) {
         super(graph);
         this.filteredIdMap = filteredIdMap;
     }
@@ -150,7 +150,7 @@ public class NodeFilteredGraph extends MultiCSRFilterGraph {
     }
 
     @Override
-    public MultiCSRGraph concurrentCopy() {
+    public CSRGraph concurrentCopy() {
         return new NodeFilteredGraph(graph.concurrentCopy(), filteredIdMap);
     }
 

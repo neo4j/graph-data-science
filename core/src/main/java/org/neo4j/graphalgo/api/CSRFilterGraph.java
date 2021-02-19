@@ -24,17 +24,17 @@ import org.neo4j.graphalgo.RelationshipType;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class MultiCSRFilterGraph extends MultiFilterGraph implements MultiCSRGraph {
+public abstract class CSRFilterGraph extends MultiFilterGraph implements CSRGraph {
 
-    protected final MultiCSRGraph graph;
+    protected final CSRGraph graph;
 
-    public MultiCSRFilterGraph(MultiCSRGraph graph) {
+    public CSRFilterGraph(CSRGraph graph) {
         super(graph);
         this.graph = graph;
     }
 
     @Override
-    public MultiCSRGraph concurrentCopy() {
+    public CSRGraph concurrentCopy() {
         return graph.concurrentCopy();
     }
 

@@ -26,9 +26,9 @@ import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.MultiCSRGraph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -129,7 +129,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
 
         GdlFactory gdlFactory = GdlFactory.of(createConfig, DATABASE_ID);
         CSRGraphStore graphStore = gdlFactory.build().graphStore();
-        MultiCSRGraph graph = graphStore.getUnion();
+        CSRGraph graph = graphStore.getUnion();
         IdFunction idFunction = gdlFactory::nodeId;
         TestGraph testGraph = new TestGraph(graph, idFunction, graphName);
 
@@ -139,7 +139,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
 
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
             injectInstance(testInstance, graphNamePrefix, graph, Graph.class, "Graph");
-            injectInstance(testInstance, graphNamePrefix, graph, MultiCSRGraph.class, "Graph");
+            injectInstance(testInstance, graphNamePrefix, graph, CSRGraph.class, "Graph");
             injectInstance(testInstance, graphNamePrefix, testGraph, TestGraph.class, "Graph");
             injectInstance(testInstance, graphNamePrefix, graphStore, GraphStore.class, "GraphStore");
             injectInstance(testInstance, graphNamePrefix, idFunction, IdFunction.class, "IdFunction");

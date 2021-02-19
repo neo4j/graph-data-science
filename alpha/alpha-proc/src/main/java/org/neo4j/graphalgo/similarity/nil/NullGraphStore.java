@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.similarity.nil;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.MultiGraph;
+import org.neo4j.graphalgo.api.MultiPartiteGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
@@ -187,7 +187,7 @@ public class NullGraphStore implements GraphStore {
     }
 
     @Override
-    public MultiGraph getGraph(
+    public MultiPartiteGraph getGraph(
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty
@@ -196,7 +196,7 @@ public class NullGraphStore implements GraphStore {
     }
 
     @Override
-    public MultiGraph getUnion() {
+    public MultiPartiteGraph getUnion() {
         return new NullGraph();
     }
 

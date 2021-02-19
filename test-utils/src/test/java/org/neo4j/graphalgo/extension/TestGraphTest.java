@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.extension;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.MultiCSRGraph;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
@@ -67,7 +67,7 @@ class TestGraphTest {
 
     @Test
     void usesIdFunctionForOriginalId() {
-        MultiCSRGraph bGraph = GdlFactory
+        CSRGraph bGraph = GdlFactory
             .of("(:A), (b:B), (:B)")
             .build()
             .graphStore()
@@ -79,7 +79,7 @@ class TestGraphTest {
 
     @Test
     void usesInnerGraphForMappedId() {
-        MultiCSRGraph bGraph = GdlFactory
+        CSRGraph bGraph = GdlFactory
             .of("(:A), (b:B), (:B)")
             .build()
             .graphStore()

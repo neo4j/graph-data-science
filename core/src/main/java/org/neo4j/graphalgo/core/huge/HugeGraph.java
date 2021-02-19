@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
-import org.neo4j.graphalgo.api.MultiCSRGraph;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.PropertyCursor;
@@ -83,7 +83,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
  * @see <a href="https://developers.google.com/protocol-buffers/docs/encoding#varints">more abount vlong</a>
  * @see <a href="https://shipilev.net/jvm-anatomy-park/4-tlab-allocation/">more abount TLAB allocation</a>
  */
-public class HugeGraph implements MultiCSRGraph {
+public class HugeGraph implements CSRGraph {
 
     public static final double NO_PROPERTY_VALUE = Double.NaN;
     private static final int NO_SUCH_NODE = 0;

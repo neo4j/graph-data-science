@@ -30,11 +30,11 @@ import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
-public abstract class MultiFilterGraph implements MultiGraph {
+public abstract class MultiFilterGraph implements MultiPartiteGraph {
 
-    protected final MultiGraph graph;
+    protected final MultiPartiteGraph graph;
 
-    public MultiFilterGraph(MultiGraph graph) {
+    public MultiFilterGraph(MultiPartiteGraph graph) {
         this.graph = graph;
     }
 
