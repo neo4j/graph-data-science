@@ -19,20 +19,35 @@
  */
 package org.neo4j.graphalgo.core.loading.construction;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class RelationshipsBuilderTest {
 
@@ -108,4 +123,68 @@ class RelationshipsBuilderTest {
         return nodesBuilderRef.get();
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {1, 10000})
+    void testOnFilteredIdMap(int numberOfBNodes) {
+        var graphString = graphCreateString(numberOfBNodes, "");
+
+        var gdlFactory = GdlFactory.of(graphString);
+        var graphStore = gdlFactory.build().graphStore();
+        var idFunction = (IdFunction) gdlFactory::nodeId;
+
+        var graph = graphStore.getGraph("A", "REL", Optional.empty());
+
+        assertThat(graph).isInstanceOf(NodeFilteredGraph.class)
+            .extracting(Graph::nodeCount, InstanceOfAssertFactories.LONG)
+            .isEqualTo(2L);
+
+        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(graph)
+            .build();
+
+        var a1Original = idFunction.of("a1");
+        var a2Original = idFunction.of("a2");
+
+        var a1MappedId = graph.toMappedNodeId(a1Original);
+        var a2MappedId = graph.toMappedNodeId(a2Original);
+
+        assertThat(a1MappedId).isEqualTo(0);
+        assertThat(a2MappedId).isEqualTo(1);
+
+        var unionGraph = graphStore.getUnion();
+
+        assertThat(unionGraph.toMappedNodeId(a1Original)).isNotEqualTo(a1MappedId);
+        assertThat(unionGraph.toMappedNodeId(a2Original)).isNotEqualTo(a2MappedId);
+        relationshipsBuilder.addFromInternal(a1MappedId, a2MappedId);
+        var relationships = relationshipsBuilder.build();
+
+        graphStore.addRelationshipType(
+            RelationshipType.of("TEST"),
+            Optional.empty(),
+            Optional.empty(),
+            relationships
+        );
+
+
+        var expectedGraphString = graphCreateString(
+            numberOfBNodes,
+            ", (a1)-[:TEST]->(a2)"
+        );
+
+        assertGraphEquals(
+            TestSupport.fromGdl(expectedGraphString),
+            graphStore.getUnion()
+        );
+    }
+
+    @NotNull
+    private String graphCreateString(int numberOfBNodes, String additional) {
+        return IntStream.range(0, numberOfBNodes)
+            .mapToObj(ignore -> "(:B)")
+            .collect(Collectors.joining(
+                ", ",
+                "CREATE ",
+                formatWithLocale(", (a1: A), (a2: A), (a1)-[:REL]->(a2)%s", additional)
+            ));
+    }
 }
