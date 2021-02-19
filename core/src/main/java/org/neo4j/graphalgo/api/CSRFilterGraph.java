@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class CSRFilterGraph extends MultiFilterGraph implements CSRGraph {
+public abstract class CSRFilterGraph extends FilterGraph implements CSRGraph {
 
     protected final CSRGraph graph;
 

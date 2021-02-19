@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.api;
 
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
@@ -167,18 +168,37 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
-        graph.forEachRelationship(nodeId, consumer);
+    public void forEachRelationship(
+        long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer
+    ) {
+        graph.forEachRelationship(nodeId, relationshipTypes, consumer);
     }
 
     @Override
-    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
-        graph.forEachRelationship(nodeId, fallbackValue, consumer);
+    public void forEachRelationship(
+        long nodeId,
+        double fallbackValue,
+        Set<RelationshipType> relationshipTypes,
+        RelationshipWithPropertyConsumer consumer
+    ) {
+        graph.forEachRelationship(nodeId, fallbackValue, relationshipTypes, consumer);
     }
 
     @Override
-    public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
-        return graph.streamRelationships(nodeId, fallbackValue);
+    public Stream<RelationshipCursor> streamRelationships(
+        long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes
+    ) {
+        return graph.streamRelationships(nodeId, fallbackValue, relationshipTypes);
+    }
+
+    @Override
+    public Set<RelationshipType> relationshipTypes(long source, long target) {
+        return graph.relationshipTypes(source, target);
+    }
+
+    @Override
+    public Set<RelationshipType> availableRelationshipTypes() {
+        return graph.availableRelationshipTypes();
     }
 
     @Override

@@ -19,13 +19,13 @@
  */
 package org.neo4j.graphalgo.similarity.nodesim;
 
+import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.MultiFilterGraph;
 import org.neo4j.graphalgo.api.MultiPartiteGraph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 
-public class TopKGraph extends MultiFilterGraph {
+public class TopKGraph extends FilterGraph {
 
     private final TopKMap topKMap;
 
