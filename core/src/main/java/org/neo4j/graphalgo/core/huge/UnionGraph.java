@@ -160,9 +160,7 @@ public final class UnionGraph implements MultiCSRGraph {
     public void forEachRelationship(
         long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer
     ) {
-        graphs
-            .stream()
-            .filter(graph -> relationshipTypes.containsAll(graph.relationshipTypes()) || relationshipTypes.isEmpty())
+        relationshipTypeFilteredGraphs(relationshipTypes)
             .forEach(graph -> graph.forEachRelationship(nodeId, consumer));
     }
 
@@ -173,9 +171,7 @@ public final class UnionGraph implements MultiCSRGraph {
         Set<RelationshipType> relationshipTypes,
         RelationshipWithPropertyConsumer consumer
     ) {
-        graphs
-            .stream()
-            .filter(graph -> relationshipTypes.containsAll(graph.relationshipTypes()) || relationshipTypes.isEmpty())
+        relationshipTypeFilteredGraphs(relationshipTypes)
             .forEach(graph -> graph.forEachRelationship(nodeId, fallbackValue, consumer));
     }
 
@@ -183,10 +179,14 @@ public final class UnionGraph implements MultiCSRGraph {
     public Stream<RelationshipCursor> streamRelationships(
         long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes
     ) {
+        return relationshipTypeFilteredGraphs(relationshipTypes)
+            .flatMap(graph -> graph.streamRelationships(nodeId, fallbackValue));
+    }
+
+    private Stream<? extends Graph> relationshipTypeFilteredGraphs(Set<RelationshipType> relationshipTypes) {
         return graphs
             .stream()
-            .filter(graph -> relationshipTypes.containsAll(graph.relationshipTypes()) || relationshipTypes.isEmpty())
-            .flatMap(graph -> graph.streamRelationships(nodeId, fallbackValue));
+            .filter(graph -> relationshipTypes.containsAll(graph.relationshipTypes()) || relationshipTypes.isEmpty());
     }
 
     @Override
