@@ -175,9 +175,7 @@ public class NullGraph implements Graph {
     @Override
     public void forEachRelationship(
         long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer
-    ) {
-
-    }
+    ) {}
 
     @Override
     public void forEachRelationship(
@@ -185,30 +183,23 @@ public class NullGraph implements Graph {
         double fallbackValue,
         Set<RelationshipType> relationshipTypes,
         RelationshipWithPropertyConsumer consumer
-    ) {
-
-    }
+    ) {}
 
     @Override
     public Stream<RelationshipCursor> streamRelationships(
         long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes
     ) {
-        return null;
+        return Stream.empty();
     }
 
     @Override
     public Set<RelationshipType> relationshipTypes(long source, long target) {
-        return null;
+        throw new NullGraphStore.NullGraphException();
     }
 
     @Override
     public Set<RelationshipType> availableRelationshipTypes() {
-        return null;
-    }
-
-    @Override
-    public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
-        return Stream.empty();
+        return Set.of();
     }
 
     @Override
