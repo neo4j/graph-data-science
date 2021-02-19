@@ -98,6 +98,11 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
+    public long toRootNodeId(long nodeId) {
+        return graph.toRootNodeId(nodeId);
+    }
+
+    @Override
     public boolean contains(long nodeId) {
         return graph.contains(nodeId);
     }
@@ -105,6 +110,11 @@ public abstract class FilterGraph implements Graph {
     @Override
     public long nodeCount() {
         return graph.nodeCount();
+    }
+
+    @Override
+    public long rootNodeCount() {
+        return graph.rootNodeCount();
     }
 
     @Override

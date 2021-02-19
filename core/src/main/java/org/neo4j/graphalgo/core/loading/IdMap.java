@@ -111,12 +111,22 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     }
 
     @Override
+    public long toRootNodeId(long nodeId) {
+        return nodeId;
+    }
+
+    @Override
     public boolean contains(final long nodeId) {
         return nodeToGraphIds.contains(nodeId);
     }
 
     @Override
     public long nodeCount() {
+        return nodeCount;
+    }
+
+    @Override
+    public long rootNodeCount() {
         return nodeCount;
     }
 
@@ -206,7 +216,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             .stream()
             .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get));
 
-        return new FilteredIdMap(newGraphIds, newNodeToGraphIds, newLabelInformation, newNodeCount, tracker);
+        return new FilteredIdMap(rootNodeCount(),newGraphIds, newNodeToGraphIds, newLabelInformation, newNodeCount, tracker);
     }
 
     private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, Map<NodeLabel, BitSet> labelInformation) {
@@ -225,7 +235,10 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     private static class FilteredIdMap extends IdMap {
 
+        private final long rootNodeCount;
+
         FilteredIdMap(
+            long rootNodeCount,
             HugeLongArray graphIds,
             HugeSparseLongArray nodeToGraphIds,
             Map<NodeLabel, BitSet> filteredLabelMap,
@@ -233,11 +246,22 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             AllocationTracker tracker
         ) {
             super(graphIds, nodeToGraphIds, filteredLabelMap, nodeCount, tracker);
+            this.rootNodeCount = rootNodeCount;
         }
 
         @Override
         public Set<NodeLabel> nodeLabels(long nodeId) {
             return super.nodeLabels(toOriginalNodeId(nodeId));
+        }
+
+        @Override
+        public long rootNodeCount() {
+            return rootNodeCount;
+        }
+
+        @Override
+        public long toRootNodeId(long nodeId) {
+            return super.toRootNodeId(toOriginalNodeId(nodeId));
         }
 
         @Override

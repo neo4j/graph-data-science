@@ -68,6 +68,11 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
+    public long rootNodeCount() {
+        return first.nodeCount();
+    }
+
+    @Override
     public GraphSchema schema() {
         return graphs
             .stream()
@@ -119,6 +124,11 @@ public final class UnionGraph implements CSRGraph {
     @Override
     public long toOriginalNodeId(long nodeId) {
         return first.toOriginalNodeId(nodeId);
+    }
+
+    @Override
+    public long toRootNodeId(long nodeId) {
+        return first.toRootNodeId(nodeId);
     }
 
     @Override

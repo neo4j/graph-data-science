@@ -172,6 +172,11 @@ public class HugeGraph implements CSRGraph {
         return idMapping.nodeCount();
     }
 
+    @Override
+    public long rootNodeCount() {
+        return idMapping.rootNodeCount();
+    }
+
     public IdMap idMap() {
         return idMapping;
     }
@@ -313,6 +318,11 @@ public class HugeGraph implements CSRGraph {
     @Override
     public long toOriginalNodeId(long nodeId) {
         return idMapping.toOriginalNodeId(nodeId);
+    }
+
+    @Override
+    public long toRootNodeId(long nodeId) {
+        return idMapping.toRootNodeId(nodeId);
     }
 
     @Override

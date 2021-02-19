@@ -41,6 +41,17 @@ public interface IdMapping {
     long toOriginalNodeId(long nodeId);
 
     /**
+     * Maps an internal id to its root internal node id.
+     * This is necessary for nested (filtered) id mappings.
+     *
+     * If this mapping is a nested mapping, this method
+     * returns the root node id of the parent mapping.
+     * For the root mapping this method returns the given
+     * node id.
+     */
+    long toRootNodeId(long nodeId);
+
+    /**
      * Returns true iff the nodeId is mapped, otherwise false.
      */
     boolean contains(long nodeId);
@@ -49,6 +60,12 @@ public interface IdMapping {
      * Number of mapped nodeIds.
      */
     long nodeCount();
+
+    /**
+     * Number of mapped node ids in the root mapping.
+     * This is necessary for nested (filtered) id mappings.
+     */
+    long rootNodeCount();
 
     default IdMapping cloneIdMapping() {
         return this;

@@ -58,7 +58,7 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
             throw new IllegalArgumentException("mutateRelationshipType must not be `REL`");
         }
 
-        runQuery(graphDb(), "CREATE (:B) CREATE (a1: A), (a2: A), (a1)-[:REL]->(a2)");
+        runQuery(graphDb(), "CREATE (:B), (a1: A), (a2: A), (a3: A), (a1)-[:REL]->(a3), (a2)-[:REL]->(a3)");
         String graphName = "myGraph";
 
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()

@@ -88,8 +88,18 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     }
 
     @Override
+    public long rootNodeCount() {
+        return filteredIdMap.rootNodeCount();
+    }
+
+    @Override
     public long toMappedNodeId(long neoNodeId) {
         return filteredIdMap.toMappedNodeId(super.toMappedNodeId(neoNodeId));
+    }
+
+    @Override
+    public long toRootNodeId(long nodeId) {
+        return filteredIdMap.toRootNodeId(nodeId);
     }
 
     @Override
