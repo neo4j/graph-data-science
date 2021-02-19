@@ -20,13 +20,13 @@
 package org.neo4j.graphalgo.beta.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 final class ValidationStep implements Runnable {
 
-    private final MultiPartiteRelationshipIterator graph;
+    private final RelationshipIterator graph;
     private final HugeLongArray colors;
     private final BitSet currentNodesToColor;
     private final BitSet nextNodesToColor;
@@ -35,7 +35,7 @@ final class ValidationStep implements Runnable {
     private final ProgressLogger progressLogger;
 
     ValidationStep(
-        MultiPartiteRelationshipIterator graph,
+        RelationshipIterator graph,
         HugeLongArray colors,
         BitSet currentNodesToColor,
         BitSet nextNodesToColor,

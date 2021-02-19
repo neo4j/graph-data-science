@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.impl.msbfs;
 
-import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
@@ -49,7 +49,7 @@ public class PredecessorStrategy implements MultiSourceBFS.ExecutionStrategy {
 
     @Override
     public void run(
-        MultiPartiteRelationshipIterator relationships,
+        RelationshipIterator relationships,
         long totalNodeCount,
         MultiSourceBFS.SourceNodes sourceNodes,
         HugeLongArray visitSet,

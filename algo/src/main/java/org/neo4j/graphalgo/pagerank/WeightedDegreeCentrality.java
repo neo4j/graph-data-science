@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -99,7 +99,7 @@ public class WeightedDegreeCentrality extends Algorithm<WeightedDegreeCentrality
     private class DegreeTask implements Runnable {
         @Override
         public void run() {
-            final MultiPartiteRelationshipIterator threadLocalGraph = graph.concurrentCopy();
+            final RelationshipIterator threadLocalGraph = graph.concurrentCopy();
             while (true) {
                 final int nodeId = nodeQueue.getAndIncrement();
                 if (nodeId >= nodeCount || !running()) {
