@@ -97,12 +97,22 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     }
 
     @Override
+    public long toRootNodeId(long nodeId) {
+        return nodeId;
+    }
+
+    @Override
     public boolean contains(final long nodeId) {
         return sparseLongArray.contains(nodeId);
     }
 
     @Override
     public long nodeCount() {
+        return sparseLongArray.idCount();
+    }
+
+    @Override
+    public long rootNodeCount() {
         return sparseLongArray.idCount();
     }
 
@@ -179,6 +189,7 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             .collect(Collectors.toMap(nodeLabel -> nodeLabel, labelInformation::get));
 
         return new FilteredIdMap(
+            rootNodeCount(),
             sparseLongArray,
             newLabelInformation,
             tracker
@@ -201,17 +212,31 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     private static class FilteredIdMap extends BitIdMap {
 
+        private final long rootNodeCount;
+
         FilteredIdMap(
+            long rootNodeCount,
             SparseLongArray sparseLongArray,
             Map<NodeLabel, BitSet> filteredLabelMap,
             AllocationTracker tracker
         ) {
             super(sparseLongArray, filteredLabelMap, tracker);
+            this.rootNodeCount = rootNodeCount;
         }
 
         @Override
         public Set<NodeLabel> nodeLabels(long nodeId) {
             return super.nodeLabels(toOriginalNodeId(nodeId));
+        }
+
+        @Override
+        public long rootNodeCount() {
+            return rootNodeCount;
+        }
+
+        @Override
+        public long toRootNodeId(long nodeId) {
+            return super.toRootNodeId(toOriginalNodeId(nodeId));
         }
 
         @Override

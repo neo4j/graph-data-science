@@ -120,12 +120,22 @@ public class NullGraph implements Graph {
     }
 
     @Override
+    public long toRootNodeId(long nodeId) {
+        throw new NullGraphStore.NullGraphException();
+    }
+
+    @Override
     public boolean contains(long nodeId) {
         return false;
     }
 
     @Override
     public long nodeCount() {
+        return 0L;
+    }
+
+    @Override
+    public long rootNodeCount() {
         return 0L;
     }
 

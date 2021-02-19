@@ -79,7 +79,7 @@ public class RelationshipsBuilder {
 
         this.relationshipCounter = new LongAdder();
 
-        ImportSizing importSizing = ImportSizing.of(concurrency, idMapping.nodeCount());
+        ImportSizing importSizing = ImportSizing.of(concurrency, idMapping.rootNodeCount());
         int pageSize = importSizing.pageSize();
         int numberOfPages = importSizing.numberOfPages();
 
@@ -152,11 +152,15 @@ public class RelationshipsBuilder {
     }
 
     public void addFromInternal(long source, long target) {
-        threadLocalBuilders.get().addRelationship(source, target);
+        threadLocalBuilders.get().addRelationship(idMapping.toRootNodeId(source), idMapping.toRootNodeId(target));
     }
 
     public void addFromInternal(long source, long target, double relationshipPropertyValue) {
-        threadLocalBuilders.get().addRelationship(source, target, relationshipPropertyValue);
+        threadLocalBuilders.get().addRelationship(
+            idMapping.toRootNodeId(source),
+            idMapping.toRootNodeId(target),
+            relationshipPropertyValue
+        );
     }
 
     public Relationships build() {
