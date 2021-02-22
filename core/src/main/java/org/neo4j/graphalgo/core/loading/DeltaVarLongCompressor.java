@@ -71,24 +71,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         }
     }
 
-    @Override
-    public DeltaVarLongCompressor concurrentCopy() {
-        return new DeltaVarLongCompressor(
-            adjacencyBuilder,
-            propertyBuilders,
-            adjacencyBuilder.newAllocator(),
-            Arrays
-                .stream(propertyBuilders)
-                .map(AdjacencyListBuilder::newAllocator)
-                .toArray(AdjacencyListAllocator[]::new),
-            adjacencyOffsetsFactory,
-            adjacencyOffsets,
-            propertyOffsets,
-            noAggregation,
-            aggregations
-        );
-    }
-
     private final AdjacencyListBuilder adjacencyBuilder;
     private final AdjacencyListBuilder[] propertyBuilders;
     private final AdjacencyListAllocator adjacencyAllocator;
@@ -152,6 +134,30 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     }
 
     @Override
+    public DeltaVarLongCompressor concurrentCopy() {
+        return new DeltaVarLongCompressor(
+            adjacencyBuilder,
+            propertyBuilders,
+            adjacencyBuilder.newAllocator(),
+            Arrays
+                .stream(propertyBuilders)
+                .map(AdjacencyListBuilder::newAllocator)
+                .toArray(AdjacencyListAllocator[]::new),
+            adjacencyOffsetsFactory,
+            adjacencyOffsets,
+            propertyOffsets,
+            noAggregation,
+            aggregations
+        );
+    }
+
+    @Override
+    public boolean supportsProperties() {
+        // TODO temporary until Geri does support properties
+        return adjacencyBuilder instanceof TransientAdjacencyListBuilder;
+    }
+
+    @Override
     public int compress(
         long nodeId,
         CompressedLongArray values,
@@ -161,6 +167,45 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             return applyVariableDeltaEncodingWithWeights(nodeId, values, buffer);
         } else {
             return applyVariableDeltaEncodingWithoutWeights(nodeId, values, buffer);
+        }
+    }
+
+    @Override
+    public void flush() {
+        adjacencyBuilder.flush();
+        for (var propertyBuilder : propertyBuilders) {
+            if (propertyBuilder != null) {
+                propertyBuilder.flush();
+            }
+        }
+    }
+
+    @Override
+    public AdjacencyListsWithProperties build() {
+        AdjacencyOffsets adjacencyOffsets = offsetPagesIntoOffsets(this.adjacencyOffsets);
+
+        var builder = ImmutableAdjacencyListsWithProperties
+            .builder()
+            .adjacency(new DvlCompressionResult(adjacencyOffsets, adjacencyBuilder.build()));
+
+        for (int i = 0; i < propertyBuilders.length; i++) {
+            var compressedProps = new DvlCompressionResult(
+                offsetPagesIntoOffsets(propertyOffsets[i]),
+                propertyBuilders[i].build()
+            );
+            builder.addProperty(compressedProps);
+        }
+
+        return builder.build();
+    }
+
+    @Override
+    public void close() {
+        adjacencyAllocator.close();
+        for (var propertiesAllocator : propertiesAllocators) {
+            if (propertiesAllocator != null) {
+                propertiesAllocator.close();
+            }
         }
     }
 
@@ -175,11 +220,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
 
         long address = copyIds(storage, requiredBytes, degree);
-
-        // TODO: this
-        // long address = copyIdsWithoutDegree(storage, requiredBytes);
-        // this.degrees.set(nodeId, degree);
-
         this.adjacencyOffsets.set(nodeId, address);
 
         array.release();
@@ -219,12 +259,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         copyProperties(uncompressedWeightsPerProperty, degree, nodeId, propertyOffsets);
 
-        // TODO: this
-        // var address = copyIdsWithoutDegree(semiCompressedBytesDuringLoading, requiredBytes);
-        // // values are in the final adjacency list
-        // this.degrees.set(nodeId, degree);
-        // copyPropertiesWithoutDegree(uncompressedWeightsPerProperty, degree, nodeId, propertyOffsets);
-
         this.adjacencyOffsets.set(nodeId, address);
         array.release();
 
@@ -239,27 +273,12 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         return slice.address();
     }
 
-    private long copyIdsWithoutDegree(byte[] targets, int requiredBytes) {
-        var slice = adjacencyAllocator.allocate(requiredBytes);
-        slice.insert(targets, 0, requiredBytes);
-        return slice.address();
-    }
-
     private void copyProperties(long[][] properties, int degree, long nodeId, HugeLongArray[] offsets) {
         for (int i = 0; i < properties.length; i++) {
             long[] property = properties[i];
             var propertiesAllocator = propertiesAllocators[i];
             long address = copyProperties(property, degree, propertiesAllocator);
             offsets[i].set(nodeId, address);
-        }
-    }
-
-    private void copyPropertiesWithoutDegree(long[][] properties, int degree, long localId, HugeLongArray[] offsets) {
-        for (int i = 0; i < properties.length; i++) {
-            long[] property = properties[i];
-            var propertiesAllocator = propertiesAllocators[i];
-            long address = copyPropertiesWithoutDegree(property, degree, propertiesAllocator);
-            offsets[i].set(localId, address);
         }
     }
 
@@ -277,48 +296,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         return slice.address();
     }
 
-    private long copyPropertiesWithoutDegree(long[] properties, int degree, AdjacencyListAllocator propertiesAllocator) {
-        int requiredBytes = degree * Long.BYTES;
-        var slice = propertiesAllocator.allocate(requiredBytes);
-        int offset = slice.offset();
-        ByteBuffer
-            .wrap(slice.page(), offset, requiredBytes)
-            .order(ByteOrder.LITTLE_ENDIAN)
-            .asLongBuffer()
-            .put(properties, 0, degree);
-        slice.bytesWritten(requiredBytes);
-        return slice.address();
-    }
-
-    @Override
-    public AdjacencyListsWithProperties build() {
-        AdjacencyOffsets adjacencyOffsets = offsetPagesIntoOffsets(this.adjacencyOffsets);
-
-        var builder = ImmutableAdjacencyListsWithProperties
-            .builder()
-            .adjacency(new DVLCompressedTopology(adjacencyOffsets, adjacencyBuilder.build()));
-
-        for (int i = 0; i < propertyBuilders.length; i++) {
-            var properties2 = new DVLCompressedProperties(
-                offsetPagesIntoOffsets(propertyOffsets[i]),
-                propertyBuilders[i].build()
-            );
-            builder.putProperty(i, properties2);
-        }
-
-        return builder.build();
-    }
-
-    @Override
-    public void close() {
-        adjacencyAllocator.close();
-        for (var propertiesAllocator : propertiesAllocators) {
-            if (propertiesAllocator != null) {
-                propertiesAllocator.close();
-            }
-        }
-    }
-
     private AdjacencyOffsets offsetPagesIntoOffsets(HugeLongArray offsets) {
         long[][] pages = new long[offsets.pages()][];
         int pageIndex = 0;
@@ -330,31 +307,11 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         return adjacencyOffsetsFactory.newOffsets(pages);
     }
 
-    public static final class DVLCompressedTopology implements CompressedTopology {
+    private static final class DvlCompressionResult implements CompressedTopology, CompressedProperties {
         final AdjacencyOffsets offsets;
         final AdjacencyList adjacency;
 
-        public DVLCompressedTopology(AdjacencyOffsets offsets, AdjacencyList adjacency) {
-            this.offsets = offsets;
-            this.adjacency = adjacency;
-        }
-
-        @Override
-        public AdjacencyOffsets adjacencyOffsets() {
-            return offsets;
-        }
-
-        @Override
-        public AdjacencyList adjacencyList() {
-            return adjacency;
-        }
-    }
-
-    static final class DVLCompressedProperties implements CompressedProperties {
-        final AdjacencyOffsets offsets;
-        final AdjacencyList adjacency;
-
-        DVLCompressedProperties(AdjacencyOffsets offsets, AdjacencyList adjacency) {
+        private DvlCompressionResult(AdjacencyOffsets offsets, AdjacencyList adjacency) {
             this.offsets = offsets;
             this.adjacency = adjacency;
         }

@@ -31,8 +31,8 @@ public final class LongArrayBuffer {
         this.length = 0;
     }
 
-    LongArrayBuffer(int capacity) {
-        this.buffer = new long[capacity];
-        this.length = capacity;
+    public LongArrayBuffer(long[] buffer, int length) {
+        this.buffer = buffer;
+        this.length = length;
     }
 }

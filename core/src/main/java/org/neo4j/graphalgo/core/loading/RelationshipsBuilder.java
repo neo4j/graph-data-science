@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressor;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressorFactory;
@@ -36,11 +35,8 @@ public final class RelationshipsBuilder {
     private static final AdjacencyListBuilder[] EMPTY_PROPERTY_BUILDERS = new AdjacencyListBuilder[0];
 
     private final RelationshipProjection projection;
-
-    private final AdjacencyListBuilder adjacencyListBuilder;
     private final AdjacencyCompressor adjacencyCompressor;
 
-    private final AdjacencyListBuilder[] propertyBuilders;
     private final Aggregation[] aggregations;
     private final int[] propertyKeyIds;
     private final double[] defaultValues;
@@ -79,11 +75,11 @@ public final class RelationshipsBuilder {
         double[] defaultValues,
         AllocationTracker tracker
     ) {
-        return new RelationshipsBuilder(
+        return create(
             nodeCount,
             projection,
+            adjacencyCompressorFactory(offsetsFactory),
             listBuilderFactory,
-            offsetsFactory,
             aggregations,
             propertyKeyIds,
             defaultValues,
@@ -91,8 +87,42 @@ public final class RelationshipsBuilder {
         );
     }
 
-    // TODO
-    static AdjacencyCompressorFactory adjacencyCompressorFactory(AdjacencyOffsetsFactory offsetsFactory) {
+    private static RelationshipsBuilder create(
+        long nodeCount,
+        RelationshipProjection projection,
+        AdjacencyCompressorFactory adjacencyCompressorFactory,
+        AdjacencyListBuilderFactory listBuilderFactory,
+        Aggregation[] aggregations,
+        int[] propertyKeyIds,
+        double[] defaultValues,
+        AllocationTracker tracker
+    ) {
+        var adjacencyListBuilder = listBuilderFactory.newAdjacencyListBuilder();
+
+        var propertyBuilders = EMPTY_PROPERTY_BUILDERS;
+        if (!projection.properties().isEmpty()) {
+            propertyBuilders = new AdjacencyListBuilder[projection.properties().numberOfMappings()];
+            Arrays.setAll(propertyBuilders, i -> listBuilderFactory.newAdjacencyListBuilder());
+        }
+
+        var adjacencyCompressor = adjacencyCompressorFactory.create(
+            nodeCount,
+            adjacencyListBuilder,
+            propertyBuilders,
+            aggregations,
+            tracker
+        );
+
+        return new RelationshipsBuilder(
+            projection,
+            adjacencyCompressor,
+            aggregations,
+            propertyKeyIds,
+            defaultValues
+        );
+    }
+
+    private static AdjacencyCompressorFactory adjacencyCompressorFactory(AdjacencyOffsetsFactory offsetsFactory) {
         return new DeltaVarLongCompressor.Factory(offsetsFactory);
     }
 
@@ -130,58 +160,17 @@ public final class RelationshipsBuilder {
     }
 
     private RelationshipsBuilder(
-        long nodeCount,
         RelationshipProjection projection,
-        AdjacencyListBuilderFactory listBuilderFactory,
-        AdjacencyOffsetsFactory offsetsFactory,
+        AdjacencyCompressor adjacencyCompressor,
         Aggregation[] aggregations,
         int[] propertyKeyIds,
-        double[] defaultValues,
-        AllocationTracker tracker
-    ) {
-        this(
-            nodeCount,
-            projection,
-            adjacencyCompressorFactory(offsetsFactory),
-            listBuilderFactory,
-            aggregations,
-            propertyKeyIds,
-            defaultValues,
-            tracker
-        );
-    }
-
-    private RelationshipsBuilder(
-        long nodeCount,
-        RelationshipProjection projection,
-        AdjacencyCompressorFactory adjacencyCompressorFactory,
-        AdjacencyListBuilderFactory listBuilderFactory,
-        Aggregation[] aggregations,
-        int[] propertyKeyIds,
-        double[] defaultValues,
-        AllocationTracker tracker
+        double[] defaultValues
     ) {
         this.projection = projection;
-        this.adjacencyListBuilder = listBuilderFactory.newAdjacencyListBuilder();
+        this.adjacencyCompressor = adjacencyCompressor;
         this.aggregations = aggregations;
         this.propertyKeyIds = propertyKeyIds;
         this.defaultValues = defaultValues;
-
-        if (projection.properties().isEmpty()) {
-            this.propertyBuilders = EMPTY_PROPERTY_BUILDERS;
-        } else {
-            this.propertyBuilders = new AdjacencyListBuilder[projection.properties().numberOfMappings()];
-            Arrays.setAll(propertyBuilders, i -> listBuilderFactory.newAdjacencyListBuilder());
-        }
-
-        // TODO move to factory methods?
-        adjacencyCompressor = adjacencyCompressorFactory.create(
-            nodeCount,
-            adjacencyListBuilder,
-            propertyBuilders,
-            aggregations,
-            tracker
-        );
     }
 
     ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
@@ -189,25 +178,11 @@ public final class RelationshipsBuilder {
     }
 
     boolean supportsProperties() {
-        // TODO temporary until Geri does support properties
-        return adjacencyListBuilder instanceof TransientAdjacencyListBuilder;
+        return adjacencyCompressor.supportsProperties();
     }
 
     public AdjacencyListsWithProperties build() {
         return adjacencyCompressor.build();
-    }
-
-    public AdjacencyList adjacencyList() {
-        return adjacencyListBuilder.build();
-    }
-
-    // TODO: This returns only the first of possibly multiple properties
-    public AdjacencyList properties() {
-        return propertyBuilders.length > 0 ? propertyBuilders[0].build() : null;
-    }
-
-    public AdjacencyList properties(int propertyIndex) {
-        return propertyBuilders.length > 0 ? propertyBuilders[propertyIndex].build() : null;
     }
 
     // TODO: maybe remove
@@ -228,11 +203,6 @@ public final class RelationshipsBuilder {
     }
 
     void flush() {
-        adjacencyListBuilder.flush();
-        for (AdjacencyListBuilder propertyBuilder : propertyBuilders) {
-            if (propertyBuilder != null) {
-                propertyBuilder.flush();
-            }
-        }
+        adjacencyCompressor.flush();
     }
 }

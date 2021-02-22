@@ -19,9 +19,7 @@
  */
 package org.neo4j.graphalgo.api;
 
-import java.util.function.DoubleSupplier;
-
-public interface PropertyCursor extends AutoCloseable, DoubleSupplier {
+public interface PropertyCursor extends AutoCloseable {
     /**
      * Initialize this cursor to point to the given {@code index}.
      */
@@ -41,10 +39,4 @@ public interface PropertyCursor extends AutoCloseable, DoubleSupplier {
 
     @Override
     void close();
-
-    @Override
-    default double getAsDouble() {
-        long propertyBits = nextLong();
-        return Double.longBitsToDouble(propertyBits);
-    }
 }

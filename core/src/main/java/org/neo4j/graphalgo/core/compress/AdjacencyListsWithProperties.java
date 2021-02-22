@@ -21,12 +21,12 @@ package org.neo4j.graphalgo.core.compress;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 
-import java.util.Map;
+import java.util.List;
 
 @ValueClass
 public interface AdjacencyListsWithProperties {
 
     CompressedTopology adjacency();
 
-    Map<Integer, CompressedProperties> properties();
+    List<CompressedProperties> properties();
 }

@@ -169,17 +169,17 @@ public class RelationshipsBuilder {
         ParallelUtil.runWithConcurrency(concurrency, relationshipImporter.flushTasks(), executorService);
 
         var build = relationshipsBuilder.build();
-        var topology2 = build.adjacency();
-        var properties2 = build.properties().values().stream().findFirst().orElse(null);
+        var compressedTopology = build.adjacency();
+        var compressedProperties = build.properties().stream().findFirst().orElse(null);
 
         return Relationships.of(
             relationshipCounter.longValue(),
             orientation,
             Aggregation.equivalentToNone(aggregation),
-            topology2.adjacencyList(),
-            topology2.adjacencyOffsets(),
-            properties2 != null ? properties2.adjacencyList() : null,
-            properties2 != null ? properties2.adjacencyOffsets() : null,
+            compressedTopology.adjacencyList(),
+            compressedTopology.adjacencyOffsets(),
+            compressedProperties != null ? compressedProperties.adjacencyList() : null,
+            compressedProperties != null ? compressedProperties.adjacencyOffsets() : null,
             DOUBLE_DEFAULT_FALLBACK
         );
     }

@@ -271,8 +271,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 aggregationsWithDefault,
                 propertyKeyIds,
                 propertyDefaultValues,
-                // TODO 👀
-                AllocationTracker.empty()
+                loadingContext.tracker()
             );
 
             allBuilders.put(relationshipType, builder);

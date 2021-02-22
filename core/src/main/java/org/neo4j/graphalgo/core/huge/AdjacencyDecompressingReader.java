@@ -26,7 +26,7 @@ import java.util.Arrays;
 
 import static org.neo4j.graphalgo.core.huge.VarLongDecoding.decodeDeltaVLongs;
 
-public final class AdjacencyDecompressingReader {
+final class AdjacencyDecompressingReader {
 
     static final int CHUNK_SIZE = 64;
 
@@ -40,7 +40,7 @@ public final class AdjacencyDecompressingReader {
     }
 
     //@formatter:off
-    public static int readInt(byte[] array, int offset) {
+    static int readInt(byte[] array, int offset) {
         return   array[    offset] & 255        |
                 (array[1 + offset] & 255) <<  8 |
                 (array[2 + offset] & 255) << 16 |
@@ -49,7 +49,7 @@ public final class AdjacencyDecompressingReader {
     //@formatter:on
 
     //@formatter:off
-    public static long readLong(byte[] array, int offset) {
+    static long readLong(byte[] array, int offset) {
         return   array[    offset] & 255L        |
                 (array[1 + offset] & 255L) <<  8 |
                 (array[2 + offset] & 255L) << 16 |

@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.apache.lucene.util.LongsRef;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.compress.LongArrayBuffer;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -43,7 +43,7 @@ class AdjacencyCompressionTest {
         double[][] expected,
         String aggregationType
     ) {
-        LongsRef data = new LongsRef(targetNodeIds, 0, targetNodeIds.length);
+        var data = new LongArrayBuffer(targetNodeIds, targetNodeIds.length);
 
         // Calculate this before applying the delta because the target node ids array is updated in place
         long expectedDataLength = Arrays.stream(targetNodeIds).distinct().count();
@@ -58,15 +58,13 @@ class AdjacencyCompressionTest {
 
         // The length of the data should be the count of the distinct elements in the target node ids array
         assertEquals(expectedDataLength, data.length);
-        // The offset should be unchanged
-        assertEquals(0, data.offset);
 
         // The target data.longs should be the same instance as the one it was created
-        assertSame(targetNodeIds, data.longs);
+        assertSame(targetNodeIds, data.buffer);
 
         // These contain the `deltas` computed during the compression
-        assertEquals(1L, data.longs[0]);
-        assertEquals(4L, data.longs[1]);
+        assertEquals(1L, data.buffer[0]);
+        assertEquals(4L, data.buffer[1]);
     }
 
     static Stream<Arguments> aggregationsWithResults() {

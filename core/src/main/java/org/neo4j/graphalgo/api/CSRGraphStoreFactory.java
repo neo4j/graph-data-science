@@ -103,16 +103,15 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
 
     private RelationshipPropertyStore constructRelationshipPropertyStore(
         RelationshipProjection projection,
-        Map<Integer, CompressedProperties> properties,
+        Iterable<CompressedProperties> properties,
         long relationshipCount
     ) {
         PropertyMappings propertyMappings = projection.properties();
         RelationshipPropertyStore.Builder propertyStoreBuilder = RelationshipPropertyStore.builder();
 
-        propertyMappings.enumerate().forEach(propertyIndexAndMapping -> {
-            int propertyIndex = propertyIndexAndMapping.getOne();
-            var compressedProperties = properties.get(propertyIndex);
-            var propertyMapping = propertyIndexAndMapping.getTwo();
+        var propertiesIter = properties.iterator();
+        propertyMappings.mappings().forEach(propertyMapping -> {
+            var compressedProperties = propertiesIter.next();
             propertyStoreBuilder.putIfAbsent(
                 propertyMapping.propertyKey(),
                 RelationshipProperty.of(
@@ -125,7 +124,8 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                         relationshipCount,
                         projection.orientation(),
                         projection.isMultiGraph(),
-                        propertyMapping.defaultValue().doubleValue() // This is fine because relationships currently only support doubles
+                        propertyMapping.defaultValue().doubleValue()
+                        // This is fine because relationships currently only support doubles
                     ),
                     propertyMapping.defaultValue().isUserDefined()
                         ? propertyMapping.defaultValue()

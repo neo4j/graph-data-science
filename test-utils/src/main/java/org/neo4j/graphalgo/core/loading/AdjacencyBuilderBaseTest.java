@@ -70,27 +70,31 @@ public abstract class AdjacencyBuilderBaseTest {
             relationshipsBatchBuffer.add(i, nodeCount - i, -1);
         }
 
-        RelationshipImporter relationshipImporter = new RelationshipImporter(AllocationTracker.empty(), adjacencyBuilder);
+        RelationshipImporter relationshipImporter = new RelationshipImporter(
+            AllocationTracker.empty(),
+            adjacencyBuilder
+        );
         RelationshipImporter.Imports imports = relationshipImporter.imports(Orientation.NATURAL, false);
         imports.importRelationships(relationshipsBatchBuffer, null);
 
         adjacencyBuilder.flushTasks().forEach(Runnable::run);
 
-        var adjacencyList = globalBuilder.build();
+        var compressedTopology = globalBuilder.build().adjacency();
 
-        try (var adjacency = adjacencyList.adjacency().adjacencyList()) {
+        try (var adjacencyList = compressedTopology.adjacencyList();
+             var adjacencyOffsets = compressedTopology.adjacencyOffsets()
+        ) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-                var offset = adjacencyList.adjacency().adjacencyOffsets().get(nodeId);
-                try (var cursor = adjacency.decompressingCursor(offset)) {
+                long offset = adjacencyOffsets.get(nodeId);
+                try (var cursor = adjacencyList.decompressingCursor(offset)) {
                     while (cursor.hasNextVLong()) {
                         long target = cursor.nextVLong();
                         assertEquals(relationships.remove(nodeId), target);
                     }
                 }
             }
+            assertTrue(relationships.isEmpty());
         }
-
-        assertTrue(relationships.isEmpty());
     }
 
     @Test

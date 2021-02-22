@@ -43,12 +43,15 @@ public class UniformNeighborhoodSampler implements NeighborhoodSampler {
         graph.concurrentCopy().forEachRelationship(
             nodeId,
             (source, target) -> {
+                if (remainingToSample.get() == 0 || remainingToConsider.get() == 0) {
+                    return false;
+                }
                 double randomDouble = randomDouble(source, target, graph.nodeCount());
                 if (remainingToConsider.getAndDecrement() * randomDouble <= remainingToSample.get()) {
                     neighbors.add(target);
                     remainingToSample.decrementAndGet();
                 }
-                return remainingToSample.get() != 0 && remainingToConsider.get() != 0;
+                return true;
             }
         );
         return neighbors;

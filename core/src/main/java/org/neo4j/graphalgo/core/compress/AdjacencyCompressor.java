@@ -23,6 +23,10 @@ import org.neo4j.graphalgo.core.loading.CompressedLongArray;
 
 public interface AdjacencyCompressor extends AutoCloseable {
 
+    AdjacencyCompressor concurrentCopy();
+
+    boolean supportsProperties();
+
     /**
      * @return the degree of the compressed adjacency list
      */
@@ -32,7 +36,7 @@ public interface AdjacencyCompressor extends AutoCloseable {
         LongArrayBuffer buffer
     );
 
-    AdjacencyCompressor concurrentCopy();
+    void flush();
 
     AdjacencyListsWithProperties build();
 
