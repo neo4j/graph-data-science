@@ -23,7 +23,11 @@ dependencies {
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
-    compileOnly group: 'org.neo4j',      name: 'neo4j',             version: ver.'neo4j'
+    neodeps.each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
 
     testAnnotationProcessor project(':annotations')
 

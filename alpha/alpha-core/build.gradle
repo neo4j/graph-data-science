@@ -13,7 +13,11 @@ dependencies {
 
     compileOnly project(':core')
 
-    compileOnly group: 'org.neo4j', name: 'neo4j', version: ver.'neo4j'
+    neodeps.each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
 
     testImplementation project(':test-utils')
     testImplementation project(':core')

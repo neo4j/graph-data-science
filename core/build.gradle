@@ -13,76 +13,7 @@ dependencies {
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
 
-    [
-        'annotations',
-        'neo4j-collections',
-        'neo4j-command-line',
-        'neo4j-common',
-        'neo4j-configuration',
-        'neo4j-graphdb-api',
-        'neo4j-id-generator',
-        'neo4j-import-util',
-        'neo4j-io',
-        'neo4j-kernel-api',
-        'neo4j-kernel',
-        'neo4j-layout',
-        'neo4j-logging',
-        'neo4j-monitoring',
-        'neo4j-procedure-api',
-        'neo4j-record-storage-engine',
-        'neo4j-resource',
-        'neo4j-schema',
-        'neo4j-storage-engine-api',
-        'neo4j-token-api',
-        'neo4j-values',
-
-        // more modules to choose from
-        // 'cypher-ast-factory',
-        // 'neo4j-ast',
-        // 'neo4j-batch-insert',
-        // 'neo4j-bolt',
-        // 'neo4j-codegen',
-        // 'neo4j-concurrent',
-        // 'neo4j-consistency-check',
-        // 'neo4j-csv',
-        // 'neo4j-cypher-ast-factory',
-        // 'neo4j-cypher-expression-evaluator',
-        // 'neo4j-cypher-interpreted-runtime',
-        // 'neo4j-cypher-ir',
-        // 'neo4j-cypher-javacc-parser',
-        // 'neo4j-cypher-logical-plans',
-        // 'neo4j-cypher-macros',
-        // 'neo4j-cypher-planner-spi',
-        // 'neo4j-cypher-planner',
-        // 'neo4j-cypher-runtime-util',
-        // 'neo4j-cypher',
-        // 'neo4j-data-collector',
-        // 'neo4j-dbms',
-        // 'neo4j-diagnostics',
-        // 'neo4j-exceptions',
-        // 'neo4j-expressions',
-        // 'neo4j-fabric',
-        // 'neo4j-front-end',
-        // 'neo4j-fulltext-index',
-        // 'neo4j-graph-algo',
-        // 'neo4j-import-tool',
-        // 'neo4j-index',
-        // 'neo4j-label-index',
-        // 'neo4j-lock',
-        // 'neo4j-lucene-index',
-        // 'neo4j-native',
-        // 'neo4j-parser',
-        // 'neo4j-procedure',
-        // 'neo4j-rewriting',
-        // 'neo4j-security',
-        // 'neo4j-spatial-index',
-        // 'neo4j-ssl',
-        // 'neo4j-unsafe',
-        // 'neo4j-util',
-        // 'neo4j-wal',
-        // 'neo4j',
-        // 'server-api',
-    ].each {
+    neodeps.each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
         }
@@ -122,7 +53,11 @@ dependencies {
     testCompileOnly group: 'org.immutables',    name: 'value-annotations',  version: ver.'immutables'
     testCompileOnly group: 'org.immutables',    name: 'builder',            version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',     name: 'annotations',        version: ver.'jetbrains-annotations'
-    testCompileOnly group: 'org.neo4j',         name: 'neo4j',              version: ver.'neo4j'
+    neodeps.each {
+        testCompileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')

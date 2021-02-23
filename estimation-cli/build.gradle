@@ -12,12 +12,11 @@ dependencies {
     implementation project(':proc')
     implementation group: 'info.picocli',       name: 'picocli',             version: ver.'picocli'
     implementation group: 'org.reflections',    name: 'reflections',         version: ver.doc.'reflections'
-    implementation group: 'org.neo4j',          name: 'neo4j-graphdb-api',   version: ver.'neo4j'
-    implementation group: 'org.neo4j',          name: 'neo4j-kernel',        version: ver.'neo4j'
-    implementation group: 'org.neo4j',          name: 'neo4j-kernel-api',    version: ver.'neo4j'
-    implementation group: 'org.neo4j',          name: 'neo4j-logging',       version: ver.'neo4j'
-    implementation group: 'org.neo4j',          name: 'neo4j-procedure-api', version: ver.'neo4j'
-    implementation group: 'org.neo4j',          name: 'neo4j-values',        version: ver.'neo4j'
+    neodeps.each {
+        implementation(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
     // transitive from neo4j, defined explicitly because we use it; keep version in sync with neo4j
     implementation group: 'com.fasterxml.jackson.core',  name: 'jackson-annotations',  version: ver.'jackson'
     implementation group: 'com.fasterxml.jackson.core',  name: 'jackson-core',         version: ver.'jackson'
