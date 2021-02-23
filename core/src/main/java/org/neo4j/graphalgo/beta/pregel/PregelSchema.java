@@ -52,13 +52,3 @@ public interface PregelSchema {
         }
     }
 }
-
-@ValueClass
-interface Element {
-    String propertyKey();
-    @Value.Auxiliary
-    ValueType propertyType();
-    @Value.Auxiliary
-    PregelSchema.Visibility visibility();
-}
-
