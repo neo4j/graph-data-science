@@ -30,6 +30,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface KnnWriteConfig extends KnnBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
 
     static KnnWriteConfig of(

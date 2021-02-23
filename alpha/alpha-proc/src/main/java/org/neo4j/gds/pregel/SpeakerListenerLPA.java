@@ -148,6 +148,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
 
     @ValueClass
     @Configuration
+    @SuppressWarnings("immutables:subtype")
     public interface SpeakerListenerLPAConfig extends PregelConfig {
 
         @Value.Default

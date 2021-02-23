@@ -32,6 +32,7 @@ import java.util.Optional;
 
 @Configuration
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface NodeClassificationMutateConfig extends AlgoBaseConfig, MutatePropertyConfig, ModelConfig {
 
     long serialVersionUID = 0x42L;

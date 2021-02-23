@@ -153,8 +153,9 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
 
     @ValueClass
     @Configuration
+    @SuppressWarnings("immutables:subtype")
     public interface HitsConfig extends PregelConfig {
-        @Value
+
         int hitsIterations();
 
         @Override

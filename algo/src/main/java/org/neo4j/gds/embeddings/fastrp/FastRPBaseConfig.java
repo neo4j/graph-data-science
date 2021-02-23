@@ -33,6 +33,7 @@ import java.util.Optional;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig, FeaturePropertiesConfig {
 
     List<Number> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);

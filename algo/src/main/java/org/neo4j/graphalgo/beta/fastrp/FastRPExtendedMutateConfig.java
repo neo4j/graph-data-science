@@ -29,6 +29,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface FastRPExtendedMutateConfig extends FastRPExtendedBaseConfig, MutatePropertyConfig {
 
     static FastRPExtendedMutateConfig of(

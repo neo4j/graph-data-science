@@ -33,6 +33,7 @@ import java.util.Map;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface LinkLogisticRegressionTrainConfig extends FeaturePropertiesConfig, TrainingConfig {
 
     @Configuration.Parameter

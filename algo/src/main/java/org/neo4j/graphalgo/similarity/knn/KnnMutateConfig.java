@@ -30,6 +30,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface KnnMutateConfig extends KnnBaseConfig, MutatePropertyConfig, MutateRelationshipConfig {
 
     static KnnMutateConfig of(

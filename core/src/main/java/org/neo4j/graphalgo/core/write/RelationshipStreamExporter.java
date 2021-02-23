@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.write;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.core.SecureTransaction;
@@ -57,10 +56,7 @@ public final class RelationshipStreamExporter extends StatementApi {
 
         long targetNode();
 
-        @org.immutables.value.Value.Default
-        default Value @Nullable [] values() {
-            return null;
-        }
+        Value[] values();
     }
 
     public static RelationshipStreamExporter.Builder builder(

@@ -33,6 +33,7 @@ import java.util.Map;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 // This class is currently used internally in NodeClassification and is not
 // a procedure-level configuration. it is derived from a NodeClassificationTrainConfig
 public interface MultiClassNLRTrainConfig extends FeaturePropertiesConfig, TrainingConfig {

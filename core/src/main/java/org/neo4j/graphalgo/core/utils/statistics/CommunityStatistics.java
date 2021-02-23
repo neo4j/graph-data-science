@@ -192,6 +192,7 @@ public final class CommunityStatistics {
     private CommunityStatistics() {}
 
     @ValueClass
+    @SuppressWarnings("immutables:incompat")
     public interface CommunityCountAndHistogram {
         long componentCount();
 

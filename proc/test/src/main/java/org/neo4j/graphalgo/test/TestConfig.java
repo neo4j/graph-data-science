@@ -32,6 +32,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface TestConfig extends AlgoBaseConfig, WriteConfig, WritePropertyConfig {
 
     @Value.Default

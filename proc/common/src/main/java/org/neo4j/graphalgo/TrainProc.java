@@ -143,8 +143,8 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
         }
     }
 
-
     @ValueClass
+    @SuppressWarnings("immutables:subtype")
     interface GraphCreateNativeResult extends GraphCreateResult {
         Map<String, Object> nodeProjection();
         Map<String, Object> relationshipProjection();
@@ -164,6 +164,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     }
 
     @ValueClass
+    @SuppressWarnings("immutables:subtype")
     interface GraphCreateCypherResult extends GraphCreateResult {
         String nodeQuery();
         String relationshipQuery();

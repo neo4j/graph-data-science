@@ -47,6 +47,7 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
 
     @Value.Default
     @Configuration.Ignore
+    @SuppressWarnings("immutables:untype")
     default Optional<Long> pageCacheMemory() {
         return Optional.empty();
     }

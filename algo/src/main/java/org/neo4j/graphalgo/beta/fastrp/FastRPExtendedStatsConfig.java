@@ -28,6 +28,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface FastRPExtendedStatsConfig extends FastRPExtendedBaseConfig {
 
     static FastRPExtendedStatsConfig of(

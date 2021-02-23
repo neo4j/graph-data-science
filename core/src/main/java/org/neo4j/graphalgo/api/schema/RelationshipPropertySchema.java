@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.Aggregation;
 
 @ValueClass
+@SuppressWarnings("immutables:subtype")
 public interface RelationshipPropertySchema extends PropertySchema {
 
     Aggregation aggregation();

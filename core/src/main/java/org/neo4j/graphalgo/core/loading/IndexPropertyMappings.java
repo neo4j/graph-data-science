@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.IntObjectMap;
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
@@ -230,10 +229,8 @@ final class IndexPropertyMappings {
     @ValueClass
     interface IndexedPropertyMapping {
 
-        @Value.Parameter
         PropertyMapping property();
 
-        @Value.Parameter
         IndexDescriptor index();
     }
 

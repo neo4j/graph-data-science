@@ -33,6 +33,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface LinkPredictionPredictMutateConfig extends AlgoBaseConfig, MutateRelationshipConfig, MutatePropertyConfig, ModelConfig {
 
     @Configuration.IntegerRange(min = 1)

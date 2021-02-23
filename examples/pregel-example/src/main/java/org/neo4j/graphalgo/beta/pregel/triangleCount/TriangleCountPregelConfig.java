@@ -30,6 +30,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration("TriangleCountPregelConfigImpl")
+@SuppressWarnings("immutables:subtype")
 public interface TriangleCountPregelConfig extends PregelConfig {
 
     @Value.Default
