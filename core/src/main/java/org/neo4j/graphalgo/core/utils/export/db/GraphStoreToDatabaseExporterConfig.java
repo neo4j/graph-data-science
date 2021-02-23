@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.export.db;
 
 import org.immutables.value.Value;
-import org.neo4j.cli.Converters;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.graphalgo.annotation.Configuration;
@@ -58,10 +57,11 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     }
 
     static GraphStoreToDatabaseExporterConfig of(String username, CypherMapWrapper config) {
-        if (config.containsKey(DB_NAME_KEY)) {
-            var dbName = new Converters.DatabaseNameConverter().convert(config.getString(DB_NAME_KEY).get()).name();
-            config = config.withString(DB_NAME_KEY, dbName);
-        }
-        return new GraphStoreToDatabaseExporterConfigImpl(username, config);
+        var normalizedConfig = config.getString(DB_NAME_KEY).map(dbName -> {
+            var databaseName = new NormalizedDatabaseName(dbName);
+            DatabaseNameValidator.validateInternalDatabaseName(databaseName);
+            return config.withString(DB_NAME_KEY, databaseName.name());
+        }).orElse(config);
+        return new GraphStoreToDatabaseExporterConfigImpl(username, normalizedConfig);
     }
 }
