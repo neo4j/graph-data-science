@@ -23,6 +23,7 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
@@ -76,7 +77,7 @@ public final class GraphFactory {
 
     @Builder.Factory
     static RelationshipsBuilder relationshipsBuilder(
-        IdMap nodes,
+        IdMapping nodes,
         Optional<Orientation> orientation,
         Optional<Boolean> loadRelationshipProperty,
         Optional<Aggregation> aggregation,

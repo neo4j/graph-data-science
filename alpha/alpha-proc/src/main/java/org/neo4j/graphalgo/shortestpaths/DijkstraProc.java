@@ -166,6 +166,11 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
         }
 
         @Override
+        public long toRootNodeId(long nodeId) {
+            return mapping.toRootNodeId(nodeId);
+        }
+
+        @Override
         public boolean contains(final long nodeId) {
             return true;
         }
@@ -173,6 +178,11 @@ public class DijkstraProc extends AlgoBaseProc<ShortestPathDijkstra, ShortestPat
         @Override
         public long nodeCount() {
             return length;
+        }
+
+        @Override
+        public long rootNodeCount() {
+            return mapping.rootNodeCount();
         }
     }
 
