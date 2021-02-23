@@ -39,7 +39,7 @@ ext {
             'jol':                          '0.10',
             'jqwik':                        '1.2.0',
             'junit4':                       '4.13.1',
-            'junit5':                       '5.6.2',
+            'junit5':                       '5.7.1',
             'junit-quickcheck-core':        '0.8.1',
             'junit-quickcheck-generators':  '0.8.1',
             'mockito':                      '3.5.2',
