@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading.construction;
 
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -28,7 +27,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
@@ -134,9 +132,8 @@ class RelationshipsBuilderTest {
 
         var graph = graphStore.getGraph("A", "REL", Optional.empty());
 
-        assertThat(graph).isInstanceOf(NodeFilteredGraph.class)
-            .extracting(Graph::nodeCount, InstanceOfAssertFactories.LONG)
-            .isEqualTo(2L);
+        assertThat(graph).isInstanceOf(NodeFilteredGraph.class);
+        assertThat(graph.nodeCount()).isEqualTo(2L);
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graph)
@@ -164,7 +161,6 @@ class RelationshipsBuilderTest {
             Optional.empty(),
             relationships
         );
-
 
         var expectedGraphString = graphCreateString(
             numberOfBNodes,
