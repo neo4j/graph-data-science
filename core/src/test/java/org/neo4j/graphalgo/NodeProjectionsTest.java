@@ -25,14 +25,12 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
@@ -137,14 +135,15 @@ class NodeProjectionsTest {
 
     @Test
     void shouldFailOnDuplicatePropertyKeys() {
-        assertThatThrownBy(() -> NodeProjection
-            .builder()
-            .label("Foo")
-            .addAllProperties(PropertyMappings.fromObject(List.of("prop", "prop")))
-            .build()
-        )
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Duplicate property key `prop`");
+        IllegalStateException ex = assertThrows(
+            IllegalStateException.class,
+            () -> NodeProjection
+                .builder()
+                .label("Foo")
+                .addAllProperties(PropertyMappings.fromObject(asList("prop", "prop")))
+                .build()
+        );
+        assertThat(ex.getMessage(), matchesPattern("Duplicate property key `prop`"));
     }
 
     static Stream<Arguments> syntacticSugarsSimple() {
