@@ -38,7 +38,7 @@ public class CompositeAdjacencyList implements AdjacencyList {
         this.adjacencyOffsets = adjacencyOffsets;
     }
 
-    List<AdjacencyList> adjacencyLists() {
+    public List<AdjacencyList> adjacencyLists() {
         return adjacencyLists;
     }
 
@@ -90,7 +90,7 @@ public class CompositeAdjacencyList implements AdjacencyList {
         adjacencyLists.forEach(AdjacencyList::close);
     }
 
-    void forEachOffset(long nodeId, CompositeIndexedOffsetOperator func) {
+    public void forEachOffset(long nodeId, CompositeIndexedOffsetOperator func) {
         for (int i = 0; i < adjacencyLists.size(); i++) {
             long offset = adjacencyOffsets.get(i).get(nodeId);
             func.apply(i, offset, offset != 0);
@@ -98,7 +98,7 @@ public class CompositeAdjacencyList implements AdjacencyList {
     }
 
     @FunctionalInterface
-    interface CompositeIndexedOffsetOperator {
+    public interface CompositeIndexedOffsetOperator {
         void apply(int index, long offset, boolean hasAdjacency);
     }
 }

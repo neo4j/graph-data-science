@@ -31,7 +31,7 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
     private final List<AdjacencyCursor> cursors;
 
 
-    CompositeAdjacencyCursor(List<AdjacencyCursor> cursors) {
+    public CompositeAdjacencyCursor(List<AdjacencyCursor> cursors) {
         this.cursors = cursors;
         this.cursorQueue = new PriorityQueue<>(cursors.size(), Comparator.comparingLong(AdjacencyCursor::peekVLong));
 

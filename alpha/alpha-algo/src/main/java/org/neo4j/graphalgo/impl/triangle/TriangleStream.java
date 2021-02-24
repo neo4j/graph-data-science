@@ -24,12 +24,13 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.intersect.ImmutableRelationshipIntersectConfig;
-import org.neo4j.graphalgo.core.intersect.RelationshipIntersectConfig;
-import org.neo4j.graphalgo.core.intersect.RelationshipIntersectFactory;
-import org.neo4j.graphalgo.core.intersect.RelationshipIntersectFactoryLocator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.triangle.IntersectingTriangleCount;
+import org.neo4j.graphalgo.triangle.intersect.ImmutableRelationshipIntersectConfig;
+import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectConfig;
+import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactory;
+import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactoryLocator;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -66,6 +67,7 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
         ExecutorService executorService,
         int concurrency
     ) {
+        IntersectingTriangleCount.FactoryRegistration.registerAll();
         var factory = RelationshipIntersectFactoryLocator
             .lookup(graph.getClass())
             .orElseThrow(
