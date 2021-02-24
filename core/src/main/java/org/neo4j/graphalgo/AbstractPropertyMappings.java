@@ -69,14 +69,13 @@ public abstract class AbstractPropertyMappings implements Iterable<PropertyMappi
             for (Object mapping : (List<?>) relPropertyMapping) {
                 List<PropertyMapping> propertyMappings = fromObject(mapping, defaultAggregation).mappings();
                 for (PropertyMapping propertyMapping : propertyMappings) {
-                    // this needs to happen before the if statement as builder.mappings is null otherwise
-                    builder.addMapping(propertyMapping);
-                    if (builder.mappings.contains(propertyMapping)) {
+                    if (builder.mappings != null && builder.mappings.contains(propertyMapping)) {
                         throw new IllegalStateException(formatWithLocale(
                             "Duplicate property key `%s`",
                             propertyMapping.propertyKey()
                         ));
                     }
+                    builder.addMapping(propertyMapping);
                 }
             }
             return builder.build();
