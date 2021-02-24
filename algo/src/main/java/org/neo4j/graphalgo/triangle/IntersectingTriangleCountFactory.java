@@ -20,8 +20,17 @@
 package org.neo4j.graphalgo.triangle;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.huge.CompositeAdjacencyList;
+import org.neo4j.graphalgo.core.huge.FilteredGraphIntersect;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.HugeGraphIntersect;
+import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
+import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.graphalgo.core.huge.UnionGraphIntersect;
+import org.neo4j.graphalgo.core.intersect.RelationshipIntersectFactoryLocator;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -31,7 +40,36 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
+import static org.neo4j.graphalgo.core.intersect.RelationshipIntersectFactoryLocator.register;
+
 public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> implements AlgorithmFactory<IntersectingTriangleCount, CONFIG> {
+
+    static {
+        register(HugeGraph.class, (graph, config) -> {
+            var topology = graph.relationshipTopology();
+            return new HugeGraphIntersect(topology.list(), topology.offsets(), config.maxDegree());
+        });
+
+        register(UnionGraph.class, (graph, config) -> new UnionGraphIntersect(
+            (CompositeAdjacencyList) graph.relationshipTopology().list(),
+            config.maxDegree()
+        ));
+
+        register(FilterGraph.class, (graph, config) -> {
+            var innerGraph = graph.graph();
+            return RelationshipIntersectFactoryLocator.lookup(innerGraph.getClass())
+                .orElseThrow(UnsupportedOperationException::new)
+                .create(innerGraph, config);
+        });
+
+        register(NodeFilteredGraph.class, (graph, config) -> {
+            var innerGraph = graph.graph();
+            var relationshipIntersect = RelationshipIntersectFactoryLocator.lookup(innerGraph.getClass())
+                .orElseThrow(UnsupportedOperationException::new)
+                .create(innerGraph, config);
+            return new FilteredGraphIntersect(graph.nodeMapping(), relationshipIntersect);
+        });
+    }
 
     @Override
     public IntersectingTriangleCount build(
@@ -47,7 +85,7 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
             eventTracker
         );
 
-        return new IntersectingTriangleCount(
+        return IntersectingTriangleCount.create(
             graph,
             configuration,
             Pools.DEFAULT,

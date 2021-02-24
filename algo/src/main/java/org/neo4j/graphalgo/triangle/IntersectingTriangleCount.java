@@ -27,6 +27,10 @@ import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.intersect.ImmutableRelationshipIntersectConfig;
+import org.neo4j.graphalgo.core.intersect.RelationshipIntersectConfig;
+import org.neo4j.graphalgo.core.intersect.RelationshipIntersectFactory;
+import org.neo4j.graphalgo.core.intersect.RelationshipIntersectFactoryLocator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
@@ -49,11 +53,13 @@ import java.util.concurrent.atomic.LongAdder;
  * http://www.math.cmu.edu/~ctsourak/tsourICDM08.pdf
  */
 @SuppressWarnings("FieldCanBeLocal")
-public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult> {
+public final class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult> {
 
     static final int EXCLUDED_NODE_TRIANGLE_COUNT = -1;
 
     private Graph graph;
+    private final RelationshipIntersectFactory<Graph> intersectFactory;
+    private final RelationshipIntersectConfig intersectConfig;
     private final TriangleCountBaseConfig config;
     private ExecutorService executorService;
     private final AtomicLong queue;
@@ -64,30 +70,47 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
 
     private LongAdder globalTriangleCounter;
 
-    public IntersectingTriangleCount(
+    public static IntersectingTriangleCount create(
         Graph graph,
         TriangleCountBaseConfig config,
         ExecutorService executorService,
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
-        this.graph = graph;
-        this.config = config;
-        this.executorService = executorService;
-        triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
-        globalTriangleCounter = new LongAdder();
-        queue = new AtomicLong();
-        this.progressLogger = progressLogger;
+        var factory = RelationshipIntersectFactoryLocator
+            .lookup(graph.getClass())
+            .orElseThrow(
+                () -> new IllegalArgumentException("No relationship intersect factory registered for graph: " + graph.getClass())
+            );
+        return new IntersectingTriangleCount(graph, factory, config, executorService, tracker, progressLogger);
     }
 
     @TestOnly
-    public IntersectingTriangleCount(
+    public static IntersectingTriangleCount create(
         Graph graph,
         TriangleCountBaseConfig config,
-        ExecutorService executorService,
-        AllocationTracker tracker
+        ExecutorService executorService
     ) {
-        this(graph, config, executorService, tracker, ProgressLogger.NULL_LOGGER);
+        return create(graph, config, executorService, AllocationTracker.empty(), ProgressLogger.NULL_LOGGER);
+    }
+
+    private IntersectingTriangleCount(
+        Graph graph,
+        RelationshipIntersectFactory<Graph> intersectFactory,
+        TriangleCountBaseConfig config,
+        ExecutorService executorService,
+        AllocationTracker tracker,
+        ProgressLogger progressLogger
+    ) {
+        this.graph = graph;
+        this.intersectFactory = intersectFactory;
+        this.intersectConfig = ImmutableRelationshipIntersectConfig.of(config.maxDegree());
+        this.config = config;
+        this.executorService = executorService;
+        this.triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
+        this.globalTriangleCounter = new LongAdder();
+        this.queue = new AtomicLong();
+        this.progressLogger = progressLogger;
     }
 
     @Override
@@ -107,7 +130,10 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
         queue.set(0);
         globalTriangleCounter.reset();
         // create tasks
-        final Collection<? extends Runnable> tasks = ParallelUtil.tasks(config.concurrency(), () -> new IntersectTask(graph));
+        final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
+            config.concurrency(),
+            () -> new IntersectTask(intersectFactory.create(graph, intersectConfig))
+        );
         // run
         ParallelUtil.run(tasks, executorService);
 
@@ -123,8 +149,8 @@ public class IntersectingTriangleCount extends Algorithm<IntersectingTriangleCou
 
         private final RelationshipIntersect intersect;
 
-        IntersectTask(Graph graph) {
-            intersect = graph.intersection(config.maxDegree());
+        IntersectTask(RelationshipIntersect relationshipIntersect) {
+            intersect = relationshipIntersect;
         }
 
         @Override

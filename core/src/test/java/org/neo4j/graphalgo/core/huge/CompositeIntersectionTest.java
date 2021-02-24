@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.core.intersect.ImmutableRelationshipIntersectConfig;
+import org.neo4j.graphalgo.core.intersect.RelationshipIntersectFactoryLocator;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -80,7 +82,9 @@ final class CompositeIntersectionTest extends AlgoTestBase {
             .build()
             .graph();
 
-        INTERSECT = graph.intersection();
+        INTERSECT = RelationshipIntersectFactoryLocator.lookup(graph.getClass())
+            .orElseThrow(IllegalArgumentException::new)
+            .create(graph, ImmutableRelationshipIntersectConfig.builder().build());
         START1 = graph.toMappedNodeId(neoStarts[0]);
         START2 = graph.toMappedNodeId(neoStarts[1]);
         TARGETS = Arrays.stream(neoTargets).map(graph::toMappedNodeId).toArray();

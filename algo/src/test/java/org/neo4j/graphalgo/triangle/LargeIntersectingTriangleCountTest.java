@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
 import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
@@ -69,11 +68,10 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
     @Test
     void testQueue() {
         loadGraph();
-        IntersectingTriangleCount.TriangleCountResult result = new IntersectingTriangleCount(
+        var result = IntersectingTriangleCount.create(
             graph,
             defaultConfigBuilder().build(),
-            Pools.DEFAULT,
-            AllocationTracker.empty()
+            Pools.DEFAULT
         ).compute();
         assertEquals(TRIANGLE_COUNT, result.globalTriangles());
         assertTriangles(result.globalTriangles());
@@ -82,11 +80,10 @@ class LargeIntersectingTriangleCountTest extends AlgoTestBase {
     @Test
     void testQueueParallel() {
         loadGraph();
-        IntersectingTriangleCount.TriangleCountResult result = new IntersectingTriangleCount(
+        var result = IntersectingTriangleCount.create(
             graph,
             defaultConfigBuilder().concurrency(4).build(),
-            Pools.DEFAULT,
-            AllocationTracker.empty()
+            Pools.DEFAULT
         ).compute();
         assertEquals(TRIANGLE_COUNT, result.globalTriangles());
         assertTriangles(result.globalTriangles());

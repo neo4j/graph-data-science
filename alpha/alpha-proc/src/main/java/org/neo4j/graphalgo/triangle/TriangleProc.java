@@ -80,7 +80,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     @Override
     protected AlgorithmFactory<TriangleStream, TriangleCountBaseConfig> algorithmFactory() {
         return (AlphaAlgorithmFactory<TriangleStream, TriangleCountBaseConfig>) (graph, configuration, tracker, log, eventTracker) ->
-            new TriangleStream(graph, Pools.DEFAULT, configuration.concurrency())
+            TriangleStream.create(graph, Pools.DEFAULT, configuration.concurrency())
                 .withTerminationFlag(TerminationFlag.wrap(transaction));
     }
 }

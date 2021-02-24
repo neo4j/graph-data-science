@@ -24,6 +24,10 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.intersect.ImmutableRelationshipIntersectConfig;
+import org.neo4j.graphalgo.core.intersect.RelationshipIntersectConfig;
+import org.neo4j.graphalgo.core.intersect.RelationshipIntersectFactory;
+import org.neo4j.graphalgo.core.intersect.RelationshipIntersectFactoryLocator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
@@ -44,9 +48,11 @@ import java.util.stream.StreamSupport;
  * emitting the nodeId and the number of triangles the node is part of,
  * this impl. streams the actual nodeIds of each triangle once.
  */
-public class TriangleStream extends Algorithm<TriangleStream, Stream<TriangleStream.Result>> {
+public final class TriangleStream extends Algorithm<TriangleStream, Stream<TriangleStream.Result>> {
 
     private final Graph graph;
+    private final RelationshipIntersectFactory<Graph> intersectFactory;
+    private final RelationshipIntersectConfig intersectConfig;
     private final ExecutorService executorService;
     private final AtomicInteger queue;
     private final int concurrency;
@@ -55,8 +61,28 @@ public class TriangleStream extends Algorithm<TriangleStream, Stream<TriangleStr
     private final AtomicInteger runningThreads;
     private final BlockingQueue<Result> resultQueue;
 
-    public TriangleStream(Graph graph, ExecutorService executorService, int concurrency) {
+    public static TriangleStream create(
+        Graph graph,
+        ExecutorService executorService,
+        int concurrency
+    ) {
+        var factory = RelationshipIntersectFactoryLocator
+            .lookup(graph.getClass())
+            .orElseThrow(
+                () -> new IllegalArgumentException("No relationship intersect factory registered for graph: " + graph.getClass())
+            );
+        return new TriangleStream(graph, factory, executorService, concurrency);
+    }
+
+    private TriangleStream(
+        Graph graph,
+        RelationshipIntersectFactory<Graph> intersectFactory,
+        ExecutorService executorService,
+        int concurrency
+    ) {
         this.graph = graph;
+        this.intersectFactory = intersectFactory;
+        this.intersectConfig = ImmutableRelationshipIntersectConfig.builder().build();
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
@@ -107,7 +133,7 @@ public class TriangleStream extends Algorithm<TriangleStream, Stream<TriangleStr
         queue.set(0);
         runningThreads.set(0);
         final Collection<Runnable> tasks;
-        tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(graph));
+        tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(intersectFactory.create(graph, intersectConfig)));
         ParallelUtil.run(tasks, false, executorService, null);
     }
 
@@ -146,8 +172,8 @@ public class TriangleStream extends Algorithm<TriangleStream, Stream<TriangleStr
 
         private final RelationshipIntersect intersect;
 
-        IntersectTask(Graph graph) {
-            intersect = graph.intersection();
+        IntersectTask(RelationshipIntersect intersect) {
+            this.intersect = intersect;
         }
 
         @Override

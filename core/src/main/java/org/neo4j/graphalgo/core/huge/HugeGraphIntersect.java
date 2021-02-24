@@ -28,7 +28,7 @@ public class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
     private final AdjacencyList adjacency;
     private final AdjacencyOffsets offsets;
 
-    HugeGraphIntersect(final AdjacencyList adjacency, final AdjacencyOffsets offsets, long maxDegree) {
+    public HugeGraphIntersect(final AdjacencyList adjacency, final AdjacencyOffsets offsets, long maxDegree) {
         super(
             adjacency.rawDecompressingCursor(),
             adjacency.rawDecompressingCursor(),

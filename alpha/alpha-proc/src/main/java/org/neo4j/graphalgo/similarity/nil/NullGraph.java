@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
@@ -78,11 +77,6 @@ public class NullGraph implements Graph {
 
     @Override
     public void canRelease(boolean canRelease) {}
-
-    @Override
-    public RelationshipIntersect intersection(long maxDegree) {
-        throw new NullGraphStore.NullGraphException();
-    }
 
     @Override
     public Graph concurrentCopy() {

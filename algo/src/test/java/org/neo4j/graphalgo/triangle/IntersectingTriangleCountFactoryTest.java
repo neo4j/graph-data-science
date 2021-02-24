@@ -45,7 +45,7 @@ class IntersectingTriangleCountFactoryTest {
 
 
         long hugeAtomicLongArray = 24 + nodeCount * 8 + 16;
-        long expected = 56 + hugeAtomicLongArray;
+        long expected = 64 + hugeAtomicLongArray;
         assertEquals(expected, actual.min);
         assertEquals(expected, actual.max);
     }
@@ -62,7 +62,7 @@ class IntersectingTriangleCountFactoryTest {
         MemoryRange actual = estimate.memoryUsage();
 
         long hugeAtomicLongArray = 32 + sizeOfHugeArray;
-        long expected = 56 + hugeAtomicLongArray;
+        long expected = 64 + hugeAtomicLongArray;
         assertEquals(expected, actual.min);
         assertEquals(expected, actual.max);
     }

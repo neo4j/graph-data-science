@@ -37,6 +37,10 @@ public abstract class FilterGraph implements Graph {
         this.graph = graph;
     }
 
+    public Graph graph() {
+        return graph;
+    }
+
     @Override
     public boolean isEmpty() {
         return graph.isEmpty();
@@ -60,11 +64,6 @@ public abstract class FilterGraph implements Graph {
     @Override
     public void canRelease(boolean canRelease) {
         graph.canRelease(canRelease);
-    }
-
-    @Override
-    public RelationshipIntersect intersection(long maxDegree) {
-        return graph.intersection(maxDegree);
     }
 
     @Override
@@ -195,11 +194,6 @@ public abstract class FilterGraph implements Graph {
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId) {
         return graph.relationshipProperty(sourceNodeId, targetNodeId);
-    }
-
-    @Override
-    public RelationshipIntersect intersection() {
-        return graph.intersection();
     }
 
     @Override

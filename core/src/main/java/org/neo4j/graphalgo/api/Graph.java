@@ -80,12 +80,6 @@ public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, Rela
 
     void canRelease(boolean canRelease);
 
-    default RelationshipIntersect intersection() {
-        return intersection(Long.MAX_VALUE);
-    }
-
-    RelationshipIntersect intersection(long maxDegree);
-
     @Override
     Graph concurrentCopy();
 }

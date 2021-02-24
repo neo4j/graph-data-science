@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -350,11 +349,6 @@ public class HugeGraph implements CSRGraph {
             isMultiGraph,
             tracker
         );
-    }
-
-    @Override
-    public RelationshipIntersect intersection(long maxDegree) {
-        return new HugeGraphIntersect(adjacencyList, adjacencyOffsets, maxDegree);
     }
 
     /**

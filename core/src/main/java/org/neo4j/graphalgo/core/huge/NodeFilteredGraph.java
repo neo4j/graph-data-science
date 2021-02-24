@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.api.ImmutableTopology;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -50,11 +49,6 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     @Override
     public GraphSchema schema() {
         return graph.schema().filterNodeLabels(filteredIdMap.availableNodeLabels());
-    }
-
-    @Override
-    public RelationshipIntersect intersection(long maxDegree) {
-        return new FilteredGraphIntersectImpl(filteredIdMap, super.intersection(maxDegree));
     }
 
     @Override

@@ -68,7 +68,7 @@ class TriangleStreamTest extends AlgoTestBase {
     void testSequential() {
         TripleConsumer mock = mock(TripleConsumer.class);
 
-        new TriangleStream(graph, Pools.DEFAULT, 1)
+        TriangleStream.create(graph, Pools.DEFAULT, 1)
                 .compute()
                 .forEach(r -> mock.consume(r.nodeA, r.nodeB, r.nodeC));
 
@@ -79,7 +79,7 @@ class TriangleStreamTest extends AlgoTestBase {
     void testParallel() {
         TripleConsumer mock = mock(TripleConsumer.class);
 
-        new TriangleStream(graph, Pools.DEFAULT, 8)
+        TriangleStream.create(graph, Pools.DEFAULT, 8)
                 .compute()
                 .forEach(r -> mock.consume(r.nodeA, r.nodeB, r.nodeC));
 

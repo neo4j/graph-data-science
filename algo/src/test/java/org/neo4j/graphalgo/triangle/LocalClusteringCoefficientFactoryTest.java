@@ -45,7 +45,7 @@ class LocalClusteringCoefficientFactoryTest {
 
         long triangleCountEstimate = 56 + 24 + nodeCount * 8 + 16;
         long hugeDoubleArray = 24 + nodeCount * 8 + 16;
-        long expected = 56 + hugeDoubleArray + triangleCountEstimate;
+        long expected = 64 + hugeDoubleArray + triangleCountEstimate;
 
         assertEquals(expected, actual.min);
         assertEquals(expected, actual.max);
@@ -81,7 +81,7 @@ class LocalClusteringCoefficientFactoryTest {
 
         long triangleCountEstimate = 56 + 32 + sizeOfHugeArray;
         long hugeDoubleArray = 32 + sizeOfHugeArray;
-        long expected = 56 + hugeDoubleArray + triangleCountEstimate;
+        long expected = 64 + hugeDoubleArray + triangleCountEstimate;
         assertEquals(expected, actual.min);
         assertEquals(expected, actual.max);
     }

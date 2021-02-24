@@ -29,12 +29,12 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
  * Instances are however safe to use concurrently with other {@link org.neo4j.graphalgo.api.RelationshipIterator}s.
  */
 
-class FilteredGraphIntersectImpl implements RelationshipIntersect {
+public class FilteredGraphIntersect implements RelationshipIntersect {
 
     private final NodeMapping filteredIdMap;
     private final RelationshipIntersect wrappedRelationshipIntersect;
 
-    FilteredGraphIntersectImpl(NodeMapping filteredIdMap, RelationshipIntersect wrappedRelationshipIntersect) {
+    public FilteredGraphIntersect(NodeMapping filteredIdMap, RelationshipIntersect wrappedRelationshipIntersect) {
         this.filteredIdMap = filteredIdMap;
         this.wrappedRelationshipIntersect = wrappedRelationshipIntersect;
     }

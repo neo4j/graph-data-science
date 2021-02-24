@@ -23,11 +23,11 @@ import org.neo4j.graphalgo.api.AdjacencyCursor;
 
 import java.util.ArrayList;
 
-class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
+public class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
 
     private final CompositeAdjacencyList compositeAdjacencyList;
 
-    UnionGraphIntersect(
+    public UnionGraphIntersect(
         CompositeAdjacencyList compositeAdjacencyList,
         long maxDegree
     ) {

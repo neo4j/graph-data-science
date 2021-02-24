@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -191,11 +190,6 @@ public final class UnionGraph implements CSRGraph {
     @Override
     public CSRGraph concurrentCopy() {
         return of(graphs.stream().map(CSRGraph::concurrentCopy).collect(Collectors.toList()));
-    }
-
-    @Override
-    public RelationshipIntersect intersection(long maxDegree) {
-        return new UnionGraphIntersect((CompositeAdjacencyList) relationshipTopology().list(), maxDegree);
     }
 
     /**
