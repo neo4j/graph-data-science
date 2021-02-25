@@ -149,7 +149,7 @@ The intention is to illustrate what the results look like and to provide a guide
 We will do this on a small graph of a handful of nodes representing houses.
 The example graph looks like this:
 
-image::../../../images/example-graphs/node_classification.svg[align="center"]
+image::example-graphs/node_classification.svg[align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=setup-query]
