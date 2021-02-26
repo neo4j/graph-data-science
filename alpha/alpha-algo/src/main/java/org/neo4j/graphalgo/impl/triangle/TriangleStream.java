@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.triangle.IntersectingTriangleCount;
 import org.neo4j.graphalgo.triangle.intersect.ImmutableRelationshipIntersectConfig;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectConfig;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactory;
@@ -52,7 +51,7 @@ import java.util.stream.StreamSupport;
 public final class TriangleStream extends Algorithm<TriangleStream, Stream<TriangleStream.Result>> {
 
     private final Graph graph;
-    private final RelationshipIntersectFactory<Graph> intersectFactory;
+    private final RelationshipIntersectFactory intersectFactory;
     private final RelationshipIntersectConfig intersectConfig;
     private final ExecutorService executorService;
     private final AtomicInteger queue;
@@ -67,9 +66,8 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
         ExecutorService executorService,
         int concurrency
     ) {
-        IntersectingTriangleCount.FactoryRegistration.registerAll();
         var factory = RelationshipIntersectFactoryLocator
-            .lookup(graph.getClass())
+            .lookup(graph)
             .orElseThrow(
                 () -> new IllegalArgumentException("No relationship intersect factory registered for graph: " + graph.getClass())
             );
@@ -78,7 +76,7 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
 
     private TriangleStream(
         Graph graph,
-        RelationshipIntersectFactory<Graph> intersectFactory,
+        RelationshipIntersectFactory intersectFactory,
         ExecutorService executorService,
         int concurrency
     ) {
@@ -135,7 +133,7 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
         queue.set(0);
         runningThreads.set(0);
         final Collection<Runnable> tasks;
-        tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(intersectFactory.create(graph, intersectConfig)));
+        tasks = ParallelUtil.tasks(concurrency, () -> new IntersectTask(intersectFactory.load(graph, intersectConfig)));
         ParallelUtil.run(tasks, false, executorService, null);
     }
 

@@ -19,9 +19,12 @@
  */
 package org.neo4j.graphalgo.triangle.intersect;
 
+import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will
@@ -29,12 +32,12 @@ import org.neo4j.graphalgo.api.RelationshipIntersect;
  * Instances are however safe to use concurrently with other {@link org.neo4j.graphalgo.api.RelationshipIterator}s.
  */
 
-public class FilteredGraphIntersect implements RelationshipIntersect {
+public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
 
     private final NodeMapping filteredIdMap;
     private final RelationshipIntersect wrappedRelationshipIntersect;
 
-    public FilteredGraphIntersect(NodeMapping filteredIdMap, RelationshipIntersect wrappedRelationshipIntersect) {
+    private NodeFilteredGraphIntersect(NodeMapping filteredIdMap, RelationshipIntersect wrappedRelationshipIntersect) {
         this.filteredIdMap = filteredIdMap;
         this.wrappedRelationshipIntersect = wrappedRelationshipIntersect;
     }
@@ -50,5 +53,27 @@ public class FilteredGraphIntersect implements RelationshipIntersect {
                 );
             }
         });
+    }
+
+    @ServiceProvider
+    public static final class NodeFilteredGraphIntersectFactory implements RelationshipIntersectFactory {
+
+        @Override
+        public boolean canLoad(Graph graph) {
+            return graph instanceof NodeFilteredGraph;
+        }
+
+        @Override
+        public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
+            var nodeFilteredGraph = (NodeFilteredGraph) graph;
+            var innerGraph = nodeFilteredGraph.graph();
+
+            var relationshipIntersect = RelationshipIntersectFactoryLocator
+                .lookup(innerGraph)
+                .orElseThrow(() -> new IllegalArgumentException("No intersect factory found for graph type " + innerGraph.getClass()))
+                .load(innerGraph, config);
+
+            return new NodeFilteredGraphIntersect(graph.nodeMapping(), relationshipIntersect);
+        }
     }
 }

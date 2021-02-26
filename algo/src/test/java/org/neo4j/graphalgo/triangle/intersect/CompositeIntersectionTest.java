@@ -80,9 +80,9 @@ final class CompositeIntersectionTest extends AlgoTestBase {
             .build()
             .graph();
 
-        INTERSECT = RelationshipIntersectFactoryLocator.lookup(graph.getClass())
+        INTERSECT = RelationshipIntersectFactoryLocator.lookup(graph)
             .orElseThrow(IllegalArgumentException::new)
-            .create(graph, ImmutableRelationshipIntersectConfig.builder().build());
+            .load(graph, ImmutableRelationshipIntersectConfig.builder().build());
         START1 = graph.toMappedNodeId(neoStarts[0]);
         START2 = graph.toMappedNodeId(neoStarts[1]);
         TARGETS = Arrays.stream(neoTargets).map(graph::toMappedNodeId).toArray();

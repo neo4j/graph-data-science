@@ -19,10 +19,14 @@
  */
 package org.neo4j.graphalgo.triangle.intersect;
 
+import org.neo4j.annotations.service.Service;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 
-public interface RelationshipIntersectFactory<G extends Graph> {
+@Service
+public interface RelationshipIntersectFactory {
 
-    RelationshipIntersect create(G graph, RelationshipIntersectConfig config);
+    boolean canLoad(Graph graph);
+
+    RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config);
 }

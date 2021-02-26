@@ -19,20 +19,21 @@
  */
 package org.neo4j.graphalgo.triangle.intersect;
 
+import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.huge.CompositeAdjacencyCursor;
 import org.neo4j.graphalgo.core.huge.CompositeAdjacencyList;
+import org.neo4j.graphalgo.core.huge.UnionGraph;
 
 import java.util.ArrayList;
 
-public class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
+public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
 
     private final CompositeAdjacencyList compositeAdjacencyList;
 
-    public UnionGraphIntersect(
-        CompositeAdjacencyList compositeAdjacencyList,
-        long maxDegree
-    ) {
+    private UnionGraphIntersect(CompositeAdjacencyList compositeAdjacencyList, long maxDegree) {
         super(
             compositeAdjacencyList.rawDecompressingCursor(),
             compositeAdjacencyList.rawDecompressingCursor(),
@@ -61,5 +62,23 @@ public class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor
     @Override
     protected int degree(long nodeId) {
         return compositeAdjacencyList.degree(nodeId);
+    }
+
+    @ServiceProvider
+    public static final class UnionGraphIntersectFactory implements RelationshipIntersectFactory {
+
+        @Override
+        public boolean canLoad(Graph graph) {
+            return graph instanceof UnionGraph;
+        }
+
+        @Override
+        public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
+            var unionGraph = (UnionGraph) graph;
+            return new UnionGraphIntersect(
+                (CompositeAdjacencyList) unionGraph.relationshipTopology().list(),
+                config.maxDegree()
+            );
+        }
     }
 }

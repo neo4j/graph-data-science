@@ -22,33 +22,23 @@ package org.neo4j.graphalgo.triangle;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.huge.CompositeAdjacencyList;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
-import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.graphalgo.triangle.intersect.FilteredGraphIntersect;
-import org.neo4j.graphalgo.triangle.intersect.HugeGraphIntersect;
 import org.neo4j.graphalgo.triangle.intersect.ImmutableRelationshipIntersectConfig;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectConfig;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactory;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactoryLocator;
-import org.neo4j.graphalgo.triangle.intersect.UnionGraphIntersect;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
-
-import static org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactoryLocator.register;
 
 /**
  * TriangleCount counts the number of triangles in the Graph as well
@@ -68,7 +58,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
     static final int EXCLUDED_NODE_TRIANGLE_COUNT = -1;
 
     private Graph graph;
-    private final RelationshipIntersectFactory<Graph> intersectFactory;
+    private final RelationshipIntersectFactory intersectFactory;
     private final RelationshipIntersectConfig intersectConfig;
     private final TriangleCountBaseConfig config;
     private ExecutorService executorService;
@@ -87,9 +77,8 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
-        FactoryRegistration.registerAll();
         var factory = RelationshipIntersectFactoryLocator
-            .lookup(graph.getClass())
+            .lookup(graph)
             .orElseThrow(
                 () -> new IllegalArgumentException("No relationship intersect factory registered for graph: " + graph.getClass())
             );
@@ -107,7 +96,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
 
     private IntersectingTriangleCount(
         Graph graph,
-        RelationshipIntersectFactory<Graph> intersectFactory,
+        RelationshipIntersectFactory intersectFactory,
         TriangleCountBaseConfig config,
         ExecutorService executorService,
         AllocationTracker tracker,
@@ -143,7 +132,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
             config.concurrency(),
-            () -> new IntersectTask(intersectFactory.create(graph, intersectConfig))
+            () -> new IntersectTask(intersectFactory.load(graph, intersectConfig))
         );
         // run
         ParallelUtil.run(tasks, executorService);
@@ -209,37 +198,6 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
 
         default LongNodeProperties asNodeProperties() {
             return localTriangles().asNodeProperties();
-        }
-    }
-
-    public static final class FactoryRegistration {
-        private FactoryRegistration() {}
-
-        public static void registerAll() {
-            register(HugeGraph.class, (graph, config) -> {
-                var topology = graph.relationshipTopology();
-                return new HugeGraphIntersect(topology.list(), topology.offsets(), config.maxDegree());
-            });
-
-            register(UnionGraph.class, (graph, config) -> new UnionGraphIntersect(
-                (CompositeAdjacencyList) graph.relationshipTopology().list(),
-                config.maxDegree()
-            ));
-
-            register(FilterGraph.class, (graph, config) -> {
-                var innerGraph = graph.graph();
-                return RelationshipIntersectFactoryLocator.lookup(innerGraph.getClass())
-                    .orElseThrow(UnsupportedOperationException::new)
-                    .create(innerGraph, config);
-            });
-
-            register(NodeFilteredGraph.class, (graph, config) -> {
-                var innerGraph = graph.graph();
-                var relationshipIntersect = RelationshipIntersectFactoryLocator.lookup(innerGraph.getClass())
-                    .orElseThrow(UnsupportedOperationException::new)
-                    .create(innerGraph, config);
-                return new FilteredGraphIntersect(graph.nodeMapping(), relationshipIntersect);
-            });
         }
     }
 }

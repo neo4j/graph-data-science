@@ -19,16 +19,20 @@
  */
 package org.neo4j.graphalgo.triangle.intersect;
 
+import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 
-public class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
+public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
 
     private final AdjacencyList adjacency;
     private final AdjacencyOffsets offsets;
 
-    public HugeGraphIntersect(final AdjacencyList adjacency, final AdjacencyOffsets offsets, long maxDegree) {
+    private HugeGraphIntersect(final AdjacencyList adjacency, final AdjacencyOffsets offsets, long maxDegree) {
         super(
             adjacency.rawDecompressingCursor(),
             adjacency.rawDecompressingCursor(),
@@ -56,5 +60,21 @@ public class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
             return 0;
         }
         return adjacency.degree(offset);
+    }
+
+    @ServiceProvider
+    public static final class HugeGraphIntersectFactory implements RelationshipIntersectFactory {
+
+        @Override
+        public boolean canLoad(Graph graph) {
+            return graph instanceof HugeGraph;
+        }
+
+        @Override
+        public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
+            var hugeGraph = (HugeGraph) graph;
+            var topology = hugeGraph.relationshipTopology();
+            return new HugeGraphIntersect(topology.list(), topology.offsets(), config.maxDegree());
+        }
     }
 }

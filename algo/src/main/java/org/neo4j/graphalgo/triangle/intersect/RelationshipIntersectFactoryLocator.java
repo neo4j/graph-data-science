@@ -21,30 +21,28 @@ package org.neo4j.graphalgo.triangle.intersect;
 
 import org.neo4j.graphalgo.api.Graph;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ServiceLoader;
+import java.util.stream.Collectors;
 
 public final class RelationshipIntersectFactoryLocator {
 
-    private static final Map<Class<? extends Graph>, RelationshipIntersectFactory<? extends Graph>> CACHE = new ConcurrentHashMap<>();
+    private static final List<RelationshipIntersectFactory> FACTORIES;
 
-    public static <G extends Graph> void register(Class<G> clazz, RelationshipIntersectFactory<G> fn) {
-        CACHE.put(clazz, fn);
+    static {
+        FACTORIES = ServiceLoader
+            .load(RelationshipIntersectFactory.class)
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .collect(Collectors.toList());
     }
 
-    @SuppressWarnings("unchecked")
-    public static Optional<RelationshipIntersectFactory<Graph>> lookup(Class<? extends Graph> clazz) {
-        if (CACHE.containsKey(clazz)) {
-            return Optional.of((RelationshipIntersectFactory<Graph>) CACHE.get(clazz));
-        } else {
-            return CACHE
-                .keySet()
-                .stream()
-                .filter(keyClass -> keyClass.isAssignableFrom(clazz))
-                .findFirst()
-                .map(c -> (RelationshipIntersectFactory<Graph>) CACHE.get(c));
-        }
+    public static Optional<RelationshipIntersectFactory> lookup(Graph graph) {
+        return FACTORIES
+            .stream()
+            .filter(f -> f.canLoad(graph))
+            .findFirst();
     }
 
     private RelationshipIntersectFactoryLocator() {}

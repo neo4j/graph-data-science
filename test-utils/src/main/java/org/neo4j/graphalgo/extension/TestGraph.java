@@ -20,9 +20,14 @@
 package org.neo4j.graphalgo.extension;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.CSRFilterGraph;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectConfig;
+import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactory;
+import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactoryLocator;
 
 public class TestGraph extends CSRFilterGraph {
 
@@ -65,5 +70,23 @@ public class TestGraph extends CSRFilterGraph {
     @Override
     public String toString() {
         return name;
+    }
+
+    @ServiceProvider
+    public static final class TestGraphIntersectFactory implements RelationshipIntersectFactory {
+
+        @Override
+        public boolean canLoad(Graph graph) {
+            return graph instanceof TestGraph;
+        }
+
+        @Override
+        public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
+            var innerGraph = ((TestGraph) graph).graph();
+            return RelationshipIntersectFactoryLocator
+                .lookup(innerGraph)
+                .orElseThrow(UnsupportedOperationException::new)
+                .load(innerGraph, config);
+        }
     }
 }
