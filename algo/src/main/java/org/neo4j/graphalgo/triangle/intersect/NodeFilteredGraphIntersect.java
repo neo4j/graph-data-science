@@ -65,6 +65,7 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
 
         @Override
         public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
+            assert graph instanceof NodeFilteredGraph;
             var nodeFilteredGraph = (NodeFilteredGraph) graph;
             var innerGraph = nodeFilteredGraph.graph();
 

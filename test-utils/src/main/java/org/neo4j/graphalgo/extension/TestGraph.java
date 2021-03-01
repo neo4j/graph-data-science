@@ -82,6 +82,7 @@ public class TestGraph extends CSRFilterGraph {
 
         @Override
         public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
+            assert graph instanceof TestGraph;
             var innerGraph = ((TestGraph) graph).graph();
             return RelationshipIntersectFactoryLocator
                 .lookup(innerGraph)

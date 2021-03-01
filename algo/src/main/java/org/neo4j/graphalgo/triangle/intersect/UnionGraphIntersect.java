@@ -74,6 +74,7 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
 
         @Override
         public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
+            assert graph instanceof UnionGraph;
             var unionGraph = (UnionGraph) graph;
             return new UnionGraphIntersect(
                 (CompositeAdjacencyList) unionGraph.relationshipTopology().list(),
