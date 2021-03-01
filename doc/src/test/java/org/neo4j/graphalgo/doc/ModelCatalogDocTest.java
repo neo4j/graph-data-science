@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.doc;
 
+import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
+import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.model.catalog.ModelDeleteProc;
 import org.neo4j.graphalgo.model.catalog.ModelDropProc;
 import org.neo4j.graphalgo.model.catalog.ModelExistsProc;
@@ -35,6 +37,8 @@ class ModelCatalogDocTest extends DocTestBase {
     @Override
     List<Class<?>> procedures() {
         return Arrays.asList(
+            GraphCreateProc.class,
+            GraphSageTrainProc.class,
             ModelListProc.class,
             ModelExistsProc.class,
             ModelDropProc.class,
