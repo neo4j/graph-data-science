@@ -86,18 +86,22 @@ CALL gds.beta.model.exists('my-model') YIELD exists;
 
 Once we have trained models in the catalog we can see information about either all of them or a single model using its name
 
+[role=query-example, no-result=true]
+--
 .Listing detailed information about all models:
 [source,cypher]
 ----
-CALL gds.model.list()
+CALL gds.beta.model.list()
 YIELD
   modelInfo,
-  configuration,
-  stored,
-  loaded,
   creationTime,
+  trainConfig,
+  graphSchema,
+  loaded,
+  stored,
   shared
 ----
+--
 
 .Listing detailed information about specific model:
 [source,cypher]
