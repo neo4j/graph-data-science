@@ -36,6 +36,27 @@ Training, using, listing, and dropping named models are management operations bo
 Models trained by a different Neo4j user are not accessible at any time.
 ====
 
+== Example setup
+
+In the below code examples, we assume that a graph exists in Neo4j like this:
+
+[source, cypher, role=setup-query]
+----
+CREATE (:Node)-[:T]->(:Node)
+----
+
+And that a graph projection has been made and a model trained and inserted in the Model Catalog.
+In this case we use a GraphSage model, but any model will work the same.
+
+[source, cypher, role=setup-query]
+----
+CALL gds.graph.create('myGraph', 'Node', 'T') YIELD graphName
+CALL gds.beta.graphSage.train('myGraph', {
+  modelName: 'my-model', degreeAsProperty: true
+}) YIELD trainMillis
+RETURN *
+----
+
 
 [.beta]
 [[catalog-model-exists]]
@@ -43,12 +64,21 @@ Models trained by a different Neo4j user are not accessible at any time.
 
 We can check if a model is available in the catalog by looking up its name.
 
+[role=query-example]
+--
 .Check if a model exists in the catalog:
 [source,cypher]
 ----
 CALL gds.beta.model.exists('my-model') YIELD exists;
 ----
 
+.Results
+[opts="header",cols="1m"]
+|===
+| exists
+| true
+|===
+--
 
 [.beta]
 [[catalog-model-list]]
