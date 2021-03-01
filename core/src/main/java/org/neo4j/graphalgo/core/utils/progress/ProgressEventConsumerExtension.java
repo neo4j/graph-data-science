@@ -75,9 +75,7 @@ public final class ProgressEventConsumerExtension extends ExtensionFactory<Progr
         } else {
             registry.registerComponent(ProgressEventTracker.class, ctx -> EmptyProgressEventTracker.INSTANCE, true);
             registry.registerComponent(ProgressEventStore.class, ctx -> EmptyProgressEventStore.INSTANCE, true);
-            return LifecycleAdapter.onStart(() -> {
-                dependencies.logService().getUserLog(ProgressEventTracker.class).info("disabled");
-            });
+            return new LifecycleAdapter();
         }
     }
 

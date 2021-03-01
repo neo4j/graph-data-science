@@ -32,6 +32,8 @@ import org.neo4j.scheduler.JobScheduler;
 import java.util.Queue;
 
 final class ProgressEventConsumerComponent extends LifecycleAdapter implements ThrowingFunction<Context, ProgressEventTracker, ProcedureException> {
+
+    private final Log log;
     private final JobScheduler jobScheduler;
     private final Monitors globalMonitors;
     private final ProgressEventConsumer.Monitor monitor;
@@ -44,6 +46,7 @@ final class ProgressEventConsumerComponent extends LifecycleAdapter implements T
         JobScheduler jobScheduler,
         Monitors globalMonitors
     ) {
+        this.log = log;
         this.jobScheduler = jobScheduler;
         this.globalMonitors = globalMonitors;
         this.monitor = globalMonitors.newMonitor(ProgressEventConsumer.Monitor.class);
@@ -56,6 +59,7 @@ final class ProgressEventConsumerComponent extends LifecycleAdapter implements T
         globalMonitors.addMonitorListener(loggingMonitor);
         progressEventConsumer = new ProgressEventConsumer(monitor, jobScheduler, messageQueue);
         progressEventConsumer.start();
+        this.log.info("GDS Progress event tracking is enabled");
     }
 
     @Override
