@@ -19,22 +19,43 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.model.catalog.ModelDropProc;
 import org.neo4j.graphalgo.model.catalog.ModelExistsProc;
 import org.neo4j.graphalgo.model.catalog.ModelListProc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class ModelCatalogDocTest extends DocTestBase {
 
     @Override
+    @BeforeEach
+    void setUp() throws Exception {
+        super.setUp();
+        ModelCatalog.set(Model.of(
+            getUsername(),
+            "my-model",
+            "example-model-type",
+            GraphSchema.empty(),
+            new Object(),
+            (ModelConfig) () -> "my-model",
+            Model.Mappable.EMPTY
+        ));
+    }
+
+    @AfterEach
+    void tearDown() {
+        ModelCatalog.removeAllLoadedModels();
+    }
+
+    @Override
     List<Class<?>> procedures() {
-        return Arrays.asList(
-            GraphCreateProc.class,
-            GraphSageTrainProc.class,
+        return List.of(
             ModelListProc.class,
             ModelExistsProc.class,
             ModelDropProc.class
