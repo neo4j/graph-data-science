@@ -30,7 +30,7 @@ This section describes changes between Graph Algorithms library  and Graph Data 
 |`direction` | Replaced by `projection` parameter of `relationshipProjection`
 |`direction: 'OUTGOING'` | `orientation: 'NATURAL'`
 |`direction: 'INCOMING'` | `orientation: 'REVERSE'`
-|`direction: 'BOTH'` | Removed footnote:direction-both[This behaviour can be achieved by creating two relationship projections - one with `orientation: 'NATURAL'` and one with `orientation: 'REVERSE'`. See <<direction-both-example, this example>>]
+|`direction: 'BOTH'` | Removed footnote:direction-both[This behaviour can be achieved by creating two relationship projections - one with `orientation: 'NATURAL'` and one with `orientation: 'REVERSE'`]
 |`undirected: true` | Replaced by `orientation: 'UNDIRECTED'` parameter of `relationshipProjection`
 |`duplicateRelationships` | Replaced by `aggregation` parameter of `relationshipProjection`
 |`duplicateRelationships: 'SKIP'` | `aggregation: 'SINGLE'`
