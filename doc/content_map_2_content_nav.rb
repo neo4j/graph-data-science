@@ -35,7 +35,7 @@ end
 content_map = File.open('docbook/content-map.xml') { |f| Nokogiri::XML(f) }
 content_structure = content_map.children[0].children.map { |node| parse_children(node) }.reject(&:nil?)
 
-output_file_name = 'antora/content-nav-generated.adoc'
+output_file_name = 'antora/content-nav.adoc'
 
 File.delete(output_file_name) if File.exist?(output_file_name)
 
