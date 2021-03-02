@@ -56,12 +56,12 @@ public interface MultiClassNLRTrainConfig extends FeaturePropertiesConfig, Train
     static MultiClassNLRTrainConfig of(
         List<String> featureProperties,
         String targetProperty,
-        int concurrency,
+        int defaultConcurrency,
         Map<String, Object> params
     ) {
         var cypherMapWrapper = CypherMapWrapper.create(params);
         if (!cypherMapWrapper.containsKey(CONCURRENCY_KEY)) {
-            cypherMapWrapper.withNumber(CONCURRENCY_KEY, concurrency);
+            cypherMapWrapper = cypherMapWrapper.withNumber(CONCURRENCY_KEY, defaultConcurrency);
         }
         var config = new MultiClassNLRTrainConfigImpl(
             featureProperties,

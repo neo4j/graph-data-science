@@ -58,12 +58,12 @@ public interface LinkLogisticRegressionTrainConfig extends FeaturePropertiesConf
 
     static LinkLogisticRegressionTrainConfig of(
         List<String> featureProperties,
-        int concurrency,
+        int defaultConcurrency,
         Map<String, Object> params
     ) {
         var cypherMapWrapper = CypherMapWrapper.create(params);
         if (!cypherMapWrapper.containsKey(CONCURRENCY_KEY)) {
-            cypherMapWrapper.withNumber(CONCURRENCY_KEY, concurrency);
+            cypherMapWrapper = cypherMapWrapper.withNumber(CONCURRENCY_KEY, defaultConcurrency);
         }
         var config = new LinkLogisticRegressionTrainConfigImpl(
             featureProperties,
