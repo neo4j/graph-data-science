@@ -150,25 +150,36 @@ The full set of fields returned from this procedure are:
 
 If we no longer need a trained model we can remove it from the catalog.
 
+[role=query-example]
+--
 .Remove a model from the catalog:
 [source,cypher]
 ----
 CALL gds.beta.model.drop('my-model')
 YIELD
   modelInfo,
-  configuration,
-  stored,
+  graphSchema,
   loaded,
-  creationTime,
+  stored,
   shared
 ----
 
 .Results
+[opts="header",cols="1m,1m,1m,1m,1m"]
+|===
+| modelInfo                                 | graphSchema                             | loaded | stored | shared
+| {modelName=my-model, modelType=graphSage} | {relationships={T={}}, nodes={Node={}}} | true   | false  | false
+|===
+--
+
+The full set of fields returned from this procedure are:
+
 * `modelInfo`: detailed information for the trained model
 ** `modelName: String`: the saved model name.
 ** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
 ** can also contain algorithm specific model details.
-* `configuration`: the configuration used for training the model.
+* `trainConfig`: the configuration used for training the model.
+* `graphSchema`: the schema of the graph on which the model was trained.
 * `stored`: True, if the model is <<catalog-model-store,stored>> on disk.
 * `loaded`: True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
 * `creationTime`: the time at which the model was registered in the catalog.
