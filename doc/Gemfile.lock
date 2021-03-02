@@ -6,6 +6,7 @@ GEM
     racc (1.5.2)
 
 PLATFORMS
+  ruby
   x86_64-linux
 
 DEPENDENCIES
