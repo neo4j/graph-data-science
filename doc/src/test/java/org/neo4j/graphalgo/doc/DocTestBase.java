@@ -23,7 +23,6 @@ import org.asciidoctor.Asciidoctor;
 import org.asciidoctor.ast.Cell;
 import org.asciidoctor.ast.Row;
 import org.assertj.core.util.Arrays;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,30 +39,31 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-import static java.lang.String.format;
 import static org.asciidoctor.Asciidoctor.Factory.create;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.graphalgo.utils.StringJoining.joinInGivenOrder;
 
 abstract class DocTestBase extends BaseProcTest {
 
     private static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
+    private static final String DELIMITER = " | ";
 
     final Asciidoctor asciidoctor = create();
+
+    boolean printActuals() {
+        return false;
+    }
 
     QueryConsumingTreeProcessor defaultTreeProcessor() {
         return new QueryConsumingTreeProcessor(
@@ -99,6 +99,11 @@ abstract class DocTestBase extends BaseProcTest {
     }
 
     @Test
+    void dontPrintActuals() {
+        assertFalse(printActuals(), "This should only be true in development, never committed!");
+    }
+
+    @Test
     void runTest() throws URISyntaxException {
         asciidoctor.javaExtensionRegistry().treeprocessor(defaultTreeProcessor());
         File file = ASCIIDOC_PATH.resolve(adocFile()).toFile();
@@ -119,7 +124,20 @@ abstract class DocTestBase extends BaseProcTest {
         return (query, expectedColumns, expectedRows) -> {
             runInTransaction(db, tx -> {
                 try (Result result = runQueryWithoutClosingTheResult(tx, query, Collections.emptyMap())) {
-                    assertEquals(expectedColumns, result.columns());
+                    if (printActuals()) {
+                        System.out.println(joinInGivenOrder(result.columns().stream(), DELIMITER));
+                        result.forEachRemaining(row -> {
+                            System.out.println(joinInGivenOrder(
+                                result.columns().stream().map(row::get).map(this::valueToString),
+                                DELIMITER
+                            ));
+                        });
+                    }
+                    assertEquals(
+                        expectedColumns,
+                        result.columns(),
+                        "Expected columns were different from actual: " + query
+                    );
                     AtomicInteger index = new AtomicInteger(0);
                     result.accept(actualRow -> {
                         Row expectedRow = expectedRows.get(index.getAndIncrement());
@@ -127,8 +145,7 @@ abstract class DocTestBase extends BaseProcTest {
                         IntStream.range(0, expectedColumns.size()).forEach(i -> {
                             String expected = cells.get(i).getText();
                             String actual = valueToString(actualRow.get(expectedColumns.get(i)));
-                            assertEquals(expected, actual,
-                                formatWithLocale("Query: %s", query));
+                            assertEquals(expected, actual, formatWithLocale("Query: %s", query));
                         });
                         return true;
                     });

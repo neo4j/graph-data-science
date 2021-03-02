@@ -43,7 +43,11 @@ public final class StringJoining {
     }
 
     public static String join(Collection<String> alternatives, CharSequence delimiter) {
-        return alternatives.stream().sorted().collect(joining(delimiter));
+        return joinInGivenOrder(alternatives.stream().sorted(), delimiter);
+    }
+
+    public static String joinInGivenOrder(Stream<String> alternatives, CharSequence delimiter) {
+        return alternatives.collect(joining(delimiter));
     }
 
     public static String join(
