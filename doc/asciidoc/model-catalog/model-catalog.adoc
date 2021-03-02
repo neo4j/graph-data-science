@@ -86,7 +86,7 @@ CALL gds.beta.model.exists('my-model') YIELD exists;
 
 Once we have trained models in the catalog we can see information about either all of them or a single model using its name
 
-[role=query-example, no-result=true]
+[role=query-example]
 --
 .Listing detailed information about all models:
 [source,cypher]
@@ -94,34 +94,50 @@ Once we have trained models in the catalog we can see information about either a
 CALL gds.beta.model.list()
 YIELD
   modelInfo,
-  creationTime,
-  trainConfig,
   graphSchema,
   loaded,
   stored,
   shared
 ----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m,1m"]
+|===
+| modelInfo                                 | graphSchema                             | loaded | stored | shared
+| {modelName=my-model, modelType=graphSage} | {relationships={T={}}, nodes={Node={}}} | true   | false  | false
+|===
 --
 
+[role=query-example]
+--
 .Listing detailed information about specific model:
 [source,cypher]
 ----
-CALL gds.model.list('my-model')
+CALL gds.beta.model.list('my-model')
 YIELD
   modelInfo,
-  configuration,
-  stored,
+  graphSchema,
   loaded,
-  creationTime,
+  stored,
   shared
 ----
 
 .Results
+[opts="header",cols="1m,1m,1m,1m,1m"]
+|===
+| modelInfo                                 | graphSchema                             | loaded | stored | shared
+| {modelName=my-model, modelType=graphSage} | {relationships={T={}}, nodes={Node={}}} | true   | false  | false
+|===
+--
+
+The full set of fields returned from this procedure are:
+
 * `modelInfo`: detailed information for the trained model
 ** `modelName: String`: the saved model name.
 ** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
 ** can also contain algorithm specific model details.
-* `configuration`: the configuration used for training the model.
+* `trainConfig`: the configuration used for training the model.
+* `graphSchema`: the schema of the graph on which the model was trained.
 * `stored`: True, if the model is <<catalog-model-store,stored>> on disk.
 * `loaded`: True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
 * `creationTime`: the time at which the model was registered in the catalog.
