@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import java.util.Arrays;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.graphalgo.core.huge.AdjacencyDecompressingReader.CHUNK_SIZE;
@@ -75,19 +76,65 @@ class TransientAdjacencyListTest {
 
     @Test
     void shouldPeekAcrossBlocks() {
-        long[] targets = new long[CHUNK_SIZE + 1];
+        int targetCount = 2 * CHUNK_SIZE;
+        long[] targets = new long[targetCount + 1];
         Arrays.setAll(targets, i -> i);
         AdjacencyCursor adjacencyCursor = adjacencyCursorFromTargets(targets);
         int position = 0;
-        while(adjacencyCursor.hasNextVLong() && position < CHUNK_SIZE) {
-            adjacencyCursor.nextVLong();
+        while(adjacencyCursor.hasNextVLong() && position < targetCount) {
+            assertThat(adjacencyCursor.peekVLong()).isEqualTo(position);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(position);
             position++;
         }
 
         assertEquals(1, adjacencyCursor.remaining());
-        assertEquals(64, adjacencyCursor.peekVLong());
-        assertEquals(64, adjacencyCursor.peekVLong());
-        assertEquals(64, adjacencyCursor.nextVLong());
+        assertEquals(targetCount, adjacencyCursor.peekVLong());
+        assertEquals(targetCount, adjacencyCursor.peekVLong());
+        assertEquals(targetCount, adjacencyCursor.nextVLong());
+    }
+
+    @Test
+    void shouldNextAcrossBlocks() {
+        int targetCount = 2 * CHUNK_SIZE;
+        long[] targets = new long[targetCount + 1];
+        Arrays.setAll(targets, i -> i);
+        AdjacencyCursor adjacencyCursor = adjacencyCursorFromTargets(targets);
+        int position = 0;
+        while(adjacencyCursor.hasNextVLong() && position < CHUNK_SIZE) {
+            assertThat(adjacencyCursor.peekVLong()).isEqualTo(position);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(position);
+            assertThat(adjacencyCursor.peekVLong()).isEqualTo(position + 1);
+            position++;
+        }
+
+        while(adjacencyCursor.hasNextVLong() && position < 2 * CHUNK_SIZE) {
+            assertThat(adjacencyCursor.peekVLong()).isEqualTo(position);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(position);
+            position++;
+        }
+
+        assertEquals(1, adjacencyCursor.remaining());
+        assertEquals(targetCount, adjacencyCursor.nextVLong());
+    }
+
+    @Test
+    void shouldPeekAcrossBlocks2() {
+        int targetCount = 2 * CHUNK_SIZE;
+        long[] targets = new long[targetCount + 1];
+        Arrays.setAll(targets, i -> i);
+        AdjacencyCursor adjacencyCursor = adjacencyCursorFromTargets(targets);
+        int position = 0;
+        while(adjacencyCursor.hasNextVLong() && position < targetCount) {
+            assertThat(adjacencyCursor.peekVLong()).isEqualTo(position);
+            assertThat(adjacencyCursor.nextVLong()).isEqualTo(position);
+            assertThat(adjacencyCursor.peekVLong()).isEqualTo(position + 1);
+            position++;
+        }
+
+        assertEquals(1, adjacencyCursor.remaining());
+        assertEquals(targetCount, adjacencyCursor.peekVLong());
+        assertEquals(targetCount, adjacencyCursor.peekVLong());
+        assertEquals(targetCount, adjacencyCursor.nextVLong());
     }
 
     @Test
