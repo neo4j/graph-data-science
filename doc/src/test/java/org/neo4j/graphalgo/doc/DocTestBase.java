@@ -109,50 +109,6 @@ abstract class DocTestBase extends BaseProcTest {
         asciidoctor.loadFile(file, Collections.emptyMap());
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    protected void assertCypherResult(String query, List<Map<String, Object>> expected) {
-        runInTransaction(db, tx -> {
-            List<Map<String, Object>> actual = new ArrayList<>();
-            runQueryWithResultConsumer(query, result -> {
-                result.accept(row -> {
-                    Map<String, Object> _row = new HashMap<>();
-                    for (String column : result.columns()) {
-                        _row.put(column, valueToString(row.get(column)));
-                    }
-                    actual.add(_row);
-                    return true;
-                });
-            });
-            String reason = format(
-                "Different amount of rows returned for actual result (%d) than expected (%d)",
-                actual.size(),
-                expected.size()
-            );
-            assertThat(reason, actual.size(), equalTo(expected.size()));
-            for (int i = 0; i < expected.size(); ++i) {
-                Map<String, Object> expectedRow = expected.get(i);
-                Map<String, Object> actualRow = actual.get(i);
-
-                assertThat(actualRow.keySet(), equalTo(expectedRow.keySet()));
-                int rowNumber = i;
-                expectedRow.forEach((key, expectedValue) -> {
-                    Matcher<Object> matcher;
-                    if (expectedValue instanceof Matcher) {
-                        matcher = (Matcher<Object>) expectedValue;
-                    } else {
-                        matcher = equalTo(expectedValue);
-                    }
-                    Object actualValue = actualRow.get(key);
-                    assertThat(
-                        formatWithLocale("Different value for column '%s' of row %d", key, rowNumber),
-                        actualValue, matcher
-                    );
-                });
-            }
-        });
-    }
-
     private SetupQueryConsumer defaultSetupQueryConsumer() {
         return setupQueries -> {
             setupQueries.forEach(this::runQuery);
