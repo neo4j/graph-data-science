@@ -21,13 +21,9 @@ package org.neo4j.graphalgo.doc;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.model.catalog.ModelDeleteProc;
 import org.neo4j.graphalgo.model.catalog.ModelDropProc;
 import org.neo4j.graphalgo.model.catalog.ModelExistsProc;
 import org.neo4j.graphalgo.model.catalog.ModelListProc;
-import org.neo4j.graphalgo.model.catalog.ModelLoadProc;
-import org.neo4j.graphalgo.model.catalog.ModelPublishProc;
-import org.neo4j.graphalgo.model.catalog.ModelStoreProc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -41,11 +37,7 @@ class ModelCatalogDocTest extends DocTestBase {
             GraphSageTrainProc.class,
             ModelListProc.class,
             ModelExistsProc.class,
-            ModelDropProc.class,
-            ModelStoreProc.class,
-            ModelDeleteProc.class,
-            ModelPublishProc.class,
-            ModelLoadProc.class
+            ModelDropProc.class
         );
     }
 
