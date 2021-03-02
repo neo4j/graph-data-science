@@ -36,27 +36,6 @@ Training, using, listing, and dropping named models are management operations bo
 Models trained by a different Neo4j user are not accessible at any time.
 ====
 
-== Example setup
-
-In the below code examples, we assume that a graph exists in Neo4j like this:
-
-[source, cypher, role=setup-query]
-----
-CREATE (:Node)-[:T]->(:Node)
-----
-
-And that a graph projection has been made and a model trained and inserted in the Model Catalog.
-In this case we use a GraphSage model, but any model will work the same.
-
-[source, cypher, role=setup-query]
-----
-CALL gds.graph.create('myGraph', 'Node', 'T') YIELD graphName
-CALL gds.beta.graphSage.train('myGraph', {
-  modelName: 'my-model', degreeAsProperty: true
-}) YIELD trainMillis
-RETURN *
-----
-
 
 [.beta]
 [[catalog-model-exists]]
@@ -94,17 +73,16 @@ Once we have trained models in the catalog we can see information about either a
 CALL gds.beta.model.list()
 YIELD
   modelInfo,
-  graphSchema,
   loaded,
   stored,
   shared
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m,1m"]
+[opts="header",cols="1m,1m,1m,1m"]
 |===
-| modelInfo                                 | graphSchema                             | loaded | stored | shared
-| {modelName=my-model, modelType=graphSage} | {relationships={T={}}, nodes={Node={}}} | true   | false  | false
+| modelInfo                                          | loaded  | stored | shared
+| {modelName=my-model, modelType=example-model-type} |  true   | false  | false
 |===
 --
 
@@ -116,17 +94,16 @@ YIELD
 CALL gds.beta.model.list('my-model')
 YIELD
   modelInfo,
-  graphSchema,
   loaded,
   stored,
   shared
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m,1m"]
+[opts="header",cols="1m,1m,1m,1m"]
 |===
-| modelInfo                                 | graphSchema                             | loaded | stored | shared
-| {modelName=my-model, modelType=graphSage} | {relationships={T={}}, nodes={Node={}}} | true   | false  | false
+| modelInfo                                          | loaded  | stored | shared
+| {modelName=my-model, modelType=example-model-type} |  true   | false  | false
 |===
 --
 
@@ -158,17 +135,16 @@ If we no longer need a trained model we can remove it from the catalog.
 CALL gds.beta.model.drop('my-model')
 YIELD
   modelInfo,
-  graphSchema,
   loaded,
   stored,
   shared
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m,1m"]
+[opts="header",cols="1m,1m,1m,1m"]
 |===
-| modelInfo                                 | graphSchema                             | loaded | stored | shared
-| {modelName=my-model, modelType=graphSage} | {relationships={T={}}, nodes={Node={}}} | true   | false  | false
+| modelInfo                                          | loaded  | stored | shared
+| {modelName=my-model, modelType=example-model-type} |  true   | false  | false
 |===
 --
 
