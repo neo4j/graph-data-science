@@ -1,4 +1,3 @@
-
 [.enterprise-edition]
 [[model-catalog-publish-ops]]
 = Publishing models
@@ -14,22 +13,32 @@ Making a model accessible to other users can be achieved by publishing it.
 [[catalog-model-publish]]
 == Publishing a model
 
+[role=query-example, no-result=true]
+--
 .Publishing trained model:
 [source,cypher]
 ----
 CALL gds.alpha.model.publish('my-model')
 YIELD
   modelInfo,
-  configuration,
+  trainConfig,
+  graphSchema,
+  stored,
+  loaded,
   creationTime,
   shared
 ----
+--
 
-.Results
+The full set of fields returned from this procedure are:
+
 * `modelInfo`: detailed information for the trained model
 ** `modelName: String`: the saved model name.
 ** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
 ** can also contain algorithm specific model details.
-* `configuration`: the configuration used for training the model.
+* `trainConfig`: the configuration used for training the model.
+* `graphSchema`: the schema of the graph on which the model was trained.
+* `stored`: True, if the model is <<catalog-model-store,stored>> on disk.
+* `loaded`: True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
 * `creationTime`: the time at which the model was registered in the catalog.
 * `shared`: a boolean flag indicating if the model is published.
