@@ -27,11 +27,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @GdsEditionTestCase(Edition.EE)
 class GdsEditionExtensionCombinedTest {
 
+    @Test
     @GdsEditionTest(Edition.EE)
     void shouldRunWithGdsEnterpriseEdition() {
         assertThat(GdsEdition.instance().isOnEnterpriseEdition()).isTrue();
     }
 
+    @Test
     @GdsEditionTest(Edition.CE)
     void shouldRunWithExplicitGdsCommunityEdition() {
         assertThat(GdsEdition.instance().isOnCommunityEdition()).isTrue();

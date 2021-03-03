@@ -117,6 +117,7 @@ class ModelLoadProcTest extends ModelProcBaseTest {
             .hasFieldOrPropertyWithValue("loaded", true);
     }
 
+    @Test
     @GdsEditionTest(Edition.CE)
     void doNotAllowToLoadModelsOnCE() {
         var query = "CALL gds.alpha.model.load('testModel1')";

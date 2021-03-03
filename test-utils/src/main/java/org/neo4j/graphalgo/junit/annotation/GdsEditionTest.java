@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.junit.annotation;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.lang.annotation.Retention;
@@ -31,7 +30,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({ METHOD })
 @Retention(RUNTIME)
 @ExtendWith(GdsEditionMethodExtension.class)
-@Test
 public @interface GdsEditionTest {
     Edition value() default Edition.CE;
 }

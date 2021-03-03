@@ -431,6 +431,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         );
     }
 
+    @Test
     @GdsEditionTest(Edition.EE)
     default void shouldAllowManyCoresOnUnlimited() {
         applyOnProcedure((proc) ->
