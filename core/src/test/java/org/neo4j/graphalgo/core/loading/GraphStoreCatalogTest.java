@@ -119,17 +119,17 @@ class GraphStoreCatalogTest {
 
     static Stream<Arguments> graphInput() {
         return Stream.of(
-            Arguments.of(List.of(), "graph", "Graph with name `graph` does not exist."),
-            Arguments.of(List.of("graph0"), "graph1", "Graph with name `graph1` does not exist. Did you mean `graph0`?"),
-            Arguments.of(List.of("graph0", "graph1"), "graph2", "Graph with name `graph2` does not exist. Did you mean one of [`graph0`, `graph1`]?"),
-            Arguments.of(List.of("graph0", "graph1", "foobar"), "graph2", "Graph with name `graph2` does not exist. Did you mean one of [`graph0`, `graph1`]?")
+            Arguments.of("db_0", List.of(), "graph", "Graph with name `graph` does not exist on database `db_0`."),
+            Arguments.of("db_1", List.of("graph0"), "graph1", "Graph with name `graph1` does not exist on database `db_1`. Did you mean `graph0`?"),
+            Arguments.of("db_2", List.of("graph0", "graph1"), "graph2", "Graph with name `graph2` does not exist on database `db_2`. Did you mean one of [`graph0`, `graph1`]?"),
+            Arguments.of("db_42", List.of("graph0", "graph1", "foobar"), "graph2", "Graph with name `graph2` does not exist on database `db_42`. Did you mean one of [`graph0`, `graph1`]?")
         );
     }
 
     @ParameterizedTest
     @MethodSource("graphInput")
-    void shouldThrowOnMissingGraph(Iterable<String> existingGraphs, String searchGraphName, String expectedMessage) {
-        var dummyDatabaseId = DatabaseIdFactory.from("DB_0", UUID.fromString("0-0-0-0-0"));
+    void shouldThrowOnMissingGraph(String dbName, Iterable<String> existingGraphs, String searchGraphName, String expectedMessage) {
+        var dummyDatabaseId = DatabaseIdFactory.from(dbName, UUID.fromString("0-0-0-0-0"));
         var dummyGraphStore = GdlFactory.of("()").build().graphStore();
 
         existingGraphs.forEach(existingGraphName -> {
