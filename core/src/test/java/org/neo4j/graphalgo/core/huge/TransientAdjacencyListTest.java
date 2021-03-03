@@ -118,26 +118,6 @@ class TransientAdjacencyListTest {
     }
 
     @Test
-    void shouldPeekAcrossBlocks2() {
-        int targetCount = 2 * CHUNK_SIZE;
-        long[] targets = new long[targetCount + 1];
-        Arrays.setAll(targets, i -> i);
-        AdjacencyCursor adjacencyCursor = adjacencyCursorFromTargets(targets);
-        int position = 0;
-        while(adjacencyCursor.hasNextVLong() && position < targetCount) {
-            assertThat(adjacencyCursor.peekVLong()).isEqualTo(position);
-            assertThat(adjacencyCursor.nextVLong()).isEqualTo(position);
-            assertThat(adjacencyCursor.peekVLong()).isEqualTo(position + 1);
-            position++;
-        }
-
-        assertEquals(1, adjacencyCursor.remaining());
-        assertEquals(targetCount, adjacencyCursor.peekVLong());
-        assertEquals(targetCount, adjacencyCursor.peekVLong());
-        assertEquals(targetCount, adjacencyCursor.nextVLong());
-    }
-
-    @Test
     void shouldComputeCompressedMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100)
