@@ -38,20 +38,7 @@ Altering the concurrency configuration has no effect.
 [[algorithms-dijkstra-source-target-syntax]]
 == Syntax
 
-include::../../shared/syntax-intro-named-graph.adoc[]
-
-.Dijkstra syntax per mode
-[.tabbed-example]
-====
-
-include::path-stream.adoc[]
-
-include::path-mutate.adoc[]
-
-include::path-write.adoc[]
-
-====
-
+include::path-syntax.adoc
 
 [[algorithms-dijkstra-single-source-syntax-anonymous]]
 === Anonymous graphs
