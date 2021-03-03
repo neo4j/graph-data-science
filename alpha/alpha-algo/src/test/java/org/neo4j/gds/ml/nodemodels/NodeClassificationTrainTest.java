@@ -26,11 +26,12 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeClassificatio
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 
 import java.util.List;
 import java.util.Map;
@@ -100,72 +101,71 @@ class NodeClassificationTrainTest {
         assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
     }
 
+    @GdsEditionTest(Edition.EE)
     @ParameterizedTest
     @EnumSource(Metric.class)
     void shouldProduceDifferentMetricsForDifferentTrainings(Metric metric) {
 
-        GdsEdition.instance().setToEnterpriseAndRun(() -> {
+        var log = new TestLog();
+        var modelCandidates = List.of(
+            Map.<String, Object>of("penalty", 0.0625, "maxIterations", 1000),
+            Map.<String, Object>of("penalty", 0.125, "maxIterations", 1000),
+            Map.<String, Object>of("penalty", 0.25, "maxIterations", 1000),
+            Map.<String, Object>of("penalty", 0.5, "maxIterations", 1000),
+            Map.<String, Object>of("penalty", 1.0, "maxIterations", 1000),
+            Map.<String, Object>of("penalty", 2.0, "maxIterations", 1000),
+            Map.<String, Object>of("penalty", 4.0, "maxIterations", 1000)
+        );
 
-            var log = new TestLog();
-            var modelCandidates = List.of(
-                Map.<String, Object>of("penalty", 0.0625, "maxIterations", 1000),
-                Map.<String, Object>of("penalty", 0.125, "maxIterations", 1000),
-                Map.<String, Object>of("penalty", 0.25, "maxIterations", 1000),
-                Map.<String, Object>of("penalty", 0.5, "maxIterations", 1000),
-                Map.<String, Object>of("penalty", 1.0, "maxIterations", 1000),
-                Map.<String, Object>of("penalty", 2.0, "maxIterations", 1000),
-                Map.<String, Object>of("penalty", 4.0, "maxIterations", 1000)
-            );
+        var bananasConfig = createConfig(
+            modelCandidates,
+            "bananasModel",
+            List.of("bananas"),
+            metric,
+            1337L
+        );
+        var bananasTrain = new NodeClassificationTrain(
+            graph,
+            bananasConfig,
+            log
+        );
 
-            var bananasConfig = createConfig(
-                modelCandidates,
-                "bananasModel",
-                List.of("bananas"),
-                metric,
-                1337L
-            );
-            var bananasTrain = new NodeClassificationTrain(
-                graph,
-                bananasConfig,
-                log
-            );
+        var arrayPropertyConfig = createConfig(
+            modelCandidates,
+            "arrayPropertyModel",
+            List.of("arrayProperty"),
+            metric,
+            42L
+        );
+        var arrayPropertyTrain = new NodeClassificationTrain(
+            graph,
+            arrayPropertyConfig,
+            log
+        );
 
-            var arrayPropertyConfig = createConfig(modelCandidates,
-                "arrayPropertyModel",
-                List.of("arrayProperty"),
-                metric,
-                42L
-            );
-            var arrayPropertyTrain = new NodeClassificationTrain(
-                graph,
-                arrayPropertyConfig,
-                log
-            );
+        var bananasModel = bananasTrain.compute();
+        var arrayPropertyModel = arrayPropertyTrain.compute();
 
-            var bananasModel = bananasTrain.compute();
-            var arrayPropertyModel = arrayPropertyTrain.compute();
+        assertThat(arrayPropertyModel)
+            .usingRecursiveComparison()
+            .withFailMessage("The trained models are exactly the same instance!")
+            .isNotSameAs(bananasModel);
 
-            assertThat(arrayPropertyModel)
-                .usingRecursiveComparison()
-                .withFailMessage("The trained models are exactly the same instance!")
-                .isNotSameAs(bananasModel);
+        assertThat(arrayPropertyModel.data())
+            .usingRecursiveComparison()
+            .withFailMessage("Should not produce the same trained `data`!")
+            .isNotEqualTo(bananasModel.data());
 
-            assertThat(arrayPropertyModel.data())
-                .usingRecursiveComparison()
-                .withFailMessage("Should not produce the same trained `data`!")
-                .isNotEqualTo(bananasModel.data());
+        var bananasCustomInfo = (NodeClassificationModelInfo) bananasModel.customInfo();
+        var bananasValidationScore = bananasCustomInfo.metrics().get(metric);
 
-            var bananasCustomInfo = (NodeClassificationModelInfo) bananasModel.customInfo();
-            var bananasValidationScore = bananasCustomInfo.metrics().get(metric);
+        var arrayPropertyCustomInfo = (NodeClassificationModelInfo) arrayPropertyModel.customInfo();
+        var arrayPropertyValidationScores = arrayPropertyCustomInfo.metrics().get(metric);
 
-            var arrayPropertyCustomInfo = (NodeClassificationModelInfo) arrayPropertyModel.customInfo();
-            var arrayPropertyValidationScores = arrayPropertyCustomInfo.metrics().get(metric);
-
-            assertThat(arrayPropertyValidationScores)
-                .usingRecursiveComparison()
-                .isNotSameAs(bananasValidationScore)
-                .isNotEqualTo(bananasValidationScore);
-        });
+        assertThat(arrayPropertyValidationScores)
+            .usingRecursiveComparison()
+            .isNotSameAs(bananasValidationScore)
+            .isNotEqualTo(bananasValidationScore);
     }
 
     private NodeClassificationTrainConfig createConfig(
