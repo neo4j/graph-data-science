@@ -212,7 +212,7 @@ class GraphDropProcTest extends BaseProcTest {
         assertError(
             "CALL gds.graph.drop($graphName)",
             map("graphName", GRAPH_NAME),
-            formatWithLocale("Graph with name `%s` does not exist.", GRAPH_NAME)
+            formatWithLocale("Graph with name `%s` does not exist on database `neo4j`.", GRAPH_NAME)
         );
 
         assertCypherResult(

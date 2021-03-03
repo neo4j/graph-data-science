@@ -205,7 +205,11 @@ public final class GraphStoreCatalog {
                     .collect(Collectors.toList());
 
                 throw new NoSuchElementException(prettySuggestions(
-                    formatWithLocale("Graph with name `%s` does not exist.", graphName),
+                    formatWithLocale(
+                        "Graph with name `%s` does not exist on database `%s`.",
+                        graphName,
+                        userCatalogKey.namedDatabaseId().name()
+                    ),
                     graphName,
                     availableGraphNames
                 ));
