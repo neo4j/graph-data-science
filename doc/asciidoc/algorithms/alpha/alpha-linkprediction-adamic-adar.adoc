@@ -11,12 +11,6 @@ link:https://en.wikipedia.org/wiki/Adamic/Adar_index[Adamic Adar] is a measure u
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-linkprediction-adamic-adar-context, History and explanation>>
-* <<algorithms-linkprediction-adamic-adar-syntax, Syntax>>
-* <<algorithms-linkprediction-adamic-adar-sample, Adamic Adar algorithm sample>>
-
 
 [[algorithms-linkprediction-adamic-adar-context]]
 == History and explanation

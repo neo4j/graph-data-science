@@ -16,15 +16,6 @@ Nodes with a high closeness score have the shortest distances to all other nodes
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-closeness-centrality-context, History and explanation>>
-* <<algorithms-closeness-centrality-usecase, Use-cases - when to use the Closeness Centrality algorithm>>
-* <<algorithms-closeness-centrality-limitations, Constraints - when not to use the Closeness Centrality algorithm>>
-* <<algorithms-closeness-centrality-syntax, Syntax>>
-* <<algorithms-closeness-centrality-sample, Closeness Centrality algorithm sample>>
-* <<algorithms-closeness-centrality-cp, Cypher projection>>
-
 
 [[algorithms-closeness-centrality-context]]
 == History and explanation

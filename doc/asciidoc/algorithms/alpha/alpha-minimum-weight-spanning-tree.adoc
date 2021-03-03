@@ -13,15 +13,6 @@ The K-Means variant of this algorithm can be used to detect clusters in the grap
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-minimum-weight-spanning-tree-context, History and explanation>>
-* <<algorithms-minimum-weight-spanning-tree-usecase, Use-cases - when to use the Minimum Weight Spanning Tree algorithm>>
-* <<algorithms-minimum-weight-spanning-tree-limitations, Constraints - when not to use the Minimum Weight Spanning Tree algorithm>>
-* <<algorithms-minimum-weight-spanning-tree-syntax, Syntax>>
-* <<algorithms-minimum-weight-spanning-tree-sample, Minimum Weight Spanning Tree algorithm sample>>
-** <<algorithms-minimum-weight-spanning-tree-k, K-Spanning tree>>
-
 
 [[algorithms-minimum-weight-spanning-tree-context]]
 == History and explanation

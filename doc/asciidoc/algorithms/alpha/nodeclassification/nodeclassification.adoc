@@ -10,14 +10,6 @@
 This section describes the Node Classification Model in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-ml-nodeclassification-intro, Introduction>>
-* <<algorithms-ml-nodeclassification-syntax, Syntax>>
-* <<algorithms-ml-nodeclassification-examples, Examples>>
-** <<algorithms-ml-nodeclassification-examples-train, Train>>
-** <<algorithms-ml-nodeclassification-examples-mutate, Mutate>>
-
 
 [[algorithms-ml-nodeclassification-intro]]
 == Introduction

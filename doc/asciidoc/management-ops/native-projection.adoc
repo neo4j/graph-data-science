@@ -17,12 +17,6 @@ The main benefit of native projections is their performance.
 In contrast, a <<cypher-projection, Cypher projection>> is more flexible from the declaration point of view, but less performant.
 In most cases it is possible to structure your Neo4j graph model in a way that enables native projections to be used.
 
-This section includes:
-
-* <<native-projection-syntax, Syntax>>
-* <<native-projection-syntax-node-projections, Node projections>>
-* <<native-projection-syntax-relationship-projections, Relationship projections>>
-
 
 [[native-projection-syntax]]
 == Syntax

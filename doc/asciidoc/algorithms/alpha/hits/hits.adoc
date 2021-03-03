@@ -11,13 +11,6 @@
 This section describes the HITS algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-hits-intro, Introduction>>
-* <<algorithms-hits-syntax, Syntax>>
-* <<algorithms-hits-examples, Examples>>
-** <<algorithms-hits-examples-stream, Stream>>
-
 
 [[algorithms-hits-intro]]
 == Introduction

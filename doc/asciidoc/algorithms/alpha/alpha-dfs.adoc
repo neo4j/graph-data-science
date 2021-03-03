@@ -9,12 +9,6 @@ This section describes the Depth First Search traversal algorithm in the Neo4j G
 
 include::alpha-note.adoc[]
 
-This topic includes:
-
-* <<algorithms-dfs-intro, Introduction>>
-* <<algorithms-dfs-syntax, Syntax>>
-* <<algorithms-dfs-examples, Examples>>
-
 [[algorithms-dfs-intro]]
 == Introduction
 

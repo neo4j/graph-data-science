@@ -11,15 +11,6 @@
 This section describes the Dijkstra Shortest Path algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-dijkstra-single-source-intro, Introduction>>
-* <<algorithms-dijkstra-single-source-syntax, Syntax>>
-* <<algorithms-dijkstra-single-source-examples, Examples>>
-** <<algorithms-dijkstra-single-source-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-dijkstra-single-source-examples-stream, Stream>>
-** <<algorithms-dijkstra-single-source-examples-mutate, Mutate>>
-** <<algorithms-dijkstra-single-source-examples-write, Write>>
 
 [[algorithms-dijkstra-single-source-intro]]
 == Introduction

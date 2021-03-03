@@ -11,17 +11,6 @@
 This section describes the A* Shortest Path algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-astar-intro, Introduction>>
-* <<algorithms-astar-requirements, Requirements>>
-* <<algorithms-astar-syntax, Syntax>>
-* <<algorithms-astar-examples, Examples>>
-** <<algorithms-astar-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-astar-examples-stream, Stream>>
-** <<algorithms-astar-examples-mutate, Mutate>>
-** <<algorithms-astar-examples-write, Write>>
-
 
 [[algorithms-astar-intro]]
 == Introduction

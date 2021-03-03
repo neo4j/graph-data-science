@@ -10,13 +10,6 @@
 This section describes the Speaker-Listener Label Propagation algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-sllpa-intro, Introduction>>
-* <<algorithms-sllpa-syntax, Syntax>>
-* <<algorithms-sllpa-examples, Examples>>
-** <<algorithms-sllpa-examples-stream, Stream>>
-
 
 [[algorithms-sllpa-intro]]
 == Introduction
