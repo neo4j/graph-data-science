@@ -28,11 +28,12 @@ import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.model.StoredModel;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.junit.annotation.GdsEnterpriseEdition;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTestCase;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -44,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
-@GdsEnterpriseEdition
+@GdsEditionTestCase(Edition.EE)
 class ModelLoadProcTest extends ModelProcBaseTest {
 
     @TempDir
@@ -116,13 +117,11 @@ class ModelLoadProcTest extends ModelProcBaseTest {
             .hasFieldOrPropertyWithValue("loaded", true);
     }
 
-    @Test
+    @GdsEditionTest(Edition.CE)
     void doNotAllowToLoadModelsOnCE() {
-        GdsEdition.instance().setToCommunityAndRun(() -> {
-            var query = "CALL gds.alpha.model.load('testModel1')";
-            assertThatThrownBy(() -> runQuery(query))
-                .getRootCause()
-                .hasMessageContaining("only available with the Graph Data Science library Enterprise Edition.");
-        });
+        var query = "CALL gds.alpha.model.load('testModel1')";
+        assertThatThrownBy(() -> runQuery(query))
+            .getRootCause()
+            .hasMessageContaining("only available with the Graph Data Science library Enterprise Edition.");
     }
 }

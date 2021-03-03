@@ -83,11 +83,6 @@ public final class GdsEdition {
     }
 
     @TestOnly
-    public <E extends Exception> void setToCommunityAndRun(CheckedRunnable<E> code) throws E {
-        setToStateAndRun(State.COMMUNITY, code);
-    }
-
-    @TestOnly
     private synchronized <E extends Exception> void setToStateAndRun(
         State state,
         CheckedRunnable<E> code

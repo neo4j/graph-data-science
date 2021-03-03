@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.model;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -29,9 +30,9 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.gdl.GdlFactory;
-import org.neo4j.graphalgo.junit.annotation.GdsEnterpriseEdition;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTestCase;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
 import java.util.List;
@@ -49,7 +50,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@GdsEnterpriseEdition
 class ModelCatalogTest {
 
     private static final String USERNAME = "testUser";
@@ -67,6 +67,74 @@ class ModelCatalogTest {
     @AfterEach
     void afterEach() {
         ModelCatalog.removeAllLoadedModels();
+    }
+
+    @Test
+    void onlyAllowOneModel() {
+        ModelCatalog.set(TEST_MODEL);
+
+        assertDoesNotThrow(() -> {
+            ModelCatalog.set(Model.of(
+                USERNAME,
+                "testModel2",
+                "testAlgo2",
+                GRAPH_SCHEMA,
+                1337L,
+                TestTrainConfig.of()
+            ));
+        });
+
+        var model2 = Model.of(
+            USERNAME,
+            "testModel2",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            1337L,
+            TestTrainConfig.of()
+        );
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.set(model2)
+        );
+
+        assertEquals("Community users can only store one model in the catalog", ex.getMessage());
+    }
+
+    @Test
+    void shouldStoreModelsPerType() {
+        var model = Model.of(
+            USERNAME,
+            "testModel",
+            "testAlgo",
+            GRAPH_SCHEMA,
+            "testTrainData",
+            TestTrainConfig.of()
+        );
+        var model2 = Model.of(
+            USERNAME,
+            "testModel2",
+            "testAlgo2",
+            GRAPH_SCHEMA,
+            1337L,
+            TestTrainConfig.of()
+        );
+
+        ModelCatalog.set(model);
+        ModelCatalog.set(model2);
+
+        assertEquals(model, ModelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class));
+        assertEquals(model2, ModelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class));
+    }
+
+    @Test
+    void shouldThrowWhenPublishingOnCE() {
+        ModelCatalog.set(TEST_MODEL);
+
+        assertThatThrownBy(() -> ModelCatalog.publish(USERNAME, TEST_MODEL.name()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(
+                "Publishing a model is only available with the Graph Data Science library Enterprise Edition.");
     }
 
     @Test
@@ -106,109 +174,6 @@ class ModelCatalogTest {
 
         assertEquals("Model with name `testModel` does not exist.", ex.getMessage());
         assertNotNull(TEST_MODEL.creationTime());
-    }
-
-    @Test
-    void shouldStoreModelsPerType() {
-        GdsEdition.instance().setToCommunityAndRun(() -> {
-            var model = Model.of(
-                USERNAME,
-                "testModel",
-                "testAlgo",
-                GRAPH_SCHEMA,
-                "testTrainData",
-                TestTrainConfig.of()
-            );
-            var model2 = Model.of(
-                USERNAME,
-                "testModel2",
-                "testAlgo2",
-                GRAPH_SCHEMA,
-                1337L,
-                TestTrainConfig.of()
-            );
-
-            ModelCatalog.set(model);
-            ModelCatalog.set(model2);
-
-            assertEquals(model, ModelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class));
-            assertEquals(model2, ModelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class));
-        });
-    }
-
-    @Test
-    void onlyAllowOneCatalogInCE() {
-        GdsEdition.instance().setToCommunityAndRun(() -> {
-            ModelCatalog.set(TEST_MODEL);
-
-            assertDoesNotThrow(() -> {
-                ModelCatalog.set(Model.of(
-                    USERNAME,
-                    "testModel2",
-                    "testAlgo2",
-                    GRAPH_SCHEMA,
-                    1337L,
-                    TestTrainConfig.of()
-                ));
-            });
-
-            var model2 = Model.of(
-                USERNAME,
-                "testModel2",
-                "testAlgo",
-                GRAPH_SCHEMA,
-                1337L,
-                TestTrainConfig.of()
-            );
-
-            IllegalArgumentException ex = assertThrows(
-                IllegalArgumentException.class,
-                () -> ModelCatalog.set(model2)
-            );
-
-            assertEquals("Community users can only store one model in the catalog", ex.getMessage());
-        });
-    }
-
-    private static Model<Integer, TestTrainConfig> testModel(String name) {
-        return Model.of(USERNAME, name, "algo", GraphSchema.empty(), 42, TestTrainConfig.of());
-    }
-
-    static Stream<Arguments> modelInput() {
-        return Stream.of(
-            Arguments.of(List.of(), "something", "Model with name `something` does not exist."),
-            Arguments.of(
-                List.of("model0"),
-                "model1",
-                "Model with name `model1` does not exist. Did you mean `model0`?"
-            ),
-            Arguments.of(
-                List.of("model0", "model1"),
-                "model2",
-                "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?"
-            ),
-            Arguments.of(
-                List.of("model0", "model1", "foobar"),
-                "model2",
-                "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?"
-            )
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("modelInput")
-    void shouldThrowOnMissingModel(Iterable<String> existingModels, String searchModel, String expectedMessage) {
-        existingModels.forEach(existingModel -> ModelCatalog.set(testModel(existingModel)));
-
-        // test the get code path
-        assertThatExceptionOfType(NoSuchElementException.class)
-            .isThrownBy(() -> ModelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class))
-            .withMessage(expectedMessage);
-
-        // test the drop code path
-        assertThatExceptionOfType(NoSuchElementException.class)
-            .isThrownBy(() -> ModelCatalog.drop(USERNAME, searchModel))
-            .withMessage(expectedMessage);
     }
 
     @Test
@@ -254,18 +219,6 @@ class ModelCatalogTest {
     }
 
     @Test
-    void checksIfPublicModelExists() {
-        ModelCatalog.set(TEST_MODEL);
-        ModelCatalog.publish(USERNAME, "testModel");
-
-        assertThat(ModelCatalog.exists(USERNAME, "testModel")).isFalse();
-        assertThat(ModelCatalog.exists(USERNAME, "testModel_public")).isTrue();
-        assertThat(ModelCatalog.exists(USERNAME, "bogusModel")).isFalse();
-        assertThat(ModelCatalog.exists("anotherUser", "testModel")).isFalse();
-        assertThat(ModelCatalog.exists("anotherUser", "testModel_public")).isTrue();
-    }
-
-    @Test
     void getModelType() {
         ModelCatalog.set(TEST_MODEL);
 
@@ -290,84 +243,8 @@ class ModelCatalogTest {
     }
 
     @Test
-    void shouldListModels() {
-        var model1 = Model.of(
-            USERNAME,
-            "testModel1",
-            "testAlgo1",
-            GRAPH_SCHEMA,
-            "modelData1",
-            TestTrainConfig.of()
-        );
-
-        var model2 = Model.of(
-            USERNAME,
-            "testModel2",
-            "testAlgo2",
-            GRAPH_SCHEMA,
-            1337L,
-            TestTrainConfig.of()
-        );
-
-        var publicModel = Model.of(
-            "anotherUser",
-            "testModel2",
-            "testAlgo2",
-            GRAPH_SCHEMA,
-            1337L,
-            TestTrainConfig.of()
-        );
-
-        ModelCatalog.set(model1);
-        ModelCatalog.set(model2);
-        ModelCatalog.set(publicModel);
-        var publishedModel = ModelCatalog.publish("anotherUser", "testModel2");
-
-
-        var models = ModelCatalog.list(USERNAME);
-        assertEquals(3, models.size());
-
-        assertThat(models).containsExactlyInAnyOrder(model1, model2, publishedModel);
-    }
-
-    @Test
     void shouldNotThrowWhenListingNonExistentModel() {
         assertDoesNotThrow(() -> ModelCatalog.list(USERNAME, "nonExistentModel"));
-    }
-
-    @Test
-    void shouldPublishModels() {
-        ModelCatalog.set(TEST_MODEL);
-        Model<?, ?> publishedModel = ModelCatalog.publish(USERNAME, "testModel");
-        assertEquals(1, ModelCatalog.list(USERNAME).size());
-
-        Model<String, TestTrainConfig> publicModel = ModelCatalog.get(
-            "anotherUser",
-            publishedModel.name(),
-            String.class,
-            TestTrainConfig.class
-        );
-
-        assertThat(publicModel)
-            .usingRecursiveComparison()
-            .ignoringFields("sharedWith", "name")
-            .withStrictTypeChecking()
-            .isEqualTo(TEST_MODEL);
-
-        assertEquals(List.of(Model.ALL_USERS), publicModel.sharedWith());
-    }
-
-    @Test
-    void shouldOnlyBeDroppedByCreator() {
-        ModelCatalog.set(TEST_MODEL);
-        ModelCatalog.publish(USERNAME, "testModel");
-
-        assertThatThrownBy(() -> ModelCatalog.drop("anotherUser", "testModel_public"))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Only the creator");
-
-        ModelCatalog.drop(USERNAME, "testModel_public");
-        assertEquals(0, ModelCatalog.list(USERNAME).size());
     }
 
     @Test
@@ -375,28 +252,150 @@ class ModelCatalogTest {
         assertEquals(0, ModelCatalog.list(USERNAME).size());
     }
 
-    @Test
-    void shouldThrowOnOverridingModels() {
-        ModelCatalog.set(TEST_MODEL);
+    @Nested
+    @GdsEditionTestCase(Edition.EE)
+    class ModelCatalogEnterpriseFeaturesTest {
 
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> ModelCatalog.set(TEST_MODEL)
-        );
+        @Test
+        void shouldListModels() {
+            var model1 = Model.of(
+                USERNAME,
+                "testModel1",
+                "testAlgo1",
+                GRAPH_SCHEMA,
+                "modelData1",
+                TestTrainConfig.of()
+            );
 
-        assertEquals("Model with name `testModel` already exists", ex.getMessage());
-    }
+            var model2 = Model.of(
+                USERNAME,
+                "testModel2",
+                "testAlgo2",
+                GRAPH_SCHEMA,
+                1337L,
+                TestTrainConfig.of()
+            );
 
-    @Test
-    void shouldThrowWhenPublishingOnCE() {
-        GdsEdition.instance().setToCommunityAndRun(() -> {
+            var publicModel = Model.of(
+                "anotherUser",
+                "testModel2",
+                "testAlgo2",
+                GRAPH_SCHEMA,
+                1337L,
+                TestTrainConfig.of()
+            );
+
+            ModelCatalog.set(model1);
+            ModelCatalog.set(model2);
+            ModelCatalog.set(publicModel);
+            var publishedModel = ModelCatalog.publish("anotherUser", "testModel2");
+
+
+            var models = ModelCatalog.list(USERNAME);
+            assertEquals(3, models.size());
+
+            assertThat(models).containsExactlyInAnyOrder(model1, model2, publishedModel);
+        }
+
+        @Test
+        void shouldOnlyBeDroppedByCreator() {
+            ModelCatalog.set(TEST_MODEL);
+            ModelCatalog.publish(USERNAME, "testModel");
+
+            assertThatThrownBy(() -> ModelCatalog.drop("anotherUser", "testModel_public"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Only the creator");
+
+            ModelCatalog.drop(USERNAME, "testModel_public");
+            assertEquals(0, ModelCatalog.list(USERNAME).size());
+        }
+
+        @Test
+        void checksIfPublicModelExists() {
+            ModelCatalog.set(TEST_MODEL);
+            ModelCatalog.publish(USERNAME, "testModel");
+
+            assertThat(ModelCatalog.exists(USERNAME, "testModel")).isFalse();
+            assertThat(ModelCatalog.exists(USERNAME, "testModel_public")).isTrue();
+            assertThat(ModelCatalog.exists(USERNAME, "bogusModel")).isFalse();
+            assertThat(ModelCatalog.exists("anotherUser", "testModel")).isFalse();
+            assertThat(ModelCatalog.exists("anotherUser", "testModel_public")).isTrue();
+        }
+
+        @Test
+        void shouldPublishModels() {
+            ModelCatalog.set(TEST_MODEL);
+            Model<?, ?> publishedModel = ModelCatalog.publish(USERNAME, "testModel");
+            assertEquals(1, ModelCatalog.list(USERNAME).size());
+
+            Model<String, TestTrainConfig> publicModel = ModelCatalog.get(
+                "anotherUser",
+                publishedModel.name(),
+                String.class,
+                TestTrainConfig.class
+            );
+
+            assertThat(publicModel)
+                .usingRecursiveComparison()
+                .ignoringFields("sharedWith", "name")
+                .withStrictTypeChecking()
+                .isEqualTo(TEST_MODEL);
+
+            assertEquals(List.of(Model.ALL_USERS), publicModel.sharedWith());
+        }
+
+        @ParameterizedTest
+        @MethodSource("org.neo4j.graphalgo.core.model.ModelCatalogTest#modelInput")
+        void shouldThrowOnMissingModel(Iterable<String> existingModels, String searchModel, String expectedMessage) {
+            existingModels.forEach(existingModel -> ModelCatalog.set(testModel(existingModel)));
+
+            // test the get code path
+            assertThatExceptionOfType(NoSuchElementException.class)
+                .isThrownBy(() -> ModelCatalog.get(USERNAME, searchModel, String.class, TestTrainConfig.class))
+                .withMessage(expectedMessage);
+
+            // test the drop code path
+            assertThatExceptionOfType(NoSuchElementException.class)
+                .isThrownBy(() -> ModelCatalog.drop(USERNAME, searchModel))
+                .withMessage(expectedMessage);
+        }
+
+        @Test
+        void shouldThrowOnOverridingModels() {
             ModelCatalog.set(TEST_MODEL);
 
-            assertThatThrownBy(() -> ModelCatalog.publish(USERNAME, TEST_MODEL.name()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining(
-                    "Publishing a model is only available with the Graph Data Science library Enterprise Edition.");
-        });
+            IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> ModelCatalog.set(TEST_MODEL)
+            );
+
+            assertEquals("Model with name `testModel` already exists", ex.getMessage());
+        }
+    }
+
+    static Stream<Arguments> modelInput() {
+        return Stream.of(
+            Arguments.of(List.of(), "something", "Model with name `something` does not exist."),
+            Arguments.of(
+                List.of("model0"),
+                "model1",
+                "Model with name `model1` does not exist. Did you mean `model0`?"
+            ),
+            Arguments.of(
+                List.of("model0", "model1"),
+                "model2",
+                "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?"
+            ),
+            Arguments.of(
+                List.of("model0", "model1", "foobar"),
+                "model2",
+                "Model with name `model2` does not exist. Did you mean one of [`model0`, `model1`]?"
+            )
+        );
+    }
+
+    private static Model<Integer, TestTrainConfig> testModel(String name) {
+        return Model.of(USERNAME, name, "algo", GraphSchema.empty(), 42, TestTrainConfig.of());
     }
 
     @ValueClass
