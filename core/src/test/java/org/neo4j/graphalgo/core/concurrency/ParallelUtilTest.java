@@ -33,8 +33,10 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable
 import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -57,6 +59,7 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -405,6 +408,45 @@ final class ParallelUtilTest {
             .isInstanceOf(RuntimeException.class)
             .hasMessage("bubu");
         assertThat(counter.get()).isEqualTo(2);
+    }
+
+    @Test
+    void shouldCollectExceptionsFromFailingTasks() {
+        AtomicInteger successfulTasks = new AtomicInteger();
+
+        Set<Runnable> tasks = new HashSet<>();
+        for (int i = 0; i < 42; i++) { // 42 succeeding tasks
+            tasks.add(successfulTasks::incrementAndGet);
+        }
+        // funky bounds because we checksum later
+        for (int i = 1; i <= 23; i++) { // 23 failing tasks
+            int j = i;
+            tasks.add(() -> {
+                throw new RuntimeException("pu exception" + j);
+            });
+        }
+
+        try {
+            ParallelUtil.runWithConcurrency(7, tasks, Pools.DEFAULT);
+
+            fail("it should have thrown");
+        } catch (RuntimeException oneOfTheTwentyThree) {
+            assertThat(oneOfTheTwentyThree.getMessage()).startsWith("pu exception");
+            assertThat(oneOfTheTwentyThree.getSuppressed().length).isEqualTo(22); // because one holds the other ones
+
+            Stream<Throwable> allTwentyThreeExceptions = Stream.concat(
+                Stream.of(oneOfTheTwentyThree),
+                Arrays.stream(oneOfTheTwentyThree.getSuppressed())
+            );
+
+            int checkSumOnFailedTasks = allTwentyThreeExceptions
+                .map(throwable -> throwable.getMessage().substring(12))
+                .mapToInt(Integer::valueOf)
+                .sum();
+            assertThat(checkSumOnFailedTasks).isEqualTo(23 * (23 + 1) / 2); // 276 == sum(1..23)
+        }
+
+        assertThat(successfulTasks.get()).isEqualTo(42);
     }
 
     private static void withPool(
