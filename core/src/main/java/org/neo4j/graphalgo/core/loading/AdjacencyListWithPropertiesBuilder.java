@@ -185,7 +185,6 @@ public final class AdjacencyListWithPropertiesBuilder {
         return adjacencyCompressor.build();
     }
 
-    // TODO: maybe remove
     public RelationshipProjection projection() {
         return this.projection;
     }
