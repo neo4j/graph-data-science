@@ -141,25 +141,6 @@ public final class ExceptionUtil {
         validateNodeIsLoaded(mappedId, neoId, "source");
     }
 
-    /**
-     * Throw {@link org.apache.commons.lang3.NotImplementedException} with the given message.
-     * If this method is called during tests, an assumption violation is returned instead.
-     * This usually won't fail the test, instead marking it disabled.
-     * The classpath is probed for the class {@code org.junit.AssumptionViolatedException}.
-     * If that class is found, test execution is assumed and that exception is returned instead of the NIE.
-     *
-     * @return an exception that can be thrown to signal that something is not implemented
-     */
-    public static RuntimeException testSafeNotImplemented(String message) {
-        try {
-            var assumptionViolationClass  = Class.forName("org.junit.AssumptionViolatedException");
-            var ctor = assumptionViolationClass.getDeclaredConstructor(String.class);
-            return ((RuntimeException) ctor.newInstance(message));
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            return new NotImplementedException(message);
-        }
-    }
-
     private static void validateNodeIsLoaded(long mappedId, long neoId, String side) {
         if (mappedId == -1) {
             throw new IllegalArgumentException(
