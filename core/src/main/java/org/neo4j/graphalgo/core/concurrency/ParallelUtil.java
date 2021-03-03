@@ -946,7 +946,7 @@ public final class ParallelUtil {
      * Does not support {@link java.util.concurrent.ForkJoinPool} as backing executor.
      */
     private static final class CompletionService {
-        private static final int AWAIT_TIMEOUT_SECONDS = 1;
+        private static final int AWAIT_TIMEOUT_MILLIS = 100;
 
         private final Executor executor;
         private final ThreadPoolExecutor pool;
@@ -1015,7 +1015,7 @@ public final class ParallelUtil {
         }
 
         boolean awaitOrFail() throws InterruptedException, ExecutionException {
-            var task = completionQueue.poll(AWAIT_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            var task = completionQueue.poll(AWAIT_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
             if (task == null) {
                 return false;
             } else {
