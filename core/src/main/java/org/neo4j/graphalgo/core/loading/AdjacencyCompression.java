@@ -30,21 +30,13 @@ import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodeVLongs;
 
 public final class AdjacencyCompression {
 
-    private static long[] growWithDestroy(long[] values, int newLength) {
-        if (values.length < newLength) {
-            // give leeway in case of nodes with a reference to themselves
-            // due to automatic skipping of identical targets, just adding one is enough to cover the
-            // self-reference case, as it is handled as two relationships that aren't counted by BOTH
-            // avoid repeated re-allocation for smaller degrees
-            // avoid generous over-allocation for larger degrees
-            int newSize = Math.max(32, 1 + newLength);
-            return new long[newSize];
-        }
-        return values;
-    }
-
-    public static void copyFrom(LongArrayBuffer into, CompressedLongArray array) {
-        into.buffer = growWithDestroy(into.buffer, array.length());
+    /**
+     * Decompress the given {@code array} into the given {@code into}.
+     * After this, {@link LongArrayBuffer#length} will reflect the number of decompressed values
+     * that are in the {@link LongArrayBuffer#buffer}.
+     */
+    static void copyFrom(LongArrayBuffer into, CompressedLongArray array) {
+        into.ensureCapacity(array.length());
         into.length = array.uncompress(into.buffer);
     }
 

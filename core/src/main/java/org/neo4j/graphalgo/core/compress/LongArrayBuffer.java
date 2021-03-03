@@ -35,4 +35,20 @@ public final class LongArrayBuffer {
         this.buffer = buffer;
         this.length = length;
     }
+
+    /**
+     * Make sure to be able to hold at least {@code length} elements.
+     * Throws existing data away.
+     */
+    public void ensureCapacity(int length) {
+        if (this.buffer.length < length) {
+            // give leeway in case of nodes with a reference to themselves
+            // due to automatic skipping of identical targets, just adding one is enough to cover the
+            // self-reference case, as it is handled as two relationships that aren't counted by BOTH
+            // avoid repeated re-allocation for smaller degrees
+            // avoid generous over-allocation for larger degrees
+            int newSize = Math.max(32, 1 + length);
+            this.buffer = new long[newSize];
+        }
+    }
 }
