@@ -42,7 +42,7 @@ public final class AdjacencyBuilder {
     public static final long IGNORE_VALUE = Long.MIN_VALUE;
 
     public static AdjacencyBuilder compressing(
-        @NotNull RelationshipsBuilder globalBuilder,
+        @NotNull AdjacencyListWithPropertiesBuilder globalBuilder,
         int numPages,
         int pageSize,
         AllocationTracker tracker,
@@ -74,7 +74,7 @@ public final class AdjacencyBuilder {
         return compressingPagedAdjacency;
     }
 
-    private final RelationshipsBuilder globalBuilder;
+    private final AdjacencyListWithPropertiesBuilder globalBuilder;
     private final ThreadLocalRelationshipsBuilder[] localBuilders;
     private final CompressedLongArray[][] compressedAdjacencyLists;
     private final LongArrayBuffer[] buffers;
@@ -91,7 +91,7 @@ public final class AdjacencyBuilder {
     private final boolean preAggregate;
 
     private AdjacencyBuilder(
-        RelationshipsBuilder globalBuilder,
+        AdjacencyListWithPropertiesBuilder globalBuilder,
         ThreadLocalRelationshipsBuilder[] localBuilders,
         CompressedLongArray[][] compressedAdjacencyLists,
         LongArrayBuffer[] buffers,

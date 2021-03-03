@@ -41,7 +41,7 @@ public abstract class AdjacencyBuilderBaseTest {
         AdjacencyListBuilderFactory listBuilderFactory,
         AdjacencyOffsetsFactory offsetsFactory
     ) {
-        RelationshipsBuilder globalBuilder = RelationshipsBuilder.create(
+        AdjacencyListWithPropertiesBuilder globalBuilder = AdjacencyListWithPropertiesBuilder.create(
             6,
             RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
             listBuilderFactory,

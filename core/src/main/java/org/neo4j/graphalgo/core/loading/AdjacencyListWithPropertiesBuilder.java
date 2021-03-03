@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import java.util.Arrays;
 import java.util.Map;
 
-public final class RelationshipsBuilder {
+public final class AdjacencyListWithPropertiesBuilder {
 
     private static final AdjacencyListBuilder[] EMPTY_PROPERTY_BUILDERS = new AdjacencyListBuilder[0];
 
@@ -41,7 +41,7 @@ public final class RelationshipsBuilder {
     private final int[] propertyKeyIds;
     private final double[] defaultValues;
 
-    public static RelationshipsBuilder create(
+    public static AdjacencyListWithPropertiesBuilder create(
         long nodeCount,
         RelationshipProjection projection,
         Map<String, Integer> relationshipPropertyTokens,
@@ -65,7 +65,7 @@ public final class RelationshipsBuilder {
         );
     }
 
-    public static RelationshipsBuilder create(
+    public static AdjacencyListWithPropertiesBuilder create(
         long nodeCount,
         RelationshipProjection projection,
         AdjacencyListBuilderFactory listBuilderFactory,
@@ -87,7 +87,7 @@ public final class RelationshipsBuilder {
         );
     }
 
-    private static RelationshipsBuilder create(
+    private static AdjacencyListWithPropertiesBuilder create(
         long nodeCount,
         RelationshipProjection projection,
         AdjacencyCompressorFactory adjacencyCompressorFactory,
@@ -113,7 +113,7 @@ public final class RelationshipsBuilder {
             tracker
         );
 
-        return new RelationshipsBuilder(
+        return new AdjacencyListWithPropertiesBuilder(
             projection,
             adjacencyCompressor,
             aggregations,
@@ -159,7 +159,7 @@ public final class RelationshipsBuilder {
         return aggregations;
     }
 
-    private RelationshipsBuilder(
+    private AdjacencyListWithPropertiesBuilder(
         RelationshipProjection projection,
         AdjacencyCompressorBlueprint adjacencyCompressor,
         Aggregation[] aggregations,

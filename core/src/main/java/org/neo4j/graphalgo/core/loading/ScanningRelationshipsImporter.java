@@ -46,7 +46,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
     private final ProgressLogger progressLogger;
 
     private final IdMapping idMap;
-    private final Map<RelationshipType, RelationshipsBuilder> allBuilders;
+    private final Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders;
     private final Map<RelationshipType, LongAdder> allRelationshipCounters;
 
     public ScanningRelationshipsImporter(
@@ -55,7 +55,7 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
         GraphDimensions dimensions,
         ProgressLogger progressLogger,
         IdMapping idMap,
-        Map<RelationshipType, RelationshipsBuilder> allBuilders,
+        Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders,
         int concurrency
     ) {
         super(
@@ -117,11 +117,11 @@ public final class ScanningRelationshipsImporter extends ScanningRecordsImporter
             int numberOfPages,
             RelationshipType relationshipType,
             RelationshipProjection projection,
-            @NotNull RelationshipsBuilder relationshipsBuilder
+            @NotNull AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder
     ) {
         LongAdder relationshipCounter = new LongAdder();
         AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
-            relationshipsBuilder,
+            adjacencyListWithPropertiesBuilder,
             numberOfPages,
             pageSize,
             tracker,

@@ -196,14 +196,14 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         int concurrency
     ) {
         var pageSize = ImportSizing.of(concurrency, dimensions.nodeCount()).pageSize();
-        Map<RelationshipType, RelationshipsBuilder> allBuilders = graphCreateConfig
+        Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders = graphCreateConfig
             .relationshipProjections()
             .projections()
             .entrySet()
             .stream()
             .collect(toMap(
                 Map.Entry::getKey,
-                projectionEntry -> RelationshipsBuilder.create(
+                projectionEntry -> AdjacencyListWithPropertiesBuilder.create(
                     dimensions.nodeCount(),
                     projectionEntry.getValue(),
                     dimensions.relationshipPropertyTokens(),

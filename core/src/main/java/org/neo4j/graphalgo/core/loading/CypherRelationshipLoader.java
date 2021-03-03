@@ -224,14 +224,14 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
         return QueryType.RELATIONSHIP;
     }
 
-    Map<RelationshipType, RelationshipsBuilder> allBuilders() {
+    Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders() {
         return loaderContext.allBuilders;
     }
 
     class Context {
 
         private final Map<RelationshipType, SingleTypeRelationshipImporter.Builder.WithImporter> importerBuildersByType;
-        private final Map<RelationshipType, RelationshipsBuilder> allBuilders;
+        private final Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders;
 
         private final int pageSize;
         private final int numberOfPages;
@@ -263,7 +263,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 .map(Aggregation::resolve)
                 .toArray(Aggregation[]::new);
 
-            RelationshipsBuilder builder = RelationshipsBuilder.create(
+            AdjacencyListWithPropertiesBuilder builder = AdjacencyListWithPropertiesBuilder.create(
                 nodeMapping.nodeCount(),
                 projection,
                 TransientAdjacencyListBuilder.builderFactory(loadingContext.tracker()),
@@ -295,12 +295,12 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
             int numberOfPages,
             RelationshipType relationshipType,
             RelationshipProjection relationshipProjection,
-            RelationshipsBuilder relationshipsBuilder,
+            AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
             AllocationTracker tracker
         ) {
             LongAdder relationshipCounter = new LongAdder();
             AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
-                relationshipsBuilder,
+                adjacencyListWithPropertiesBuilder,
                 numberOfPages,
                 pageSize,
                 tracker,

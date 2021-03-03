@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.loading.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.loading.AdjacencyListWithPropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 
@@ -91,14 +91,14 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
 
     @ValueClass
     public interface RelationshipImportResult {
-        Map<RelationshipType, RelationshipsBuilder> builders();
+        Map<RelationshipType, AdjacencyListWithPropertiesBuilder> builders();
 
         ObjectLongMap<RelationshipType> counts();
 
         GraphDimensions dimensions();
 
         static RelationshipImportResult of(
-            Map<RelationshipType, RelationshipsBuilder> builders,
+            Map<RelationshipType, AdjacencyListWithPropertiesBuilder> builders,
             ObjectLongMap<RelationshipType> counts,
             GraphDimensions dimensions
         ) {

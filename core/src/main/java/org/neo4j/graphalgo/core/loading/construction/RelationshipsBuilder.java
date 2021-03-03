@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.AdjacencyBuilder;
+import org.neo4j.graphalgo.core.loading.AdjacencyListWithPropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.ImportSizing;
 import org.neo4j.graphalgo.core.loading.RelationshipImporter;
 import org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer;
@@ -48,7 +49,7 @@ public class RelationshipsBuilder {
 
     private static final int DUMMY_PROPERTY_ID = -2;
 
-    private final org.neo4j.graphalgo.core.loading.RelationshipsBuilder relationshipsBuilder;
+    private final AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder;
     private final RelationshipImporter relationshipImporter;
     private final RelationshipImporter.Imports imports;
     private final IdMapping idMapping;
@@ -93,7 +94,7 @@ public class RelationshipsBuilder {
             projectionBuilder.addProperty(GraphFactory.DUMMY_PROPERTY, GraphFactory.DUMMY_PROPERTY, DefaultValue.DEFAULT, aggregation);
         }
 
-        this.relationshipsBuilder = org.neo4j.graphalgo.core.loading.RelationshipsBuilder.create(
+        this.adjacencyListWithPropertiesBuilder = AdjacencyListWithPropertiesBuilder.create(
             idMapping.rootNodeCount(),
             projectionBuilder.build(),
             TransientAdjacencyListBuilder.builderFactory(tracker),
@@ -105,7 +106,7 @@ public class RelationshipsBuilder {
         );
 
         AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
-            relationshipsBuilder,
+            adjacencyListWithPropertiesBuilder,
             numberOfPages,
             pageSize,
             tracker,
@@ -168,7 +169,7 @@ public class RelationshipsBuilder {
 
         ParallelUtil.runWithConcurrency(concurrency, relationshipImporter.flushTasks(), executorService);
 
-        var build = relationshipsBuilder.build();
+        var build = adjacencyListWithPropertiesBuilder.build();
         var compressedTopology = build.adjacency();
         var compressedProperties = build.properties().stream().findFirst().orElse(null);
 
