@@ -41,7 +41,8 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.graphalgo.junit.annotation.GdsEnterpriseEdition;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -430,8 +431,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         );
     }
 
-    @Test
-    @GdsEnterpriseEdition
+    @GdsEditionTest(Edition.EE)
     default void shouldAllowManyCoresOnUnlimited() {
         applyOnProcedure((proc) ->
             getWriteAndStreamProcedures(proc).forEach(method -> {

@@ -21,7 +21,8 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.junit.annotation.GdsEnterpriseEdition;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -142,8 +143,7 @@ class FeatureToggleProcTest extends BaseProcTest {
         assertEquals(false, USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled());
     }
 
-    @Test
-    @GdsEnterpriseEdition
+    @GdsEditionTest(Edition.EE)
     void toggleUseBitIdMap() {
         var useBitIdMap = USE_BIT_ID_MAP.isEnabled();
         runQuery("CALL gds.features.useBitIdMap($value)", Map.of("value", !useBitIdMap));
@@ -152,8 +152,7 @@ class FeatureToggleProcTest extends BaseProcTest {
         assertEquals(useBitIdMap, USE_BIT_ID_MAP.isEnabled());
     }
 
-    @Test
-    @GdsEnterpriseEdition
+    @GdsEditionTest(Edition.EE)
     void resetUseBitIdMap() {
         USE_BIT_ID_MAP.reset();
         assertCypherResult(
