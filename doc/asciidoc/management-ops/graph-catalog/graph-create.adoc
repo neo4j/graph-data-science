@@ -25,7 +25,7 @@ For detailed information about the configuration of each variant, we refer to th
 In the following two examples we show how to create a graph called `my-native-graph` that contains `Person` nodes and `LIKES` relationships.
 
 .Create a graph using a native projection:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-native-graph',
@@ -38,7 +38,7 @@ YIELD graphName, nodeCount, relationshipCount, createMillis;
 We can also use Cypher to select the nodes and relationships to be projected into the in-memory graph.
 
 .Create a graph using a Cypher projection:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
@@ -51,7 +51,7 @@ YIELD graphName, nodeCount, relationshipCount, createMillis;
 After creating the graphs in the catalog, we can refer to them in algorithms by using their name.
 
 .Run Page Rank on one of our created graphs:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream('my-native-graph') YIELD nodeId, score;
 ----

@@ -6,7 +6,7 @@ This is useful if we ran multiple algorithms in `mutate` mode and want to retrie
 This is similar to what the `stream` execution mode does, but allows more fine-grained control over the operations.
 
 .Stream multiple node properties:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamNodeProperties('my-graph', ['componentId', 'pageRank', 'communityId'])
 ----
@@ -17,7 +17,7 @@ The procedure can be configured to stream just the properties for some specific 
 In the following example, we ran an algorithm on a sub-graph and subsequently streamed the newly created property.
 
 .Stream node properties of a specific node projection:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', ['A', 'B'], '*')
 CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
@@ -36,7 +36,7 @@ For streaming a single node property this is not necessary.
 The result has the format `nodeId`, `propertyValue`, as is familiar from the streaming mode of many algorithm procedures.
 
 .Stream a single node property:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamNodeProperty('my-graph', 'componentId')
 ----

@@ -16,7 +16,7 @@ This is a procedure that can show the log entries of a long-running task or algo
 ==== Syntax
 
 .Getting the proggress of tasks:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.listProgress()
 YIELD
@@ -34,7 +34,7 @@ YIELD
 
 Assuming we just started `gds.alpha.node2vec.stream` procedure.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.listProgress()
 YIELD

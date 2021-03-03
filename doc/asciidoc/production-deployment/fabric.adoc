@@ -42,7 +42,7 @@ The other shard, the analytical database, stores a graph with the same data, exc
 
 Using Fabric, we can now calculate the PageRank score for each Person and join the results with the name of that Person.
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL {
   USE FABRIC_DB_NAME.ANALYTICS_DB

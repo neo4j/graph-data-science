@@ -14,7 +14,7 @@ The feature is useful in the following, exemplary scenarios:
 * Share analytical results within the organization.
 
 .Export a named graph to a new database in the Neo4j databases directory:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.export('my-graph', { dbName: 'mydatabase' })
 ----
@@ -42,7 +42,7 @@ The database must not exist when using the export procedure, it needs to be crea
 
 
 .After running the procedure, we can start a new database and query the exported graph:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 :use system
 CREATE DATABASE mydatabase;

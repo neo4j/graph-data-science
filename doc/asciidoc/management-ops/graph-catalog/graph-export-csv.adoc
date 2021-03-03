@@ -16,7 +16,7 @@ The `gds.export.location` parameter must be configured for this feature.
 ====
 
 .Export a named graph to a set of CSV files:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graph.export.csv('my-graph', {exportName: 'myExport'})
 ----
@@ -95,7 +95,7 @@ Using the `gds.graph.export.csv.estimate` procedure it is possible to estimate t
 The estimation uses sampling to generate a more accurate estiamte.
 
 .Estimate the required disk space for exporting a named graph to CSV files.:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graph.export.csv.export('my-graph', {exportName: 'myExport'})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory;

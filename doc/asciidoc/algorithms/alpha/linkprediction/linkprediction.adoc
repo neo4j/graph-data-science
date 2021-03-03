@@ -183,7 +183,7 @@ include::specific-configuration.adoc[]
 include::../../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (alice:Person {name: 'Alice', numberOfPosts: 38}),
@@ -218,7 +218,7 @@ This is because the Link Prediction model is defined only for undirected graphs.
 include::../../shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=graph-create-query]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create(
   'myGraph',
@@ -247,7 +247,7 @@ First, we must do the test/train splits.
 For this we will make use of the `gds.alpha.ml.splitRelationships` procedure.
 We will do one split to generate the test graph.
 
-[source, cypher, role=example-query]
+[source, cypher, role=noplay example-query]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
   relationshipTypes: ['KNOWS'],
@@ -270,7 +270,7 @@ Additionally, a number of non-existing relationships will be created into the `K
 
 Next, we will create the train graph.
 
-[source, cypher, role=example-query]
+[source, cypher, role=noplay example-query]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
   relationshipTypes: ['KNOWS_REMAINING'],
@@ -295,7 +295,7 @@ We have 12 actual relationships, giving us a class ratio of `(28 - 12) / 12 = 1.
 
 [[algorithms-ml-linkprediction-examples-train-query]]
 .Train a Link Prediction model:
-[source, cypher, role=example-query]
+[source, cypher, role=noplay example-query]
 ----
 CALL gds.alpha.ml.linkPrediction.train('myGraph', {
   trainRelationshipType: 'KNOWS_TRAINGRAPH',
@@ -339,7 +339,7 @@ We will use the model which we trained in the <<algorithms-ml-linkprediction-exa
 
 We must also make sure that we do not include any of the relationships from the train or test graphs, which we do by specifying a relationship filter for the original relationship type `'KNOWS'`.
 
-[source, cypher, role=example-query]
+[source, cypher, role=noplay example-query]
 ----
 CALL gds.alpha.ml.linkPrediction.predict.mutate('myGraph', {
   relationshipTypes: ['KNOWS'],
@@ -362,7 +362,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 
 In order to analyze our predicted relationships we will write them back to Neo4j:
 
-[source, cypher, role=example-query]
+[source, cypher, role=noplay example-query]
 ----
 CALL gds.graph.writeRelationship('myGraph', 'KNOWS_PREDICTED', 'probability')
 YIELD relationshipsWritten, propertiesWritten

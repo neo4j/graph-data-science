@@ -28,7 +28,7 @@ The output of the procedure contains information about which nodes were visited 
 == Syntax
 
 .The following describes the API for running the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.dfs.stream(
   graphName: String,
@@ -69,7 +69,7 @@ include::../common-configuration/common-configuration.adoc[]
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
        (nA:Node {tag: 'a'}),
@@ -85,7 +85,7 @@ CREATE
 ----
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher, role=graph-create-query]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create('myGraph', 'Node', 'REL', { relationshipProperties: 'cost' })
 ----
@@ -96,7 +96,7 @@ If we do not specify any of the options for early termination, the whole graph i
 [role=query-example]
 --
 .Running the Depth First Search algorithm:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (a:Node{tag:'a'})
 WITH id(a) AS startNode
@@ -124,7 +124,7 @@ If specifying d and e as target nodes, not all nodes at distance 1 will be visit
 [role=query-example]
 --
 .Running the Depth First Search algorithm with target nodes:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (a:Node{tag:'a'}), (d:Node{tag:'d'}), (e:Node{tag:'e'})
 WITH id(a) AS startNode, [id(d), id(e)] AS targetNodes
@@ -149,7 +149,7 @@ ORDER BY tags
 [role=query-example]
 --
 .Running the Depth First Search algorithm with maxDepth:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (a:Node{tag:'a'})
 WITH id(a) AS startNode
