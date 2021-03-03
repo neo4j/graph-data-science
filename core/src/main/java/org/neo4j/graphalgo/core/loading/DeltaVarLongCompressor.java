@@ -239,7 +239,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         byte[] semiCompressedBytesDuringLoading = array.storage();
         long[][] uncompressedWeightsPerProperty = array.weights();
 
-        // uncompressed semiCompressed into full uncompressed long[] (in buffer)
+        // decompress semiCompressed into full uncompressed long[] (in buffer)
         // ordered by whatever order they've been read
         AdjacencyCompression.copyFrom(buffer, array);
         // buffer contains uncompressed, unsorted target list
