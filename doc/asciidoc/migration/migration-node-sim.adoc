@@ -48,20 +48,20 @@
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Minimalistic streaming over named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.nodeSimilarity.stream(null, null, {graph: 'myGraph'})
 YIELD node1, node2, similarity
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream('myGraph')
 YIELD node1, node2, similarity
 ----
 2+| Streaming over named graph using `topK` and `similarityCutoff` configuration properties:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.nodeSimilarity.stream(
   null,
@@ -74,7 +74,7 @@ CALL algo.nodeSimilarity.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream(
   'myGraph',
@@ -86,7 +86,7 @@ CALL gds.nodeSimilarity.stream(
 ----
 2+| Streaming over named graph using `bottomK` configuration property:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.nodeSimilarity.stream(
   null,
@@ -98,7 +98,7 @@ CALL algo.nodeSimilarity.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream(
   'myGraph',
@@ -109,7 +109,7 @@ CALL gds.nodeSimilarity.stream(
 ----
 2+| Minimalistic streaming over anonymous graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.nodeSimilarity.stream(
   'MyLabel',
@@ -117,7 +117,7 @@ CALL algo.nodeSimilarity.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream({
   nodeProjection: 'MyLabel',
@@ -126,7 +126,7 @@ CALL gds.nodeSimilarity.stream({
 ----
 2+| Streaming over anonymous graph using `REVERSE` relationship projection:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.nodeSimilarity.stream(
   'MyLabel',
@@ -135,7 +135,7 @@ CALL algo.nodeSimilarity.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream({
   nodeProjection: 'MyLabel',
@@ -148,7 +148,7 @@ CALL gds.nodeSimilarity.stream({
 ----
 2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.nodeSimilarity.stream(
   'MyLabel',
@@ -157,7 +157,7 @@ CALL algo.nodeSimilarity.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream({
   nodeProjection: 'MyLabel',
@@ -181,7 +181,7 @@ CALL gds.nodeSimilarity.stream({
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+|Minimalistic `write` with `writeRelationshipType` and `writeProperty`:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.nodeSimilarity(
   null,
@@ -202,7 +202,7 @@ YIELD
   writeProperty
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.write(
   'myGraph',
@@ -228,7 +228,7 @@ RETURN
 ----
 2+| Memory estimation of the algorithm:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.memrec(
   'MyLabel',
@@ -242,7 +242,7 @@ CALL algo.memrec(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.write.estimate(
   {

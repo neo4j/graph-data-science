@@ -15,7 +15,7 @@ It differs however in that relationship projections cannot have more than one pr
 Moreover, the `nodeProjection` and `relationshipProjection` arguments are named and placed in the configuration map of the algorithm:
 
 .Anonymous native projection syntax
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.<algo>.<mode>(
   {
@@ -30,7 +30,7 @@ CALL gds.<algo>.<mode>(
 
 The following examples demonstrates creating an anonymous graph from `Person` nodes and `KNOWS` relationships.
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.<algo>.<mode>(
   {
@@ -45,7 +45,7 @@ CALL gds.<algo>.<mode>(
 
 The above example can be an alternative to the calls below:
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
   {
@@ -71,7 +71,7 @@ CALL gds.graph.drop('new-graph-name');
 Similarly for <<cypher-projection, Cypher projection>>, the explicit creation with `gds.graph.create.cypher` can be inlined in an algorithm call using the keys `nodeQuery` and `relationshipQuery`.
 
 .Anonymous cypher projection syntax
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.<algo>.<mode>(
   {

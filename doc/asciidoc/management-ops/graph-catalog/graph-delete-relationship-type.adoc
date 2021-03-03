@@ -5,7 +5,7 @@ We can delete all relationships of a given type from a named graph in the catalo
 This is useful to free up main memory or to remove accidentally created relationship types.
 
 .Delete all relationships of type T from a named graph:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.deleteRelationships('my-graph', 'T')
 YIELD graphName, relationshipType, deletedRelationships, deletedProperties

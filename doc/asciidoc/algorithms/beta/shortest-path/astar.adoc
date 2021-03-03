@@ -79,7 +79,7 @@ include::path-anonymous-graph.adoc[]
 include::../../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (a:Station {name: 'Kings Cross',         latitude: 51.5308, longitude: -0.1238}),
        (b:Station {name: 'Euston',              latitude: 51.5282, longitude: -0.1337}),
@@ -102,7 +102,7 @@ The algorithm will pick the next node in the search based on the already travele
 include::../../shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=graph-create-query]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create(
     'myGraph',
@@ -127,7 +127,7 @@ include::../../shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm in write mode:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.beta.shortestPath.astar.write.estimate('myGraph', {
@@ -159,7 +159,7 @@ include::../../shared/examples-stream-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.beta.shortestPath.astar.stream('myGraph', {
@@ -201,7 +201,7 @@ include::path-examples-mutate-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.beta.shortestPath.astar.mutate('myGraph', {
@@ -236,7 +236,7 @@ include::path-examples-write-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `write` mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.beta.shortestPath.astar.write('myGraph', {

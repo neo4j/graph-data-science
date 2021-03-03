@@ -46,7 +46,7 @@ We can check if a model is available in the catalog by looking up its name.
 [role=query-example]
 --
 .Check if a model exists in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.exists('my-model') YIELD exists;
 ----
@@ -68,7 +68,7 @@ Once we have trained models in the catalog we can see information about either a
 [role=query-example]
 --
 .Listing detailed information about all models:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.list()
 YIELD
@@ -89,7 +89,7 @@ YIELD
 [role=query-example]
 --
 .Listing detailed information about specific model:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.list('my-model')
 YIELD
@@ -130,7 +130,7 @@ If we no longer need a trained model we can remove it from the catalog.
 [role=query-example]
 --
 .Remove a model from the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.drop('my-model')
 YIELD

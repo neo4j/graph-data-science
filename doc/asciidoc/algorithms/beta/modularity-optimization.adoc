@@ -44,7 +44,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [.include-with-stream]
 ======
 .Run Modularity Optimization in stream mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.modularityOptimization.stream(graphNameOrConfig: String|Map, configuration: Map})
 YIELD nodeId, communityId
@@ -78,7 +78,7 @@ include::../common-configuration/common-configuration.adoc[]
 [.include-with-mutate]
 ======
 .Run Modularity Optimization in mutate mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.mutate(graphName: String|Map, configuration: Map})
 YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, mutateMillis, configuration
@@ -89,7 +89,7 @@ Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 
 .The following will run the algorithm and store the results in `myGraph`:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.mutate('myGraph', { mutateProperty: 'modularity' })
 ----
@@ -99,7 +99,7 @@ CALL gds.beta.modularityOptimization.mutate('myGraph', { mutateProperty: 'modula
 [.include-with-write]
 ======
 .Run Modularity Optimization in write mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.write(graphName: String|Map, configuration: Map})
 YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, writeMillis, configuration
@@ -146,7 +146,7 @@ include::../common-configuration/common-configuration.adoc[]
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (a:Person {name:'Alice'})
@@ -177,7 +177,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 ====
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher, role=graph-create-query]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create(
     'myGraph',
@@ -196,7 +196,7 @@ The following example demonstrates using the Modularity Algorithm on this weight
 [role=query-example]
 --
 .Running the Modularity Optimization algorithm in stream mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.stream('myGraph', { relationshipWeightProperty: 'weight' })
 YIELD nodeId, communityId
@@ -222,7 +222,7 @@ It is also possible to write the assigned community ids back to the database usi
 [role=query-example]
 --
 .Running the Modularity Optimization algorithm in write mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.write('myGraph', { relationshipWeightProperty: 'weight', writeProperty: 'community' })
 YIELD nodes, communityCount, ranIterations, didConverge
@@ -246,7 +246,7 @@ To instead mutate the in-memory graph with the assigned community ids, the `muta
 [role=query-example]
 --
 .Running the Modularity Optimization algorithm in mutate mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.mutate('myGraph', { relationshipWeightProperty: 'weight', mutateProperty: 'community' })
 YIELD nodes, communityCount, ranIterations, didConverge

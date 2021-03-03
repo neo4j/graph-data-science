@@ -5,7 +5,7 @@ We can remove node properties from a named graph in the catalog.
 This is useful to free up main memory or to remove accidentally created node properties.
 
 .Remove multiple node properties from a named graph:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.removeNodeProperties('my-graph', ['pageRank', 'communityId'])
 ----
@@ -16,7 +16,7 @@ The procedure can be configured to remove just the properties for some specific 
 In the following example, we ran an algorithm on a sub-graph and subsequently remove the newly created property.
 
 .Remove node properties of a specific node projection:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', ['A', 'B'], '*')
 CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})

@@ -57,7 +57,7 @@ include::../shared/syntax-intro-named-graph.adoc[]
 [.include-with-stream]
 ======
 .Run Louvain in stream mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stream(
   graphName: String,
@@ -89,7 +89,7 @@ include::specific-configuration.adoc[]
 [.include-with-stats]
 ======
 .Run Louvain in stats mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stats(
   graphName: String,
@@ -132,7 +132,7 @@ include::specific-configuration.adoc[]
 [.include-with-mutate]
 ======
 .Run Louvain in mutate mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.mutate(
   graphName: String,
@@ -178,7 +178,7 @@ include::specific-configuration.adoc[]
 [.include-with-write]
 ======
 .Run Louvain in write mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.write(
   graphName: String,
@@ -229,7 +229,7 @@ include::specific-configuration.adoc[]
 === Anonymous graphs
 
 .Run Louvain in write mode on an anonymous graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.write(configuration: Map)
 YIELD
@@ -261,7 +261,7 @@ The results are the same as for running write mode with a named graph, see the <
 include::../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (nAlice:User {name: 'Alice', seed: 42}),
@@ -296,7 +296,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 ====
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher, role=graph-create-query]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create(
     'myGraph',
@@ -324,7 +324,7 @@ include::../shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.write.estimate('myGraph', { writeProperty: 'community' })
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
@@ -347,7 +347,7 @@ include::../shared/examples-stream-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stream('myGraph')
 YIELD nodeId, communityId, intermediateCommunityIds
@@ -383,7 +383,7 @@ include::../shared/examples-stats-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm and returns the result in form of statistical and measurement values
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stats('myGraph')
 YIELD communityCount
@@ -406,7 +406,7 @@ include::../shared/examples-mutate-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm and store the results in `myGraph`:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.mutate('myGraph', { mutateProperty: 'communityId' })
 YIELD communityCount, modularity, modularities
@@ -434,7 +434,7 @@ include::../shared/examples-write-intro.adoc[]
 [role=query-example]
 --
 .The following run the algorithm, and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.write('myGraph', { writeProperty: 'community' })
 YIELD communityCount, modularity, modularities
@@ -461,7 +461,7 @@ The Louvain algorithm can also run on weighted graphs, taking the given relation
 [role=query-example]
 --
 .The following will run the algorithm on a weighted graph and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stream('myGraph', { relationshipWeightProperty: 'weight' })
 YIELD nodeId, communityId, intermediateCommunityIds
@@ -496,7 +496,7 @@ The algorithm will try to keep the seeded community IDs.
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stream('myGraph', { seedProperty: 'seed' })
 YIELD nodeId, communityId, intermediateCommunityIds
@@ -536,7 +536,7 @@ In order to demonstrate this iterative behavior, we need to construct a more com
 
 image::louvain-multilevel-graph.svg[align="center"]
 
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (a:Node {name: 'a'})
 CREATE (b:Node {name: 'b'})
@@ -584,7 +584,7 @@ CREATE (m)-[:TYPE]->(n);
 [role=query-example]
 --
 .The following will load the example graph, run the algorithm and stream results including the intermediate communities:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stream({
     nodeProjection: 'Node',

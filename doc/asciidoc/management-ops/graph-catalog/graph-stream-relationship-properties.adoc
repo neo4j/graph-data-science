@@ -6,7 +6,7 @@ This is useful if we ran multiple algorithms in `mutate` mode and want to retrie
 This is similar to what the `stream` execution mode does, but allows more fine-grained control over the operations.
 
 .Stream multiple relationship properties:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperties('my-graph', ['similarityScore', 'weight'])
 ----
@@ -15,7 +15,7 @@ The procedure can be configured to stream just the properties for some specific 
 In the following example, we ran an algorithm on a sub-graph and subsequently streamed the newly created property.
 
 .Stream relationship properties of a specific relationship projection:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', ['*'], [A', 'B'])
 CALL gds.nodeSimiliarity.mutate('my-graph', {relationshipTypes: ['A'], mutateRelationshipType: 'R', mutateProperty: 'similarityScore'})
@@ -34,7 +34,7 @@ For streaming a single relationship property, the property name can be left out.
 The result has the format `sourceNodeId`, `targetNodeId`, `relationshipType`, `propertyValue`.
 
 .Stream a single relationship property:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('my-graph', 'similarityScore')
 ----
