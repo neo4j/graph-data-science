@@ -165,7 +165,7 @@ public final class CompressedLongArray {
         return storage;
     }
 
-    long[][] weights() {
+    public long[][] weights() {
         return weights;
     }
 
