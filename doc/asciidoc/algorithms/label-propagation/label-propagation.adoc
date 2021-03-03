@@ -9,20 +9,6 @@
 This section describes the Label Propagation algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-label-propagation-intro, Introduction>>
-* <<algorithms-label-propagation-syntax, Syntax>>
-** <<algorithms-label-propagation-syntax-anonymous, Anonymous graphs>>
-* <<algorithms-label-propagation-examples, Examples>>
-** <<algorithms-label-propagation-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-label-propagation-examples-stream, Stream>>
-** <<algorithms-label-propagation-examples-stats, Stats>>
-** <<algorithms-label-propagation-examples-write, Mutate>>
-** <<algorithms-label-propagation-examples-write, Write>>
-** <<algorithms-label-propagation-examples-weighted, Weighted>>
-** <<algorithms-label-propagation-examples-seeding, Seeded communities>>
-
 
 [[algorithms-label-propagation-intro]]
 == Introduction

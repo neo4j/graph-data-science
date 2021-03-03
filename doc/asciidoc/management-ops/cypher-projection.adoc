@@ -34,15 +34,6 @@ During graph creation, GDS performs automatic <<estimate-heap-control, memory es
 This feature is off by default for Cypher projections as the memory consumption might be overestimated.
 ====
 
-This section includes:
-
-* <<cypher-projection-syntax, Syntax>>
-* <<cypher-projection-query-constraints, Cypher query constraints>>
-* <<cypher-projection-relationship-types, Relationship types>>
-* <<cypher-projection-relationship-orientation, Relationship orientation>>
-* <<cypher-projection-relationship-aggregation, Relationship aggregation>>
-* <<cypher-projection-parameters, Using query parameters>>
-
 
 [[cypher-projection-syntax]]
 == Syntax

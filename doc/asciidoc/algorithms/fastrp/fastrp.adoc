@@ -9,21 +9,6 @@
 This section describes the Fast Random Projection (FastRP) node embedding algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-embeddings-fastrp-introduction, Introduction>>
-* <<algorithms-embeddings-fastrp-parameter-tuning, Tuning algorithm parameters>>
-* <<algorithms-embeddings-fastrp-syntax, Syntax>>
-** <<algorithms-embeddings-fastrp-syntax-anonymous, Anonymous graphs>>
-* <<algorithms-embeddings-fastrp-examples, Examples>>
-** <<algorithms-embeddings-fastrp-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-embeddings-fastrp-examples-stream, Stream>>
-** <<algorithms-embeddings-fastrp-examples-stats, Stats>>
-** <<algorithms-embeddings-fastrp-examples-mutate, Mutate>>
-** <<algorithms-embeddings-fastrp-examples-write, Write>>
-** <<algorithms-embeddings-fastrp-examples-weighted, Weighted>>
-* <<algorithms-embeddings-fastrp-extended, Extended algorithm: Using Node Properties>>
-
 
 [[algorithms-embeddings-fastrp-introduction]]
 == Introduction

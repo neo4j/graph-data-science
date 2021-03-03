@@ -12,17 +12,6 @@ link:https://en.wikipedia.org/wiki/Pearson_correlation_coefficient[Pearson simil
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-similarity-pearson-context, History and explanation>>
-* <<algorithms-similarity-pearson-usecase, Use-cases - when to use the Pearson Similarity algorithm>>
-* <<algorithms-similarity-pearson-function-sample, Pearson Similarity algorithm function sample>>
-* <<algorithms-similarity-pearson-procedure-sample, Pearson Similarity algorithm procedures sample>>
-* <<algorithms-similarity-pearson-source-target-ids, Specifying source and target ids>>
-* <<algorithms-similarity-pearson-skipping-values, Skipping values>>
-* <<algorithms-similarity-pearson-cypher-projection, Cypher projection>>
-* <<algorithms-similarity-pearson-syntax, Syntax>>
-
 
 [[algorithms-similarity-pearson-context]]
 == History and explanation

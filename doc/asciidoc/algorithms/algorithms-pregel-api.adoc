@@ -6,19 +6,6 @@
 This chapter provides documentation for the Pregel API in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-pregel-api-intro, Introduction>>
-* <<algorithms-pregel-api-java, Pregel Java API>>
-** <<algorithms-pregel-api-java-computation, Computation>>
-** <<algorithms-pregel-api-java-context, Init context and computation context>>
-** <<algorithms-pregel-api-master-compute, Master Computation >>
-** <<algorithms-pregel-api-java-config, Configuration>>
-* <<algorithms-pregel-api-procedure, Run Pregel via Cypher>>
-** <<algorithms-pregel-api-procedure-generation, Procedure generation>>
-** <<algorithms-pregel-api-plugin, Building and installing a Neo4j plugin>>
-** <<algorithms-pregel-api-example, Example: Connected Components>>
-
 [[algorithms-pregel-api-intro]]
 == Introduction
 
