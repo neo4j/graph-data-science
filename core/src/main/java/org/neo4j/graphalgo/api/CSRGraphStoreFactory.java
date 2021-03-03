@@ -124,8 +124,8 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                         relationshipCount,
                         projection.orientation(),
                         projection.isMultiGraph(),
-                        propertyMapping.defaultValue().doubleValue()
                         // This is fine because relationships currently only support doubles
+                        propertyMapping.defaultValue().doubleValue()
                     ),
                     propertyMapping.defaultValue().isUserDefined()
                         ? propertyMapping.defaultValue()
