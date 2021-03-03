@@ -20,18 +20,17 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import org.neo4j.graphalgo.utils.CheckedRunnable;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
@@ -41,9 +40,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NativeFactoryTest {
 
-    @ParameterizedTest
-    @CsvSource({"false,3405981464,4606168256", "true,1818450752,3018637544"})
-    void memoryEstimation(boolean useBitIdMap, long expectedMinUsage, long expectedMaxUsage) {
+    @Test
+    @GdsEditionTest(Edition.EE)
+    void memoryEstimationBitMapEnabled() {
+        var expectedMinUsage = 1818450752L;
+        var expectedMaxUsage = 3018637544L;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
             .maxRelCount(500_000_000L)
@@ -56,11 +57,28 @@ class NativeFactoryTest {
                 RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL)
             )));
 
-        if (useBitIdMap) {
-            GdsEdition.instance().setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(runnable));
-        } else {
-            runnable.run();
-        }
+        GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(runnable);
+
+        var estimate = memoryEstimation.get().estimate(dimensions, 1);
+        assertEquals(expectedMinUsage, estimate.memoryUsage().min);
+        assertEquals(expectedMaxUsage, estimate.memoryUsage().max);
+    }
+
+    @Test
+    void memoryEstimationBitMapDisabled() {
+        var expectedMinUsage = 3405981464L;
+        var expectedMaxUsage = 4606168256L;
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(100_000_000L)
+            .maxRelCount(500_000_000L)
+            .build();
+
+        var memoryEstimation = new AtomicReference<MemoryEstimation>();
+        memoryEstimation.set(NativeFactory.getMemoryEstimation(
+            NodeProjections.all(),
+            RelationshipProjections.single(RelationshipType.ALL_RELATIONSHIPS, RelationshipProjection.ALL)
+        ));
+
 
         var estimate = memoryEstimation.get().estimate(dimensions, 1);
         assertEquals(expectedMinUsage, estimate.memoryUsage().min);
