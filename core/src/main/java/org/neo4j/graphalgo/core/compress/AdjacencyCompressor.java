@@ -24,16 +24,6 @@ import org.neo4j.graphalgo.core.loading.CompressedLongArray;
 public interface AdjacencyCompressor extends AutoCloseable {
 
     /**
-     * @return a copy of this compressor that can be used concurrently with other copies.
-     */
-    AdjacencyCompressor concurrentCopy();
-
-    /**
-     * @return true iff this compressor can deal with properties.
-     */
-    boolean supportsProperties();
-
-    /**
      * Compress a list of target ids into an adjacency list.
      * The input {@code values} are an unsorted and separately compressed list of target ids.
      * Those ids can be unpacked into a {@code long[]} using {@link org.neo4j.graphalgo.core.loading.CompressedLongArray#uncompress(long[])}.
@@ -56,7 +46,8 @@ public interface AdjacencyCompressor extends AutoCloseable {
      * using {@link org.neo4j.graphalgo.core.loading.CompressedLongArray#release()}.
      *
      * Implementors will need to write the resulting target list somewhere. Where exactly is up to the implementation.
-     * The results should end up in the data that is returned by the {@link #build()} method.
+     * The results should end up in the data that is returned by the
+     * {@link org.neo4j.graphalgo.core.compress.AdjacencyCompressorBlueprint#build()} method.
      * The method only needs to return the degree of the compressed adjacency list. This value can be different from
      * {@link org.neo4j.graphalgo.core.loading.CompressedLongArray#length()} due to possible deduplication, though it
      * should never be larger. The return value is only used for tracking progress and reporting, it is not stored in
@@ -73,20 +64,6 @@ public interface AdjacencyCompressor extends AutoCloseable {
         CompressedLongArray values,
         LongArrayBuffer buffer
     );
-
-    /**
-     * Implementors may choose to buffer some internal data and only write it intermittently to its final location.
-     * This method is called at the end to ensure that all possible in-flight data can be cleaned up.
-     *
-     * This method might be called multiple times and any other method may be called after a flush.
-     * To release internal data for good, see {@link #close()}.
-     */
-    void flush();
-
-    /**
-     * @return the final adjacency list, together with any number of properties, if any.
-     */
-    AdjacencyListsWithProperties build();
 
     /**
      * Closing this compressor will release some internal data structures, making them eligible for garbage collection.

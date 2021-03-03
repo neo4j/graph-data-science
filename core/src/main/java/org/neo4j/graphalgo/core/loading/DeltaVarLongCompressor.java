@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressor;
+import org.neo4j.graphalgo.core.compress.AdjacencyCompressorBlueprint;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.graphalgo.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.graphalgo.core.compress.ImmutableAdjacencyListsWithProperties;
@@ -48,7 +49,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         }
 
         @Override
-        public AdjacencyCompressor create(
+        public AdjacencyCompressorBlueprint create(
             long nodeCount,
             AdjacencyListBuilder adjacencyBuilder,
             AdjacencyListBuilder[] propertyBuilders,
@@ -56,7 +57,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             boolean noAggregation,
             AllocationTracker tracker
         ) {
-            return new DeltaVarLongCompressor(
+            return new Blueprint(
                 adjacencyBuilder,
                 propertyBuilders,
                 adjacencyOffsetsFactory,
@@ -71,90 +72,122 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         }
     }
 
-    private final AdjacencyListBuilder adjacencyBuilder;
-    private final AdjacencyListBuilder[] propertyBuilders;
+    private static final class Blueprint implements AdjacencyCompressorBlueprint {
+        private final AdjacencyListBuilder adjacencyBuilder;
+        private final AdjacencyListBuilder[] propertyBuilders;
+        private final AdjacencyOffsetsFactory adjacencyOffsetsFactory;
+        private final HugeLongArray adjacencyOffsets;
+        private final HugeLongArray[] propertyOffsets;
+        private final boolean noAggregation;
+        private final Aggregation[] aggregations;
+
+        private Blueprint(
+            AdjacencyListBuilder adjacencyBuilder,
+            AdjacencyListBuilder[] propertyBuilders,
+            AdjacencyOffsetsFactory adjacencyOffsetsFactory,
+            HugeLongArray adjacencyOffsets,
+            HugeLongArray[] propertyOffsets,
+            boolean noAggregation,
+            Aggregation[] aggregations
+        ) {
+            this.adjacencyBuilder = adjacencyBuilder;
+            this.propertyBuilders = propertyBuilders;
+            this.adjacencyOffsetsFactory = adjacencyOffsetsFactory;
+            this.adjacencyOffsets = adjacencyOffsets;
+            this.propertyOffsets = propertyOffsets;
+            this.noAggregation = noAggregation;
+            this.aggregations = aggregations;
+        }
+
+        @Override
+        public DeltaVarLongCompressor createCompressor() {
+            return new DeltaVarLongCompressor(
+                adjacencyBuilder.newAllocator(),
+                Arrays
+                    .stream(propertyBuilders)
+                    .map(AdjacencyListBuilder::newAllocator)
+                    .toArray(AdjacencyListAllocator[]::new),
+                adjacencyOffsets,
+                propertyOffsets,
+                noAggregation,
+                aggregations
+            );
+        }
+
+        @Override
+        public boolean supportsProperties() {
+            // TODO temporary until Geri does support properties
+            return adjacencyBuilder instanceof TransientAdjacencyListBuilder;
+        }
+
+        @Override
+        public void flush() {
+            adjacencyBuilder.flush();
+            for (var propertyBuilder : propertyBuilders) {
+                if (propertyBuilder != null) {
+                    propertyBuilder.flush();
+                }
+            }
+        }
+
+        @Override
+        public AdjacencyListsWithProperties build() {
+            AdjacencyOffsets adjacencyOffsets = offsetPagesIntoOffsets(this.adjacencyOffsets);
+
+            var builder = ImmutableAdjacencyListsWithProperties
+                .builder()
+                .adjacency(new DvlCompressionResult(adjacencyOffsets, adjacencyBuilder.build()));
+
+            for (int i = 0; i < propertyBuilders.length; i++) {
+                var compressedProps = new DvlCompressionResult(
+                    offsetPagesIntoOffsets(propertyOffsets[i]),
+                    propertyBuilders[i].build()
+                );
+                builder.addProperty(compressedProps);
+            }
+
+            return builder.build();
+        }
+
+        private AdjacencyOffsets offsetPagesIntoOffsets(HugeLongArray offsets) {
+            long[][] pages = new long[offsets.pages()][];
+            int pageIndex = 0;
+            try (var cursor = offsets.initCursor(offsets.newCursor())) {
+                while (cursor.next()) {
+                    pages[pageIndex++] = cursor.array;
+                }
+            }
+            return adjacencyOffsetsFactory.newOffsets(pages);
+        }
+    }
+
     private final AdjacencyListAllocator adjacencyAllocator;
     private final AdjacencyListAllocator[] propertiesAllocators;
-    private final AdjacencyOffsetsFactory adjacencyOffsetsFactory;
     private final HugeLongArray adjacencyOffsets;
     private final HugeLongArray[] propertyOffsets;
     private final boolean noAggregation;
     private final Aggregation[] aggregations;
 
     private DeltaVarLongCompressor(
-        AdjacencyListBuilder adjacencyBuilder,
-        AdjacencyListBuilder[] propertyBuilders,
-        AdjacencyOffsetsFactory adjacencyOffsetsFactory,
-        HugeLongArray adjacencyOffsets,
-        HugeLongArray[] propertyOffsets,
-        boolean noAggregation,
-        Aggregation[] aggregations
-    ) {
-        this.adjacencyBuilder = adjacencyBuilder;
-        this.propertyBuilders = propertyBuilders;
-        this.adjacencyAllocator = null;
-        this.propertiesAllocators = null;
-        this.adjacencyOffsetsFactory = adjacencyOffsetsFactory;
-        this.adjacencyOffsets = adjacencyOffsets;
-        this.propertyOffsets = propertyOffsets;
-        this.noAggregation = noAggregation;
-        this.aggregations = aggregations;
-    }
-
-    private DeltaVarLongCompressor(
-        AdjacencyListBuilder adjacencyBuilder,
-        AdjacencyListBuilder[] propertyBuilders,
         AdjacencyListAllocator adjacencyAllocator,
         AdjacencyListAllocator[] propertiesAllocators,
-        AdjacencyOffsetsFactory adjacencyOffsetsFactory,
         HugeLongArray adjacencyOffsets,
         HugeLongArray[] propertyOffsets,
         boolean noAggregation,
         Aggregation[] aggregations
     ) {
-        this.adjacencyBuilder = adjacencyBuilder;
-        this.propertyBuilders = propertyBuilders;
         this.adjacencyAllocator = adjacencyAllocator;
         this.propertiesAllocators = propertiesAllocators;
-        this.adjacencyOffsetsFactory = adjacencyOffsetsFactory;
         this.adjacencyOffsets = adjacencyOffsets;
         this.propertyOffsets = propertyOffsets;
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
-        this.prepare();
-    }
-
-    private void prepare() {
         adjacencyAllocator.prepare();
         for (var propertiesAllocator : propertiesAllocators) {
             if (propertiesAllocator != null) {
                 propertiesAllocator.prepare();
             }
         }
-    }
-
-    @Override
-    public DeltaVarLongCompressor concurrentCopy() {
-        return new DeltaVarLongCompressor(
-            adjacencyBuilder,
-            propertyBuilders,
-            adjacencyBuilder.newAllocator(),
-            Arrays
-                .stream(propertyBuilders)
-                .map(AdjacencyListBuilder::newAllocator)
-                .toArray(AdjacencyListAllocator[]::new),
-            adjacencyOffsetsFactory,
-            adjacencyOffsets,
-            propertyOffsets,
-            noAggregation,
-            aggregations
-        );
-    }
-
-    @Override
-    public boolean supportsProperties() {
-        // TODO temporary until Geri does support properties
-        return adjacencyBuilder instanceof TransientAdjacencyListBuilder;
     }
 
     @Override
@@ -168,35 +201,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         } else {
             return applyVariableDeltaEncodingWithoutWeights(nodeId, values, buffer);
         }
-    }
-
-    @Override
-    public void flush() {
-        adjacencyBuilder.flush();
-        for (var propertyBuilder : propertyBuilders) {
-            if (propertyBuilder != null) {
-                propertyBuilder.flush();
-            }
-        }
-    }
-
-    @Override
-    public AdjacencyListsWithProperties build() {
-        AdjacencyOffsets adjacencyOffsets = offsetPagesIntoOffsets(this.adjacencyOffsets);
-
-        var builder = ImmutableAdjacencyListsWithProperties
-            .builder()
-            .adjacency(new DvlCompressionResult(adjacencyOffsets, adjacencyBuilder.build()));
-
-        for (int i = 0; i < propertyBuilders.length; i++) {
-            var compressedProps = new DvlCompressionResult(
-                offsetPagesIntoOffsets(propertyOffsets[i]),
-                propertyBuilders[i].build()
-            );
-            builder.addProperty(compressedProps);
-        }
-
-        return builder.build();
     }
 
     @Override
@@ -294,17 +298,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             .put(properties, 0, degree);
         slice.bytesWritten(requiredBytes);
         return slice.address();
-    }
-
-    private AdjacencyOffsets offsetPagesIntoOffsets(HugeLongArray offsets) {
-        long[][] pages = new long[offsets.pages()][];
-        int pageIndex = 0;
-        try (var cursor = offsets.initCursor(offsets.newCursor())) {
-            while (cursor.next()) {
-                pages[pageIndex++] = cursor.array;
-            }
-        }
-        return adjacencyOffsetsFactory.newOffsets(pages);
     }
 
     private static final class DvlCompressionResult implements CompressedTopology, CompressedProperties {

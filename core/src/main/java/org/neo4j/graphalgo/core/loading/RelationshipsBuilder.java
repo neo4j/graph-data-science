@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.compress.AdjacencyCompressor;
+import org.neo4j.graphalgo.core.compress.AdjacencyCompressorBlueprint;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.graphalgo.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -35,7 +35,7 @@ public final class RelationshipsBuilder {
     private static final AdjacencyListBuilder[] EMPTY_PROPERTY_BUILDERS = new AdjacencyListBuilder[0];
 
     private final RelationshipProjection projection;
-    private final AdjacencyCompressor adjacencyCompressor;
+    private final AdjacencyCompressorBlueprint adjacencyCompressor;
 
     private final Aggregation[] aggregations;
     private final int[] propertyKeyIds;
@@ -161,7 +161,7 @@ public final class RelationshipsBuilder {
 
     private RelationshipsBuilder(
         RelationshipProjection projection,
-        AdjacencyCompressor adjacencyCompressor,
+        AdjacencyCompressorBlueprint adjacencyCompressor,
         Aggregation[] aggregations,
         int[] propertyKeyIds,
         double[] defaultValues
@@ -174,7 +174,7 @@ public final class RelationshipsBuilder {
     }
 
     ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
-        return new ThreadLocalRelationshipsBuilder(adjacencyCompressor.concurrentCopy());
+        return new ThreadLocalRelationshipsBuilder(adjacencyCompressor.createCompressor());
     }
 
     boolean supportsProperties() {

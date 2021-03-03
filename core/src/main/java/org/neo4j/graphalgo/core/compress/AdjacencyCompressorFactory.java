@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 public interface AdjacencyCompressorFactory {
 
-    AdjacencyCompressor create(
+    AdjacencyCompressorBlueprint create(
         long nodeCount,
         AdjacencyListBuilder adjacencyBuilder,
         AdjacencyListBuilder[] propertyBuilders,
@@ -36,7 +36,7 @@ public interface AdjacencyCompressorFactory {
         AllocationTracker tracker
     );
 
-    default AdjacencyCompressor create(
+    default AdjacencyCompressorBlueprint create(
         long nodeCount,
         AdjacencyListBuilder adjacencyBuilder,
         AdjacencyListBuilder[] propertyBuilders,
