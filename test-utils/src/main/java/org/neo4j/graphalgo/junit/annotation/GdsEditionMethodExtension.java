@@ -35,13 +35,10 @@ public class GdsEditionMethodExtension extends GdsEditionExtension implements Be
         setEdition(context);
     }
 
-    private void setEdition(ExtensionContext context) {
-        var contextStore = context.getStore(ExtensionContext.Namespace.GLOBAL);
-        contextStore.put("isEnterprise", org.neo4j.graphalgo.core.GdsEdition.instance().isOnEnterpriseEdition());
-
+    Edition editionToSetTo(ExtensionContext context) {
         var testMethod = context.getRequiredTestMethod();
         var gdsEdition = testMethod.getAnnotation(GdsEditionTest.class);
 
-        setGdsEdition(gdsEdition.value());
+        return gdsEdition.value();
     }
 }

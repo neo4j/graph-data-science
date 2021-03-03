@@ -19,28 +19,27 @@
  */
 package org.neo4j.graphalgo.junit.annotation;
 
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class GdsEditionClassExtension extends GdsEditionExtension  implements BeforeEachCallback, AfterEachCallback {
+public class GdsEditionClassExtension extends GdsEditionExtension implements BeforeAllCallback, AfterAllCallback {
+
     @Override
-    public void afterEach(ExtensionContext context) {
+    public void afterAll(ExtensionContext context) {
         resetEdition(context);
     }
 
     @Override
-    public void beforeEach(ExtensionContext context) {
+    public void beforeAll(ExtensionContext context) {
         setEdition(context);
     }
 
-    private void setEdition(ExtensionContext context) {
-        var contextStore = context.getStore(ExtensionContext.Namespace.GLOBAL);
-        contextStore.put("isEnterprise", org.neo4j.graphalgo.core.GdsEdition.instance().isOnEnterpriseEdition());
-
+    @Override
+    Edition editionToSetTo(ExtensionContext context) {
         var testClass = context.getRequiredTestClass();
         var gdsEdition = testClass.getAnnotation(GdsEditionTestCase.class);
 
-        setGdsEdition(gdsEdition.value());
+        return gdsEdition.value();
     }
 }

@@ -30,10 +30,11 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTestCase;
 import org.neo4j.graphalgo.model.catalog.ModelDeleteProc;
 import org.neo4j.graphalgo.model.catalog.ModelLoadProc;
 import org.neo4j.graphalgo.model.catalog.ModelStoreProc;
@@ -41,6 +42,7 @@ import org.neo4j.graphalgo.model.catalog.ModelStoreProc;
 import java.nio.file.Path;
 import java.util.List;
 
+@GdsEditionTestCase(Edition.EE)
 class ModelCatalogStoreDocTest extends DocTestBase {
 
     @TempDir
@@ -53,7 +55,6 @@ class ModelCatalogStoreDocTest extends DocTestBase {
         GraphDatabaseApiProxy
             .resolveDependency(db, Config.class)
             .set(ModelStoreSettings.model_store_location, modelStoreLocation);
-        GdsEdition.instance().setToEnterpriseEdition();
         ModelCatalog.set(Model.of(
             getUsername(),
             "my-model",
@@ -68,7 +69,6 @@ class ModelCatalogStoreDocTest extends DocTestBase {
     @AfterEach
     void tearDown() {
         ModelCatalog.drop(getUsername(), "my-model");
-        GdsEdition.instance().setToCommunityEdition();
     }
 
     @Override

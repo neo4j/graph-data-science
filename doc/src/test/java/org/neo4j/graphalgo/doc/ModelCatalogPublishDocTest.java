@@ -30,15 +30,17 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTestCase;
 import org.neo4j.graphalgo.model.catalog.ModelPublishProc;
 
 import java.nio.file.Path;
 import java.util.List;
 
+@GdsEditionTestCase(Edition.EE)
 class ModelCatalogPublishDocTest extends DocTestBase {
 
     @TempDir
@@ -51,7 +53,6 @@ class ModelCatalogPublishDocTest extends DocTestBase {
         GraphDatabaseApiProxy
             .resolveDependency(db, Config.class)
             .set(ModelStoreSettings.model_store_location, modelStoreLocation);
-        GdsEdition.instance().setToEnterpriseEdition();
         ModelCatalog.set(Model.of(
             getUsername(),
             "my-model",
@@ -66,7 +67,6 @@ class ModelCatalogPublishDocTest extends DocTestBase {
     @AfterEach
     void tearDown() {
         ModelCatalog.removeAllLoadedModels();
-        GdsEdition.instance().setToCommunityEdition();
     }
 
     @Override

@@ -23,24 +23,31 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 abstract class GdsEditionExtension {
 
-    void setGdsEdition(Edition edition) {
-        switch (edition) {
+    private static final String EDITION_CONTEXT_STORE_KEY = "is_enterprise";
+
+    abstract Edition editionToSetTo(ExtensionContext context);
+
+    void resetEdition(ExtensionContext context) {
+        var contextStore = context.getStore(ExtensionContext.Namespace.GLOBAL);
+        boolean wasEnterprisePreviously = (boolean) contextStore.get(EDITION_CONTEXT_STORE_KEY);
+        if (wasEnterprisePreviously) {
+            org.neo4j.graphalgo.core.GdsEdition.instance().setToEnterpriseEdition();
+        } else {
+            org.neo4j.graphalgo.core.GdsEdition.instance().setToCommunityEdition();
+        }
+    }
+
+    void setEdition(ExtensionContext context) {
+        var contextStore = context.getStore(ExtensionContext.Namespace.GLOBAL);
+        contextStore.put(EDITION_CONTEXT_STORE_KEY, org.neo4j.graphalgo.core.GdsEdition.instance().isOnEnterpriseEdition());
+
+        switch (editionToSetTo(context)) {
             case CE:
                 org.neo4j.graphalgo.core.GdsEdition.instance().setToCommunityEdition();
                 break;
             case EE:
                 org.neo4j.graphalgo.core.GdsEdition.instance().setToEnterpriseEdition();
                 break;
-        }
-    }
-
-    void resetEdition(ExtensionContext context) {
-        var contextStore = context.getStore(ExtensionContext.Namespace.GLOBAL);
-        boolean wasEnterprisePreviously = (boolean) contextStore.get("isEnterprise");
-        if (wasEnterprisePreviously) {
-            org.neo4j.graphalgo.core.GdsEdition.instance().setToEnterpriseEdition();
-        } else {
-            org.neo4j.graphalgo.core.GdsEdition.instance().setToCommunityEdition();
         }
     }
 }

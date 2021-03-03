@@ -20,24 +20,27 @@
 package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTestCase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@GdsEditionTestCase(Edition.CE)
 class GdsEditionTest {
 
     @Test
+    @org.neo4j.graphalgo.junit.annotation.GdsEditionTest(Edition.CE)
     void isCommunity() {
-        GdsEdition.instance().setToCommunityEdition();
         assertTrue(GdsEdition.instance().isOnCommunityEdition());
         assertFalse(GdsEdition.instance().isOnEnterpriseEdition());
         assertFalse(GdsEdition.instance().isInvalidLicense());
     }
 
     @Test
+    @org.neo4j.graphalgo.junit.annotation.GdsEditionTest(Edition.EE)
     void isEnterprise() {
-        GdsEdition.instance().setToEnterpriseEdition();
         assertFalse(GdsEdition.instance().isOnCommunityEdition());
         assertTrue(GdsEdition.instance().isOnEnterpriseEdition());
         assertFalse(GdsEdition.instance().isInvalidLicense());
