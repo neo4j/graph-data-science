@@ -9,22 +9,6 @@
 This section describes the PageRank algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-page-rank-intro, Introduction>>
-* <<algorithms-page-rank-considerations, Considerations>>
-* <<algorithms-page-rank-syntax, Syntax>>
-* <<algorithms-page-rank-examples, Examples>>
-** <<algorithms-page-rank-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-page-rank-examples-stream, Stream>>
-** <<algorithms-page-rank-examples-stats, Stats>>
-** <<algorithms-page-rank-examples-mutate, Mutate>>
-** <<algorithms-page-rank-examples-write, Write>>
-** <<algorithms-page-rank-examples-weighted, Weighted>>
-** <<algorithms-page-rank-examples-tolerance, Tolerance>>
-** <<algorithms-page-rank-examples-damping, Damping Factor>>
-** <<algorithms-page-rank-examples-personalised, Personalised PageRank>>
-
 
 [[algorithms-page-rank-intro]]
 == Introduction

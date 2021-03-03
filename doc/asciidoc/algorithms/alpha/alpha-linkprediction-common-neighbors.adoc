@@ -11,12 +11,6 @@ Common neighbors captures the idea that two strangers who have a friend in commo
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-linkprediction-common-neighbors-context, History and explanation>>
-* <<algorithms-linkprediction-common-neighbors-syntax, Syntax>>
-* <<algorithms-linkprediction-common-neighbors-sample, Common Neighbors algorithm sample>>
-
 
 [[algorithms-linkprediction-common-neighbors-context]]
 == History and explanation

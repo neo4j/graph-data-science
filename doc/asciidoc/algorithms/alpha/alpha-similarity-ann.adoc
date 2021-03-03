@@ -15,12 +15,6 @@ The similarity of items is computed based on <<alpha-algorithms-similarity-jacca
 
 The implementation in the library is based on Dong, Charikar, and Li's paper http://www.cs.princeton.edu/cass/papers/www11.pdf[Efficient K-Nearest Neighbor Graph Construction for Generic Similarity Measures^].
 
-This section includes:
-
-* <<ann-syntax, Syntax>>
-* <<ann-usecase, Use-cases - when to use the Approximate Nearest Neighbors algorithm>>
-* <<ann-procedure-sample, Approximate Nearest Neighbors algorithm sample>>
-* <<ann-usage, Usage>>
 
 [[ann-syntax]]
 == Syntax

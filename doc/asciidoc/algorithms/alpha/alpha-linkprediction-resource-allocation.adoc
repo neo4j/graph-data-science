@@ -11,12 +11,6 @@ link:https://arxiv.org/pdf/0901.0553.pdf[Resource Allocation] is a measure used 
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-linkprediction-resource-allocation-context, History and explanation>>
-* <<algorithms-linkprediction-resource-allocation-syntax, Syntax>>
-* <<algorithms-linkprediction-resource-allocation-sample, Resource Allocation algorithm sample>>
-
 
 [[algorithms-linkprediction-resource-allocation-context]]
 == History and explanation

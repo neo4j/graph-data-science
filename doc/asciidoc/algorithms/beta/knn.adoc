@@ -11,17 +11,6 @@
 This section describes the K-Nearest Neighbors (KNN) algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-knn-intro, Introduction>>
-* <<algorithms-knn-syntax, Syntax>>
-** <<algorithms-knn-syntax-anonymous, Anonymous graphs>>
-* <<algorithms-knn-examples, Examples>>
-** <<algorithms-knn-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-knn-examples-stream, Stream>>
-** <<algorithms-knn-examples-stats, Stats>>
-** <<algorithms-knn-examples-mutate, Mutate>>
-** <<algorithms-knn-examples-write, Write>>
 
 [[algorithms-knn-intro]]
 == Introduction

@@ -6,14 +6,6 @@
 This section provides explanations and examples for each of the utility functions in the Neo4j Graph Data Science library.
 --
 
-Utility functions are grouped into the following categories:
-
-* <<utility-functions-system, System Functions>>
-* <<utility-functions-numeric, Numeric Functions>>
-* <<utility-functions-node-path, Node and Path Functions>>
-* <<utility-functions-catalog, Catalog Functions>>
-
-
 [[utility-functions-system]]
 == System Functions
 

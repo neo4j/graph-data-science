@@ -12,15 +12,6 @@ It is defined as the size of the intersection of two sets, divided by the size o
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-similarity-overlap-context, History and explanation>>
-* <<algorithms-similarity-overlap-usecase, Use-cases - when to use the Overlap Similarity algorithm>>
-* <<algorithms-similarity-overlap-function-sample, Overlap Similarity algorithm function sample>>
-* <<algorithms-similarity-overlap-procedure-sample, Overlap Similarity algorithm procedures sample>>
-* <<algorithms-similarity-overlap-source-target-ids, Specifying source and target ids>>
-* <<algorithms-similarity-overlap-syntax, Syntax>>
-
 
 [[algorithms-similarity-overlap-context]]
 == History and explanation

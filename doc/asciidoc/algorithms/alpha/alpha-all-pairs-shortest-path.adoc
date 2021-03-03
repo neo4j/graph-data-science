@@ -12,13 +12,6 @@ This algorithm has optimizations that make it quicker than calling the Single So
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithm-all-pairs-shortest-path-context, History and explanation>>
-* <<algorithm-all-pairs-shortest-path-usecase, Use-cases - when to use the All Pairs Shortest Path algorithm>>
-* <<algorithm-all-pairs-shortest-path-syntax, Syntax>>
-* <<algorithm-all-pairs-shortest-path-sample, All Pairs Shortest Path algorithm sample>>
-
 
 [[algorithm-all-pairs-shortest-path-context]]
 == History and explanation
