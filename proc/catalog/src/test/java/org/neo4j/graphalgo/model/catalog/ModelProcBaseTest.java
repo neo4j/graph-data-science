@@ -20,10 +20,8 @@
 package org.neo4j.graphalgo.model.catalog;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
@@ -47,14 +45,8 @@ class ModelProcBaseTest extends BaseProcTest {
         )
     );
 
-    @BeforeEach
-    void setupEE() {
-        GdsEdition.instance().setToEnterpriseEdition();
-    }
-
     @AfterEach
     void tearDown() {
         ModelCatalog.removeAllLoadedModels();
-        GdsEdition.instance().setToCommunityEdition();
     }
 }

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.concurrency;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.graphalgo.junit.annotation.GdsEnterpriseEdition;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -30,7 +30,6 @@ class PoolsTest {
 
     @Test
     void shouldGetLimitedPool() {
-        GdsEdition.instance().setToCommunityEdition();
         ThreadPoolExecutor defaultPool = (ThreadPoolExecutor) Pools.createDefaultPool();
 
         assertEquals(4, defaultPool.getCorePoolSize());
@@ -38,8 +37,8 @@ class PoolsTest {
     }
 
     @Test
+    @GdsEnterpriseEdition
     void shouldGetUnlimitedPool() {
-        GdsEdition.instance().setToEnterpriseEdition();
         ThreadPoolExecutor defaultPool = (ThreadPoolExecutor) Pools.createDefaultPool();
 
         int availableProcessors = Runtime.getRuntime().availableProcessors();

@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.junit.annotation.GdsEnterpriseEdition;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -43,11 +44,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
+@GdsEnterpriseEdition
 class ModelLoadProcTest extends ModelProcBaseTest {
 
     @TempDir
     Path tempDir;
-    public static final String MODEL_NAME = "testModel1";
+
+    private static final String MODEL_NAME = "testModel1";
 
     @Override
     @ExtensionCallback
@@ -59,7 +62,6 @@ class ModelLoadProcTest extends ModelProcBaseTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(ModelStoreProc.class, ModelLoadProc.class);
-        GdsEdition.instance().setToEnterpriseEdition();
 
         var model1 = Model.of(
             getUsername(),

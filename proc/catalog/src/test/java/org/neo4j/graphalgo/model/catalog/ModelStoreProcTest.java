@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.junit.annotation.GdsEnterpriseEdition;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -43,6 +44,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
+@GdsEnterpriseEdition
 class ModelStoreProcTest extends ModelProcBaseTest {
 
     @TempDir
@@ -58,7 +60,6 @@ class ModelStoreProcTest extends ModelProcBaseTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(ModelStoreProc.class);
-        GdsEdition.instance().setToEnterpriseEdition();
     }
 
     @Test

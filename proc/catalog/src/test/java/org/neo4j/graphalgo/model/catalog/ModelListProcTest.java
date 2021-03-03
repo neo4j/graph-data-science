@@ -32,7 +32,6 @@ import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.model.StoredModel;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -55,7 +54,6 @@ class ModelListProcTest extends ModelProcBaseTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(ModelListProc.class);
-        GdsEdition.instance().setToEnterpriseEdition();
     }
 
     @ParameterizedTest

@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.model;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -32,6 +31,7 @@ import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.gdl.GdlFactory;
+import org.neo4j.graphalgo.junit.annotation.GdsEnterpriseEdition;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
 import java.util.List;
@@ -49,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@GdsEnterpriseEdition
 class ModelCatalogTest {
 
     private static final String USERNAME = "testUser";
@@ -62,11 +63,6 @@ class ModelCatalogTest {
         "modelData",
         TestTrainConfig.of()
     );
-
-    @BeforeEach
-    void setUp() {
-        GdsEdition.instance().setToEnterpriseEdition();
-    }
 
     @AfterEach
     void afterEach() {

@@ -27,10 +27,10 @@ import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.junit.annotation.GdsEnterpriseEdition;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -42,6 +42,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.core.Is.isA;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
+@GdsEnterpriseEdition
 class ModelPublishProcTest extends ModelProcBaseTest {
 
     @TempDir
@@ -60,7 +61,6 @@ class ModelPublishProcTest extends ModelProcBaseTest {
             ModelPublishProc.class,
             ModelListProc.class
         );
-        GdsEdition.instance().setToEnterpriseEdition();
     }
 
     @AfterEach
