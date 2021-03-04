@@ -44,7 +44,7 @@ Models trained by a different Neo4j user are not accessible at any time.
 We can check if a model is stored in the catalog by looking up its name.
 
 .Check if a model exists in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.exists('my-model') YIELD exists;
 ----
@@ -56,7 +56,7 @@ CALL gds.beta.model.exists('my-model') YIELD exists;
 Once we have trained models in the catalog we can see information about either all of them or a single model using its name
 
 .Listing detailed information about all models:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.model.list()
 YIELD
@@ -66,7 +66,7 @@ YIELD
 ----
 
 .Listing detailed information about specific model:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.model.list('my-model')
 YIELD
@@ -90,7 +90,7 @@ YIELD
 If we no longer need a trained model we can remove it from the catalog.
 
 .Remove a model from the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.drop('my-model')
 YIELD

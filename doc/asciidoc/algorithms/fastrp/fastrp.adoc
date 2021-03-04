@@ -123,7 +123,7 @@ include::../shared/syntax-intro-named-graph.adoc[]
 ======
 
 .Run FastRP in stream mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.stream(
   graphName: String,
@@ -152,7 +152,7 @@ include::specific-configuration.adoc[]
 ======
 
 .Run FastRP in stats mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.stats(
   graphName: String,
@@ -186,7 +186,7 @@ include::specific-configuration.adoc[]
 ======
 
 .Run FastRP in mutate mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.mutate(
   graphName: String,
@@ -223,7 +223,7 @@ include::specific-configuration.adoc[]
 ======
 
 .Run FastRP in write mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.write(
   graphName: String,
@@ -266,7 +266,7 @@ include::specific-configuration.adoc[]
 include::../shared/syntax-anonymous-graphs.adoc[]
 
 .Run FastRP in write mode on an anonymous graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.write(
   configuration: Map
@@ -296,7 +296,7 @@ The results are the same as for running write mode with a named graph, see the <
 include::../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (dan:Person {name: 'Dan'}),
@@ -330,7 +330,7 @@ We will also add the `weight` relationship property which we will make use of wh
 include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'persons'.
-[source, cypher, role=graph-create-query]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create(
   'persons',
@@ -353,7 +353,7 @@ include::../shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.stream.estimate('persons', {embeddingDimension: 128})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
@@ -377,7 +377,7 @@ include::../shared/examples-stream-intro.adoc[]
 [role=query-example, no-result=true]
 --
 .The following will run the algorithm, and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.stream('persons', { embeddingDimension: 4 })
 YIELD nodeId, embedding
@@ -417,7 +417,7 @@ include::../shared/examples-stats-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm and returns the result in form of statistical and measurement values
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.stats('persons', { embeddingDimension: 8 })
 YIELD nodeCount
@@ -443,7 +443,7 @@ include::../shared/examples-mutate-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.mutate(
   'persons',
@@ -476,7 +476,7 @@ include::../shared/examples-write-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `write` mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.write(
   'persons',
@@ -510,7 +510,7 @@ Below is an example of running the weighted variant of algorithm.
 [role=query-example, no-result=true]
 --
 .The following will run the algorithm, and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.stream(
   'persons',
@@ -566,7 +566,7 @@ Other factors that may influence the choice of `propertyDimension` are vaguely t
 [.include-with-stream]
 ======
 .Run FastRPExtended in stream mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.fastRPExtended.stream(
   graphName: String,
@@ -594,7 +594,7 @@ include::specific-configuration-ext.adoc[]
 [.include-with-stats]
 ======
 .Run FastRPExtended in stats mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.fastRPExtended.stats(
   graphName: String,
@@ -627,7 +627,7 @@ include::specific-configuration-ext.adoc[]
 [.include-with-mutate]
 ======
 .Run FastRPExtended in mutate mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.fastRPExtended.mutate(
   graphName: String,
@@ -664,7 +664,7 @@ include::specific-configuration-ext.adoc[]
 [.include-with-write]
 ======
 .Run FastRPExtended in write mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.fastRPExtended.write(
   graphName: String,
@@ -704,7 +704,7 @@ Memory estimation for FastRPExtended works similarly to FastRP, which we can see
 [role=query-example]
 --
 .The following will estimate the memory requirements for FastRPExtended:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.fastRPExtended.stream.estimate('persons', {embeddingDimension: 128, propertyDimension: 64, featureProperties: ['p1', 'p2']})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory

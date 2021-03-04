@@ -73,7 +73,7 @@ In practice, a variation on the original formula is used so that we don't run in
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.closeness.write(configuration: Map)
 YIELD nodes, createMillis, computeMillis, writeMillis
@@ -102,7 +102,7 @@ YIELD nodes, createMillis, computeMillis, writeMillis
 
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.closeness.stream(configuration: Map)
 YIELD nodeId, centrality
@@ -131,7 +131,7 @@ YIELD nodeId, centrality
 image::closeness_centrality.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (a:Node{id:"A"}),
        (b:Node{id:"B"}),
@@ -149,7 +149,7 @@ CREATE (a:Node{id:"A"}),
 ----
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.closeness.stream({
   nodeProjection: 'Node',
@@ -180,7 +180,7 @@ Any node that has a direct connection to all other nodes would score 1.
 // end::stream-sample-graph-explanation[]
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.closeness.write({
   nodeProjection: 'Node',
@@ -201,7 +201,7 @@ CALL gds.alpha.closeness.write({
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.closeness.write({
   nodeQuery: 'MATCH (p:Node) RETURN id(p) AS id',

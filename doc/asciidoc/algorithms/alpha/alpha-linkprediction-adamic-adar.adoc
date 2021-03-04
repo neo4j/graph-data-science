@@ -31,7 +31,7 @@ The library contains a function to calculate closeness between two nodes.
 == Syntax
 
 .The following will run the algorithm and return the result:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 RETURN gds.alpha.linkprediction.adamicAdar(node1:Node, node2:Node, {
     relationshipQuery:String,
@@ -55,7 +55,7 @@ RETURN gds.alpha.linkprediction.adamicAdar(node1:Node, node2:Node, {
 == Adamic Adar algorithm sample
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE
  (zhen:Person {name: 'Zhen'}),
@@ -73,7 +73,7 @@ CREATE
 ----
 
 .The following will return the Adamic Adar score for Michael and Karin:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p1:Person {name: 'Michael'})
  MATCH (p2:Person {name: 'Karin'})
@@ -91,7 +91,7 @@ CREATE
 We can also compute the score of a pair of nodes based on a specific relationship type.
 
 .The following will return the Adamic Adar score for Michael and Karin based only on the `FRIENDS` relationships:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p1:Person {name: 'Michael'})
  MATCH (p2:Person {name: 'Karin'})
