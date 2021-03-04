@@ -41,4 +41,9 @@ public class GdsEditionMethodExtension extends GdsEditionExtension implements Be
 
         return gdsEdition.value();
     }
+
+    @Override
+    ExtensionContext.Namespace namespace(ExtensionContext context) {
+        return ExtensionContext.Namespace.create(getClass(), context.getRequiredTestMethod());
+    }
 }

@@ -28,7 +28,7 @@ abstract class GdsEditionExtension {
     abstract Edition editionToSetTo(ExtensionContext context);
 
     void resetEdition(ExtensionContext context) {
-        var contextStore = context.getStore(ExtensionContext.Namespace.GLOBAL);
+        var contextStore = context.getStore(namespace(context));
         boolean wasEnterprisePreviously = (boolean) contextStore.get(EDITION_CONTEXT_STORE_KEY);
         if (wasEnterprisePreviously) {
             org.neo4j.graphalgo.core.GdsEdition.instance().setToEnterpriseEdition();
@@ -38,7 +38,7 @@ abstract class GdsEditionExtension {
     }
 
     void setEdition(ExtensionContext context) {
-        var contextStore = context.getStore(ExtensionContext.Namespace.GLOBAL);
+        var contextStore = context.getStore(namespace(context));
         contextStore.put(EDITION_CONTEXT_STORE_KEY, org.neo4j.graphalgo.core.GdsEdition.instance().isOnEnterpriseEdition());
 
         switch (editionToSetTo(context)) {
@@ -49,5 +49,9 @@ abstract class GdsEditionExtension {
                 org.neo4j.graphalgo.core.GdsEdition.instance().setToEnterpriseEdition();
                 break;
         }
+    }
+
+    ExtensionContext.Namespace namespace(ExtensionContext context) {
+        return ExtensionContext.Namespace.create(context.getRequiredTestClass());
     }
 }
