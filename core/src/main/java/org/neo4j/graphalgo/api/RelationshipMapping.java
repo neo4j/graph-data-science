@@ -25,7 +25,5 @@ import java.util.Set;
 
 public interface RelationshipMapping {
 
-    Set<RelationshipType> relationshipTypes(long source, long target);
-
     Set<RelationshipType> availableRelationshipTypes();
 }

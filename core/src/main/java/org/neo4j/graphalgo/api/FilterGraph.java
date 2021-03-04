@@ -190,11 +190,6 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public Set<RelationshipType> relationshipTypes(long source, long target) {
-        return graph.relationshipTypes(source, target);
-    }
-
-    @Override
     public Set<RelationshipType> availableRelationshipTypes() {
         return graph.availableRelationshipTypes();
     }

@@ -194,11 +194,6 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public Set<RelationshipType> relationshipTypes(long source, long target) {
-        throw new NullGraphStore.NullGraphException();
-    }
-
-    @Override
     public Set<RelationshipType> availableRelationshipTypes() {
         return Set.of();
     }

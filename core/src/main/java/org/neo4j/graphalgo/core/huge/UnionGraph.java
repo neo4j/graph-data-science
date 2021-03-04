@@ -192,11 +192,6 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public Set<RelationshipType> relationshipTypes(long source, long target) {
-        return null;
-    }
-
-    @Override
     public Set<RelationshipType> availableRelationshipTypes() {
         Set<RelationshipType> relationshipTypes = new HashSet<>();
         for (CSRGraph graph : graphs) {

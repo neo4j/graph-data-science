@@ -323,11 +323,6 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public Set<RelationshipType> relationshipTypes(long source, long target) {
-        return Set.of(relationshipType());
-    }
-
-    @Override
     public int degree(long node) {
         if (adjacencyOffsets == null) {
             return 0;
