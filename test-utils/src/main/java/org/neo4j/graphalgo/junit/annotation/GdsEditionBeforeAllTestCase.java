@@ -30,7 +30,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({ TYPE, ANNOTATION_TYPE })
 @Retention(RUNTIME)
-@ExtendWith(GdsEditionClassExtension.class)
-public @interface GdsEditionTestCase {
+@ExtendWith(GdsEditionBeforeAllExtension.class)
+public @interface GdsEditionBeforeAllTestCase {
     Edition value() default Edition.CE;
 }

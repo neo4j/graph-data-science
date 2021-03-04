@@ -23,7 +23,7 @@ import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class GdsEditionClassExtension extends GdsEditionExtension implements BeforeAllCallback, AfterAllCallback {
+public class GdsEditionBeforeAllExtension extends GdsEditionExtension implements BeforeAllCallback, AfterAllCallback {
 
     @Override
     public void afterAll(ExtensionContext context) {
@@ -38,7 +38,7 @@ public class GdsEditionClassExtension extends GdsEditionExtension implements Bef
     @Override
     Edition editionToSetTo(ExtensionContext context) {
         var testClass = context.getRequiredTestClass();
-        var gdsEdition = testClass.getAnnotation(GdsEditionTestCase.class);
+        var gdsEdition = testClass.getAnnotation(GdsEditionBeforeAllTestCase.class);
 
         return gdsEdition.value();
     }

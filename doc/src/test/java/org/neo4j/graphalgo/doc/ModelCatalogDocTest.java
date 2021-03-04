@@ -25,12 +25,15 @@ import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionBeforeEachTestCase;
 import org.neo4j.graphalgo.model.catalog.ModelDropProc;
 import org.neo4j.graphalgo.model.catalog.ModelExistsProc;
 import org.neo4j.graphalgo.model.catalog.ModelListProc;
 
 import java.util.List;
 
+@GdsEditionBeforeEachTestCase(Edition.EE)
 class ModelCatalogDocTest extends DocTestBase {
 
     @Override
