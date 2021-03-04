@@ -60,7 +60,7 @@ public class RestartCheckProc {
     public void enableProc() {
         var globalProcedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
         try {
-            globalProcedures.procedure(LazyProcedure.PROCEDURE_NAME);
+            globalProcedures.procedure(SafeToRestartProcedure.PROCEDURE_NAME);
             // already registered
             return;
         } catch (ProcedureException e) {
@@ -69,13 +69,13 @@ public class RestartCheckProc {
             }
         }
         try {
-            globalProcedures.register(new LazyProcedure(progress), false);
+            globalProcedures.register(new SafeToRestartProcedure(progress), false);
         } catch (ProcedureException e) {
             throw new RuntimeException("Could not register procedure: " + e.getMessage(), e);
         }
     }
 
-    private static final class LazyProcedure implements CallableProcedure {
+    private static final class SafeToRestartProcedure implements CallableProcedure {
         private static final QualifiedName PROCEDURE_NAME = new QualifiedName(
             new String[]{"gds", "internal"},
             "safeToRestart"
@@ -113,7 +113,7 @@ public class RestartCheckProc {
 
         private final ProgressEventStore progress;
 
-        private LazyProcedure(ProgressEventStore progress) {
+        private SafeToRestartProcedure(ProgressEventStore progress) {
             this.progress = progress;
         }
 
