@@ -12,7 +12,7 @@ One benefit of using Cypher queries is the possibility to form the graph from da
 A common use case is the reduction of paths into single relationships between the start and end node of the path.
 
 .The following query reduces a 2-hop path to a single relationship effectively representing co-authors:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (p1:Author)-[:WROTE]->(a:Article)<-[:WROTE]-(p2:Author)
 RETURN id(p1) AS source, id(p2) AS target, count(a) AS weight
@@ -30,7 +30,7 @@ For production, it is recommended to adapt the domain model in a way that it can
 A Cypher projection takes three mandatory arguments: `graphName`, `nodeQuery` and `relationshipQuery`.
 In addition, the optional `configuration` parameter allows us to further configure graph creation.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     graphName: String,
@@ -71,7 +71,7 @@ The query result must contain a column called `id`.
 The value in that column is used to uniquely identify the node.
 
 .Simple example of a node query used for Cypher projection.
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n) RETURN id(n) AS id
 ----
@@ -85,14 +85,14 @@ The values are used to connect the relationships to the nodes selected by the no
 If either the source or the target value can not be mapped to a node, the relationship is not projected.
 
 .Simple example of a relationship query used for Cypher projection.
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n)-->(m) RETURN id(n) AS source, id(m) AS target
 ----
 
 Using both example queries in a Cypher projection, we can project the whole Neo4j graph into an in-memory graph and store it in the catalog:
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
@@ -124,7 +124,7 @@ If we want to use a different default value, the `coalesce` function can be used
 The following Cypher projection loads multiple node and relationship properties:
 
 .Projecting query columns into node and relationship properties.
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
@@ -135,7 +135,7 @@ CALL gds.graph.create.cypher(
 
 The projected properties can be referred to by any algorithm that uses properties as input, for example, <<algorithms-label-propagation, Label Propagation>>.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.stream(
     'my-cypher-graph', {
@@ -156,7 +156,7 @@ This column is expected to return a list of strings.
 Consider the following example where `Author` nodes are connected by `WROTE` relationships to either `Article` or `Book` nodes.
 
 .Using the `labels` column to distinguish between node labels.
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
@@ -169,7 +169,7 @@ The created graph will be composed of nodes labeled with either `:Book`, `:Artic
 This allows us to apply a node filter during algorithm execution:
 
 .Using a node filter to run the algorithm on a subgraph.
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.stream(
     'my-cypher-graph', {
@@ -188,7 +188,7 @@ If the `type` column is present in the query result, we use the values in that c
 For the following example, let's assume `City` nodes to be connected by either `ROAD` or `RAIL` relationships.
 
 .Using the `type` column to distinguish between multiple relationship types.
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
@@ -201,7 +201,7 @@ The loaded graph will be composed of the two relationship types.
 This allows us to apply a relationship filter during algorithm execution:
 
 .Using a relationship filter to run the algorithm on a subgraph.
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.stream(
     'my-cypher-graph', {
@@ -218,7 +218,7 @@ The cypher projection can achieve the same feature by adjusting the `MATCH` clau
 
 
 .Loading the relationships with orientation `NATURAL`
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
@@ -229,7 +229,7 @@ CALL gds.graph.create.cypher(
 
 
 .Loading the relationships with orientation `UNDIRECTED`
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
@@ -241,7 +241,7 @@ CALL gds.graph.create.cypher(
 Note the missing arrow in the `Match` clause of the relationship query.
 
 .Loading the relationships with orientation `REVERSE`
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
@@ -261,7 +261,7 @@ For some algorithms, we want the projected graph to contain at most one relation
 
 The simplest way to achieve this is to use the `DISTINCT` operator in the relationship query:
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n:City)-[r:ROAD]->(m:City)
 RETURN DISINCT id(n) AS source, id(m) AS target
@@ -269,7 +269,7 @@ RETURN DISINCT id(n) AS source, id(m) AS target
 
 If we also want to load relationship properties, aggregating the values of parallel edges can also be achieved using Cypher.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n:City)-[r:ROAD]->(m:City)
 RETURN
@@ -283,7 +283,7 @@ One drawback of that approach is that we put more pressure on the Cypher executi
 An alternative approach is to use `relationshipProperties` as part of the optional configuration map.
 The syntax is identical to the property mappings used in the native projection.
 
-[source,cypher]
+[source,cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
@@ -318,7 +318,7 @@ CALL gds.graph.create.cypher(
 Similar to https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[Cypher], it is also possible to set query parameters.
 In the following example we supply a list of strings to limit the cities we want to project.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',

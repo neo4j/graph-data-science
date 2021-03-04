@@ -13,7 +13,7 @@ This section describes the utility functions and shows their usage in concrete e
 [role=query-example]
 --
 .Usage:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 RETURN gds.version() AS version
 ----
@@ -58,7 +58,7 @@ RETURN gds.version() AS version
 [role=query-example]
 --
 .Example for gds.util.IsFinite:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] AS value
 RETURN gds.util.isFinite(value) AS isFinite
@@ -77,7 +77,7 @@ RETURN gds.util.isFinite(value) AS isFinite
 [role=query-example]
 --
 .Example for gds.util.isInfinite():
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] AS value
 RETURN gds.util.isInfinite(value) AS isInfinite
@@ -124,7 +124,7 @@ A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering
 Consider the graph created by the following Cypher statement:
 
 .Example graph:
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE  (nAlice:User {name: 'Alice'})
 CREATE  (nBridget:User {name: 'Bridget'})
@@ -136,7 +136,7 @@ CREATE  (nBridget)-[:LINK]->(nCharles)
 [role=query-example]
 --
 .Example for gds.util.asNode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (u:User{name: 'Alice'})
 WITH id(u) AS nodeId
@@ -154,7 +154,7 @@ RETURN gds.util.asNode(nodeId).name AS node
 [role=query-example]
 --
 .Example for gds.util.asNodes:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (u:User)
 WHERE NOT u.name = 'Charles'
@@ -196,13 +196,13 @@ Catalog functions allow accessing in-memory graphs directly from a Cypher query.
 === Examples
 
 .Create a graph in the catalog:
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CALL gds.graph.create('my-graph', 'User', 'LINK');
 ----
 
 .Run an algorithm that updates the named-graph:
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CALL gds.pageRank.mutate('my-graph', { mutateProperty: 'score' })
 ----
@@ -212,7 +212,7 @@ We can now access the property `score` without writing the data to Neo4j.
 [role=query-example]
 --
 .Access a property node property for Alice:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (alice:User)
 WHERE alice.name = 'Alice'

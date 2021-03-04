@@ -36,7 +36,7 @@ Read more in https://link.springer.com/chapter/10.1007/978-3-319-23461-8_11[Two 
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.degree.write(configuration: Map)
 YIELD nodes, createMillis, computeMillis, writeMillis, writeProperty
@@ -65,7 +65,7 @@ YIELD nodes, createMillis, computeMillis, writeMillis, writeProperty
 |===
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.degree.stream(configuration: Map)
 YIELD node, score
@@ -96,7 +96,7 @@ YIELD node, score
 This sample will explain the Degree Centrality algorithm, using a simple graph:
 
 .Create sample graph
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (alice:User {name: 'Alice'}),
        (bridget:User {name: 'Bridget'}),
@@ -115,7 +115,7 @@ CREATE (alice:User {name: 'Alice'}),
 ----
 
 .The following will run the algorithm and stream results, showing which users have the most followers:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.degree.stream({
   nodeProjection: 'User',
@@ -132,7 +132,7 @@ ORDER BY followers DESC
 ----
 
 .The following will run the algorithm and store results, showing which users have the most followers:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.degree.write({
   nodeProjection: 'User',
@@ -159,7 +159,7 @@ CALL gds.alpha.degree.write({
 |===
 
 .The following will run the algorithm and stream results, showing which users follow the most other users:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.degree.stream({
   nodeProjection: 'User',
@@ -171,7 +171,7 @@ ORDER BY followers DESC
 ----
 
 .The following will run the algorithm and store results, showing which users follow the most other users:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.degree.write({
   nodeProjection: 'User',
@@ -204,7 +204,7 @@ This sample will explain the weighted Degree Centrality algorithm, using a simpl
 
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (alice:User {name:'Alice'}),
        (bridget:User {name:'Bridget'}),
@@ -225,7 +225,7 @@ CREATE (alice:User {name:'Alice'}),
 This algorithm is a variant of the Degree Centrality algorithm, that measures the sum of the weights of incoming and outgoing relationships.
 
 .The following will run the algorithm and stream results, showing which users have the most weighted followers:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.degree.stream({
    nodeProjection: 'User',
@@ -244,7 +244,7 @@ ORDER BY weightedFollowers DESC
 ----
 
 .The following will run the algorithm and store results, showing which users have the most weighted followers:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.degree.write({
    nodeProjection: 'User',
@@ -282,7 +282,7 @@ Charles and Michael both only have one follower, but those relationships have a 
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.degree.write({
   nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
@@ -294,7 +294,7 @@ CALL gds.alpha.degree.write({
 Note, that if we want to find the number of users that a user is following rather than their number of followers, we need to handle that in our Cypher query.
 
 .The following will run the algorithm and store the results, calculating the number of users that a user follows:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.degree.write({
   nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',

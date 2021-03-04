@@ -77,7 +77,7 @@ It was considered to be one of the "three distinct intuitive conceptions of cent
 == Syntax
 
 .The following will run the Betweenness Centrality algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.betweenness.write(configuration: Map)
 YIELD nodes, minCentrality, maxCentrality, sumCentrality, createMillis, computeMillis, writeMillis
@@ -115,7 +115,7 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, createMillis, computeM
 
 
 .The following will run the Betweenness Centrality algorithm and stream results:
-[source,cypher]
+[source,cypher, role=noplay]
 ----
 CALL gds.alpha.betweenness.stream(configuration: Map)
 YIELD nodeId, centrality
@@ -139,7 +139,7 @@ YIELD nodeId, centrality
 
 
 .The following will run the Sampled Betweenness Centrality algorithm and write back results:
-[source,cypher]
+[source,cypher, role=noplay]
 ----
 CALL gds.alpha.betweenness.sampled.write(configuration: Map)
 YIELD nodes, minCentrality, maxCentrality, sumCentrality, createMillis, computeMillis, writeMillis
@@ -173,7 +173,7 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality, createMillis, computeM
 
 
 .The following will run the Sampled Betweenness Centrality algorithm and stream results:
-[source,cypher]
+[source,cypher, role=noplay]
 ----
 CALL gds.alpha.betweenness.sampled.stream(configuration: Map)
 YIELD nodeId, centrality
@@ -208,7 +208,7 @@ People with high betweenness tend to be the innovators and brokers in social net
 They combine different perspectives, transfer ideas between groups, and get power from their ability to make introductions and pull strings.
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (alice:User {name: 'Alice'}),
        (bridget:User {name: 'Bridget'}),
@@ -224,7 +224,7 @@ CREATE (alice:User {name: 'Alice'}),
 ----
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.betweenness.stream({
   nodeProjection: 'User',
@@ -252,7 +252,7 @@ The others don't have any influence, because all the shortest paths between pair
 
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.betweenness.write({
   nodeProjection: 'User',
@@ -296,7 +296,7 @@ This can be controlled by the `maxDepth` parameter.
 
 
 .The following will run the algorithm and stream results:
-[source,cypher]
+[source,cypher, role=noplay]
 ----
 CALL gds.alpha.betweenness.sampled.stream({
   nodeProjection: 'User',
@@ -326,7 +326,7 @@ The others don’t have any influence, because all the shortest paths between pa
 
 
 .The following will run the algorithm and write back results:
-[source,cypher]
+[source,cypher, role=noplay]
 ----
 CALL gds.alpha.betweenness.sampled.write({
   nodeProjection: 'User',
@@ -352,7 +352,7 @@ YIELD nodes, minCentrality, maxCentrality, sumCentrality
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.betweenness.write({
   nodeQuery: 'MATCH (p:User) RETURN id(p) AS id',

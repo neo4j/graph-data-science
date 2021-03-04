@@ -50,7 +50,7 @@ In our implementation, geospatial distance is used as heurestic.
 == Syntax
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.shortestPath.astar.stream(configuration:Map)
 YIELD nodeId, cost
@@ -83,7 +83,7 @@ YIELD nodeId, cost
 == A* algorithm sample
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (a:Station {name: 'King\'s Cross St. Pancras', latitude: 51.5308, longitude: -0.1238}),
        (b:Station {name: 'Euston',                    latitude: 51.5282, longitude: -0.1337}),
@@ -99,7 +99,7 @@ CREATE (a:Station {name: 'King\'s Cross St. Pancras', latitude: 51.5308, longitu
 
 // TODO: runs weighted, even it is not specified
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (start:Station {name: 'King\'s Cross St. Pancras'}), (end:Station {name: 'Kentish Town'})
 CALL gds.alpha.shortestPath.astar.stream({
@@ -136,7 +136,7 @@ RETURN gds.util.asNode(nodeId).name AS station, cost
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (start:Station {name: "King's Cross St. Pancras"}), (end:Station {name: "Kentish Town"})
 CALL gds.alpha.shortestPath.astar.stream({

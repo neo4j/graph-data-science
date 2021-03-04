@@ -55,7 +55,7 @@ include::alpha-similarity.adoc[tag=weighted-function-note]
 We can use it to compute the similarity of two hardcoded lists.
 
 .The following will return the euclidean similarity of two lists of numbers:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  RETURN gds.alpha.similarity.euclideanDistance([3,8,7,5,2,9], [10,8,6,6,4,5]) AS similarity
 ----
@@ -72,7 +72,7 @@ These two lists of numbers have a euclidean distance of 8.42.
 We can also use it to compute the similarity of nodes based on lists computed by a Cypher query.
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MERGE (french:Cuisine {name:'French'})
  MERGE (italian:Cuisine {name:'Italian'})
@@ -113,7 +113,7 @@ We can also use it to compute the similarity of nodes based on lists computed by
 ----
 
 .The following will return the Euclidean distance of Zhen and Praveena:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p1:Person {name: 'Zhen'})-[likes1:LIKES]->(cuisine)
  MATCH (p2:Person {name: 'Praveena'})-[likes2:LIKES]->(cuisine)
@@ -130,7 +130,7 @@ We can also use it to compute the similarity of nodes based on lists computed by
 |===
 
 .The following will return the Euclidean distance  of Zhen and the other people that have a cuisine in common:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p1:Person {name: 'Zhen'})-[likes1:LIKES]->(cuisine)
  MATCH (p2:Person)-[likes2:LIKES]->(cuisine) WHERE p2 <> p1
@@ -156,7 +156,7 @@ include::alpha-similarity.adoc[tag=computation]
 include::alpha-similarity.adoc[tag=weighted-note]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MERGE (french:Cuisine {name:'French'})
  MERGE (italian:Cuisine {name:'Italian'})
@@ -197,7 +197,7 @@ include::alpha-similarity.adoc[tag=weighted-note]
 ----
 
 .The following will return a stream of node pairs, along with their intersection and euclidean similarities:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -238,7 +238,7 @@ We get this result because there is no overlap in their food preferences.
 We can filter those results out using the `gds.util.isFinite` function.
 
 .The following will return a stream of node pairs, along with their intersection and finite euclidean similarities:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -275,7 +275,7 @@ We might decide that we don't want to see users with a similarity above 4 return
 If so, we can filter those out by passing in the `similarityCutoff` parameter.
 
 .The following will return a stream of node pairs that have a similarity of at most 4, along with their euclidean distance:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -306,7 +306,7 @@ If we're implementing a k-Nearest Neighbors type query we might instead want to 
 We can do that by passing in the `topK` parameter.
 
 .The following will return a stream of users along with the most similar user to them (i.e. `k=1`):
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -337,7 +337,7 @@ These results will not necessarily be symmetrical.
 For example, the person most similar to Arya is Karin, but the person most similar to Karin is Praveena.
 
 .The following will find the most similar user for each user, and store a relationship between those users:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -361,7 +361,7 @@ For example, the person most similar to Arya is Karin, but the person most simil
 We then could write a query to find out what types of cuisine that other people similar to us might like.
 
 .The following will find the most similar user to Praveena, and return their favorite cuisines that Praveena doesn't (yet!) like:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person {name: "Praveena"})-[:SIMILAR]->(other),
        (other)-[:LIKES]->(cuisine)
@@ -386,7 +386,7 @@ We could use this technique to compute the similarity of a subset of items to al
 
 
 .The following will find the most similar person (i.e. `k=1`) to Arya and Praveena:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -422,7 +422,7 @@ The algorithm checks every value against the `skipValue` to determine whether th
 For cases where no values should be skipped, skipping can be disabled by setting `skipValue` to `null`.
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MERGE (french:Cuisine {name:'French'})          SET french.embedding = [0.71, 0.33, 0.81, 0.52, 0.41]
  MERGE (italian:Cuisine {name:'Italian'})        SET italian.embedding = [0.31, 0.72, 0.58, 0.67, 0.31]
@@ -434,7 +434,7 @@ For cases where no values should be skipped, skipping can be disabled by setting
 ----
 
 .The following will find the similarity between cuisines based on the `embedding` property:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (c:Cuisine)
  WITH {item:id(c), weights: c.embedding} AS userData
@@ -455,7 +455,7 @@ include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
 
 .Set `graph:'cypher'` in the config:
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
  WITH "MATCH (person:Person)-[likes:LIKES]->(c)
        RETURN id(person) AS item, id(c) AS category, likes.score AS weight" AS query
@@ -475,7 +475,7 @@ include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.similarity.euclidean.write(configuration: Map)
 YIELD nodes, similarityPair, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
@@ -531,7 +531,7 @@ YIELD nodes, similarityPair, writeRelationshipType, writeProperty, min, max, mea
 |===
 
 .The following will run the algorithm and stream results:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.similarity.euclidean.stream(configuration: Map)
 YIELD item1, item2, count1, count2, intersection, similarity

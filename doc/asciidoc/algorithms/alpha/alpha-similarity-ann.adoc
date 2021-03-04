@@ -20,7 +20,7 @@ The implementation in the library is based on Dong, Charikar, and Li's paper htt
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.ann.write(configuration: Map)
 YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
@@ -72,7 +72,7 @@ Otherwise a list of maps of the following structure: `{item: nodeId, weights: [d
 |===
 
 .The following will run the algorithm and stream results:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.ann.stream(configuration: Map)
 YIELD item1, item2, count1, count2, intersection, similarity
@@ -122,7 +122,7 @@ The corresponding k-Nearest Neighbors Graph can then be used as part of recommen
 == Approximate Nearest Neighbors algorithm sample
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  CREATE 
   (french:Cuisine {name:'French'}),
@@ -156,7 +156,7 @@ The corresponding k-Nearest Neighbors Graph can then be used as part of recommen
 ----
 
 .The following will return a stream of nodes, along with up to the 3 most similar nodes to them based on Jaccard Similarity:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person)-[:LIKES]->(cuisine)
  WITH {item:id(p), categories: collect(id(cuisine))} AS userData
@@ -196,7 +196,7 @@ We also have 3 pairs of users who are not similar at all.
 We'd probably want to filter those out, which we can do by passing in the `similarityCutoff` parameter.
 
 .The following will find up to 3 similar users for each user, and store a relationship between those users:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person)-[:LIKES]->(cuisine)
  WITH {item:id(p), categories: collect(id(cuisine))} AS userData
@@ -224,7 +224,7 @@ We'd probably want to filter those out, which we can do by passing in the `simil
 We then could write a query to find out what types of cuisine that other people similar to us might like.
 
 .The following will find the most similar user to Praveena, and return their favorite cuisines that Praveena doesn't (yet!) like:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person {name: 'Praveena'})-[:SIMILAR]->(other),
        (other)-[:LIKES]->(cuisine)

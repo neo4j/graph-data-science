@@ -68,7 +68,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 === Write mode
 
 .Run PageRank in write mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.write(
   graphName: String,
@@ -85,7 +85,7 @@ include::common-parameters-named-graph.adoc[]
 include::common-configuration-named-graph.adoc[]
 
 .Run PageRank in write mode on an anonymous graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.write(configuration: Map)
 YIELD
@@ -125,7 +125,7 @@ include::common-configuration-anonymous-graph.adoc[]
 === Mutate mode
 
 .Run PageRank in mutate mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.mutate(
   graphName: String,
@@ -142,7 +142,7 @@ Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 
 .The following will run the algorithm and store the results in `myGraph`:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.mutate('myGraph', { mutateProperty: 'pagerank' })
 ----
@@ -151,7 +151,7 @@ CALL gds.pageRank.mutate('myGraph', { mutateProperty: 'pagerank' })
 === Stream mode
 
 .Run PageRank in stream mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream(
   graphName: String,
@@ -167,7 +167,7 @@ include::common-parameters-named-graph.adoc[]
 include::common-configuration-named-graph.adoc[]
 
 .Run PageRank in stream mode on an anonymous graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream(configuration: Map)
 YIELD
@@ -201,7 +201,7 @@ include::common-configuration-anonymous-graph.adoc[]
 === Stats mode
 
 .Run PageRank in stats mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stats(
   graphName: String,
@@ -217,7 +217,7 @@ YIELD
 include::common-parameters-named-graph.adoc[]
 
 .Run PageRank in stats mode on an anonymous graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stats(configuration: Map)
 YIELD
@@ -240,7 +240,7 @@ The following will estimate the memory requirements for running the algorithm.
 The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
 
 .Run PageRank in estimate mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.<mode>.estimate(
   graphName: String,
@@ -251,7 +251,7 @@ CALL gds.pageRank.<mode>.estimate(
 include::common-parameters-named-graph.adoc[]
 
 .Run PageRank in estimate mode on an anonymous graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.<mode>.estimate(configuration: Map)
 ----
@@ -265,7 +265,7 @@ include::common-estimate-mode.adoc[]
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (home:Page {name:'Home'})
 CREATE (about:Page {name:'About'})
@@ -302,7 +302,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 ====
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CALL gds.graph.create(
     'myGraph',
@@ -323,7 +323,7 @@ In the following examples we will demonstrate using the Page Rank algorithm on t
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream('myGraph', { maxIterations: 20, dampingFactor: 0.85 })
 YIELD nodeId, score
@@ -351,7 +351,7 @@ To instead write the page-rank score to a node property in the Neo4j graph, use 
 [role=query-example]
 --
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.write('myGraph', {
   maxIterations: 20,
@@ -375,7 +375,7 @@ YIELD nodePropertiesWritten AS writtenProperties, ranIterations
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream('myGraph', {
   maxIterations: 20,
@@ -407,7 +407,7 @@ To instead write the page-rank score to a node property in the Neo4j graph, use 
 [role=query-example]
 --
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.write('myGraph', {
   maxIterations: 20,
@@ -438,7 +438,7 @@ The following examples show how to run Page Rank centered around 'Site A'.
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (siteA:Page {name: 'Site A'})
 CALL gds.pageRank.stream('myGraph', {
@@ -470,7 +470,7 @@ ORDER BY score DESC, name ASC
 [role=query-example]
 --
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (siteA:Page {name: 'Site A'})
 CALL gds.pageRank.write('myGraph', {
@@ -497,7 +497,7 @@ RETURN nodePropertiesWritten AS writtenProperties, ranIterations
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.write.estimate('myGraph', {
   writeProperty: 'pageRank',
@@ -521,7 +521,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [role=query-example]
 --
 .The following will run the algorithm and returns the result in form of statistical and measurement values
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stats('myGraph', {
   maxIterations: 20,

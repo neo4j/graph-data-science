@@ -24,7 +24,7 @@ In most cases it is possible to structure your Neo4j graph model in a way that e
 A native projection takes three mandatory arguments: `graphName`, `nodeProjection` and `relationshipProjection`.
 In addition, the optional `configuration` parameter allows us to further configure graph creation.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     graphName: String,
@@ -91,7 +91,7 @@ The following map-like syntax shows the general way of defining node projections
 In the following example, we want to project `Person` nodes into the in-memory graph.
 The resulting graph contains all Neo4j nodes that have the label `Person`.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-graph', {
@@ -104,7 +104,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 We can use the following shorthand syntax to project a single node label.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', 'Person', '*')
 YIELD graphName, nodeCount, relationshipCount;
@@ -113,7 +113,7 @@ YIELD graphName, nodeCount, relationshipCount;
 It is often useful to create an in-memory graph representing more than one node label.
 Let's assume, the database contains `Person` and `City` nodes which we want to project.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-graph', {
@@ -127,7 +127,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 The following shorthand syntax can be used to project multiple labels.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', ['Person', 'City'], '*')
 YIELD graphName, nodeCount, relationshipCount;
@@ -135,7 +135,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 Projecting multiple node labels enables algorithms to only use a subset of those.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 // Uses `Person` nodes for computing Page Rank scores between persons
 CALL gds.pageRank.stream('my-graph', { nodeLabels: ['Person'] }) YIELD nodeId, score;
@@ -143,7 +143,7 @@ CALL gds.pageRank.stream('my-graph', { nodeLabels: ['Person'] }) YIELD nodeId, s
 
 To project all nodes in the Neo4j graph, we can use the special `*` ('star') node projection.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', '*', '*')
 YIELD graphName, nodeCount, relationshipCount;
@@ -155,7 +155,7 @@ For example, if a graph was projected with labels `'A'`, `'B'` and also with the
 It is however still possible to filter for nodes with label `'A'` or `'B'` in order to retrieve a subgraph containing only those nodes.
 
 .Example usage of node label filters:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('myGraph', ['Person', 'City', '*'])
 
@@ -215,7 +215,7 @@ For the following example, let's assume that each `City` node stores two propert
 We want to project both properties and project `stateId` to the custom property key `community`.
 
 .Create a graph with multiple node properties:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-graph', {
@@ -237,7 +237,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 If we do not need to rename the node property keys or give a default value, we can use the following shorthand syntax.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', 'City', '*', {
         nodeProperties: ['population', 'stateId']
@@ -251,7 +251,7 @@ In the example, we project the property key `stateId` to a custom property key `
 When we use the projected graph in an algorithm, we refer to the custom property key instead.
 
 .Project node properties for all projected node labels:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', 'City', '*', {
         nodeProperties: ['population', { community: 'stateId' }]
@@ -262,7 +262,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 The projected properties can be referred to by any algorithm that uses properties as input, for example, <<algorithms-label-propagation, Label Propagation>>.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.stream(
     'my-graph', {
@@ -325,7 +325,7 @@ The following map-like syntax shows the general way of defining relationship pro
 
 In the following example, we want to project `City` nodes as well as `ROAD` and `RAIL` relationships into the in-memory graph.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-graph',
@@ -347,7 +347,7 @@ YIELD graphName, nodeCount, relationshipCount;
 In the above example, we are using the same relationship type as in the Neo4j database as well as the default `orientation`.
 In that case we can use the following syntactic sugar, similar to node projections.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create( 'my-graph', 'City', ['ROAD', 'RAIL'])
 YIELD graphName, nodeCount, relationshipCount;
@@ -355,7 +355,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 Projecting multiple relationship types enables algorithms to only use a subset of those.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 // Uses `ROAD` relationships for computing Page Rank of cities
 CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['ROAD'] }) YIELD nodeId, score;
@@ -378,7 +378,7 @@ There are three possible values: `NATURAL`, `REVERSE` and `UNDIRECTED` which can
 Consider the following graph containing `Person` nodes connected by `KNOWS` relationships.
 A `KNOWS` relationship is directed, as one person might know another person, but not necessarily the other way around.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (alice:Person {name: 'Alice'})
 CREATE (bob:Person {name: 'Bob'})
@@ -397,7 +397,7 @@ However, Bob and Eve would have two relationships each as the outgoing and incom
 
 To create a graph projection with different projection types, we use the following syntax:
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-graph',
@@ -425,7 +425,7 @@ If we run the examples, we can see different ranks for the individual nodes.
 The Page Rank algorithm evenly distributes ranks along the relationships of a node.
 In the reverse case, Alice has no relationships which leads to a different result.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 // Uses `KNOWS` relationships for computing Page Rank of persons
 CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['KNOWS'] }) YIELD nodeId, score;
@@ -503,7 +503,7 @@ In the following example, we want to project `City` nodes and `ROAD` relationshi
 For nodes we project the `stateId` property.
 
 .Create a graph with multiple node and relationship properties:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-graph', {
@@ -532,7 +532,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 We can use the following shorthand syntax to express the same projection.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-graph', 'City', 'ROAD', {
@@ -545,7 +545,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 The projected properties can be referred to by any algorithm that uses properties as input, for example <<algorithms-label-propagation, Label Propagation>>.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 // Option 1: Use the road quality as relationship weight
 CALL gds.labelPropagation.stream(
@@ -574,7 +574,7 @@ In the following example, we want to aggregate all `ROAD` relationships between 
 While doing so, we compute the maximum quality of the parallel relationships and store it on the resulting relationship.
 
 .Create a graph with aggregated parallel relationships using the maximum value of the `condition` property:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-graph', {
@@ -601,7 +601,7 @@ YIELD graphName, nodeCount, relationshipCount;
 ----
 
 .Create a graph with aggregated relationships using the parallel relationship count as a relationship property:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-graph', {
@@ -628,7 +628,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 Since we have only one node projection and one relationship projection, we can use the following shorthand syntax.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-graph', 'City', 'ROAD', {
@@ -641,7 +641,7 @@ YIELD graphName, nodeCount, relationshipCount;
 
 As before, the projected properties can be referred to by any algorithm that uses properties as input, for example <<algorithms-label-propagation, Label Propagation>>.
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.stream(
     'my-graph', {

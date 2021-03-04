@@ -57,7 +57,7 @@ For more information, see http://i11www.iti.kit.edu/extra/publications/sw-fclt-0
 == Syntax
 
 .The following will return a stream of triples with `nodeId` for each triangle:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.triangle.stream(configuration: Map)
 YIELD nodeA, nodeB, nodeC
@@ -81,7 +81,7 @@ YIELD nodeA, nodeB, nodeC
 |===
 
 .The following will count the number of triangles that a node is a member of, and return a stream with `nodeId` and `triangleCount`:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.triangleCount.stream(configuration: Map)
 YIELD nodeId, triangles
@@ -104,7 +104,7 @@ YIELD nodeId, triangles
 |===
 
 .The following will count the number of triangles that a node is a member of, and write it back. It will return the total triangle count and average clustering coefficient of the given graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.triangleCount.write(configuration: Map)
 YIELD createMillis, computeMillis, writeMillis, nodeCount, triangleCount, averageClusteringCoefficient
@@ -153,7 +153,7 @@ YIELD createMillis, computeMillis, writeMillis, nodeCount, triangleCount, averag
 image::triangle_count.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (alice:Person {name: 'Alice'}),
        (michael:Person {name: 'Michael'}),
@@ -172,7 +172,7 @@ CREATE (alice:Person {name: 'Alice'}),
 ----
 
 .The following will return a stream of triples, with the name property for each node in each triangle:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.triangle.stream({
   nodeProjection: 'Person',
@@ -200,7 +200,7 @@ We can see that there are `KNOWS` triangles containing "Will, Michael, and Chris
 This means that everybody in the triangle knows each other.
 
 .The following will count the number of triangles that a node is member of, and write it back. It will return the total triangle count and average clustering coefficient of the given graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.triangleCount.write({
   nodeProjection: 'Person',
@@ -216,7 +216,7 @@ YIELD nodeCount, triangleCount, averageClusteringCoefficient
 ----
 
 .The following will count the number of triangles that a node is member of, and return a stream with `nodeId` and `triangleCount`:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.triangleCount.stream({
   nodeProjection: 'Person',
@@ -256,7 +256,7 @@ Evidence suggests that in most real-world networks, and in particular social net
 
 We check if this holds true for Yelp's social network of friends:
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.triangleCount.write({
   nodeProjection: 'Person',
@@ -285,7 +285,7 @@ Local triangle count and clustering coefficient of nodes can be used as features
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.triangleCount.write({
   nodeQuery: 'MATCH (p:Person) RETURN id(p) AS id',

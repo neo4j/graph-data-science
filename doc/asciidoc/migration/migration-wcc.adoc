@@ -45,20 +45,20 @@
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Minimalistic stream over named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.unionFind.stream(null, null, {graph: 'myGraph'})
 YIELD nodeId, setId
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stream('myGraph')
 YIELD nodeId, componentId
 ----
 2+| Streaming over weighted named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.unionFind.stream(
   null,
@@ -70,7 +70,7 @@ CALL algo.unionFind.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stream(
   'myGraph',
@@ -81,7 +81,7 @@ CALL gds.wcc.stream(
 ----
 2+| Minimalistic streaming over anonymous graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.unionFind.stream(
   'MyLabel',
@@ -89,7 +89,7 @@ CALL algo.unionFind.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stream({
   nodeProjection: 'MyLabel',
@@ -98,7 +98,7 @@ CALL gds.wcc.stream({
 ----
 2+| Streaming over anonymous graph with `REVERSE` relationship projection:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.unionFind.stream(
   'MyLabel',
@@ -107,7 +107,7 @@ CALL algo.unionFind.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stream({
   nodeProjection: 'MyLabel',
@@ -120,7 +120,7 @@ CALL gds.wcc.stream({
 ----
 2+| Streaming over anonymous graph with relationship specifying default value for the weight property:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.unionFind.stream(
   'MyLabel',
@@ -133,7 +133,7 @@ CALL algo.unionFind.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stream({
   nodeProjection: 'MyLabel',
@@ -156,7 +156,7 @@ CALL gds.wcc.stream({
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Minimalistic `write` mode:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.unionFind(
   null,
@@ -174,7 +174,7 @@ YIELD
   writeProperty
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.write(
   'myGraph',
@@ -193,7 +193,7 @@ RETURN
 ----
 2+| Running `write` mode over weighted named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.unionFind(
   null,
@@ -207,7 +207,7 @@ CALL algo.unionFind(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.write(
   'myGraph',
@@ -219,7 +219,7 @@ CALL gds.wcc.write(
 ----
 2+| Memory estimation of the algorithm:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.memrec(
   'MyLabel',
@@ -233,7 +233,7 @@ CALL algo.memrec(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.write.estimate(
   {

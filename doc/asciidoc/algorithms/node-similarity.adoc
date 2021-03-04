@@ -59,7 +59,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 === Write mode
 
 .Run Node Similarity in write mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.write(
   graphName: String,
@@ -78,7 +78,7 @@ include::common-parameters-named-graph.adoc[]
 include::common-configuration-named-graph.adoc[]
 
 .Run Node Similarity in write mode on an anonymous graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.write(configuration: Map)
 YIELD
@@ -122,7 +122,7 @@ include::common-configuration-anonymous-graph.adoc[]
 === Mutate mode
 
 .Run Node Similarity in write mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.mutate(
   graphName: String,
@@ -140,7 +140,7 @@ we need to specify a `mutateRelationshipType` and `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 
 .The following will run the algorithm and store the results in `myGraph`:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.mutate('myGraph', {
     mutateRelationshipType: 'SIMILAR',
@@ -153,7 +153,7 @@ CALL gds.nodeSimilarity.mutate('myGraph', {
 === Stream mode
 
 .Run Node Similarity in stream mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream(
   graphName: String,
@@ -169,7 +169,7 @@ include::common-parameters-named-graph.adoc[]
 include::common-configuration-named-graph.adoc[]
 
 .Run Node Similarity in stream mode on an anonymous graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream(configuration: Map)
 YIELD
@@ -207,7 +207,7 @@ include::common-configuration-anonymous-graph.adoc[]
 === Stats mode
 
 .Run Node Similarity in stats mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stats(
   graphName: String,
@@ -221,7 +221,7 @@ YIELD
 include::common-parameters-named-graph.adoc[]
 
 .Run Node Similarity in stats mode on an anonymous graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stats(configuration: Map)
 YIELD
@@ -253,7 +253,7 @@ The following will estimate the memory requirements for running the algorithm.
 The `mode` can be substituted with the available modes (`stream`, `write` and `stats`).
 
 .Run Node Similarity in estimate mode on a named graph.
-[source,cypher]
+[source,cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.<mode>.estimate(
   graphName: String,
@@ -264,7 +264,7 @@ CALL gds.nodeSimilarity.<mode>.estimate(
 include::common-parameters-named-graph.adoc[]
 
 .Run Node Similarity in estimate mode on an anonymous graph.
-[source,cypher]
+[source,cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.<mode>.estimate(configuration: Map)
 ----
@@ -279,7 +279,7 @@ include::common-estimate-mode.adoc[]
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (alice:Person {name: 'Alice'})
 CREATE (bob:Person {name: 'Bob'})
@@ -318,7 +318,7 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 ====
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 ----
@@ -326,7 +326,7 @@ CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 Similarly, loading a graph with Cypher also requires to load the whole pool of nodes of the bipartite graph as well a the relationships that link them.
 
 .The following statement will create a graph with Cypher and store it in the catalog.
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CALL gds.graph.create.cypher(
     'myCypherGraph',
@@ -344,7 +344,7 @@ In the following examples we will demonstrate using the Node Similarity algorith
 [role=query-example]
 --
 .The following will run the algorithm, and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream('myGraph')
 YIELD node1, node2, similarity
@@ -385,7 +385,7 @@ The Jaccard similarity score is written as a property on the relationship.
 [role=query-example]
 --
 .The following will run the algorithm, and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.write('myGraph', {
     writeRelationshipType: 'SIMILAR',
@@ -441,7 +441,7 @@ If neither is specified, topK is used.
 [role=query-example]
 --
 .The following will run the algorithm, and stream the top 1 result per node:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream('myGraph', { topK: 1 })
 YIELD node1, node2, similarity
@@ -465,7 +465,7 @@ ORDER BY Person1
 [role=query-example]
 --
 .The following will run the algorithm, and stream the bottom 1 result per node:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream('myGraph', { bottomK: 1 })
 YIELD node1, node2, similarity
@@ -498,7 +498,7 @@ A value of 0 means no global limit is imposed and all results from topK or botto
 [role=query-example]
 --
 .The following will run the algorithm, and stream the 3 highest out of the top 1 results per node:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream('myGraph', { topK: 1, topN: 3 })
 YIELD node1, node2, similarity
@@ -527,7 +527,7 @@ This value can not be lower than 1.
 [role=query-example]
 --
 .The following will ignore nodes with less than 3 LIKES relationships:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream('myGraph', { degreeCutoff: 3 })
 YIELD node1, node2, similarity
@@ -556,7 +556,7 @@ Setting similarity cutoff to 0 may yield a very large result set, increased runt
 [role=query-example]
 --
 .The following will ignore node pairs with a similarity score less than 0.5:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream('myGraph', { similarityCutoff: 0.5 })
 YIELD node1, node2, similarity
@@ -585,7 +585,7 @@ ORDER BY Person1
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.write.estimate('myGraph', {
   writeRelationshipType: 'SIMILAR',
@@ -608,7 +608,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [role=query-example]
 --
 .The following will run the algorithm and returns the result in form of statistical and measurement values
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stats('myGraph')
 YIELD nodesCompared

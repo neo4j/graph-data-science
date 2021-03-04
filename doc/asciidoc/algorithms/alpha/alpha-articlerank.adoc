@@ -46,7 +46,7 @@ This sample will explain the ArticleRank algorithm, using a simple graph:
 image::articlerank.svg[]
 
 .The following will create a sample graph:
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (paper0:Paper {name:'Paper 0'}),
@@ -81,7 +81,7 @@ CREATE
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.articleRank.stream({
   nodeProjection: 'Paper',
@@ -109,7 +109,7 @@ ORDER BY score DESC
 --
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.articleRank.write({
   nodeProjection: 'Paper',
@@ -129,7 +129,7 @@ Papers 5 and 6 are not cited by any other papers, so their score doesn't increas
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.articleRank.write(graphNameOrConfig: String|Map, configuration: Map)
 YIELD nodes, iterations, createMillis, computeMillis, writeMillis, dampingFactor, writeProperty
@@ -163,7 +163,7 @@ YIELD nodes, iterations, createMillis, computeMillis, writeMillis, dampingFactor
 |===
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.articleRank.stream(graphNameOrConfig: String|Map, configuration: Map)
 YIELD node, score

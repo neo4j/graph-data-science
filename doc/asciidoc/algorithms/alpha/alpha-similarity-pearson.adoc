@@ -50,7 +50,7 @@ include::alpha-similarity.adoc[tag=weighted-function-note]
 We can use it to compute the similarity of two hardcoded lists.
 
 .The following will return the Pearson similarity of two lists of numbers:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 RETURN gds.alpha.similarity.pearson([5,8,7,5,4,9], [7,8,6,6,4,5]) AS similarity
 ----
@@ -65,7 +65,7 @@ RETURN gds.alpha.similarity.pearson([5,8,7,5,4,9], [7,8,6,6,4,5]) AS similarity
 We can also use it to compute the similarity of nodes based on lists computed by a Cypher query.
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MERGE (home_alone:Movie {name:'Home Alone'})
 MERGE (matrix:Movie {name:'The Matrix'})
@@ -107,7 +107,7 @@ MERGE (karin)-[:RATED {score: 9}]->(gruffalo)
 ----
 
 .The following will return the Pearson similarity of Arya and Karin:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (p1:Person {name: 'Arya'})-[rated:RATED]->(movie)
 WITH p1, gds.alpha.similarity.asVector(movie, rated.score) AS p1Vector
@@ -134,7 +134,7 @@ We do this because the Pearson Similarity algorithm needs to compute the average
 We can't therefore just pass in collections of the ratings of movies that have been reviewed by both people.
 
 .The following will return the Pearson similarity of Arya and other people that have rated at least one movie:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (p1:Person {name: 'Arya'})-[rated:RATED]->(movie)
 WITH p1, gds.alpha.similarity.asVector(movie, rated.score) AS p1Vector
@@ -168,7 +168,7 @@ include::alpha-similarity.adoc[tag=weighted-note]
 
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MERGE (home_alone:Movie {name:'Home Alone'})
 MERGE (matrix:Movie {name:'The Matrix'})
@@ -211,7 +211,7 @@ MERGE (karin)-[:RATED {score: 9}]->(gruffalo)
 
 
 .The following will return a stream of node pairs along with their Pearson similarities:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
@@ -251,7 +251,7 @@ We also have 4 pairs of users who are not similar at all.
 We'd probably want to filter those out, which we can do by passing in the `similarityCutoff` parameter.
 
 .The following will return a stream of node pairs that have a similarity of at least 0.1, along with their Pearson similarities:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
@@ -283,7 +283,7 @@ If we're implementing a k-Nearest Neighbors type query we might instead want to 
 We can do that by passing in the `topK` parameter.
 
 .The following will return a stream of users along with the most similar user to them (i.e. `k=1`):
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
@@ -315,7 +315,7 @@ For example, the person most similar to Arya is Karin, but the person most simil
 
 
 .The following will find the most similar user for each user, and store a relationship between those users:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
@@ -340,7 +340,7 @@ RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, m
 We then could write a query to find out which are the movies that other people similar to us liked.
 
 .The following will find the most similar user to Karin, and return their movies that Karin didn't (yet!) rate:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (p:Person {name: 'Karin'})-[:SIMILAR]->(other),
       (other)-[r:RATED]->(movie)
@@ -363,7 +363,7 @@ include::alpha-similarity.adoc[tag=source-target-ids]
 We could use this technique to compute the similarity of a subset of items to all other items.
 
 .The following will find the most similar person (i.e. `k=1`) to Arya and Praveena:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (p:Person), (m:Movie)
 OPTIONAL MATCH (p)-[rated:RATED]->(m)
@@ -398,7 +398,7 @@ The algorithm checks every value against the `skipValue` to determine whether th
 For cases where no values should be skipped, skipping can be disabled by setting `skipValue` to `null`.
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MERGE (home_alone:Movie {name:'Home Alone'})    SET home_alone.embedding = [0.71, 0.33, 0.81, 0.52, 0.41]
 MERGE (matrix:Movie {name:'The Matrix'})        SET matrix.embedding = [0.31, 0.72, 0.58, 0.67, 0.31]
@@ -408,7 +408,7 @@ MERGE (jerry:Movie {name:'Jerry Maguire'})      SET jerry.embedding = [0.47, 0.9
 ----
 
 .The following will find the similarity between movies based on the `embedding` property:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (m:Movie)
 WITH {item:id(m), weights: m.embedding} AS userData
@@ -445,7 +445,7 @@ include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
 
 .Set `graph:'cypher'` in the config:
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 WITH "MATCH (person:Person)-[rated:RATED]->(c)
       RETURN id(person) AS item, id(c) AS category, rated.score AS weight" AS query
@@ -471,7 +471,7 @@ RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, m
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.similarity.pearson.write(configuration: Map)
 YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
@@ -527,7 +527,7 @@ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, me
 |===
 
 .The following will run the algorithm and stream results:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.similarity.pearson.stream(configuration: Map)
 YIELD item1, item2, count1, count2, intersection, similarity

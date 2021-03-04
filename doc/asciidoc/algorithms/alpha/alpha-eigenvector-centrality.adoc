@@ -31,7 +31,7 @@ Eigenvector Centrality can be used in many of the https://arxiv.org/pdf/1407.510
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.eigenvector.write(configuration: Map)
 YIELD nodes, iterations, dampingFactor, writeProperty, createMillis, computeMillis, writeMillis
@@ -63,7 +63,7 @@ YIELD nodes, iterations, dampingFactor, writeProperty, createMillis, computeMill
 |===
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.eigenvector.stream(configuration: Map)
 YIELD node, score
@@ -96,7 +96,7 @@ This sample will explain the Eigenvector Centrality algorithm, using a simple gr
 image::pagerank.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (home:Page {name:'Home'}),
        (about:Page {name:'About'}),
@@ -123,7 +123,7 @@ CREATE (home:Page {name:'Home'}),
 ----
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.eigenvector.stream({
   nodeProjection: 'Page',
@@ -152,7 +152,7 @@ As we might expect, the _Home_ page has the highest Eigenvector Centrality becau
 We can also see that it's not only the number of incoming links that is important, but also the importance of the pages behind those links.
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.eigenvector.write({
   nodeProjection: 'Page',
@@ -178,7 +178,7 @@ The algorithm supports the following options:
 * `l2norm` - divide each score by the square root of the squared  sum of all scores
 
 .The following will run the algorithm and stream results using `max` normalization:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.eigenvector.stream({
   nodeProjection: 'Page',
@@ -212,7 +212,7 @@ include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
 .Use `nodeQuery` and `relationshipQuery` in the config:
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.eigenvector.write({
   nodeQuery: 'MATCH (p:Page) RETURN id(p) AS id',

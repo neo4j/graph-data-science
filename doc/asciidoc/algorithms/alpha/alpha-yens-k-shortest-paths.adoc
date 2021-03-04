@@ -55,7 +55,7 @@ The algorithm assumes that adding a relationship to a path can never make a path
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.kShortestPaths.write(configuration: Map)
 YIELD resultCount, createMillis, computeMillis, writeMillis
@@ -85,7 +85,7 @@ YIELD resultCount, createMillis, computeMillis, writeMillis
 |===
 
 .The following will run the algorithm and stream the results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.kShortestPaths.stream(configuration: Map)
 YIELD index, sourceNodeId, targetNodeId, nodeIds, costs, path
@@ -121,7 +121,7 @@ YIELD index, sourceNodeId, targetNodeId, nodeIds, costs, path
 image::yens.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (a:Loc {name:'A'}),
       (b:Loc {name:'B'}),
@@ -141,7 +141,7 @@ CREATE (a:Loc {name:'A'}),
 ----
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (start:Loc{name: 'A'}), (end:Loc{name: 'F'})
 CALL gds.alpha.kShortestPaths.stream({
@@ -175,7 +175,7 @@ RETURN [node IN gds.util.asNodes(nodeIds) | node.name] AS places,
 This procedure doesn't return paths by default, but we can have it return those by passing in the config `path: true`.
 
 .The following will run the algorithm and stream results, including paths:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (start:Loc{name: 'A'}), (end:Loc{name: 'F'})
 CALL gds.alpha.kShortestPaths.stream({
@@ -200,7 +200,7 @@ LIMIT 1
 image::yens-path.svg[]
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (start:Loc{name: 'A'}), (end:Loc{name: 'F'})
 CALL gds.alpha.kShortestPaths.write({
@@ -228,7 +228,7 @@ RETURN resultCount
 |===
 
 .The following will return all 3 of the shortest path:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH p=()-[r:PATH_0|:PATH_1|:PATH_2]->() RETURN p LIMIT 25
 ----
@@ -244,7 +244,7 @@ Second quickest path is saved as `PATH_1` and third one is saved as`PATH_2`
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
 CALL gds.alpha.kShortestPaths.write({

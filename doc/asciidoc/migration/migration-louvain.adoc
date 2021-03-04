@@ -51,20 +51,20 @@
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+|Minimalistic streaming over named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.beta.louvain.stream(null, null, {graph: 'myGraph'})
 YIELD nodeId, community, communities
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stream('myGraph')
 YIELD nodeId, communityId, intermediateCommunityIds
 ----
 2+|Streaming over named graph using additional properties - `maxLevels` and `maxIterations`:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.beta.louvain.stream(
   null,
@@ -77,7 +77,7 @@ CALL algo.beta.louvain.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stream(
   'myGraph',
@@ -89,7 +89,7 @@ CALL gds.louvain.stream(
 ----
 2+| Streaming over named graph with weight property:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.beta.louvain.stream(
   null,
@@ -101,7 +101,7 @@ CALL algo.beta.louvain.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stream(
   'myGraph',
@@ -112,7 +112,7 @@ CALL gds.louvain.stream(
 ----
 2+| Minimalistic streaming over anonymous graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.beta.louvain.stream(
   'MyLabel',
@@ -120,7 +120,7 @@ CALL algo.beta.louvain.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stream({
   nodeProjection: 'MyLabel',
@@ -129,7 +129,7 @@ CALL gds.louvain.stream({
 ----
 2+| Streaming over anonymous graph with `REVERSE` relationship projection:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.beta.louvain.stream(
   'MyLabel',
@@ -138,7 +138,7 @@ CALL algo.beta.louvain.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stream({
   nodeProjection: 'MyLabel',
@@ -151,7 +151,7 @@ CALL gds.louvain.stream({
 ----
 2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.louvain.stream(
   'MyLabel',
@@ -160,7 +160,7 @@ CALL algo.louvain.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.stream({
   nodeProjection: 'MyLabel',
@@ -184,7 +184,7 @@ CALL gds.louvain.stream({
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Minimalistic write with just `writeProperty`:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.beta.louvain(
   null,
@@ -204,7 +204,7 @@ YIELD
   writeProperty
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.write(
   'myGraph',
@@ -227,7 +227,7 @@ RETURN
 ----
 2+| Running in `write` mode over weighted graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.beta.louvain(
   null,
@@ -241,7 +241,7 @@ CALL algo.beta.louvain(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.write(
   'myGraph',
@@ -253,7 +253,7 @@ CALL gds.louvain.write(
 ----
 2+| Memory estimation of the algorithm:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.memrec(
   'MyLabel',
@@ -267,7 +267,7 @@ CALL algo.memrec(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.write.estimate(
   {

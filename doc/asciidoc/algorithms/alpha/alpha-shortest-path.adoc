@@ -56,7 +56,7 @@ The algorithm assumes that adding a relationship to a path can never make a path
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.shortestPath.write(configuration: Map)
 YIELD nodeCount, totalCost, createMillis, computeMillis, writeMillis
@@ -85,7 +85,7 @@ YIELD nodeCount, totalCost, createMillis, computeMillis, writeMillis
 |===
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.shortestPath.stream(configuration: Map)
 YIELD nodeId, cost
@@ -115,7 +115,7 @@ YIELD nodeId, cost
 image::sssp.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (a:Loc {name: 'A'}),
        (b:Loc {name: 'B'}),
@@ -139,7 +139,7 @@ CREATE (a:Loc {name: 'A'}),
 === Dijkstra Shortest Path
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
 CALL gds.alpha.shortestPath.stream({
@@ -178,7 +178,7 @@ The quickest route takes us from A to F, via C, D, and E, at a total cost of 160
 * Finally, from E to F, for a further 40.
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
 CALL gds.alpha.shortestPath.write({
@@ -213,7 +213,7 @@ include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
 .Set `graph:'cypher'` in the config:
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (start:Loc {name: 'A'}), (end:Loc {name: 'F'})
 CALL gds.alpha.shortestPath.write({

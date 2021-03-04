@@ -100,14 +100,14 @@ dbms.security.procedures.whitelist=gds.*
 
 To verify your installation, the library version can be printed by entering into the browser in Neo4j Desktop and calling the `gds.version()` function:
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 RETURN gds.version()
 ----
 
 To list all installed algorithms, run the `gds.list()` procedure:
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.list()
 ----

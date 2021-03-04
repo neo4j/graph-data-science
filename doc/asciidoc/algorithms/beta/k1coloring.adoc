@@ -43,7 +43,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 === Write mode
 
 .The following describes the API for running the algorithm and writing results back to Neo4j:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.write(graphName: String, configuration: Map)
 YIELD nodes, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, writeMillis
@@ -83,7 +83,7 @@ include::../common-parameters.adoc[]
 === Mutate mode
 
 .Run K1-Coloring in mutate mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.mutate(graphName: String, configuration: Map)
 YIELD nodes, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, mutateMillis
@@ -94,7 +94,7 @@ Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 
 .The following will run the algorithm and store the results in `myGraph`:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.mutate('myGraph', { mutateProperty: 'color' })
 ----
@@ -104,7 +104,7 @@ CALL gds.beta.k1coloring.mutate('myGraph', { mutateProperty: 'color' })
 [[algorithms-k1coloring-syntax-stream]]
 
 .The following describes the API for running the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.stream(graphName: String, {
   // additional configuration
@@ -145,7 +145,7 @@ YIELD nodeId, color
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (alice:User {name: 'Alice'}),
        (bridget:User {name: 'Bridget'}),
@@ -168,15 +168,17 @@ However, <<cypher-projection, Cypher projection>> and anonymous graphs could als
 ====
 
 .The following statement will create the graph and store it in the graph catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('myGraph', 'Person', 'LIKES')
 ----
 
 In the following examples we will demonstrate using the K-1 Coloring algorithm on this graph.
 
+[role=query-example]
+--
 .Running the K-1 Coloring algorithm in stream mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.stream('myGraph')
 YIELD nodeId, color
@@ -197,7 +199,7 @@ ORDER BY name
 It is also possible to write the assigned colors back to the database using the `write` mode.
 
 .Running the K-1 Coloring algorithm in write mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.write('myGraph', {writeProperty: 'color'})
 YIELD nodes, colorCount, ranIterations, didConverge
@@ -216,7 +218,7 @@ In this example we return the number of processed nodes, the number of colors us
 To instead mutate the in-memory graph with the assigned colors, the `mutate` mode can be used as follows.
 
 .Running the K-1 Coloring algorithm in mutate mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.mutate('myGraph', {mutateProperty: 'color'})
 YIELD nodes, colorCount, ranIterations, didConverge

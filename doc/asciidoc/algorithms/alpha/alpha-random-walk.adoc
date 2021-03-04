@@ -63,7 +63,7 @@ The constraints of <<algorithms-pagerank-usage,Page Rank>> also apply to Random 
 == Syntax
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.randomWalk.stream(configuration: Map)
 YIELD startNodeId, nodeIds, path
@@ -102,7 +102,7 @@ This sample will explain the Random Walk algorithm, using a simple graph:
 image::pagerank.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (home:Page {name: 'Home'}),
        (about:Page {name: 'About'}),
@@ -130,7 +130,7 @@ CREATE (home:Page {name: 'Home'}),
 ----
 
 .The following will run the algorithm starting from the Home page and returning a 1 random walk, of path length 3:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (home:Page {name: 'Home'})
 CALL gds.alpha.randomWalk.stream({
@@ -166,7 +166,7 @@ RETURN gds.util.asNode(nodeId).name AS page
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (home:Page {name: 'Home'})
 CALL gds.alpha.randomWalk.stream({

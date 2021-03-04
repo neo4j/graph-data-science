@@ -41,7 +41,7 @@ Plain cypher does not support filtering `Infinity` values, so `gds.util.isFinite
 [[algorithm-all-pairs-shortest-path-syntax]]
 == Syntax
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.allShortestPaths.stream(configuration: Map)
 YIELD startNodeId, targetNodeId, distance
@@ -63,7 +63,7 @@ YIELD startNodeId, targetNodeId, distance
 image::sssp.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (a:Loc {name: 'A'}),
        (b:Loc {name: 'B'}),
@@ -84,7 +84,7 @@ CREATE (a:Loc {name: 'A'}),
 ----
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.allShortestPaths.stream({
   nodeProjection: 'Loc',
@@ -137,7 +137,7 @@ Note that relationship query does not specify direction of the relationship.
 This is applicable to all other algorithms that use Cypher loading.
 
 .The following will run the algorithm, treating the graph as undirected:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.allShortestPaths.stream({
   nodeQuery: 'MATCH (n:Loc) RETURN id(n) AS id',

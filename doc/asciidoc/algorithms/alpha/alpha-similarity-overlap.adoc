@@ -46,7 +46,7 @@ We might then use these computed subsets to https://jbarrasa.com/2017/03/31/quic
 == Overlap Similarity algorithm function sample
 
 .The following will return the Overlap similarity of two lists of numbers:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 RETURN gds.alpha.similarity.overlap([1,2,3], [1,2,4,5]) AS similarity
 ----
@@ -76,7 +76,7 @@ O(A,B) = 2 / min(3,4)
 == Overlap Similarity algorithm procedures sample
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  CREATE
  (fahrenheit451:Book {title:'Fahrenheit 451'}),
@@ -110,7 +110,7 @@ O(A,B) = 2 / min(3,4)
 ----
 
 .The following will return a stream of node pairs, along with their intersection and overlap similarities:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (book:Book)-[:HAS_GENRE]->(genre)
  WITH {item:id(genre), categories: collect(id(book))} AS userData
@@ -141,7 +141,7 @@ Dystopia is also a subgenre of Classics.
 The others are less obvious; Dystopia probably isn't a subgenre of Fantasy, but the other two pairs could be subgenres.
 
 .The following will return a stream of node pairs that have a similarity of at least 0.75, along with their intersection and overlap similarities:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (book:Book)-[:HAS_GENRE]->(genre)
  WITH {item:id(genre), categories: collect(id(book))} AS userData
@@ -173,7 +173,7 @@ If we're implementing a k-Nearest Neighbors type query we might instead want to 
 We can do that by passing in the `topK` parameter.
 
 .The following will return a stream of genres, along with the two most similar super genres to them (i.e. `k=2`):
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (book:Book)-[:HAS_GENRE]->(genre)
  WITH {item:id(genre), categories: collect(id(book))} AS userData
@@ -202,7 +202,7 @@ We can do that by passing in the `topK` parameter.
 // end::stream-topk[]
 
 .The following will find the most similar genre for each genre, and store a relationship between those genres:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (book:Book)-[:HAS_GENRE]->(genre)
  WITH {item:id(genre), categories: collect(id(book))} AS userData
@@ -228,7 +228,7 @@ We can do that by passing in the `topK` parameter.
 We then could write a query to find out the genre hierarchy for a specific genre.
 
 .The following will find the genre hierarchy for the Fantasy genre
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH path = (fantasy:Genre {name: "Fantasy"})-[:NARROWER_THAN*]->(genre)
  RETURN [node in nodes(path) | node.name] AS hierarchy
@@ -254,7 +254,7 @@ include::alpha-similarity.adoc[tag=source-target-ids]
 We could use this technique to compute the similarity of a subset of items to all other items.
 
 .The following will return the super genres for the `Fantasy` and `Classics` genres:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (book:Book)-[:HAS_GENRE]->(genre)
  WITH {item:id(genre), name: genre.name, categories: collect(id(book))} AS userData
@@ -285,7 +285,7 @@ We could use this technique to compute the similarity of a subset of items to al
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.similarity.overlap.write(configuration: Map)
 YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
@@ -342,7 +342,7 @@ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, me
 |===
 
 .The following will run the algorithm and stream results:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.similarity.overlap.stream(configuration: Map)
 YIELD item1, item2, count1, count2, similarity

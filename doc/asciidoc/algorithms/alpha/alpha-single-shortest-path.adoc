@@ -38,7 +38,7 @@ The algorithm assumes that adding a relationship to a path can never make a path
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.shortestPath.deltaStepping.write(configuration: Map)
 YIELD nodeCount, loadDuration, evalDuration, writeDuration
@@ -66,7 +66,7 @@ YIELD nodeCount, loadDuration, evalDuration, writeDuration
 
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.shortestPath.deltaStepping.stream(configuration: Map)
 YIELD nodeId, distance
@@ -96,7 +96,7 @@ YIELD nodeId, distance
 image::sssp.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (a:Loc {name: 'A'}),
        (b:Loc {name: 'B'}),
@@ -120,7 +120,7 @@ CREATE (a:Loc {name: 'A'}),
 === Delta stepping algorithm
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n:Loc {name: 'A'})
 CALL gds.alpha.shortestPath.deltaStepping.stream({
@@ -154,7 +154,7 @@ RETURN gds.util.asNode(nodeId).name AS destination, distance
 The above table shows the cost of going from A to each of the other nodes, including itself at a cost of 0.
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n:Loc {name: 'A'})
 CALL gds.alpha.shortestPath.deltaStepping.write({
@@ -186,7 +186,7 @@ RETURN nodeCount, loadDuration, evalDuration, writeDuration
 
 include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (start:Loc {name: 'A'})
 CALL gds.alpha.shortestPath.deltaStepping.write({

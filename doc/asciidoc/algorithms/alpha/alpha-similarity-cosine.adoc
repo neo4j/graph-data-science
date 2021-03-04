@@ -45,7 +45,7 @@ For example, to get movie recommendations based on the preferences of users who 
 == Syntax
 
 .The following will create an anonymous graph to run the algorithm on and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.similarity.cosine.write(configuration: Map)
 YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
@@ -101,7 +101,7 @@ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, me
 |===
 
 .The following will create an anonymous graph to run the algorithm on and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.similarity.cosine.stream(configuration: Map)
 YIELD item1, item2, count1, count2, intersection, similarity
@@ -153,7 +153,7 @@ include::alpha-similarity.adoc[tag=weighted-function-note]
 We can use it to compute the similarity of two hardcoded lists.
 
 .The following will return the cosine similarity of two lists of numbers:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 RETURN gds.alpha.similarity.cosine([3,8,7,5,2,9], [10,8,6,6,4,5]) AS similarity
 ----
@@ -182,7 +182,7 @@ image::cosine-similarity2.png[role="middle"]
 We can also use it to compute the similarity of nodes based on lists computed by a Cypher query.
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (french:Cuisine {name:'French'})
 CREATE (italian:Cuisine {name:'Italian'})
@@ -223,7 +223,7 @@ CREATE (karin)-[:LIKES {score: 10}]->(portuguese)
 ----
 
 .The following will return the Cosine similarity of Michael and Arya:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p1:Person {name: 'Michael'})-[likes1:LIKES]->(cuisine)
  MATCH (p2:Person {name: "Arya"})-[likes2:LIKES]->(cuisine)
@@ -241,7 +241,7 @@ CREATE (karin)-[:LIKES {score: 10}]->(portuguese)
 
 
 .The following will return the Cosine similarity of Michael and the other people that have a cuisine in common:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p1:Person {name: 'Michael'})-[likes1:LIKES]->(cuisine)
  MATCH (p2:Person)-[likes2:LIKES]->(cuisine) WHERE p2 <> p1
@@ -266,12 +266,11 @@ CREATE (karin)-[:LIKES {score: 10}]->(portuguese)
 [[algorithms-similarity-cosine-procedure-sample]]
 == Cosine Similarity algorithm procedures examples
 
-
 include::alpha-similarity.adoc[tag=computation]
 include::alpha-similarity.adoc[tag=weighted-note]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (french:Cuisine {name:'French'})
 CREATE (italian:Cuisine {name:'Italian'})
@@ -313,7 +312,7 @@ CREATE (karin)-[:LIKES {score: 10}]->(portuguese)
 
 
 .The following will return a stream of node pairs along with their Cosine similarities:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -350,7 +349,7 @@ We also have 2 pairs of users who are not similar at all.
 We'd probably want to filter those out, which we can do by passing in the `similarityCutoff` parameter.
 
 .The following will return a stream of node pairs that have a similarity of at least 0.1, along with their cosine similarities:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -384,7 +383,7 @@ If we're implementing a k-Nearest Neighbors type query we might instead want to 
 We can do that by passing in the `topK` parameter.
 
 .The following will return a stream of users along with the most similar user to them (i.e. `k=1`):
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -416,7 +415,7 @@ These results will not be symmetrical.
 For example, the person most similar to Zhen is Michael, but the person most similar to Michael is Arya.
 
 .The following will find the most similar user for each user, and store a relationship between those users:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -443,7 +442,7 @@ For example, the person most similar to Zhen is Michael, but the person most sim
 We then could write a query to find out what types of cuisine that other people similar to us might like.
 
 .The following will find the most similar user to Praveena, and return their favourite cuisines that Praveena doesn't (yet!) like:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person {name: "Praveena"})-[:SIMILAR]->(other),
        (other)-[:LIKES]->(cuisine)
@@ -468,7 +467,7 @@ include::alpha-similarity.adoc[tag=source-target-ids]
 We could use this technique to compute the similarity of a subset of items to all other items.
 
 .The following will find the most similar person (i.e. `k=1`) to Arya and Praveena:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (p:Person), (c:Cuisine)
  OPTIONAL MATCH (p)-[likes:LIKES]->(c)
@@ -503,7 +502,7 @@ The algorithm checks every value against the `skipValue` to determine whether th
 For cases where no values should be skipped, skipping can be disabled by setting `skipValue` to `null`.
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (french:Cuisine {name:'French'})          SET french.embedding = [0.71, 0.33, 0.81, 0.52, 0.41]
 CREATE (italian:Cuisine {name:'Italian'})        SET italian.embedding = [0.31, 0.72, 0.58, 0.67, 0.31]
@@ -515,7 +514,7 @@ CREATE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31
 ----
 
 .The following will find the similarity between cuisines based on the `embedding` property:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
  MATCH (c:Cuisine)
  WITH {item:id(c), weights: c.embedding} AS userData
@@ -536,7 +535,7 @@ include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
 
 .Set `graph:'cypher'` in the config:
 
-[source,cypher]
+[source, cypher, role=noplay]
 ----
  WITH 'MATCH (person:Person)-[likes:LIKES]->(c)
        RETURN id(person) AS item, id(c) AS category, likes.score AS weight' AS query

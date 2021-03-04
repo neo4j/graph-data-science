@@ -44,20 +44,20 @@
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+|Minimalistic stream over named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.pageRank.stream(null, null, {graph: 'myGraph'})
 YIELD nodeId, score
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream('myGraph')
 YIELD nodeId, score
 ----
 2+| Streaming over named graph with iteration limit:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.pageRank.stream(
   null,
@@ -69,7 +69,7 @@ CALL algo.pageRank.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream(
   'myGraph',
@@ -80,7 +80,7 @@ CALL gds.pageRank.stream(
 ----
 2+| Minimalistic streaming over anonymous graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.pageRank.stream(
   'MyLabel',
@@ -88,7 +88,7 @@ CALL algo.pageRank.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream({
   nodeProjection: 'MyLabel',
@@ -97,7 +97,7 @@ CALL gds.pageRank.stream({
 ----
 2+| Streaming over anonymous graph with `REVERSE` relationship projection:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.pageRank.stream(
   'MyLabel',
@@ -106,7 +106,7 @@ CALL algo.pageRank.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream({
   nodeProjection: 'MyLabel',
@@ -119,7 +119,7 @@ CALL gds.pageRank.stream({
 ----
 2+| Streaming over anonymous graph with relationship weight property, assigning it a default value in case the property doesn't have value:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.pageRank.stream(
   'MyLabel',
@@ -131,7 +131,7 @@ CALL algo.pageRank.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream({
   nodeProjection: 'MyLabel',
@@ -154,7 +154,7 @@ CALL gds.pageRank.stream({
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Running `write` mode on named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.pageRank(
   null,
@@ -173,7 +173,7 @@ YIELD
   writeProperty
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.write(
   'myGraph',
@@ -194,7 +194,7 @@ RETURN
 ----
 2+| Memory estimation of the algorithm:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.memrec(
   'MyLabel',
@@ -207,7 +207,7 @@ CALL algo.memrec(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.write.estimate(
   {

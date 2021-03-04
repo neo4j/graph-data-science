@@ -44,7 +44,7 @@ Decomposing a directed graph into its strongly connected components is a classic
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scc.write(graphName: String|Map, configuration: Map)
 YIELD createMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
@@ -85,7 +85,7 @@ YIELD createMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
 |===
 
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scc.stream(graphName: String, configuration: Map)
 YIELD nodeId, componentId
@@ -114,7 +114,7 @@ YIELD nodeId, componentId
 image::strongly_connected_components.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (nAlice:User {name:'Alice'})
 CREATE (nBridget:User {name:'Bridget'})
@@ -136,7 +136,7 @@ CREATE (nMichael)-[:FOLLOW]->(nBridget);
 ----
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scc.write({
   nodeProjection: 'User',
@@ -154,7 +154,7 @@ YIELD setCount, maxSetSize, minSetSize;
 |===
 
 .The following will run the algorithm and stream back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scc.stream({
   nodeProjection: 'User',
@@ -185,7 +185,7 @@ Charles ends up in his own component because there isn't an outgoing relationshi
 // end::stream-sample-graph-explanation[]
 
 .The following will find the largest partition:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (u:User)
 RETURN u.componentId AS Component, count(*) AS ComponentSize
@@ -208,7 +208,7 @@ include::../../management-ops/cypher-projection.adoc[tag=explanation]
 
 .Use `nodeQuery` and `relationshipQuery` in the config:
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scc.stream({
   nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',

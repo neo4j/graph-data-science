@@ -18,7 +18,7 @@ For example, the following statement will only create an empty graph (assuming t
 
 [role=query-example]
 --
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (n:MyLabel) // the new node is part of Cypher transaction state
 WITH *
@@ -39,7 +39,7 @@ The situation is the same when using an anonymous projection with an algorithm p
 
 [role=query-example]
 --
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (n:MyWccLabel) // the new node is part of Cypher transaction state
 WITH *

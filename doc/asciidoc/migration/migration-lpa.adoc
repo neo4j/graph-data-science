@@ -46,20 +46,20 @@
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Streaming over a named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.labelPropagation.stream(null, null, {graph: 'myGraph'})
 YIELD nodeId, label
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.stream('myGraph')
 YIELD nodeId, communityId
 ----
 2+| Streaming over a named graph using configuration for iterations and relationship weight property:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.labelPropagation.stream(
   null,
@@ -72,7 +72,7 @@ CALL algo.labelPropagation.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.stream(
   'myGraph',
@@ -84,7 +84,7 @@ CALL gds.labelPropagation.stream(
 ----
 2+| Streaming over anonymous graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.labelPropagation.stream(
   'MyLabel',
@@ -92,7 +92,7 @@ CALL algo.labelPropagation.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.stream({
   nodeProjection: 'MyLabel',
@@ -101,7 +101,7 @@ CALL gds.labelPropagation.stream({
 ----
 2+| Streaming over anonymous graph using relationship with `REVERSE` projection:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.labelPropagation.stream(
   'MyLabel',
@@ -110,7 +110,7 @@ CALL algo.labelPropagation.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.stream({
   nodeProjection: 'MyLabel',
@@ -123,7 +123,7 @@ CALL gds.labelPropagation.stream({
 ----
 2+| Streaming over anonymous graph using two way relationships footnote:[Not algorithm specific. This is also possible with named graphs. The graph has to be created with two relationship projections - one for each direction]:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.labelPropagation.stream(
   'MyLabel',
@@ -132,7 +132,7 @@ CALL algo.labelPropagation.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.stream({
   nodeProjection: 'MyLabel',
@@ -156,7 +156,7 @@ CALL gds.labelPropagation.stream({
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+|Minimalistic write:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.labelPropagation(
   null,
@@ -174,7 +174,7 @@ YIELD
   writeProperty
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.write(
   'myGraph',
@@ -193,7 +193,7 @@ RETURN
 ----
 2+|Write using weight properties footnote:lpa-write-weighted[In GA the weightProperty is for Nodes and Relationships while in GDS there are separate properties]:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.labelPropagation(
   null,
@@ -207,7 +207,7 @@ CALL algo.labelPropagation(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.write(
   'myGraph',
@@ -220,7 +220,7 @@ CALL gds.labelPropagation.write(
 ----
 2+|Memory estimation of the algorithm:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.memrec(
   'MyLabel',
@@ -234,7 +234,7 @@ CALL algo.memrec(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.write.estimate(
   {

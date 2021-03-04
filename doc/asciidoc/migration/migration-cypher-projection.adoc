@@ -7,7 +7,7 @@
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| Basic Cypher queries, defining source and target:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.graph.load(
   'myGraph',
@@ -21,7 +21,7 @@ CALL algo.graph.load(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
   'myGraph',
@@ -33,7 +33,7 @@ CALL gds.graph.create.cypher(
 ----
 2+| With concurrency property and Cypher query with relationship property:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.graph.load(
   'myGraph',
@@ -51,7 +51,7 @@ CALL algo.graph.load(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
   'myGraph',
@@ -69,7 +69,7 @@ CALL gds.graph.create.cypher(
 ----
 2+| Parallel loading:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.graph.load(
   'myGraph',

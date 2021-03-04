@@ -1,7 +1,7 @@
 = Treeprocessor test
 
 .Setup query
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (alice:Person {name: 'Alice'})
 CREATE (bob:Person {name: 'Bob'})
@@ -27,7 +27,7 @@ CREATE (dave)-[:LIKES]->(bongos);
 [role=query-example]
 --
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.stream({
   nodeProjection: ['Person', 'Instrument'],
@@ -56,5 +56,3 @@ ORDER BY similarity DESCENDING, Person1, Person2
 |===
 
 --
-
-
