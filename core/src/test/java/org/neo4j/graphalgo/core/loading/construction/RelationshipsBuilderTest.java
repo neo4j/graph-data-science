@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -49,11 +50,68 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class RelationshipsBuilderTest {
 
+    static Stream<Arguments> idMaps() {
+        return TestMethodRunner.idMapImplementation().map(Arguments::of);
+    }
+
     static Stream<Arguments> propertiesAndIdMaps() {
         return crossArguments(
             () -> Stream.of(Arguments.of(true), Arguments.of(false)),
-            () -> TestMethodRunner.idMapImplementation().map(Arguments::of)
+            RelationshipsBuilderTest::idMaps
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("idMaps")
+    void multipleRelationshipProperties(TestMethodRunner runTest) {
+        var concurrency = 1;
+        var nodeCount = 100;
+        var relationshipCount = 1000;
+
+        var idMap = createIdMap(nodeCount, runTest);
+
+        var relationshipsBuilder = GraphFactory.initRelationshipsWithMultiplePropertiesBuilder()
+            .nodes(idMap)
+            .orientation(Orientation.NATURAL)
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE, false))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE, false))
+            .concurrency(concurrency)
+            .build();
+
+        double[] propertyValueBuffer = new double[2];
+        LongStream.range(0, relationshipCount).forEach(relId -> {
+            var sourceId = relId % nodeCount;
+            var targetId = sourceId + 1;
+            propertyValueBuffer[0] = sourceId;
+            propertyValueBuffer[1] = targetId;
+            relationshipsBuilder.addFromInternal(sourceId, targetId, propertyValueBuffer);
+        });
+
+        var relationships = relationshipsBuilder.buildAll();
+        assertThat(relationships.size()).isEqualTo(2);
+        // asserting on topology
+        assertThat(relationships.get(0).topology().elementCount()).isEqualTo(relationshipCount);
+        assertThat(relationships.get(0).topology().orientation()).isEqualTo(Orientation.NATURAL);
+
+        // asserting on properties
+
+        var prop1Graph = GraphFactory.create(idMap, relationships.get(0), AllocationTracker.empty());
+        prop1Graph.forEachNode(nodeId -> {
+            prop1Graph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
+                assertThat(sourceNodeId).isEqualTo(Double.doubleToLongBits(property));
+                return true;
+            });
+            return true;
+        });
+
+        var prop2Graph = GraphFactory.create(idMap, relationships.get(1), AllocationTracker.empty());
+        prop2Graph.forEachNode(nodeId -> {
+            prop2Graph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
+                assertThat(targetNodeId).isEqualTo(Double.doubleToLongBits(property));
+                return true;
+            });
+            return true;
+        });
     }
 
     @ParameterizedTest()

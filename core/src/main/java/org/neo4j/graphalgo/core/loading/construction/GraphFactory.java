@@ -23,6 +23,7 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -37,6 +38,7 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -96,6 +98,50 @@ public final class GraphFactory {
             executorService.orElse(Pools.DEFAULT),
             tracker.orElse(AllocationTracker.empty())
         );
+    }
+
+    @ValueClass
+    public interface PropertyConfig {
+
+        @Value.Default
+        default Aggregation aggregation() {
+            return Aggregation.NONE;
+        }
+
+        @Value.Default
+        default boolean preAggregate() {
+            return false;
+        }
+
+        static PropertyConfig of(Aggregation aggregation, boolean preAggregate) {
+            return ImmutablePropertyConfig.of(aggregation, preAggregate);
+        }
+    }
+
+    public static RelationshipsWithMultiplePropertiesBuilderBuilder initRelationshipsWithMultiplePropertiesBuilder() {
+        return new RelationshipsWithMultiplePropertiesBuilderBuilder();
+    }
+
+    @Builder.Factory
+    static RelationshipsBuilder relationshipsWithMultiplePropertiesBuilder(
+        IdMapping nodes,
+        Optional<Orientation> orientation,
+        List<PropertyConfig> propertyConfigs,
+        Optional<Integer> concurrency,
+        Optional<ExecutorService> executorService,
+        Optional<AllocationTracker> tracker
+    ) {
+        return null;
+//        return new RelationshipsBuilder(
+//            nodes,
+//            orientation.orElse(Orientation.NATURAL),
+//            loadRelationshipProperty.orElse(false),
+//            aggregation.orElse(Aggregation.NONE),
+//            preAggregate.orElse(false),
+//            concurrency.orElse(1),
+//            executorService.orElse(Pools.DEFAULT),
+//            tracker.orElse(AllocationTracker.empty())
+//        );
     }
 
     public static HugeGraph create(NodeMapping idMap, Relationships relationships, AllocationTracker tracker) {

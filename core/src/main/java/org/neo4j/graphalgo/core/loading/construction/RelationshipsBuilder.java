@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.core.loading.TransientAdjacencyListBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.utils.AutoCloseableThreadLocal;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
@@ -136,6 +137,14 @@ public class RelationshipsBuilder {
         );
     }
 
+    public void add(long source, long target, double[] relationshipPropertyValues) {
+        addFromInternal(
+            idMapping.toMappedNodeId(source),
+            idMapping.toMappedNodeId(target),
+            relationshipPropertyValues
+        );
+    }
+
     public <T extends Relationship> void add(Stream<T> relationshipStream) {
         relationshipStream.forEach(this::add);
     }
@@ -164,7 +173,19 @@ public class RelationshipsBuilder {
         );
     }
 
+    public void addFromInternal(long source, long target, double[] relationshipPropertyValues) {
+        threadLocalBuilders.get().addRelationship(
+            idMapping.toRootNodeId(source),
+            idMapping.toRootNodeId(target),
+            relationshipPropertyValues
+        );
+    }
+
     public Relationships build() {
+        return buildAll().get(0);
+    }
+
+    public List<Relationships> buildAll() {
         threadLocalBuilders.close();
 
         ParallelUtil.runWithConcurrency(concurrency, relationshipImporter.flushTasks(), executorService);
@@ -173,7 +194,7 @@ public class RelationshipsBuilder {
         var compressedTopology = build.adjacency();
         var compressedProperties = build.properties().stream().findFirst().orElse(null);
 
-        return Relationships.of(
+        var relationships = Relationships.of(
             relationshipCounter.longValue(),
             orientation,
             Aggregation.equivalentToNone(aggregation),
@@ -183,6 +204,7 @@ public class RelationshipsBuilder {
             compressedProperties != null ? compressedProperties.adjacencyOffsets() : null,
             DOUBLE_DEFAULT_FALLBACK
         );
+        return List.of(relationships);
     }
 
     private static class ThreadLocalBuilder implements AutoCloseable {
@@ -214,6 +236,12 @@ public class RelationshipsBuilder {
             if (relationshipBuffer.isFull()) {
                 flushBuffer();
                 relationshipBuffer.reset();
+            }
+        }
+
+        void addRelationship(long source, long target, double[] relationshipPropertyValue) {
+            for (double propertyValue : relationshipPropertyValue) {
+               addRelationship(source, target, propertyValue);
             }
         }
 
