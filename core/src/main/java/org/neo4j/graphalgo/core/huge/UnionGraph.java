@@ -181,7 +181,7 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public RelationshipIterator typeFilteredIterator(Set<RelationshipType> relationshipTypes) {
+    public RelationshipIterator relationshipTypeFilteredIterator(Set<RelationshipType> relationshipTypes) {
         List<CSRGraph> filteredGraphs = new ArrayList<>();
         for (CSRGraph graph : graphs) {
             if (relationshipTypes.isEmpty() || relationshipTypes.containsAll(graph.availableRelationshipTypes())) {

@@ -114,7 +114,7 @@ class UnionGraphTest {
     void shouldSelectGivenRelationships(String sourceVariable, Set<RelationshipType> relTypes, Collection<String> targetVariables) {
         Graph graph = multiRelTypeGraphStore.getUnion();
 
-        RelationshipIterator filteredIterator = graph.typeFilteredIterator(relTypes);
+        RelationshipIterator filteredIterator = graph.relationshipTypeFilteredIterator(relTypes);
         long[] actualTargets = filteredIterator
             .streamRelationships(
                 multiRelTypeIdFunction.of(sourceVariable),

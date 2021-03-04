@@ -189,7 +189,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public RelationshipIterator typeFilteredIterator(Set<RelationshipType> relationshipTypes) {
+    public RelationshipIterator relationshipTypeFilteredIterator(Set<RelationshipType> relationshipTypes) {
         return this;
     }
 

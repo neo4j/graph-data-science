@@ -294,7 +294,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public RelationshipIterator typeFilteredIterator(Set<RelationshipType> relationshipTypes) {
+    public RelationshipIterator relationshipTypeFilteredIterator(Set<RelationshipType> relationshipTypes) {
         assertSupportedRelationships(relationshipTypes);
         return this;
     }

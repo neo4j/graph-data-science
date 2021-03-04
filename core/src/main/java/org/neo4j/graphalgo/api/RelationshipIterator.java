@@ -48,7 +48,7 @@ public interface RelationshipIterator extends RelationshipPredicate {
 
     Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue);
 
-    RelationshipIterator typeFilteredIterator(Set<RelationshipType> relationshipTypes);
+    RelationshipIterator relationshipTypeFilteredIterator(Set<RelationshipType> relationshipTypes);
 
     /**
      * @return a copy of this iterator that reuses new cursors internally,
