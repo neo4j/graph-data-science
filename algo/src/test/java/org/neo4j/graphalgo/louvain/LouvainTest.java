@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -43,6 +42,8 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 
 import java.util.Map;
 import java.util.Optional;
@@ -334,29 +335,28 @@ class LouvainTest {
 
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
+    @GdsEditionTest(Edition.CE)
     void testMemoryEstimation(int concurrency, int levels, long expectedMinBytes, long expectedMaxBytes) {
-        GdsEdition.instance().setToCommunityAndRun(() -> {
-            GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-                .nodeCount(100_000L)
-                .maxRelCount(500_000L)
-                .build();
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
+            .nodeCount(100_000L)
+            .maxRelCount(500_000L)
+            .build();
 
-            LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
-                .maxLevels(levels)
-                .maxIterations(10)
-                .tolerance(TOLERANCE_DEFAULT)
-                .includeIntermediateCommunities(false)
-                .concurrency(1)
-                .build();
+        LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
+            .maxLevels(levels)
+            .maxIterations(10)
+            .tolerance(TOLERANCE_DEFAULT)
+            .includeIntermediateCommunities(false)
+            .concurrency(1)
+            .build();
 
-            assertMemoryEstimation(
-                () -> new LouvainFactory<>().memoryEstimation(config),
-                dimensions,
-                concurrency,
-                expectedMinBytes,
-                expectedMaxBytes
-            );
-        });
+        assertMemoryEstimation(
+            () -> new LouvainFactory<>().memoryEstimation(config),
+            dimensions,
+            concurrency,
+            expectedMinBytes,
+            expectedMaxBytes
+        );
     }
 
     @Test

@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Transaction;
@@ -38,6 +37,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.GdsEditionUtils.setToEnterpriseAndRun;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
@@ -118,7 +118,7 @@ public final class TestGraphLoader {
         try (Transaction ignored = db.beginTx()) {
             if (factoryType == TestSupport.FactoryType.NATIVE_BIT_ID_MAP) {
                 var graphStore = new AtomicReference<GraphStore>();
-                GdsEdition.instance().setToEnterpriseAndRun(() ->
+                setToEnterpriseAndRun(() ->
                     GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(() ->
                         graphStore.set(loader(factoryType).graphStore())));
 

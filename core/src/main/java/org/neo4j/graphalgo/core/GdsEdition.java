@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.utils.CheckedRunnable;
-
 import java.util.Optional;
 
 public final class GdsEdition {
@@ -75,25 +72,6 @@ public final class GdsEdition {
     public void setToInvalidLicense(String errorMessage) {
         set(State.INVALID_LICENSE);
         this.errorMessage = Optional.of(errorMessage);
-    }
-
-    @TestOnly
-    public <E extends Exception> void setToEnterpriseAndRun(CheckedRunnable<E> code) throws E {
-        setToStateAndRun(State.ENTERPRISE, code);
-    }
-
-    @TestOnly
-    private synchronized <E extends Exception> void setToStateAndRun(
-        State state,
-        CheckedRunnable<E> code
-    ) throws E {
-        var before = get();
-        set(state);
-        try {
-            code.checkedRun();
-        } finally {
-            set(before);
-        }
     }
 
     private void set(State state) {

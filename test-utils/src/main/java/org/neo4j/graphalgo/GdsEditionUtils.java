@@ -17,25 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading.construction;
+package org.neo4j.graphalgo;
 
+import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.utils.CheckedRunnable;
-import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
-import java.util.stream.Stream;
+public final class GdsEditionUtils {
 
-import static org.neo4j.graphalgo.GdsEditionUtils.setToEnterpriseAndRun;
+    private GdsEditionUtils() {}
 
-public interface TestMethodRunner {
-    <E extends Exception> void run(CheckedRunnable<E> code) throws E;
-
-    static Stream<TestMethodRunner> idMapImplementation() {
-        TestMethodRunner defaultImpl = CheckedRunnable::checkedRun;
-        TestMethodRunner bitImMapImpl = TestMethodRunner::runWithBitIdMap;
-        return Stream.of(defaultImpl, bitImMapImpl);
-    }
-
-    static <E extends Exception> void runWithBitIdMap(CheckedRunnable<E> code) throws E {
-        setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(code));
+    public static <E extends Exception>  void setToEnterpriseAndRun(CheckedRunnable<E> code) throws E {
+        GdsEdition.instance().setToEnterpriseEdition();
+        try {
+            code.checkedRun();
+        } finally {
+            GdsEdition.instance().setToCommunityEdition();
+        }
     }
 }
