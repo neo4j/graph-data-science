@@ -30,6 +30,8 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+
 class RestartCheckProcTest extends BaseTest {
 
     @BeforeEach
@@ -46,7 +48,25 @@ class RestartCheckProcTest extends BaseTest {
     }
 
     @Test
-    void shouldReturnTrueWhenCatalogIsEmpty() {
+    void enableProcToRegisterTheSafeToRestartProc() {
+        assertThatCode(() -> runQuery("CALL gds.internal.safeToRestart()"))
+            .hasMessageStartingWith("There is no procedure with the name `gds.internal.safeToRestart` registered for this database instance.");
+
+        // This is gonna be replaced with some code that runs on DB startup and
+        // checks the version to see if we're in the correct environment
+        runQuery("CALL gds.internal.enableProc()");
+
+        assertReturnTrueWhenCatalogIsEmpty();
+    }
+
+    @Test
+    void doubleEnableIsSafe() {
+        runQuery("CALL gds.internal.enableProc()");
+        runQuery("CALL gds.internal.enableProc()");
+        assertReturnTrueWhenCatalogIsEmpty();
+    }
+
+    void assertReturnTrueWhenCatalogIsEmpty() {
         assertCypherResult("CALL gds.internal.safeToRestart()", List.of(
             Map.of("safeToRestart", Boolean.TRUE)
         ));
@@ -65,6 +85,7 @@ class RestartCheckProcTest extends BaseTest {
             .graphStore();
         GraphStoreCatalog.set(config, graphStore);
 
+        runQuery("CALL gds.internal.enableProc()");
         assertCypherResult("CALL gds.internal.safeToRestart()", List.of(
             Map.of("safeToRestart", Boolean.FALSE)
         ));
