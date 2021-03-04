@@ -23,6 +23,10 @@ import org.neo4j.graphalgo.RelationshipType;
 
 import java.util.Map;
 
+/**
+ * A subtype of {@link Graph} which exposes datastructures specific to the csr graph representation
+ * such as {@link AdjacencyList} and {@link AdjacencyOffsets}.
+ */
 public interface CSRGraph extends Graph {
 
     Map<RelationshipType, Relationships.Topology> relationshipTopologies();

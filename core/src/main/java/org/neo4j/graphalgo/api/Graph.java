@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.api.schema.GraphSchema;
 
 import java.util.Set;
 
-public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, RelationshipIterator, RelationshipProperties, RelationshipMapping, RelationshipAccess {
+public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, RelationshipIterator, RelationshipProperties, RelationshipAccess {
 
     GraphSchema schema();
 
@@ -41,7 +41,6 @@ public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, Rela
         return nodeMapping().availableNodeLabels();
     }
 
-    @Override
     default Set<RelationshipType> availableRelationshipTypes() {
         return schema().relationshipSchema().properties().keySet();
     }

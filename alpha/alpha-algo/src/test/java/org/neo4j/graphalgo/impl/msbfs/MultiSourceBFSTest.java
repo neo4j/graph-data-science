@@ -336,7 +336,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         final int nodeCount = 8192;
         final int sourceCount = 1024;
 
-
         RelationshipIterator iter = new RelationshipIterator() {
             @Override
             public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {

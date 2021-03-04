@@ -173,9 +173,7 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(
-        long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer
-    ) {
+    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         graph.forEachRelationship(nodeId, fallbackValue, consumer);
     }
 

@@ -109,11 +109,7 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     }
 
     @Override
-    public void forEachRelationship(
-        long nodeId,
-        double fallbackValue,
-        RelationshipWithPropertyConsumer consumer
-    ) {
+    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
         super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue, (s, t, p) -> filterAndConsume(s, t, p, consumer));
     }
 
