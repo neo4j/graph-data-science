@@ -241,11 +241,6 @@ public class HugeGraph implements CSRGraph {
         return defaultPropertyValue;
     }
 
-    @Override
-    public Set<RelationshipType> relationshipTypes() {
-        return schema.relationshipSchema().properties().keySet();
-    }
-
     private double findPropertyValue(long fromId, long toId) {
         long relOffset = adjacencyOffsets.get(fromId);
         if (relOffset == NO_SUCH_NODE) {
@@ -324,16 +319,11 @@ public class HugeGraph implements CSRGraph {
     }
 
     private RelationshipType relationshipType() {
-        return relationshipTypes().iterator().next();
+        return availableRelationshipTypes().iterator().next();
     }
 
     @Override
     public Set<RelationshipType> relationshipTypes(long source, long target) {
-        return Set.of(relationshipType());
-    }
-
-    @Override
-    public Set<RelationshipType> availableRelationshipTypes() {
         return Set.of(relationshipType());
     }
 

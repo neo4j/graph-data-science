@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -197,7 +198,11 @@ public final class UnionGraph implements CSRGraph {
 
     @Override
     public Set<RelationshipType> availableRelationshipTypes() {
-        return null;
+        Set<RelationshipType> relationshipTypes = new HashSet<>();
+        for (CSRGraph graph : graphs) {
+            relationshipTypes.addAll(graph.availableRelationshipTypes());
+        }
+        return relationshipTypes;
     }
 
     @Override

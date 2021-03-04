@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.api;
 import org.neo4j.graphalgo.RelationshipType;
 
 import java.util.Map;
-import java.util.Set;
 
 public abstract class CSRFilterGraph extends FilterGraph implements CSRGraph {
 
@@ -41,15 +40,5 @@ public abstract class CSRFilterGraph extends FilterGraph implements CSRGraph {
     @Override
     public Map<RelationshipType, Relationships.Topology> relationshipTopologies() {
         return graph.relationshipTopologies();
-    }
-
-    @Override
-    public Set<RelationshipType> relationshipTypes(long source, long target) {
-        return graph.relationshipTypes();
-    }
-
-    @Override
-    public Set<RelationshipType> availableRelationshipTypes() {
-        return graph.availableRelationshipTypes();
     }
 }
