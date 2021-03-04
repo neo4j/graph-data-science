@@ -43,7 +43,7 @@ include::../shared/syntax-intro-named-graph.adoc[]
 [.include-with-stream]
 ======
 .Run WCC in stream mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stream(
   graphName: String,
@@ -73,7 +73,7 @@ include::specific-configuration.adoc[]
 [.include-with-stats]
 ======
 .Run WCC in stats mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stats(
   graphName: String,
@@ -111,7 +111,7 @@ include::specific-configuration.adoc[]
 [.include-with-mutate]
 ======
 .Run WCC in mutate mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.mutate(
   graphName: String,
@@ -155,7 +155,7 @@ include::specific-configuration.adoc[]
 [.include-with-write]
 ======
 .Run WCC in write mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.write(
   graphName: String,
@@ -203,7 +203,7 @@ include::specific-configuration.adoc[]
 include::../shared/syntax-anonymous-graphs.adoc[]
 
 .Run WCC in write mode on an anonymous graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.write(
   configuration: Map
@@ -236,7 +236,7 @@ The results are the same as for running write mode with a named graph, see the <
 include::../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (nAlice:User {name: 'Alice'}),
@@ -258,7 +258,7 @@ The relationships that connect the nodes in each component have a property `weig
 include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=graph-create-query]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create(
   'myGraph',
@@ -281,7 +281,7 @@ include::../shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm in write mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.write.estimate('myGraph', { writeProperty: 'component' })
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
@@ -305,7 +305,7 @@ include::../shared/examples-stream-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stream('myGraph')
 YIELD nodeId, componentId
@@ -341,7 +341,7 @@ include::../shared/examples-stats-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `stats` mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stats('myGraph')
 YIELD componentCount
@@ -366,7 +366,7 @@ include::../shared/examples-mutate-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.mutate('myGraph', { mutateProperty: 'componentId' })
 YIELD nodePropertiesWritten, componentCount;
@@ -388,7 +388,7 @@ include::../shared/examples-write-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `write` mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.write('myGraph', { writeProperty: 'componentId' })
 YIELD nodePropertiesWritten, componentCount;
@@ -420,7 +420,7 @@ The default fallback value is zero, but can be configured to using the `defaultV
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stream('myGraph', {
   relationshipWeightProperty: 'weight',
@@ -483,7 +483,7 @@ _Step 1_
 [role=query-example, group=seeding]
 --
 .The following will run the algorithm in `write` mode:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.write('myGraph', {
   writeProperty: 'componentId',
@@ -508,7 +508,7 @@ After the algorithm has finished writing to Neo4j we want to create a new node i
 [role=query-example, no-result=true, group=seeding]
 --
 .The following will create a new node in the Neo4j graph, with no component ID:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (b:User {name: 'Bridget'})
 CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})
@@ -523,7 +523,7 @@ We will therefore create a second in-memory graph that contains the previously c
 [role=query-example, no-result=true, group=seeding]
 --
 .The following will create a new graph containing the previously computed component id:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
   'myGraph-seeded',
@@ -543,7 +543,7 @@ _Step 4_
 [role=query-example, group=seeding]
 --
 .The following will run the algorithm in `stream` mode using `seedProperty`:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stream('myGraph-seeded', {
   seedProperty: 'componentId',
@@ -582,7 +582,7 @@ Note that the example below relies on <<algorithms-wcc-examples-seeding-steps, S
 [role=query-example, group=seeding]
 --
 .The following will run the algorithm in `write` mode using `seedProperty`:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.write('myGraph-seeded', {
   seedProperty: 'componentId',

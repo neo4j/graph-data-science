@@ -28,7 +28,7 @@ For more information on this algorithm see:
 [.include-with-train]
 ======
 .Run GraphSAGE in train mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.train(
   graphName: String,
@@ -60,7 +60,7 @@ include::specific-train-configuration.adoc[]
 [.include-with-stream]
 ======
 .Run GraphSAGE in stream mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.stream(
   graphName: String,
@@ -88,7 +88,7 @@ include::specific-configuration.adoc[]
 [.include-with-mutate]
 ======
 .Run GraphSAGE in mutate mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.mutate(
   graphName: String,
@@ -125,7 +125,7 @@ include::specific-configuration.adoc[]
 [.include-with-write]
 ======
 .Run GraphSAGE in write mode on a graph stored in the catalog.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.write(
   graphName: String,
@@ -167,7 +167,7 @@ include::specific-configuration.adoc[]
 include::../../shared/syntax-anonymous-graphs.adoc[]
 
 .Run GraphSAGE in write mode on an anonymous graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.write(
   configuration: Map
@@ -192,7 +192,7 @@ The results are the same as for running write mode with a named graph, see the <
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   // Persons
@@ -215,7 +215,7 @@ CREATE
   (john)-[:KNOWS {relWeight: 5.0}]->(jeff)
 ----
 
-[source, cypher, role=graph-create-query]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create(
   'persons',
@@ -243,7 +243,7 @@ Below is an example of how to do that.
 
 NOTE: The names specified in the `featureProperties` configuration parameter must exist in the in-memory graph.
 
-[source, cypher, role=query-example, no-result=true]
+[source, cypher, role=noplay query-example, no-result=true]
 ----
 CALL gds.beta.graphSage.train(
   'persons',
@@ -292,7 +292,7 @@ In the multi-label mode, it is no longer required that all labels have all the s
 
 In order to demonstrate GraphSAGE with multiple labels, we need to add a few more nodes and relationships to the example Graph.
 
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (guitar:Instrument {name: 'Guitar', cost: 1337.0}),
@@ -312,7 +312,7 @@ CREATE
   (john)-[:LIKES]->(trumpet)
 ----
 
-[source, cypher, role=graph-create-query]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create(
   'persons_with_instruments',
@@ -339,7 +339,7 @@ CALL gds.graph.create(
 
 We can now run GraphSAGE in multi-label mode on that graph by specifying the `projectedFeatureDimension` parameter.
 
-[source, cypher, role=query-example, no-result=true]
+[source, cypher, role=noplay query-example, no-result=true]
 ----
 CALL gds.beta.graphSage.train(
   'persons_with_instruments',
@@ -357,7 +357,7 @@ CALL gds.beta.graphSage.train(
 The GraphSAGE implementation supports training using relationship weights.
 Greater relationship weight between nodes signifies that the nodes should have more similar embedding values.
 
-[source, cypher, role=query-example, no-result=true]
+[source, cypher, role=noplay query-example, no-result=true]
 ----
 CALL gds.beta.graphSage.train(
   'persons',
@@ -384,7 +384,7 @@ To generate embeddings and stream them back to the client we can use the stream 
 We must first train a model, which we do using the `gds.beta.graphSage.train` procedure.
 
 [[graph-sage-trained-model-example]]
-[source, cypher, role=query-example, no-result=true, group=graphSage]
+[source, cypher, role=noplay query-example, no-result=true, group=graphSage]
 ----
 CALL gds.beta.graphSage.train(
   'persons',
@@ -399,7 +399,7 @@ CALL gds.beta.graphSage.train(
 
 Once we have trained a model (named `'graphSage'`) we can use it to generate and stream the embeddings.
 
-[source, cypher, role=query-example, no-result=true, group=graphSage]
+[source, cypher, role=noplay query-example, no-result=true, group=graphSage]
 ----
 CALL gds.beta.graphSage.stream(
   'persons',
@@ -430,7 +430,7 @@ The <<graph-sage-trained-model-example, model trained as part of the stream exam
 Below is an example of how to achieve this.
 
 --
-[source, cypher, role=query-example, no-result=true, group=graphSage]
+[source, cypher, role=noplay query-example, no-result=true, group=graphSage]
 ----
 CALL gds.beta.graphSage.mutate(
   'persons',
@@ -457,7 +457,7 @@ The <<graph-sage-trained-model-example, model trained as part of the stream exam
 Below is an example of how to achieve this.
 
 --
-[source, cypher, role=query-example, no-result=true, group=graphSage]
+[source, cypher, role=noplay query-example, no-result=true, group=graphSage]
 ----
 CALL gds.beta.graphSage.write(
   'persons',

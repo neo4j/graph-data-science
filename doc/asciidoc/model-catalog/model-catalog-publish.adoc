@@ -16,7 +16,7 @@ Making a model accessible to other users can be achieved by publishing it.
 [role=query-example, no-result=true]
 --
 .Publishing trained model:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.publish('my-model')
 YIELD

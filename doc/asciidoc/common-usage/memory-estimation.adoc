@@ -26,7 +26,7 @@ In many use cases it will be useful to estimate the required memory of a graph a
 To make this process easier every algorithm supports the `.estimate` mode, which returns an estimate of the amount of memory required to run graph algorithms.
 
 .Syntax
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.<ALGO>.<MODE>.estimate(graphNameOrConfig: String|Map, configuration: Map)
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
@@ -65,7 +65,7 @@ The <<catalog-graph-create, `gds.graph.create`>> procedures also support `.estim
 Those procedures don't accept the graph name as the first argument, as they don't actually create the graph.
 
 .Syntax
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.estimate(nodeProjection: String|List|Map, relationshipProjection: String|List|Map, configuration: Map})
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
@@ -103,7 +103,7 @@ However, it is recommended to specify `'*'` for both in the fictive graph case a
 The query below is an example of estimating a fictive graph with 100 nodes and 1000 relationships.
 
 .Example
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.estimate('*', '*', {
   nodeCount: 100,
@@ -124,7 +124,7 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 The <<cypher-projection, `gds.graph.create.cypher`>> procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
 
 .Syntax
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher.estimate(nodeQuery: String, relationshipQuery: String, configuration: Map})
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount

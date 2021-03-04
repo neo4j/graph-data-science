@@ -54,13 +54,13 @@ Setting the sampling size to the node count will produce exact results.
 |Graph Algorithms v3.5 |Graph Data Science v1.3
 2+|Minimalistic stream over named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.betweenness.stream(null, null, {graph: 'myGraph'})
 YIELD nodeId, centrality
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.betweenness.stream('myGraph')
 YIELD nodeId, score
@@ -68,13 +68,13 @@ YIELD nodeId, score
 
 2+|Minimalistic stream over named graph, sampled:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.betweenness.sampled.stream(null, null, {graph: 'myGraph', probability: 0.5})
 YIELD nodeId, centrality
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.betweenness.stream('myGraph', {samplingSize: 1000}) // assume 2000 nodes
 YIELD nodeId, score
@@ -82,7 +82,7 @@ YIELD nodeId, score
 
 2+| Minimalistic streaming over anonymous graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.betweenness.stream(
   'MyLabel',
@@ -90,7 +90,7 @@ CALL algo.betweenness.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.betweenness.stream({
   nodeProjection: 'MyLabel',
@@ -100,7 +100,7 @@ CALL gds.betweenness.stream({
 
 2+| Streaming over anonymous graph with `UNDRECTED` relationship orientation:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.betweenness.stream(
   'MyLabel',
@@ -109,7 +109,7 @@ CALL algo.betweenness.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.betweenness.stream({
   nodeProjection: 'MyLabel',
@@ -128,7 +128,7 @@ CALL gds.betweenness.stream({
 |Graph Algorithms v3.5 |Graph Data Science v1.3
 2+| Running `write` mode on named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.betweenness(
   null,
@@ -149,7 +149,7 @@ YIELD
   writeMillis
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.betweenness.write(
   'myGraph',

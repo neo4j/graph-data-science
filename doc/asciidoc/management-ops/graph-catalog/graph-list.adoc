@@ -9,7 +9,7 @@ The procedure takes an optional parameter `graphName`:
 * If a graph name is given but not found in the catalog, an empty list will be returned.
 
 .List information about graphs in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list(
   graphName: String?
@@ -75,27 +75,27 @@ The `density` is the result of `relationshipCount` divided by the maximal number
 == Examples
 
 .List basic information about all graphs in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list()
 YIELD graphName, nodeCount, relationshipCount, schema;
 ----
 
 .List extended information about a specific named graph in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('my-cypher-graph')
 YIELD graphName, nodeQuery, relationshipQuery, nodeCount, relationshipCount, schema, creationTime, modificationTime, memoryUsage;
 ----
 
 .List all information about a specific named graph in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('my-native-graph')
 ----
 
 .List information about the degree distribution of a specific graph:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('my-cypher-graph')
 YIELD graphName, degreeDistribution;

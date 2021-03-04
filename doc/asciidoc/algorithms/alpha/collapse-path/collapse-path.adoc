@@ -31,7 +31,7 @@ Exactly one relationship is created for every pair of nodes for which at least o
 [.include-with-mutate]
 ======
 .Run Collapse Path in mutate mode on a named graph.
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.collapsePath.mutate(
   graphName: String,
@@ -75,7 +75,7 @@ include::specific-configuration.adoc[]
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (Dan:Person),
@@ -96,7 +96,7 @@ CREATE
 In this example we want to create a relationship, called `PLAYS_SAME_INSTRUMENT`, between `Person` nodes that play the same instrument.
 To achieve that we have to traverse a path specified by the following Cypher pattern:
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 (p1:Person)-[:PLAYS]->(:Instrument)-[:PLAYED_BY]->(p2:Person)
 ----
@@ -105,7 +105,7 @@ In our source graph only the `PLAYS` relationship type exists.
 The `PLAYED_BY` relationship type can be created by loading the `PLAYS` relationship type in `REVERSE` direction.
 The following query will create such a graph:
 
-[source, cypher, role=graph-create-query]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create(
   'persons',
@@ -126,7 +126,7 @@ Now we can run the algorithm by specifying the traversal `PLAYS, PLAYED_BY` in t
 
 [role=query-example]
 --
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.collapsePath.mutate(
   'persons',
@@ -147,7 +147,7 @@ CALL gds.alpha.collapsePath.mutate(
 --
 
 .The mutated graph will look like the following graph when filtered by the `PLAYS_SAME_INSTRUMENT` relationship
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE
   (Dan:Person),

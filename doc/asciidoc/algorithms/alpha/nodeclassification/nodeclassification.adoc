@@ -144,7 +144,7 @@ The example graph looks like this:
 image::example-graphs/node_classification.svg[align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=setup-query]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (:House {color: 'Gold', sizePerStory: [15.5, 23.6, 33.1], class: 0}),
@@ -170,7 +170,7 @@ We will also project the `sizeOfStory` property to use as a model feature, and t
 include::../../shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=graph-create-query]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create('myGraph', {
     House: { properties: ['sizePerStory', 'class'] },
@@ -192,7 +192,7 @@ In this example we will train a model to predict the class in which a house belo
 --
 [[algorithms-ml-nodeclassification-examples-train-query]]
 .Train a Node Classification model:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.nodeClassification.train('myGraph', {
   nodeLabels: ['House'],
@@ -240,7 +240,7 @@ We will use the model which we trained in the <<algorithms-ml-nodeclassification
 
 [role=query-example, group=mutate]
 --
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.nodeClassification.predict.mutate('myGraph', {
   nodeLabels: ['House', 'UnknownHouse'],
@@ -263,7 +263,7 @@ In order to analyse our predicted classes we stream the properties from the in-m
 
 [role=query-example, no-result=true, group=mutate]
 --
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamNodeProperties(
   'myGraph', ['predicted_probability', 'predicted_class'], ['UnknownHouse']
