@@ -98,6 +98,7 @@ public final class GraphFactory {
         Optional<Orientation> orientation,
         Optional<Boolean> loadRelationshipProperty,
         Optional<Aggregation> aggregation,
+        Optional<DefaultValue> defaultValue,
         Optional<Boolean> preAggregate,
         Optional<Integer> concurrency,
         Optional<ExecutorService> executorService,
@@ -105,7 +106,7 @@ public final class GraphFactory {
         Optional<AllocationTracker> tracker
     ) {
         List<PropertyConfig> propertyConfigs = loadRelationshipProperty.orElse(false)
-            ? List.of(PropertyConfig.of(aggregation.orElse(Aggregation.NONE)))
+            ? List.of(PropertyConfig.of(aggregation, defaultValue))
             : List.of();
 
         return relationshipsWithMultiplePropertiesBuilder(
@@ -127,8 +128,17 @@ public final class GraphFactory {
             return Aggregation.NONE;
         }
 
-        static PropertyConfig of(Aggregation aggregation) {
-            return ImmutablePropertyConfig.of(aggregation);
+        @Value.Default
+        default DefaultValue defaultValue() {
+            return DefaultValue.forDouble();
+        }
+
+        static PropertyConfig of(Aggregation aggregation, DefaultValue defaultValue) {
+            return ImmutablePropertyConfig.of(aggregation, defaultValue);
+        }
+
+        static PropertyConfig of(Optional<Aggregation> aggregation, Optional<DefaultValue> defaultValue) {
+            return of(aggregation.orElse(Aggregation.NONE), defaultValue.orElse(DefaultValue.forDouble()));
         }
     }
 
@@ -167,16 +177,14 @@ public final class GraphFactory {
         propertyConfigs.forEach(propertyConfig -> projectionBuilder.addProperty(
             GraphFactory.DUMMY_PROPERTY,
             GraphFactory.DUMMY_PROPERTY,
-            // TODO configurable
-            DefaultValue.DEFAULT,
+            DefaultValue.of(propertyConfig.defaultValue()),
             propertyConfig.aggregation()
         ));
 
         var projection = projectionBuilder.build();
 
         int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
-        // TODO: configurable?
-        double[] defaultValues = propertyConfigs.stream().mapToDouble(ignored -> Double.NaN).toArray();
+        double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
         var importSizing = ImportSizing.of(concurrency.orElse(1), nodes.rootNodeCount());
         int pageSize = importSizing.pageSize();

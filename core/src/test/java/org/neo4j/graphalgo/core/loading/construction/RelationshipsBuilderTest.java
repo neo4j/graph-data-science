@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -73,8 +74,8 @@ class RelationshipsBuilderTest {
         var relationshipsBuilder = GraphFactory.initRelationshipsWithMultiplePropertiesBuilder()
             .nodes(idMap)
             .orientation(Orientation.NATURAL)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE))
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE, DefaultValue.forDouble()))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE, DefaultValue.forDouble()))
             .concurrency(concurrency)
             .tracker(AllocationTracker.empty())
             .build();
