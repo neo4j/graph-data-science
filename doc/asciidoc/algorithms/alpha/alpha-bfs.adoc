@@ -9,11 +9,6 @@ This section describes the Breadth First Search traversal algorithm in the Neo4j
 
 include::alpha-note.adoc[tag=alpha-note]
 
-This topic includes:
-
-* <<algorithms-bfs-intro, Introduction>>
-* <<algorithms-bfs-syntax, Syntax>>
-* <<algorithms-bfs-examples, Examples>>
 
 [[algorithms-bfs-intro]]
 == Introduction

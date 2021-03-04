@@ -13,17 +13,6 @@ It is the dot product of the two vectors divided by the product of the two vecto
 
 include::alpha-note.adoc[tag=alpha-note]
 
-This section includes:
-
-* <<algorithms-similarity-cosine-context, History and explanation>>
-* <<algorithms-similarity-cosine-usecase, Use-cases - when to use the Cosine Similarity algorithm>>
-* <<algorithms-similarity-cosine-function-sample, Cosine Similarity function algorithm sample>>
-* <<algorithms-similarity-cosine-procedure-sample, Cosine Similarity procedures algorithm sample>>
-* <<algorithms-similarity-cosine-source-target-ids, Specifying source and target ids>>
-* <<algorithms-similarity-cosine-skipping-values, Skipping values>>
-* <<algorithms-similarity-cosine-cypher-projection, Cypher projection>>
-* <<algorithms-similarity-cosine-syntax, Syntax>>
-
 
 [[algorithms-similarity-cosine-context]]
 == History and explanation

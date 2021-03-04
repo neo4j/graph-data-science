@@ -13,15 +13,6 @@ The Degree Centrality algorithm can help us find popular nodes in a graph.
 
 include::alpha-note.adoc[tag=alpha-note]
 
-This section includes:
-
-* <<algorithms-degree-context, History and explanation>>
-* <<algorithms-degree-usecase, Use-cases - when to use the Degree Centrality algorithm>>
-* <<algorithms-degree-sample, Degree Centrality algorithm sample>>
-* <<algorithms-degree-weighted-sample, Weighted Degree Centrality algorithm sample>>
-* <<algorithms-degree-cp, Cypher projection>>
-* <<algorithms-degree-syntax, Syntax>>
-
 
 [[algorithms-degree-context]]
 == History and explanation

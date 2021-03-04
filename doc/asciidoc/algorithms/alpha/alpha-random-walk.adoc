@@ -14,15 +14,6 @@ It’s similar to how a drunk person traverses a city.
 
 include::alpha-note.adoc[tag=alpha-note]
 
-This section includes:
-
-* <<algorithms-random-walk-context, History and explanation>>
-* <<algorithms-random-walk-usecase, Use-cases - when to use the Random Walk algorithm>>
-* <<algorithms-random-walk-limitations, Constraints - when not to use the Random Walk algorithm>>
-* <<algorithms-random-walk-syntax, Syntax>>
-* <<algorithms-random-walk-sample, Random Walk algorithm sample>>
-* <<algorithms-random-walk-cp, Cypher projection>>
-
 
 [[algorithms-random-walk-context]]
 == History and explanation

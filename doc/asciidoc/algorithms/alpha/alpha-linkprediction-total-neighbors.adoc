@@ -12,12 +12,6 @@ It is based on the idea that the more connected a node is, the more likely it is
 
 include::alpha-note.adoc[tag=alpha-note]
 
-This section includes:
-
-* <<algorithms-linkprediction-total-neighbors-context, History and explanation>>
-* <<algorithms-linkprediction-total-neighbors-syntax, Syntax>>
-* <<algorithms-linkprediction-total-neighbors-sample, Total Neighbors algorithm sample>>
-
 
 [[algorithms-linkprediction-total-neighbors-context]]
 == History and explanation

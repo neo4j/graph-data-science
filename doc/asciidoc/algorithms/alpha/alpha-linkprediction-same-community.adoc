@@ -12,12 +12,6 @@ These communities could be computed by using one of the <<algorithms-community>>
 
 include::alpha-note.adoc[tag=alpha-note]
 
-This section includes:
-
-* <<algorithms-linkprediction-same-community-context, History and explanation>>
-* <<algorithms-linkprediction-same-community-syntax, Syntax>>
-* <<algorithms-linkprediction-same-community-sample, Same Community algorithm sample>>
-
 
 [[algorithms-linkprediction-same-community-context]]
 == History and explanation

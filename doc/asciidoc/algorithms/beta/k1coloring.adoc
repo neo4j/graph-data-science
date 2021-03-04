@@ -9,12 +9,6 @@ This section describes the K-1 Coloring algorithm in the Neo4j Graph Data Scienc
 
 include::beta-note.adoc[tag=beta-note]
 
-This topic includes:
-
-* <<algorithms-k1coloring-intro, Introduction>>
-* <<algorithms-k1coloring-syntax, Syntax>>
-* <<algorithms-k1coloring-examples, Examples>>
-
 
 [[algorithms-k1coloring-intro]]
 == Introduction

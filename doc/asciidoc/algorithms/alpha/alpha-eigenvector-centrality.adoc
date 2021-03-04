@@ -14,15 +14,6 @@ A high score means that a node is connected to other nodes that have high scores
 
 include::alpha-note.adoc[tag=alpha-note]
 
-This section includes:
-
-* <<algorithms-eigenvector-context, History and explanation>>
-* <<algorithms-eigenvector-usecase, Use-cases - when to use the Eigenvector Centrality algorithm>>
-* <<algorithms-eigenvector-syntax, Syntax>>
-* <<algorithms-eigenvector-sample, Eigenvector Centrality algorithm sample>>
-* <<algorithms-eigenvector-cp, Cypher projection>>
-* <<algorithms-eigenvector-support, Graph type support>>
-
 
 [[algorithms-eigenvector-context]]
 == History and explanation

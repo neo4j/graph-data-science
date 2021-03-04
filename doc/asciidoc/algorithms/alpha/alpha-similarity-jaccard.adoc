@@ -17,11 +17,6 @@ include::alpha-note.adoc[tag=alpha-note]
 
 A related procedure for computing Jaccard similarity is described in <<algorithms-node-similarity>>.
 
-This section includes:
-
-* <<alpha-algorithms-similarity-jaccard-context, History and explanation>>
-* <<alpha-algorithms-similarity-jaccard-usecase, Use-cases - when to use the Jaccard Similarity algorithm>>
-* <<alpha-algorithms-similarity-jaccard-function-sample, Jaccard Similarity algorithm function sample>>
 
 [[alpha-algorithms-similarity-jaccard-context]]
 == History and explanation

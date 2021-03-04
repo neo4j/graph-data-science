@@ -9,19 +9,6 @@ This section describes the Node Similarity algorithm in the Neo4j Graph Data Sci
 The algorithm is based on the Jaccard Similarity score.
 --
 
-This topic includes:
-
-* <<algorithms-node-similarity-intro, Introduction>>
-* <<algorithms-node-similarity-syntax, Syntax>>
-* <<algorithms-node-similarity-examples, Examples>>
-** <<algorithms-node-similarity-examples-stream, Streaming results>>
-** <<algorithms-node-similarity-examples-write, Writing results>>
-** <<algorithms-node-similarity-examples-limits, Limiting results>>
-*** <<algorithms-node-similarity-examples-limits-topk-bottomk, topK and bottomK>>
-*** <<algorithms-node-similarity-examples-limits-topn-bottomn, topN and bottomN>>
-** <<algorithms-node-similarity-examples-degree-similarity-cutoff, Degree cutoff and similarity cutoff>>
-** <<algorithms-node-similarity-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-node-similarity-examples-stats, Stats>>
 
 [[algorithms-node-similarity-intro]]
 == Introduction

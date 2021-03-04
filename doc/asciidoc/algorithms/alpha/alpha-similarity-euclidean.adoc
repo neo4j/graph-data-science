@@ -14,17 +14,6 @@ Euclidean distance measures the straight line distance between two points in n-d
 [.alpha-note]
 include::alpha-note.adoc[tag=alpha-note]
 
-This section includes:
-
-* <<algorithms-similarity-euclidean-context, History and explanation>>
-* <<algorithms-similarity-euclidean-usecase, Use-cases - when to use the Euclidean Distance algorithm>>
-* <<algorithms-similarity-euclidean-function-sample, Euclidean Distance algorithm function sample>>
-* <<algorithms-similarity-euclidean-procedure-sample, Euclidean Distance algorithm procedures sample>>
-* <<algorithms-similarity-euclidean-source-target-ids, Specifying source and target ids>>
-* <<algorithms-similarity-euclidean-skipping-values, Skipping values>>
-* <<algorithms-similarity-euclidean-cypher-projection, Cypher projection>>
-* <<algorithms-similarity-euclidean-syntax, Syntax>>
-
 
 [[algorithms-similarity-euclidean-context]]
 == History and explanation

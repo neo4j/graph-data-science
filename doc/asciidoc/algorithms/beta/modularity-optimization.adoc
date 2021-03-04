@@ -9,11 +9,7 @@ This section describes the Modularity Optimization algorithm in the Neo4j Graph 
 
 include::beta-note.adoc[tag=beta-note]
 
-This topic includes:
 
-* <<algorithms-modularity-optimization-intro, Introduction>>
-* <<algorithms-modularity-optimization-syntax, Syntax>>
-* <<algorithms-modularity-optimization-examples, Examples>>
 
 [[algorithms-modularity-optimization-intro]]
 == Introduction

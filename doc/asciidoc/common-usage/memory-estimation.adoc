@@ -19,12 +19,6 @@ The model contains three types of data:
 
 Memory configuration depends on the graph projection that we're using.
 
-This section includes:
-
-* <<estimate-procedure-algo>>
-* <<estimate-procedure-graph>>
-* <<estimate-heap-control>>
-
 [[estimate-procedure-algo]]
 == Estimating memory requirements for algorithms
 
