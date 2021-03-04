@@ -47,7 +47,7 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class AdjacencyListWithPropertiesBuilderTest {
+class RelationshipsBuilderTest {
 
     static Stream<Arguments> propertiesAndIdMaps() {
         return crossArguments(
