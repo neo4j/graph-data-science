@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -175,6 +176,11 @@ public final class UnionGraph implements CSRGraph {
         return graphs
             .stream()
             .flatMap(graph -> graph.streamRelationships(nodeId, fallbackValue));
+    }
+
+    @Override
+    public RelationshipIterator typeFilteredIterator(Set<RelationshipType> relationshipTypes) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

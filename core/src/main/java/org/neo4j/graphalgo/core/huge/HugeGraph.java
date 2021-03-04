@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -298,6 +299,12 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
+    public RelationshipIterator typeFilteredIterator(Set<RelationshipType> relationshipTypes) {
+        assertSupportedRelationships(relationshipTypes);
+        return this;
+    }
+
+    @Override
     public Map<RelationshipType, Relationships.Topology> relationshipTopologies() {
         return Map.of(relationshipType(), relationshipTopology());
     }
@@ -306,7 +313,6 @@ public class HugeGraph implements CSRGraph {
         return relationships().topology();
     }
 
-    //TODO: remove maybe
     private void assertSupportedRelationships(Set<RelationshipType> relationshipTypes) {
         if (!relationshipTypes.isEmpty() && (relationshipTypes.size() > 1 || !relationshipTypes.contains(relationshipType()))) {
             throw new IllegalArgumentException(formatWithLocale(
