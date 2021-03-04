@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRFilterGraph;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.NodeMapping;
@@ -105,18 +104,17 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     }
 
     @Override
-    public void forEachRelationship(long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer) {
-        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), relationshipTypes, (s, t) -> filterAndConsume(s, t, consumer));
+    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
+        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), (s, t) -> filterAndConsume(s, t, consumer));
     }
 
     @Override
     public void forEachRelationship(
         long nodeId,
         double fallbackValue,
-        Set<RelationshipType> relationshipTypes,
         RelationshipWithPropertyConsumer consumer
     ) {
-        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue, relationshipTypes, (s, t, p) -> filterAndConsume(s, t, p, consumer));
+        super.forEachRelationship(filteredIdMap.toOriginalNodeId(nodeId), fallbackValue, (s, t, p) -> filterAndConsume(s, t, p, consumer));
     }
 
     @Override

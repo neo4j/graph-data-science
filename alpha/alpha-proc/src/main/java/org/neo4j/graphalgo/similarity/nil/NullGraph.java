@@ -173,22 +173,17 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(
-        long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer
-    ) {}
+    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {}
 
     @Override
     public void forEachRelationship(
         long nodeId,
         double fallbackValue,
-        Set<RelationshipType> relationshipTypes,
         RelationshipWithPropertyConsumer consumer
     ) {}
 
     @Override
-    public Stream<RelationshipCursor> streamRelationships(
-        long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes
-    ) {
+    public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         return Stream.empty();
     }
 

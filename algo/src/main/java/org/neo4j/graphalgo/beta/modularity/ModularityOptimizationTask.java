@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 final class ModularityOptimizationTask implements Runnable {
 
     private final Graph graph;
-    private final MultiPartiteRelationshipIterator localGraph;
+    private final RelationshipIterator localGraph;
     private final long batchStart;
     private final long batchEnd;
     private final long color;

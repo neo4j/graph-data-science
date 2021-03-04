@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
@@ -31,7 +31,7 @@ import static org.neo4j.graphalgo.labelpropagation.LabelPropagation.DEFAULT_WEIG
 
 final class ComputeStep implements Step {
 
-    private final MultiPartiteRelationshipIterator localRelationshipIterator;
+    private final RelationshipIterator localRelationshipIterator;
     private final HugeLongArray existingLabels;
     private final PrimitiveLongIterable nodes;
     private final ProgressLogger progressLogger;

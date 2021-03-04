@@ -306,33 +306,7 @@ public class HugeGraph implements CSRGraph {
         return relationships().topology();
     }
 
-    @Override
-    public void forEachRelationship(
-        long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer
-    ) {
-        assertSupportedRelationships(relationshipTypes);
-        forEachRelationship(nodeId, consumer);
-    }
-
-    @Override
-    public void forEachRelationship(
-        long nodeId,
-        double fallbackValue,
-        Set<RelationshipType> relationshipTypes,
-        RelationshipWithPropertyConsumer consumer
-    ) {
-        assertSupportedRelationships(relationshipTypes);
-        forEachRelationship(nodeId, fallbackValue, consumer);
-    }
-
-    @Override
-    public Stream<RelationshipCursor> streamRelationships(
-        long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes
-    ) {
-        assertSupportedRelationships(relationshipTypes);
-        return streamRelationships(nodeId, fallbackValue);
-    }
-
+    //TODO: remove maybe
     private void assertSupportedRelationships(Set<RelationshipType> relationshipTypes) {
         if (!relationshipTypes.isEmpty() && (relationshipTypes.size() > 1 || !relationshipTypes.contains(relationshipType()))) {
             throw new IllegalArgumentException(formatWithLocale(

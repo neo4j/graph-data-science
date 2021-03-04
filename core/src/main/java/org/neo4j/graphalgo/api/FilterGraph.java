@@ -168,27 +168,20 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public void forEachRelationship(
-        long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer
-    ) {
-        graph.forEachRelationship(nodeId, relationshipTypes, consumer);
+    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
+        graph.forEachRelationship(nodeId, consumer);
     }
 
     @Override
     public void forEachRelationship(
-        long nodeId,
-        double fallbackValue,
-        Set<RelationshipType> relationshipTypes,
-        RelationshipWithPropertyConsumer consumer
+        long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer
     ) {
-        graph.forEachRelationship(nodeId, fallbackValue, relationshipTypes, consumer);
+        graph.forEachRelationship(nodeId, fallbackValue, consumer);
     }
 
     @Override
-    public Stream<RelationshipCursor> streamRelationships(
-        long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes
-    ) {
-        return graph.streamRelationships(nodeId, fallbackValue, relationshipTypes);
+    public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
+        return graph.streamRelationships(nodeId, fallbackValue);
     }
 
     @Override

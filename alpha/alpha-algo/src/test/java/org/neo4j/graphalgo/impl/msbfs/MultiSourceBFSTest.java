@@ -24,12 +24,11 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -336,9 +335,10 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         final int nodeCount = 8192;
         final int sourceCount = 1024;
 
-        MultiPartiteRelationshipIterator iter = new MultiPartiteRelationshipIterator() {
+
+        RelationshipIterator iter = new RelationshipIterator() {
             @Override
-            public void forEachRelationship(long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer) {
+            public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
                 for (long i = 0; i < nodeCount; i++) {
                     if (i != nodeId) {
                         consumer.accept(nodeId, i);
@@ -347,7 +347,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             }
 
             @Override
-            public void forEachRelationship(long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes, RelationshipWithPropertyConsumer consumer) {
+            public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
 
             }
 
@@ -357,7 +357,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             }
 
             @Override
-            public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes) {
+            public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
                 throw new UnsupportedOperationException(".streamRelationships is not implemented.");
             }
         };

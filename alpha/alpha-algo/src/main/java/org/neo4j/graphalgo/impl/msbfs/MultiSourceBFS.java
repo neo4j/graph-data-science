@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.msbfs;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -70,7 +70,7 @@ public final class MultiSourceBFS implements Runnable {
     interface ExecutionStrategy {
 
         void run(
-            MultiPartiteRelationshipIterator relationships,
+            RelationshipIterator relationships,
             long totalNodeCount,
             SourceNodes sourceNodes,
             HugeLongArray visitSet,
@@ -90,7 +90,7 @@ public final class MultiSourceBFS implements Runnable {
 
     private final long nodeCount;
     private final IdMapping nodeIds;
-    private final MultiPartiteRelationshipIterator relationships;
+    private final RelationshipIterator relationships;
     private final ExecutionStrategy strategy;
     private final boolean allowStartNodeTraversal;
     private final long[] startNodes;
@@ -113,7 +113,7 @@ public final class MultiSourceBFS implements Runnable {
 
     public static MultiSourceBFS aggregatedNeighborProcessing(
         IdMapping nodeIds,
-        MultiPartiteRelationshipIterator relationships,
+        RelationshipIterator relationships,
         BfsConsumer perNodeAction,
         AllocationTracker tracker,
         long... startNodes
@@ -189,7 +189,7 @@ public final class MultiSourceBFS implements Runnable {
 
     public MultiSourceBFS(
         IdMapping nodeIds,
-        MultiPartiteRelationshipIterator relationships,
+        RelationshipIterator relationships,
         ExecutionStrategy strategy,
         boolean initSeenNext,
         boolean allowStartNodeTraversal,
@@ -213,7 +213,7 @@ public final class MultiSourceBFS implements Runnable {
 
     private MultiSourceBFS(
         IdMapping nodeIds,
-        MultiPartiteRelationshipIterator relationships,
+        RelationshipIterator relationships,
         ExecutionStrategy strategy,
         long nodeCount,
         boolean allowStartNodeTraversal,
@@ -238,7 +238,7 @@ public final class MultiSourceBFS implements Runnable {
 
     private MultiSourceBFS(
         IdMapping nodeIds,
-        MultiPartiteRelationshipIterator relationships,
+        RelationshipIterator relationships,
         ExecutionStrategy strategy,
         long nodeCount,
         long nodeOffset,

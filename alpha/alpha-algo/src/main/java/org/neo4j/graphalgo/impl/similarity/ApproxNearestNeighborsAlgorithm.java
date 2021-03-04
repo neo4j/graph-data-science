@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
@@ -300,7 +300,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         return changes == 0 || changes < inputSize * Math.abs(topK) * config.precision();
     }
 
-    private LongHashSet findNeighbors(long nodeId, MultiPartiteRelationshipIterator graph) {
+    private LongHashSet findNeighbors(long nodeId, RelationshipIterator graph) {
         LongHashSet neighbors = new LongHashSet();
         graph.forEachRelationship(nodeId, (sourceNodeId, targetNodeId) -> {
             neighbors.add(targetNodeId);
@@ -434,10 +434,10 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
         private final SimilarityComputer<INPUT> similarityComputer;
         private final RleDecoder rleDecoder;
         private final AnnTopKConsumer[] localTopKConsumers;
-        private final MultiPartiteRelationshipIterator oldOutRelationships;
-        private final MultiPartiteRelationshipIterator oldInRelationships;
-        private final MultiPartiteRelationshipIterator newOutRelationships;
-        private final MultiPartiteRelationshipIterator newInRelationships;
+        private final RelationshipIterator oldOutRelationships;
+        private final RelationshipIterator oldInRelationships;
+        private final RelationshipIterator newOutRelationships;
+        private final RelationshipIterator newInRelationships;
         private final double sampleRate;
 
         ComputeTask(
@@ -509,7 +509,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             }
         }
 
-        private LongHashSet getNeighbors(long nodeId, MultiPartiteRelationshipIterator outRelationships, MultiPartiteRelationshipIterator inRelationships) {
+        private LongHashSet getNeighbors(long nodeId, RelationshipIterator outRelationships, RelationshipIterator inRelationships) {
             long[] potentialIncomingNeighbors = findNeighbors(nodeId, inRelationships).toArray();
             long[] incomingNeighbors = config.sampling()
                 ? ANNUtils.sampleNeighbors(potentialIncomingNeighbors, sampleRate, random)

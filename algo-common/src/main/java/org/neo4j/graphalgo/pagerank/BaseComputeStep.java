@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -45,7 +45,7 @@ public abstract class BaseComputeStep implements ComputeStep {
     private int[] lengths;
     protected double tolerance;
     private final long[] sourceNodeIds;
-    final MultiPartiteRelationshipIterator relationshipIterator;
+    final RelationshipIterator relationshipIterator;
     final Degrees degrees;
     private final AllocationTracker tracker;
 

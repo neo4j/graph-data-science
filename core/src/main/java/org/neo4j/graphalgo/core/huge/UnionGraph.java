@@ -157,36 +157,24 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public void forEachRelationship(
-        long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer
-    ) {
-        relationshipTypeFilteredGraphs(relationshipTypes)
-            .forEach(graph -> graph.forEachRelationship(nodeId, consumer));
+    public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
+        for (Graph graph : graphs) {
+            graph.forEachRelationship(nodeId, consumer);
+        }
     }
 
     @Override
-    public void forEachRelationship(
-        long nodeId,
-        double fallbackValue,
-        Set<RelationshipType> relationshipTypes,
-        RelationshipWithPropertyConsumer consumer
-    ) {
-        relationshipTypeFilteredGraphs(relationshipTypes)
-            .forEach(graph -> graph.forEachRelationship(nodeId, fallbackValue, consumer));
+    public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
+        for (Graph graph : graphs) {
+            graph.forEachRelationship(nodeId, fallbackValue, consumer);
+        }
     }
 
     @Override
-    public Stream<RelationshipCursor> streamRelationships(
-        long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes
-    ) {
-        return relationshipTypeFilteredGraphs(relationshipTypes)
-            .flatMap(graph -> graph.streamRelationships(nodeId, fallbackValue));
-    }
-
-    private Stream<? extends Graph> relationshipTypeFilteredGraphs(Set<RelationshipType> relationshipTypes) {
+    public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
         return graphs
             .stream()
-            .filter(graph -> relationshipTypes.containsAll(graph.relationshipTypes()) || relationshipTypes.isEmpty());
+            .flatMap(graph -> graph.streamRelationships(nodeId, fallbackValue));
     }
 
     @Override
