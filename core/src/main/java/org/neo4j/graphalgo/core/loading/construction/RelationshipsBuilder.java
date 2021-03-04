@@ -20,140 +20,68 @@
 package org.neo4j.graphalgo.core.loading.construction;
 
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.Relationships;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
-import org.neo4j.graphalgo.core.loading.AdjacencyBuilder;
 import org.neo4j.graphalgo.core.loading.AdjacencyListWithPropertiesBuilder;
-import org.neo4j.graphalgo.core.loading.ImportSizing;
-import org.neo4j.graphalgo.core.loading.RecordsBatchBuffer;
 import org.neo4j.graphalgo.core.loading.RelationshipImporter;
 import org.neo4j.graphalgo.core.loading.RelationshipPropertiesBatchBuffer;
 import org.neo4j.graphalgo.core.loading.SingleTypeRelationshipImporter;
-import org.neo4j.graphalgo.core.loading.TransientAdjacencyListBuilder;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.utils.AutoCloseableThreadLocal;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP;
-import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 public class RelationshipsBuilder {
 
-    private final AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder;
-    private final SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder;
-
     private final IdMapping idMapping;
-    private final Orientation orientation;
-    private final int concurrency;
-    private final ExecutorService executorService;
-    private final LongAdder relationshipCounter;
-    private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilders;
+
     private final boolean loadRelationshipProperty;
     private final boolean isMultiGraph;
 
-    public RelationshipsBuilder(
+    private final AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder;
+    private final Orientation orientation;
+    private final SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder;
+    private final LongAdder relationshipCounter;
+
+    private final int concurrency;
+    private final ExecutorService executorService;
+
+    private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilders;
+
+    RelationshipsBuilder(
         IdMapping idMapping,
         Orientation orientation,
-        List<GraphFactory.PropertyConfig> propertyConfigs,
-        boolean preAggregate,
+        int bufferSize,
+        int[] propertyKeyIds,
+        AdjacencyListWithPropertiesBuilder adjacencyListWithPropertiesBuilder,
+        SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder,
+        LongAdder relationshipCounter,
+        boolean loadRelationshipProperty,
+        boolean isMultiGraph,
         int concurrency,
-        ExecutorService executorService,
-        AllocationTracker tracker
+        ExecutorService executorService
     ) {
         this.idMapping = idMapping;
         this.orientation = orientation;
-        this.loadRelationshipProperty = !propertyConfigs.isEmpty();
-
-        var aggregations = propertyConfigs.isEmpty()
-            ? new Aggregation[]{Aggregation.NONE}
-            : propertyConfigs.stream()
-                .map(GraphFactory.PropertyConfig::aggregation)
-                .map(Aggregation::resolve)
-                .toArray(Aggregation[]::new);
-
-        this.isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
-
+        this.adjacencyListWithPropertiesBuilder = adjacencyListWithPropertiesBuilder;
+        this.importerBuilder = importerBuilder;
+        this.relationshipCounter = relationshipCounter;
+        this.loadRelationshipProperty = loadRelationshipProperty;
+        this.isMultiGraph = isMultiGraph;
         this.concurrency = concurrency;
         this.executorService = executorService;
-
-        this.relationshipCounter = new LongAdder();
-
-        // TODO: configurable?
-        var relationshipType = RelationshipType.ALL_RELATIONSHIPS;
-        var importSizing = ImportSizing.of(concurrency, idMapping.rootNodeCount());
-        int pageSize = importSizing.pageSize();
-        int numberOfPages = importSizing.numberOfPages();
-        int bufferSize = (int) Math.min(idMapping.rootNodeCount(), RecordsBatchBuffer.DEFAULT_BUFFER_SIZE);
-
-        var projectionBuilder = RelationshipProjection
-            .builder()
-            .type(relationshipType.name())
-            .orientation(orientation);
-
-        propertyConfigs.forEach(propertyConfig -> projectionBuilder.addProperty(
-            GraphFactory.DUMMY_PROPERTY,
-            GraphFactory.DUMMY_PROPERTY,
-            DefaultValue.DEFAULT,
-            propertyConfig.aggregation()
-        ));
-
-        var projection = projectionBuilder.build();
-
-        int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
-        // TODO: configurable?
-        double[] defaultValues = propertyConfigs.stream().mapToDouble(ignored -> Double.NaN).toArray();
-
-        this.adjacencyListWithPropertiesBuilder = AdjacencyListWithPropertiesBuilder.create(
-            idMapping.rootNodeCount(),
-            projection,
-            TransientAdjacencyListBuilder.builderFactory(tracker),
-            TransientAdjacencyOffsets.forPageSize(pageSize),
-            aggregations,
-            propertyKeyIds,
-            defaultValues,
-            tracker
-        );
-
-        AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
-            adjacencyListWithPropertiesBuilder,
-            numberOfPages,
-            pageSize,
-            tracker,
-            relationshipCounter,
-            preAggregate
-        );
-
-        var relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);
-
-        this.importerBuilder = new SingleTypeRelationshipImporter.Builder(
-            relationshipType,
-            projection,
-            loadRelationshipProperty,
-            NO_SUCH_RELATIONSHIP_TYPE,
-            relationshipImporter,
-            relationshipCounter,
-            false
-        ).loadImporter(loadRelationshipProperty);
 
         this.threadLocalBuilders = AutoCloseableThreadLocal.withInitial(() -> new ThreadLocalBuilder(
             idMapping,
             importerBuilder,
             bufferSize,
-            propertyKeyIds.length,
             propertyKeyIds
         ));
     }
@@ -264,13 +192,12 @@ public class RelationshipsBuilder {
             IdMapping idMap,
             SingleTypeRelationshipImporter.Builder.WithImporter importerBuilder,
             int bufferSize,
-            int propertyCount,
             int[] propertyKeyIds
         ) {
             this.propertyKeyIds = propertyKeyIds;
 
             if (propertyKeyIds.length > 1) {
-                this.propertiesBatchBuffer = new RelationshipPropertiesBatchBuffer(bufferSize, propertyCount);
+                this.propertiesBatchBuffer = new RelationshipPropertiesBatchBuffer(bufferSize, propertyKeyIds.length);
                 this.importer = importerBuilder.withBuffer(idMap, bufferSize, propertiesBatchBuffer);
             } else {
                 this.propertiesBatchBuffer = null;

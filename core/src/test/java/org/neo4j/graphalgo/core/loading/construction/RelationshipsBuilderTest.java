@@ -76,6 +76,7 @@ class RelationshipsBuilderTest {
             .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE))
             .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE))
             .concurrency(concurrency)
+            .tracker(AllocationTracker.empty())
             .build();
 
         double[] propertyValueBuffer = new double[2];
@@ -128,6 +129,7 @@ class RelationshipsBuilderTest {
             .orientation(Orientation.NATURAL)
             .loadRelationshipProperty(importProperty)
             .concurrency(concurrency)
+            .tracker(AllocationTracker.empty())
             .build();
 
         ParallelUtil.parallelStreamConsume(
@@ -195,6 +197,7 @@ class RelationshipsBuilderTest {
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(graph)
+            .tracker(AllocationTracker.empty())
             .build();
 
         var a1Original = idFunction.of("a1");

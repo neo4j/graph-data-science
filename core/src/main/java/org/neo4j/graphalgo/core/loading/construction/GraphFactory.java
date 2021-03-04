@@ -22,8 +22,10 @@ package org.neo4j.graphalgo.core.loading.construction;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -35,13 +37,26 @@ import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
+import org.neo4j.graphalgo.core.loading.AdjacencyBuilder;
+import org.neo4j.graphalgo.core.loading.AdjacencyListWithPropertiesBuilder;
+import org.neo4j.graphalgo.core.loading.ImportSizing;
+import org.neo4j.graphalgo.core.loading.RecordsBatchBuffer;
+import org.neo4j.graphalgo.core.loading.RelationshipImporter;
+import org.neo4j.graphalgo.core.loading.SingleTypeRelationshipImporter;
+import org.neo4j.graphalgo.core.loading.TransientAdjacencyListBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.stream.IntStream;
+
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 @Value.Style(
     builderVisibility = Value.Style.BuilderVisibility.PUBLIC,
@@ -50,7 +65,7 @@ import java.util.concurrent.ExecutorService;
 )
 public final class GraphFactory {
 
-    static final String DUMMY_PROPERTY = "property";
+    private static final String DUMMY_PROPERTY = "property";
 
     private GraphFactory() {}
 
@@ -86,20 +101,21 @@ public final class GraphFactory {
         Optional<Boolean> preAggregate,
         Optional<Integer> concurrency,
         Optional<ExecutorService> executorService,
+        // TODO: non-optional
         Optional<AllocationTracker> tracker
     ) {
         List<PropertyConfig> propertyConfigs = loadRelationshipProperty.orElse(false)
             ? List.of(PropertyConfig.of(aggregation.orElse(Aggregation.NONE)))
             : List.of();
 
-        return new RelationshipsBuilder(
+        return relationshipsWithMultiplePropertiesBuilder(
             nodes,
-            orientation.orElse(Orientation.NATURAL),
+            orientation,
             propertyConfigs,
-            preAggregate.orElse(false),
-            concurrency.orElse(1),
-            executorService.orElse(Pools.DEFAULT),
-            tracker.orElse(AllocationTracker.empty())
+            preAggregate,
+            concurrency,
+            executorService,
+            tracker
         );
     }
 
@@ -130,14 +146,89 @@ public final class GraphFactory {
         Optional<ExecutorService> executorService,
         Optional<AllocationTracker> tracker
     ) {
+        var loadRelationshipProperties = !propertyConfigs.isEmpty();
+        var actualTracker = tracker.orElse(AllocationTracker.empty());
+
+        var aggregations = propertyConfigs.isEmpty()
+            ? new Aggregation[]{Aggregation.NONE}
+            : propertyConfigs.stream()
+                .map(GraphFactory.PropertyConfig::aggregation)
+                .map(Aggregation::resolve)
+                .toArray(Aggregation[]::new);
+
+        var relationshipType = RelationshipType.ALL_RELATIONSHIPS;
+        var isMultiGraph = Arrays.stream(aggregations).allMatch(Aggregation::equivalentToNone);
+
+        var projectionBuilder = RelationshipProjection
+            .builder()
+            .type(relationshipType.name())
+            .orientation(orientation.orElse(Orientation.NATURAL));
+
+        propertyConfigs.forEach(propertyConfig -> projectionBuilder.addProperty(
+            GraphFactory.DUMMY_PROPERTY,
+            GraphFactory.DUMMY_PROPERTY,
+            // TODO configurable
+            DefaultValue.DEFAULT,
+            propertyConfig.aggregation()
+        ));
+
+        var projection = projectionBuilder.build();
+
+        int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
+        // TODO: configurable?
+        double[] defaultValues = propertyConfigs.stream().mapToDouble(ignored -> Double.NaN).toArray();
+
+        var importSizing = ImportSizing.of(concurrency.orElse(1), nodes.rootNodeCount());
+        int pageSize = importSizing.pageSize();
+        int numberOfPages = importSizing.numberOfPages();
+        int bufferSize = (int) Math.min(nodes.rootNodeCount(), RecordsBatchBuffer.DEFAULT_BUFFER_SIZE);
+
+        var relationshipCounter = new LongAdder();
+
+        var adjacencyListWithPropertiesBuilder = AdjacencyListWithPropertiesBuilder.create(
+            nodes.rootNodeCount(),
+            projection,
+            TransientAdjacencyListBuilder.builderFactory(actualTracker),
+            TransientAdjacencyOffsets.forPageSize(pageSize),
+            aggregations,
+            propertyKeyIds,
+            defaultValues,
+            actualTracker
+        );
+
+        AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
+            adjacencyListWithPropertiesBuilder,
+            numberOfPages,
+            pageSize,
+            actualTracker,
+            relationshipCounter,
+            preAggregate.orElse(false)
+        );
+
+        var relationshipImporter = new RelationshipImporter(actualTracker, adjacencyBuilder);
+
+        var importerBuilder = new SingleTypeRelationshipImporter.Builder(
+            relationshipType,
+            projection,
+            loadRelationshipProperties,
+            NO_SUCH_RELATIONSHIP_TYPE,
+            relationshipImporter,
+            relationshipCounter,
+            false
+        ).loadImporter(loadRelationshipProperties);
+
         return new RelationshipsBuilder(
             nodes,
             orientation.orElse(Orientation.NATURAL),
-            propertyConfigs,
-            preAggregate.orElse(false),
+            bufferSize,
+            propertyKeyIds,
+            adjacencyListWithPropertiesBuilder,
+            importerBuilder,
+            relationshipCounter,
+            loadRelationshipProperties,
+            isMultiGraph,
             concurrency.orElse(1),
-            executorService.orElse(Pools.DEFAULT),
-            tracker.orElse(AllocationTracker.empty())
+            executorService.orElse(Pools.DEFAULT)
         );
     }
 
