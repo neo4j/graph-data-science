@@ -81,7 +81,7 @@ public class RestartCheckProc {
             "safeToRestart"
         );
 
-        private static final ProcedureSignature SIGNATURE = new ProcedureSignature(
+        private static final ProcedureSignature SIGNATURE = ProcedureSignatureProxy.signature(
             PROCEDURE_NAME,
             // input signature: ()
             List.of(),
@@ -106,7 +106,9 @@ public class RestartCheckProc {
             // Procedure is not allowed to be run on the system database
             false,
             // hide from dbms.procedures listing
-            true
+            true,
+            // allowedExpiredCredentials - can be called when credentials are expired
+            false
         );
 
         private final ProgressEventStore progress;
