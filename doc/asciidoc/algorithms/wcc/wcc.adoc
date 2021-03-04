@@ -9,21 +9,6 @@
 This section describes the Weakly Connected Components (WCC) algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-wcc-intro, Introduction>>
-* <<algorithms-wcc-syntax, Syntax>>
-** <<algorithms-wcc-syntax-anonymous-graphs, Anonymous graphs>>
-* <<algorithms-wcc-examples, Examples>>
-** <<algorithms-wcc-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-wcc-examples-stream, Stream>>
-** <<algorithms-wcc-examples-stats, Stats>>
-** <<algorithms-wcc-examples-mutate, Mutate>>
-** <<algorithms-wcc-examples-write, Write>>
-** <<algorithms-wcc-examples-weighted, Weighted>>
-** <<algorithms-wcc-examples-seeding, Seeded components>>
-** <<algorithms-wcc-examples-seed-write, Writing Seeded components>>
-
 
 [[algorithms-wcc-intro]]
 == Introduction

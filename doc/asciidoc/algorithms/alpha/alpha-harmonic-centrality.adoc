@@ -14,13 +14,6 @@ As with many of the centrality algorithms, it originates from the field of socia
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-harmonic-centrality-context, History and explanation>>
-* <<algorithms-harmonic-centrality-usecase, Use-cases - when to use the Harmonic Centrality algorithm>>
-* <<algorithms-harmonic-centrality-syntax, Syntax>>
-* <<algorithms-harmonic-centrality-sample, Harmonic Centrality algorithm sample>>
-
 
 [[algorithms-harmonic-centrality-context]]
 == History and explanation

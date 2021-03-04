@@ -9,21 +9,6 @@
 This section describes the Triangle Count algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-triangle-count-intro, Introduction>>
-* <<algorithms-triangle-count-syntax, Syntax>>
-** <<algorithms-triangle-count-syntax-anonymous, Anonymous graphs>>
-** <<algorithms-triangle-count-syntax-triangles-listing, Triangles Listing>>
-* <<algorithms-triangle-count-examples, Examples>>
-** <<algorithms-triangle-count-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-triangle-count-examples-stream, Stream>>
-** <<algorithms-triangle-count-examples-stats, Stats>>
-** <<algorithms-triangle-count-examples-mutate, Mutate>>
-** <<algorithms-triangle-count-examples-write, Write>>
-** <<algorithms-triangle-count-examples-max-degree, Maximum degree>>
-** <<algorithms-triangle-count-examples-triangles-listing, Triangles Listing>>
-
 
 [[algorithms-triangle-count-intro]]
 == Introduction

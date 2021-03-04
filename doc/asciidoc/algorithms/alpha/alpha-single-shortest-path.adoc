@@ -11,16 +11,6 @@ The Single Source Shortest Path (SSSP) algorithm calculates the shortest (weight
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-single-source-shortest-path-context, History and explanation>>
-* <<algorithms-single-source-shortest-path-usecase, Use-cases - when to use the Single Source Shortest Path algorithm>>
-* <<algorithms-single-source-shortest-path-limitations, Constraints - when not to use the Single Source Shortest Path algorithm>>
-* <<algorithms-single-source-shortest-path-syntax, Syntax>>
-* <<algorithms-single-source-shortest-path-sample, Single Source Shortest Path algorithm sample>>
-** <<algorithms-single-source-shortest-path-delta, Delta stepping algorithm>>
-*** <<algorithms-single-source-shortest-path-cp, Cypher projection>>
-
 
 [[algorithms-single-source-shortest-path-context]]
 == History and explanation

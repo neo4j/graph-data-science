@@ -7,11 +7,6 @@
 This section describes the Collapse Path algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-collapse-path-intro, Introduction>>
-* <<algorithms-collapse-path-syntax, Syntax>>
-* <<algorithms-collapse-path-examples, Examples>>
 
 [[algorithms-collapse-path-intro]]
 == Introduction

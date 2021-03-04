@@ -11,13 +11,6 @@ ArticleRank is a variant of the <<algorithms-page-rank, Page Rank algorithm>>, w
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-articlerank-context, History and explanation>>
-* <<algorithms-articlerank-sample, ArticleRank algorithm sample>>
-* <<algorithms-articlerank-syntax, Syntax>>
-* <<algorithms-articlerank-support, Graph type support>>
-
 
 [[algorithms-articlerank-context]]
 == History and explanation

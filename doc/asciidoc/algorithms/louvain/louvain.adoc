@@ -9,21 +9,6 @@
 This section describes the Louvain algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-louvain-intro, Introduction>>
-* <<algorithms-louvain-syntax, Syntax>>
-** <<algorithms-louvain-syntax-anonymous, Anonymous graphs>>
-* <<algorithms-louvain-examples, Examples>>
-** <<algorithms-louvain-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-louvain-examples-stream, Stream>>
-** <<algorithms-louvain-examples-stats, Stats>>
-** <<algorithms-louvain-examples-mutate, Mutate>>
-** <<algorithms-louvain-examples-write, Write>>
-** <<algorithms-louvain-examples-stream-weighted, Weighted>>
-** <<algorithms-louvain-examples-stream-seeded, Seeded>>
-** <<algorithms-louvain-examples-stream-intermediate, Stream intermediate communities>>
-
 
 [[algorithms-louvain-intro]]
 == Introduction

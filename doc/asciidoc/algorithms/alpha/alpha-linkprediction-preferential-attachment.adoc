@@ -11,12 +11,6 @@ Preferential Attachment is a measure used to compute the closeness of nodes, bas
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-linkprediction-preferential-attachment-context, History and explanation>>
-* <<algorithms-linkprediction-preferential-attachment-syntax, Syntax>>
-* <<algorithms-linkprediction-preferential-attachment-sample, Preferential Attachment algorithm sample>>
-
 
 [[algorithms-linkprediction-preferential-attachment-context]]
 == History and explanation
