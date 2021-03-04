@@ -20,11 +20,9 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.Relationships;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -32,7 +30,6 @@ import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
@@ -250,16 +247,13 @@ class TransientAdjacencyListTest {
             nodesBuilder.addNode(target);
         }
         NodeMapping idMap = nodesBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = new RelationshipsBuilder(
-            idMap,
-            Orientation.NATURAL,
-            false,
-            Aggregation.NONE,
-            false,
-            1,
-            Pools.DEFAULT,
-            AllocationTracker.empty()
-        );
+
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(idMap)
+            .concurrency(1)
+            .executorService(Pools.DEFAULT)
+            .build();
+
         for (long target : targets) {
             relationshipsBuilder.add(sourceNodeId, target);
         }

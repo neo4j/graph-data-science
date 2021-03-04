@@ -30,7 +30,7 @@ import org.neo4j.memory.MemoryTracker;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Stream;
 
-final class SingleTypeRelationshipImporter {
+public final class SingleTypeRelationshipImporter {
 
     private final RelationshipImporter.Imports imports;
     private final RelationshipImporter.PropertyReader propertyReader;
@@ -45,15 +45,15 @@ final class SingleTypeRelationshipImporter {
         this.buffer = buffer;
     }
 
-    RelationshipsBatchBuffer buffer() {
+    public RelationshipsBatchBuffer buffer() {
         return buffer;
     }
 
-    long importRelationships() {
+    public long importRelationships() {
         return imports.importRelationships(buffer, propertyReader);
     }
 
-    static class Builder {
+    public static class Builder {
 
         private final RelationshipType relationshipType;
         private final RelationshipProjection projection;
@@ -63,7 +63,7 @@ final class SingleTypeRelationshipImporter {
         private final boolean validateRelationships;
         private final boolean loadProperties;
 
-        Builder(
+        public Builder(
             RelationshipType relationshipType,
             RelationshipProjection projection,
             boolean loadProperties,
@@ -93,23 +93,23 @@ final class SingleTypeRelationshipImporter {
             return this.loadProperties;
         }
 
-        WithImporter loadImporter(boolean loadProperties) {
+        public WithImporter loadImporter(boolean loadProperties) {
             RelationshipImporter.Imports imports = importer.imports(projection.orientation(), loadProperties);
             return new WithImporter(imports);
         }
 
-        class WithImporter {
+        public class WithImporter {
             private final RelationshipImporter.Imports imports;
 
             WithImporter(RelationshipImporter.Imports imports) {
                 this.imports = imports;
             }
 
-            Stream<Runnable> flushTasks() {
+            public Stream<Runnable> flushTasks() {
                 return importer.flushTasks().stream();
             }
 
-            SingleTypeRelationshipImporter withBuffer(
+            public SingleTypeRelationshipImporter withBuffer(
                 IdMapping idMap,
                 int bulkSize,
                 RelationshipImporter.PropertyReader propertyReader

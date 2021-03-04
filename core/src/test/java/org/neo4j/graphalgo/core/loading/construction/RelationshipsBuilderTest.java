@@ -73,8 +73,8 @@ class RelationshipsBuilderTest {
         var relationshipsBuilder = GraphFactory.initRelationshipsWithMultiplePropertiesBuilder()
             .nodes(idMap)
             .orientation(Orientation.NATURAL)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE, false))
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE, false))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE))
             .concurrency(concurrency)
             .build();
 
@@ -98,7 +98,7 @@ class RelationshipsBuilderTest {
         var prop1Graph = GraphFactory.create(idMap, relationships.get(0), AllocationTracker.empty());
         prop1Graph.forEachNode(nodeId -> {
             prop1Graph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
-                assertThat(sourceNodeId).isEqualTo(Double.doubleToLongBits(property));
+                assertThat(sourceNodeId).isEqualTo((long) property);
                 return true;
             });
             return true;
@@ -107,7 +107,7 @@ class RelationshipsBuilderTest {
         var prop2Graph = GraphFactory.create(idMap, relationships.get(1), AllocationTracker.empty());
         prop2Graph.forEachNode(nodeId -> {
             prop2Graph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
-                assertThat(targetNodeId).isEqualTo(Double.doubleToLongBits(property));
+                assertThat(targetNodeId).isEqualTo((long) property);
                 return true;
             });
             return true;

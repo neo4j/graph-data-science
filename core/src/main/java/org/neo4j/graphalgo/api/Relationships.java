@@ -25,12 +25,33 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Optional;
 
+import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
+
 @ValueClass
 public interface Relationships {
 
     Topology topology();
 
     Optional<Properties> properties();
+
+    static Relationships of(
+        long relationshipCount,
+        Orientation orientation,
+        boolean isMultiGraph,
+        AdjacencyList adjacencyList,
+        AdjacencyOffsets adjacencyOffsets
+    ) {
+        return of(
+            relationshipCount,
+            orientation,
+            isMultiGraph,
+            adjacencyList,
+            adjacencyOffsets,
+            null,
+            null,
+            DOUBLE_DEFAULT_FALLBACK
+        );
+    }
 
     static Relationships of(
         long relationshipCount,

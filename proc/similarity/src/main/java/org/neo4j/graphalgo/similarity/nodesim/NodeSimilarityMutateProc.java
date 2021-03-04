@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -158,16 +159,15 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
         if (similarityGraphResult.isTopKGraph()) {
             TopKGraph topKGraph = (TopKGraph) similarityGraphResult.similarityGraph();
 
-            RelationshipsBuilder relationshipsBuilder = new RelationshipsBuilder(
-                topKGraph,
-                Orientation.NATURAL,
-                true,
-                Aggregation.NONE,
-                false,
-                1,
-                Pools.DEFAULT,
-                allocationTracker()
-            );
+            RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+                .nodes(topKGraph)
+                .orientation(Orientation.NATURAL)
+                .loadRelationshipProperty(true)
+                .aggregation(Aggregation.NONE)
+                .preAggregate(false)
+                .concurrency(1)
+                .executorService(Pools.DEFAULT)
+                .build();
 
             if (shouldComputeHistogram(callContext)) {
                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);

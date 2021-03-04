@@ -30,7 +30,7 @@ public class RelationshipPropertiesBatchBuffer implements RelationshipImporter.P
     private final long[][] buffer;
     private final int propertyCount;
 
-    RelationshipPropertiesBatchBuffer(int batchSize, int propertyCount) {
+    public RelationshipPropertiesBatchBuffer(int batchSize, int propertyCount) {
         this.propertyCount = propertyCount;
         this.buffer = new long[propertyCount][batchSize];
     }

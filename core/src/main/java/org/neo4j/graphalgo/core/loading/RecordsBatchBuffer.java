@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.core.loading.StoreScanner.RecordConsumer;
 
 public abstract class RecordsBatchBuffer<Reference> implements RecordConsumer<Reference> {
 
-    static final int DEFAULT_BUFFER_SIZE = 100_000;
+    public static final int DEFAULT_BUFFER_SIZE = 100_000;
 
     final long[] buffer;
     int length;
