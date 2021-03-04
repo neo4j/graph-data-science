@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
@@ -42,7 +42,7 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
     private final HugeAtomicBitSet voteBits;
     private final Messenger<ITERATOR> messenger;
     private final PregelComputation<CONFIG> computation;
-    private final RelationshipIterator relationshipIterator;
+    private final MultiPartiteRelationshipIterator relationshipIterator;
 
     private int iteration;
     private boolean hasSendMessage;
@@ -56,7 +56,7 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
         NodeValue nodeValue,
         Messenger<ITERATOR> messenger,
         HugeAtomicBitSet voteBits,
-        RelationshipIterator relationshipIterator
+        MultiPartiteRelationshipIterator relationshipIterator
     ) {
         this.iteration = iteration;
         this.nodeCount = graph.nodeCount();

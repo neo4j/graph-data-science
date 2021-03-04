@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.centrality.degreecentrality;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -119,13 +119,13 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
     }
 
     private class WeightedDegreeTask implements Runnable {
-        private final RelationshipIterator relationshipIterator;
+        private final MultiPartiteRelationshipIterator relationshipIterator;
         private final long startNodeId;
         private final double[] partition;
         private final long endNodeId;
 
         WeightedDegreeTask(
-            RelationshipIterator relationshipIterator,
+            MultiPartiteRelationshipIterator relationshipIterator,
             long start,
             double[] partition
         ) {

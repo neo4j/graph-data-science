@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.write;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -173,7 +173,7 @@ public final class RelationshipExporter extends StatementApi {
             if (afterWrite != null) {
                 writeConsumer = writeConsumer.andThen(afterWrite);
             }
-            RelationshipIterator relationshipIterator = graph.concurrentCopy();
+            MultiPartiteRelationshipIterator relationshipIterator = graph.concurrentCopy();
             for (long currentNode = start; currentNode < end; currentNode++) {
                 relationshipIterator.forEachRelationship(currentNode, Double.NaN, writeConsumer);
 

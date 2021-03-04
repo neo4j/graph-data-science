@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.impl.walking;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -147,7 +147,7 @@ public class CollapsePath extends Algorithm<CollapsePath, Relationships> {
 
         @Override
         protected void prepareNextVisit(
-            RelationshipIterator relationships,
+            MultiPartiteRelationshipIterator relationships,
             long nodeVisit,
             long nodeId,
             HugeLongArray nextSet,

@@ -19,17 +19,21 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.neo4j.graphalgo.RelationshipType;
+
+import java.util.Set;
 import java.util.stream.Stream;
 
-public interface RelationshipIterator extends RelationshipPredicate {
+public interface MultiPartiteRelationshipIterator extends RelationshipPredicate {
 
     /**
      * Calls the given consumer function for every relationship of a given node.
      *
      * @param nodeId id of the node for which to iterate relationships
+     * @param relationshipTypes Set of relationship types to filter for
      * @param consumer relationship consumer function
      */
-    void forEachRelationship(long nodeId, RelationshipConsumer consumer);
+    void forEachRelationship(long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer);
 
     /**
      * Calls the given consumer function for every relationship of a given node.
@@ -39,18 +43,42 @@ public interface RelationshipIterator extends RelationshipPredicate {
      *
      * @param nodeId id of the node for which to iterate relationships
      * @param fallbackValue value used as relationship property if no properties were loaded
+     * @param relationshipTypes Set of relationship types to filter for
      * @param consumer relationship consumer function
      */
-    void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer);
+    void forEachRelationship(
+        long nodeId,
+        double fallbackValue,
+        Set<RelationshipType> relationshipTypes,
+        RelationshipWithPropertyConsumer consumer
+    );
 
-    Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue);
+    Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue, Set<RelationshipType> relationshipTypes);
+
+    default void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
+        forEachRelationship(nodeId, Set.of(), consumer);
+    }
+
+    default void forEachRelationship(
+        long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer
+    ) {
+        forEachRelationship(nodeId, fallbackValue, Set.of(), consumer);
+    }
+
+    default Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
+        return streamRelationships(nodeId, fallbackValue, Set.of());
+    }
+
+    @Override
+    default boolean exists(long sourceNodeId, long targetNodeId) {
+        return false;
+    }
 
     /**
      * @return a copy of this iterator that reuses new cursors internally,
      *         so that iterations happen independent from other iterations.
      */
-    default RelationshipIterator concurrentCopy() {
+    default MultiPartiteRelationshipIterator concurrentCopy() {
         return this;
     }
-
 }

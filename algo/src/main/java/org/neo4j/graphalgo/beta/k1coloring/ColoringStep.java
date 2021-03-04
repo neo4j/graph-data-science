@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
@@ -28,7 +28,7 @@ public final class ColoringStep implements Runnable {
 
     public static final int INITIAL_FORBIDDEN_COLORS = 1000;
     
-    private final RelationshipIterator graph;
+    private final MultiPartiteRelationshipIterator graph;
     private final HugeLongArray colors;
     private final BitSet nodesToColor;
     private final BitSet forbiddenColors;
@@ -38,7 +38,7 @@ public final class ColoringStep implements Runnable {
     private final long[] resetMask;
 
     public ColoringStep(
-        RelationshipIterator graph,
+        MultiPartiteRelationshipIterator graph,
         HugeLongArray colors,
         BitSet nodesToColor,
         long nodeCount,

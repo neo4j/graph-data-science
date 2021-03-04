@@ -27,9 +27,9 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -336,7 +336,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
         final int nodeCount = 8192;
         final int sourceCount = 1024;
 
-        RelationshipIterator iter = new RelationshipIterator() {
+        MultiPartiteRelationshipIterator iter = new MultiPartiteRelationshipIterator() {
             @Override
             public void forEachRelationship(long nodeId, Set<RelationshipType> relationshipTypes, RelationshipConsumer consumer) {
                 for (long i = 0; i < nodeCount; i++) {

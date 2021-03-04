@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.louvain;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.beta.modularity.ImmutableModularityOptimizationStreamConfig;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimization;
@@ -316,7 +316,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         private final ModularityOptimization modularityOptimization;
 
-        private final RelationshipIterator relationshipIterator;
+        private final MultiPartiteRelationshipIterator relationshipIterator;
 
         private final Partition partition;
 
@@ -324,7 +324,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         private RelationshipCreator(
             RelationshipsBuilder relationshipsBuilder,
             ModularityOptimization modularityOptimization,
-            RelationshipIterator relationshipIterator,
+            MultiPartiteRelationshipIterator relationshipIterator,
             Partition partition
         ) {
             this.relationshipsBuilder = relationshipsBuilder;

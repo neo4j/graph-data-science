@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.impl.msbfs;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.MultiPartiteRelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 
@@ -130,7 +130,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
 
         private final IntPriorityQueue queue;
         private final double[] distance;
-        private final RelationshipIterator threadLocalGraph;
+        private final MultiPartiteRelationshipIterator threadLocalGraph;
 
         private ShortestPathTask() {
             distance = new double[nodeCount];
