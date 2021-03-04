@@ -80,7 +80,7 @@ For detailed information about the configuration of each variant, we refer to th
 In the following two examples we show how to create a graph called `my-native-graph` that contains `Person` nodes and `LIKES` relationships.
 
 .Create a graph using a native projection:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
     'my-native-graph',
@@ -93,7 +93,7 @@ YIELD graphName, nodeCount, relationshipCount, createMillis;
 We can also use Cypher to select the nodes and relationships to be projected into the in-memory graph.
 
 .Create a graph using a Cypher projection:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
     'my-cypher-graph',
@@ -106,7 +106,7 @@ YIELD graphName, nodeCount, relationshipCount, createMillis;
 After creating the graphs in the catalog, we can refer to them in algorithms by using their name.
 
 .Run Page Rank on one of our created graphs:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream('my-native-graph') YIELD nodeId, score;
 ----
@@ -123,7 +123,7 @@ The procedure takes an optional parameter `graphName`:
 * If a graph name is given but not found in the catalog, an error will be raised.
 
 .List information about graphs in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list(
   graphName: String?
@@ -189,27 +189,27 @@ The `density` is the result of `relationshipCount` divided by the maximal number
 === Examples
 
 .List basic information about all graphs in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list()
 YIELD graphName, nodeCount, relationshipCount, schema;
 ----
 
 .List extended information about a specific named graph in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('my-cypher-graph')
 YIELD graphName, nodeQuery, relationshipQuery, nodeCount, relationshipCount, schema, creationTime, modificationTime, memoryUsage;
 ----
 
 .List all information about a specific named graph in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('my-native-graph')
 ----
 
 .List information about the degree distribution of a specific graph:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('my-cypher-graph')
 YIELD graphName, degreeDistribution;
@@ -222,7 +222,7 @@ YIELD graphName, degreeDistribution;
 We can check if a graph is stored in the catalog by looking up its name.
 
 .Check if a graph exists in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.exists('my-store-graph') YIELD exists;
 ----
@@ -235,7 +235,7 @@ We can remove node properties from a named graph in the catalog.
 This is useful to free up main memory or to remove accidentally created node properties.
 
 .Remove multiple node properties from a named graph:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.removeNodeProperties('my-graph', ['pageRank', 'communityId'])
 ----
@@ -246,7 +246,7 @@ The procedure can be configured to remove just the properties for some specific 
 In the following example, we ran an algorithm on a sub-graph and subsequently remove the newly created property.
 
 .Remove node properties of a specific node projection:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', ['A', 'B'], '*')
 CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
@@ -266,7 +266,7 @@ We can delete all relationships of a given type from a named graph in the catalo
 This is useful to free up main memory or to remove accidentally created relationship types.
 
 .Delete all relationships of type T from a named graph:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.deleteRelationships('my-graph', 'T')
 YIELD graphName, relationshipType, deletedRelationships, deletedProperties
@@ -279,7 +279,7 @@ YIELD graphName, relationshipType, deletedRelationships, deletedProperties
 Once we have finished using the named graph we can remove it from the catalog to free up memory.
 
 .Remove a graph from the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.drop('my-store-graph') YIELD graphName;
 ----
@@ -288,7 +288,7 @@ If we want the procedure to fail silently on non-existing graphs, we can set a b
 This will yield an empty result for non-existing graphs.
 
 .Try removing a graph from the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.drop('my-fictive-graph', false) YIELD graphName;
 ----
@@ -302,7 +302,7 @@ This is useful if we ran multiple algorithms in `mutate` mode and want to retrie
 This is similar to what the `stream` execution mode does, but allows more fine-grained control over the operations.
 
 .Stream multiple node properties:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamNodeProperties('my-graph', ['componentId', 'pageRank', 'communityId'])
 ----
@@ -313,7 +313,7 @@ The procedure can be configured to stream just the properties for some specific 
 In the following example, we ran an algorithm on a sub-graph and subsequently streamed the newly created property.
 
 .Stream node properties of a specific node projection:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', ['A', 'B'], '*')
 CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
@@ -332,7 +332,7 @@ For streaming a single node property this is not necessary.
 The result has the format `nodeId`, `propertyValue`, as is familiar from the streaming mode of many algorithm procedures.
 
 .Stream a single node property:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamNodeProperty('my-graph', 'componentId')
 ----
@@ -346,7 +346,7 @@ This is useful if we ran multiple algorithms in `mutate` mode and want to retrie
 This is similar to what the `stream` execution mode does, but allows more fine-grained control over the operations.
 
 .Stream multiple relationship properties:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperties('my-graph', ['similarityScore', 'weight'])
 ----
@@ -355,7 +355,7 @@ The procedure can be configured to stream just the properties for some specific 
 In the following example, we ran an algorithm on a sub-graph and subsequently streamed the newly created property.
 
 .Stream relationship properties of a specific relationship projection:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', ['*'], [A', 'B'])
 CALL gds.nodeSimiliarity.mutate('my-graph', {relationshipTypes: ['A'], mutateRelationshipType: 'R', mutateProperty: 'similarityScore'})
@@ -374,7 +374,7 @@ For streaming a single relationship property, the property name can be left out.
 The result has the format `sourceNodeId`, `targetNodeId`, `relationshipType`, `propertyValue`.
 
 .Stream a single relationship property:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('my-graph', 'similarityScore')
 ----
@@ -390,7 +390,7 @@ The properties to write are typically the `writeProperty` values that were used 
 Properties that were added to the created graph at creation time will often already be present in the Neo4j database.
 
 .Write multiple node properties to Neo4j:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.writeNodeProperties('my-graph', ['componentId', 'pageRank', 'communityId'])
 ----
@@ -401,7 +401,7 @@ The procedure can be configured to write just the properties for some specific n
 In the following example, we ran an algorithm on a sub-graph and subsequently wrote the newly created property to Neo4j.
 
 .Write node properties of a specific node projection to Neo4j:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create('my-graph', ['A', 'B'], '*')
 CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
@@ -425,7 +425,7 @@ This can either be an element identifier used in a relationship projection durin
 Relationships are always written using a single thread.
 
 .Write relationships to Neo4j:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.writeRelationship('my-graph', 'SIMILAR_TO')
 ----
@@ -434,7 +434,7 @@ By default, no relationship properties will be written.
 To write relationship properties, these have to be explicitly specified.
 
 .Write relationships and their properties to Neo4j:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.writeRelationship('my-graph', 'SIMILAR_TO', 'similarityScore')
 ----
@@ -456,7 +456,7 @@ The feature is useful in the following, exemplary scenarios:
 * Share analytical results within the organization.
 
 .Export a named graph to a new database in the Neo4j databases directory:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.export('my-graph', { dbName: 'mydatabase' })
 ----
@@ -484,7 +484,7 @@ The database must not exist when using the export procedure, it needs to be crea
 
 
 .After running the procedure, we can start a new database and query the exported graph:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 :use system
 CREATE DATABASE mydatabase;
