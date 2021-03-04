@@ -22,11 +22,11 @@ The GDS library supports the following Neo4j versions:
 | `4.2.0` - `4.2.3`
 | `4.1.0` - `4.1.7` footnote:neo411bug[There is a bug in Neo4j 4.1.1 that can lead to an exception when using Cypher projection. If possible, use the lastest patch version.]
 | `4.0.0` - `4.0.11`
-.3+<.^|`1.4.x`
+.3+<.^|`1.4.x` footnote:deprecated[This version series is end-of-life and will not receive further patches. Please use a later version.]
 | `4.2.0` - `4.2.3`
 | `4.1.0` - `4.1.7` footnote:neo411bug[]
 | `4.0.0` - `4.0.11`
-.2+<.^|`1.3.x` footnote:deprecated[This version series is end-of-life and will not receive further patches. Please use a later version.]
+.2+<.^|`1.3.x` footnote:deprecated[]
 | `4.1.0` - `4.1.5` footnote:neo411bug[]
 | `4.0.0` - `4.0.9`
 | `1.2.3` footnote:deprecated[]
