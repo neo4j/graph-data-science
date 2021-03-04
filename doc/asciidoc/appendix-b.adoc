@@ -43,4 +43,22 @@ include::migration/migration-graph-info.adoc[leveloffset=+2]
 
 include::migration/migration-graph-remove.adoc[leveloffset=+2]
 
-include::migration/migration-product-algos.adoc[leveloffset=+2]
+[[migration-product-algos]]
+=== Production-ready algorithms
+
+* <<migration-lpa, Label Propagation>>
+* <<migration-louvain, Louvain>>
+* <<migration-node-sim, Node Similarity>>
+* <<migration-page-rank, PageRank>>
+* <<migration-wcc, Weakly Connected Components>>
+
+include::migration/migration-lpa.adoc[leveloffset=+1]
+
+include::migration/migration-louvain.adoc[leveloffset=+1]
+
+include::migration/migration-node-sim.adoc[leveloffset=+1]
+
+include::migration/migration-page-rank.adoc[leveloffset=+1]
+
+include::migration/migration-wcc.adoc[leveloffset=+1]
+

@@ -60,4 +60,3 @@
 *** xref:production-deployment/transaction-handling/index.adoc[]
 ** xref:appendix-a/index.adoc[]
 ** xref:appendix-b/index.adoc[]
-*** xref:appendix-b/migration-guide/index.adoc[]
