@@ -9,21 +9,6 @@
 This section describes the Betweenness Centrality algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-betweenness-centrality-intro, Introduction>>
-* <<algorithms-betweenness-centrality-considerations, Considerations and sampling>>
-* <<algorithms-betweenness-centrality-syntax, Syntax>>
-** <<algorithms-betweenness-centrality-syntax-anonymous, Anonymous graphs>>
-* <<algorithms-betweenness-centrality-examples, Examples>>
-** <<algorithms-betweenness-centrality-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-betweenness-centrality-examples-stream, Stream>>
-** <<algorithms-betweenness-centrality-examples-stats, Stats>>
-** <<algorithms-betweenness-centrality-examples-mutate, Mutate>>
-** <<algorithms-betweenness-centrality-examples-write, Write>>
-** <<algorithms-betweenness-centrality-examples-sampling, Sampling>>
-** <<algorithms-betweenness-centrality-examples-undirected, Undirected>>
-
 
 [[algorithms-betweenness-centrality-intro]]
 == Introduction

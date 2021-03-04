@@ -9,19 +9,6 @@
 This section describes the Local Clustering Coefficient algorithm in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-local-clustering-coefficient-intro, Introduction>>
-* <<algorithms-local-clustering-coefficient-syntax, Syntax>>
-** <<algorithms-local-clustering-coefficient-syntax-anonymous, Anonymous Graphs>>
-* <<algorithms-local-clustering-coefficient-examples, Examples>>
-** <<algorithms-local-clustering-coefficient-examples-memory-estimation, Memory Estimation>>
-** <<algorithms-local-clustering-coefficient-examples-stream, Stream>>
-** <<algorithms-local-clustering-coefficient-examples-stats, Stats>>
-** <<algorithms-local-clustering-coefficient-examples-mutate, Mutate>>
-** <<algorithms-local-clustering-coefficient-examples-write, Write>>
-** <<algorithms-local-clustering-coefficient-examples-pre-computed, Pre-computed counts>>
-
 
 [[algorithms-local-clustering-coefficient-intro]]
 == Introduction

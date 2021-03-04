@@ -14,14 +14,6 @@ It is often used early in a graph analysis process to help us get an idea of how
 
 include::alpha-note.adoc[]
 
-This section includes:
-
-* <<algorithms-strongly-connected-components-context, History and explanation>>
-* <<algorithms-strongly-connected-components-usecase, Use-cases - when to use the Strongly Connected Components algorithm>>
-* <<algorithms-strongly-connected-components-syntax, Syntax>>
-* <<algorithms-strongly-connected-components-example, Strongly Connected Components algorithm example>>
-* <<algorithms-strongly-connected-components-cp, Cypher projection>>
-
 
 [[algorithms-strongly-connected-components-context]]
 == History and explanation

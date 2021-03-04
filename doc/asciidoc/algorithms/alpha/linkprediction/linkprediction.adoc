@@ -10,14 +10,6 @@
 This section describes the Link Prediction Model in the Neo4j Graph Data Science library.
 --
 
-This topic includes:
-
-* <<algorithms-ml-linkprediction-intro, Introduction>>
-* <<algorithms-ml-linkprediction-syntax, Syntax>>
-* <<algorithms-ml-linkprediction-examples, Examples>>
-** <<algorithms-ml-linkprediction-examples-train, Train>>
-** <<algorithms-ml-linkprediction-examples-mutate, Mutate>>
-
 
 [[algorithms-ml-linkprediction-intro]]
 == Introduction
