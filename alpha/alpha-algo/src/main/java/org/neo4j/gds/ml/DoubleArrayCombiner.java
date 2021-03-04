@@ -21,4 +21,5 @@ package org.neo4j.gds.ml;
 
 public interface DoubleArrayCombiner {
     double[] combine(double[] sourceArray, double[] targetArray);
+    int outputDimension(int inputDimension);
 }

@@ -100,5 +100,10 @@ class LinkLogisticRegressionPredictorTest {
             }
             return result;
         }
+
+        @Override
+        public int outputDimension(int inputDimension) {
+            return inputDimension;
+        }
     }
 }

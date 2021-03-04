@@ -56,14 +56,11 @@ public class LinkLogisticRegressionBase {
         batch.nodeIds().forEach(nodeId -> {
             graphCopy.forEachRelationship(nodeId, (src, trg) -> {
                 var linkFeatures = features(graph, src, trg);
-                setLinkFeatures(linkFeatures, features, relationshipOffset.getValue());
+                setLinkFeatures(linkFeatures, features, relationshipOffset.getValue(), cols);
                 relationshipOffset.increment();
                 return true;
             });
         });
-        for (int nodeOffset = 0; nodeOffset < rows; nodeOffset++) {
-            features[nodeOffset * cols + cols - 1] = 1.0;
-        }
         return new MatrixConstant(features, rows, cols);
     }
 
@@ -74,9 +71,7 @@ public class LinkLogisticRegressionBase {
     }
 
     protected double[] nodeFeatures(Graph graph, long nodeId) {
-        int numberOfFeatures = modelData.numberOfFeatures();
-        // bias feature is handled afterwards
-        var features = new double[numberOfFeatures - 1];
+        var features = new double[modelData.numberOfNodeFeatures()];
 
         var consumer = featureConsumer(features);
         FeatureExtraction.extract(
@@ -103,9 +98,7 @@ public class LinkLogisticRegressionBase {
         };
     }
 
-    private void setLinkFeatures(double[] linkFeatures, double[] features, int relationshipOffset) {
-        var numberOfFeaturesWithoutBias = linkFeatures.length;
-        var numberOfFeatures = numberOfFeaturesWithoutBias + 1;
-        System.arraycopy(linkFeatures, 0, features, relationshipOffset * numberOfFeatures, numberOfFeaturesWithoutBias);
+    private void setLinkFeatures(double[] linkFeatures, double[] features, int relationshipOffset, int cols) {
+        System.arraycopy(linkFeatures, 0, features, relationshipOffset * cols, cols);
     }
 }

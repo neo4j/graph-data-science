@@ -62,7 +62,7 @@ class LinkLogisticRegressionBaseTest {
         var base = new LinkLogisticRegressionBase(LinkLogisticRegressionData.builder()
             .linkFeatureCombiner(LinkFeatureCombiner.L2)
             .featureProperties(nodePropertyKeys)
-            .numberOfFeatures(3)
+            .numberOfNodeFeatures(2)
             .weights(weights)
             .build()
         );

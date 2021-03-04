@@ -20,28 +20,56 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.neo4j.gds.ml.DoubleArrayCombiner;
+import org.neo4j.graphalgo.core.utils.Intersections;
 
 public enum LinkFeatureCombiner implements DoubleArrayCombiner {
     L2 {
         @Override
         public double[] combine(double[] sourceArray, double[] targetArray) {
             assert sourceArray.length == targetArray.length;
-            var result = new double[sourceArray.length];
+            var result = new double[sourceArray.length + 1];
             for (int i = 0; i < sourceArray.length; i++) {
                 result[i] = Math.pow((sourceArray[i] - targetArray[i]), 2);
             }
+            result[sourceArray.length] = 1.0;
             return result;
+        }
+
+        @Override
+        public int outputDimension(int inputDimension) {
+            return inputDimension + 1;
         }
     },
     HADAMARD {
         @Override
         public double[] combine(double[] sourceArray, double[] targetArray) {
             assert sourceArray.length == targetArray.length;
-            var result = new double[sourceArray.length];
-            for (int i = 0; i < result.length; i++) {
+            var result = new double[sourceArray.length + 1];
+            for (int i = 0; i < sourceArray.length; i++) {
                 result[i] = sourceArray[i] * targetArray[i];
+            }
+            result[sourceArray.length] = 1.0;
+            return result;
+        }
+
+        @Override
+        public int outputDimension(int inputDimension) {
+            return inputDimension + 1;
+        }
+    },
+    COSINE {
+        @Override
+        public double[] combine(double[] sourceArray, double[] targetArray) {
+            var result = new double[] { Intersections.cosine(sourceArray, targetArray, sourceArray.length) , 1.0};
+            if (Double.isNaN(result[0])) {
+                result[0] = 0;
             }
             return result;
         }
-    };
+
+        @Override
+        public int outputDimension(int inputDimension) {
+            return 2;
+        }
+    }
 }
