@@ -4,7 +4,7 @@
 We can check if a graph is stored in the catalog by looking up its name.
 
 .Check if a graph exists in the catalog:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.exists('my-store-graph') YIELD exists;
 ----

@@ -53,21 +53,21 @@ If the graph has no weights, or all relationships have the same weight, then any
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.spanningTree.write(configuration: Map)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
 .The following will compute the minimum weight spanning tree and write the results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.spanningTree.minimum.write(configuration: Map)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
 .The following will compute the maximum weight spanning tree and write the results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.spanningTree.maximum.write(configuration: Map)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
@@ -94,13 +94,13 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 |===
 
 .The following will run the k-spanning tree algorithms and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.spanningTree.kmin.write(configuration: Map)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 ----
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.spanningTree.kmax.write(configuration: Map)
 YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
@@ -134,7 +134,7 @@ YIELD createMillis, computeMillis, writeMillis, effectiveNodeCount
 image::mst.png[]
 
 .The following will create a sample graph:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CREATE (a:Place {id: 'A'}),
        (b:Place {id: 'B'}),
@@ -155,7 +155,7 @@ CREATE (a:Place {id: 'A'}),
 Minimum weight spanning tree visits all nodes that are in the same connected component as the starting node, and returns a spanning tree of all nodes in the component where the total weight of the relationships is minimized.
 
 .The following will run the Minimum Weight Spanning Tree algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n:Place {id: 'D'})
 CALL gds.alpha.spanningTree.minimum.write({
@@ -177,7 +177,7 @@ RETURN createMillis, computeMillis, writeMillis, effectiveNodeCount;
 ----
 
 .To find all pairs of nodes included in our minimum spanning tree, run the following query:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH path = (n:Place {id: 'D'})-[:MINST*]-()
 WITH relationships(path) AS rels
@@ -205,7 +205,7 @@ Nodes F and G aren't included because they're unreachable from D.
 Maximum weighted tree spanning algorithm is similar to the minimum one, except that it returns a spanning tree of all nodes in the component where the total weight of the relationships is maximized.
 
 .The following will run the maximum weight spanning tree algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
 CALL gds.alpha.spanningTree.maximum.write({
@@ -239,7 +239,7 @@ When we ran MST above, we got a 5-minimum spanning tree returned, that covered a
 By setting the `k=3`, we define that we want to get returned a 3-minimum spanning tree that covers 3 nodes and has 2 relationships.
 
 .The following will run the k-minimum spanning tree algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
 CALL gds.alpha.spanningTree.kmin.write({
@@ -260,7 +260,7 @@ RETURN createMillis,computeMillis,writeMillis, effectiveNodeCount;
 ----
 
 .Find nodes that belong to our k-spanning tree result:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n:Place)
 WITH n.id AS Place, n.kminst AS Partition, count(*) AS count
@@ -282,7 +282,7 @@ RETURN Place, Partition
 Nodes A, B, and C are the result 3-minimum spanning tree of our graph.
 
 .The following will run the k-maximum spanning tree algorithm and write back results:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n:Place{id: 'D'})
 CALL gds.alpha.spanningTree.kmax.write({
@@ -303,7 +303,7 @@ RETURN createMillis,computeMillis,writeMillis, effectiveNodeCount;
 ----
 
 .Find nodes that belong to our k-spanning tree result:
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 MATCH (n:Place)
 WITH n.id AS Place, n.kmaxst AS Partition, count(*) AS count

@@ -31,7 +31,7 @@ The graph generation is parameterized by three dimensions:
 == Syntax
 
 .The following describes the API for running the algorithm
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graph.generate(graphName: String, nodeCount: Integer, averageDegree: Integer, {
   relationshipDistribution: String,

@@ -18,7 +18,7 @@ This in-memory graph implementation performance depends on the underlying graph 
 It can be slower for write procedures and graph creation of smaller graphs.
 To switch to the more memory intensive implementation used in GDS Community Edition you can disable this feature by using the following procedure call.
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.features.useBitIdMap(false)
 ----

@@ -26,35 +26,35 @@
 |Graph Algorithms v3.5 |Graph Data Science v1.0
 2+| View information for a Named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.graph.info('myGraph')
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('myGraph')
 ----
 2+| Check graph existence:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.graph.info('myGraph') YIELD exists
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.exists('myGraph') YIELD exists
 ----
 2+| View graph statistics:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.graph.info('myGraph', true)
 YIELD min, max, mean, p50
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('myGraph')
 YIELD degreeDistribution AS dd

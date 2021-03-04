@@ -26,7 +26,7 @@ The `gds.model.store_location` parameter must be configured for this feature.
 [role=query-example, no-result=true]
 --
 .Store a model on disk:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.store('my-model')
 YIELD
@@ -51,7 +51,7 @@ In order to use a stored model, it has to be explicitly loaded.
 [role=query-example, no-result=true]
 --
 .Store a model on disk:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.load('my-model')
 YIELD
@@ -80,7 +80,7 @@ Deleting a model will remove it from disk, but keep it in the in-memory model ca
 [role=query-example, no-result=true]
 --
 .Store a model on disk:
-[source,cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.delete('my-model')
 YIELD

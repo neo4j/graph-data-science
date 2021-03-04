@@ -10,7 +10,7 @@ The goal is to demonstrate correct usage of the GDS library write functionality 
 
 Example for incorrect use.
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 :BEGIN
 
@@ -43,7 +43,7 @@ Notice the reordering of the statements, this ensures that the in-memory graph w
 
 First remove the unwanted relationships.
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 :BEGIN
 
@@ -54,7 +54,7 @@ MATCH ()-[r:SIMILAR_TO]->() DELETE r;
 
 Create the in-memory graph.
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 :BEGIN
 
@@ -70,7 +70,7 @@ CALL gds.graph.create.cypher(
 
 Run the algorithm.
 
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 :BEGIN
 

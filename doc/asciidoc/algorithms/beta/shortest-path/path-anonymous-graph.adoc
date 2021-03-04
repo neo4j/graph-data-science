@@ -1,7 +1,7 @@
 include::../../shared/syntax-anonymous-graphs.adoc[]
 
 .Run {algorithm} in write mode on an anonymous graph:
-[source, cypher, subs="quotes,attributes+"]
+[source, cypher, role=noplay, subs="quotes,attributes+"]
 ----
 CALL {procedure-name}.write(
   configuration: Map

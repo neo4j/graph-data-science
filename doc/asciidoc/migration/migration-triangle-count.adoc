@@ -51,13 +51,13 @@ The triangle enumeration procedure `algo.triangles.stream()` has been renamed to
 
 2+| Streaming triangle counts over named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.triangleCount.stream(null, null, {graph: 'myGraph'})
 YIELD nodeId, triangles
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.triangleCount.stream('myGraph')
 YIELD nodeId, triangleCount
@@ -65,13 +65,13 @@ YIELD nodeId, triangleCount
 
 2+| Streaming local clustering coefficients over named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.triangleCount.stream(null, null, {graph: 'myGraph'})
 YIELD nodeId, coefficient
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.localClusteringCoefficient.stream('myGraph')
 YIELD nodeId, localClusteringCoefficient
@@ -79,13 +79,13 @@ YIELD nodeId, localClusteringCoefficient
 
 2+| Streaming both triangle counts and local clustering coefficients:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.triangleCount.stream(null, null, {graph: 'myGraph'})
 YIELD nodeId, triangles, coefficient
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.triangleCount.mutate('myGraph', {mutateProperty: 'tc'})
 YIELD globalTriangleCount
@@ -102,7 +102,7 @@ RETURN nodeId, triangleCount, localClusteringCoefficient
 
 2+| Streaming triangle counts over anonymous graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.triangleCount.stream(
   'MyLabel',
@@ -110,7 +110,7 @@ CALL algo.triangleCount.stream(
 )
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.triangleCount.stream({
   nodeProjection: 'MyLabel',
@@ -130,7 +130,7 @@ CALL gds.triangleCount.stream({
 
 2+| Writing triangle counts from named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.triangleCount(null, null, {
   graph: 'myGraph',
@@ -139,7 +139,7 @@ CALL algo.triangleCount(null, null, {
 }) YIELD nodeCount, triangleCount
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.triangleCount.write('myGraph', {
   writeProperty: 'tc'
@@ -148,7 +148,7 @@ CALL gds.triangleCount.write('myGraph', {
 
 2+| Writing local clustering coefficients from named graph:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.triangleCount(null, null, {
   graph: 'myGraph',
@@ -157,7 +157,7 @@ CALL algo.triangleCount(null, null, {
 }) YIELD nodeCount, averageClusteringCoefficient
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.localClusteringCoefficient.write('myGraph', {
   writeProperty: 'lcc'
@@ -166,7 +166,7 @@ CALL gds.localClusteringCoefficient.write('myGraph', {
 
 2+| Writing both triangle counts and local clustering coefficients:
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL algo.triangleCount(null, null, {
   graph: 'myGraph',
@@ -176,7 +176,7 @@ CALL algo.triangleCount(null, null, {
 }) YIELD nodeCount, triangleCount, averageClusteringCoefficient
 ----
 |
-[source, cypher]
+[source, cypher, role=noplay]
 ----
 CALL gds.triangleCount.mutate('myGraph', {
   mutateProperty: 'tc'
