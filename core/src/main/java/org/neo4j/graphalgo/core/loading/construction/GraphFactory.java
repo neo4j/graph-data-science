@@ -113,6 +113,7 @@ public final class GraphFactory {
             nodes,
             orientation,
             propertyConfigs,
+            aggregation,
             preAggregate,
             concurrency,
             executorService,
@@ -151,6 +152,7 @@ public final class GraphFactory {
         IdMapping nodes,
         Optional<Orientation> orientation,
         List<PropertyConfig> propertyConfigs,
+        Optional<Aggregation> aggregation,
         Optional<Boolean> preAggregate,
         Optional<Integer> concurrency,
         Optional<ExecutorService> executorService,
@@ -160,7 +162,7 @@ public final class GraphFactory {
         var actualTracker = tracker.orElse(AllocationTracker.empty());
 
         var aggregations = propertyConfigs.isEmpty()
-            ? new Aggregation[]{Aggregation.NONE}
+            ? new Aggregation[]{aggregation.orElse(Aggregation.NONE)}
             : propertyConfigs.stream()
                 .map(GraphFactory.PropertyConfig::aggregation)
                 .map(Aggregation::resolve)
