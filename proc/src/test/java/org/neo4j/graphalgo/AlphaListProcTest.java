@@ -26,7 +26,10 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainPro
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.graphalgo.centrality.ArticleRankProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
+<<<<<<< HEAD
 import org.neo4j.graphalgo.centrality.DegreeCentralityProc;
+=======
+>>>>>>> cc3309ae4d... Remove alpha degree proc and tests
 import org.neo4j.graphalgo.centrality.HarmonicCentralityProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -71,8 +74,6 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.closeness.stream",
         "gds.alpha.closeness.harmonic.write",
         "gds.alpha.closeness.harmonic.stream",
-        "gds.alpha.degree.write",
-        "gds.alpha.degree.stream",
         "gds.alpha.dfs.stream",
         "gds.alpha.scc.write",
         "gds.alpha.scc.stream",
@@ -137,7 +138,10 @@ class AlphaListProcTest extends BaseProcTest {
             ApproxNearestNeighborsProc.class,
             ArticleRankProc.class,
             ClosenessCentralityProc.class,
+<<<<<<< HEAD
             DegreeCentralityProc.class,
+=======
+>>>>>>> cc3309ae4d... Remove alpha degree proc and tests
             EigenvectorCentralityProc.class,
             HarmonicCentralityProc.class,
             IsFiniteFunc.class,
