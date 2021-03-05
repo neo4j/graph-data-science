@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -55,71 +56,24 @@ class RelationshipsBuilderTest {
         return TestMethodRunner.idMapImplementation().map(Arguments::of);
     }
 
-    static Stream<Arguments> propertiesAndIdMaps() {
+    static Stream<Arguments> concurrenciesAndIdMaps() {
         return crossArguments(
+            () -> Stream.of(Arguments.of(1), Arguments.of(4)),
+            RelationshipsBuilderTest::idMaps
+        );
+    }
+
+    static Stream<Arguments> concurrenciesAndPropertiesAndIdMaps() {
+        return crossArguments(
+            () -> Stream.of(Arguments.of(1), Arguments.of(4)),
             () -> Stream.of(Arguments.of(true), Arguments.of(false)),
             RelationshipsBuilderTest::idMaps
         );
     }
 
-    @ParameterizedTest
-    @MethodSource("idMaps")
-    void multipleRelationshipProperties(TestMethodRunner runTest) {
-        var concurrency = 1;
-        var nodeCount = 100;
-        var relationshipCount = 1000;
-
-        var idMap = createIdMap(nodeCount, runTest);
-
-        var relationshipsBuilder = GraphFactory.initRelationshipsWithMultiplePropertiesBuilder()
-            .nodes(idMap)
-            .orientation(Orientation.NATURAL)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE, DefaultValue.forDouble()))
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE, DefaultValue.forDouble()))
-            .concurrency(concurrency)
-            .tracker(AllocationTracker.empty())
-            .build();
-
-        double[] propertyValueBuffer = new double[2];
-        LongStream.range(0, relationshipCount).forEach(relId -> {
-            var sourceId = relId % nodeCount;
-            var targetId = sourceId + 1;
-            propertyValueBuffer[0] = sourceId;
-            propertyValueBuffer[1] = targetId;
-            relationshipsBuilder.addFromInternal(sourceId, targetId, propertyValueBuffer);
-        });
-
-        var relationships = relationshipsBuilder.buildAll();
-        assertThat(relationships.size()).isEqualTo(2);
-        // asserting on topology
-        assertThat(relationships.get(0).topology().elementCount()).isEqualTo(relationshipCount);
-        assertThat(relationships.get(0).topology().orientation()).isEqualTo(Orientation.NATURAL);
-
-        // asserting on properties
-
-        var prop1Graph = GraphFactory.create(idMap, relationships.get(0), AllocationTracker.empty());
-        prop1Graph.forEachNode(nodeId -> {
-            prop1Graph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
-                assertThat(sourceNodeId).isEqualTo((long) property);
-                return true;
-            });
-            return true;
-        });
-
-        var prop2Graph = GraphFactory.create(idMap, relationships.get(1), AllocationTracker.empty());
-        prop2Graph.forEachNode(nodeId -> {
-            prop2Graph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
-                assertThat(targetNodeId).isEqualTo((long) property);
-                return true;
-            });
-            return true;
-        });
-    }
-
     @ParameterizedTest()
-    @MethodSource("propertiesAndIdMaps")
-    void parallelRelationshipImport(boolean importProperty, TestMethodRunner runTest) {
-        var concurrency = 4;
+    @MethodSource("concurrenciesAndPropertiesAndIdMaps")
+    void zeroAndOneRelationshipProperties(int concurrency, boolean importProperty, TestMethodRunner runTest) {
         var nodeCount = 100;
         var relationshipCount = 1000;
 
@@ -152,12 +106,11 @@ class RelationshipsBuilderTest {
         var graph = GraphFactory.create(idMap, relationships, AllocationTracker.empty());
 
         graph.forEachNode(nodeId -> {
-            assertEquals(10, graph.degree(nodeId));
-
+            assertThat(graph.degree(nodeId)).as("degree").isEqualTo(10);
             graph.forEachRelationship(nodeId, Double.NaN, ((sourceNodeId, targetNodeId, weight) -> {
-                assertEquals(sourceNodeId, targetNodeId - 1, "Incorrect source, target combination");
+                assertThat(targetNodeId - 1).as("source, target combination").isEqualTo(sourceNodeId);
                 if (importProperty) {
-                    assertEquals(weight % nodeCount, sourceNodeId, "Incorrect weight");
+                    assertThat(sourceNodeId).as("weight property").isEqualTo((long) weight % nodeCount);
                 }
                 return true;
             }));
@@ -166,6 +119,62 @@ class RelationshipsBuilderTest {
         });
     }
 
+    @ParameterizedTest
+    @MethodSource("concurrenciesAndIdMaps")
+    void multipleRelationshipProperties(int concurrency, TestMethodRunner runTest) {
+        var nodeCount = 100;
+        var relationshipCount = 1000;
+
+        var idMap = createIdMap(nodeCount, runTest);
+
+        var relationshipsBuilder = GraphFactory.initRelationshipsWithMultiplePropertiesBuilder()
+            .nodes(idMap)
+            .orientation(Orientation.NATURAL)
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE, DefaultValue.forDouble()))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(Aggregation.NONE, DefaultValue.forDouble()))
+            .concurrency(concurrency)
+            .tracker(AllocationTracker.empty())
+            .build();
+
+        ParallelUtil.parallelStreamConsume(
+            LongStream.range(0, relationshipCount),
+            concurrency,
+            stream -> stream.forEach(relId -> {
+                double[] propertyValueBuffer = new double[2];
+                var sourceId = relId % nodeCount;
+                var targetId = sourceId + 1;
+                propertyValueBuffer[0] = sourceId;
+                propertyValueBuffer[1] = targetId;
+                relationshipsBuilder.addFromInternal(sourceId, targetId, propertyValueBuffer);
+            })
+        );
+
+        var relationships = relationshipsBuilder.buildAll();
+        assertThat(relationships.size()).as("constructed relationships").isEqualTo(2);
+        // asserting on topology
+        assertThat(relationships.get(0).topology().elementCount())
+            .as("global relationship count")
+            .isEqualTo(relationshipCount);
+        assertThat(relationships.get(0).topology().orientation())
+            .as("global orientation")
+            .isEqualTo(Orientation.NATURAL);
+
+        // asserting on properties
+        assertGraph(GraphFactory.create(idMap, relationships.get(0), AllocationTracker.empty()), true);
+        assertGraph(GraphFactory.create(idMap, relationships.get(1), AllocationTracker.empty()), false);
+    }
+
+    private void assertGraph(Graph graph, boolean sourceIsProperty) {
+        graph.forEachNode(nodeId -> {
+            assertThat(graph.degree(nodeId)).as("degree").isEqualTo(10);
+            graph.forEachRelationship(nodeId, Double.NaN, (sourceNodeId, targetNodeId, property) -> {
+                var actual = sourceIsProperty ? sourceNodeId : targetNodeId;
+                assertThat(actual).as("relationship property").isEqualTo((long) property);
+                return true;
+            });
+            return true;
+        });
+    }
 
     private NodeMapping createIdMap(long nodeCount, TestMethodRunner runTest) {
         var nodesBuilderRef = new AtomicReference<NodeMapping>();
