@@ -100,7 +100,7 @@ public final class HugeAtomicBitSet {
         } else {
             // set within range
             setWord(startWordIndex, startBitMask);
-            for (long wordIndex = startWordIndex + 1; wordIndex <= endWordIndex; wordIndex++) {
+            for (long wordIndex = startWordIndex + 1; wordIndex < endWordIndex; wordIndex++) {
                 bits.set(wordIndex, -1L);
             }
             setWord(endWordIndex, endBitMask);
