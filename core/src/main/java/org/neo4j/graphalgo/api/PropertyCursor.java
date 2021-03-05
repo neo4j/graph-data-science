@@ -23,7 +23,7 @@ public interface PropertyCursor extends AutoCloseable {
     /**
      * Initialize this cursor to point to the given {@code index}.
      */
-    PropertyCursor init(long index);
+    PropertyCursor init(long index, int degree);
 
     /**
      * Return true iff there is at least one more target to decode.

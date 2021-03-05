@@ -100,8 +100,9 @@ public class RelationshipStore {
 
         // for each relationship type, merge its Topology list and all associated Property lists
         topologies.forEach((relationshipType, topology) -> {
-            var adjacencyList = (TransientAdjacencyList) topology.list();
-            var adjacencyOffsets = (TransientAdjacencyOffsets) topology.offsets();
+            var adjacencyDegrees = topology.degrees();
+            var adjacencyList = topology.list();
+            var adjacencyOffsets = topology.offsets();
 
             var propertyLists = properties.getOrDefault(relationshipType, Map.of())
                 .entrySet()
@@ -126,7 +127,13 @@ public class RelationshipStore {
 
             relationshipIterators.put(
                 outputRelationshipType,
-                new CompositeRelationshipIterator(adjacencyList, adjacencyOffsets, propertyLists, propertyOffsets)
+                new CompositeRelationshipIterator(
+                    adjacencyDegrees,
+                    adjacencyList,
+                    adjacencyOffsets,
+                    propertyLists,
+                    propertyOffsets
+                )
             );
         });
 

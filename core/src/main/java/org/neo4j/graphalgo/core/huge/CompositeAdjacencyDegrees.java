@@ -17,17 +17,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.compress;
+package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyDegrees;
-import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
-public interface CompressedTopology {
+import java.util.List;
 
-    AdjacencyDegrees adjacencyDegrees();
+public class CompositeAdjacencyDegrees implements AdjacencyDegrees {
 
-    AdjacencyOffsets adjacencyOffsets();
+    private final List<AdjacencyDegrees> adjacencyDegrees;
 
-    AdjacencyList adjacencyList();
+    CompositeAdjacencyDegrees(List<AdjacencyDegrees> adjacencyDegrees) {
+        this.adjacencyDegrees = adjacencyDegrees;
+    }
+
+    public List<AdjacencyDegrees> adjacencyDegrees() {
+        return adjacencyDegrees;
+    }
+
+    @Override
+    public int degree(long node) {
+        long degree = 0L;
+        for (AdjacencyDegrees adjacencyDegree : adjacencyDegrees) {
+            degree += adjacencyDegree.degree(node);
+        }
+        return Math.toIntExact(degree);
+    }
+
+    @Override
+    public void close() {
+        adjacencyDegrees.forEach(AdjacencyDegrees::close);
+    }
 }

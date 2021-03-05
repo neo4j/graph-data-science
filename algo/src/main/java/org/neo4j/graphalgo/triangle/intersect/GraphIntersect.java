@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 
-import java.util.function.LongPredicate;
+import java.util.function.IntPredicate;
 
 import static org.neo4j.graphalgo.api.AdjacencyCursor.NOT_FOUND;
 
@@ -39,7 +39,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
     private final CURSOR cache;
     private final CURSOR cacheA;
     private final CURSOR cacheB;
-    private final LongPredicate degreeFilter;
+    private final IntPredicate degreeFilter;
 
     protected GraphIntersect(
         CURSOR cache,
@@ -54,18 +54,19 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         this.empty = empty;
 
         this.degreeFilter = maxDegree < Long.MAX_VALUE
-            ? (node) -> degree(node) <= maxDegree
+            ? (degree) -> degree <= maxDegree
             : (ignore) -> true;
     }
 
     @Override
     public void intersectAll(long nodeA, IntersectionConsumer consumer) {
         // check the first node's degree
-        if (!degreeFilter.test(nodeA)) {
+        int degreeA = degree(nodeA);
+        if (!degreeFilter.test(degreeA)) {
             return;
         }
 
-        CURSOR neighboursAMain = cursor(nodeA, cache);
+        CURSOR neighboursAMain = cursor(nodeA, degreeA, cache);
 
         // find first neighbour B of A with id > A
         long nodeB = neighboursAMain.skipUntil(nodeA);
@@ -92,8 +93,9 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
             // we have not yet seen a triangle
             triangleC = NOT_FOUND;
             // check the second node's degree
-            if (degreeFilter.test(nodeB)) {
-                neighboursB = cursor(nodeB, neighboursB);
+            int degreeB = degree(nodeB);
+            if (degreeFilter.test(degreeB)) {
+                neighboursB = cursor(nodeB, degreeB, neighboursB);
                 // find first neighbour Cb of B with id > B
                 nodeCfromB = neighboursB.skipUntil(nodeB);
 
@@ -102,7 +104,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
                     // copy the state of A's cursor
                     neighboursA.copyFrom(neighboursAMain);
 
-                    if (degreeFilter.test(nodeCfromB)) {
+                    if (degreeFilter.test(degree(nodeCfromB))) {
                         // find the first neighbour Ca of A with id >= Cb
                         nodeCfromA = neighboursA.advance(nodeCfromB);
                         triangleC = checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCfromA, nodeCfromB, triangleC);
@@ -112,7 +114,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
                     while (neighboursA.hasNextVLong() && neighboursB.hasNextVLong()) {
                         // take the next neighbour Cb of B
                         nodeCfromB = neighboursB.nextVLong();
-                        if (degreeFilter.test(nodeCfromB)) {
+                        if (degreeFilter.test(degree(nodeCfromB))) {
                             if (nodeCfromB > nodeCfromA) {
                                 // if Cb > Ca, take the next neighbour Ca of A with id >= Cb
                                 nodeCfromA = neighboursA.advance(nodeCfromB);
@@ -133,7 +135,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
                     if (neighboursB.hasNextVLong()) {
                         // we take the next neighbour Cb of B with id >= Ca
                         nodeCfromB = neighboursB.advance(nodeCfromA);
-                        if (degreeFilter.test(nodeCfromB)) {
+                        if (degreeFilter.test(degree(nodeCfromB))) {
                             checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCfromA, nodeCfromB, triangleC);
                         }
                     }
@@ -162,8 +164,8 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         return triangleC;
     }
 
-    protected CURSOR cursor(long node, CURSOR reuse) {
-        reuse.init(node);
+    protected CURSOR cursor(long node, int degree, CURSOR reuse) {
+        reuse.init(node, degree);
         return reuse;
     }
 

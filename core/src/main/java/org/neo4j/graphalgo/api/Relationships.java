@@ -38,6 +38,7 @@ public interface Relationships {
         long relationshipCount,
         Orientation orientation,
         boolean isMultiGraph,
+        AdjacencyDegrees adjacencyDegrees,
         AdjacencyList adjacencyList,
         AdjacencyOffsets adjacencyOffsets
     ) {
@@ -64,6 +65,7 @@ public interface Relationships {
         double defaultPropertyValue
     ) {
         Topology topology = ImmutableTopology.of(
+            adjacencyDegrees,
             adjacencyList,
             adjacencyOffsets,
             relationshipCount,
@@ -73,6 +75,7 @@ public interface Relationships {
 
         Optional<Properties> maybePropertyCSR = properties != null && propertyOffsets != null
             ? Optional.of(ImmutableProperties.of(
+                adjacencyDegrees,
                 properties,
                 propertyOffsets,
                 relationshipCount,
@@ -86,6 +89,8 @@ public interface Relationships {
 
     @ValueClass
     interface Topology {
+        AdjacencyDegrees degrees();
+
         AdjacencyList list();
 
         AdjacencyOffsets offsets();

@@ -19,10 +19,12 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.CSRGraph;
@@ -98,8 +100,10 @@ public class HugeGraph implements CSRGraph {
     protected final Orientation orientation;
 
     protected final long relationshipCount;
-    protected AdjacencyList adjacencyList;
-    protected AdjacencyOffsets adjacencyOffsets;
+    protected AdjacencyDegrees degrees;
+
+    protected @NotNull AdjacencyList adjacencyList;
+    protected @NotNull AdjacencyOffsets adjacencyOffsets;
 
     protected final double defaultPropertyValue;
     @Nullable
@@ -145,8 +149,8 @@ public class HugeGraph implements CSRGraph {
         GraphSchema schema,
         Map<String, NodeProperties> nodeProperties,
         long relationshipCount,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets,
+        @NotNull AdjacencyList adjacencyList,
+        @NotNull AdjacencyOffsets adjacencyOffsets,
         boolean hasRelationshipProperty,
         double defaultPropertyValue,
         @Nullable AdjacencyList properties,
@@ -248,8 +252,9 @@ public class HugeGraph implements CSRGraph {
         }
         long propertyOffset = propertyOffsets.get(fromId);
 
-        AdjacencyCursor relDecompressingCursor = adjacencyList.decompressingCursor(relOffset);
-        PropertyCursor propertyCursor = properties.cursor(propertyOffset);
+        int degree = degrees.degree(fromId);
+        AdjacencyCursor relDecompressingCursor = adjacencyList.decompressingCursor(relOffset, degree);
+        PropertyCursor propertyCursor = properties.cursor(propertyOffset, degree);
 
         while (relDecompressingCursor.hasNextVLong() && propertyCursor.hasNextLong() && relDecompressingCursor.nextVLong() != toId) {
             propertyCursor.nextLong();
@@ -324,14 +329,7 @@ public class HugeGraph implements CSRGraph {
 
     @Override
     public int degree(long node) {
-        if (adjacencyOffsets == null) {
-            return 0;
-        }
-        long offset = adjacencyOffsets.get(node);
-        if (offset == 0L) {
-            return 0;
-        }
-        return adjacencyList.degree(offset);
+        return degrees.degree(node);
     }
 
     @Override
@@ -419,19 +417,16 @@ public class HugeGraph implements CSRGraph {
     }
 
     private AdjacencyCursor adjacencyCursorForIteration(long sourceNodeId) {
-        if (adjacencyOffsets == null) {
-            throw new NullPointerException();
-        }
         long offset = adjacencyOffsets.get(sourceNodeId);
         if (offset == 0L) {
             return emptyCursor;
         }
-        cursorCache.init(offset);
+        cursorCache.init(offset, degrees.degree(sourceNodeId));
         return cursorCache;
     }
 
     private PropertyCursor propertyCursorForIteration(long sourceNodeId) {
-        if (!hasRelationshipProperty()) {
+        if (!hasRelationshipProperty() || propertyOffsets == null || properties == null) {
             throw new UnsupportedOperationException(
                 "Can not create property cursor on a graph without relationship property");
         }
@@ -440,7 +435,7 @@ public class HugeGraph implements CSRGraph {
         if (offset == 0L) {
             return Cursor.EMPTY;
         }
-        return properties.cursor(offset);
+        return properties.cursor(offset, degrees.degree(sourceNodeId));
     }
 
     @Override
@@ -452,19 +447,17 @@ public class HugeGraph implements CSRGraph {
     public void releaseTopology() {
         if (!canRelease) return;
 
-        if (adjacencyList != null) {
-            adjacencyList.close();
-            adjacencyList = null;
-            adjacencyOffsets.close();
-            adjacencyOffsets = null;
-            if (properties != null) {
-                properties.close();
-                properties = null;
-            }
-            if (propertyOffsets != null) {
-                propertyOffsets.close();
-                propertyOffsets = null;
-            }
+        adjacencyList.close();
+        adjacencyList = null;
+        adjacencyOffsets.close();
+        adjacencyOffsets = null;
+        if (properties != null) {
+            properties.close();
+            properties = null;
+        }
+        if (propertyOffsets != null) {
+            propertyOffsets.close();
+            propertyOffsets = null;
         }
         if (emptyCursor != null) {
             emptyCursor.close();
@@ -500,6 +493,7 @@ public class HugeGraph implements CSRGraph {
             relationshipCount,
             orientation,
             isMultiGraph(),
+            degrees,
             adjacencyList,
             adjacencyOffsets,
             properties,

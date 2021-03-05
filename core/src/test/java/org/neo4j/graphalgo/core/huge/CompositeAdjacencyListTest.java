@@ -44,8 +44,8 @@ class CompositeAdjacencyListTest {
 
     @Test
     void shouldComputeCorrectDegree() {
-        var adjacencyList = ((UnionGraph) graph).relationshipTopology().list();
-        assertTrue(adjacencyList instanceof CompositeAdjacencyList);
+        var adjacencyList = ((UnionGraph) graph).relationshipTopology().degrees();
+        assertTrue(adjacencyList instanceof CompositeAdjacencyDegrees);
         assertEquals(2, adjacencyList.degree(0));
         assertEquals(0, adjacencyList.degree(1));
     }

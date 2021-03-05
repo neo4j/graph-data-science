@@ -26,14 +26,14 @@ public interface AdjacencyCursor extends AutoCloseable {
     /**
      * Initialize this cursor to point to the given {@code index}.
      */
-    void init(long index);
+    void init(long index, int degree);
 
     /**
      * Initialize this cursor to point to the given {@code index}.
      * Returns this to allow chaining.
      */
-    default AdjacencyCursor initializedTo(long index) {
-        this.init(index);
+    default AdjacencyCursor initializedTo(long index, int degree) {
+        this.init(index, degree);
         return this;
     }
 

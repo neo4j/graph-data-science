@@ -68,12 +68,11 @@ final class AdjacencyDecompressingReader {
         offset = other.offset;
     }
 
-    int reset(byte[] adjacencyPage, int offset) {
+    int reset(byte[] adjacencyPage, int offset, int degree) {
         this.array = adjacencyPage;
-        int numAdjacencies = readInt(adjacencyPage, offset); // offset should not be 0
-        this.offset = decodeDeltaVLongs(0L, adjacencyPage, Integer.BYTES + offset, Math.min(numAdjacencies, CHUNK_SIZE), block);
+        this.offset = decodeDeltaVLongs(0L, adjacencyPage, offset, Math.min(degree, CHUNK_SIZE), block);
         pos = 0;
-        return numAdjacencies;
+        return degree;
     }
 
     long next(int remaining) {

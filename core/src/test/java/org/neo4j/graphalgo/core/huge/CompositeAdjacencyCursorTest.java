@@ -52,7 +52,10 @@ class CompositeAdjacencyCursorTest extends BaseTest {
 
     @BeforeEach
     void setup() {
-        adjacencyCursor = (CompositeAdjacencyCursor) ((UnionGraph)graph).relationshipTopology().list().decompressingCursor(0);
+        var topology = ((UnionGraph) graph).relationshipTopology();
+        var offset = topology.offsets().get(0);
+        var degree = topology.degrees().degree(0);
+        adjacencyCursor = (CompositeAdjacencyCursor) topology.list().decompressingCursor(offset, degree);
     }
 
     @Test

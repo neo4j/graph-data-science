@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -31,6 +32,7 @@ import org.neo4j.graphalgo.core.compress.LongArrayBuffer;
 import org.neo4j.graphalgo.core.compress.CompressedProperties;
 import org.neo4j.graphalgo.core.compress.CompressedTopology;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.nio.ByteBuffer;
@@ -42,9 +44,14 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
     public static final class Factory implements AdjacencyCompressorFactory {
 
+        private final AdjacencyDegreesFactory adjacencyDegreesFactory;
         private final AdjacencyOffsetsFactory adjacencyOffsetsFactory;
 
-        public Factory(AdjacencyOffsetsFactory adjacencyOffsetsFactory) {
+        public Factory(
+            AdjacencyDegreesFactory adjacencyDegreesFactory,
+            AdjacencyOffsetsFactory adjacencyOffsetsFactory
+        ) {
+            this.adjacencyDegreesFactory = adjacencyDegreesFactory;
             this.adjacencyOffsetsFactory = adjacencyOffsetsFactory;
         }
 
@@ -60,7 +67,9 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             return new Blueprint(
                 adjacencyBuilder,
                 propertyBuilders,
+                adjacencyDegreesFactory,
                 adjacencyOffsetsFactory,
+                HugeIntArray.newArray(nodeCount, tracker),
                 HugeLongArray.newArray(nodeCount, tracker),
                 Stream
                     .generate(() -> HugeLongArray.newArray(nodeCount, tracker))
@@ -75,7 +84,9 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private static final class Blueprint implements AdjacencyCompressorBlueprint {
         private final AdjacencyListBuilder adjacencyBuilder;
         private final AdjacencyListBuilder[] propertyBuilders;
+        private final AdjacencyDegreesFactory adjacencyDegreesFactory;
         private final AdjacencyOffsetsFactory adjacencyOffsetsFactory;
+        private final HugeIntArray adjacencyDegrees;
         private final HugeLongArray adjacencyOffsets;
         private final HugeLongArray[] propertyOffsets;
         private final boolean noAggregation;
@@ -84,7 +95,9 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         private Blueprint(
             AdjacencyListBuilder adjacencyBuilder,
             AdjacencyListBuilder[] propertyBuilders,
+            AdjacencyDegreesFactory adjacencyDegreesFactory,
             AdjacencyOffsetsFactory adjacencyOffsetsFactory,
+            HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
             HugeLongArray[] propertyOffsets,
             boolean noAggregation,
@@ -92,7 +105,9 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         ) {
             this.adjacencyBuilder = adjacencyBuilder;
             this.propertyBuilders = propertyBuilders;
+            this.adjacencyDegreesFactory = adjacencyDegreesFactory;
             this.adjacencyOffsetsFactory = adjacencyOffsetsFactory;
+            this.adjacencyDegrees = adjacencyDegrees;
             this.adjacencyOffsets = adjacencyOffsets;
             this.propertyOffsets = propertyOffsets;
             this.noAggregation = noAggregation;
@@ -107,6 +122,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
                     .stream(propertyBuilders)
                     .map(AdjacencyListBuilder::newAllocator)
                     .toArray(AdjacencyListAllocator[]::new),
+                adjacencyDegrees,
                 adjacencyOffsets,
                 propertyOffsets,
                 noAggregation,
@@ -132,14 +148,20 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         @Override
         public AdjacencyListsWithProperties build() {
+            AdjacencyDegrees adjacencyDegrees = degreePagesIntoDegrees(this.adjacencyDegrees);
             AdjacencyOffsets adjacencyOffsets = offsetPagesIntoOffsets(this.adjacencyOffsets);
 
             var builder = ImmutableAdjacencyListsWithProperties
                 .builder()
-                .adjacency(new DvlCompressionResult(adjacencyOffsets, adjacencyBuilder.build()));
+                .adjacency(new DvlCompressionResult(
+                    adjacencyDegrees,
+                    adjacencyOffsets,
+                    adjacencyBuilder.build()
+                ));
 
             for (int i = 0; i < propertyBuilders.length; i++) {
                 var compressedProps = new DvlCompressionResult(
+                    adjacencyDegrees,
                     offsetPagesIntoOffsets(propertyOffsets[i]),
                     propertyBuilders[i].build()
                 );
@@ -147,6 +169,10 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             }
 
             return builder.build();
+        }
+
+        private AdjacencyDegrees degreePagesIntoDegrees(HugeIntArray degrees) {
+            return adjacencyDegreesFactory.newDegrees(degrees);
         }
 
         private AdjacencyOffsets offsetPagesIntoOffsets(HugeLongArray offsets) {
@@ -163,6 +189,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
     private final AdjacencyListAllocator adjacencyAllocator;
     private final AdjacencyListAllocator[] propertiesAllocators;
+    private final HugeIntArray adjacencyDegrees;
     private final HugeLongArray adjacencyOffsets;
     private final HugeLongArray[] propertyOffsets;
     private final boolean noAggregation;
@@ -171,6 +198,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private DeltaVarLongCompressor(
         AdjacencyListAllocator adjacencyAllocator,
         AdjacencyListAllocator[] propertiesAllocators,
+        HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
         HugeLongArray[] propertyOffsets,
         boolean noAggregation,
@@ -178,6 +206,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     ) {
         this.adjacencyAllocator = adjacencyAllocator;
         this.propertiesAllocators = propertiesAllocators;
+        this.adjacencyDegrees = adjacencyDegrees;
         this.adjacencyOffsets = adjacencyOffsets;
         this.propertyOffsets = propertyOffsets;
         this.noAggregation = noAggregation;
@@ -223,7 +252,9 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         int degree = AdjacencyCompression.applyDeltaEncoding(buffer, aggregations[0]);
         int requiredBytes = AdjacencyCompression.compress(buffer, storage);
 
-        long address = copyIds(storage, requiredBytes, degree);
+        long address = copyIds(storage, requiredBytes);
+
+        this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
 
         array.release();
@@ -258,21 +289,21 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         int requiredBytes = AdjacencyCompression.compress(buffer, semiCompressedBytesDuringLoading);
         // values are now vlong encoded in the array storage (semiCompressed)
 
-        var address = copyIds(semiCompressedBytesDuringLoading, requiredBytes, degree);
+        var address = copyIds(semiCompressedBytesDuringLoading, requiredBytes);
         // values are in the final adjacency list
 
         copyProperties(uncompressedWeightsPerProperty, degree, nodeId, propertyOffsets);
 
+        this.adjacencyDegrees.set(nodeId, degree);
         this.adjacencyOffsets.set(nodeId, address);
         array.release();
 
         return degree;
     }
 
-    private long copyIds(byte[] targets, int requiredBytes, int degree) {
+    private long copyIds(byte[] targets, int requiredBytes) {
         // sizeOf(degree) + compression bytes
-        var slice = adjacencyAllocator.allocate(Integer.BYTES + requiredBytes);
-        slice.writeInt(degree);
+        var slice = adjacencyAllocator.allocate(requiredBytes);
         slice.insert(targets, 0, requiredBytes);
         return slice.address();
     }
@@ -288,8 +319,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
     private long copyProperties(long[] properties, int degree, AdjacencyListAllocator propertiesAllocator) {
         int requiredBytes = degree * Long.BYTES;
-        var slice = propertiesAllocator.allocate(Integer.BYTES /* degree */ + requiredBytes);
-        slice.writeInt(degree);
+        var slice = propertiesAllocator.allocate(requiredBytes);
         int offset = slice.offset();
         ByteBuffer
             .wrap(slice.page(), offset, requiredBytes)
@@ -301,12 +331,23 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     }
 
     private static final class DvlCompressionResult implements CompressedTopology, CompressedProperties {
+        final AdjacencyDegrees degrees;
         final AdjacencyOffsets offsets;
         final AdjacencyList adjacency;
 
-        private DvlCompressionResult(AdjacencyOffsets offsets, AdjacencyList adjacency) {
+        private DvlCompressionResult(
+            AdjacencyDegrees degrees,
+            AdjacencyOffsets offsets,
+            AdjacencyList adjacency
+        ) {
+            this.degrees = degrees;
             this.offsets = offsets;
             this.adjacency = adjacency;
+        }
+
+        @Override
+        public AdjacencyDegrees adjacencyDegrees() {
+            return degrees;
         }
 
         @Override

@@ -22,6 +22,9 @@ package org.neo4j.graphalgo.core.huge;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.AdjacencyDegrees;
+import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.ImmutableTopology;
@@ -291,20 +294,22 @@ public final class UnionGraph implements CSRGraph {
     }
 
     public Relationships.Topology relationshipTopology() {
-        var adjacencyLists = graphs
-            .stream()
-            .flatMap(graph -> graph.relationshipTopologies().values().stream())
-            .map(Relationships.Topology::list)
-            .collect(Collectors.toList());
-        var adjacencyOffsets = graphs
-            .stream()
-            .flatMap(graph -> graph.relationshipTopologies().values().stream())
-            .map(Relationships.Topology::offsets)
-            .collect(Collectors.toList());
+        List<AdjacencyDegrees> adjacencyDegrees = new ArrayList<>(graphs.size());
+        List<AdjacencyList> adjacencyLists = new ArrayList<>(graphs.size());
+        List<AdjacencyOffsets> adjacencyOffsets  = new ArrayList<>(graphs.size());
+
+        for (CSRGraph graph : graphs) {
+            for (Relationships.Topology topology : graph.relationshipTopologies().values()) {
+                adjacencyDegrees.add(topology.degrees());
+                adjacencyLists.add(topology.list());
+                adjacencyOffsets.add(topology.offsets());
+            }
+        }
 
         return ImmutableTopology.builder()
+            .degrees(new CompositeAdjacencyDegrees(adjacencyDegrees))
             .offsets(new CompositeAdjacencyOffsets(adjacencyOffsets))
-            .list(new CompositeAdjacencyList(adjacencyLists, adjacencyOffsets))
+            .list(new CompositeAdjacencyList(adjacencyDegrees, adjacencyLists, adjacencyOffsets))
             .orientation(Orientation.NATURAL)
             .elementCount(relationshipCount())
             .isMultiGraph(true)
