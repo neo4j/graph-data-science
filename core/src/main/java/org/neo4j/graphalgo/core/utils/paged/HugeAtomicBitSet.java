@@ -219,13 +219,6 @@ public final class HugeAtomicBitSet {
     }
 
     /**
-     * Returns the number of bits this bitset can hold.
-     */
-    public long capacity() {
-        return bits.size();
-    }
-
-    /**
      * Returns the number of bits in the bitset.
      */
     public long size() {
