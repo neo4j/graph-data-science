@@ -44,7 +44,8 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
     HeapControlTest<DegreeCentrality, CONFIG, DegreeCentrality.DegreeFunction>
 {
 
-    protected static final String GRAPH_NAME = "dcGraph";
+    static final String DEFAULT_RESULT_PROPERTY = "degreeScore";
+    static final String GRAPH_NAME = "dcGraph";
 
     @Neo4jGraph
     private static final String DB_CYPHER =

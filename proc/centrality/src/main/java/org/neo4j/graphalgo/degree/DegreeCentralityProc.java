@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.degree;
 
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 
 public final class DegreeCentralityProc {
 
@@ -29,5 +31,16 @@ public final class DegreeCentralityProc {
 
     static <CONFIG extends  DegreeCentralityConfig>AlgorithmFactory<DegreeCentrality, CONFIG> algorithmFactory() {
         return new DegreeCentralityFactory<>();
+    }
+
+    static <PROC_RESULT, CONFIG extends DegreeCentralityConfig> AbstractCentralityResultBuilder<PROC_RESULT> resultBuilder(
+        AbstractCentralityResultBuilder<PROC_RESULT> procResultBuilder,
+        AlgoBaseProc.ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, CONFIG> computeResult
+    ) {
+        var result = computeResult.result();
+        procResultBuilder
+            .withCentralityFunction(!computeResult.isGraphEmpty() ? result::get : null);
+
+        return procResultBuilder;
     }
 }
