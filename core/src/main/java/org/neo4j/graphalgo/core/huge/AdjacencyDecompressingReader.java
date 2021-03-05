@@ -40,15 +40,6 @@ final class AdjacencyDecompressingReader {
     }
 
     //@formatter:off
-    static int readInt(byte[] array, int offset) {
-        return   array[    offset] & 255        |
-                (array[1 + offset] & 255) <<  8 |
-                (array[2 + offset] & 255) << 16 |
-                (array[3 + offset] & 255) << 24;
-    }
-    //@formatter:on
-
-    //@formatter:off
     static long readLong(byte[] array, int offset) {
         return   array[    offset] & 255L        |
                 (array[1 + offset] & 255L) <<  8 |
