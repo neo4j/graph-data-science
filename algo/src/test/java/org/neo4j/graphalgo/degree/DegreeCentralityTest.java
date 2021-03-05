@@ -17,15 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.impl.degreecentrality;
+package org.neo4j.graphalgo.degree;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.centrality.degreecentrality.DegreeCentrality;
-import org.neo4j.graphalgo.centrality.degreecentrality.ImmutableDegreeCentralityConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -44,31 +42,31 @@ final class DegreeCentralityTest {
 
     @GdlGraph
     private static final String DB_CYPHER =
-            "CREATE" +
-            "  (a:Label1)" +
-            ", (b:Label1)" +
-            ", (c:Label1)" +
-            ", (d:Label1)" +
-            ", (e:Label1)" +
-            ", (f:Label1)" +
-            ", (g:Label1)" +
-            ", (h:Label1)" +
-            ", (i:Label1)" +
-            ", (j:Label1)" +
+        "CREATE" +
+        "  (a:Label1)" +
+        ", (b:Label1)" +
+        ", (c:Label1)" +
+        ", (d:Label1)" +
+        ", (e:Label1)" +
+        ", (f:Label1)" +
+        ", (g:Label1)" +
+        ", (h:Label1)" +
+        ", (i:Label1)" +
+        ", (j:Label1)" +
 
-            ", (b)-[:TYPE1 {weight: 2.0}]->(c)" +
+        ", (b)-[:TYPE1 {weight: 2.0}]->(c)" +
 
-            ", (c)-[:TYPE1 {weight: 2.0}]->(b)" +
+        ", (c)-[:TYPE1 {weight: 2.0}]->(b)" +
 
-            ", (d)-[:TYPE1 {weight: 2.0}]->(a)" +
-            ", (d)-[:TYPE1 {weight: 2.0}]->(b)" +
+        ", (d)-[:TYPE1 {weight: 2.0}]->(a)" +
+        ", (d)-[:TYPE1 {weight: 2.0}]->(b)" +
 
-            ", (e)-[:TYPE1 {weight: 2.0}]->(b)" +
-            ", (e)-[:TYPE1 {weight: 2.0}]->(d)" +
-            ", (e)-[:TYPE1 {weight: 2.0}]->(f)" +
+        ", (e)-[:TYPE1 {weight: 2.0}]->(b)" +
+        ", (e)-[:TYPE1 {weight: 2.0}]->(d)" +
+        ", (e)-[:TYPE1 {weight: 2.0}]->(f)" +
 
-            ", (f)-[:TYPE1 {weight: 2.0}]->(b)" +
-            ", (f)-[:TYPE1 {weight: 2.0}]->(e)";
+        ", (f)-[:TYPE1 {weight: 2.0}]->(b)" +
+        ", (f)-[:TYPE1 {weight: 2.0}]->(e)";
 
     @Inject
     private Graph graph;
