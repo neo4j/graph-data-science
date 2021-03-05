@@ -29,7 +29,7 @@ Altering the concurrency configuration has no effect.
 [[algorithms-dijkstra-source-target-syntax]]
 == Syntax
 
-include::path-syntax.adoc
+include::path-syntax.adoc[]
 
 [[algorithms-dijkstra-single-source-syntax-anonymous]]
 === Anonymous graphs
