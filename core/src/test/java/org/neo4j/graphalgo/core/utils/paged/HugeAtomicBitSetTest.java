@@ -22,11 +22,13 @@ package org.neo4j.graphalgo.core.utils.paged;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -71,16 +73,38 @@ class HugeAtomicBitSetTest {
         assertTrue(bitSet.get(0));
     }
 
+    @Test
+    void testSize() {
+        var bitSet = HugeAtomicBitSet.create(1337, AllocationTracker.empty());
+        assertThat(bitSet.size()).isEqualTo(1337);
+    }
+
     @ParameterizedTest
     @CsvSource({"0,1336", "0,63", "70,140"})
     void setRange(int startIndex, int endIndex) {
         var bitSet = HugeAtomicBitSet.create(1337, AllocationTracker.empty());
         bitSet.set(startIndex, endIndex);
-        for (int i = 0; i < bitSet.capacity(); i++) {
-            if (i < Math.abs(startIndex) || i > Math.abs(endIndex)) {
-                assertFalse(bitSet.get(i), formatWithLocale("index %d expected to be false", i));
-            } else {
+        for (int i = 0; i < bitSet.size(); i++) {
+            if (i >= startIndex && i < endIndex) {
                 assertTrue(bitSet.get(i), formatWithLocale("index %d expected to be true", i));
+            } else {
+                assertFalse(bitSet.get(i), formatWithLocale("index %d expected to be false", i));
+            }
+        }
+    }
+
+    @Test
+    void setRangeDoesNotSetOutsideOfRange() {
+        var bitSet = HugeAtomicBitSet.create(1337, AllocationTracker.empty());
+        bitSet.set(0, 1337);
+        // need to go through the inner bitset to check for values outside of size()
+        var innerBitSet = bitSet.toBitSet();
+        var max = BitUtil.align(1337, 64);
+        for (int i = 0; i < max; i++) {
+            if (i < 1337) {
+                assertTrue(innerBitSet.get(i), formatWithLocale("index %d expected to be true", i));
+            } else {
+                assertFalse(innerBitSet.get(i), formatWithLocale("index %d expected to be false", i));
             }
         }
     }
@@ -97,11 +121,35 @@ class HugeAtomicBitSetTest {
         phaser.arriveAndAwaitAdvance();
         phaser.arriveAndAwaitAdvance();
 
-        for (int i = 0; i < bitSet.capacity(); i++) {
+        for (int i = 0; i < bitSet.size(); i++) {
             if (i >= 0 && i < 32) assertTrue(bitSet.get(i));
             else if (i >= 40 && i < 80) assertTrue(bitSet.get(i));
             else if (i >= 100 && i < 127) assertTrue(bitSet.get(i));
             else assertFalse(bitSet.get(i));
+        }
+    }
+
+    @Test
+    void setRangeParallelDoesNotSetOutsideOfRange() {
+        var bitSet = HugeAtomicBitSet.create(168, AllocationTracker.empty());
+        var phaser = new Phaser(5);
+        var pool = Executors.newCachedThreadPool();
+        pool.submit(new SetTask(bitSet, phaser, 0, 42));
+        pool.submit(new SetTask(bitSet, phaser, 42, 84));
+        pool.submit(new SetTask(bitSet, phaser, 92, 122));
+        pool.submit(new SetTask(bitSet, phaser, 133, 137));
+        phaser.arriveAndAwaitAdvance();
+        phaser.arriveAndAwaitAdvance();
+
+        // need to go through the inner bitset to check for values outside of size()
+        var innerBitSet = bitSet.toBitSet();
+        var max = BitUtil.align(168, 64);
+        for (int i = 0; i < max; i++) {
+            if (i < 84 || (i >= 92 && i < 122) || (i >= 133 && i < 137)) {
+                assertTrue(innerBitSet.get(i), formatWithLocale("index %d expected to be true", i));
+            } else {
+                assertFalse(innerBitSet.get(i), formatWithLocale("index %d expected to be false", i));
+            }
         }
     }
 
