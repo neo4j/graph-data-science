@@ -508,12 +508,12 @@ public class CSRGraphStore implements GraphStore {
         if (this.nodes instanceof AutoCloseable) {
             closeables.accept((AutoCloseable) this.nodes);
         }
-        this.relationships.values().forEach(rel -> closeables.add(rel.list()).add(rel.offsets()));
+        this.relationships.values().forEach(rel -> closeables.add(rel.list()).add(rel.offsets()).add(rel.degrees()));
         this.relationshipProperties.forEach((propertyName, properties) ->
             properties.values().forEach(prop -> closeables.add(prop.values().list()).add(prop.values().offsets()))
         );
 
-        var errorWhileClosing = closeables.build().flatMap(closeable -> {
+        var errorWhileClosing = closeables.build().distinct().flatMap(closeable -> {
             try {
                 closeable.close();
                 return Stream.empty();
