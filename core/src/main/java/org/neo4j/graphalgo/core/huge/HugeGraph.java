@@ -451,12 +451,18 @@ public class HugeGraph implements CSRGraph {
     public void releaseTopology() {
         if (!canRelease) return;
 
-        adjacencyList.close();
-        adjacencyList = null;
-        adjacencyDegrees.close();
-        adjacencyDegrees = null;
-        adjacencyOffsets.close();
-        adjacencyOffsets = null;
+        if (adjacencyList != null) {
+            adjacencyList.close();
+            adjacencyList = null;
+        }
+        if (adjacencyDegrees != null) {
+            adjacencyDegrees.close();
+            adjacencyDegrees = null;
+        }
+        if (adjacencyOffsets != null) {
+            adjacencyOffsets.close();
+            adjacencyOffsets = null;
+        }
         if (properties != null) {
             properties.close();
             properties = null;
