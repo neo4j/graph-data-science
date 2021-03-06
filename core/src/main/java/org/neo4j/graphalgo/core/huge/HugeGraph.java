@@ -101,9 +101,9 @@ public class HugeGraph implements CSRGraph {
 
     protected final long relationshipCount;
 
-    protected @NotNull AdjacencyList adjacencyList;
-    protected @NotNull AdjacencyDegrees adjacencyDegrees;
-    protected @NotNull AdjacencyOffsets adjacencyOffsets;
+    protected AdjacencyList adjacencyList;
+    protected AdjacencyDegrees adjacencyDegrees;
+    protected AdjacencyOffsets adjacencyOffsets;
 
     protected final double defaultPropertyValue;
     @Nullable
