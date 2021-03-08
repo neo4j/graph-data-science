@@ -65,8 +65,8 @@ final class DegreeCentralityTest {
         ", (e)-[:TYPE1 {weight: 2.0}]->(d)" +
         ", (e)-[:TYPE1 {weight: 2.0}]->(f)" +
 
-        ", (f)-[:TYPE1 {weight: 2.0}]->(b)" +
-        ", (f)-[:TYPE1 {weight: 2.0}]->(e)";
+        ", (f)-[:TYPE1 {weight: 4.0}]->(b)" +
+        ", (f)-[:TYPE1 {weight: -2.0}]->(e)";
 
     @Inject
     private Graph graph;
@@ -98,7 +98,7 @@ final class DegreeCentralityTest {
         var degreeFunction = degreeCentrality.compute();
         expected.forEach((variable, expectedDegree) -> {
             long nodeId = graph.toMappedNodeId(idFunction.of(variable));
-            assertEquals(degreeFunction.get(nodeId), expectedDegree, 1E-6);
+            assertEquals(expectedDegree, degreeFunction.get(nodeId), 1E-6);
         });
     }
 

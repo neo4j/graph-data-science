@@ -150,7 +150,9 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
             for (long nodeId = startNodeId; nodeId < endNodeId && running(); nodeId++) {
                 MutableDouble nodeWeight = new MutableDouble(0.0D);
                 relationshipIterator.forEachRelationship(nodeId, DEFAULT_WEIGHT, (sourceNodeId, targetNodeId, weight) -> {
-                    nodeWeight.add(weight);
+                    if (weight > 0.0D) {
+                        nodeWeight.add(weight);
+                    }
                     return true;
                 });
                 result.set(nodeId, nodeWeight.doubleValue());
