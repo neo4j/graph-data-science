@@ -20,19 +20,34 @@
 package org.neo4j.gds.ml.normalizing;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
+
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MinMaxNormalizerTest {
 
-    @Test
-    void normalizes() {
-        var properties = (DoubleNodeProperties) nodeId -> nodeId;
+    private static Stream<Arguments> properties() {
+        return Stream.of(
+            Arguments.of((DoubleNodeProperties) nodeId -> nodeId, 0D, 9D),
+            Arguments.of((LongNodeProperties) nodeId -> nodeId, 0D, 9D),
+            Arguments.of((DoubleNodeProperties) nodeId -> 50000000D * nodeId, 0D, 4.5e8)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("properties")
+    void normalizes(NodeProperties properties, double min, double max) {
         var minMaxNormalizer = MinMaxNormalizer.create(properties, 10);
 
-        assertThat(minMaxNormalizer.min).isEqualTo(0D);
-        assertThat(minMaxNormalizer.max).isEqualTo(9D);
+        assertThat(minMaxNormalizer.min).isEqualTo(min);
+        assertThat(minMaxNormalizer.max).isEqualTo(max);
 
         for (int i = 0; i < 10; i++) {
             assertThat(minMaxNormalizer.normalize(i)).isEqualTo(i / 9D);
