@@ -19,9 +19,13 @@
  */
 package org.neo4j.graphalgo;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import java.util.List;
 import java.util.Map;
@@ -36,10 +40,33 @@ class RestartCheckProcTest extends BaseTest {
         );
     }
 
+    @AfterEach
+    void tearDown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+    }
+
     @Test
-    void safeToRestartAlwaysReturnsYes() {
+    void safeToRestartReturnsTrueWhenCatalogIsEmpty() {
         assertCypherResult("CALL gds.internal.safeToRestart()", List.of(
             Map.of("safeToRestart", Boolean.TRUE)
+        ));
+    }
+
+    @Test
+    void safeToRestartReturnsFalseIfThereAreGraphsInTheCatalog() {
+        var config = ImmutableGraphCreateFromStoreConfig.of(
+            AuthSubject.ANONYMOUS.username(),
+            "config",
+            NodeProjections.all(),
+            RelationshipProjections.all()
+        );
+        var graphStore = new StoreLoaderBuilder().api(db)
+            .build()
+            .graphStore();
+        GraphStoreCatalog.set(config, graphStore);
+
+        assertCypherResult("CALL gds.internal.safeToRestart()", List.of(
+            Map.of("safeToRestart", Boolean.FALSE)
         ));
     }
 }
