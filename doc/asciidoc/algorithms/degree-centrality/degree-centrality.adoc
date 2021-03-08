@@ -230,21 +230,22 @@ include::../shared/examples-intro.adoc[]
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
-CREATE (alice:User {name: 'Alice'}),
-       (bridget:User {name: 'Bridget'}),
-       (charles:User {name: 'Charles'}),
-       (doug:User {name: 'Doug'}),
-       (mark:User {name: 'Mark'}),
-       (michael:User {name: 'Michael'}),
+CREATE
+  (alice:User {name: 'Alice'}),
+  (bridget:User {name: 'Bridget'}),
+  (charles:User {name: 'Charles'}),
+  (doug:User {name: 'Doug'}),
+  (mark:User {name: 'Mark'}),
+  (michael:User {name: 'Michael'}),
 
-       (alice)-[:FOLLOWS {score: 1}]->(doug),
-       (alice)-[:FOLLOWS {score: -2}]->(bridget),
-       (alice)-[:FOLLOWS {score: 5}]->(charles),
-       (mark)-[:FOLLOWS {score: 1.5}]->(doug),
-       (mark)-[:FOLLOWS {score: 4.5}]->(michael),
-       (bridget)-[:FOLLOWS {score: 1.5}]->(doug),
-       (charles)-[:FOLLOWS {score: 2}]->(doug),
-       (michael)-[:FOLLOWS {score: 1.5}]->(doug)
+  (alice)-[:FOLLOWS {score: 1}]->(doug),
+  (alice)-[:FOLLOWS {score: -2}]->(bridget),
+  (alice)-[:FOLLOWS {score: 5}]->(charles),
+  (mark)-[:FOLLOWS {score: 1.5}]->(doug),
+  (mark)-[:FOLLOWS {score: 4.5}]->(michael),
+  (bridget)-[:FOLLOWS {score: 1.5}]->(doug),
+  (charles)-[:FOLLOWS {score: 2}]->(doug),
+  (michael)-[:FOLLOWS {score: 1.5}]->(doug)
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
