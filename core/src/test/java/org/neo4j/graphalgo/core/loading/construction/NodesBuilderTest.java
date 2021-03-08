@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.HashSet;
 import java.util.stream.LongStream;
@@ -40,6 +41,7 @@ class NodesBuilderTest {
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(nodeCount)
                 .concurrency(concurrency)
+                .tracker(AllocationTracker.empty())
                 .build();
 
             ParallelUtil.parallelStreamConsume(
@@ -63,6 +65,7 @@ class NodesBuilderTest {
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(attempts)
                 .concurrency(concurrency)
+                .tracker(AllocationTracker.empty())
                 .build();
 
             ParallelUtil.parallelStreamConsume(
@@ -90,6 +93,7 @@ class NodesBuilderTest {
                 .maxOriginalId(attempts)
                 .hasLabelInformation(true)
                 .concurrency(concurrency)
+                .tracker(AllocationTracker.empty())
                 .build();
 
             ParallelUtil.parallelStreamConsume(LongStream.range(0, attempts), concurrency, stream -> stream.forEach(

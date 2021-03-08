@@ -153,7 +153,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(1)
             .executorService(Pools.DEFAULT)
-            .tracker(AllocationTracker.empty())
+            .tracker(allocationTracker())
             .build();
 
         computationResult

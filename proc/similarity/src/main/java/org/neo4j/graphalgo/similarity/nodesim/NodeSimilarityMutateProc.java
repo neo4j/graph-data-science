@@ -167,6 +167,7 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
                 .preAggregate(false)
                 .concurrency(1)
                 .executorService(Pools.DEFAULT)
+                .tracker(allocationTracker())
                 .build();
 
             if (shouldComputeHistogram(callContext)) {

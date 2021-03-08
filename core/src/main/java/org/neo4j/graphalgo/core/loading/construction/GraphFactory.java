@@ -78,13 +78,13 @@ public final class GraphFactory {
         long maxOriginalId,
         Optional<Boolean> hasLabelInformation,
         Optional<Integer> concurrency,
-        Optional<AllocationTracker> tracker
+        AllocationTracker tracker
     ) {
         return new NodesBuilder(
             maxOriginalId,
             hasLabelInformation.orElse(false),
             concurrency.orElse(1),
-            tracker.orElse(AllocationTracker.empty())
+            tracker
         );
     }
 
@@ -127,10 +127,9 @@ public final class GraphFactory {
         Optional<Boolean> preAggregate,
         Optional<Integer> concurrency,
         Optional<ExecutorService> executorService,
-        Optional<AllocationTracker> tracker
+        AllocationTracker tracker
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
-        var actualTracker = tracker.orElse(AllocationTracker.empty());
 
         var aggregations = propertyConfigs.isEmpty()
             ? new Aggregation[]{aggregation.orElse(Aggregation.NONE)}
@@ -169,24 +168,24 @@ public final class GraphFactory {
         var adjacencyListWithPropertiesBuilder = AdjacencyListWithPropertiesBuilder.create(
             nodes.rootNodeCount(),
             projection,
-            TransientAdjacencyListBuilder.builderFactory(actualTracker),
+            TransientAdjacencyListBuilder.builderFactory(tracker),
             TransientAdjacencyOffsets.forPageSize(pageSize),
             aggregations,
             propertyKeyIds,
             defaultValues,
-            actualTracker
+            tracker
         );
 
         AdjacencyBuilder adjacencyBuilder = AdjacencyBuilder.compressing(
             adjacencyListWithPropertiesBuilder,
             numberOfPages,
             pageSize,
-            actualTracker,
+            tracker,
             relationshipCounter,
             preAggregate.orElse(false)
         );
 
-        var relationshipImporter = new RelationshipImporter(actualTracker, adjacencyBuilder);
+        var relationshipImporter = new RelationshipImporter(tracker, adjacencyBuilder);
 
         var importerBuilder = new SingleTypeRelationshipImporter.Builder(
             relationshipType,

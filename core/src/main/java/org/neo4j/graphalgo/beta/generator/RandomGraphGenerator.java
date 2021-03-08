@@ -120,6 +120,7 @@ public final class RandomGraphGenerator {
                 : List.of()
             )
             .aggregation(aggregation)
+            .tracker(allocationTracker)
             .build();
 
         generateRelationships(relationshipsBuilder);

@@ -183,7 +183,10 @@ class RelationshipsBuilderTest {
     private NodeMapping createIdMap(long nodeCount, TestMethodRunner runTest) {
         var nodesBuilderRef = new AtomicReference<NodeMapping>();
         runTest.run(() -> {
-            var nodesBuilder = GraphFactory.initNodesBuilder().maxOriginalId(nodeCount).build();
+            var nodesBuilder = GraphFactory.initNodesBuilder()
+                .maxOriginalId(nodeCount)
+                .tracker(AllocationTracker.empty())
+                .build();
 
             for (long i = 0; i < nodeCount; i++) {
                 nodesBuilder.addNode(i);

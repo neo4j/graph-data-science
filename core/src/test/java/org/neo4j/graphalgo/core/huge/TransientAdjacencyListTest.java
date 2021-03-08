@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
@@ -241,6 +242,7 @@ class TransientAdjacencyListTest {
         long sourceNodeId = targets[0];
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(targets[targets.length - 1])
+            .tracker(AllocationTracker.empty())
             .build();
 
         for (long target : targets) {
@@ -252,6 +254,7 @@ class TransientAdjacencyListTest {
             .nodes(idMap)
             .concurrency(1)
             .executorService(Pools.DEFAULT)
+            .tracker(AllocationTracker.empty())
             .build();
 
         for (long target : targets) {

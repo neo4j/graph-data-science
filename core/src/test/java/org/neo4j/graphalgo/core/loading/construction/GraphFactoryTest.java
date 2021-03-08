@@ -91,6 +91,7 @@ class GraphFactoryTest {
                 .nodes(idMap)
                 .orientation(orientation)
                 .aggregation(Aggregation.SUM)
+                .tracker(AllocationTracker.empty())
                 .build();
 
             for (int i = 0; i < nodeCount; i++) {
@@ -148,7 +149,10 @@ class GraphFactoryTest {
 
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
         int nodeCount = 4;
-        var nodesBuilder = GraphFactory.initNodesBuilder().maxOriginalId(nodeCount).build();
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(nodeCount)
+            .tracker(AllocationTracker.empty())
+            .build();
 
         for (int i = 0; i < nodeCount; i++) {
             nodesBuilder.addNode(i);
@@ -159,6 +163,7 @@ class GraphFactoryTest {
             .nodes(idMap)
             .orientation(orientation)
             .addPropertyConfig(aggregation, DefaultValue.forDouble())
+            .tracker(AllocationTracker.empty())
             .build();
 
         for (int i = 0; i < nodeCount; i++) {

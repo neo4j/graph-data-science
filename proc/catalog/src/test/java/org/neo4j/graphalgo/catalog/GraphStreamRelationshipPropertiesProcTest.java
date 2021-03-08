@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.values.storable.NumberType;
@@ -187,6 +188,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+            .tracker(AllocationTracker.empty())
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
@@ -291,6 +293,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
+            .tracker(AllocationTracker.empty())
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);

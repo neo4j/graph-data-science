@@ -90,7 +90,10 @@ class NewOldGraphTest {
     }
 
     private static NodeMapping idMap(int numberOfNodes) {
-        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder().maxOriginalId(numberOfNodes).build();
+        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(numberOfNodes)
+            .tracker(AllocationTracker.empty())
+            .build();
 
         for (int i = 0; i < numberOfNodes; i++) {
             nodesBuilder.addNode(i);
