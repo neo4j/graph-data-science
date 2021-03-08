@@ -20,14 +20,13 @@
 package org.neo4j.gds;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.cli.AdminTool;
 import org.neo4j.cli.ExecutionContext;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Settings;
@@ -42,58 +41,40 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-class DumpDatasetTest {
-    private static final String DUMP_PATH = "INSERT_PATH_HERE";
-    // Fill in the classes you need
-    private static final List<Class> PROC_CLASSES = List.of(GraphCreateProc.class);
+abstract class DumpDatasetTest {
+    abstract String dumpPath();
+    abstract List<Class> procedureAndFunctionClasses();
 
-    private static Path dbPath;
-    private static GdsGraphDatabaseAPI api;
+    protected Path dbPath;
+    protected GdsGraphDatabaseAPI api;
 
-    void test() {
-        String createQuery = "CALL gds.graph.create(" +
-                             "'all_person', " +
-                             "    {" +
-                             "      Person: {label: 'Person', properties: ['title_int', 'age', 'gender_int', 'death_year']}" +
-                             "    }," +
-                             "    {" +
-                             "      relType: {type: '*', orientation: 'UNDIRECTED', properties: ['weight']}" +
-                             "    }" +
-                             ")";
-
-        runQuery(createQuery, r -> {
-            System.out.println(r.resultAsString());
-            return true;
-        });
-    }
-
-    private GraphStore graphStore(String graphName) {
+    protected GraphStore graphStore(String graphName) {
         return GraphStoreCatalog.get("", api.databaseId(), graphName).graphStore();
     }
 
-    private Graph graph(String graphName) {
+    protected Graph graph(String graphName) {
         return graphStore(graphName).getUnion();
     }
 
-    private void runQuery(String query) {
+    protected void runQuery(String query) {
         api.executeTransactionally(query, Map.of(), r-> {return true;});
     }
 
-    private void runQuery(String query, ResultTransformer<Object> transformer) {
+    protected void runQuery(String query, ResultTransformer<Object> transformer) {
         api.executeTransactionally(query, Map.of(), transformer);
     }
 
-    private void runQuery(String query, Map<String, Object> parameters, ResultTransformer<Object> transformer) {
+    protected void runQuery(String query, Map<String, Object> parameters, ResultTransformer<Object> transformer) {
         api.executeTransactionally(query, parameters, transformer);
     }
 
-    @BeforeAll
-    static void setup() {
-        api = open(DUMP_PATH);
+    @BeforeEach
+    void setup() {
+        api = open(dumpPath());
     }
 
-    @AfterAll
-    static void tearDown() {
+    @AfterEach
+    void tearDown() {
         api.shutdown();
         try {
             FileUtils.deleteDirectory(dbPath.toFile());
@@ -102,14 +83,14 @@ class DumpDatasetTest {
         }
     }
 
-    private static GdsGraphDatabaseAPI open(String dumpPath) {
+    private GdsGraphDatabaseAPI open(String dumpPath) {
         var creator = CommunityDbCreator.getInstance();
         createEmptyDb(creator);
         runLoadCommand(dumpPath);
         return makeDbmsAndApi();
     }
 
-    private static GdsGraphDatabaseAPI makeDbmsAndApi() {
+    private GdsGraphDatabaseAPI makeDbmsAndApi() {
         var dbms = new DatabaseManagementServiceBuilder(dbPath.toFile())
             .setConfig(Settings.procedureUnrestricted(), List.of("gds.*"))
             .setConfig(Settings.udc(), false)
@@ -130,8 +111,8 @@ class DumpDatasetTest {
         return api;
     }
 
-    private static void registerProcedures(GlobalProcedures proceduresService) {
-        PROC_CLASSES
+    private void registerProcedures(GlobalProcedures proceduresService) {
+        procedureAndFunctionClasses()
             .forEach(procedureClass -> {
                 try {
                     proceduresService.registerProcedure(procedureClass);
@@ -141,8 +122,8 @@ class DumpDatasetTest {
             });
     }
 
-    private static void registerFunctions(GlobalProcedures proceduresService) {
-        PROC_CLASSES
+    private void registerFunctions(GlobalProcedures proceduresService) {
+        procedureAndFunctionClasses()
             .forEach(functionClass -> {
                 try {
                     proceduresService.registerFunction(functionClass);
@@ -152,7 +133,7 @@ class DumpDatasetTest {
             });
     }
 
-    private static void runLoadCommand(String dumpPath) {
+    private void runLoadCommand(String dumpPath) {
         final var ctx = new ExecutionContext( dbPath, dbPath.resolve("conf") );
         try {
             var confDir = dbPath.resolve("conf");
@@ -167,7 +148,7 @@ class DumpDatasetTest {
         }
     }
 
-    private static void createEmptyDb(CommunityDbCreator creator) {
+    private void createEmptyDb(CommunityDbCreator creator) {
         Path datasetDir = null;
         try {
             dbPath = Files.createTempDirectory("testDumpDb");
