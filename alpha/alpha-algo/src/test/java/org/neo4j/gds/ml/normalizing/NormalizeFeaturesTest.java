@@ -35,11 +35,11 @@ class NormalizeFeaturesTest {
 
     @GdlGraph
     static String GDL =
-        "(a:A {a: 1.1D}), " +
-        "(b:A {a: 2.8D}), " +
-        "(c:A {a: 3}), " +
-        "(d:A {a: -1}), " +
-        "(e:A {a: -10})";
+        "(a:A {a: 1.1D, b: 20, c: 50}), " +
+        "(b:A {a: 2.8D, b: 21, c: 51}), " +
+        "(c:A {a: 3, b: 22, c: 52}), " +
+        "(d:A {a: -1, b: 23, c: 60}), " +
+        "(e:A {a: -10, b: 24, c: 100})";
 
     @Inject
     TestGraph graph;
@@ -50,13 +50,13 @@ class NormalizeFeaturesTest {
         var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
 
         var result = algo.compute();
+        var resultProperties = result.normalizedProperties().toArray();
 
-        var properties = result.normalizedProperties().toArray();
-        assertArrayEquals(new double[]{1.1}, properties[(int) graph.toOriginalNodeId("a")]);
-        assertArrayEquals(new double[]{2.8}, properties[(int) graph.toOriginalNodeId("b")]);
-        assertArrayEquals(new double[]{3D}, properties[(int) graph.toOriginalNodeId("c")]);
-        assertArrayEquals(new double[]{-1D}, properties[(int) graph.toOriginalNodeId("d")]);
-        assertArrayEquals(new double[]{-10D}, properties[(int) graph.toOriginalNodeId("e")]);
+        assertArrayEquals(new double[]{1.1}, resultProperties[(int) graph.toOriginalNodeId("a")]);
+        assertArrayEquals(new double[]{2.8}, resultProperties[(int) graph.toOriginalNodeId("b")]);
+        assertArrayEquals(new double[]{3D}, resultProperties[(int) graph.toOriginalNodeId("c")]);
+        assertArrayEquals(new double[]{-1D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
+        assertArrayEquals(new double[]{-10D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
     }
 
     @Test
@@ -65,13 +65,28 @@ class NormalizeFeaturesTest {
         var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
 
         var result = algo.compute();
+        var resultProperties = result.normalizedProperties().toArray();
 
-        var properties = result.normalizedProperties().toArray();
-        assertArrayEquals(new double[]{11.1/13D}, properties[(int) graph.toOriginalNodeId("a")]);
-        assertArrayEquals(new double[]{12.8/13D}, properties[(int) graph.toOriginalNodeId("b")]);
-        assertArrayEquals(new double[]{1D}, properties[(int) graph.toOriginalNodeId("c")]);
-        assertArrayEquals(new double[]{9/13D}, properties[(int) graph.toOriginalNodeId("d")]);
-        assertArrayEquals(new double[]{0D}, properties[(int) graph.toOriginalNodeId("e")]);
+        assertArrayEquals(new double[]{11.1/13D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
+        assertArrayEquals(new double[]{12.8/13D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
+        assertArrayEquals(new double[]{1D}, resultProperties[(int) graph.toOriginalNodeId("c")]);
+        assertArrayEquals(new double[]{9/13D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
+        assertArrayEquals(new double[]{0D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
+    }
+
+    @Test
+    void minmaxNormalisationOverMultipleProperties() {
+        var config = ImmutableNormalizeFeaturesConfig.builder().featureProperties(List.of("a", "b", "c")).build();
+        var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
+
+        var result = algo.compute();
+        var resultProperties = result.normalizedProperties().toArray();
+
+        assertArrayEquals(new double[]{11.1/13D, 0D, 0D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
+        assertArrayEquals(new double[]{12.8/13D, 0.25, 1/50D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
+        assertArrayEquals(new double[]{1D, 0.5, 2/50D}, resultProperties[(int) graph.toOriginalNodeId("c")]);
+        assertArrayEquals(new double[]{9/13D, 0.75, 10/50D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
+        assertArrayEquals(new double[]{0D, 1D, 1D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
     }
 
 }
