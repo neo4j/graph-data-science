@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 @GdlExtension
 class NormalizeFeaturesTest {
@@ -57,6 +57,21 @@ class NormalizeFeaturesTest {
         assertArrayEquals(new double[]{3D}, properties[(int) graph.toOriginalNodeId("c")]);
         assertArrayEquals(new double[]{-1D}, properties[(int) graph.toOriginalNodeId("d")]);
         assertArrayEquals(new double[]{-10D}, properties[(int) graph.toOriginalNodeId("e")]);
+    }
+
+    @Test
+    void minmaxNormalisation() {
+        var config = ImmutableNormalizeFeaturesConfig.builder().featureProperties(List.of("a")).build();
+        var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
+
+        var result = algo.compute();
+
+        var properties = result.normalizedProperties().toArray();
+        assertArrayEquals(new double[]{11.1/13D}, properties[(int) graph.toOriginalNodeId("a")]);
+        assertArrayEquals(new double[]{12.8/13D}, properties[(int) graph.toOriginalNodeId("b")]);
+        assertArrayEquals(new double[]{1D}, properties[(int) graph.toOriginalNodeId("c")]);
+        assertArrayEquals(new double[]{9/13D}, properties[(int) graph.toOriginalNodeId("d")]);
+        assertArrayEquals(new double[]{0D}, properties[(int) graph.toOriginalNodeId("e")]);
     }
 
 }

@@ -27,6 +27,9 @@ import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFeatures.NormalizeFeaturesResult> {
 
     private final Graph graph;
@@ -42,9 +45,16 @@ public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFea
     @Override
     public NormalizeFeaturesResult compute() {
         var normalizedProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
-        config.featureProperties().forEach(featureProperty ->
-            normalizedProperties.setAll(value -> new double[]{graph.nodeProperties(featureProperty).doubleValue(value)})
-        );
+        normalizedProperties.setAll(nodeId -> {
+            var propertyCount = config.featureProperties().size();
+            var resultProperties = new double[propertyCount];
+            for (int i = 0; i < propertyCount; i++) {
+                var normalizer = resolveNormalizers().get(i);
+                var afterValue = normalizer.normalize(nodeId);
+                resultProperties[i] = afterValue;
+            }
+            return resultProperties;
+        });
 
         return NormalizeFeaturesResult.of(normalizedProperties);
     }
@@ -64,6 +74,14 @@ public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFea
         static NormalizeFeaturesResult of(HugeObjectArray<double[]> properties) {
             return ImmutableNormalizeFeaturesResult.of(properties);
         }
+    }
+
+    private List<MinMaxNormalizer> resolveNormalizers() {
+        var normalizers = config.featureProperties().stream().map(property -> {
+            var nodeProperties = graph.nodeProperties(property);
+            return MinMaxNormalizer.create(nodeProperties, graph.nodeCount());
+        }).collect(Collectors.toList());
+        return normalizers;
     }
 
     @ValueClass
