@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
@@ -47,7 +48,12 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> impl
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        // TODO
-        return MemoryEstimations.empty();
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(DegreeCentrality.class);
+        if (configuration.cacheDegrees() || configuration.relationshipWeightProperty() != null) {
+            return builder
+                .perNode("degree cache", HugeDoubleArray::memoryEstimation)
+                .build();
+        }
+        return builder.build();
     }
 }
