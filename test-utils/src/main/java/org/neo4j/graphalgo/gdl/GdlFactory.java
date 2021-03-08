@@ -279,7 +279,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                     .orientation(graphCreateConfig.orientation())
                     .aggregation(graphCreateConfig.aggregation())
                     .addAllPropertyConfigs(relTypeAndProperty.getValue().isPresent()
-                        ? List.of(GraphFactory.PropertyConfig.withDefaults())
+                        ? List.of(GraphFactory.PropertyConfig.of(graphCreateConfig.aggregation(), DefaultValue.forDouble()))
                         : List.of()
                     )
                     .executorService(loadingContext.executor())

@@ -79,6 +79,7 @@ class GraphFactoryTest {
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(nodeCount)
                 .hasLabelInformation(true)
+                .tracker(AllocationTracker.empty())
                 .build();
 
             nodesBuilder.addNode(0, NodeLabel.of("A"));
