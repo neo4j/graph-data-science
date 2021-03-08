@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyDegrees;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.AdjacencyBuilder;
 import org.neo4j.graphalgo.core.loading.AdjacencyListWithPropertiesBuilder;
@@ -169,6 +170,7 @@ public final class GraphFactory {
             nodes.rootNodeCount(),
             projection,
             TransientAdjacencyListBuilder.builderFactory(tracker),
+            TransientAdjacencyDegrees.Factory.INSTANCE,
             TransientAdjacencyOffsets.forPageSize(pageSize),
             aggregations,
             propertyKeyIds,
