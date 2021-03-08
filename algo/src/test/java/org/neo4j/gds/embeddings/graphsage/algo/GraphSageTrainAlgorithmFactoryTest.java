@@ -36,7 +36,7 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.junit.annotation.Edition;
-import org.neo4j.graphalgo.junit.annotation.GdsEditionBeforeAllTestCase;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,7 +61,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-@GdsEditionBeforeAllTestCase(Edition.EE)
+@GdsEditionTest(Edition.EE)
 class GraphSageTrainAlgorithmFactoryTest {
 
     private static final int SOME_REASONABLE_VALUE = 100;

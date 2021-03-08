@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.junit.annotation.Edition;
-import org.neo4j.graphalgo.junit.annotation.GdsEditionBeforeAllTestCase;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 
 import java.util.List;
@@ -253,7 +253,7 @@ class ModelCatalogTest {
     }
 
     @Nested
-    @GdsEditionBeforeAllTestCase(Edition.EE)
+    @GdsEditionTest(Edition.EE)
     class ModelCatalogEnterpriseFeaturesTest {
 
         @Test

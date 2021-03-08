@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.core.GdsEdition;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@GdsEditionBeforeAllTestCase(Edition.EE)
+@GdsEditionTest(Edition.EE)
 class GdsEditionExtensionCombinedTest {
 
     @Test

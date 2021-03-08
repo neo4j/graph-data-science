@@ -45,7 +45,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.gdl.GdlGraphs;
 import org.neo4j.graphalgo.junit.annotation.Edition;
-import org.neo4j.graphalgo.junit.annotation.GdsEditionBeforeAllTestCase;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import org.neo4j.logging.NullLog;
 
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfOpenHashContainer;
 
-@GdsEditionBeforeAllTestCase(Edition.EE)
+@GdsEditionTest(Edition.EE)
 class GraphSageAlgorithmFactoryTest {
 
     @SuppressWarnings("UnnecessaryLocalVariable")

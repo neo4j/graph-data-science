@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GdsEditionClassExtensionTest {
 
     @Nested
-    @GdsEditionBeforeAllTestCase(Edition.EE)
+    @GdsEditionTest(Edition.EE)
     class BeforeEachTestOnEE {
 
         @Test
@@ -43,7 +43,7 @@ class GdsEditionClassExtensionTest {
     }
 
     @Nested
-    @GdsEditionBeforeAllTestCase(Edition.CE)
+    @GdsEditionTest(Edition.CE)
     class BeforeEachTestOnCE {
 
         @Test
