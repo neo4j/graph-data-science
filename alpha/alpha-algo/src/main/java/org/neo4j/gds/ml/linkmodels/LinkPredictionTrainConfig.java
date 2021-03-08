@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
@@ -28,6 +29,7 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
@@ -36,7 +38,7 @@ import java.util.Optional;
 
 @ValueClass
 @Configuration
-public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig {
+public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig, RelationshipWeightConfig {
 
     Optional<Long> randomSeed();
 
@@ -60,6 +62,13 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeatureProper
     @Value.Default
     default List<LinkMetric> metrics() {
         return List.of(LinkMetric.AUCPR);
+    }
+
+    @Override
+    @Configuration.Ignore
+    @Value.Default
+    default @Nullable String relationshipWeightProperty() {
+        return null;
     }
 
     static LinkPredictionTrainConfig of(

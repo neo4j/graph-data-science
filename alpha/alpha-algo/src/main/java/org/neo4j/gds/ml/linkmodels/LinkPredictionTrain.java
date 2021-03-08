@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
@@ -61,13 +62,12 @@ public class LinkPredictionTrain
     private final AllocationTracker allocationTracker;
 
     public LinkPredictionTrain(
-        Graph trainGraph,
-        Graph testGraph,
+        Graph graph,
         LinkPredictionTrainConfig config,
         Log log
     ) {
-        this.trainGraph = trainGraph;
-        this.testGraph = testGraph;
+        this.trainGraph = graph.relationshipTypeFilteredGraph(Set.of(config.trainRelationshipType()));
+        this.testGraph = graph.relationshipTypeFilteredGraph(Set.of(config.testRelationshipType()));
         this.config = config;
         this.log = log;
         this.allocationTracker = AllocationTracker.empty();

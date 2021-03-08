@@ -25,7 +25,6 @@ import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -71,7 +70,15 @@ public class LinkPredictionTrainProc extends
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LinkPredictionTrainConfig.of(username, graphName, maybeImplicitCreate, config);
+        var lpConfig = LinkPredictionTrainConfig.of(username, graphName, maybeImplicitCreate, config);
+        var trainType = lpConfig.trainRelationshipType();
+        var testType = lpConfig.testRelationshipType();
+        return ImmutableLinkPredictionTrainConfig
+            .builder()
+            .from(lpConfig)
+            .relationshipTypes(List.of(trainType.name, testType.name))
+            .relationshipWeightProperty(EdgeSplitter.RELATIONSHIP_PROPERTY)
+            .build();
     }
 
     @Override
@@ -90,29 +97,6 @@ public class LinkPredictionTrainProc extends
     protected AlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
         return new AlgorithmFactory<>() {
             @Override
-            public GraphAndAlgorithm<LinkPredictionTrain> build(
-                GraphStore graphStore,
-                LinkPredictionTrainConfig configuration,
-                AllocationTracker tracker,
-                Log log,
-                ProgressEventTracker eventTracker
-            ) {
-                var trainGraph = graphStore.getGraph(
-                    configuration.nodeLabelIdentifiers(graphStore),
-                    List.of(configuration.trainRelationshipType()),
-                    Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY)
-                );
-                var testGraph = graphStore.getGraph(
-                    configuration.nodeLabelIdentifiers(graphStore),
-                    List.of(configuration.testRelationshipType()),
-                    Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY)
-                );
-
-                var algo = new LinkPredictionTrain(trainGraph, testGraph, configuration, log);
-                return GraphAndAlgorithm.of(trainGraph, algo);
-            }
-
-            @Override
             public LinkPredictionTrain build(
                 Graph graph,
                 LinkPredictionTrainConfig configuration,
@@ -120,7 +104,7 @@ public class LinkPredictionTrainProc extends
                 Log log,
                 ProgressEventTracker eventTracker
             ) {
-                throw new UnsupportedOperationException("Link Prediction requires two graphs as input.");
+                return new LinkPredictionTrain(graph, configuration, log);
             }
 
             @Override

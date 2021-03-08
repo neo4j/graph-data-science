@@ -25,7 +25,9 @@ import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -102,8 +104,8 @@ class LinkPredictionTrainTest {
 
     @Test
     void trainsAModel() {
-        var trainGraph = graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
-        var testGraph = graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
+        var trainGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
+        var testGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
 
         var nodeCount = 15;
         var truePositives = 16;
@@ -113,8 +115,8 @@ class LinkPredictionTrainTest {
 
         var expectedWinner = Map.<String, Object>of("maxIterations", 1000);
         var config = ImmutableLinkPredictionTrainConfig.builder()
-            .trainRelationshipType(RelationshipType.of("unused"))
-            .testRelationshipType(RelationshipType.of("unused"))
+            .trainRelationshipType(RelationshipType.of("TRAIN"))
+            .testRelationshipType(RelationshipType.of("TEST"))
             .featureProperties(List.of("z"))
             .modelName("model")
             .validationFolds(3)
@@ -126,8 +128,7 @@ class LinkPredictionTrainTest {
             )).build();
 
         var linkPredictionTrain = new LinkPredictionTrain(
-            trainGraph,
-            testGraph,
+            UnionGraph.of(List.of(trainGraph, testGraph)),
             config,
             TestProgressLogger.NULL_LOGGER.getLog()
         );
@@ -147,8 +148,8 @@ class LinkPredictionTrainTest {
 
     @Test
     void trainsAModelWithListFeatures() {
-        var trainGraph = graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
-        var testGraph = graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
+        var trainGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
+        var testGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
 
         var nodeCount = 15;
         var truePositives = 16;
@@ -158,8 +159,8 @@ class LinkPredictionTrainTest {
 
         var expectedWinner = Map.<String, Object>of("maxIterations", 1000);
         var config = ImmutableLinkPredictionTrainConfig.builder()
-            .trainRelationshipType(RelationshipType.of("unused"))
-            .testRelationshipType(RelationshipType.of("unused"))
+            .trainRelationshipType(RelationshipType.of("TRAIN"))
+            .testRelationshipType(RelationshipType.of("TEST"))
             .featureProperties(List.of("array"))
             .modelName("model")
             .validationFolds(3)
@@ -171,8 +172,7 @@ class LinkPredictionTrainTest {
             )).build();
 
         var linkPredictionTrain = new LinkPredictionTrain(
-            trainGraph,
-            testGraph,
+            UnionGraph.of(List.of(trainGraph, testGraph)),
             config,
             TestProgressLogger.NULL_LOGGER.getLog()
         );
