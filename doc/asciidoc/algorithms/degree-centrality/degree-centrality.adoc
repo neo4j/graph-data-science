@@ -224,6 +224,7 @@ The results are the same as for running write mode with a named graph, see the <
 
 :algorithm-name: {algorithm}
 :graph-description: social network
+:image-file: degree-centralit-graph.svg
 include::../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
