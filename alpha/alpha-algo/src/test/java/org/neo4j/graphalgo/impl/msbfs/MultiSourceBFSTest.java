@@ -24,7 +24,6 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -359,11 +358,6 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             @Override
             public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
                 throw new UnsupportedOperationException(".streamRelationships is not implemented.");
-            }
-
-            @Override
-            public Graph relationshipTypeFilteredGraph(Set<RelationshipType> relationshipTypes) {
-                throw new UnsupportedOperationException();
             }
         };
 

@@ -19,9 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.RelationshipType;
-
-import java.util.Set;
 import java.util.stream.Stream;
 
 public interface RelationshipIterator extends RelationshipPredicate {
@@ -47,8 +44,6 @@ public interface RelationshipIterator extends RelationshipPredicate {
     void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer);
 
     Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue);
-
-    Graph relationshipTypeFilteredGraph(Set<RelationshipType> relationshipTypes);
 
     /**
      * @return a copy of this iterator that reuses new cursors internally,

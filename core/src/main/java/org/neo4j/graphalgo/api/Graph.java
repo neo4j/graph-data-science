@@ -81,6 +81,8 @@ public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, Rela
      */
     boolean isMultiGraph();
 
+    Graph relationshipTypeFilteredGraph(Set<RelationshipType> relationshipTypes);
+
     boolean hasRelationshipProperty();
 
     void canRelease(boolean canRelease);
