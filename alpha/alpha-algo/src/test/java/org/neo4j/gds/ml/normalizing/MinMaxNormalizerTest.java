@@ -39,4 +39,17 @@ class MinMaxNormalizerTest {
         }
     }
 
+    @Test
+    void avoidsDivByZero() {
+        var properties = (DoubleNodeProperties) nodeId -> 4D;
+        var minMaxNormalizer = MinMaxNormalizer.create(properties, 10);
+
+        assertThat(minMaxNormalizer.min).isEqualTo(4D);
+        assertThat(minMaxNormalizer.max).isEqualTo(4D);
+
+        for (int i = 0; i < 10; i++) {
+            assertThat(minMaxNormalizer.normalize(i)).isEqualTo(0D);
+        }
+    }
+
 }

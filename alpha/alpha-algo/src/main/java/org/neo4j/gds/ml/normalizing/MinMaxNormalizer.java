@@ -34,6 +34,9 @@ final class MinMaxNormalizer {
     }
 
     double normalize(long nodeId) {
+        if (Math.abs(max - min) < 1e-15) {
+            return 0D;
+        }
         return (properties.doubleValue(nodeId) - min) / (max - min);
     }
 
