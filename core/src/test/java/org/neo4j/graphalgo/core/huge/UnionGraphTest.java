@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -114,8 +113,8 @@ class UnionGraphTest {
     void shouldSelectGivenRelationships(String sourceVariable, Set<RelationshipType> relTypes, Collection<String> targetVariables) {
         Graph graph = multiRelTypeGraphStore.getUnion();
 
-        RelationshipIterator filteredIterator = graph.relationshipTypeFilteredIterator(relTypes);
-        long[] actualTargets = filteredIterator
+        var filteredGraph = graph.relationshipTypeFilteredGraph(relTypes);
+        long[] actualTargets = filteredGraph
             .streamRelationships(
                 multiRelTypeIdFunction.of(sourceVariable),
                 Double.NaN

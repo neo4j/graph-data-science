@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
@@ -185,7 +184,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public RelationshipIterator relationshipTypeFilteredIterator(Set<RelationshipType> relationshipTypes) {
+    public Graph relationshipTypeFilteredGraph(Set<RelationshipType> relationshipTypes) {
         return this;
     }
 

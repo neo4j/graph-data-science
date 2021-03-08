@@ -28,12 +28,12 @@ import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.CSRGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -302,7 +302,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public RelationshipIterator relationshipTypeFilteredIterator(Set<RelationshipType> relationshipTypes) {
+    public Graph relationshipTypeFilteredGraph(Set<RelationshipType> relationshipTypes) {
         assertSupportedRelationships(relationshipTypes);
         return this;
     }

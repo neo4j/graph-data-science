@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -184,7 +183,7 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public RelationshipIterator relationshipTypeFilteredIterator(Set<RelationshipType> relationshipTypes) {
+    public Graph relationshipTypeFilteredGraph(Set<RelationshipType> relationshipTypes) {
         List<CSRGraph> filteredGraphs = new ArrayList<>();
         for (CSRGraph graph : graphs) {
             if (relationshipTypes.isEmpty() || relationshipTypes.containsAll(graph.availableRelationshipTypes())) {

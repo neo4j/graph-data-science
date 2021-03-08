@@ -183,8 +183,8 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
-    public RelationshipIterator relationshipTypeFilteredIterator(Set<RelationshipType> relationshipTypes) {
-        return graph.relationshipTypeFilteredIterator(relationshipTypes);
+    public Graph relationshipTypeFilteredGraph(Set<RelationshipType> relationshipTypes) {
+        return graph.relationshipTypeFilteredGraph(relationshipTypes);
     }
 
     @Override

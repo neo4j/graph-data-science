@@ -362,7 +362,7 @@ final class MultiSourceBFSTest extends AlgoTestBase {
             }
 
             @Override
-            public RelationshipIterator relationshipTypeFilteredIterator(Set<RelationshipType> relationshipTypes) {
+            public Graph relationshipTypeFilteredGraph(Set<RelationshipType> relationshipTypes) {
                 throw new UnsupportedOperationException();
             }
         };
