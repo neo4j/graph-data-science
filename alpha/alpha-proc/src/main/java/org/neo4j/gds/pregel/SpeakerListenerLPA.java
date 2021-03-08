@@ -116,7 +116,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
     private void speak(ComputeContext<SpeakerListenerLPAConfig> context, long[] labels) {
-        context.getNeighbours().forEach(neighbor -> {
+        context.forEachNeighbor(neighbor -> {
             var randomLabelPosition = random.get().nextInt(context.superstep() + 1);
             var labelToSend = labels[randomLabelPosition];
             context.sendTo(neighbor, labelToSend);
