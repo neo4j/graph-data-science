@@ -58,6 +58,10 @@ import org.neo4j.graphalgo.betweenness.BetweennessCentralityWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
+import org.neo4j.graphalgo.degree.DegreeCentralityMutateProc;
+import org.neo4j.graphalgo.degree.DegreeCentralityStatsProc;
+import org.neo4j.graphalgo.degree.DegreeCentralityStreamProc;
+import org.neo4j.graphalgo.degree.DegreeCentralityWriteProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
@@ -175,11 +179,15 @@ final class EstimationCliTest {
         "gds.betweenness.stream.estimate",
         "gds.betweenness.write.estimate",
 
+        "gds.degree.mutate.estimate",
+        "gds.degree.stats.estimate",
+        "gds.degree.stream.estimate",
+        "gds.degree.write.estimate",
+
         "gds.fastRP.mutate.estimate",
         "gds.fastRP.stats.estimate",
         "gds.fastRP.stream.estimate",
         "gds.fastRP.write.estimate",
-
 
         "gds.graph.create.cypher.estimate",
         "gds.graph.create.estimate",
@@ -591,6 +599,11 @@ final class EstimationCliTest {
             runEstimation(new BetweennessCentralityStatsProc()::estimate),
             runEstimation(new BetweennessCentralityStreamProc()::estimate),
             runEstimation(new BetweennessCentralityWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new DegreeCentralityMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new DegreeCentralityStatsProc()::estimate),
+            runEstimation(new DegreeCentralityStreamProc()::estimate),
+            runEstimation(new DegreeCentralityWriteProc()::estimate, "writeProperty", "foo"),
 
             runEstimation(new FastRPMutateProc()::estimate, "mutateProperty", "foo", "embeddingDimension", 128),
             runEstimation(new FastRPStatsProc()::estimate, "embeddingDimension", 128),
