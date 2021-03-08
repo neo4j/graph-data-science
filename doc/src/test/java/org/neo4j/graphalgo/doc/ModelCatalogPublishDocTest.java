@@ -34,13 +34,13 @@ import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.junit.annotation.Edition;
-import org.neo4j.graphalgo.junit.annotation.GdsEditionBeforeEachTestCase;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import org.neo4j.graphalgo.model.catalog.ModelPublishProc;
 
 import java.nio.file.Path;
 import java.util.List;
 
-@GdsEditionBeforeEachTestCase(Edition.EE)
+@GdsEditionTest(Edition.EE)
 class ModelCatalogPublishDocTest extends DocTestBase {
 
     @TempDir

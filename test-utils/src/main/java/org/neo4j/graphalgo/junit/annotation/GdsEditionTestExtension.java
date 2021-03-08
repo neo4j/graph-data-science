@@ -20,8 +20,10 @@
 package org.neo4j.graphalgo.junit.annotation;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.graphalgo.core.GdsEdition;
@@ -29,6 +31,8 @@ import org.neo4j.graphalgo.core.GdsEdition;
 public class GdsEditionTestExtension implements
     BeforeTestExecutionCallback,
     AfterTestExecutionCallback,
+    BeforeEachCallback,
+    AfterEachCallback,
     BeforeAllCallback,
     AfterAllCallback {
 
@@ -36,22 +40,22 @@ public class GdsEditionTestExtension implements
 
     @Override
     public void beforeAll(ExtensionContext context) {
-        if (isClassAnnotation(context)) {
-            var namespace = namespace(context, true);
-
-            var testClass = context.getRequiredTestClass();
-            var gdsEdition = testClass.getAnnotation(GdsEditionTest.class).value();
-
-            setEdition(namespace, gdsEdition, context);
-        }
+        setGdsEditionAtClassLevel(context);
     }
 
     @Override
     public void afterAll(ExtensionContext context) {
-        if (isClassAnnotation(context)) {
-            var namespace = namespace(context, true);
-            resetEdition(namespace, context);
-        }
+        resetGdsEditionAtClassLevel(context);
+    }
+
+    @Override
+    public void beforeEach(ExtensionContext context) {
+        setGdsEditionAtClassLevel(context);
+    }
+
+    @Override
+    public void afterEach(ExtensionContext context) {
+        resetGdsEditionAtClassLevel(context);
     }
 
     @Override
@@ -97,6 +101,24 @@ public class GdsEditionTestExtension implements
             GdsEdition.instance().setToEnterpriseEdition();
         } else {
             GdsEdition.instance().setToCommunityEdition();
+        }
+    }
+
+    private void setGdsEditionAtClassLevel(ExtensionContext context) {
+        if (isClassAnnotation(context)) {
+            var namespace = namespace(context, true);
+
+            var testClass = context.getRequiredTestClass();
+            var gdsEdition = testClass.getAnnotation(GdsEditionTest.class).value();
+
+            setEdition(namespace, gdsEdition, context);
+        }
+    }
+
+    private void resetGdsEditionAtClassLevel(ExtensionContext context) {
+        if (isClassAnnotation(context)) {
+            var namespace = namespace(context, true);
+            resetEdition(namespace, context);
         }
     }
 
