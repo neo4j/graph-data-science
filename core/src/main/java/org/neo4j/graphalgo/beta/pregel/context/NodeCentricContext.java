@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.beta.pregel.ComputeStep;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 
 import java.util.function.LongConsumer;
-import java.util.stream.LongStream;
 
 public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
 
@@ -139,13 +138,6 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
     public void forEachDistinctNeighbor(long nodeId, LongConsumer targetConsumer) {
         computeStep.forEachDistinctNeighbor(nodeId, targetConsumer);
     }
-
-    /**
-     * Returns the outgoing neighbour-ids of the currently processed node.
-     */
-    public LongStream getNeighbours() { return computeStep.getNeighbors(nodeId); }
-
-    public LongStream getNeighbours(long nodeId) { return computeStep.getNeighbors(nodeId); }
 }
 
 

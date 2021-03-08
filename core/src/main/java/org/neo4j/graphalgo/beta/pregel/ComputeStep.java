@@ -168,15 +168,6 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
         });
     }
 
-    public LongStream getNeighbors(long sourceNodeId) {
-        LongStream.Builder builder = LongStream.builder();
-        relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
-            builder.accept(targetNodeId);
-            return true;
-        });
-        return builder.build();
-    }
-
     public double doubleNodeValue(String key, long nodeId) {
         return nodeValue.doubleValue(key, nodeId);
     }
