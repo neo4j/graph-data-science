@@ -24,13 +24,13 @@ include::page-rank/page-rank.adoc[leveloffset=+1]
 
 include::betweenness-centrality/betweenness-centrality.adoc[leveloffset=+1]
 
+include::degree-centrality/degree-centrality.adoc[leveloffset=+1]
+
 include::alpha/alpha-articlerank.adoc[leveloffset=+1]
 
 include::alpha/alpha-closeness-centrality.adoc[leveloffset=+1]
 
 include::alpha/alpha-harmonic-centrality.adoc[leveloffset=+1]
-
-include::alpha/alpha-degree-centrality.adoc[leveloffset=+1]
 
 include::alpha/alpha-eigenvector-centrality.adoc[leveloffset=+1]
 

@@ -1,5 +1,4 @@
 [[algorithms-degree-centrality]]
-[.alpha]
 = Degree Centrality
 
 [abstract]
@@ -10,8 +9,6 @@ This section describes the Degree Centrality algorithm in the Neo4j Graph Data S
 Degree centrality measures the number of incoming and outgoing relationships from a node.
 
 The Degree Centrality algorithm can help us find popular nodes in a graph.
-
-include::alpha-note.adoc[]
 
 
 [[algorithms-degree-context]]
