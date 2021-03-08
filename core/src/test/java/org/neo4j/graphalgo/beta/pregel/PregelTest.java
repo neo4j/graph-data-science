@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.annotation.Configuration;
@@ -90,8 +91,9 @@ class PregelTest {
         assertArrayEquals(expected, nodeValues.doubleProperties(KEY).toArray());
     }
 
-    @Test
-    void testCorrectnessForLargeGraph() {
+    @ParameterizedTest
+    @EnumSource(Partitioning.class)
+    void testCorrectnessForLargeGraph(Partitioning partitioningScheme) {
         var graph = RandomGraphGenerator.builder()
             .nodeCount(10_000)
             .averageDegree(10)
@@ -104,6 +106,7 @@ class PregelTest {
         var configBuilder = ImmutablePregelConfig.builder()
             .username("")
             .maxIterations(10)
+            .partitioning(partitioningScheme)
             .isAsynchronous(false);
 
         var singleThreadedConfig = configBuilder.concurrency(1).build();

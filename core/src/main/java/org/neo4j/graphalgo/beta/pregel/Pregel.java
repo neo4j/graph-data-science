@@ -20,10 +20,12 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -36,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class Pregel<CONFIG extends PregelConfig> {
@@ -166,7 +170,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     private List<ComputeStep<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
-        List<Partition> partitions = PartitionUtils.rangePartition(concurrency, graph.nodeCount());
+
+        List<Partition> partitions = partitionGraph();
 
         List<ComputeStep<CONFIG, ?>> computeSteps = new ArrayList<>(concurrency);
 
@@ -184,6 +189,31 @@ public final class Pregel<CONFIG extends PregelConfig> {
             ));
         }
         return computeSteps;
+    }
+
+    @NotNull
+    private List<Partition> partitionGraph() {
+        List<Partition> partitions;
+
+        switch (config.partitioning()) {
+            case RANGE:
+                partitions = PartitionUtils.rangePartition(concurrency, graph.nodeCount());
+                break;
+            case DEGREE:
+                var batchSize = Math.max(
+                    ParallelUtil.DEFAULT_BATCH_SIZE,
+                    BitUtil.ceilDiv(graph.relationshipCount(), concurrency)
+                );
+                partitions = PartitionUtils.degreePartition(graph, batchSize);
+                break;
+            default:
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Unsupported partitioning `%s`",
+                    config.partitioning()
+                ));
+        }
+
+        return partitions;
     }
 
     private void runComputeSteps(Collection<ComputeStep<CONFIG, ?>> computeSteps) {

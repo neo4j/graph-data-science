@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -47,6 +49,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -71,6 +74,29 @@ public class PregelProcTest extends BaseProcTest {
             .algo("example", "pregel", "test")
             .streamMode()
             .addParameter("maxIterations", 20)
+            .yields("nodeId", "values");
+
+        assertCypherResult(query, List.of(Map.of(
+            "nodeId", 1L,
+            "values", ConditionFactory.containsExactlyInAnyOrderEntriesOf(Map.of(
+                CompositeTestAlgorithm.LONG_KEY, 42L,
+                CompositeTestAlgorithm.DOUBLE_KEY, 42D,
+                CompositeTestAlgorithm.LONG_ARRAY_KEY, new long[]{1, 3, 3, 7},
+                CompositeTestAlgorithm.DOUBLE_ARRAY_KEY, new double[]{1, 9, 8, 4}
+            ))
+        )));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Partitioning.class)
+    void streamWithPartitioning(Partitioning partitioningScheme) {
+        var query = GdsCypher.call()
+            .withNodeLabel("RealNode")
+            .withAnyRelationshipType()
+            .algo("example", "pregel", "test")
+            .streamMode()
+            .addParameter("maxIterations", 20)
+            .addParameter("partitioning", partitioningScheme.toString().toLowerCase(Locale.ENGLISH))
             .yields("nodeId", "values");
 
         assertCypherResult(query, List.of(Map.of(

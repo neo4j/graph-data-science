@@ -66,6 +66,13 @@ public interface PregelConfig extends
         return concurrency();
     }
 
+    @Value.Default
+    @Configuration.ConvertWith("org.neo4j.graphalgo.beta.pregel.Partitioning#parse")
+    @Configuration.ToMapValue("org.neo4j.graphalgo.beta.pregel.Partitioning#toString")
+    default Partitioning partitioning() {
+        return Partitioning.RANGE;
+    }
+
     static PregelConfig of(
         String username,
         Optional<String> graphName,

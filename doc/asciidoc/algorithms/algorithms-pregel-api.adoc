@@ -298,6 +298,7 @@ This is equivalent to all the other algorithms within the GDS library.
 | Name                                                                             | Type      | Default Value | Description
 | <<common-configuration-max-iterations,maxIterations>>                            | Integer   | -             | Maximum number of supersteps after which the computation will terminate.
 | isAsynchronous                                                                   | Boolean   | false         | Flag indicating if messages can be sent and received in the same superstep.
+| partitioning                                                                     | String    | "range"       | Selects the partitioning of the input graph, can be either "range" or "degree".
 | <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String    | null          | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
 | <<common-configuration-concurrency,concurrency>>                                 | Integer   | 4             | Concurrency used when executing the Pregel computation.
 | <<common-configuration-write-concurrency,writeConcurrency>>                      | Integer   | concurrency   | Concurrency used when writing computation results to Neo4j.
