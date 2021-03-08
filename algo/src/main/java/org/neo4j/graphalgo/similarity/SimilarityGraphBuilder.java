@@ -20,8 +20,10 @@
 package org.neo4j.graphalgo.similarity;
 
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
@@ -97,7 +99,7 @@ public class SimilarityGraphBuilder {
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(baseIdMap)
             .orientation(orientation)
-            .loadRelationshipProperty(true)
+            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(concurrency)
             .executorService(executorService)
             .tracker(tracker)

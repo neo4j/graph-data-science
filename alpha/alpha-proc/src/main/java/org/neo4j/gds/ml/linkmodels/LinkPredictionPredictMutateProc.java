@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -149,7 +150,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
             .aggregation(Aggregation.SINGLE)
             .nodes(computationResult.graph().nodeMapping())
             .orientation(Orientation.UNDIRECTED)
-            .loadRelationshipProperty(true)
+            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(1)
             .executorService(Pools.DEFAULT)
             .tracker(AllocationTracker.empty())

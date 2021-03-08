@@ -30,7 +30,9 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
@@ -184,7 +186,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
-            .loadRelationshipProperty(true)
+            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
@@ -288,7 +290,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
             .orientation(Orientation.NATURAL)
-            .loadRelationshipProperty(true)
+            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);

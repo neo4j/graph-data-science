@@ -23,10 +23,12 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.beta.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -48,7 +50,7 @@ public abstract class ShortestPathMutateProc<ALGO extends Algorithm<ALGO, Dijkst
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(computationResult.graph())
-            .loadRelationshipProperty(true)
+            .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .orientation(Orientation.NATURAL)
             .build();
 

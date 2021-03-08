@@ -28,8 +28,8 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.impl.msbfs.ANPStrategy;
@@ -58,10 +58,9 @@ public class CollapsePath extends Algorithm<CollapsePath, Relationships> {
 
     @Override
     public Relationships compute() {
-        RelationshipsBuilder relImporter = new RelationshipsBuilderBuilder()
+        RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(((HugeGraph) graphs[0]).idMap())
             .orientation(Orientation.NATURAL)
-            .loadRelationshipProperty(false)
             .aggregation(Aggregation.NONE)
             .concurrency(config.concurrency())
             .executorService(executorService)

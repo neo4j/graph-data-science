@@ -88,39 +88,6 @@ public final class GraphFactory {
         );
     }
 
-    public static RelationshipsBuilderBuilder initRelationshipsBuilder() {
-        return new RelationshipsBuilderBuilder();
-    }
-
-    @Builder.Factory
-    static RelationshipsBuilder relationshipsBuilder(
-        IdMapping nodes,
-        Optional<Orientation> orientation,
-        Optional<Boolean> loadRelationshipProperty,
-        Optional<Aggregation> aggregation,
-        Optional<DefaultValue> defaultValue,
-        Optional<Boolean> preAggregate,
-        Optional<Integer> concurrency,
-        Optional<ExecutorService> executorService,
-        // TODO: non-optional
-        Optional<AllocationTracker> tracker
-    ) {
-        List<PropertyConfig> propertyConfigs = loadRelationshipProperty.orElse(false)
-            ? List.of(PropertyConfig.of(aggregation, defaultValue))
-            : List.of();
-
-        return relationshipsWithMultiplePropertiesBuilder(
-            nodes,
-            orientation,
-            propertyConfigs,
-            aggregation,
-            preAggregate,
-            concurrency,
-            executorService,
-            tracker
-        );
-    }
-
     @ValueClass
     public interface PropertyConfig {
 
@@ -134,6 +101,10 @@ public final class GraphFactory {
             return DefaultValue.forDouble();
         }
 
+        static PropertyConfig withDefaults() {
+            return of(Optional.empty(), Optional.empty());
+        }
+
         static PropertyConfig of(Aggregation aggregation, DefaultValue defaultValue) {
             return ImmutablePropertyConfig.of(aggregation, defaultValue);
         }
@@ -143,12 +114,12 @@ public final class GraphFactory {
         }
     }
 
-    public static RelationshipsWithMultiplePropertiesBuilderBuilder initRelationshipsWithMultiplePropertiesBuilder() {
-        return new RelationshipsWithMultiplePropertiesBuilderBuilder();
+    public static RelationshipsBuilderBuilder initRelationshipsBuilder() {
+        return new RelationshipsBuilderBuilder();
     }
 
     @Builder.Factory
-    static RelationshipsBuilder relationshipsWithMultiplePropertiesBuilder(
+    static RelationshipsBuilder relationshipsBuilder(
         IdMapping nodes,
         Optional<Orientation> orientation,
         List<PropertyConfig> propertyConfigs,

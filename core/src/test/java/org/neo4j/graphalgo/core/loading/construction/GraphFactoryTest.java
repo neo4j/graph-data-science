@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -157,8 +158,7 @@ class GraphFactoryTest {
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)
-            .aggregation(aggregation)
-            .loadRelationshipProperty(true)
+            .addPropertyConfig(aggregation, DefaultValue.forDouble())
             .build();
 
         for (int i = 0; i < nodeCount; i++) {

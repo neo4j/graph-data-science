@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -73,19 +74,22 @@ public abstract class EdgeSplitter {
     }
 
     protected RelationshipsBuilder newRelationshipsBuilderWithProp(Graph graph, Orientation orientation) {
-        return newRelationshipsBuilder(graph, orientation, Optional.of(true));
+        return newRelationshipsBuilder(graph, orientation, true);
     }
 
     protected RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation) {
-        return newRelationshipsBuilder(graph, orientation, Optional.empty());
+        return newRelationshipsBuilder(graph, orientation, false);
     }
 
-    private RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation, Optional<Boolean> loadRelationshipProperty) {
+    private RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation, boolean loadRelationshipProperty) {
         return GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)
             .nodes(graph.nodeMapping())
             .orientation(orientation)
-            .loadRelationshipProperty(loadRelationshipProperty)
+            .addAllPropertyConfigs(loadRelationshipProperty
+                ? List.of(GraphFactory.PropertyConfig.of(Aggregation.SINGLE, DefaultValue.forDouble()))
+                : List.of()
+            )
             .concurrency(1)
             .executorService(Pools.DEFAULT)
             .tracker(AllocationTracker.empty())

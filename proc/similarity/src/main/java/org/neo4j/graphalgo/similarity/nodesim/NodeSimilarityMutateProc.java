@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -162,8 +163,7 @@ public class NodeSimilarityMutateProc extends MutatePropertyProc<NodeSimilarity,
             RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(topKGraph)
                 .orientation(Orientation.NATURAL)
-                .loadRelationshipProperty(true)
-                .aggregation(Aggregation.NONE)
+                .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
                 .preAggregate(false)
                 .concurrency(1)
                 .executorService(Pools.DEFAULT)

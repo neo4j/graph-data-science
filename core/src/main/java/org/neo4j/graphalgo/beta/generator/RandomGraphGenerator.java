@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
@@ -110,12 +111,15 @@ public final class RandomGraphGenerator {
         }
 
         NodeMapping idMap = nodesBuilder.build();
-        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)
-            .loadRelationshipProperty(maybeRelationshipPropertyProducer.isPresent())
-            .aggregation(aggregation)
             .tracker(allocationTracker)
+            .addAllPropertyConfigs(maybeRelationshipPropertyProducer.isPresent()
+                ? List.of(GraphFactory.PropertyConfig.of(aggregation, DefaultValue.forDouble()))
+                : List.of()
+            )
+            .aggregation(aggregation)
             .build();
 
         generateRelationships(relationshipsBuilder);

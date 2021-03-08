@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.louvain;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -213,8 +214,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)
-            .loadRelationshipProperty(true)
-            .aggregation(Aggregation.SUM)
+            .addPropertyConfig(Aggregation.SUM, DefaultValue.forDouble())
             .preAggregate(true)
             .executorService(executorService)
             .tracker(tracker)
