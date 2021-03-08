@@ -288,7 +288,7 @@ public final class ModelCatalog {
 
         private void canStoreModel(String modelType) {
             if (GdsEdition.instance().isOnCommunityEdition() && reachedModelsLimit(modelType)) {
-                throw new IllegalArgumentException("Community users can only store one model in the catalog");
+                throw new IllegalArgumentException("Community users can only store one model in the catalog, see https://neo4j.com/docs/graph-data-science/");
             }
         }
 

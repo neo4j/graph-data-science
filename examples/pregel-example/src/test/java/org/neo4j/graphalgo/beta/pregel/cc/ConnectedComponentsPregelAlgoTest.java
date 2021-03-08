@@ -120,6 +120,6 @@ class ConnectedComponentsPregelAlgoTest {
                 .build();
         });
 
-        assertThat(illegalArgumentException, containsMessage("The configured `writeConcurrency` value is too high"));
+        assertThat(illegalArgumentException, containsMessage("Community users cannot exceed writeConcurrency=4 (you configured writeConcurrency=10), see https://neo4j.com/docs/graph-data-science/"));
     }
 }

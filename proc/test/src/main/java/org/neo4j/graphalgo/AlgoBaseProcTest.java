@@ -426,7 +426,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 assertThat(ex)
                     .getRootCause()
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("The configured `readConcurrency` value is too high");
+                    .hasMessageContaining("Community users cannot exceed readConcurrency=4 (you configured readConcurrency=10), see https://neo4j.com/docs/graph-data-science/");
             })
         );
     }

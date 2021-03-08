@@ -45,10 +45,7 @@ public interface ConcurrencyConfig {
     static void validateConcurrency(int requestedConcurrency, String configKey) {
         if (GdsEdition.instance().isOnCommunityEdition() && requestedConcurrency > CONCURRENCY_LIMITATION) {
             throw new IllegalArgumentException(formatWithLocale(
-                "The configured `%1$s` value is too high. " +
-                "The maximum allowed `%1$s` value is %2$d but %3$d was configured. " +
-                "Please see the documentation (System Requirements section) for an explanation of concurrency limitations for different editions of Neo4j Graph Data Science. " +
-                "Higher than concurrency %2$d is only available, when you have licensed the Enterprise Edition of the Neo4j Graph Data Science Library.",
+                "Community users cannot exceed %1$s=%2$d (you configured %1$s=%3$d), see https://neo4j.com/docs/graph-data-science/",
                 configKey,
                 CONCURRENCY_LIMITATION,
                 requestedConcurrency

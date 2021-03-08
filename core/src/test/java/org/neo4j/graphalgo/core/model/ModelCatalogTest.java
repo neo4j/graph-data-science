@@ -98,7 +98,7 @@ class ModelCatalogTest {
             () -> ModelCatalog.set(model2)
         );
 
-        assertEquals("Community users can only store one model in the catalog", ex.getMessage());
+        assertEquals("Community users can only store one model in the catalog, see https://neo4j.com/docs/graph-data-science/", ex.getMessage());
     }
 
     @Test
