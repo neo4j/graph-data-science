@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
@@ -27,6 +28,7 @@ import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 
+import java.util.function.LongConsumer;
 import java.util.stream.LongStream;
 
 public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator> implements Runnable {
@@ -144,6 +146,24 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
     public void sendToNeighborsWeighted(long sourceNodeId, double message) {
         relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
             sendTo(targetNodeId, computation.applyRelationshipWeight(message, weight));
+            return true;
+        });
+    }
+
+    public void forEachNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
+        relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+            targetConsumer.accept(targetNodeId);
+            return true;
+        });
+    }
+
+    public void forEachDistinctNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
+        var prevTarget = new MutableLong(-1);
+        relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+            if (prevTarget.longValue() != targetNodeId) {
+                targetConsumer.accept(targetNodeId);
+                prevTarget.setValue(targetNodeId);
+            }
             return true;
         });
     }

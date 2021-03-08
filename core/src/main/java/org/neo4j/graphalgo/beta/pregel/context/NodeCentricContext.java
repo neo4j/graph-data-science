@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.pregel.context;
 import org.neo4j.graphalgo.beta.pregel.ComputeStep;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 
+import java.util.function.LongConsumer;
 import java.util.stream.LongStream;
 
 public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
@@ -109,6 +110,34 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
      */
     public int degree() {
         return computeStep.degree(nodeId);
+    }
+
+    /**
+     * Calls the consumer for each neighbor of the currently processed node.
+     */
+    public void forEachNeighbor(LongConsumer targetConsumer) {
+        computeStep.forEachNeighbor(nodeId, targetConsumer);
+    }
+
+    /**
+     * Calls the consumer for each neighbor of the given node.
+     */
+    public void forEachNeighbor(long nodeId, LongConsumer targetConsumer) {
+        computeStep.forEachNeighbor(nodeId, targetConsumer);
+    }
+
+    /**
+     * Calls the consumer once for each neighbor of the currently processed node.
+     */
+    public void forEachDistinctNeighbor(LongConsumer targetConsumer) {
+        computeStep.forEachDistinctNeighbor(nodeId, targetConsumer);
+    }
+
+    /**
+     * Calls the consumer once for each neighbor of the given node.
+     */
+    public void forEachDistinctNeighbor(long nodeId, LongConsumer targetConsumer) {
+        computeStep.forEachDistinctNeighbor(nodeId, targetConsumer);
     }
 
     /**
