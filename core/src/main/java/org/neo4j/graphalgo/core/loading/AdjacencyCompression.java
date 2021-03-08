@@ -89,15 +89,6 @@ public final class AdjacencyCompression {
         return encodeVLongs(data, length, out, 0);
     }
 
-    //@formatter:off
-    static void writeDegree(byte[] out, int offset, int degree) {
-        out[    offset] = (byte) (degree);
-        out[1 + offset] = (byte) (degree >>> 8);
-        out[2 + offset] = (byte) (degree >>> 16);
-        out[3 + offset] = (byte) (degree >>> 24);
-    }
-    //@formatter:on
-
     private static int applyDelta(long[] values, int length, Aggregation aggregation) {
         long value = values[0], delta;
         int in = 1, out = 1;

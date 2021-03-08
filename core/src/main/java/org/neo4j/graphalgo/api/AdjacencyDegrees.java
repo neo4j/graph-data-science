@@ -17,17 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.compress;
+package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
-import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
+public interface AdjacencyDegrees extends AutoCloseable {
 
-public interface CompressedTopology {
+    int degree(long node);
 
-    AdjacencyDegrees adjacencyDegrees();
-
-    AdjacencyOffsets adjacencyOffsets();
-
-    AdjacencyList adjacencyList();
+    @Override
+    void close();
 }

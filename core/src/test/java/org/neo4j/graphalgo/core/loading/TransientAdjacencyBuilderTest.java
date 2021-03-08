@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyDegrees;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
@@ -29,6 +30,7 @@ class TransientAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
     void test() throws Exception {
         testAdjacencyList(
             TransientAdjacencyListBuilder.builderFactory(AllocationTracker.empty()),
+            TransientAdjacencyDegrees.Factory.INSTANCE,
             TransientAdjacencyOffsets.forPageSize(8)
         );
     }

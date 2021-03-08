@@ -140,7 +140,7 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
     }
 
     @Override
-    public void init(long index) {
+    public void init(long index, int degree) {
         throw new UnsupportedOperationException(
             "CompositeAdjacencyCursor does not support init, use CompositeAdjacencyList.decompressingCursor instead.");
     }

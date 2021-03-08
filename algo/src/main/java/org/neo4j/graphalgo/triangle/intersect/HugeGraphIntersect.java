@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.triangle.intersect;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.Graph;
@@ -29,10 +30,15 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 
 public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
 
-    private final AdjacencyList adjacency;
+    private final AdjacencyDegrees degrees;
     private final AdjacencyOffsets offsets;
 
-    private HugeGraphIntersect(final AdjacencyList adjacency, final AdjacencyOffsets offsets, long maxDegree) {
+    private HugeGraphIntersect(
+        AdjacencyDegrees degrees,
+        AdjacencyList adjacency,
+        AdjacencyOffsets offsets,
+        long maxDegree
+    ) {
         super(
             adjacency.rawDecompressingCursor(),
             adjacency.rawDecompressingCursor(),
@@ -40,26 +46,22 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
             adjacency.rawDecompressingCursor(),
             maxDegree
         );
-        this.adjacency = adjacency;
+        this.degrees = degrees;
         this.offsets = offsets;
     }
 
     @Override
-    public AdjacencyCursor cursor(long node, AdjacencyCursor reuse) {
+    public AdjacencyCursor cursor(long node, int degree, AdjacencyCursor reuse) {
         final long offset = offsets.get(node);
         if (offset == 0L) {
             return empty;
         }
-        return super.cursor(offset, reuse);
+        return super.cursor(offset, degree, reuse);
     }
 
     @Override
     protected int degree(long node) {
-        long offset = offsets.get(node);
-        if (offset == 0L) {
-            return 0;
-        }
-        return adjacency.degree(offset);
+        return degrees.degree(node);
     }
 
     @ServiceProvider
@@ -75,7 +77,7 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
             assert graph instanceof HugeGraph;
             var hugeGraph = (HugeGraph) graph;
             var topology = hugeGraph.relationshipTopology();
-            return new HugeGraphIntersect(topology.list(), topology.offsets(), config.maxDegree());
+            return new HugeGraphIntersect(topology.degrees(), topology.list(), topology.offsets(), config.maxDegree());
         }
     }
 }

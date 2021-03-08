@@ -123,13 +123,6 @@ public final class TransientAdjacencyList implements AdjacencyList {
     }
 
     @Override
-    public int degree(long index) {
-        return AdjacencyDecompressingReader.readInt(
-                pages[pageIndex(index, PAGE_SHIFT)],
-                indexInPage(index, PAGE_MASK));
-    }
-
-    @Override
     public void close() {
         pages = null;
     }
@@ -153,7 +146,6 @@ public final class TransientAdjacencyList implements AdjacencyList {
         private byte[][] pages;
 
         private byte[] currentPage;
-        private int degree;
         private int offset;
         private int limit;
 
@@ -174,11 +166,9 @@ public final class TransientAdjacencyList implements AdjacencyList {
         }
 
         @Override
-        public Cursor init(long fromIndex) {
+        public Cursor init(long fromIndex, int degree) {
             this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
             this.offset = indexInPage(fromIndex, PAGE_MASK);
-            this.degree = AdjacencyDecompressingReader.readInt(currentPage, offset);
-            this.offset += Integer.BYTES;
             this.limit = offset + degree * Long.BYTES;
             return this;
         }
@@ -203,10 +193,12 @@ public final class TransientAdjacencyList implements AdjacencyList {
         }
 
         @Override
-        public void init(long fromIndex) {
+        public void init(long fromIndex, int degree) {
             maxTargets = decompress.reset(
                 pages[pageIndex(fromIndex, PAGE_SHIFT)],
-                indexInPage(fromIndex, PAGE_MASK));
+                indexInPage(fromIndex, PAGE_MASK),
+                degree
+            );
             currentPosition = 0;
         }
 

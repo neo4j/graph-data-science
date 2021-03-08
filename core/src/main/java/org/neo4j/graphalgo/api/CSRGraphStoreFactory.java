@@ -70,6 +70,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
             relationships.put(
                 relationshipType,
                 ImmutableTopology.of(
+                    adjacency.adjacencyDegrees(),
                     adjacency.adjacencyList(),
                     adjacency.adjacencyOffsets(),
                     relationshipCount,
@@ -83,6 +84,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                     relationshipType,
                     constructRelationshipPropertyStore(
                         projection,
+                        adjacency.adjacencyDegrees(),
                         properties,
                         relationshipCount
                     )
@@ -103,6 +105,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
 
     private RelationshipPropertyStore constructRelationshipPropertyStore(
         RelationshipProjection projection,
+        AdjacencyDegrees degrees,
         Iterable<CompressedProperties> properties,
         long relationshipCount
     ) {
@@ -119,6 +122,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                     NumberType.FLOATING_POINT,
                     GraphStore.PropertyState.PERSISTENT,
                     ImmutableProperties.of(
+                        degrees,
                         compressedProperties.adjacencyList(),
                         compressedProperties.adjacencyOffsets(),
                         relationshipCount,

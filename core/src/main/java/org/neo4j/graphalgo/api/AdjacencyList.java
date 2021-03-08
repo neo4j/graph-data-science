@@ -21,14 +21,12 @@ package org.neo4j.graphalgo.api;
 
 public interface AdjacencyList extends AutoCloseable {
 
-    int degree(long index);
-
     // Cursors
 
     PropertyCursor rawCursor();
 
-    default PropertyCursor cursor(long offset) {
-        return rawCursor().init(offset);
+    default PropertyCursor cursor(long offset, int degree) {
+        return rawCursor().init(offset, degree);
     }
 
     /**
@@ -39,8 +37,8 @@ public interface AdjacencyList extends AutoCloseable {
     /**
      * Get a new cursor initialised on the given offset
      */
-    default AdjacencyCursor decompressingCursor(long offset) {
-        return rawDecompressingCursor().initializedTo(offset);
+    default AdjacencyCursor decompressingCursor(long offset, int degree) {
+        return rawDecompressingCursor().initializedTo(offset, degree);
     }
 
     @Override

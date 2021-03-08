@@ -40,15 +40,6 @@ final class AdjacencyDecompressingReader {
     }
 
     //@formatter:off
-    static int readInt(byte[] array, int offset) {
-        return   array[    offset] & 255        |
-                (array[1 + offset] & 255) <<  8 |
-                (array[2 + offset] & 255) << 16 |
-                (array[3 + offset] & 255) << 24;
-    }
-    //@formatter:on
-
-    //@formatter:off
     static long readLong(byte[] array, int offset) {
         return   array[    offset] & 255L        |
                 (array[1 + offset] & 255L) <<  8 |
@@ -68,12 +59,11 @@ final class AdjacencyDecompressingReader {
         offset = other.offset;
     }
 
-    int reset(byte[] adjacencyPage, int offset) {
+    int reset(byte[] adjacencyPage, int offset, int degree) {
         this.array = adjacencyPage;
-        int numAdjacencies = readInt(adjacencyPage, offset); // offset should not be 0
-        this.offset = decodeDeltaVLongs(0L, adjacencyPage, Integer.BYTES + offset, Math.min(numAdjacencies, CHUNK_SIZE), block);
+        this.offset = decodeDeltaVLongs(0L, adjacencyPage, offset, Math.min(degree, CHUNK_SIZE), block);
         pos = 0;
-        return numAdjacencies;
+        return degree;
     }
 
     long next(int remaining) {

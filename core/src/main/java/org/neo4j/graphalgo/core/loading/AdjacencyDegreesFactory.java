@@ -17,17 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.compress;
+package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.AdjacencyDegrees;
-import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 
-public interface CompressedTopology {
+@FunctionalInterface
+public interface AdjacencyDegreesFactory {
 
-    AdjacencyDegrees adjacencyDegrees();
-
-    AdjacencyOffsets adjacencyOffsets();
-
-    AdjacencyList adjacencyList();
+    AdjacencyDegrees newDegrees(HugeIntArray degrees);
 }

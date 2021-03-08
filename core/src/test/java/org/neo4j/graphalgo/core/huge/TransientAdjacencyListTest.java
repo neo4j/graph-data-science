@@ -261,7 +261,10 @@ class TransientAdjacencyListTest {
             relationshipsBuilder.add(sourceNodeId, target);
         }
         Relationships relationships = relationshipsBuilder.build();
-        long offset = relationships.topology().offsets().get(idMap.toMappedNodeId(sourceNodeId));
-        return (TransientAdjacencyList.DecompressingCursor) relationships.topology().list().decompressingCursor(offset);
+        var topology = relationships.topology();
+        var mappedNodeId = idMap.toMappedNodeId(sourceNodeId);
+        long offset = topology.offsets().get(mappedNodeId);
+        int degree = topology.degrees().degree(mappedNodeId);
+        return (TransientAdjacencyList.DecompressingCursor) topology.list().decompressingCursor(offset, degree);
     }
 }

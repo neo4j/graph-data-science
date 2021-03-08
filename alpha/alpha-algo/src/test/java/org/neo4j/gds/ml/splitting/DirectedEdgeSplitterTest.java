@@ -72,27 +72,27 @@ class DirectedEdgeSplitterTest {
         assertThat(selectedRels.topology()).satisfies(topology -> {
             // it selected 5,0 and 5,3 (neg) and 1,2 and 2,3 (pos) relationships
             assertEquals(4L, topology.elementCount());
-            var cursor = topology.list().decompressingCursor(topology.offsets().get(5L));
+            var cursor = topology.list().decompressingCursor(topology.offsets().get(5L), topology.degrees().degree(5L));
             assertEquals(0L, cursor.nextVLong());
             assertEquals(3L, cursor.nextVLong());
-            var cursor2 = topology.list().decompressingCursor(topology.offsets().get(1L));
+            var cursor2 = topology.list().decompressingCursor(topology.offsets().get(1L), topology.degrees().degree(1L));
             assertEquals(2L, cursor2.nextVLong());
-            var cursor3 = topology.list().decompressingCursor(topology.offsets().get(2L));
+            var cursor3 = topology.list().decompressingCursor(topology.offsets().get(2L), topology.degrees().degree(2L));
             assertEquals(3L, cursor3.nextVLong());
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
         assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
             assertEquals(4L, p.elementCount());
-            var cursor = p.list().cursor(p.offsets().get(5L));
+            var cursor = p.list().cursor(p.offsets().get(5L), p.degrees().degree(5L));
             // 5,0 is negative
             assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
             // 5,3 is positive
             assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
-            var cursor2 = p.list().cursor(p.offsets().get(1L));
+            var cursor2 = p.list().cursor(p.offsets().get(1L), p.degrees().degree(1L));
             // 1,2 is positive
             assertEquals(POSITIVE, Double.longBitsToDouble(cursor2.nextLong()));
-            var cursor3 = p.list().cursor(p.offsets().get(2L));
+            var cursor3 = p.list().cursor(p.offsets().get(2L), p.degrees().degree(2L));
             // 2,3 is positive
             assertEquals(POSITIVE, Double.longBitsToDouble(cursor3.nextLong()));
         });

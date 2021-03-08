@@ -27,15 +27,6 @@ public interface AdjacencyListPageSlice {
     long address();
 
     /**
-     * Write a single int at the current {@link #offset()}.
-     * The endianness of the int is left to the implementation.
-     */
-    default void writeInt(int value) {
-        AdjacencyCompression.writeDegree(page(), offset(), value);
-        bytesWritten(Integer.BYTES);
-    }
-
-    /**
      * Write some bytes at the current {@link #offset()}.
      */
     default void insert(byte[] bytes, int arrayOffset, int length) {

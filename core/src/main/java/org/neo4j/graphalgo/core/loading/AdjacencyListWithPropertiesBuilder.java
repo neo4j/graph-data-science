@@ -46,6 +46,7 @@ public final class AdjacencyListWithPropertiesBuilder {
         RelationshipProjection projection,
         Map<String, Integer> relationshipPropertyTokens,
         AdjacencyListBuilderFactory listBuilderFactory,
+        AdjacencyDegreesFactory degreesFactory,
         AdjacencyOffsetsFactory offsetsFactory,
         AllocationTracker tracker
     ) {
@@ -57,6 +58,7 @@ public final class AdjacencyListWithPropertiesBuilder {
             nodeCount,
             projection,
             listBuilderFactory,
+            degreesFactory,
             offsetsFactory,
             aggregations,
             propertyKeyIds,
@@ -69,6 +71,7 @@ public final class AdjacencyListWithPropertiesBuilder {
         long nodeCount,
         RelationshipProjection projection,
         AdjacencyListBuilderFactory listBuilderFactory,
+        AdjacencyDegreesFactory degreesFactory,
         AdjacencyOffsetsFactory offsetsFactory,
         Aggregation[] aggregations,
         int[] propertyKeyIds,
@@ -78,7 +81,7 @@ public final class AdjacencyListWithPropertiesBuilder {
         return create(
             nodeCount,
             projection,
-            adjacencyCompressorFactory(offsetsFactory),
+            adjacencyCompressorFactory(degreesFactory, offsetsFactory),
             listBuilderFactory,
             aggregations,
             propertyKeyIds,
@@ -122,8 +125,11 @@ public final class AdjacencyListWithPropertiesBuilder {
         );
     }
 
-    private static AdjacencyCompressorFactory adjacencyCompressorFactory(AdjacencyOffsetsFactory offsetsFactory) {
-        return new DeltaVarLongCompressor.Factory(offsetsFactory);
+    private static AdjacencyCompressorFactory adjacencyCompressorFactory(
+        AdjacencyDegreesFactory degreesFactory,
+        AdjacencyOffsetsFactory offsetsFactory
+    ) {
+        return new DeltaVarLongCompressor.Factory(degreesFactory, offsetsFactory);
     }
 
     private static double[] defaultValues(RelationshipProjection projection) {

@@ -162,6 +162,7 @@ public class RelationshipsBuilder {
                     relationshipCounter.longValue(),
                     orientation,
                     isMultiGraph,
+                    compressedTopology.adjacencyDegrees(),
                     compressedTopology.adjacencyList(),
                     compressedTopology.adjacencyOffsets(),
                     compressedProperties.adjacencyList(),
@@ -174,6 +175,7 @@ public class RelationshipsBuilder {
                 relationshipCounter.longValue(),
                 orientation,
                 isMultiGraph,
+                compressedTopology.adjacencyDegrees(),
                 compressedTopology.adjacencyList(),
                 compressedTopology.adjacencyOffsets()
             ));

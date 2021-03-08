@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.ObjectObjectHashMap;
 import com.carrotsearch.hppc.ObjectObjectMap;
 import com.carrotsearch.hppc.procedures.ObjectObjectProcedure;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.PropertyCursor;
@@ -33,6 +34,7 @@ import java.util.Map;
 
 class CompositeRelationshipIterator {
 
+    private final AdjacencyDegrees adjacencyDegrees;
     private final AdjacencyList adjacencyList;
     private final AdjacencyOffsets adjacencyOffsets;
     private final Map<String, ? extends AdjacencyList> propertyLists;
@@ -43,20 +45,23 @@ class CompositeRelationshipIterator {
     private final ObjectObjectMap<String, PropertyCursor> propertyCursorCache;
 
     CompositeRelationshipIterator(
+        AdjacencyDegrees adjacencyDegrees,
         AdjacencyList adjacencyList,
         AdjacencyOffsets adjacencyOffsets,
         Map<String, ? extends AdjacencyList> propertyLists,
         Map<String, ? extends AdjacencyOffsets> propertyOffsets
     ) {
-        this(adjacencyList, adjacencyOffsets, propertyLists, hppcCopy(propertyOffsets));
+        this(adjacencyDegrees, adjacencyList, adjacencyOffsets, propertyLists, hppcCopy(propertyOffsets));
     }
 
     private CompositeRelationshipIterator(
+        AdjacencyDegrees adjacencyDegrees,
         AdjacencyList adjacencyList,
         AdjacencyOffsets adjacencyOffsets,
         Map<String, ? extends AdjacencyList> propertyLists,
         ObjectObjectMap<String, AdjacencyOffsets> propertyOffsets
     ) {
+        this.adjacencyDegrees = adjacencyDegrees;
         this.adjacencyList = adjacencyList;
         this.adjacencyOffsets = adjacencyOffsets;
         this.propertyLists = propertyLists;
@@ -76,7 +81,7 @@ class CompositeRelationshipIterator {
     }
 
     CompositeRelationshipIterator concurrentCopy() {
-        return new CompositeRelationshipIterator(adjacencyList, adjacencyOffsets, propertyLists, propertyOffsets);
+        return new CompositeRelationshipIterator(adjacencyDegrees, adjacencyList, adjacencyOffsets, propertyLists, propertyOffsets);
     }
 
     int propertyCount() {
@@ -91,11 +96,12 @@ class CompositeRelationshipIterator {
         }
 
         // init adjacency cursor
-        var adjacencyCursor = cursorCache.initializedTo(offset);
+        var degree = adjacencyDegrees.degree(sourceId);
+        var adjacencyCursor = cursorCache.initializedTo(offset, degree);
         // init property cursors
         for (var propertyKey : propertyKeys) {
             var propertyOffset = propertyOffsets.get(propertyKey).get(sourceId);
-            var propertyCursor = propertyCursorCache.get(propertyKey).init(propertyOffset);
+            var propertyCursor = propertyCursorCache.get(propertyKey).init(propertyOffset, degree);
             propertyCursorCache.put(propertyKey, propertyCursor);
         }
 

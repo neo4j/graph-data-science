@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.huge.CompositeAdjacencyCursor;
+import org.neo4j.graphalgo.core.huge.CompositeAdjacencyDegrees;
 import org.neo4j.graphalgo.core.huge.CompositeAdjacencyList;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 
@@ -31,9 +32,14 @@ import java.util.ArrayList;
 
 public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
 
+    private final CompositeAdjacencyDegrees compositeAdjacencyDegrees;
     private final CompositeAdjacencyList compositeAdjacencyList;
 
-    private UnionGraphIntersect(CompositeAdjacencyList compositeAdjacencyList, long maxDegree) {
+    private UnionGraphIntersect(
+        CompositeAdjacencyDegrees compositeAdjacencyDegrees,
+        CompositeAdjacencyList compositeAdjacencyList,
+        long maxDegree
+    ) {
         super(
             compositeAdjacencyList.rawDecompressingCursor(),
             compositeAdjacencyList.rawDecompressingCursor(),
@@ -41,27 +47,31 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
             compositeAdjacencyList.rawDecompressingCursor(),
             maxDegree
         );
+        this.compositeAdjacencyDegrees = compositeAdjacencyDegrees;
         this.compositeAdjacencyList = compositeAdjacencyList;
     }
 
     @Override
-    protected CompositeAdjacencyCursor cursor(long nodeId, CompositeAdjacencyCursor reuse) {
+    protected CompositeAdjacencyCursor cursor(long nodeId, int unusedDegree, CompositeAdjacencyCursor reuse) {
         var adjacencyCursors = new ArrayList<AdjacencyCursor>(compositeAdjacencyList.adjacencyLists().size());
         var cursors = reuse.cursors();
         var emptyCursors = empty.cursors();
 
-        compositeAdjacencyList.forEachOffset(nodeId, ((index, offset, hasAdjacency) -> adjacencyCursors.add(
-            index,
-            hasAdjacency
-                ? cursors.get(index).initializedTo(offset)
-                : emptyCursors.get(index)
-        )));
+        compositeAdjacencyList.forEachOffset(
+            nodeId,
+            (list, index, offset, degree, hasAdjacency) -> adjacencyCursors.add(
+                index,
+                hasAdjacency
+                    ? cursors.get(index).initializedTo(offset, degree)
+                    : emptyCursors.get(index)
+            )
+        );
         return new CompositeAdjacencyCursor(adjacencyCursors);
     }
 
     @Override
     protected int degree(long nodeId) {
-        return compositeAdjacencyList.degree(nodeId);
+        return compositeAdjacencyDegrees.degree(nodeId);
     }
 
     @ServiceProvider
@@ -75,9 +85,10 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         @Override
         public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
             assert graph instanceof UnionGraph;
-            var unionGraph = (UnionGraph) graph;
+            var topology = ((UnionGraph) graph).relationshipTopology();
             return new UnionGraphIntersect(
-                (CompositeAdjacencyList) unionGraph.relationshipTopology().list(),
+                (CompositeAdjacencyDegrees) topology.degrees(),
+                (CompositeAdjacencyList) topology.list(),
                 config.maxDegree()
             );
         }

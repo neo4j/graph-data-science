@@ -74,19 +74,19 @@ class UndirectedEdgeSplitterTest {
         assertThat(selectedRels.topology()).satisfies(topology -> {
             // it selected 2,5 (neg) and 3,2 (pos) relationships
             assertEquals(2L, topology.elementCount());
-            var cursor = topology.list().decompressingCursor(topology.offsets().get(3L));
+            var cursor = topology.list().decompressingCursor(topology.offsets().get(3L), topology.degrees().degree(3L));
             assertEquals(2L, cursor.nextVLong());
-            var cursor2 = topology.list().decompressingCursor(topology.offsets().get(2L));
+            var cursor2 = topology.list().decompressingCursor(topology.offsets().get(2L), topology.degrees().degree(2L));
             assertEquals(5L, cursor2.nextVLong());
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
         assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
             assertEquals(2L, p.elementCount());
-            var cursor = p.list().cursor(p.offsets().get(3L));
+            var cursor = p.list().cursor(p.offsets().get(3L), p.degrees().degree(3L));
             // 3,2 is positive
             assertEquals(POSITIVE, Double.longBitsToDouble(cursor.nextLong()));
-            var cursor2 = p.list().cursor(p.offsets().get(2L));
+            var cursor2 = p.list().cursor(p.offsets().get(2L), p.degrees().degree(2L));
             // 2,5 is negative
             assertEquals(NEGATIVE, Double.longBitsToDouble(cursor2.nextLong()));
         });
