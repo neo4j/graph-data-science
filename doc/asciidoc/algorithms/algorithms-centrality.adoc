@@ -12,11 +12,11 @@ The Neo4j GDS library includes the following centrality algorithms, grouped by q
 * Production-quality
 ** <<algorithms-page-rank, Page Rank>>
 ** <<algorithms-betweenness-centrality, Betweenness Centrality>>
+** <<algorithms-degree-centrality, Degree Centrality>>
 * Alpha
 ** <<algorithms-articlerank, ArticleRank>>
 ** <<algorithms-closeness-centrality, Closeness Centrality>>
 ** <<algorithms-harmonic-centrality, Harmonic Centrality>>
-** <<algorithms-degree-centrality, Degree Centrality>>
 ** <<algorithms-eigenvector, Eigenvector Centrality>>
 ** <<algorithms-hits, HITS>>
 
