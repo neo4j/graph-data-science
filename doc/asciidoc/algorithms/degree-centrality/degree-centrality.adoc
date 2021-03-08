@@ -1,24 +1,29 @@
 [[algorithms-degree-centrality]]
 = Degree Centrality
+:entity: node
+:result: centrality
+:algorithm: Degree Centrality
 
 [abstract]
 --
 This section describes the Degree Centrality algorithm in the Neo4j Graph Data Science library.
 --
 
-Degree centrality measures the number of incoming and outgoing relationships from a node.
 
-The Degree Centrality algorithm can help us find popular nodes in a graph.
+[[algorithms-degree-centrality-intro]]
+== Introduction
+
+The Degree Centrality algorithm can be used to find popular nodes within a graph.
+Degree centrality measures the number of incoming or outgoing relationships from a node.
+It can be applied to both, weighted and unweighted graphs.
+In the weighted case the algorithm computes the sum of all positive weights of adjacent relationships of a node, for each node in the graph.
+
+For more information on this algorithm, see:
+
+* http://leonidzhukov.net/hse/2014/socialnetworks/papers/freeman79-centrality.pdf[Linton C. Freeman: Centrality in Social Networks Conceptual Clarification, 1979.^]
 
 
-[[algorithms-degree-context]]
-== History and explanation
-
-Degree Centrality was proposed by Linton C. Freeman in his 1979 paper http://leonidzhukov.net/hse/2014/socialnetworks/papers/freeman79-centrality.pdf[Centrality in Social Networks Conceptual Clarification^].
-While the Degree Centrality algorithm can be used to find the popularity of individual nodes, it is often used as part of a global analysis where we calculate the minimum degree, maximum degree, mean degree, and standard deviation across the whole graph.
-
-
-[[algorithms-degree-usecase]]
+[[algorithms-degree-centrality-usecase]]
 == Use-cases - when to use the Degree Centrality algorithm
 
 * Degree centrality is an important component of any attempt to determine the most important people on a social network.
@@ -29,72 +34,200 @@ The weighted centrality for fraudsters is significantly higher because they tend
 Read more in https://link.springer.com/chapter/10.1007/978-3-319-23461-8_11[Two Step graph-based semi-supervised Learning for Online Auction Fraud Detection^]
 
 
-[[algorithms-degree-syntax]]
+[[algorithms-degree-centrality-syntax]]
 == Syntax
 
-.The following will run the algorithm and write back results:
+include::../shared/syntax-intro-named-graph.adoc[]
+
+.Degree Centrality syntax per mode
+[.tabbed-example]
+====
+
+[.include-with-stream]
+======
+.Run Degree Centrality in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.degree.write(configuration: Map)
-YIELD nodes, createMillis, computeMillis, writeMillis, writeProperty, centralityDistribution
+CALL gds.degree.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  score: Float
 ----
 
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header"]
 |===
-| Name                          | Type    | Default                | Optional | Description
-| concurrency                   | int     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
-| readConcurrency               | int     | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| writeConcurrency              | int     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| relationshipWeightProperty    | String  | null                   | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
-| defaultValue                  | float   | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
+| Name   | Type     | Description
+| nodeId | Integer  | Node ID.
+| score  | Float    | Degree Centrality score.
 |===
+======
+
+
+[.include-with-stats]
+======
+.Run Degree Centrality in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.degree.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  centralityDistribution: Map,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
 |===
 | Name                   | Type      | Description
-| nodes                  | int       | The number of nodes considered.
-| writeProperty          | string    | The property name written back to.
-| createMillis           | int       | Milliseconds for loading data.
-| computeMillis          | int       | Milliseconds for running the algorithm.
-| writeMillis            | int       | Milliseconds for writing result data back.
 | centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| configuration          | Map       | Configuration used for running the algorithm.
 |===
+======
 
-.The following will run the algorithm and stream results:
+
+[.include-with-mutate]
+======
+.Run Degree Centrality in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.degree.stream(configuration: Map)
-YIELD node, score
+CALL gds.degree.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  centralityDistribution: Map,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
 ----
 
-.Configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name             | Type   | Default                | Optional | Description
-| concurrency      | int    | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
-| readConcurrency  | int    | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
-| weightProperty   | string | null                   | yes      | The property name that contains weight. If null, treats the graph as unweighted. Must be numeric.
-| defaultValue     | float  | 0.0                    | yes      | The default value of the weight in case it is missing or invalid.
-|===
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
 
 .Results
-[opts="header"]
+[opts="header",cols="1,1,6"]
 |===
-| Name   | Type  | Description
-| nodeId | long  | Node ID
-| score  | float | Degree Centrality score
+| Name                   | Type      | Description
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten  | Integer   | Number of properties added to the in-memory graph.
+| configuration          | Map       | Configuration used for running the algorithm.
 |===
+======
 
 
-[[algorithms-degree-sample]]
-== Degree Centrality algorithm sample
-
-This sample will explain the Degree Centrality algorithm, using a simple graph:
-
-.Create sample graph
+[.include-with-write]
+======
+.Run Degree Centrality in write mode on a named graph.
 [source, cypher, role=noplay]
+----
+CALL gds.degree.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  centralityDistribution: Map,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| writeMillis            | Integer   | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer   | Number of properties written to Neo4j.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
+====
+
+
+[[algorithms-degree-centrality-syntax-anonymous]]
+=== Anonymous graphs
+
+include::../shared/syntax-anonymous-graphs.adoc[]
+
+.Run Degree Centrality in write mode on an anonymous graph:
+[source, cypher, role=noplay]
+----
+CALL gds.degree.write(
+  configuration: Map
+)
+YIELD
+  centralityDistribution: Map,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+
+The results are the same as for running write mode with a named graph, see the <<algorithms-degree-centrality-syntax, write mode syntax above>>.
+
+
+[[algorithms-degree-centrality-exsamples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: social network
+include::../shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (alice:User {name: 'Alice'}),
        (bridget:User {name: 'Bridget'}),
@@ -102,116 +235,9 @@ CREATE (alice:User {name: 'Alice'}),
        (doug:User {name: 'Doug'}),
        (mark:User {name: 'Mark'}),
        (michael:User {name: 'Michael'}),
-       (alice)-[:FOLLOWS]->(doug),
-       (alice)-[:FOLLOWS]->(bridget),
-       (alice)-[:FOLLOWS]->(charles),
-       (mark)-[:FOLLOWS]->(doug),
-       (mark)-[:FOLLOWS]->(michael),
-       (bridget)-[:FOLLOWS]->(doug),
-       (charles)-[:FOLLOWS]->(doug),
-       (michael)-[:FOLLOWS]->(doug)
-----
 
-.The following will run the algorithm and stream results, showing which users have the most followers:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.degree.stream({
-  nodeProjection: 'User',
-  relationshipProjection: {
-    FOLLOWS: {
-      type: 'FOLLOWS',
-      orientation: 'REVERSE'
-    }
-  }
-})
-YIELD nodeId, score
-RETURN gds.util.asNode(nodeId).name AS name, score AS followers
-ORDER BY followers DESC
-----
-
-.The following will run the algorithm and store results, showing which users have the most followers:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.degree.write({
-  nodeProjection: 'User',
-  relationshipProjection: {
-    FOLLOWS: {
-      type: 'FOLLOWS',
-      orientation: 'REVERSE'
-    }
-  },
-  writeProperty: 'followers'
-})
-----
-
-.Results
-[opts="header",cols="1,1"]
-|===
-| Name | Followers
-| Doug    | 5.0
-| Bridget | 1.0
-| Charles | 1.0
-| Michael | 1.0
-| Mark    | 0.0
-| Alice   | 0.0
-|===
-
-.The following will run the algorithm and stream results, showing which users follow the most other users:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.degree.stream({
-  nodeProjection: 'User',
-  relationshipProjection: 'FOLLOWS'
-})
-YIELD nodeId, score
-RETURN gds.util.asNode(nodeId).name AS name, score AS followers
-ORDER BY followers DESC
-----
-
-.The following will run the algorithm and store results, showing which users follow the most other users:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.degree.write({
-  nodeProjection: 'User',
-  relationshipProjection: 'FOLLOWS',
-  writeProperty: 'followers'
-})
-----
-
-.Results
-[opts="header",cols="1,1"]
-|===
-| Name | Following
-| Alice   | 3.0
-| Mark    | 2.0
-| Bridget | 1.0
-| Charles | 1.0
-| Michael | 1.0
-| Doug    | 0.0
-|===
-
-We can see that Doug is the most popular user in our imaginary Twitter graph, with 5 followers - all other users follow him, but he doesn't follow anybody back.
-In the real Twitter network celebrities have very high follower counts but tend to follow very few back people.
-We could therefore consider Doug a celebrity!
-
-
-[[algorithms-degree-weighted-sample]]
-== Weighted Degree Centrality algorithm sample
-
-This sample will explain the weighted Degree Centrality algorithm, using a simple graph:
-
-
-.The following will create a sample graph:
-[source, cypher, role=noplay]
-----
-CREATE (alice:User {name:'Alice'}),
-       (bridget:User {name:'Bridget'}),
-       (charles:User {name:'Charles'}),
-       (doug:User {name:'Doug'}),
-       (mark:User {name:'Mark'}),
-       (michael:User {name:'Michael'}),
        (alice)-[:FOLLOWS {score: 1}]->(doug),
-       (alice)-[:FOLLOWS {score: 2}]->(bridget),
+       (alice)-[:FOLLOWS {score: -2}]->(bridget),
        (alice)-[:FOLLOWS {score: 5}]->(charles),
        (mark)-[:FOLLOWS {score: 1.5}]->(doug),
        (mark)-[:FOLLOWS {score: 4.5}]->(michael),
@@ -220,83 +246,206 @@ CREATE (alice:User {name:'Alice'}),
        (michael)-[:FOLLOWS {score: 1.5}]->(doug)
 ----
 
-This algorithm is a variant of the Degree Centrality algorithm, that measures the sum of the weights of incoming and outgoing relationships.
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `User` nodes and the `FOLLOWS` relationships.
 
-.The following will run the algorithm and stream results, showing which users have the most weighted followers:
+include::../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a reverse projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'User',
+  {
+    FOLLOWS: {
+      orientation: 'REVERSE',
+      properties: ['score']
+    }
+  }
+)
+----
+
+The graph is projected in a `REVERSE` orientation in order to retrieve people with the most followers in the following examples.
+This will be demonstrated using the Degree Centrality algorithm on this graph.
+
+
+[[algorithms-degree-centrality-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.degree.stream({
-   nodeProjection: 'User',
-   relationshipProjection: {
-       FOLLOWS: {
-           type: 'FOLLOWS',
-           orientation: 'REVERSE',
-           properties: 'score'
-       }
-   },
-   relationshipWeightProperty: 'score'
-})
+CALL gds.degree.write.estimate('myGraph', { writeProperty: 'degree' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 8                 | 40     | 40     | "40 Bytes"
+|===
+--
+
+
+[[algorithms-degree-centrality-examples-stream]]
+=== Stream
+
+:stream-details: For example, we can order the results to find the nodes with the highest degree centrality.
+include::../shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.degree.stream('myGraph')
 YIELD nodeId, score
-RETURN gds.util.asNode(nodeId).name AS name, score AS weightedFollowers
-ORDER BY weightedFollowers DESC
-----
-
-.The following will run the algorithm and store results, showing which users have the most weighted followers:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.degree.write({
-   nodeProjection: 'User',
-   relationshipProjection: {
-       FOLLOWS: {
-           type: 'FOLLOWS',
-           orientation: 'REVERSE',
-           properties: 'score'
-       }
-   },
-   relationshipWeightProperty: 'score',
-   writeProperty: 'weightedFollowers'
-})
-YIELD nodes, writeProperty
+RETURN gds.util.asNode(nodeId).name AS name, score AS followers
+ORDER BY followers DESC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| Name | `weightedFollowers`
+| name    | followers
+| Doug    | 5.0
+| Bridget | 1.0
+| Charles | 1.0
+| Michael | 1.0
+| Mark    | 0.0
+| Alice   | 0.0
+|===
+--
+
+We can see that Doug is the most popular user in our imaginary Twitter graph, with 5 followers - all other users follow him, but he doesn't follow anybody back.
+In the real Twitter network celebrities have very high follower counts but tend to follow very few back people.
+We could therefore consider Doug a celebrity!
+
+
+[[algorithms-degree-centrality-examples-stats]]
+=== Stats
+
+:stats-syntax: algorithms-degree-centrality-syntax
+include::../shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stats` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.degree.stats('myGraph')
+YIELD centralityDistribution
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore
+----
+
+.Results
+[opts="header"]
+|===
+| minimumScore | meanScore
+| 0.0          | 1.3333358764648438
+|===
+--
+
+Comparing this to the results we saw in the <<algorithms-degree-centrality-examples-stream, stream example>>, we can find our minimum and maximum values from the table.
+
+
+[[algorithms-degree-centrality-examples-mutate]]
+=== Mutate
+
+include::../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.degree.mutate('myGraph', { mutateProperty: 'degree' })
+YIELD centralityDistribution, nodePropertiesWritten
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| minimumScore | meanScore                  | nodePropertiesWritten
+| 0.0          | 1.3333358764648438         | 6
+|===
+--
+
+The returned result is the same as in the `stats` example.
+Additionally, the graph 'myGraph' now has a node property `degree` which stores the degree centrality score for each node.
+To find out how to inspect the new schema of the in-memory graph, see <<catalog-graph-list>>.
+
+
+[[algorithms-degree-centrality-examples-write]]
+=== Write
+
+include::../shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.degree.write('myGraph', { writeProperty: 'degree' })
+YIELD centralityDistribution, nodePropertiesWritten
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| minimumScore | meanScore                  | nodePropertiesWritten
+| 0.0          | 1.3333358764648438         | 6
+|===
+--
+
+The returned result is the same as in the `stats` example.
+Additionally, each of the seven nodes now has a new property `degree` in the Neo4j database, containing the degree centrality score for that node.
+
+
+[[algorithms-degree-centrality-weighted-example]]
+== Weighted Degree Centrality example
+
+This sample will explain the weighted Degree Centrality algorithm, using a simple graph:
+
+This algorithm is a variant of the Degree Centrality algorithm, that measures the sum of positive weights of incoming and outgoing relationships.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode, showing which users have the most weighted followers:
+[source, cypher, role=noplay]
+----
+CALL gds.degree.stream(
+   'myGraph',
+   { relationshipWeightProperty: 'score' }
+)
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score AS weightedFollowers
+ORDER BY weightedFollowers DESC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name    | weightedFollowers
 | Doug    | 7.5
 | Charles | 5.0
 | Michael | 4.5
-| Bridget | 2.0
+| Bridget | 0.0
 | Alice   | 0.0
 | Mark    | 0.0
 |===
+--
 
 Doug still remains our most popular user, but there isn't such a big gap to the next person.
 Charles and Michael both only have one follower, but those relationships have a high relationship weight.
-
-
-[[algorithms-degree-cp]]
-== Cypher projection
-
-include::../../management-ops/cypher-projection.adoc[tag=explanation]
-
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.degree.write({
-  nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
-  relationshipQuery: 'MATCH (u1:User)<-[:FOLLOWS]-(u2:User) RETURN id(u1) AS source, id(u2) AS target',
-  writeProperty: 'followers'
-})
-----
-
-Note, that if we want to find the number of users that a user is following rather than their number of followers, we need to handle that in our Cypher query.
-
-.The following will run the algorithm and store the results, calculating the number of users that a user follows:
-[source, cypher, role=noplay]
-----
-CALL gds.alpha.degree.write({
-  nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
-  relationshipQuery: 'MATCH (u1:User)-[:FOLLOWS]->(u2:User) RETURN id(u1) AS source, id(u2) AS target',
-  writeProperty: 'followers'
-})
-----
+Note that Bridget also has a weighted score of 0.0, despite having a connection from Alice.
+That is because the `score` property value between Bridget and Alice is negative and will be ignored by the algorithm.
