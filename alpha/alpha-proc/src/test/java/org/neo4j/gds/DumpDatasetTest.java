@@ -28,6 +28,7 @@ import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -102,9 +103,7 @@ abstract class DumpDatasetTest {
             ))
             .build();
         api = Neo4jProxy.newDb(dbms);
-        GlobalProcedures proceduresService = api
-            .getDependencyResolver()
-            .resolveDependency(GlobalProcedures.class);
+        GlobalProcedures proceduresService = GraphDatabaseApiProxy.resolveDependency(api, GlobalProcedures.class);
 
         registerProcedures(proceduresService);
         registerFunctions(proceduresService);
