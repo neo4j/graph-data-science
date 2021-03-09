@@ -83,6 +83,7 @@ final class BatchImporterFactoryProxy {
                 factory,
                 directoryStructure,
                 fileSystem,
+                null,
                 config,
                 logService,
                 executionMonitor,
