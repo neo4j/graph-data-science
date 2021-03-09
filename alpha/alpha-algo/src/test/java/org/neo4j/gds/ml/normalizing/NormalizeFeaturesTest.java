@@ -45,21 +45,6 @@ class NormalizeFeaturesTest {
     TestGraph graph;
 
     @Test
-    void outputsAList() {
-        var config = ImmutableNormalizeFeaturesConfig.builder().featureProperties(List.of("a")).build();
-        var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
-
-        var result = algo.compute();
-        var resultProperties = result.normalizedProperties().toArray();
-
-        assertArrayEquals(new double[]{1.1}, resultProperties[(int) graph.toOriginalNodeId("a")]);
-        assertArrayEquals(new double[]{2.8}, resultProperties[(int) graph.toOriginalNodeId("b")]);
-        assertArrayEquals(new double[]{3D}, resultProperties[(int) graph.toOriginalNodeId("c")]);
-        assertArrayEquals(new double[]{-1D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
-        assertArrayEquals(new double[]{-10D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
-    }
-
-    @Test
     void minmaxNormalisation() {
         var config = ImmutableNormalizeFeaturesConfig.builder()
             .featureProperties(List.of("a"))
