@@ -83,33 +83,26 @@ final class DegreeCentralityTest {
             () -> Stream.of(
                 Arguments.of(
                     true,
-                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D),
-                    true
+                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
                 ),
                 Arguments.of(
                     true,
-                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D),
-                    false
+                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
                 ),
                 Arguments.of(
                     false,
-                    Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D),
-                    false
+                    Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D)
                 )
             ),
-            () -> Stream.of(Arguments.of(1), Arguments.of(4))
-        );
+            () -> Stream.of(Arguments.of(1), Arguments.of(4)));
     }
 
     @ParameterizedTest
     @MethodSource("degreeCentralityParameters")
-    void shouldComputeCorrectResults(boolean weighted, Map<String, Double> expected, boolean cacheDegrees, int concurrency) {
+    void shouldComputeCorrectResults(boolean weighted, Map<String, Double> expected, int concurrency) {
         var configBuilder = ImmutableDegreeCentralityConfig.builder();
         if (weighted) {
             configBuilder.relationshipWeightProperty("weight");
-        }
-        if (cacheDegrees) {
-            configBuilder.cacheDegrees(true);
         }
         configBuilder.concurrency(concurrency);
         var config = configBuilder.build();

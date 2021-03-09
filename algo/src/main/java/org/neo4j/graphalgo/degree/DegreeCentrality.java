@@ -66,19 +66,8 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
         DegreeFunction result;
         if (config.relationshipWeightProperty() == null) {
-            if (config.cacheDegrees()) {
-                var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
-                var tasks = PartitionUtils.rangePartition(
-                    config.concurrency(),
-                    graph.nodeCount(),
-                    partition -> new CacheDegreeTask(graph, degrees, partition)
-                );
-                ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
-                result = degrees::get;
-            } else {
-                result = graph::degree;
-                progressLogger.logProgress(graph.nodeCount());
-            }
+            result = graph::degree;
+            progressLogger.logProgress(graph.nodeCount());
         } else {
             var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
             var degreeBatchSize = BitUtil.ceilDiv(graph.relationshipCount(), config.concurrency());
@@ -103,29 +92,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
     @Override
     public void release() {
         graph = null;
-    }
-
-    private class CacheDegreeTask implements Runnable {
-
-        private final Graph graph;
-        private final HugeDoubleArray result;
-        private final long startNodeId;
-        private final long endNodeId;
-
-        CacheDegreeTask(Graph graph, HugeDoubleArray result, Partition partition) {
-            this.graph = graph;
-            this.result = result;
-            this.startNodeId = partition.startNode();
-            this.endNodeId = partition.startNode() + partition.nodeCount();
-        }
-
-        @Override
-        public void run() {
-            for (long nodeId = startNodeId; nodeId < endNodeId && running(); nodeId++) {
-                result.set(nodeId, graph.degree(nodeId));
-            }
-            getProgressLogger().logProgress(endNodeId - startNodeId);
-        }
     }
 
     private class WeightedDegreeTask implements Runnable {

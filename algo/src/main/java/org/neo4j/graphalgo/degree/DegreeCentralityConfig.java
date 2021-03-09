@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.degree;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -28,9 +27,4 @@ import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 @ValueClass
 @Configuration
 public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeightConfig {
-
-    @Value.Default
-    default boolean cacheDegrees() {
-        return false;
-    }
 }
