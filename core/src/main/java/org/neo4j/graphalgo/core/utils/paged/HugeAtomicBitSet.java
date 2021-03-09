@@ -100,7 +100,7 @@ public final class HugeAtomicBitSet {
         } else {
             // set within range
             setWord(startWordIndex, startBitMask);
-            for (long wordIndex = startWordIndex + 1; wordIndex <= endWordIndex; wordIndex++) {
+            for (long wordIndex = startWordIndex + 1; wordIndex < endWordIndex; wordIndex++) {
                 bits.set(wordIndex, -1L);
             }
             setWord(endWordIndex, endBitMask);
@@ -216,13 +216,6 @@ public final class HugeAtomicBitSet {
             }
         }
         return Long.bitCount(bits.get(bits.size() - 1)) >= remainder;
-    }
-
-    /**
-     * Returns the number of bits this bitset can hold.
-     */
-    public long capacity() {
-        return bits.size();
     }
 
     /**
