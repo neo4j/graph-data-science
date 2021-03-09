@@ -48,11 +48,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
     }
 
     public DegreeCentrality(
-            Graph graph,
-            ExecutorService executor,
-            DegreeCentralityConfig config,
-            ProgressLogger progressLogger,
-            AllocationTracker tracker
+        Graph graph,
+        ExecutorService executor,
+        DegreeCentralityConfig config,
+        ProgressLogger progressLogger,
+        AllocationTracker tracker
     ) {
         this.graph = graph;
         this.executor = executor;
@@ -67,7 +67,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
         DegreeFunction result;
         if (config.relationshipWeightProperty() == null) {
-            result = graph::degree;
             if (config.cacheDegrees()) {
                 var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
                 var tasks = PartitionUtils
@@ -77,6 +76,9 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                     .collect(Collectors.toList());
                 ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
                 result = degrees::get;
+            } else {
+                result = graph::degree;
+                progressLogger.logProgress(graph.nodeCount());
             }
         } else {
             var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
