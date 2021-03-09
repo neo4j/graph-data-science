@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 
 import java.util.function.IntPredicate;
+import java.util.function.Supplier;
 
 import static org.neo4j.graphalgo.api.AdjacencyCursor.NOT_FOUND;
 
@@ -41,17 +42,11 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
     private final CURSOR cacheB;
     private final IntPredicate degreeFilter;
 
-    protected GraphIntersect(
-        CURSOR cache,
-        CURSOR cacheA,
-        CURSOR cacheB,
-        CURSOR empty,
-        long maxDegree
-    ) {
-        this.cache = cache;
-        this.cacheA = cacheA;
-        this.cacheB = cacheB;
-        this.empty = empty;
+    protected GraphIntersect(Supplier<CURSOR> cursorSupplier, long maxDegree) {
+        this.cache = cursorSupplier.get();
+        this.cacheA = cursorSupplier.get();
+        this.cacheB = cursorSupplier.get();
+        this.empty = cursorSupplier.get();
 
         this.degreeFilter = maxDegree < Long.MAX_VALUE
             ? (degree) -> degree <= maxDegree

@@ -40,13 +40,7 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         CompositeAdjacencyList compositeAdjacencyList,
         long maxDegree
     ) {
-        super(
-            compositeAdjacencyList.rawDecompressingCursor(),
-            compositeAdjacencyList.rawDecompressingCursor(),
-            compositeAdjacencyList.rawDecompressingCursor(),
-            compositeAdjacencyList.rawDecompressingCursor(),
-            maxDegree
-        );
+        super(compositeAdjacencyList::rawDecompressingCursor, maxDegree);
         this.compositeAdjacencyDegrees = compositeAdjacencyDegrees;
         this.compositeAdjacencyList = compositeAdjacencyList;
     }

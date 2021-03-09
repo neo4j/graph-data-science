@@ -39,13 +39,7 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
         AdjacencyOffsets offsets,
         long maxDegree
     ) {
-        super(
-            adjacency.rawDecompressingCursor(),
-            adjacency.rawDecompressingCursor(),
-            adjacency.rawDecompressingCursor(),
-            adjacency.rawDecompressingCursor(),
-            maxDegree
-        );
+        super(adjacency::rawDecompressingCursor, maxDegree);
         this.degrees = degrees;
         this.offsets = offsets;
     }
