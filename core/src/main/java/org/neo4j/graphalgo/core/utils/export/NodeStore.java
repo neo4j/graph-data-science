@@ -38,27 +38,30 @@ public class NodeStore {
 
     final HugeIntArray labelCounts;
 
-    final NodeMapping nodeLabels;
+    final NodeMapping nodeMapping;
 
     final Map<String, Map<String, NodeProperties>> nodeProperties;
 
     private final Set<NodeLabel> availableNodeLabels;
 
+    private final boolean hasLabels;
+
     public NodeStore(
         long nodeCount,
         HugeIntArray labelCounts,
-        NodeMapping nodeLabels,
+        NodeMapping nodeMapping,
         Map<String, Map<String, NodeProperties>> nodeProperties
     ) {
         this.nodeCount = nodeCount;
         this.labelCounts = labelCounts;
-        this.nodeLabels = nodeLabels;
+        this.nodeMapping = nodeMapping;
         this.nodeProperties = nodeProperties;
-        this.availableNodeLabels = nodeLabels != null ? nodeLabels.availableNodeLabels() : null;
+        this.hasLabels = !nodeMapping.containsOnlyAllNodesLabel();
+        this.availableNodeLabels = nodeMapping.availableNodeLabels();
     }
 
     boolean hasLabels() {
-        return nodeLabels != null;
+        return hasLabels;
     }
 
     boolean hasProperties() {
@@ -66,7 +69,7 @@ public class NodeStore {
     }
 
     int labelCount() {
-        return !hasLabels() ? 0 : nodeLabels.availableNodeLabels().size();
+        return !hasLabels() ? 0 : nodeMapping.availableNodeLabels().size();
     }
 
     public int propertyCount() {
@@ -86,7 +89,7 @@ public class NodeStore {
 
         int i = 0;
         for (var nodeLabel : availableNodeLabels) {
-            if (nodeLabels.hasLabel(nodeId, nodeLabel)) {
+            if (nodeMapping.hasLabel(nodeId, nodeLabel)) {
                 labels[i++] = nodeLabel.name;
             }
         }
@@ -127,7 +130,7 @@ public class NodeStore {
         return new NodeStore(
             graphStore.nodeCount(),
             labelCounts,
-            nodeLabels.containsOnlyAllNodesLabel() ? null : nodeLabels,
+            nodeLabels,
             nodeProperties
         );
     }

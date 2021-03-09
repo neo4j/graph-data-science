@@ -38,6 +38,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class CsvNodeVisitor extends NodeVisitor {
 
     public static final String ID_COLUMN_NAME = ":ID";
+    public static final String REVERSE_ID_COLUMN_NAME = ":NEO_ID";
 
     private final Path fileLocation;
     private final int visitorId;
@@ -66,6 +67,9 @@ public class CsvNodeVisitor extends NodeVisitor {
         try {
             // write Id
             csvAppender.appendField(Long.toString(id()));
+
+            // write Neo4j Id
+            csvAppender.appendField(Long.toString(originalId()));
 
             // write properties
             forEachProperty(((key, value, type) -> {
@@ -118,6 +122,7 @@ public class CsvNodeVisitor extends NodeVisitor {
     private void writeHeaderFile(String headerFileName) {
         try (var headerAppender = csvWriter.append(fileLocation.resolve(headerFileName), StandardCharsets.UTF_8)) {
             headerAppender.appendField(ID_COLUMN_NAME);
+            headerAppender.appendField(REVERSE_ID_COLUMN_NAME);
 
             forEachProperty(((key, value, type) -> {
                 var propertyHeader = formatWithLocale(

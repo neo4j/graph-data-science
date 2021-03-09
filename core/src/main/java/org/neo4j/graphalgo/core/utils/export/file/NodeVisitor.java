@@ -37,6 +37,7 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
 
 
     private long currentId;
+    private long originalId;
     private List<String> currentLabels;
 
     protected NodeVisitor(NodeSchema nodeSchema) {
@@ -50,6 +51,10 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
         return currentId;
     }
 
+    public long originalId() {
+        return originalId;
+    }
+
     public List<String> labels() {
         return currentLabels;
     }
@@ -60,6 +65,12 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
     @Override
     public boolean id(long id) {
         currentId = id;
+        return true;
+    }
+
+    @Override
+    public boolean originalId(long id) {
+        originalId = id;
         return true;
     }
 

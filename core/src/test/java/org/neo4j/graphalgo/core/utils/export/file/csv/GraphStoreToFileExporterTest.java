@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExpor
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
 import java.io.File;
@@ -41,8 +42,10 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.REVERSE_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class GraphStoreToFileExporterTest extends CsvTest {
@@ -64,6 +67,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
     @Inject
     public GraphStore graphStore;
 
+    @Inject
+    private IdFunction idFunction;
+
     @GdlGraph(graphNamePrefix = "concurrent")
     private static final String GDL_FOR_CONCURRENCY =
         "CREATE" +
@@ -80,7 +86,11 @@ class GraphStoreToFileExporterTest extends CsvTest {
 
     @Inject
     public GraphStore concurrentGraphStore;
-    public static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME);
+
+    @Inject
+    private IdFunction concurrentIdFunction;
+
+    public static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME, REVERSE_ID_COLUMN_NAME);
     public static final List<String> RELATIONSHIP_COLUMNS = List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);
 
     @Test
@@ -121,8 +131,8 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "nodes_A_B_0.csv",
             List.of(
-                List.of("0", "0", "42", "1;3;3;7"),
-                List.of("1", "1", "43", "")
+                List.of("0", Long.toString(idFunction.of("a")), "0", "42", "1;3;3;7"),
+                List.of("1", Long.toString(idFunction.of("b")), "1", "43", "")
             )
         );
 
@@ -130,7 +140,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "nodes_A_C_0.csv",
             List.of(
-                List.of("2", "2", "44", "1;9;8;4")
+                List.of("2", Long.toString(idFunction.of("c")), "2", "44", "1;9;8;4")
             )
         );
 
@@ -138,7 +148,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "nodes_B_0.csv",
             List.of(
-                List.of("3", "3", "", "")
+                List.of("3", Long.toString(idFunction.of("d")), "3", "", "")
             )
         );
 
@@ -194,7 +204,12 @@ class GraphStoreToFileExporterTest extends CsvTest {
                     throw new RuntimeException(e);
                 }
             }).collect(Collectors.toList());
-        assertThat(nodeContents).containsExactlyInAnyOrder("0", "1", "2", "3");
+        assertThat(nodeContents).containsExactlyInAnyOrder(
+            stringPair(0, "a"),
+            stringPair(1, "b"),
+            stringPair(2, "c"),
+            stringPair(3, "d")
+        );
 
         var relationshipContents = Arrays.stream(tempDir
             .toFile()
@@ -215,5 +230,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
             "2,3",
             "3,0"
         );
+    }
+
+    private String stringPair(long id, String variable) {
+        return formatWithLocale("%s,%s", id, idFunction.of(variable));
     }
 }
