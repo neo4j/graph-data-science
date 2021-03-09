@@ -31,3 +31,27 @@ message ProjectedFeatureDimension {
   int32 value = 1;
   bool present = 2;
 }
+
+message NodeClassificationTrainConfig {
+  AlgoBaseConfigProto algoBaseConfig = 1;
+  ModelConfigProto modelConfig = 2;
+  FeaturePropertiesConfigProto featurePropertiesConfig = 3;
+
+  RandomSeed randomSeed = 4;
+  repeated Metric metrics = 5;
+  double holdoutFraction = 6;
+  int32 validationFolds = 7;
+  string targetProperty = 8;
+  repeated string params = 9;
+}
+
+message RandomSeed {
+  int64 value = 1;
+  bool present = 2;
+}
+
+enum Metric {
+    F1_WEIGHTED = 0;
+    F1_MACRO = 1;
+    ACCURACY = 2;
+}
