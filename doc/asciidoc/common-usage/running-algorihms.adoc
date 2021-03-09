@@ -81,7 +81,7 @@ To learn more about algorithm specific parameters and to find out if an algorith
 concurrency - Integer::
 Controls the parallelism with which the algorithm is executed.
 By default this value is set to 4.
-For more details on the concurrency settings and limitations please see <<system-requirements-cpu>> of the System Requirements.
+For more details on the concurrency settings and limitations please see <<system-requirements-cpu, the CPU section>> of the System Requirements.
 
 [[common-configuration-relationship-types]]
 relationshipTypes - String[]::
