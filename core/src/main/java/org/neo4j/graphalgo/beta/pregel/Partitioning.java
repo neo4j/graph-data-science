@@ -20,21 +20,39 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.utils.StringJoining;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public enum Partitioning {
     RANGE,
     DEGREE;
 
+    private static final List<String> VALUES = Arrays
+        .stream(Partitioning.values())
+        .map(Partitioning::name)
+        .collect(Collectors.toList());
+
     public static @Nullable Partitioning parse(Object input) {
         if (input instanceof String) {
-            return Partitioning.valueOf(((String) input).toUpperCase(Locale.ENGLISH));
+            var inputString = ((String) input).toUpperCase(Locale.ENGLISH);
+
+            if (!VALUES.contains(inputString)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Partitioning with name `%s` does not exist. Available options are %s.",
+                    inputString,
+                    StringJoining.join(VALUES)
+                ));
+            }
+
+            return Partitioning.valueOf(inputString);
         }
-        if (input instanceof Partitioning) {
-            return (Partitioning) input;
-        }
-        return null;
+        return (Partitioning) input;
     }
 
     public static String toString(Partitioning partitioning) {

@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -108,6 +109,24 @@ public class PregelProcTest extends BaseProcTest {
                 CompositeTestAlgorithm.DOUBLE_ARRAY_KEY, new double[]{1, 9, 8, 4}
             ))
         )));
+    }
+
+    @Test
+    void streamWithInvalidPartitioning() {
+        var query = GdsCypher.call()
+            .withNodeLabel("RealNode")
+            .withAnyRelationshipType()
+            .algo("example", "pregel", "test")
+            .streamMode()
+            .addParameter("maxIterations", 20)
+            .addParameter("partitioning", "perfect")
+            .yields("nodeId", "values");
+
+        assertThatThrownBy(() -> {
+            runQuery(query);
+        })
+            .getRootCause()
+            .hasMessageContaining("Partitioning with name `PERFECT` does not exist. Available options are ['DEGREE', 'RANGE'].");
     }
 
     @Test
