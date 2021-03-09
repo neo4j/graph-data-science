@@ -48,6 +48,7 @@ class NormalizeFeaturesTest {
     void minmaxNormalisation() {
         var config = ImmutableNormalizeFeaturesConfig.builder()
             .featureProperties(List.of("a"))
+            .mutateProperty("mutateProp")
             .normalizers(List.of("MinMax"))
             .build();
         var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
@@ -67,6 +68,7 @@ class NormalizeFeaturesTest {
         var config = ImmutableNormalizeFeaturesConfig.builder()
             .featureProperties(List.of("a", "b", "c"))
             .normalizers(List.of("MinMax", "MinMax", "MinMax"))
+            .mutateProperty("mutateProp")
             .build();
         var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
 
@@ -85,6 +87,7 @@ class NormalizeFeaturesTest {
         var config = ImmutableNormalizeFeaturesConfig.builder()
             .featureProperties(List.of("a", "b"))
             .normalizers(List.of("MinMax", "Mean"))
+            .mutateProperty("mutateProp")
             .build();
         var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
         var result = algo.compute();

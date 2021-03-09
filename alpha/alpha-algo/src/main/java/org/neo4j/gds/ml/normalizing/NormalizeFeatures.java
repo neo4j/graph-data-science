@@ -22,15 +22,13 @@ package org.neo4j.gds.ml.normalizing;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFeatures.NormalizeFeaturesResult> {
+public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFeatures.Result> {
 
     private final Graph graph;
     private final NormalizeFeaturesConfig config;
@@ -43,7 +41,7 @@ public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFea
     }
 
     @Override
-    public NormalizeFeaturesResult compute() {
+    public Result compute() {
         var normalizedProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
         normalizedProperties.setAll(nodeId -> {
             var propertyCount = config.featureProperties().size();
@@ -56,7 +54,7 @@ public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFea
             return resultProperties;
         });
 
-        return NormalizeFeaturesResult.of(normalizedProperties);
+        return Result.of(normalizedProperties);
     }
 
     @Override
@@ -68,11 +66,11 @@ public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFea
     public void release() {}
 
     @ValueClass
-    interface NormalizeFeaturesResult {
+    interface Result {
         HugeObjectArray<double[]> normalizedProperties();
 
-        static NormalizeFeaturesResult of(HugeObjectArray<double[]> properties) {
-            return ImmutableNormalizeFeaturesResult.of(properties);
+        static Result of(HugeObjectArray<double[]> properties) {
+            return ImmutableResult.of(properties);
         }
     }
 
@@ -91,8 +89,4 @@ public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFea
         return normalizers;
     }
 
-    @ValueClass
-    interface NormalizeFeaturesConfig extends AlgoBaseConfig, FeaturePropertiesConfig {
-        List<String> normalizers();
-    }
 }
