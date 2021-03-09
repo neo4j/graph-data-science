@@ -310,19 +310,19 @@ include::../shared/examples-stream-intro.adoc[]
 CALL gds.degree.stream('myGraph')
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score AS followers
-ORDER BY followers DESC
+ORDER BY followers DESC, name DESC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| name    | followers
-| Doug    | 5.0
-| Bridget | 1.0
-| Charles | 1.0
-| Michael | 1.0
-| Mark    | 0.0
-| Alice   | 0.0
+| name      | followers
+| "Doug"    | 5.0
+| "Michael" | 1.0
+| "Charles" | 1.0
+| "Bridget" | 1.0
+| "Mark"    | 0.0
+| "Alice"   | 0.0
 |===
 --
 
@@ -431,19 +431,19 @@ CALL gds.degree.stream(
 )
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score AS weightedFollowers
-ORDER BY weightedFollowers DESC
+ORDER BY weightedFollowers DESC, name DESC
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| name    | weightedFollowers
-| Doug    | 7.5
-| Charles | 5.0
-| Michael | 4.5
-| Bridget | 0.0
-| Alice   | 0.0
-| Mark    | 0.0
+| name      | weightedFollowers
+| "Doug"    | 7.5
+| "Charles" | 5.0
+| "Michael" | 4.5
+| "Mark"    | 0.0
+| "Bridget" | 0.0
+| "Alice"   | 0.0
 |===
 --
 
