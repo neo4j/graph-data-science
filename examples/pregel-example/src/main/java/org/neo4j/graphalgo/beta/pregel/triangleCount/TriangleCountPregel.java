@@ -19,15 +19,22 @@
  */
 package org.neo4j.graphalgo.beta.pregel.triangleCount;
 
+import com.carrotsearch.hppc.LongContainer;
 import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.procedures.LongProcedure;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
+import org.neo4j.graphalgo.beta.pregel.Reducer;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+
+import java.util.Optional;
+import java.util.function.LongConsumer;
 
 /**
  * ! Assuming an unweighted graph
@@ -49,37 +56,30 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
         if (context.isInitialSuperstep()) {
             context.setNodeValue(TRIANGLE_COUNT, 0);
         } else if (context.superstep() == Phase.MERGE_NEIGHBORS.step) {
-            var isNeighbourFromA = new LongHashSet(context.degree());
-            context.forEachDistinctNeighbor(isNeighbourFromA::add);
+            var neighborsOfA = new LongHashSet(context.degree());
+            context.forEachDistinctNeighbor(neighborsOfA::add);
 
             long nodeA = context.nodeId();
             var trianglesFromNodeA = new MutableLong();
 
-            for (long nodeB : isNeighbourFromA.toArray()) {
+            neighborsOfA.forEach((LongProcedure) nodeB -> {
                 if (nodeB > nodeA) {
+                    LongConsumer findTriangles = nodeC -> {
+                        // find common neighbors of A
+                        // check indexed neighbors of A
+                        if (nodeC > nodeB && neighborsOfA.contains(nodeC)) {
+                            trianglesFromNodeA.increment();
+                            context.sendTo(nodeB, 1);
+                            context.sendTo(nodeC, 1);
+                        }
+                    };
                     if (context.isMultiGraph()) {
-                        context.forEachDistinctNeighbor(nodeB, nodeC -> {
-                            // find common neighbors
-                            // check indexed neighbours of A
-                            if (nodeC > nodeB && isNeighbourFromA.contains(nodeC)) {
-                                trianglesFromNodeA.increment();
-                                context.sendTo(nodeB, 1);
-                                context.sendTo(nodeC, 1);
-                            }
-                        });
+                        context.forEachDistinctNeighbor(nodeB, findTriangles);
                     } else {
-                        context.forEachNeighbor(nodeB, nodeC -> {
-                            // find common neighbors
-                            // check indexed neighbours of A
-                            if (nodeC > nodeB && isNeighbourFromA.contains(nodeC)) {
-                                trianglesFromNodeA.increment();
-                                context.sendTo(nodeB, 1);
-                                context.sendTo(nodeC, 1);
-                            }
-                        });
+                        context.forEachNeighbor(nodeB, findTriangles);
                     }
                 }
-            }
+            });
             context.setNodeValue(TRIANGLE_COUNT, trianglesFromNodeA.longValue());
         } else if (context.superstep() == Phase.COUNT_TRIANGLES.step) {
             long triangles = context.longNodeValue(TRIANGLE_COUNT);
