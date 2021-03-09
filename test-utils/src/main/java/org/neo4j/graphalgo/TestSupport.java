@@ -19,6 +19,11 @@
  */
 package org.neo4j.graphalgo;
 
+import org.assertj.core.api.Condition;
+import org.assertj.core.api.HamcrestCondition;
+import org.assertj.core.api.ObjectAssert;
+import org.hamcrest.Matcher;
+import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,6 +41,7 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
@@ -47,6 +53,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,11 +64,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.Orientation.REVERSE;
+import static org.neo4j.graphalgo.QueryRunner.runQueryWithResultConsumer;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class TestSupport {
@@ -296,6 +307,69 @@ public final class TestSupport {
         );
 
         assertEquals(Status.Transaction.Terminated, exception.status());
+    }
+
+    public static void assertCypherResult(
+        GraphDatabaseService db,
+        @Language("Cypher") String query,
+        List<Map<String, Object>> expected
+    ) {
+        assertCypherResult(db, query, emptyMap(), expected);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void assertCypherResult(
+        GraphDatabaseService db,
+        @Language("Cypher") String query,
+        Map<String, Object> queryParameters,
+        List<Map<String, Object>> expected
+    ) {
+        runInTransaction(db, tx -> {
+            List<Map<String, Object>> actual = new ArrayList<>();
+            runQueryWithResultConsumer(db, query, queryParameters, result -> {
+                result.accept(row -> {
+                    Map<String, Object> _row = new HashMap<>();
+                    for (String column : result.columns()) {
+                        _row.put(column, row.get(column));
+                    }
+                    actual.add(_row);
+                    return true;
+                });
+            });
+            assertThat(actual)
+                .withFailMessage("Different amount of rows returned for actual result (%d) than expected (%d)",
+                    actual.size(),
+                    expected.size()
+                )
+                .hasSize(expected.size());
+
+            for (int i = 0; i < expected.size(); ++i) {
+                Map<String, Object> expectedRow = expected.get(i);
+                Map<String, Object> actualRow = actual.get(i);
+
+                assertThat(actualRow.keySet()).containsExactlyInAnyOrderElementsOf(expectedRow.keySet());
+
+                int rowNumber = i;
+                expectedRow.forEach((key, expectedValue) -> {
+                    Object actualValue = actualRow.get(key);
+                    ObjectAssert<Object> assertion = assertThat(actualValue).withFailMessage(
+                        "Different value for column '%s' of row %d (expected %s, but got %s)",
+                        key,
+                        rowNumber,
+                        expectedValue,
+                        actualValue
+                    );
+
+                    if (expectedValue instanceof Matcher) {
+                        assertion.is(new HamcrestCondition<>((Matcher<Object>) expectedValue));
+                    } else if (expectedValue instanceof Condition) {
+                        assertion.is((Condition<Object>) expectedValue);
+                    } else {
+                        assertion.isEqualTo(expectedValue);
+                    }
+                });
+            }
+        });
     }
 
     public static String getCypherAggregation(String aggregation, String property) {

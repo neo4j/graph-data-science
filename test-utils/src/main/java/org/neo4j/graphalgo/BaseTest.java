@@ -21,10 +21,6 @@ package org.neo4j.graphalgo;
 
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.Condition;
-import org.assertj.core.api.HamcrestCondition;
-import org.assertj.core.api.ObjectAssert;
-import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.neo4j.graphalgo.core.EnterpriseLicensingExtension;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTrackerExtensionFactory;
@@ -40,8 +36,6 @@ import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 import org.neo4j.test.extension.ImpermanentDbmsExtension;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -50,8 +44,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 @ImpermanentDbmsExtension(configurationCallback = "configuration")
 @Neo4jGraphExtension
@@ -237,58 +229,12 @@ public abstract class BaseTest {
         assertCypherResult(query, emptyMap(), expected);
     }
 
-    @SuppressWarnings("unchecked")
     protected void assertCypherResult(
         @Language("Cypher") String query,
         Map<String, Object> queryParameters,
-        List<Map<String, Object>> expected
+        List<Map<String, Object>>expected
     ) {
-        runInTransaction(db, tx -> {
-            List<Map<String, Object>> actual = new ArrayList<>();
-            runQueryWithResultConsumer(query, queryParameters, result -> {
-                result.accept(row -> {
-                    Map<String, Object> _row = new HashMap<>();
-                    for (String column : result.columns()) {
-                        _row.put(column, row.get(column));
-                    }
-                    actual.add(_row);
-                    return true;
-                });
-            });
-            assertThat(actual)
-                .withFailMessage("Different amount of rows returned for actual result (%d) than expected (%d)",
-                    actual.size(),
-                    expected.size()
-                )
-                .hasSize(expected.size());
-
-            for (int i = 0; i < expected.size(); ++i) {
-                Map<String, Object> expectedRow = expected.get(i);
-                Map<String, Object> actualRow = actual.get(i);
-
-                assertThat(actualRow.keySet()).containsExactlyInAnyOrderElementsOf(expectedRow.keySet());
-
-                int rowNumber = i;
-                expectedRow.forEach((key, expectedValue) -> {
-                    Object actualValue = actualRow.get(key);
-                    ObjectAssert<Object> assertion = assertThat(actualValue).withFailMessage(
-                        "Different value for column '%s' of row %d (expected %s, but got %s)",
-                        key,
-                        rowNumber,
-                        expectedValue,
-                        actualValue
-                    );
-
-                    if (expectedValue instanceof Matcher) {
-                        assertion.is(new HamcrestCondition<>((Matcher<Object>) expectedValue));
-                    } else if (expectedValue instanceof Condition) {
-                        assertion.is((Condition<Object>) expectedValue);
-                    } else {
-                        assertion.isEqualTo(expectedValue);
-                    }
-                });
-            }
-        });
+        TestSupport.assertCypherResult(db, query, queryParameters, expected);
     }
 
     static {
