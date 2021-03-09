@@ -368,6 +368,7 @@ CALL gds.pageRank.stream('my-graph', { relationshipTypes: ['RAIL'] }) YIELD node
 ----
 
 
+[[native-projection-syntax-projection-orientation]]
 === Projection orientation
 
 By default, relationships are projected in their natural representation, i.e., in the same way as they are stored in Neo4j.

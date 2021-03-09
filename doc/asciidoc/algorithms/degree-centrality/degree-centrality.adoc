@@ -1,7 +1,7 @@
 [[algorithms-degree-centrality]]
 = Degree Centrality
 :entity: node
-:result: centrality
+:result: degree centrality
 :algorithm: Degree Centrality
 
 [abstract]
@@ -14,9 +14,11 @@ This section describes the Degree Centrality algorithm in the Neo4j Graph Data S
 == Introduction
 
 The Degree Centrality algorithm can be used to find popular nodes within a graph.
-Degree centrality measures the number of incoming or outgoing relationships from a node.
-It can be applied to both, weighted and unweighted graphs.
+Degree centrality measures the number of incoming or outgoing (or both) relationships from a node, depending on the orientation of a relationship projection.
+For more information on relationship orientations, see the <<native-projection-syntax-projection-orientation, projection orientation section>>.
+It can be applied to either weighted or unweighted graphs.
 In the weighted case the algorithm computes the sum of all positive weights of adjacent relationships of a node, for each node in the graph.
+Non-positive weights are ignored.
 
 For more information on this algorithm, see:
 
@@ -24,10 +26,13 @@ For more information on this algorithm, see:
 
 
 [[algorithms-degree-centrality-usecase]]
-== Use-cases - when to use the Degree Centrality algorithm
+== Use-cases
 
-* Degree centrality is an important component of any attempt to determine the most important people on a social network.
-For example, in BrandWatch's https://www.brandwatch.com/blog/react-influential-men-and-women-2017/[most influential men and women on Twitter 2017^] the top 5 people in each category have over 40m followers each.
+The Degree Centrality algorithm has been shown to be useful in many different applications.
+For example:
+
+* Degree centrality is an important component of any attempt to determine the most important people in a social network.
+For example, in BrandWatch's https://www.brandwatch.com/blog/react-influential-men-and-women-2017/[most influential men and women on Twitter 2017^] the top 5 people in each category have over 40m followers each, which is a lot higher than the average degree.
 
 * Weighted degree centrality has been used to help separate fraudsters from legitimate users of an online auction.
 The weighted centrality for fraudsters is significantly higher because they tend to collude with each other to artificially increase the price of items.
@@ -51,8 +56,7 @@ include::../shared/syntax-intro-named-graph.adoc[]
 CALL gds.degree.stream(
   graphName: String,
   configuration: Map
-)
-YIELD
+) YIELD
   nodeId: Integer,
   score: Float
 ----
@@ -81,8 +85,7 @@ include::specific-configuration.adoc[]
 CALL gds.degree.stats(
   graphName: String,
   configuration: Map
-)
-YIELD
+) YIELD
   centralityDistribution: Map,
   createMillis: Integer,
   computeMillis: Integer,
@@ -117,8 +120,7 @@ include::specific-configuration.adoc[]
 CALL gds.degree.mutate(
   graphName: String,
   configuration: Map
-)
-YIELD
+) YIELD
   centralityDistribution: Map,
   createMillis: Integer,
   computeMillis: Integer,
@@ -157,8 +159,7 @@ include::specific-configuration.adoc[]
 CALL gds.degree.write(
   graphName: String,
   configuration: Map
-)
-YIELD
+) YIELD
   centralityDistribution: Map,
   createMillis: Integer,
   computeMillis: Integer,
@@ -201,8 +202,7 @@ include::../shared/syntax-anonymous-graphs.adoc[]
 ----
 CALL gds.degree.write(
   configuration: Map
-)
-YIELD
+) YIELD
   centralityDistribution: Map,
   createMillis: Integer,
   computeMillis: Integer,
@@ -224,7 +224,7 @@ The results are the same as for running write mode with a named graph, see the <
 
 :algorithm-name: {algorithm}
 :graph-description: social network
-:image-file: degree-centralit-graph.svg
+:image-file: degree-centrality-graph.svg
 include::../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
@@ -326,9 +326,9 @@ ORDER BY followers DESC, name DESC
 |===
 --
 
-We can see that Doug is the most popular user in our imaginary Twitter graph, with 5 followers - all other users follow him, but he doesn't follow anybody back.
-In the real Twitter network celebrities have very high follower counts but tend to follow very few back people.
-We could therefore consider Doug a celebrity!
+We can see that Doug is the most popular user in our imaginary social network graph, with 5 followers - all other users follow them, but they don't follow anybody back.
+In a real social network, celebrities have very high follower counts but tend to follow only very few people.
+We could therefore consider Doug quite the celebrity!
 
 
 [[algorithms-degree-centrality-examples-stats]]
@@ -355,7 +355,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 |===
 --
 
-Comparing this to the results we saw in the <<algorithms-degree-centrality-examples-stream, stream example>>, we can find our minimum and maximum values from the table.
+Comparing this to the results we saw in the <<algorithms-degree-centrality-examples-stream, stream example>>, we can find our minimum and mean values from the table.
 
 
 [[algorithms-degree-centrality-examples-mutate]]
@@ -416,13 +416,12 @@ Additionally, each of the seven nodes now has a new property `degree` in the Neo
 [[algorithms-degree-centrality-weighted-example]]
 == Weighted Degree Centrality example
 
-This sample will explain the weighted Degree Centrality algorithm, using a simple graph:
-
+This example will explain the weighted Degree Centrality algorithm.
 This algorithm is a variant of the Degree Centrality algorithm, that measures the sum of positive weights of incoming and outgoing relationships.
 
 [role=query-example]
 --
-.The following will run the algorithm in `stream` mode, showing which users have the most weighted followers:
+.The following will run the algorithm in `stream` mode, showing which users have the highest weighted degree centrality:
 [source, cypher, role=noplay]
 ----
 CALL gds.degree.stream(
