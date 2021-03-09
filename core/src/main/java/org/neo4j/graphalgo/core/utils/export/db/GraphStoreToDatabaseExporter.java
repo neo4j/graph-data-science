@@ -110,7 +110,6 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
                 BatchImporterFactory.withHighestPriority(),
                 databaseLayout,
                 fs,
-                null, // no external page cache
                 PageCacheTracer.NULL,
                 importConfig,
                 logService,

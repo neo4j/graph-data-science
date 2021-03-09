@@ -205,7 +205,6 @@ public interface Neo4jProxyApi {
         BatchImporterFactory factory,
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
-        PageCache externalPageCache,
         PageCacheTracer pageCacheTracer,
         Configuration config,
         LogService logService,

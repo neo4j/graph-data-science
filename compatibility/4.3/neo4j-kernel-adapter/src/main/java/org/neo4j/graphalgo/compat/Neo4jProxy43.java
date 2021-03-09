@@ -333,7 +333,6 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
         BatchImporterFactory factory,
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
-        PageCache externalPageCache,
         PageCacheTracer pageCacheTracer,
         Configuration config,
         LogService logService,
@@ -348,7 +347,6 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
         return factory.instantiate(
             directoryStructure,
             fileSystem,
-            externalPageCache,
             pageCacheTracer,
             config,
             logService,
