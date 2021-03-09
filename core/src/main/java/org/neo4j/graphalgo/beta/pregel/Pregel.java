@@ -193,27 +193,21 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     @NotNull
     private List<Partition> partitionGraph() {
-        List<Partition> partitions;
-
         switch (config.partitioning()) {
             case RANGE:
-                partitions = PartitionUtils.rangePartition(concurrency, graph.nodeCount());
-                break;
+                return PartitionUtils.rangePartition(concurrency, graph.nodeCount());
             case DEGREE:
                 var batchSize = Math.max(
                     ParallelUtil.DEFAULT_BATCH_SIZE,
                     BitUtil.ceilDiv(graph.relationshipCount(), concurrency)
                 );
-                partitions = PartitionUtils.degreePartition(graph, batchSize);
-                break;
+                return PartitionUtils.degreePartition(graph, batchSize);
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Unsupported partitioning `%s`",
                     config.partitioning()
                 ));
         }
-
-        return partitions;
     }
 
     private void runComputeSteps(Collection<ComputeStep<CONFIG, ?>> computeSteps) {
