@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.normalizing;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 
-final class MinMaxNormalizer {
+final class MinMaxNormalizer implements Normalizer {
 
     private final NodeProperties properties;
     final double min;
@@ -31,13 +31,6 @@ final class MinMaxNormalizer {
         this.properties = properties;
         this.min = min;
         this.max = max;
-    }
-
-    double normalize(long nodeId) {
-        if (Math.abs(max - min) < 1e-15) {
-            return 0D;
-        }
-        return (properties.doubleValue(nodeId) - min) / (max - min);
     }
 
     static MinMaxNormalizer create(NodeProperties properties, long nodeCount) {
@@ -56,4 +49,13 @@ final class MinMaxNormalizer {
 
         return new MinMaxNormalizer(properties, min, max);
     }
+
+    @Override
+    public double normalize(long nodeId) {
+        if (Math.abs(max - min) < 1e-15) {
+            return 0D;
+        }
+        return (properties.doubleValue(nodeId) - min) / (max - min);
+    }
+
 }
