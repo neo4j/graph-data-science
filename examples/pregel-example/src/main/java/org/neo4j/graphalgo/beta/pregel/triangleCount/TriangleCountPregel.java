@@ -19,11 +19,9 @@
  */
 package org.neo4j.graphalgo.beta.pregel.triangleCount;
 
-import com.carrotsearch.hppc.LongContainer;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.procedures.LongProcedure;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
@@ -83,13 +81,18 @@ public class TriangleCountPregel implements PregelComputation<TriangleCountPrege
             context.setNodeValue(TRIANGLE_COUNT, trianglesFromNodeA.longValue());
         } else if (context.superstep() == Phase.COUNT_TRIANGLES.step) {
             long triangles = context.longNodeValue(TRIANGLE_COUNT);
-            for (Double ignored : messages) {
-                triangles++;
+            if (!messages.isEmpty()) {
+                triangles += messages.doubleIterator().nextDouble();
             }
 
             context.setNodeValue(TRIANGLE_COUNT, triangles);
             context.voteToHalt();
         }
+    }
+
+    @Override
+    public Optional<Reducer> reducer() {
+        return Optional.of(new Reducer.Count());
     }
 
     enum Phase {

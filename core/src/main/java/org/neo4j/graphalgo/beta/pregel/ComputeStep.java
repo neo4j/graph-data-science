@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 
 import java.util.function.LongConsumer;
-import java.util.stream.LongStream;
 
 public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator> implements Runnable {
 
