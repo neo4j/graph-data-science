@@ -61,7 +61,10 @@ class NormalizeFeaturesTest {
 
     @Test
     void minmaxNormalisation() {
-        var config = ImmutableNormalizeFeaturesConfig.builder().featureProperties(List.of("a")).build();
+        var config = ImmutableNormalizeFeaturesConfig.builder()
+            .featureProperties(List.of("a"))
+            .normalizers(List.of("MinMax"))
+            .build();
         var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
 
         var result = algo.compute();
@@ -76,7 +79,10 @@ class NormalizeFeaturesTest {
 
     @Test
     void minmaxNormalisationOverMultipleProperties() {
-        var config = ImmutableNormalizeFeaturesConfig.builder().featureProperties(List.of("a", "b", "c")).build();
+        var config = ImmutableNormalizeFeaturesConfig.builder()
+            .featureProperties(List.of("a", "b", "c"))
+            .normalizers(List.of("MinMax", "MinMax", "MinMax"))
+            .build();
         var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
 
         var result = algo.compute();
@@ -89,4 +95,20 @@ class NormalizeFeaturesTest {
         assertArrayEquals(new double[]{0D, 1D, 1D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
     }
 
+    @Test
+    void differentNormalizers() {
+        var config = ImmutableNormalizeFeaturesConfig.builder()
+            .featureProperties(List.of("a", "b"))
+            .normalizers(List.of("MinMax", "Mean"))
+            .build();
+        var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
+        var result = algo.compute();
+        var resultProperties = result.normalizedProperties().toArray();
+
+        assertArrayEquals(new double[]{11.1 / 13D, -0.5D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
+        assertArrayEquals(new double[]{12.8 / 13D, -0.25D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
+        assertArrayEquals(new double[]{1D, 0}, resultProperties[(int) graph.toOriginalNodeId("c")]);
+        assertArrayEquals(new double[]{9 / 13D, 0.25D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
+        assertArrayEquals(new double[]{0D, 0.5D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
+    }
 }

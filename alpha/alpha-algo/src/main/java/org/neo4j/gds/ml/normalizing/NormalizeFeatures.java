@@ -27,8 +27,8 @@ import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFeatures.NormalizeFeaturesResult> {
 
@@ -76,15 +76,23 @@ public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFea
         }
     }
 
-    private List<MinMaxNormalizer> resolveNormalizers() {
-        var normalizers = config.featureProperties().stream().map(property -> {
+    private List<Normalizer> resolveNormalizers() {
+        assert config.normalizers().size() == config.featureProperties().size();
+
+        List<Normalizer> normalizers = new ArrayList<>();
+
+        for (int i = 0; i < config.normalizers().size(); i++) {
+            String normalizer = config.normalizers().get(i);
+            String property = config.featureProperties().get(i);
+
             var nodeProperties = graph.nodeProperties(property);
-            return MinMaxNormalizer.create(nodeProperties, graph.nodeCount());
-        }).collect(Collectors.toList());
+            normalizers.add(Normalizer.Factory.create(normalizer, nodeProperties, graph.nodeCount()));
+        }
         return normalizers;
     }
 
     @ValueClass
     interface NormalizeFeaturesConfig extends AlgoBaseConfig, FeaturePropertiesConfig {
+        List<String> normalizers();
     }
 }
