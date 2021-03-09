@@ -46,14 +46,14 @@ class RestartCheckProcTest extends BaseTest {
     }
 
     @Test
-    void safeToRestartReturnsTrueWhenCatalogIsEmpty() {
+    void shouldReturnTrueWhenCatalogIsEmpty() {
         assertCypherResult("CALL gds.internal.safeToRestart()", List.of(
             Map.of("safeToRestart", Boolean.TRUE)
         ));
     }
 
     @Test
-    void safeToRestartReturnsFalseIfThereAreGraphsInTheCatalog() {
+    void shouldReturnFalseIfThereAreGraphsInTheCatalog() {
         var config = ImmutableGraphCreateFromStoreConfig.of(
             AuthSubject.ANONYMOUS.username(),
             "config",

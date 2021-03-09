@@ -30,7 +30,7 @@ public class RestartCheckProc {
     @Admin
     @Procedure("gds.internal.safeToRestart")
     public Stream<SafeToRestartResult> safeToRestart() {
-        return Stream.of(new SafeToRestartResult(GraphStoreCatalog.getAllGraphStoresCount() == 0));
+        return Stream.of(new SafeToRestartResult(GraphStoreCatalog.graphStoresCount() == 0));
     }
 
     public static final class SafeToRestartResult {

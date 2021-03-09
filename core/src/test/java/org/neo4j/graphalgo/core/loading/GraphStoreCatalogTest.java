@@ -46,7 +46,7 @@ import static org.neo4j.graphalgo.extension.GdlSupportExtension.DATABASE_ID;
 @GdlExtension
 class GraphStoreCatalogTest {
 
-    private static final String USER_NAME = "";
+    private static final String USER_NAME = "alice";
     private static final String GRAPH_NAME = "graph";
     private static final GraphCreateFromStoreConfig CONFIG = GraphCreateFromStoreConfig.emptyWithName(USER_NAME, GRAPH_NAME);
 
@@ -86,6 +86,19 @@ class GraphStoreCatalogTest {
         assertEquals(1, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
         GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {}, true);
         assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+    }
+
+    @Test
+    void graphStoresCountAcrossUsers() {
+        assertEquals(0, GraphStoreCatalog.graphStoresCount());
+        GraphStoreCatalog.set(CONFIG, graphStore);
+        assertEquals(1, GraphStoreCatalog.graphStoresCount());
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+        assertEquals(2, GraphStoreCatalog.graphStoresCount());
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("clive", GRAPH_NAME), graphStore);
+        assertEquals(3, GraphStoreCatalog.graphStoresCount());
+        GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {}, true);
+        assertEquals(2, GraphStoreCatalog.graphStoresCount());
     }
 
     @Test

@@ -86,14 +86,6 @@ public final class GraphStoreCatalog {
             .sum();
     }
 
-    public static int getAllGraphStoresCount() {
-        return userCatalogs
-            .values()
-            .stream()
-            .mapToInt(userCatalog -> userCatalog.getGraphStores().values().size())
-            .sum();
-    }
-
     public static int graphStoresCount(NamedDatabaseId databaseId) {
         return userCatalogs
             .values()
