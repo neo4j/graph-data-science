@@ -17,31 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.centrality;
+package org.neo4j.graphalgo.degree;
 
-import org.apache.commons.lang3.StringUtils;
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.MutatePropertyConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-@Configuration
+import java.util.Optional;
+
 @ValueClass
-@SuppressWarnings("immutables:subtype")
-public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeightConfig, WritePropertyConfig {
+@Configuration
+public interface DegreeCentralityMutateConfig extends DegreeCentralityConfig, MutatePropertyConfig {
 
-    String DEFAULT_SCORE_PROPERTY = "degree";
-
-    @Configuration.Ignore
-    @Value.Default
-    default boolean isWeighted() {
-        return StringUtils.isNotEmpty(relationshipWeightProperty());
-    }
-
-    @Value.Default
-    default String writeProperty() {
-        return DEFAULT_SCORE_PROPERTY;
+    static DegreeCentralityMutateConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> implicitCreateConfig,
+        CypherMapWrapper config
+    ) {
+        return new DegreeCentralityMutateConfigImpl(graphName, implicitCreateConfig, username, config);
     }
 }

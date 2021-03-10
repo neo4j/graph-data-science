@@ -35,7 +35,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrality.DegreeFunction> {
-    public static final double DEFAULT_WEIGHT = 0D;
+
+    private static final double DEFAULT_WEIGHT = 0D;
 
     private Graph graph;
     private final ExecutorService executor;

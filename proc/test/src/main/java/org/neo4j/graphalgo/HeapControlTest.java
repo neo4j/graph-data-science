@@ -50,12 +50,12 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> applyOnProcedure(proc -> {
             loadGraph(heapGraphName());
             CONFIG config = proc.newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
-            proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
+            proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 21);
         }));
 
         String message = ExceptionUtil.rootCause(exception).getMessage();
         String messageTemplate =
-            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\).";
+            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(21 Bytes\\).";
         if (GraphStoreCatalog.graphStoresCount() > 0) {
             messageTemplate += formatWithLocale(
                 " Note: there are %s graphs currently loaded into memory.",

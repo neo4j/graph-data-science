@@ -150,6 +150,15 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.fastRP.stream.estimate`
 | `gds.fastRP.write`
 | `gds.fastRP.write.estimate`
+.8+<.^| Degree Centrality
+| `gds.degree.mutate`
+| `gds.degree.mutate.estimate`
+| `gds.degree.stats`
+| `gds.degree.stats.estimate`
+| `gds.degree.stream`
+| `gds.degree.stream.estimate`
+| `gds.degree.write`
+| `gds.degree.write.estimate`
 |===
 
 [[beta-tier]]
@@ -271,9 +280,6 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.closeness.harmonic.write`
 .1+<.^|<<algorithms-collapse-path, Collapse Path>>
 | `gds.alpha.collapsePath.mutate`
-.2+<.^|<<algorithms-degree-centrality, Degree Centrality>>
-| `gds.alpha.degree.stream`
-| `gds.alpha.degree.write`
 .1+<.^|<<algorithms-dfs, Depth First Search>>
 | `gds.alpha.dfs.stream`
 .2+<.^|<<algorithms-eigenvector, Eigenvector Centrality>>
