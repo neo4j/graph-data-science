@@ -82,8 +82,8 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
         runQueryWithRowConsumer(query, map("relProjection", relProjection),
             row -> {
-                assertEquals(303520, row.getNumber("bytesMax").longValue());
-                assertEquals(303520, row.getNumber("bytesMin").longValue());
+                assertEquals(295448, row.getNumber("bytesMax").longValue());
+                assertEquals(295448, row.getNumber("bytesMin").longValue());
                 assertEquals(expectedPercentage, row.getNumber("heapPercentageMin").doubleValue());
                 assertEquals(expectedPercentage, row.getNumber("heapPercentageMax").doubleValue());
             }
@@ -104,8 +104,8 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
         runQueryWithRowConsumer(query, map("relProjection", relProjection),
             row -> {
-                assertEquals(30190216, row.getNumber("bytesMin").longValue());
-                assertEquals(30190216, row.getNumber("bytesMax").longValue());
+                assertEquals(30063136, row.getNumber("bytesMin").longValue());
+                assertEquals(30063136, row.getNumber("bytesMax").longValue());
                 assertEquals(expectedPercentage, row.getNumber("heapPercentageMin").doubleValue());
                 assertEquals(expectedPercentage, row.getNumber("heapPercentageMax").doubleValue());
             }
@@ -122,8 +122,8 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
         runQueryWithRowConsumer(query, map("relProjection", relProjection),
             row -> {
-                assertEquals(573944, row.getNumber("bytesMin").longValue());
-                assertEquals(573944, row.getNumber("bytesMax").longValue());
+                assertEquals(557800, row.getNumber("bytesMin").longValue());
+                assertEquals(557800, row.getNumber("bytesMax").longValue());
             }
         );
     }
@@ -137,8 +137,8 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
             query,
             map("nodeQuery", nodeQuery, "relationshipQuery", relationshipQuery),
             row -> {
-                assertEquals(303520, row.getNumber("bytesMin").longValue());
-                assertEquals(303520, row.getNumber("bytesMax").longValue());
+                assertEquals(295448, row.getNumber("bytesMin").longValue());
+                assertEquals(295448, row.getNumber("bytesMax").longValue());
             }
         );
     }
@@ -164,8 +164,8 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
         String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
         runQueryWithRowConsumer(query,
             row -> {
-                assertEquals(303760, row.getNumber("bytesMin").longValue());
-                assertEquals(303760, row.getNumber("bytesMax").longValue());
+                assertEquals(295928, row.getNumber("bytesMin").longValue());
+                assertEquals(295928, row.getNumber("bytesMax").longValue());
                 assertEquals(42, row.getNumber("nodeCount").longValue());
                 assertEquals(1337, row.getNumber("relationshipCount").longValue());
             }
@@ -177,8 +177,8 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
         String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 42, relationshipCount: 1337})";
         runQueryWithRowConsumer(query,
             row -> {
-                assertEquals(303760, row.getNumber("bytesMin").longValue());
-                assertEquals(303760, row.getNumber("bytesMax").longValue());
+                assertEquals(295928, row.getNumber("bytesMin").longValue());
+                assertEquals(295928, row.getNumber("bytesMax").longValue());
                 assertEquals(42, row.getNumber("nodeCount").longValue());
                 assertEquals(1337, row.getNumber("relationshipCount").longValue());
             }
@@ -190,8 +190,8 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
         String query = "CALL gds.graph.create.estimate('*', {`FOO`: {type: '*', properties: 'weight'}}, {nodeCount: 42, relationshipCount: 1337})";
         runQueryWithRowConsumer(query,
             row -> {
-                assertEquals(574184, row.getNumber("bytesMin").longValue());
-                assertEquals(574184, row.getNumber("bytesMax").longValue());
+                assertEquals(558520, row.getNumber("bytesMin").longValue());
+                assertEquals(558520, row.getNumber("bytesMax").longValue());
             }
         );
     }
@@ -201,8 +201,8 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
         String query = "CALL gds.graph.create.estimate('*', '*', {nodeCount: 5000000000, relationshipCount: 20000000000})";
         runQueryWithRowConsumer(query,
             row -> {
-                assertEquals(170_836_586_808L, row.getNumber("bytesMin").longValue());
-                assertEquals(230_841_207_456L, row.getNumber("bytesMax").longValue());
+                assertEquals(170_040_500_648L, row.getNumber("bytesMin").longValue());
+                assertEquals(230_045_121_296L, row.getNumber("bytesMax").longValue());
                 assertEquals(5_000_000_000L, row.getNumber("nodeCount").longValue());
                 assertEquals(20_000_000_000L, row.getNumber("relationshipCount").longValue());
             }
