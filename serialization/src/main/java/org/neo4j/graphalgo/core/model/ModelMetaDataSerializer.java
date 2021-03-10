@@ -19,18 +19,15 @@
  */
 package org.neo4j.graphalgo.core.model;
 
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import com.google.protobuf.Any;
+import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
 import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
 import org.neo4j.graphalgo.api.schema.SchemaSerializer;
 import org.neo4j.graphalgo.config.BaseConfig;
-import org.neo4j.graphalgo.config.GraphSageTrainConfigSerializer;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.IOException;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ModelMetaDataSerializer {
 
@@ -75,25 +72,15 @@ public final class ModelMetaDataSerializer {
     }
 
     private static void serializableTrainConfig(Model<?, ?> model, ModelProto.ModelMetaData.Builder builder) {
-        switch (model.algoType()) {
-            case GraphSage.MODEL_TYPE:
-                builder.setGraphSageTrainConfig(GraphSageTrainConfigSerializer.toSerializable((GraphSageTrainConfig) model
-                    .trainConfig()));
-                break;
-            default:
-                throw new RuntimeException(formatWithLocale("Unsupported model type: %s", model.algoType()));
-        }
+        var trainConfigSerializer =
+            TrainConfigSerializerFactory.trainConfigSerializer(model.algoType());
+        var serializable = trainConfigSerializer.toSerializable(model.trainConfig());
+        builder.setTrainConfig(Any.pack(serializable));
     }
 
     private static <CONFIG extends ModelConfig & BaseConfig> CONFIG trainConfig(ModelProto.ModelMetaData protoModelMetaData) {
-        switch (protoModelMetaData.getAlgoType()) {
-            case GraphSage.MODEL_TYPE:
-                return (CONFIG) GraphSageTrainConfigSerializer.fromSerializable(protoModelMetaData.getGraphSageTrainConfig());
-            default:
-                throw new RuntimeException(formatWithLocale(
-                    "Unsupported model type: %s",
-                    protoModelMetaData.getAlgoType()
-                ));
-        }
+        var modelConfigSerializer =
+            TrainConfigSerializerFactory.trainConfigSerializer(protoModelMetaData.getAlgoType());
+        return (CONFIG) modelConfigSerializer.fromSerializable(protoModelMetaData.getTrainConfig());
     }
 }

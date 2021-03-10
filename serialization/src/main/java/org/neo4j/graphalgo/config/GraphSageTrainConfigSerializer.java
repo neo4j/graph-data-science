@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.config;
 
+import org.neo4j.gds.TrainConfigSerializer;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
@@ -33,11 +34,12 @@ import static org.neo4j.graphalgo.config.ConfigSerializers.serializableModelConf
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableRelationshipWeightConfig;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableToleranceConfig;
 
-public final class GraphSageTrainConfigSerializer {
+public final class GraphSageTrainConfigSerializer implements TrainConfigSerializer<GraphSageTrainConfig, TrainConfigsProto.GraphSageTrainConfig> {
 
-    private GraphSageTrainConfigSerializer() {}
+    public GraphSageTrainConfigSerializer() {}
 
-    public static TrainConfigsProto.GraphSageTrainConfig toSerializable(GraphSageTrainConfig trainConfig) {
+    @Override
+    public TrainConfigsProto.GraphSageTrainConfig toSerializable(GraphSageTrainConfig trainConfig) {
         var protoConfigBuilder = TrainConfigsProto.GraphSageTrainConfig.newBuilder();
 
         protoConfigBuilder
@@ -69,7 +71,8 @@ public final class GraphSageTrainConfigSerializer {
         return protoConfigBuilder.build();
     }
 
-    public static GraphSageTrainConfig fromSerializable(TrainConfigsProto.GraphSageTrainConfig protoTrainConfig) {
+    @Override
+    public GraphSageTrainConfig fromSerializable(TrainConfigsProto.GraphSageTrainConfig protoTrainConfig) {
         var trainConfigBuilder = GraphSageTrainConfig.builder();
 
         trainConfigBuilder
@@ -100,5 +103,10 @@ public final class GraphSageTrainConfigSerializer {
         }
 
         return trainConfigBuilder.build();
+    }
+
+    @Override
+    public Class<TrainConfigsProto.GraphSageTrainConfig> serializableClass() {
+        return TrainConfigsProto.GraphSageTrainConfig.class;
     }
 }

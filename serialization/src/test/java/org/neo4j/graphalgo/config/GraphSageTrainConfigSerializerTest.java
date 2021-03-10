@@ -43,10 +43,11 @@ class GraphSageTrainConfigSerializerTest {
             .featureProperties(List.of("age", "birth_year", "death_year"));
 
         var trainConfig = trainConfigBuilder.build();
-        var proto = GraphSageTrainConfigSerializer.toSerializable(trainConfig);
+        var trainConfigSerializer = new GraphSageTrainConfigSerializer();
+        var proto = trainConfigSerializer.toSerializable(trainConfig);
         assertThat(proto).isNotNull();
 
-        var from = GraphSageTrainConfigSerializer.fromSerializable(proto);
+        var from = trainConfigSerializer.fromSerializable(proto);
         assertThat(from)
             .isNotNull()
             .usingRecursiveComparison()
@@ -66,10 +67,12 @@ class GraphSageTrainConfigSerializerTest {
             .relationshipWeightProperty("blah-blah");
 
         var trainConfig = trainConfigBuilder.build();
-        var proto = GraphSageTrainConfigSerializer.toSerializable(trainConfig);
+        var trainConfigSerializer = new GraphSageTrainConfigSerializer();
+
+        var proto = trainConfigSerializer.toSerializable(trainConfig);
         assertThat(proto).isNotNull();
 
-        var from = GraphSageTrainConfigSerializer.fromSerializable(proto);
+        var from = trainConfigSerializer.fromSerializable(proto);
         assertThat(from)
             .isNotNull()
             .usingRecursiveComparison()
@@ -103,10 +106,11 @@ class GraphSageTrainConfigSerializerTest {
             .batchSize(batchSize);
 
         var trainConfig = trainConfigBuilder.build();
-        var proto = GraphSageTrainConfigSerializer.toSerializable(trainConfig);
+        var trainConfigSerializer = new GraphSageTrainConfigSerializer();
+        var proto = trainConfigSerializer.toSerializable(trainConfig);
         assertThat(proto).isNotNull();
 
-        var from = GraphSageTrainConfigSerializer.fromSerializable(proto);
+        var from = trainConfigSerializer.fromSerializable(proto);
         assertThat(from)
             .isNotNull()
             .usingRecursiveComparison()

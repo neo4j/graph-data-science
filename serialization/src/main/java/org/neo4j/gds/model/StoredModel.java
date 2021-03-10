@@ -22,9 +22,9 @@ package org.neo4j.gds.model;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.model.storage.ModelFileReader;
 import org.neo4j.gds.model.storage.ModelFileWriter;
+import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
-import org.neo4j.graphalgo.config.GraphSageTrainConfigSerializer;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
@@ -153,7 +153,7 @@ public class StoredModel implements Model<Object, ModelConfig> {
     public ModelConfig trainConfig() {
         return ModelSupport.onValidAlgoType(
             algoType(),
-            () -> GraphSageTrainConfigSerializer.fromSerializable(metaData.getGraphSageTrainConfig())
+            () -> TrainConfigSerializerFactory.trainConfigSerializer(algoType()).fromSerializable(metaData.getTrainConfig())
         );
     }
 

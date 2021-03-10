@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "graph_schema.proto";
 import "config/train_configs.proto";
+import "google/protobuf/any.proto";
 
 option java_package = "org.neo4j.graphalgo.core.model.proto";
 option java_outer_classname = "ModelProto";
@@ -15,9 +16,7 @@ message ModelMetaData {
   GraphSchema graphSchema = 5;
   ZonedDateTime creationTime = 6;
 
-  oneof trainConfig {
-    GraphSageTrainConfig graphSageTrainConfig = 7;
-  }
+  google.protobuf.Any trainConfig = 7;
 }
 
 message ZonedDateTime {
