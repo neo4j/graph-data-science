@@ -41,7 +41,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
     private Graph graph;
     private final ExecutorService executor;
     private final DegreeCentralityConfig config;
-    private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
 
     public interface DegreeFunction {
