@@ -23,7 +23,6 @@ import com.google.protobuf.Parser;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
 import org.neo4j.gds.model.ModelSupport;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.File;
@@ -49,7 +48,7 @@ public class ModelFileReader {
 
     public Object readData(String algoType) throws IOException {
         return ModelSupport.onValidAlgoType(algoType, () -> {
-            var parser = GraphSageProto.GraphSageModel.parser();
+            var parser = GraphSageModelSerializer.modelParser();
             var graphSageModelProto = readModelData(persistenceDir, parser);
             return GraphSageModelSerializer.deserializeModelData(graphSageModelProto);
         });
@@ -62,7 +61,7 @@ public class ModelFileReader {
 
     private Model<?, ?> fromSerializable(ModelProto.ModelMetaData modelMetaData) throws IOException {
         return ModelSupport.onValidAlgoType(modelMetaData.getAlgoType(), () -> {
-            var parser = GraphSageProto.GraphSageModel.parser();
+            var parser = GraphSageModelSerializer.modelParser();
             var graphSageModelProto = readModelData(persistenceDir, parser);
             return GraphSageModelSerializer.fromSerializable(graphSageModelProto, modelMetaData);
         });

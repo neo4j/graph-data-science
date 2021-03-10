@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import com.google.protobuf.Parser;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.core.model.Model;
@@ -64,5 +65,9 @@ public final class GraphSageModelSerializer {
             LayerSerializer.fromSerializable(protoModel.getData().getLayersList()),
             FeatureFunctionSerializer.fromSerializable(protoModel.getFeatureFunction())
         );
+    }
+
+    public static Parser<GraphSageProto.GraphSageModel> modelParser() {
+        return GraphSageProto.GraphSageModel.parser();
     }
 }
