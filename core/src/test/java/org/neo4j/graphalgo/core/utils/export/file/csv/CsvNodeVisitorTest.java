@@ -35,7 +35,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitNodesWithoutLabelsAndProperties() {
-        var nodeVisitor = new CsvNodeVisitor(tempDir, NodeSchema.builder().build());
+        var nodeVisitor = new CsvNodeVisitor(tempDir, NodeSchema.builder().build(), true);
 
         nodeVisitor.id(0L);
         nodeVisitor.originalId(42L);
@@ -58,7 +58,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitNodesWithLabels() {
-        var nodeVisitor = new CsvNodeVisitor(tempDir, NodeSchema.builder().build());
+        var nodeVisitor = new CsvNodeVisitor(tempDir, NodeSchema.builder().build(), true);
 
         nodeVisitor.id(0L);
         nodeVisitor.originalId(42L);
@@ -102,7 +102,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
             .addProperty(NodeLabel.ALL_NODES, "foo", ValueType.DOUBLE)
             .addProperty(NodeLabel.ALL_NODES, "bar", ValueType.DOUBLE)
             .build();
-        var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema);
+        var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema, true);
 
         nodeVisitor.id(0L);
         nodeVisitor.originalId(42L);
@@ -150,7 +150,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
             .addProperty(cLabel, "isolated", ValueType.DOUBLE)
 
             .build();
-        var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema);
+        var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema, true);
 
         // :A:B
         nodeVisitor.id(0L);

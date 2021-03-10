@@ -99,6 +99,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(1)
+            .reverseIdMapping(true)
             .build();
 
         // export db
@@ -182,6 +183,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(2)
+            .reverseIdMapping(true)
             .build();
 
         // export db
