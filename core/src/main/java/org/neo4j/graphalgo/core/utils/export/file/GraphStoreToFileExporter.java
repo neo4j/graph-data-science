@@ -24,8 +24,12 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
+import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor;
+import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSchemaVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor;
+import org.neo4j.graphalgo.core.utils.export.file.schema.NodeSchemaVisitor;
+import org.neo4j.graphalgo.core.utils.export.file.schema.RelationshipSchemaVisitor;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
 
@@ -37,6 +41,8 @@ import java.util.function.Function;
 
 public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFileExporterConfig> {
 
+    private final NodeSchemaVisitor nodeSchemaVisitor;
+    private final RelationshipSchemaVisitor relationshipSchemaVisitor;
     private final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
     private final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
 
@@ -50,6 +56,8 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
         return new GraphStoreToFileExporter(
             graphStore,
             config,
+            new CsvNodeSchemaVisitor(),
+            new CsvRelationshipSchemaVisitor(),
             (index) -> new CsvNodeVisitor(exportPath, graphStore.schema().nodeSchema(), headerFiles, index, config.exportNeoNodeIds()),
             (index) -> new CsvRelationshipVisitor(exportPath, graphStore.schema().relationshipSchema(), headerFiles, index)
         );
@@ -58,18 +66,27 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
     private GraphStoreToFileExporter(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
+        NodeSchemaVisitor nodeSchemaVisitor,
+        RelationshipSchemaVisitor relationshipSchemaVisitor,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
     ) {
         super(graphStore, config);
+        this.nodeSchemaVisitor = nodeSchemaVisitor;
+        this.relationshipSchemaVisitor = relationshipSchemaVisitor;
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;
     }
 
     @Override
     protected void export(GraphStoreInput graphStoreInput) {
+        exportMetaData(graphStoreInput);
         exportNodes(graphStoreInput);
         exportRelationships(graphStoreInput);
+    }
+
+    private void exportMetaData(GraphStoreInput graphStoreInput) {
+
     }
 
     private void exportNodes(GraphStoreInput graphStoreInput) {
@@ -78,7 +95,7 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
 
         var tasks = ParallelUtil.tasks(
             config.writeConcurrency(),
-            (index) -> new ImportRunner(nodeVisitorSupplier.apply(index), nodeInputIterator)
+            (index) -> new ElementImportRunner(nodeVisitorSupplier.apply(index), nodeInputIterator)
         );
 
         ParallelUtil.runWithConcurrency(config.writeConcurrency(), tasks, Pools.DEFAULT);
@@ -90,17 +107,17 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
 
         var tasks = ParallelUtil.tasks(
             config.writeConcurrency(),
-            (index) -> new ImportRunner(relationshipVisitorSupplier.apply(index), relationshipInputIterator)
+            (index) -> new ElementImportRunner(relationshipVisitorSupplier.apply(index), relationshipInputIterator)
         );
 
         ParallelUtil.runWithConcurrency(config.writeConcurrency(), tasks, Pools.DEFAULT);
     }
 
-    private static final class ImportRunner implements Runnable {
+    private static final class ElementImportRunner implements Runnable {
         private final ElementVisitor<?, ?, ?> visitor;
         private final InputIterator inputIterator;
 
-        private ImportRunner(
+        private ElementImportRunner(
             ElementVisitor<?, ?, ?> visitor,
             InputIterator inputIterator
         ) {

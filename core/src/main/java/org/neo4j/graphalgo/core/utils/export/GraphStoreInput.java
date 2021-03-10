@@ -43,17 +43,19 @@ import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 public final class GraphStoreInput implements CompatInput {
 
+    private final MetaDataStore metaDataStore;
     private final NodeStore nodeStore;
-
     private final RelationshipStore relationshipStore;
 
     private final int batchSize;
 
     GraphStoreInput(
+        MetaDataStore metaDataStore,
         NodeStore nodeStore,
         RelationshipStore relationshipStore,
         int batchSize
     ) {
+        this.metaDataStore = metaDataStore;
         this.nodeStore = nodeStore;
         this.relationshipStore = relationshipStore;
         this.batchSize = batchSize;
@@ -93,6 +95,10 @@ public final class GraphStoreInput implements CompatInput {
             numberOfRelationshipProperties * Double.BYTES,
             nodeStore.labelCount()
         );
+    }
+
+    public MetaDataStore metaDataStore() {
+        return metaDataStore;
     }
 
     abstract static class GraphImporter implements InputIterator {
