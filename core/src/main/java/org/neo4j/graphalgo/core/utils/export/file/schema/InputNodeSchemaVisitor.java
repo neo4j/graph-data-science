@@ -21,15 +21,13 @@ package org.neo4j.graphalgo.core.utils.export.file.schema;
 
 import org.neo4j.graphalgo.NodeLabel;
 
-import java.util.Set;
-
 public interface InputNodeSchemaVisitor extends InputSchemaVisitor {
 
-    boolean labels(Set<NodeLabel> nodeLabels);
+    boolean nodeLabel(NodeLabel nodeLabel);
 
     abstract class Adapter extends ElementSchemaVisitor implements InputNodeSchemaVisitor {
         @Override
-        public boolean labels(Set<NodeLabel> nodeLabels) {
+        public boolean nodeLabel(NodeLabel nodeLabel) {
             return true;
         }
     }

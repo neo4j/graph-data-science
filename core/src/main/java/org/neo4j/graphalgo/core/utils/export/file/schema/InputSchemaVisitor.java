@@ -23,7 +23,9 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
-public interface InputSchemaVisitor {
+import java.io.Closeable;
+
+public interface InputSchemaVisitor extends Closeable {
 
     boolean key(String key);
 
@@ -35,7 +37,7 @@ public interface InputSchemaVisitor {
 
     void endOfEntity();
 
-    class Adapter implements InputSchemaVisitor {
+    abstract class Adapter implements InputSchemaVisitor {
         @Override
         public boolean key(String key) {
             return true;

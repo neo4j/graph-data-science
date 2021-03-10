@@ -19,12 +19,56 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
+import de.siegmar.fastcsv.writer.CsvAppender;
+import de.siegmar.fastcsv.writer.CsvWriter;
 import org.neo4j.graphalgo.core.utils.export.file.schema.RelationshipSchemaVisitor;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 
 public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
 
+    private static final String RELATIONSHIP_SCHEMA_FILE_NAME = "relationship-schema.csv";
+
+    private final CsvAppender csvAppender;
+
+    public CsvRelationshipSchemaVisitor(Path fileLocation) {
+        try {
+            this.csvAppender = new CsvWriter().append(fileLocation.resolve(RELATIONSHIP_SCHEMA_FILE_NAME), StandardCharsets.UTF_8);
+            writeHeader();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     protected void export() {
+        try {
+            csvAppender.appendField(relationshipType().name());
+            csvAppender.appendField(key());
+            csvAppender.appendField(valueType().csvName());
+            csvAppender.appendField(defaultValue().toString());
+            csvAppender.appendField(aggregation().name());
+            csvAppender.appendField(state().name());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    @Override
+    public void close() throws IOException {
+        csvAppender.flush();
+        csvAppender.close();
+    }
+
+    private void writeHeader() throws IOException {
+        csvAppender.appendField("label");
+        csvAppender.appendField("propertyKey");
+        csvAppender.appendField("valueType");
+        csvAppender.appendField("defaultValue");
+        csvAppender.appendField("aggregation");
+        csvAppender.appendField("state");
+        csvAppender.endLine();
     }
 }
