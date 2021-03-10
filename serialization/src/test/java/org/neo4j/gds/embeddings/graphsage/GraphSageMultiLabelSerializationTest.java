@@ -66,14 +66,15 @@ class GraphSageMultiLabelSerializationTest {
             ModelMetaDataSerializer.toSerializable(model),
             ModelProto.ModelMetaData.parser()
         );
+        var serializer = new GraphSageModelSerializer();
         var protoGraphSageModel = serializationRoundTrip(
-            GraphSageModelSerializer.toSerializable(model.data()),
+            serializer.toSerializable(model.data()),
             GraphSageProto.GraphSageModel.parser()
         );
 
         assertThat(protoGraphSageModel).isNotNull();
 
-        var deserializedModel = GraphSageModelSerializer.fromSerializable(protoGraphSageModel, protoModelMetaData);
+        var deserializedModel = serializer.fromSerializable(protoGraphSageModel, protoModelMetaData);
 
         assertThat(deserializedModel.data().layers())
             .isNotNull()

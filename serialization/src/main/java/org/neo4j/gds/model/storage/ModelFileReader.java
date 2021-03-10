@@ -48,9 +48,10 @@ public class ModelFileReader {
 
     public Object readData(String algoType) throws IOException {
         return ModelSupport.onValidAlgoType(algoType, () -> {
-            var parser = GraphSageModelSerializer.modelParser();
+            var serializer = new GraphSageModelSerializer();
+            var parser = serializer.modelParser();
             var graphSageModelProto = readModelData(persistenceDir, parser);
-            return GraphSageModelSerializer.deserializeModelData(graphSageModelProto);
+            return serializer.deserializeModelData(graphSageModelProto);
         });
     }
 
@@ -61,9 +62,10 @@ public class ModelFileReader {
 
     private Model<?, ?> fromSerializable(ModelProto.ModelMetaData modelMetaData) throws IOException {
         return ModelSupport.onValidAlgoType(modelMetaData.getAlgoType(), () -> {
-            var parser = GraphSageModelSerializer.modelParser();
+            var serializer = new GraphSageModelSerializer();
+            var parser = serializer.modelParser();
             var graphSageModelProto = readModelData(persistenceDir, parser);
-            return GraphSageModelSerializer.fromSerializable(graphSageModelProto, modelMetaData);
+            return serializer.fromSerializable(graphSageModelProto, modelMetaData);
         });
     }
 

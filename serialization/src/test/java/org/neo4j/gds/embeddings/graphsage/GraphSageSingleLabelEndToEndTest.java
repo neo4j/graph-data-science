@@ -91,12 +91,14 @@ class GraphSageSingleLabelEndToEndTest {
             ModelMetaDataSerializer.toSerializable(model),
             ModelProto.ModelMetaData.parser()
         );
+        var serializer = new GraphSageModelSerializer();
+
         var protoGraphSageModel = serializationRoundTrip(
-            GraphSageModelSerializer.toSerializable(model.data()),
+            serializer.toSerializable(model.data()),
             GraphSageProto.GraphSageModel.parser()
         );
 
-        Model<ModelData, GraphSageTrainConfig> deserializedModel = GraphSageModelSerializer.fromSerializable(protoGraphSageModel, protoModelMetaData);
+        Model<ModelData, GraphSageTrainConfig> deserializedModel = serializer.fromSerializable(protoGraphSageModel, protoModelMetaData);
         var embeddingsFromDeserializedModel = produceEmbeddings(deserializedModel);
 
         assertThat(originalEmbeddings)

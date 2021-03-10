@@ -83,7 +83,7 @@ class GraphSageSingleLabelSerializationTest {
     private Graph graph;
 
     @Test
-    void e2eTest() throws IOException, ClassNotFoundException {
+    void e2eTest() throws IOException {
         var model = train();
         var originalEmbeddings = produceEmbeddings(model);
 
@@ -91,12 +91,13 @@ class GraphSageSingleLabelSerializationTest {
             ModelMetaDataSerializer.toSerializable(model),
             ModelProto.ModelMetaData.parser()
         );
+        var serializer = new GraphSageModelSerializer();
         var protoGraphSageModel = serializationRoundTrip(
-            GraphSageModelSerializer.toSerializable(model.data()),
+            serializer.toSerializable(model.data()),
             GraphSageProto.GraphSageModel.parser()
         );
 
-        var deserializedModel = GraphSageModelSerializer.fromSerializable(
+        var deserializedModel = serializer.fromSerializable(
             protoGraphSageModel,
             protoModelMetaData
         );

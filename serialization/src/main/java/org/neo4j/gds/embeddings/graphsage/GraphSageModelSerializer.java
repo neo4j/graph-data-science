@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import com.google.protobuf.Parser;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
@@ -29,12 +30,10 @@ import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.IOException;
 
-public final class GraphSageModelSerializer {
+public final class GraphSageModelSerializer implements ModelSerializer<ModelData, GraphSageTrainConfig, GraphSageProto.GraphSageModel> {
 
-    private GraphSageModelSerializer() {}
-
-    public static GraphSageProto.GraphSageModel toSerializable(ModelData modelData) throws
-        IOException {
+    @Override
+    public GraphSageProto.GraphSageModel toSerializable(ModelData modelData) throws IOException {
         var modelDataBuilder = GraphSageProto.ModelData.newBuilder();
         for (int i = 0; i < modelData.layers().length; i++) {
             GraphSageProto.Layer layer = LayerSerializer.toSerializable(modelData.layers()[i]);
@@ -47,11 +46,11 @@ public final class GraphSageModelSerializer {
             .build();
     }
 
-    public static Model<ModelData, GraphSageTrainConfig> fromSerializable(
+    @Override
+    public Model<ModelData, GraphSageTrainConfig> fromSerializable(
         GraphSageProto.GraphSageModel protoModel,
         ModelProto.ModelMetaData modelMetaData
     ) throws IOException {
-
         return ModelMetaDataSerializer
             .<ModelData, GraphSageTrainConfig>fromSerializable(modelMetaData)
             .data(deserializeModelData(protoModel))
@@ -59,15 +58,17 @@ public final class GraphSageModelSerializer {
             .build();
     }
 
+    @Override
     @NotNull
-    public static ModelData deserializeModelData(GraphSageProto.GraphSageModel protoModel) throws IOException {
+    public ModelData deserializeModelData(GraphSageProto.GraphSageModel protoModel) throws IOException {
         return ModelData.of(
             LayerSerializer.fromSerializable(protoModel.getData().getLayersList()),
             FeatureFunctionSerializer.fromSerializable(protoModel.getFeatureFunction())
         );
     }
 
-    public static Parser<GraphSageProto.GraphSageModel> modelParser() {
+    @Override
+    public Parser<GraphSageProto.GraphSageModel> modelParser() {
         return GraphSageProto.GraphSageModel.parser();
     }
 }

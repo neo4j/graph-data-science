@@ -71,7 +71,8 @@ public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig> {
     private GeneratedMessageV3 toSerializable(DATA data, String algoType) throws IOException {
         switch (algoType) {
             case GraphSage.MODEL_TYPE:
-                return GraphSageModelSerializer.toSerializable((ModelData) data);
+                var serializer = new GraphSageModelSerializer();
+                return serializer.toSerializable((ModelData) data);
             default:
                 throw new IllegalArgumentException(formatWithLocale("Algo type %s was not found.", algoType));
         }
