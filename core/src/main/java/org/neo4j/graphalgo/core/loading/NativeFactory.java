@@ -196,7 +196,6 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         IdsAndProperties idsAndProperties,
         int concurrency
     ) {
-        var pageSize = ImportSizing.of(concurrency, dimensions.nodeCount()).pageSize();
         Map<RelationshipType, AdjacencyListWithPropertiesBuilder> allBuilders = graphCreateConfig
             .relationshipProjections()
             .projections()
@@ -210,7 +209,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
                     dimensions.relationshipPropertyTokens(),
                     TransientAdjacencyListBuilder.builderFactory(tracker),
                     TransientAdjacencyDegrees.Factory.INSTANCE,
-                    TransientAdjacencyOffsets.forPageSize(pageSize),
+                    TransientAdjacencyOffsets.Factory.INSTANCE,
                     tracker
                 )
             ));

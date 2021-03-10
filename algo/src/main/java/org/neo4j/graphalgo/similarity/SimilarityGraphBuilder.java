@@ -72,7 +72,7 @@ public class SimilarityGraphBuilder {
                     "adjacency list",
                     TransientAdjacencyList.compressedMemoryEstimation(averageDegree, newNodeCount)
                 )
-                .add("adjacency offsets", TransientAdjacencyOffsets.memoryEstimation(concurrency, newNodeCount))
+                .add("adjacency offsets", TransientAdjacencyOffsets.memoryEstimation())
                 .build();
         });
     }

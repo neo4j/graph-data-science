@@ -20,9 +20,10 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 @FunctionalInterface
 public interface AdjacencyOffsetsFactory {
 
-    AdjacencyOffsets newOffsets(long[][] pages);
+    AdjacencyOffsets newOffsets(HugeLongArray offsets);
 }

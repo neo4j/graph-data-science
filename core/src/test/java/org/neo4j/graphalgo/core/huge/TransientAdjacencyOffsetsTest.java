@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.huge;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 
@@ -34,9 +33,8 @@ class TransientAdjacencyOffsetsTest {
     void shouldComputeMemoryEstimationForSinglePage() {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
         MemoryTree memRec = TransientAdjacencyOffsets
-                .memoryEstimation(4096, 1)
+                .memoryEstimation()
                 .estimate(dimensions, 1);
-        MemoryRange expected = MemoryRange.of(16L /* Page.class */ + BitUtil.align(16 + 4096 * 8, 8) /* data */);
 
         assertEquals(expected, memRec.memoryUsage());
     }
@@ -44,9 +42,8 @@ class TransientAdjacencyOffsetsTest {
     @Test
     void shouldComputeMemoryEstimationForMultiplePages() {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000).build();
-        int numberOfPages = (int) BitUtil.ceilDiv(100_000, 4096);
         MemoryTree memRec = TransientAdjacencyOffsets
-                .memoryEstimation(4096, numberOfPages)
+                .memoryEstimation()
                 .estimate(dimensions, 1);
 
         MemoryRange expected = MemoryRange.of(

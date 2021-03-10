@@ -269,7 +269,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 projection,
                 TransientAdjacencyListBuilder.builderFactory(loadingContext.tracker()),
                 TransientAdjacencyDegrees.Factory.INSTANCE,
-                TransientAdjacencyOffsets.forPageSize(pageSize),
+                TransientAdjacencyOffsets.Factory.INSTANCE,
                 aggregationsWithDefault,
                 propertyKeyIds,
                 propertyDefaultValues,

@@ -176,14 +176,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         }
 
         private AdjacencyOffsets offsetPagesIntoOffsets(HugeLongArray offsets) {
-            long[][] pages = new long[offsets.pages()][];
-            int pageIndex = 0;
-            try (var cursor = offsets.initCursor(offsets.newCursor())) {
-                while (cursor.next()) {
-                    pages[pageIndex++] = cursor.array;
-                }
-            }
-            return adjacencyOffsetsFactory.newOffsets(pages);
+            return adjacencyOffsetsFactory.newOffsets(offsets);
         }
     }
 

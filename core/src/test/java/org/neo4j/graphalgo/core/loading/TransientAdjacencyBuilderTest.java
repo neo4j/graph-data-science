@@ -31,7 +31,7 @@ class TransientAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
         testAdjacencyList(
             TransientAdjacencyListBuilder.builderFactory(AllocationTracker.empty()),
             TransientAdjacencyDegrees.Factory.INSTANCE,
-            TransientAdjacencyOffsets.forPageSize(8)
+            TransientAdjacencyOffsets.Factory.INSTANCE
         );
     }
 }

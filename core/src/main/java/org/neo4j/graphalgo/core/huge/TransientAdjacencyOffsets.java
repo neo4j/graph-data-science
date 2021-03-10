@@ -21,103 +21,38 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.AdjacencyOffsetsFactory;
-import org.neo4j.graphalgo.core.loading.ImportSizing;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
+public class TransientAdjacencyOffsets implements AdjacencyOffsets {
 
-public abstract class TransientAdjacencyOffsets implements AdjacencyOffsets {
+    public enum Factory implements AdjacencyOffsetsFactory {
+        INSTANCE;
 
-    public static AdjacencyOffsetsFactory forPageSize(int pageSize) {
-        return pages -> pages.length == 1
-            ? new SinglePageOffsets(pages[0])
-            : new PagedOffsets(pages, pageSize);
-    }
-
-    static MemoryEstimation memoryEstimation(int pageSize, int numberOfPages) {
-        if (numberOfPages == 1) {
-            return SinglePageOffsets.memoryEstimation(pageSize);
-        } else {
-            return PagedOffsets.memoryEstimation(pageSize, numberOfPages);
+        @Override
+        public AdjacencyOffsets newOffsets(HugeLongArray offsets) {
+            return new TransientAdjacencyOffsets(offsets);
         }
     }
 
-    public static MemoryEstimation memoryEstimation(int concurrency, long nodeCount) {
-        ImportSizing importSizing = ImportSizing.of(concurrency, nodeCount);
-        return TransientAdjacencyOffsets.memoryEstimation(
-            importSizing.pageSize(),
-            importSizing.numberOfPages());
-    }
+    private final HugeLongArray offsets;
+
+    public TransientAdjacencyOffsets(HugeLongArray offsets) {this.offsets = offsets;}
 
     public static MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.setup(
-                "adjacency offsets",
-                (dimensions, concurrency) -> memoryEstimation(concurrency, dimensions.nodeCount())
-        );
+        return MemoryEstimations
+            .builder(TransientAdjacencyOffsets.class)
+            .perNode("offsets", HugeLongArray::memoryEstimation)
+            .build();
     }
 
-    public static TransientAdjacencyOffsets of(long[] page) {
-        return new SinglePageOffsets(page);
+    @Override
+    public long get(long index) {
+        return offsets.get(index);
     }
 
-    private static final class PagedOffsets extends TransientAdjacencyOffsets {
-
-        private final int pageShift;
-        private final long pageMask;
-        private long[][] pages;
-
-        static MemoryEstimation memoryEstimation(int pageSize, int numberOfPages) {
-            return MemoryEstimations.builder(PagedOffsets.class)
-                    .fixed("pages wrapper", sizeOfObjectArray(numberOfPages))
-                    .fixed("page[]", sizeOfLongArray(pageSize) * numberOfPages)
-                    .build();
-        }
-
-        private PagedOffsets(long[][] pages, int pageSize) {
-            assert pageSize == 0 || BitUtil.isPowerOfTwo(pageSize);
-            this.pageShift = Integer.numberOfTrailingZeros(pageSize);
-            this.pageMask = pageSize - 1;
-            this.pages = pages;
-        }
-
-        @Override
-        public long get(long index) {
-            final int pageIndex = (int) (index >>> pageShift);
-            final int indexInPage = (int) (index & pageMask);
-            return pages[pageIndex][indexInPage];
-        }
-
-        @Override
-        public void close() {
-            pages = null;
-        }
-    }
-
-    private static final class SinglePageOffsets extends TransientAdjacencyOffsets {
-
-        private long[] page;
-
-        static MemoryEstimation memoryEstimation(int pageSize) {
-            return MemoryEstimations.builder(SinglePageOffsets.class)
-                    .fixed("page", sizeOfLongArray(pageSize))
-                    .build();
-        }
-
-        private SinglePageOffsets(long[] page) {
-            this.page = page;
-        }
-
-        @Override
-        public long get(long index) {
-            return page[(int) index];
-        }
-
-        @Override
-        public void close() {
-            page = null;
-        }
+    @Override
+    public void close() {
     }
 }

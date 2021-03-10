@@ -171,7 +171,7 @@ public final class GraphFactory {
             projection,
             TransientAdjacencyListBuilder.builderFactory(tracker),
             TransientAdjacencyDegrees.Factory.INSTANCE,
-            TransientAdjacencyOffsets.forPageSize(pageSize),
+            TransientAdjacencyOffsets.Factory.INSTANCE,
             aggregations,
             propertyKeyIds,
             defaultValues,
