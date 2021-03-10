@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.model.storage;
 
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Parser;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
+import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.model.ModelSupport;
+import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
@@ -46,23 +48,23 @@ public class ModelFileReader {
         return ModelProto.ModelMetaData.parseFrom(readDataFromFile(file));
     }
 
-    public Object readData(String algoType) throws IOException {
+    public <D, TC extends ModelConfig, PD extends GeneratedMessageV3> Object readData(String algoType) throws IOException {
         return ModelSupport.onValidAlgoType(algoType, () -> {
-            var serializer = new GraphSageModelSerializer();
+            ModelSerializer<D, TC, PD> serializer = ModelSerializerFactory.serializer(algoType);
             var parser = serializer.modelParser();
             var graphSageModelProto = readModelData(persistenceDir, parser);
             return serializer.deserializeModelData(graphSageModelProto);
         });
     }
 
-    public Model<?, ?> read() throws IOException {
+    public <D, TC extends ModelConfig> Model<D, TC> read() throws IOException {
         var modelMetaData = readMetaData();
         return fromSerializable(modelMetaData);
     }
 
-    private Model<?, ?> fromSerializable(ModelProto.ModelMetaData modelMetaData) throws IOException {
+    private <D, TC extends ModelConfig, PD extends GeneratedMessageV3> Model<D, TC> fromSerializable(ModelProto.ModelMetaData modelMetaData) throws IOException {
         return ModelSupport.onValidAlgoType(modelMetaData.getAlgoType(), () -> {
-            var serializer = new GraphSageModelSerializer();
+            ModelSerializer<D, TC, PD> serializer = ModelSerializerFactory.serializer(modelMetaData.getAlgoType());
             var parser = serializer.modelParser();
             var graphSageModelProto = readModelData(persistenceDir, parser);
             return serializer.fromSerializable(graphSageModelProto, modelMetaData);

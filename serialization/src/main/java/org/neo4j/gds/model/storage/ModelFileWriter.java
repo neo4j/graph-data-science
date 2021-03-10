@@ -20,9 +20,6 @@
 package org.neo4j.gds.model.storage;
 
 import com.google.protobuf.GeneratedMessageV3;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
@@ -36,7 +33,6 @@ import java.nio.file.Path;
 
 import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
 import static org.neo4j.gds.model.storage.ModelToFileExporter.MODEL_DATA_FILE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig> {
 
@@ -69,13 +65,9 @@ public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig> {
     }
 
     private GeneratedMessageV3 toSerializable(DATA data, String algoType) throws IOException {
-        switch (algoType) {
-            case GraphSage.MODEL_TYPE:
-                var serializer = new GraphSageModelSerializer();
-                return serializer.toSerializable((ModelData) data);
-            default:
-                throw new IllegalArgumentException(formatWithLocale("Algo type %s was not found.", algoType));
-        }
+        return ModelSerializerFactory
+            .serializer(algoType)
+            .toSerializable(data);
     }
 
     private <T extends GeneratedMessageV3> void writeDataToFile(File file, T data) throws IOException {

@@ -17,28 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.model.storage;
 
 import com.google.protobuf.GeneratedMessageV3;
-import com.google.protobuf.Parser;
-import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.ModelSerializer;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
 import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
-import java.io.IOException;
+public final class ModelSerializerFactory {
+    private ModelSerializerFactory() {}
 
-public interface ModelSerializer<DATA, TRAIN_CONFIG extends ModelConfig, PROTO_DATA extends GeneratedMessageV3> {
+    public static <D, TC extends ModelConfig, PD extends GeneratedMessageV3, R extends ModelSerializer<D, TC, PD>> R serializer(String algoType) {
+        return (R) new GraphSageModelSerializer();
+    }
 
-    PROTO_DATA toSerializable(DATA modelData) throws IOException;
-
-    Model<DATA, TRAIN_CONFIG> fromSerializable(
-        PROTO_DATA protoModel,
-        ModelProto.ModelMetaData modelMetaData
-    ) throws IOException;
-
-    @NotNull
-    DATA deserializeModelData(PROTO_DATA protoModel) throws IOException;
-
-    Parser<PROTO_DATA> modelParser();
 }
