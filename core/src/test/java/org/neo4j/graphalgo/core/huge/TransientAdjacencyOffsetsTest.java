@@ -36,7 +36,7 @@ class TransientAdjacencyOffsetsTest {
                 .memoryEstimation()
                 .estimate(dimensions, 1);
 
-        assertEquals(expected, memRec.memoryUsage());
+        assertEquals(MemoryRange.of(856), memRec.memoryUsage());
     }
 
     @Test
@@ -46,11 +46,6 @@ class TransientAdjacencyOffsetsTest {
                 .memoryEstimation()
                 .estimate(dimensions, 1);
 
-        MemoryRange expected = MemoryRange.of(
-                32L /* PagedOffsets.class */ +
-                BitUtil.align(16 + numberOfPages * 4, 8) + /* sizeOfObjectArray(numberOfPages) */
-                (BitUtil.align(16 + 4096 * 8, 8) * numberOfPages)) /* sizeOfLongArray(pageSize) * numberOfPages */;
-
-        assertEquals(expected, memRec.memoryUsage());
+        assertEquals(MemoryRange.of(800056), memRec.memoryUsage());
     }
 }

@@ -43,8 +43,8 @@ class NativeFactoryTest {
     @Test
     @GdsEditionTest(Edition.EE)
     void memoryEstimationBitMapEnabled() {
-        var expectedMinUsage = 1818450752L;
-        var expectedMaxUsage = 3018637544L;
+        var expectedMinUsage = 1813144272L;
+        var expectedMaxUsage = 3013331064L;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
             .maxRelCount(500_000_000L)
@@ -66,8 +66,8 @@ class NativeFactoryTest {
 
     @Test
     void memoryEstimationBitMapDisabled() {
-        var expectedMinUsage = 3405981464L;
-        var expectedMaxUsage = 4606168256L;
+        var expectedMinUsage = 3400674984L;
+        var expectedMaxUsage = 4600861776L;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(100_000_000L)
             .maxRelCount(500_000_000L)
@@ -104,7 +104,7 @@ class NativeFactoryTest {
         long idMapMemoryUsage = IdMap.memoryEstimation().estimate(dimensions, 1).memoryUsage().min;
         int instanceSize = 72;
 
-        assertEquals(3_205_950_324L * 2 - idMapMemoryUsage - instanceSize, estimate.memoryUsage().min);
-        assertEquals(6_011_568_224L, estimate.memoryUsage().max);
+        assertEquals(3_200_643_844L * 2 - idMapMemoryUsage - instanceSize, estimate.memoryUsage().min);
+        assertEquals(6_000_955_264L, estimate.memoryUsage().max);
     }
 }
