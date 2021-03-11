@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.neo4j.gds.TrainConfigSerializer;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.util.ObjectMapperSingleton;
 import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,11 +33,11 @@ import java.util.stream.Collectors;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableFeaturePropertiesConfig;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableModelConfig;
 
-public final class NodeClassificationTrainConfigSerializer {
+public final class NodeClassificationTrainConfigSerializer implements TrainConfigSerializer<NodeClassificationTrainConfig, TrainConfigsProto.NodeClassificationTrainConfig> {
 
-    private NodeClassificationTrainConfigSerializer() {}
+    public NodeClassificationTrainConfigSerializer() {}
 
-    public static TrainConfigsProto.NodeClassificationTrainConfig toSerializable(NodeClassificationTrainConfig trainConfig) {
+    public TrainConfigsProto.NodeClassificationTrainConfig toSerializable(NodeClassificationTrainConfig trainConfig) {
         var builder = TrainConfigsProto.NodeClassificationTrainConfig.newBuilder();
 
         builder
@@ -64,14 +64,14 @@ public final class NodeClassificationTrainConfigSerializer {
                 var p = ObjectMapperSingleton.OBJECT_MAPPER.writeValueAsString(paramsMap);
                 builder.addParams(p);
             } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         });
 
         return builder.build();
     }
 
-    public static NodeClassificationTrainConfig fromSerializable(TrainConfigsProto.NodeClassificationTrainConfig serializedTrainConfig) {
+    public NodeClassificationTrainConfig fromSerializable(TrainConfigsProto.NodeClassificationTrainConfig serializedTrainConfig) {
         var builder = NodeClassificationTrainConfig.builder();
 
         builder
@@ -97,19 +97,23 @@ public final class NodeClassificationTrainConfigSerializer {
         List<Map<String, Object>> params = serializedTrainConfig
             .getParamsList()
             .stream()
-            .map(NodeClassificationTrainConfigSerializer::protoToMap)
+            .map(this::protoToMap)
             .collect(Collectors.toList());
         builder.params(params);
 
         return builder.build();
     }
 
-    private static Map<String, Object> protoToMap(String p) {
+    @Override
+    public Class<TrainConfigsProto.NodeClassificationTrainConfig> serializableClass() {
+        return TrainConfigsProto.NodeClassificationTrainConfig.class;
+    }
+
+    private Map<String, Object> protoToMap(String p) {
         try {
             return ObjectMapperSingleton.OBJECT_MAPPER.readValue(p, Map.class);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return Collections.emptyMap();
     }
 }

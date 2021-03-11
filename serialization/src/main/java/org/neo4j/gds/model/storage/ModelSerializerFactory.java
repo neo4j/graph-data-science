@@ -22,12 +22,32 @@ package org.neo4j.gds.model.storage;
 import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeClassificationSerializer;
+import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.utils.StringJoining;
+
+import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ModelSerializerFactory {
+
     private ModelSerializerFactory() {}
 
     public static <D, PD extends GeneratedMessageV3, R extends ModelSerializer<D, PD>> R serializer(String algoType) {
-        return (R) new GraphSageModelSerializer();
+        switch (algoType) {
+            case GraphSage.MODEL_TYPE:
+                return (R) new GraphSageModelSerializer();
+            case NodeClassificationTrain.MODEL_TYPE:
+                return (R) new NodeClassificationSerializer();
+            default:
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Unknown model type '%s', supported model types are: %s.",
+                    algoType,
+                    StringJoining.join(SUPPORTED_TYPES)
+                ));
+        }
     }
 
 }

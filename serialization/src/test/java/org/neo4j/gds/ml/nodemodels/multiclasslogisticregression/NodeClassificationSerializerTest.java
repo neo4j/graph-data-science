@@ -48,7 +48,8 @@ class NodeClassificationSerializerTest {
             .classIdMap(classIdMap)
             .build();
 
-        var serializedData = NodeClassificationSerializer.toSerializable(modelData);
+        var serializer = new NodeClassificationSerializer();
+        var serializedData = serializer.toSerializable(modelData);
 
         var serializedWeights = serializedData.getWeights();
         var serializedArray = serializedWeights.getDataList().stream().mapToDouble(Double::doubleValue).toArray();
@@ -78,7 +79,9 @@ class NodeClassificationSerializerTest {
                     .addAllOriginalIds(List.of(19L, 42L))
                     .build())
                 .build();
-        var multiClassNLRData = NodeClassificationSerializer.fromSerializable(serialized);
+
+        var serializer = new NodeClassificationSerializer();
+        var multiClassNLRData = serializer.deserializeModelData(serialized);
 
         assertThat(multiClassNLRData).isNotNull();
 

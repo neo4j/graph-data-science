@@ -21,15 +21,32 @@ package org.neo4j.gds.model.storage;
 
 import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.TrainConfigSerializer;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.graphalgo.config.GraphSageTrainConfigSerializer;
 import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.config.NodeClassificationTrainConfigSerializer;
+import org.neo4j.graphalgo.utils.StringJoining;
+
+import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class TrainConfigSerializerFactory {
 
     private TrainConfigSerializerFactory() {}
 
     public static <TC extends ModelConfig, PD extends GeneratedMessageV3, R extends TrainConfigSerializer<TC, PD>> R trainConfigSerializer(String algoType) {
-        return (R) new GraphSageTrainConfigSerializer();
-
+        switch (algoType) {
+            case GraphSage.MODEL_TYPE:
+                return (R) new GraphSageTrainConfigSerializer();
+            case NodeClassificationTrain.MODEL_TYPE:
+                return (R) new NodeClassificationTrainConfigSerializer();
+            default:
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Unknown model type '%s', supported model types are: %s.",
+                    algoType,
+                    StringJoining.join(SUPPORTED_TYPES)
+                ));
+        }
     }
 }

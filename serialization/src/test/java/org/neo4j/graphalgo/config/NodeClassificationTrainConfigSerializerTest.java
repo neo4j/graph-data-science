@@ -55,7 +55,8 @@ class NodeClassificationTrainConfigSerializerTest {
             .params(List.of(model1, model2))
             .build();
 
-        var serializedConfig = NodeClassificationTrainConfigSerializer.toSerializable(config);
+        var trainConfigSerializer = new NodeClassificationTrainConfigSerializer();
+        var serializedConfig = trainConfigSerializer.toSerializable(config);
 
         assertThat(serializedConfig).isNotNull();
 
@@ -93,7 +94,8 @@ class NodeClassificationTrainConfigSerializerTest {
             .params(List.of(model1))
             .build();
 
-        var serializedConfig = NodeClassificationTrainConfigSerializer.toSerializable(config);
+        var trainConfigSerializer = new NodeClassificationTrainConfigSerializer();
+        var serializedConfig = trainConfigSerializer.toSerializable(config);
 
         assertThat(serializedConfig).isNotNull();
 
@@ -121,9 +123,10 @@ class NodeClassificationTrainConfigSerializerTest {
             .params(List.of(model1, model2))
             .build();
 
-        var serializedConfig = NodeClassificationTrainConfigSerializer.toSerializable(config);
+        var trainConfigSerializer = new NodeClassificationTrainConfigSerializer();
+        var serializedConfig = trainConfigSerializer.toSerializable(config);
 
-        var deserializedConfig = NodeClassificationTrainConfigSerializer.fromSerializable(serializedConfig);
+        var deserializedConfig = trainConfigSerializer.fromSerializable(serializedConfig);
 
         assertThat(deserializedConfig).isNotNull();
 

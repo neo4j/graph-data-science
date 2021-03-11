@@ -20,6 +20,7 @@
 package org.neo4j.gds.model;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.Set;
@@ -27,12 +28,15 @@ import java.util.Set;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ModelSupport {
-    private static final Set<String> SUPPORTED_TYPES = Set.of(GraphSage.MODEL_TYPE);
+    public static final Set<String> SUPPORTED_TYPES = Set.of(
+        GraphSage.MODEL_TYPE,
+        NodeClassificationTrain.MODEL_TYPE
+    );
 
-    public static void validateAlgoType(String algoType) {
+    private static void validateAlgoType(String algoType) {
         if (!SUPPORTED_TYPES.contains(algoType)) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Unknown model type '%s', supported model types are: %.",
+                "Unknown model type '%s', supported model types are: %s.",
                 algoType,
                 StringJoining.join(SUPPORTED_TYPES)
             ));
@@ -43,13 +47,7 @@ public final class ModelSupport {
         String algoType,
         SupportedModelVisitor<R, E> visitor
     ) throws E {
-        if (!SUPPORTED_TYPES.contains(algoType)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Unknown model type '%s', supported model types are: %.",
-                algoType,
-                StringJoining.join(SUPPORTED_TYPES)
-            ));
-        }
+        validateAlgoType(algoType);
         return visitor.graphSage();
     }
 

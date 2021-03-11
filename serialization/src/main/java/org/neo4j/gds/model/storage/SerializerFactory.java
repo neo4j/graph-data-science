@@ -22,13 +22,23 @@ package org.neo4j.gds.model.storage;
 import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeClassificationSerializer;
 import org.neo4j.graphalgo.config.ModelConfig;
 
 public final class SerializerFactory {
     private SerializerFactory() {}
 
     public static <D, TC extends ModelConfig, PD extends GeneratedMessageV3, R extends ModelSerializer<D, TC, PD>> R serializer(String algoType) {
-        return (R) new GraphSageModelSerializer();
+        switch (algoType) {
+            case GraphSage.MODEL_TYPE:
+                return (R) new GraphSageModelSerializer();
+            case NodeClassificationTrain.MODEL_TYPE:
+                return (R) new NodeClassificationSerializer();
+            default:
+                throw new RuntimeException();
+        }
     }
 
 }
