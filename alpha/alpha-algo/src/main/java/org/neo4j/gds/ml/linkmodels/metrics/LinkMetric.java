@@ -19,49 +19,106 @@
  */
 package org.neo4j.gds.ml.linkmodels.metrics;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 
 public enum LinkMetric {
     AUCPR;
 
-    public double compute(
-        SignedProbabilities signedProbabilities,
-        double classRatio
-    ) {
-        if (signedProbabilities.positiveCount() == 0) return 0.0;
-        var auc = new MutableDouble(0);
-        var lastPrecision = new MutableDouble(
-            signedProbabilities.positiveCount()
-            / (signedProbabilities.positiveCount() + classRatio * signedProbabilities.negativeCount())
+    public double compute(SignedProbabilities signedProbabilities, double classRatio) {
+        var positiveCount = signedProbabilities.positiveCount();
+        var negativeCount = signedProbabilities.negativeCount();
+        if (positiveCount == 0) return 0.0;
+        var firstPrecision = positiveCount / (positiveCount + classRatio * negativeCount);
+        var curveConsumer = new CurveConsumer(firstPrecision, 1.0);
+        var signedProbabilitiesConsumer = new SignedProbabilitiesConsumer(
+            curveConsumer,
+            positiveCount,
+            negativeCount,
+            classRatio
         );
-        var lastRecall = new MutableDouble(1.0);
-        MutableLong positivesSeen = new MutableLong(0);
-        MutableLong negativesSeen = new MutableLong(0);
-        signedProbabilities.stream().forEach(signedProbability -> {
-            boolean isPositive = signedProbability > 0;
-            if (isPositive) {
-                positivesSeen.increment();
-            } else {
-                negativesSeen.increment();
+        signedProbabilities.stream().forEach(signedProbabilitiesConsumer::accept);
+        curveConsumer.accept(1.0, 0.0);
+
+        return curveConsumer.auc();
+    }
+
+    private class SignedProbabilitiesConsumer {
+        private final CurveConsumer innerConsumer;
+        private final long positiveCount;
+        private final long negativeCount;
+        private final double classRatio;
+
+        private boolean hasSeenAValue;
+        private double lastThreshold = 42;
+
+        private long positivesSeen;
+        private long negativesSeen;
+
+        private SignedProbabilitiesConsumer(
+            CurveConsumer innerConsumer,
+            long positiveCount,
+            long negativeCount,
+            double classRatio
+        ) {
+            this.innerConsumer = innerConsumer;
+            this.positiveCount = positiveCount;
+            this.negativeCount = negativeCount;
+            this.classRatio = classRatio;
+            this.hasSeenAValue = false;
+            this.positivesSeen = 0;
+            this.negativesSeen = 0;
+        }
+
+        void accept(double signedProbability) {
+            var hasSeenAvalue = positivesSeen > 0 || negativesSeen > 0;
+            if (hasSeenAvalue) {
+                if (Math.abs(signedProbability) != lastThreshold) {
+                    reportPointOnCurve();
+                }
             }
-            var truePositives = signedProbabilities.positiveCount() - positivesSeen.getValue();
+            lastThreshold = Math.abs(signedProbability);
+            if (signedProbability >= 0) {
+                positivesSeen++;
+            } else {
+                negativesSeen++;
+            }
+
+        }
+
+        private void reportPointOnCurve() {
+            var truePositives = positiveCount - positivesSeen;
+            var falsePositives = negativeCount - negativesSeen;
+            var falseNegatives = positivesSeen;
             if (truePositives == 0) {
-                auc.add(lastPrecision.getValue() * (lastRecall.getValue()));
-                lastPrecision.setValue(0);
-                lastRecall.setValue(0);
+                innerConsumer.accept(0, 0);
                 return;
             }
-            var falsePositives = signedProbabilities.negativeCount() - negativesSeen.getValue();
-            var falseNegatives = positivesSeen.getValue();
-            //TODO: consider if BigDecimal division is needed for large graphs
             var precision = truePositives/(truePositives + classRatio * falsePositives);
             var recall = truePositives/((double)(truePositives + falseNegatives));
-            auc.add(lastPrecision.getValue() * (lastRecall.getValue() - recall));
-            lastPrecision.setValue(precision);
-            lastRecall.setValue(recall);
-        });
-        return auc.getValue();
+            innerConsumer.accept(precision, recall);
+        }
+    }
+
+    private class CurveConsumer {
+
+        private double auc;
+        private double previousPrecision;
+        private double previousRecall;
+
+        CurveConsumer(double previousPrecision, double previousRecall) {
+            this.previousPrecision = previousPrecision;
+            this.previousRecall = previousRecall;
+        }
+
+        void accept(double precision, double recall) {
+            auc += (previousPrecision + precision)/2.0 * (previousRecall - recall);
+            this.previousPrecision = precision;
+            this.previousRecall = recall;
+        }
+
+        double auc() {
+            return auc;
+        }
+
     }
 }
