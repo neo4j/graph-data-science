@@ -79,9 +79,7 @@ public interface Expression {
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
-                var inValue = in().evaluate(context) == TRUE;
-
-                return inValue ? FALSE : TRUE;
+                return in().evaluate(context) == TRUE ? FALSE : TRUE;
             }
         }
     }
@@ -98,10 +96,9 @@ public interface Expression {
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context) == TRUE;
-                var rhsValue = rhs().evaluate(context) == TRUE;
-
-                return lhsValue && rhsValue ? TRUE : FALSE;
+                return lhs().evaluate(context) == TRUE && rhs().evaluate(context) == TRUE
+                    ? TRUE
+                    : FALSE;
             }
         }
 
@@ -111,10 +108,9 @@ public interface Expression {
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context) == TRUE;
-                var rhsValue = rhs().evaluate(context) == TRUE;
-
-                return lhsValue || rhsValue ? TRUE : FALSE;
+                return lhs().evaluate(context) == TRUE || rhs().evaluate(context) == TRUE
+                    ? TRUE
+                    : FALSE;
             }
         }
 
@@ -124,10 +120,9 @@ public interface Expression {
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context) == TRUE;
-                var rhsValue = rhs().evaluate(context) == TRUE;
-
-                return lhsValue ^ rhsValue ? TRUE : FALSE;
+                return lhs().evaluate(context) == TRUE ^ rhs().evaluate(context) == TRUE
+                    ? TRUE
+                    : FALSE;
             }
         }
 
