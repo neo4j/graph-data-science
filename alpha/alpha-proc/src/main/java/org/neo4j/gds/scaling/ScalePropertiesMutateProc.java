@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class ScalePropertiesMutateProc extends MutatePropertyProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateProc.MutateResult, ScalePropertiesConfig> {
+public class ScalePropertiesMutateProc extends MutatePropertyProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateProc.MutateResult, ScalePropertiesMutateConfig> {
 
     @Procedure("gds.alpha.scaleProperties.mutate")
     @Description("Normalize node properties")
@@ -48,23 +48,23 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig> computationResult) {
         return (DoubleArrayNodeProperties) computationResult.result().scaledProperties()::get;
     }
 
     @Override
-    protected ScalePropertiesConfig newConfig(
+    protected ScalePropertiesMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ScalePropertiesConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ScalePropertiesMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<ScaleProperties, ScalePropertiesConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<ScaleProperties, ScalePropertiesConfig>) (graph, configuration, tracker, log, eventTracker) -> new ScaleProperties(
+    protected AlgorithmFactory<ScaleProperties, ScalePropertiesMutateConfig> algorithmFactory() {
+        return (AlphaAlgorithmFactory<ScaleProperties, ScalePropertiesMutateConfig>) (graph, configuration, tracker, log, eventTracker) -> new ScaleProperties(
             graph,
             configuration,
             tracker
@@ -72,7 +72,7 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig> computeResult) {
         return new MutateResult.Builder();
     }
 

@@ -37,10 +37,10 @@ import java.util.List;
 public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.Result> {
 
     private final Graph graph;
-    private final ScalePropertiesConfig config;
+    private final ScalePropertiesBaseConfig config;
     private final AllocationTracker tracker;
 
-    public ScaleProperties(Graph graph, ScalePropertiesConfig config, AllocationTracker tracker) {
+    public ScaleProperties(Graph graph, ScalePropertiesBaseConfig config, AllocationTracker tracker) {
         this.graph = graph;
         this.config = config;
         this.tracker = tracker;

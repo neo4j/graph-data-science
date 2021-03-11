@@ -21,26 +21,23 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.MutatePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.List;
 import java.util.Optional;
 
 @Configuration
 @ValueClass
-interface ScalePropertiesConfig extends MutatePropertyConfig, FeaturePropertiesConfig {
-    List<String> scalers();
+interface ScalePropertiesMutateConfig extends ScalePropertiesBaseConfig, MutatePropertyConfig {
 
-    static ScalePropertiesConfig of(
+    static ScalePropertiesMutateConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new ScalePropertiesConfigImpl(
+        return new ScalePropertiesMutateConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
