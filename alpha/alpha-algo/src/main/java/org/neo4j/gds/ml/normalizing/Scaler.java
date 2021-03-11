@@ -30,8 +30,8 @@ public interface Scaler {
 
         static Scaler create(String name, NodeProperties properties, long nodeCount) {
             switch (name) {
-                case "MinMax": return MinMaxNormalizer.create(properties, nodeCount);
-                case "Mean": return MeanNormalizer.create(properties, nodeCount);
+                case "MinMax": return MinMax.create(properties, nodeCount);
+                case "Mean": return Mean.create(properties, nodeCount);
                 default: return null;
             }
         }

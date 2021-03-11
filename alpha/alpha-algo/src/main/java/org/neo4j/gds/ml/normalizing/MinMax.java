@@ -21,19 +21,19 @@ package org.neo4j.gds.ml.normalizing;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 
-final class MinMaxNormalizer implements Scaler {
+final class MinMax implements Scaler {
 
     private final NodeProperties properties;
     final double min;
     final double max;
 
-    private MinMaxNormalizer(NodeProperties properties, double min, double max) {
+    private MinMax(NodeProperties properties, double min, double max) {
         this.properties = properties;
         this.min = min;
         this.max = max;
     }
 
-    static MinMaxNormalizer create(NodeProperties properties, long nodeCount) {
+    static MinMax create(NodeProperties properties, long nodeCount) {
         var max = Double.MIN_VALUE;
         var min = Double.MAX_VALUE;
 
@@ -47,7 +47,7 @@ final class MinMaxNormalizer implements Scaler {
             }
         }
 
-        return new MinMaxNormalizer(properties, min, max);
+        return new MinMax(properties, min, max);
     }
 
     @Override

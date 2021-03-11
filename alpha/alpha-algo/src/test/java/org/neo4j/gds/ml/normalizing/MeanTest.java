@@ -27,43 +27,44 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MinMaxNormalizerTest {
+class MeanTest {
 
     private static Stream<Arguments> properties() {
+        double[] expected = {-0.5, -7 / 18D, -5 / 18D, -3 / 18D, -1 / 18D, 1 / 18D, 3 / 18D, 5 / 18D, 7 / 18D, 0.5};
         return Stream.of(
-            Arguments.of((DoubleNodeProperties) nodeId -> nodeId, 0D, 9D),
-            Arguments.of((LongNodeProperties) nodeId -> nodeId, 0D, 9D),
-            Arguments.of((DoubleNodeProperties) nodeId -> 50000000D * nodeId, 0D, 4.5e8)
+            Arguments.of((DoubleNodeProperties) nodeId -> nodeId, 4.5D, 9D, expected),
+            Arguments.of((LongNodeProperties) nodeId -> nodeId, 4.5D, 9D, expected),
+            Arguments.of((DoubleNodeProperties) nodeId -> 50000000D * nodeId, 50000000D * 4.5D, 4.5e8, expected)
         );
     }
 
     @ParameterizedTest
     @MethodSource("properties")
-    void normalizes(NodeProperties properties, double min, double max) {
-        var minMaxNormalizer = MinMaxNormalizer.create(properties, 10);
+    void normalizes(NodeProperties properties, double avg, double maxMinDiff, double[] expected) {
+        var normalizer = Mean.create(properties, 10);
 
-        assertThat(minMaxNormalizer.min).isEqualTo(min);
-        assertThat(minMaxNormalizer.max).isEqualTo(max);
+        assertThat(normalizer.avg).isEqualTo(avg);
+        assertThat(normalizer.maxMinDiff).isEqualTo(maxMinDiff);
 
-        for (int i = 0; i < 10; i++) {
-            assertThat(minMaxNormalizer.scaleProperty(i)).isEqualTo(i / 9D);
-        }
+        double[] actual = IntStream.range(0, 10).mapToDouble(normalizer::scaleProperty).toArray();
+        assertThat(actual).containsSequence(expected);
     }
 
     @Test
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 4D;
-        var minMaxNormalizer = MinMaxNormalizer.create(properties, 10);
+        var normalizer = Mean.create(properties, 10);
 
-        assertThat(minMaxNormalizer.min).isEqualTo(4D);
-        assertThat(minMaxNormalizer.max).isEqualTo(4D);
+        assertThat(normalizer.avg).isEqualTo(4D);
+        assertThat(normalizer.maxMinDiff).isEqualTo(0D);
 
         for (int i = 0; i < 10; i++) {
-            assertThat(minMaxNormalizer.scaleProperty(i)).isEqualTo(0D);
+            assertThat(normalizer.scaleProperty(i)).isEqualTo(0D);
         }
     }
 

@@ -21,21 +21,21 @@ package org.neo4j.gds.ml.normalizing;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 
-final class MeanNormalizer implements Scaler {
+final class Mean implements Scaler {
 
     private final NodeProperties properties;
     final double avg;
     final double maxMinDiff;
 
-    private MeanNormalizer(NodeProperties properties, double avg, double maxMinDiff) {
+    private Mean(NodeProperties properties, double avg, double maxMinDiff) {
         this.properties = properties;
         this.avg = avg;
         this.maxMinDiff = maxMinDiff;
     }
 
-    static MeanNormalizer create(NodeProperties properties, long nodeCount) {
+    static Mean create(NodeProperties properties, long nodeCount) {
         if (nodeCount == 0) {
-            return new MeanNormalizer(properties, 0, 0);
+            return new Mean(properties, 0, 0);
         }
 
         var max = Double.MIN_VALUE;
@@ -53,7 +53,7 @@ final class MeanNormalizer implements Scaler {
             }
         }
 
-        return new MeanNormalizer(properties, sum / nodeCount, max - min);
+        return new Mean(properties, sum / nodeCount, max - min);
     }
 
     @Override
