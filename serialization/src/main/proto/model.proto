@@ -17,6 +17,8 @@ message ModelMetaData {
   ZonedDateTime creationTime = 6;
 
   google.protobuf.Any trainConfig = 7;
+
+  string customInfo = 8;
 }
 
 message ZonedDateTime {

@@ -20,7 +20,9 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
     annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
 
-    implementation      group: 'com.google.protobuf',      name: 'protobuf-java',      version: ver.'protobuf'
+    implementation      group: 'com.google.protobuf',        name: 'protobuf-java',    version: ver.'protobuf'
+
+    implementation         group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
     compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
@@ -36,6 +38,7 @@ dependencies {
     testCompileOnly group: 'org.immutables',    name: 'builder',            version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',     name: 'annotations',        version: ver.'jetbrains-annotations'
     testCompileOnly group: 'org.neo4j',         name: 'neo4j',              version: ver.'neo4j'
+    testImplementation         group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
 
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 

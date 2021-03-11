@@ -69,7 +69,6 @@ public final class GraphSageModelSerializer implements ModelSerializer<ModelData
         return ModelMetaDataSerializer
             .<ModelData, GraphSageTrainConfig>fromSerializable(modelMetaData)
             .data(deserializeModelData(protoModel))
-            .customInfo(Model.Mappable.EMPTY)
             .build();
     }
 }

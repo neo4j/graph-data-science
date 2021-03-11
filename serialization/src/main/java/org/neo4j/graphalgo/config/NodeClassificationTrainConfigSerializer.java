@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.neo4j.gds.TrainConfigSerializer;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
@@ -63,7 +62,7 @@ public final class NodeClassificationTrainConfigSerializer implements TrainConfi
             try {
                 var p = ObjectMapperSingleton.OBJECT_MAPPER.writeValueAsString(paramsMap);
                 builder.addParams(p);
-            } catch (JsonProcessingException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
@@ -112,7 +111,7 @@ public final class NodeClassificationTrainConfigSerializer implements TrainConfi
     private Map<String, Object> protoToMap(String p) {
         try {
             return ObjectMapperSingleton.OBJECT_MAPPER.readValue(p, Map.class);
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

@@ -64,7 +64,6 @@ public class NodeClassificationSerializer implements ModelSerializer<MultiClassN
                 .weights(weights)
                 .classIdMap(localIdMap)
                 .build())
-            .customInfo(Model.Mappable.EMPTY)
             .build();
     }
 

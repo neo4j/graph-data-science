@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -34,6 +33,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 class NodeClassificationTrainConfigSerializerTest {
 
@@ -148,8 +148,8 @@ class NodeClassificationTrainConfigSerializerTest {
     private Map<String, Object> protoToMap(String p) {
         try {
             return ObjectMapperSingleton.OBJECT_MAPPER.readValue(p, Map.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            fail(e.getMessage());
         }
         return Collections.emptyMap();
     }

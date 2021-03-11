@@ -132,4 +132,15 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
 
         Mappable EMPTY = Map::of;
     }
+
+    class SerializableMappable implements Mappable {
+        private final Map<String, Object> map;
+
+        public SerializableMappable(Map<String, Object> map) {this.map = map;}
+
+        @Override
+        public Map<String, Object> toMap() {
+            return map;
+        }
+    }
 }

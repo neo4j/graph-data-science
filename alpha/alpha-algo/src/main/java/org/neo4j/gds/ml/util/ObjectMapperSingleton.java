@@ -20,9 +20,11 @@
 package org.neo4j.gds.ml.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 public final class ObjectMapperSingleton {
-    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
     private ObjectMapperSingleton() {}
 }
