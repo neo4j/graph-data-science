@@ -27,9 +27,17 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.DEFAULT_VALUE_COLUMN_NAME;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.PROPERTY_KEY_COLUMN_NAME;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.STATE_COLUMN_NAME;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.VALUE_TYPE_COLUMN_NAME;
+
 public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
 
-    private static final String RELATIONSHIP_SCHEMA_FILE_NAME = "relationship-schema.csv";
+    static final String RELATIONSHIP_TYPE_COLUMN_NAME = "relationshipType";
+    static final String AGGREGATION_COLUMN_NAME = "aggregation";
+
+    static final String RELATIONSHIP_SCHEMA_FILE_NAME = "relationship-schema.csv";
 
     private final CsvAppender csvAppender;
 
@@ -51,6 +59,7 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
             csvAppender.appendField(defaultValue().toString());
             csvAppender.appendField(aggregation().name());
             csvAppender.appendField(state().name());
+            csvAppender.endLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -63,12 +72,12 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
     }
 
     private void writeHeader() throws IOException {
-        csvAppender.appendField("label");
-        csvAppender.appendField("propertyKey");
-        csvAppender.appendField("valueType");
-        csvAppender.appendField("defaultValue");
-        csvAppender.appendField("aggregation");
-        csvAppender.appendField("state");
+        csvAppender.appendField(RELATIONSHIP_TYPE_COLUMN_NAME);
+        csvAppender.appendField(PROPERTY_KEY_COLUMN_NAME);
+        csvAppender.appendField(VALUE_TYPE_COLUMN_NAME);
+        csvAppender.appendField(DEFAULT_VALUE_COLUMN_NAME);
+        csvAppender.appendField(AGGREGATION_COLUMN_NAME);
+        csvAppender.appendField(STATE_COLUMN_NAME);
         csvAppender.endLine();
     }
 }
