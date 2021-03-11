@@ -66,9 +66,13 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
     }
 
     @Override
-    public void close() throws IOException {
-        csvAppender.flush();
-        csvAppender.close();
+    public void close() {
+        try {
+            csvAppender.flush();
+            csvAppender.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void writeHeader() throws IOException {

@@ -61,5 +61,9 @@ public interface InputSchemaVisitor extends Closeable {
         @Override
         public void endOfEntity() {
         }
+
+        @Override
+        public void close() {
+        }
     }
 }

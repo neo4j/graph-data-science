@@ -207,6 +207,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                     nodeSchemaVisitor.endOfEntity();
                 });
             });
+            nodeSchemaVisitor.close();
         }
 
         private void exportRelationshipSchema(GraphStoreInput graphStoreInput) {
@@ -222,6 +223,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                     relationshipSchemaVisitor.endOfEntity();
                 });
             });
+            relationshipSchemaVisitor.close();
         }
     }
 }
