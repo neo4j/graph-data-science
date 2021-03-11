@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.beta.filter.expr;
 
+import org.neo4j.cypher.internal.expressions.functions.Exp;
+
 import java.util.List;
 
 public interface Expression {
@@ -76,6 +78,33 @@ public interface Expression {
         }
     }
 
+    abstract class UnaryExpression implements Expression {
+
+        private final Expression in;
+
+        UnaryExpression(Expression in) {
+            this.in = in;
+        }
+
+        Expression in() {
+            return in;
+        }
+
+        static class Not extends UnaryExpression {
+
+            Not(Expression in) {
+                super(in);
+            }
+
+            @Override
+            public double evaluate(EvaluationContext context) {
+                var inValue = in().evaluate(context) == TRUE;
+
+                return inValue ? FALSE : TRUE;
+            }
+        }
+    }
+
     abstract class BinaryExpression implements Expression {
 
         private final Expression lhs;
@@ -102,14 +131,10 @@ public interface Expression {
 
             @Override
             public double evaluate(EvaluationContext context) {
-                var lhsValue = lhs().evaluate(context);
-                var rhsValue = rhs().evaluate(context);
+                var lhsValue = lhs().evaluate(context) == TRUE;
+                var rhsValue = rhs().evaluate(context) == TRUE;
 
-                if (lhsValue == Literal.TRUE && rhsValue == Literal.TRUE) {
-                    return Literal.TRUE;
-                } else {
-                    return Literal.FALSE;
-                }
+                return lhsValue && rhsValue ? TRUE : FALSE;
             }
         }
 
@@ -120,14 +145,52 @@ public interface Expression {
 
             @Override
             public double evaluate(EvaluationContext context) {
+                var lhsValue = lhs().evaluate(context) == TRUE;
+                var rhsValue = rhs().evaluate(context) == TRUE;
+
+                return lhsValue || rhsValue ? TRUE : FALSE;
+            }
+        }
+
+        static class Xor extends BinaryExpression {
+            Xor(Expression lhs, Expression rhs) {
+                super(lhs, rhs);
+            }
+
+            @Override
+            public double evaluate(EvaluationContext context) {
+                var lhsValue = lhs().evaluate(context) == TRUE;
+                var rhsValue = rhs().evaluate(context) == TRUE;
+
+                return lhsValue ^ rhsValue ? TRUE : FALSE;
+            }
+        }
+
+        static class Equal extends BinaryExpression {
+            Equal(Expression lhs, Expression rhs) {
+                super(lhs, rhs);
+            }
+
+            @Override
+            public double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
-                if (lhsValue == Literal.TRUE || rhsValue == Literal.TRUE) {
-                    return Literal.TRUE;
-                } else {
-                    return Literal.FALSE;
-                }
+                return Math.abs(lhsValue - rhsValue) < EPSILON ? TRUE : FALSE;
+            }
+        }
+
+        static class NotEqual extends BinaryExpression {
+            NotEqual(Expression lhs, Expression rhs) {
+                super(lhs, rhs);
+            }
+
+            @Override
+            public double evaluate(EvaluationContext context) {
+                var lhsValue = lhs().evaluate(context);
+                var rhsValue = rhs().evaluate(context);
+
+                return Math.abs(lhsValue - rhsValue) > EPSILON ? TRUE : FALSE;
             }
         }
 
@@ -141,11 +204,7 @@ public interface Expression {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
-                if ((lhsValue - rhsValue) > EPSILON) {
-                    return TRUE;
-                } else {
-                    return FALSE;
-                }
+                return (lhsValue - rhsValue) > EPSILON ? TRUE : FALSE;
             }
         }
 
@@ -163,6 +222,20 @@ public interface Expression {
             }
         }
 
+        static class LessThan extends BinaryExpression {
+            LessThan(Expression lhs, Expression rhs) {
+                super(lhs, rhs);
+            }
+
+            @Override
+            public double evaluate(EvaluationContext context) {
+                var lhsValue = lhs().evaluate(context);
+                var rhsValue = rhs().evaluate(context);
+
+                return (rhsValue - lhsValue) > EPSILON ? TRUE : FALSE;
+            }
+        }
+
         static class LessThanEquals extends BinaryExpression {
             LessThanEquals(Expression lhs, Expression rhs) {
                 super(lhs, rhs);
@@ -173,11 +246,7 @@ public interface Expression {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
-                if (rhsValue - lhsValue >= -EPSILON) {
-                    return TRUE;
-                } else {
-                    return FALSE;
-                }
+                return lhsValue < rhsValue || (rhsValue - lhsValue) > EPSILON ? TRUE : FALSE;
             }
         }
     }

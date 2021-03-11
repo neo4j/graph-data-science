@@ -42,8 +42,8 @@ class GdsASTFactory extends ASTFactoryAdapter {
     @Override
     public Expression.Literal.LongLiteral newDecimalInteger(InputPosition p, String image, boolean negated) {
         try {
-            long x = Long.parseLong(image);
-            return new Expression.Literal.LongLiteral(negated ? -x : x);
+            long value = Long.parseLong(image);
+            return new Expression.Literal.LongLiteral(negated ? -value : value);
         } catch (NumberFormatException e) {
             if (negated && LONG_MIN_VALUE_DECIMAL_STRING.equals(image)) {
                 return new Expression.Literal.LongLiteral(Long.MIN_VALUE);
@@ -64,14 +64,9 @@ class GdsASTFactory extends ASTFactoryAdapter {
     }
 
     @Override
-    public Expression hasLabelsOrTypes(
-        Expression subject, List<ASTFactory.StringPos<InputPosition>> labels
-    ) {
-        if (labels.size() > 1) {
-            throw new UnsupportedOperationException("Currently only a single type predicate is supported");
-        }
-
-        return new Expression.HasLabelsOrTypes(subject, labels.stream().map(l -> l.string).collect(Collectors.toList()));
+    public Expression hasLabelsOrTypes(Expression subject, List<ASTFactory.StringPos<InputPosition>> labels) {
+        var labelStrings = labels.stream().map(l -> l.string).collect(Collectors.toList());
+        return new Expression.HasLabelsOrTypes(subject, labelStrings);
     }
 
     @Override
@@ -86,7 +81,7 @@ class GdsASTFactory extends ASTFactoryAdapter {
 
     @Override
     public Expression xor(InputPosition p, Expression lhs, Expression rhs) {
-        throw new UnsupportedOperationException();
+        return new Expression.BinaryExpression.Xor(lhs, rhs);
     }
 
     @Override
@@ -96,17 +91,17 @@ class GdsASTFactory extends ASTFactoryAdapter {
 
     @Override
     public Expression not(Expression e) {
-        throw new UnsupportedOperationException();
+        return new Expression.UnaryExpression.Not(e);
     }
 
     @Override
     public Expression eq(InputPosition p, Expression lhs, Expression rhs) {
-        throw new UnsupportedOperationException();
+        return new Expression.BinaryExpression.Equal(lhs, rhs);
     }
 
     @Override
     public Expression neq(InputPosition p, Expression lhs, Expression rhs) {
-        throw new UnsupportedOperationException();
+        return new Expression.BinaryExpression.NotEqual(lhs, rhs);
     }
 
     @Override
@@ -121,15 +116,13 @@ class GdsASTFactory extends ASTFactoryAdapter {
 
     @Override
     public Expression lt(InputPosition p, Expression lhs, Expression rhs) {
-        throw new UnsupportedOperationException();
+        return new Expression.BinaryExpression.LessThan(lhs, rhs);
     }
 
     @Override
     public Expression gt(InputPosition p, Expression lhs, Expression rhs) {
         return new Expression.BinaryExpression.GreaterThan(lhs, rhs);
     }
-
-
 
     @Override
     public InputPosition inputPosition(int offset, int line, int column) {
