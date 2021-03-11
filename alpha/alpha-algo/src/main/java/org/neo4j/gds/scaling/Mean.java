@@ -17,28 +17,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.normalizing;
+package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 
-final class MinMax implements Scaler {
+final class Mean implements Scaler {
 
     private final NodeProperties properties;
-    final double min;
-    final double max;
+    final double avg;
+    final double maxMinDiff;
 
-    private MinMax(NodeProperties properties, double min, double max) {
+    private Mean(NodeProperties properties, double avg, double maxMinDiff) {
         this.properties = properties;
-        this.min = min;
-        this.max = max;
+        this.avg = avg;
+        this.maxMinDiff = maxMinDiff;
     }
 
-    static MinMax create(NodeProperties properties, long nodeCount) {
+    static Mean create(NodeProperties properties, long nodeCount) {
+        if (nodeCount == 0) {
+            return new Mean(properties, 0, 0);
+        }
+
         var max = Double.MIN_VALUE;
         var min = Double.MAX_VALUE;
+        var sum = 0D;
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             var propertyValue = properties.doubleValue(nodeId);
+            sum += propertyValue;
             if (propertyValue < min) {
                 min = propertyValue;
             }
@@ -47,15 +53,15 @@ final class MinMax implements Scaler {
             }
         }
 
-        return new MinMax(properties, min, max);
+        return new Mean(properties, sum / nodeCount, max - min);
     }
 
     @Override
     public double scaleProperty(long nodeId) {
-        if (Math.abs(max - min) < 1e-15) {
+        if (Math.abs(maxMinDiff) < 1e-15) {
             return 0D;
         }
-        return (properties.doubleValue(nodeId) - min) / (max - min);
+        return (properties.doubleValue(nodeId) - avg) / maxMinDiff;
     }
 
 }
