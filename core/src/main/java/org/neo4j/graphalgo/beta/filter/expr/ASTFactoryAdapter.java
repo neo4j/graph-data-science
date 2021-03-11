@@ -25,7 +25,7 @@ import scala.util.Either;
 
 import java.util.List;
 
-abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, Expression, Expression, Expression.Variable, Expression.Property, NULL, NULL, NULL, NULL, NULL, NULL, InputPosition> {
+abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, Expression, Expression, Expression, Expression, NULL, NULL, NULL, NULL, NULL, NULL, InputPosition> {
 
     @Override
     public Expression neq2(InputPosition p, Expression lhs, Expression rhs) {
@@ -91,7 +91,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     @Override
     public Expression listComprehension(
         InputPosition p,
-        Expression.Variable v,
+        Expression v,
         Expression list,
         Expression where,
         Expression projection
@@ -102,7 +102,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     @Override
     public Expression patternComprehension(
         InputPosition p,
-        Expression.Variable v,
+        Expression v,
         NULL aNull,
         Expression where,
         Expression projection
@@ -111,14 +111,14 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public Expression filterExpression(InputPosition p, Expression.Variable v, Expression list, Expression where) {
+    public Expression filterExpression(InputPosition p, Expression v, Expression list, Expression where) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public Expression extractExpression(
         InputPosition p,
-        Expression.Variable v,
+        Expression v,
         Expression list,
         Expression where,
         Expression projection
@@ -129,9 +129,9 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     @Override
     public Expression reduceExpression(
         InputPosition p,
-        Expression.Variable acc,
+        Expression acc,
         Expression accExpr,
-        Expression.Variable v,
+        Expression v,
         Expression list,
         Expression innerExpr
     ) {
@@ -139,22 +139,22 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public Expression allExpression(InputPosition p, Expression.Variable v, Expression list, Expression where) {
+    public Expression allExpression(InputPosition p, Expression v, Expression list, Expression where) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Expression anyExpression(InputPosition p, Expression.Variable v, Expression list, Expression where) {
+    public Expression anyExpression(InputPosition p, Expression v, Expression list, Expression where) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Expression noneExpression(InputPosition p, Expression.Variable v, Expression list, Expression where) {
+    public Expression noneExpression(InputPosition p, Expression v, Expression list, Expression where) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Expression singleExpression(InputPosition p, Expression.Variable v, Expression list, Expression where) {
+    public Expression singleExpression(InputPosition p, Expression v, Expression list, Expression where) {
         throw new UnsupportedOperationException();
     }
 
@@ -169,7 +169,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public Expression mapProjection(InputPosition p, Expression.Variable v, List<NULL> nulls) {
+    public Expression mapProjection(InputPosition p, Expression v, List<NULL> nulls) {
         throw new UnsupportedOperationException();
     }
 
@@ -184,7 +184,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public NULL mapProjectionVariable(Expression.Variable v) {
+    public NULL mapProjectionVariable(Expression v) {
         throw new UnsupportedOperationException();
     }
 
@@ -289,7 +289,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public Expression newStringParameter(InputPosition p, Expression.Variable v) {
+    public Expression newStringParameter(InputPosition p, Expression v) {
         throw new UnsupportedOperationException();
     }
 
@@ -299,12 +299,12 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public Expression oldParameter(InputPosition p, Expression.Variable v) {
+    public Expression oldParameter(InputPosition p, Expression v) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Expression newParameter(InputPosition p, Expression.Variable v) {
+    public Expression newParameter(InputPosition p, Expression v) {
         throw new UnsupportedOperationException();
     }
 
@@ -352,7 +352,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public NULL newReturnItem(InputPosition p, Expression e, Expression.Variable v) {
+    public NULL newReturnItem(InputPosition p, Expression e, Expression v) {
         throw new UnsupportedOperationException();
     }
 
@@ -384,7 +384,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     @Override
     public NULL usingIndexHint(
         InputPosition p,
-        Expression.Variable v,
+        Expression v,
         String label,
         List<String> properties,
         boolean seekOnly
@@ -393,12 +393,12 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public NULL usingJoin(InputPosition p, List<Expression.Variable> joinVariables) {
+    public NULL usingJoin(InputPosition p, List<Expression> joinVariables) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public NULL usingScan(InputPosition p, Expression.Variable v, String label) {
+    public NULL usingScan(InputPosition p, Expression v, String label) {
         throw new UnsupportedOperationException();
     }
 
@@ -413,22 +413,22 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public NULL setProperty(Expression.Property property, Expression value) {
+    public NULL setProperty(Expression property, Expression value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public NULL setVariable(Expression.Variable variable, Expression value) {
+    public NULL setVariable(Expression variable, Expression value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public NULL addAndSetVariable(Expression.Variable variable, Expression value) {
+    public NULL addAndSetVariable(Expression variable, Expression value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public NULL setLabels(Expression.Variable variable, List<StringPos<InputPosition>> value) {
+    public NULL setLabels(Expression variable, List<StringPos<InputPosition>> value) {
         throw new UnsupportedOperationException();
     }
 
@@ -438,12 +438,12 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public NULL removeProperty(Expression.Property property) {
+    public NULL removeProperty(Expression property) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public NULL removeLabels(Expression.Variable variable, List<StringPos<InputPosition>> labels) {
+    public NULL removeLabels(Expression variable, List<StringPos<InputPosition>> labels) {
         throw new UnsupportedOperationException();
     }
 
@@ -453,7 +453,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public NULL unwindClause(InputPosition p, Expression e, Expression.Variable v) {
+    public NULL unwindClause(InputPosition p, Expression e, Expression v) {
         throw new UnsupportedOperationException();
     }
 
@@ -476,12 +476,12 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     }
 
     @Override
-    public NULL callResultItem(InputPosition p, String name, Expression.Variable v) {
+    public NULL callResultItem(InputPosition p, String name, Expression v) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public NULL namedPattern(Expression.Variable v, NULL aNull) {
+    public NULL namedPattern(Expression v, NULL aNull) {
         throw new UnsupportedOperationException();
     }
 
@@ -503,7 +503,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
     @Override
     public NULL nodePattern(
         InputPosition p,
-        Expression.Variable v,
+        Expression v,
         List<StringPos<InputPosition>> labels,
         Expression properties
     ) {
@@ -515,7 +515,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
         InputPosition p,
         boolean left,
         boolean right,
-        Expression.Variable v,
+        Expression v,
         List<StringPos<InputPosition>> relTypes,
         NULL aNull,
         Expression properties,
@@ -531,14 +531,14 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL, NULL, NULL, NULL, N
 
     @Override
     public NULL loadCsvClause(
-        InputPosition p, boolean headers, Expression source, Expression.Variable v, String fieldTerminator
+        InputPosition p, boolean headers, Expression source, Expression v, String fieldTerminator
     ) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public NULL foreachClause(
-        InputPosition p, Expression.Variable v, Expression list, List<NULL> nulls
+        InputPosition p, Expression v, Expression list, List<NULL> nulls
     ) {
         throw new UnsupportedOperationException();
     }

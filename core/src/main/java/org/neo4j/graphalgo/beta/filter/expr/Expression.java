@@ -19,7 +19,8 @@
  */
 package org.neo4j.graphalgo.beta.filter.expr;
 
-import org.neo4j.cypher.internal.expressions.functions.Exp;
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.List;
 
@@ -27,77 +28,57 @@ public interface Expression {
     double TRUE = 1.0D;
     double FALSE = 0.0D;
     double EPSILON = 0.000001D;
+    double VARIABLE = Double.NaN;
 
     double evaluate(EvaluationContext context);
 
-    class Variable implements Expression {
-        public String variable;
+    interface LeafExpression extends Expression {
 
-        Variable(String variable) {
-            this.variable = variable;
-        }
+        @ValueClass
+        interface Variable extends LeafExpression {
 
-        @Override
-        public double evaluate(EvaluationContext context) {
-            return Double.NaN;
-        }
-    }
-
-    class Property implements Expression {
-        public Expression subject;
-
-        public String propertyKey;
-
-        Property(Expression subject, String propertyKey) {
-            this.subject = subject;
-            this.propertyKey = propertyKey;
-        }
-
-        @Override
-        public double evaluate(EvaluationContext context) {
-            return context.getProperty(propertyKey);
-        }
-    }
-
-    class HasLabelsOrTypes implements Expression {
-        private final Expression subject;
-        private final List<String> labelsOrTypes;
-
-        public HasLabelsOrTypes(Expression subject, List<String> labelsOrTypes) {
-            this.subject = subject;
-            this.labelsOrTypes = labelsOrTypes;
-        }
-
-        @Override
-        public double evaluate(EvaluationContext context) {
-            if (context.hasLabelsOrTypes(labelsOrTypes)) {
-                return TRUE;
-            } else {
-                return FALSE;
-            }
-        }
-    }
-
-    abstract class UnaryExpression implements Expression {
-
-        private final Expression in;
-
-        UnaryExpression(Expression in) {
-            this.in = in;
-        }
-
-        Expression in() {
-            return in;
-        }
-
-        static class Not extends UnaryExpression {
-
-            Not(Expression in) {
-                super(in);
-            }
-
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
+                return VARIABLE;
+            }
+        }
+
+
+        @ValueClass
+        interface Property extends LeafExpression {
+
+            String propertyKey();
+
+            @Value.Derived
+            @Override
+            default double evaluate(EvaluationContext context) {
+                return context.getProperty(propertyKey());
+            }
+        }
+
+        @ValueClass
+        interface HasLabelsOrTypes extends LeafExpression {
+            List<String> labelsOrTypes();
+
+            @Value.Derived
+            @Override
+            default double evaluate(EvaluationContext context) {
+                return context.hasLabelsOrTypes(labelsOrTypes()) ? TRUE : FALSE;
+            }
+        }
+    }
+
+    interface UnaryExpression extends Expression {
+
+        Expression in();
+
+        @ValueClass
+        interface Not extends UnaryExpression {
+
+            @Value.Derived
+            @Override
+            default double evaluate(EvaluationContext context) {
                 var inValue = in().evaluate(context) == TRUE;
 
                 return inValue ? FALSE : TRUE;
@@ -105,32 +86,18 @@ public interface Expression {
         }
     }
 
-    abstract class BinaryExpression implements Expression {
+    interface BinaryExpression extends Expression {
 
-        private final Expression lhs;
+        Expression lhs();
 
-        private final Expression rhs;
+        Expression rhs();
 
-        BinaryExpression(Expression lhs, Expression rhs) {
-            this.lhs = lhs;
-            this.rhs = rhs;
-        }
+        @ValueClass
+        interface And extends BinaryExpression {
 
-        Expression lhs() {
-            return lhs;
-        }
-
-        Expression rhs() {
-            return rhs;
-        }
-
-        static class And extends BinaryExpression {
-            And(Expression lhs, Expression rhs) {
-                super(lhs, rhs);
-            }
-
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context) == TRUE;
                 var rhsValue = rhs().evaluate(context) == TRUE;
 
@@ -138,13 +105,12 @@ public interface Expression {
             }
         }
 
-        static class Or extends BinaryExpression {
-            Or(Expression lhs, Expression rhs) {
-                super(lhs, rhs);
-            }
+        @ValueClass
+        interface Or extends BinaryExpression {
 
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context) == TRUE;
                 var rhsValue = rhs().evaluate(context) == TRUE;
 
@@ -152,13 +118,12 @@ public interface Expression {
             }
         }
 
-        static class Xor extends BinaryExpression {
-            Xor(Expression lhs, Expression rhs) {
-                super(lhs, rhs);
-            }
+        @ValueClass
+        interface Xor extends BinaryExpression {
 
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context) == TRUE;
                 var rhsValue = rhs().evaluate(context) == TRUE;
 
@@ -166,13 +131,12 @@ public interface Expression {
             }
         }
 
-        static class Equal extends BinaryExpression {
-            Equal(Expression lhs, Expression rhs) {
-                super(lhs, rhs);
-            }
+        @ValueClass
+        interface Equal extends BinaryExpression {
 
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
@@ -180,13 +144,12 @@ public interface Expression {
             }
         }
 
-        static class NotEqual extends BinaryExpression {
-            NotEqual(Expression lhs, Expression rhs) {
-                super(lhs, rhs);
-            }
+        @ValueClass
+        interface NotEqual extends BinaryExpression {
 
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
@@ -194,13 +157,11 @@ public interface Expression {
             }
         }
 
-        static class GreaterThan extends BinaryExpression {
-            GreaterThan(Expression lhs, Expression rhs) {
-                super(lhs, rhs);
-            }
-
+        @ValueClass
+        interface GreaterThan extends BinaryExpression {
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
@@ -208,13 +169,11 @@ public interface Expression {
             }
         }
 
-        static class GreaterThanEquals extends BinaryExpression {
-            GreaterThanEquals(Expression lhs, Expression rhs) {
-                super(lhs, rhs);
-            }
-
+        @ValueClass
+        interface GreaterThanEquals extends BinaryExpression {
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
@@ -222,13 +181,12 @@ public interface Expression {
             }
         }
 
-        static class LessThan extends BinaryExpression {
-            LessThan(Expression lhs, Expression rhs) {
-                super(lhs, rhs);
-            }
+        @ValueClass
+        interface LessThan extends BinaryExpression {
 
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
@@ -236,13 +194,12 @@ public interface Expression {
             }
         }
 
-        static class LessThanEquals extends BinaryExpression {
-            LessThanEquals(Expression lhs, Expression rhs) {
-                super(lhs, rhs);
-            }
+        @ValueClass
+        interface LessThanEquals extends BinaryExpression {
 
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
@@ -253,42 +210,44 @@ public interface Expression {
 
     interface Literal extends Expression {
 
-        class LongLiteral implements Literal {
-            public long value;
+        @ValueClass
+        interface LongLiteral extends Literal {
+            long value();
 
-            LongLiteral(long value) {
-                this.value = value;
-            }
-
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
-                return ((Long) value).doubleValue();
+            default double evaluate(EvaluationContext context) {
+                return ((Long) value()).doubleValue();
             }
         }
 
-        class DoubleLiteral implements Literal {
-            public double value;
+        @ValueClass
+        interface DoubleLiteral extends Literal {
+            double value();
 
-            DoubleLiteral(double value) {
-                this.value = value;
-            }
-
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
-                return value;
+            default double evaluate(EvaluationContext context) {
+                return value();
             }
         }
 
-        class TrueLiteral implements Literal {
+        @ValueClass
+        interface TrueLiteral extends Literal {
+
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
                 return TRUE;
             }
         }
 
-        class FalseLiteral implements Literal {
+        @ValueClass
+        interface FalseLiteral extends Literal {
+
+            @Value.Derived
             @Override
-            public double evaluate(EvaluationContext context) {
+            default double evaluate(EvaluationContext context) {
                 return FALSE;
             }
         }

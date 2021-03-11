@@ -30,23 +30,24 @@ class GdsASTFactory extends ASTFactoryAdapter {
     private static final String LONG_MIN_VALUE_DECIMAL_STRING = Long.toString(Long.MIN_VALUE).substring(1);
 
     @Override
-    public Expression.Variable newVariable(InputPosition p, String name) {
-        return new Expression.Variable(name);
+    public Expression newVariable(InputPosition p, String name) {
+        return ImmutableVariable.builder().build();
     }
 
     @Override
     public Expression.Literal.DoubleLiteral newDouble(InputPosition p, String image) {
-        return new Expression.Literal.DoubleLiteral(Double.parseDouble(image));
+        return ImmutableDoubleLiteral.of(Double.parseDouble(image));
     }
 
     @Override
     public Expression.Literal.LongLiteral newDecimalInteger(InputPosition p, String image, boolean negated) {
         try {
             long value = Long.parseLong(image);
-            return new Expression.Literal.LongLiteral(negated ? -value : value);
+
+            return ImmutableLongLiteral.of(negated ? -value : value);
         } catch (NumberFormatException e) {
             if (negated && LONG_MIN_VALUE_DECIMAL_STRING.equals(image)) {
-                return new Expression.Literal.LongLiteral(Long.MIN_VALUE);
+                return ImmutableLongLiteral.of(Long.MIN_VALUE);
             } else {
                 throw e;
             }
@@ -55,73 +56,73 @@ class GdsASTFactory extends ASTFactoryAdapter {
 
     @Override
     public Expression newTrueLiteral(InputPosition p) {
-        return new Expression.Literal.TrueLiteral();
+        return ImmutableTrueLiteral.builder().build();
     }
 
     @Override
     public Expression newFalseLiteral(InputPosition p) {
-        return new Expression.Literal.FalseLiteral();
+        return ImmutableFalseLiteral.builder().build();
     }
 
     @Override
     public Expression hasLabelsOrTypes(Expression subject, List<ASTFactory.StringPos<InputPosition>> labels) {
         var labelStrings = labels.stream().map(l -> l.string).collect(Collectors.toList());
-        return new Expression.HasLabelsOrTypes(subject, labelStrings);
+        return ImmutableHasLabelsOrTypes.of(labelStrings);
     }
 
     @Override
-    public Expression.Property property(Expression subject, ASTFactory.StringPos<InputPosition> propertyKeyName) {
-        return new Expression.Property(subject, propertyKeyName.string);
+    public Expression property(Expression subject, ASTFactory.StringPos<InputPosition> propertyKeyName) {
+        return ImmutableProperty.of(propertyKeyName.string);
     }
 
     @Override
     public Expression or(InputPosition p, Expression lhs, Expression rhs) {
-        return new Expression.BinaryExpression.Or(lhs, rhs);
+        return ImmutableOr.of(lhs, rhs);
     }
 
     @Override
     public Expression xor(InputPosition p, Expression lhs, Expression rhs) {
-        return new Expression.BinaryExpression.Xor(lhs, rhs);
+        return ImmutableXor.of(lhs, rhs);
     }
 
     @Override
     public Expression and(InputPosition p, Expression lhs, Expression rhs) {
-        return new Expression.BinaryExpression.And(lhs, rhs);
-    }
-
-    @Override
-    public Expression not(Expression e) {
-        return new Expression.UnaryExpression.Not(e);
+        return ImmutableAnd.of(lhs, rhs);
     }
 
     @Override
     public Expression eq(InputPosition p, Expression lhs, Expression rhs) {
-        return new Expression.BinaryExpression.Equal(lhs, rhs);
+        return ImmutableEqual.of(lhs, rhs);
+    }
+
+    @Override
+    public Expression not(Expression e) {
+        return ImmutableNot.of(e);
     }
 
     @Override
     public Expression neq(InputPosition p, Expression lhs, Expression rhs) {
-        return new Expression.BinaryExpression.NotEqual(lhs, rhs);
+        return ImmutableNotEqual.of(lhs, rhs);
     }
 
     @Override
     public Expression lte(InputPosition p, Expression lhs, Expression rhs) {
-        return new Expression.BinaryExpression.LessThanEquals(lhs, rhs);
+        return ImmutableLessThanEquals.of(lhs, rhs);
     }
 
     @Override
     public Expression gte(InputPosition p, Expression lhs, Expression rhs) {
-        return new Expression.BinaryExpression.GreaterThanEquals(lhs, rhs);
+        return ImmutableGreaterThanEquals.of(lhs, rhs);
     }
 
     @Override
     public Expression lt(InputPosition p, Expression lhs, Expression rhs) {
-        return new Expression.BinaryExpression.LessThan(lhs, rhs);
+        return ImmutableLessThan.of(lhs, rhs);
     }
 
     @Override
     public Expression gt(InputPosition p, Expression lhs, Expression rhs) {
-        return new Expression.BinaryExpression.GreaterThan(lhs, rhs);
+        return ImmutableGreaterThan.of(lhs, rhs);
     }
 
     @Override
