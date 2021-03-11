@@ -37,6 +37,14 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisito
 
 class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
 
+    public static final List<String> LABEL_SCHEMA_COLUMNS = List.of(
+        LABEL_COLUMN_NAME,
+        PROPERTY_KEY_COLUMN_NAME,
+        VALUE_TYPE_COLUMN_NAME,
+        DEFAULT_VALUE_COLUMN_NAME,
+        STATE_COLUMN_NAME
+    );
+
     @Test
     void writesVisitedNodeSchema() throws IOException {
         var nodeSchemaVisitor = new CsvNodeSchemaVisitor(tempDir);
@@ -70,12 +78,6 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
 
     @Override
     protected List<String> defaultHeaderColumns() {
-        return List.of(
-            LABEL_COLUMN_NAME,
-            PROPERTY_KEY_COLUMN_NAME,
-            VALUE_TYPE_COLUMN_NAME,
-            DEFAULT_VALUE_COLUMN_NAME,
-            STATE_COLUMN_NAME
-        );
+        return LABEL_SCHEMA_COLUMNS;
     }
 }

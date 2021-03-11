@@ -23,7 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporter;
 import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -43,7 +45,9 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.core.utils.export.file.NodeSchemaUtils.computeNodeSchema;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -234,6 +238,46 @@ class GraphStoreToFileExporterTest extends CsvTest {
             "1,2",
             "2,3",
             "3,0"
+        );
+    }
+
+    @Test
+    void exportSchema() {
+        var config = ImmutableGraphStoreToFileExporterConfig
+            .builder()
+            .exportName(tempDir.toString())
+            .writeConcurrency(1)
+            .mode(GraphStoreToFileExporter.Mode.FULL)
+            .build();
+
+        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        exporter.run(AllocationTracker.empty());
+
+        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME));
+
+        assertDataContent(
+            NODE_SCHEMA_FILE_NAME,
+            List.of(
+                CsvNodeSchemaVisitorTest.LABEL_SCHEMA_COLUMNS,
+                List.of("A", "prop1", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name()),
+                List.of("A", "prop2", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name()),
+                List.of("A", "prop3", ValueType.LONG_ARRAY.csvName(), ValueType.LONG_ARRAY.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name()),
+                List.of("B", "prop1", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name()),
+                List.of("B", "prop2", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name()),
+                List.of("B", "prop3", ValueType.LONG_ARRAY.csvName(), ValueType.LONG_ARRAY.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name()),
+                List.of("C", "prop1", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name()),
+                List.of("C", "prop2", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name()),
+                List.of("C", "prop3", ValueType.LONG_ARRAY.csvName(), ValueType.LONG_ARRAY.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name())
+            )
+        );
+
+        assertDataContent(
+            RELATIONSHIP_SCHEMA_FILE_NAME,
+            List.of(
+                CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
+                List.of("REL1", "prop2", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), GraphStore.PropertyState.PERSISTENT.name()),
+                List.of("REL2", "prop4", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), GraphStore.PropertyState.PERSISTENT.name())
+            )
         );
     }
 

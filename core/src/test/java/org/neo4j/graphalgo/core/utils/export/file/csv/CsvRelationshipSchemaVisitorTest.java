@@ -39,6 +39,15 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSche
 
 class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
 
+    public static final List<String> RELATIONSHIP_SCHEMA_COLUMNS = List.of(
+        RELATIONSHIP_TYPE_COLUMN_NAME,
+        PROPERTY_KEY_COLUMN_NAME,
+        VALUE_TYPE_COLUMN_NAME,
+        DEFAULT_VALUE_COLUMN_NAME,
+        AGGREGATION_COLUMN_NAME,
+        STATE_COLUMN_NAME
+    );
+
     @Test
     void writesVisitedNodeSchema() throws IOException {
         var relationshipSchemaVisitor = new CsvRelationshipSchemaVisitor(tempDir);
@@ -74,13 +83,6 @@ class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
 
     @Override
     protected List<String> defaultHeaderColumns() {
-        return List.of(
-            RELATIONSHIP_TYPE_COLUMN_NAME,
-            PROPERTY_KEY_COLUMN_NAME,
-            VALUE_TYPE_COLUMN_NAME,
-            DEFAULT_VALUE_COLUMN_NAME,
-            AGGREGATION_COLUMN_NAME,
-            STATE_COLUMN_NAME
-        );
+        return RELATIONSHIP_SCHEMA_COLUMNS;
     }
 }
