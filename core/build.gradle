@@ -24,7 +24,9 @@ dependencies {
             [group: 'io.jsonwebtoken', name: 'jjwt-api', version: ver.'jjwt'],
             [group: 'org.ejml', name: 'ejml-core', version: ver.'ejml'],
             [group: 'org.ejml', name: 'ejml-ddense', version: ver.'ejml'],
-            [group: 'de.siegmar', name: 'fastcsv', version: ver.'fastcsv']
+            [group: 'de.siegmar', name: 'fastcsv', version: ver.'fastcsv'],
+            [group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'openCypher']
+
     )
 
     implementation(
