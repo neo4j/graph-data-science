@@ -24,9 +24,9 @@ import org.opencypher.v9_0.parser.javacc.Cypher;
 import org.opencypher.v9_0.parser.javacc.CypherCharStream;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
-public class ExpressionParser {
+public final class ExpressionParser {
 
-    public Expression parse(String cypher) throws ParseException {
+    public static Expression parse(String cypher) throws ParseException {
         var astFactory = new GdsASTFactory();
         var exceptionFactory = new ExceptionFactory();
         var charstream = new CypherCharStream(cypher);
@@ -34,4 +34,5 @@ public class ExpressionParser {
         return new Cypher<>(astFactory, exceptionFactory, charstream).Expression();
     }
 
+    private ExpressionParser() {}
 }

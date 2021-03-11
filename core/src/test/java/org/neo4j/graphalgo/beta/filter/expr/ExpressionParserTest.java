@@ -47,7 +47,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("nots")
     void nots(String cypher, Expression.UnaryExpression.Not expected) throws ParseException {
-        var actual = new ExpressionParser().parse(cypher);
+        var actual = ExpressionParser.parse(cypher);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -55,13 +55,13 @@ class ExpressionParserTest {
 
     @Test
     void trueLiteral() throws ParseException {
-        var actual = new ExpressionParser().parse("TRUE");
+        var actual = ExpressionParser.parse("TRUE");
         assertThat(actual).isEqualTo(Expression.Literal.TrueLiteral.INSTANCE);
     }
 
     @Test
     void falseLiteral() throws ParseException {
-        var actual = new ExpressionParser().parse("FALSE");
+        var actual = ExpressionParser.parse("FALSE");
         assertThat(actual).isEqualTo(Expression.Literal.FalseLiteral.INSTANCE);
     }
 
@@ -77,7 +77,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("longs")
     void longLiteral(String cypher, Expression.Literal.LongLiteral expected) throws ParseException {
-        var actual = new ExpressionParser().parse(cypher);
+        var actual = ExpressionParser.parse(cypher);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -94,7 +94,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("doubles")
     void doubleLiteral(String cypher, Expression.Literal.DoubleLiteral expected) throws ParseException {
-        var actual = new ExpressionParser().parse(cypher);
+        var actual = ExpressionParser.parse(cypher);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -123,7 +123,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("ands")
     void and(String cypher, Expression.BinaryExpression.And expected) throws ParseException {
-        var actual = new ExpressionParser().parse(cypher);
+        var actual = ExpressionParser.parse(cypher);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -150,7 +150,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("ors")
     void or(String cypher, Expression.BinaryExpression.Or expected) throws ParseException {
-        var actual = new ExpressionParser().parse(cypher);
+        var actual = ExpressionParser.parse(cypher);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -177,7 +177,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("xors")
     void xor(String cypher, Expression.BinaryExpression.Xor expected) throws ParseException {
-        var actual = new ExpressionParser().parse(cypher);
+        var actual = ExpressionParser.parse(cypher);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -207,7 +207,7 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("equals")
     void equal(String cypher, Expression.BinaryExpression.Equal expected) throws ParseException {
-        var actual = new ExpressionParser().parse(cypher);
+        var actual = ExpressionParser.parse(cypher);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -241,13 +241,13 @@ class ExpressionParserTest {
     @ParameterizedTest
     @MethodSource("notEquals")
     void notEqual(String cypher, Expression.BinaryExpression.NotEqual expected) throws ParseException {
-        var actual = new ExpressionParser().parse(cypher);
+        var actual = ExpressionParser.parse(cypher);
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     void greaterThan() throws ParseException {
-        var actual = new ExpressionParser().parse("1337 > 42");
+        var actual = ExpressionParser.parse("1337 > 42");
         assertThat(actual).isEqualTo(ImmutableGreaterThan.of(
             ImmutableLongLiteral.of(1337),
             ImmutableLongLiteral.of(42)
@@ -256,7 +256,7 @@ class ExpressionParserTest {
 
     @Test
     void greaterThanEquals() throws ParseException {
-        var actual = new ExpressionParser().parse("1337 >= 42");
+        var actual = ExpressionParser.parse("1337 >= 42");
         assertThat(actual).isEqualTo(ImmutableGreaterThanEquals.of(
             ImmutableLongLiteral.of(1337),
             ImmutableLongLiteral.of(42)
@@ -265,7 +265,7 @@ class ExpressionParserTest {
 
     @Test
     void lessThan() throws ParseException {
-        var actual = new ExpressionParser().parse("1337 < 42");
+        var actual = ExpressionParser.parse("1337 < 42");
         assertThat(actual).isEqualTo(ImmutableLessThan.of(
             ImmutableLongLiteral.of(1337),
             ImmutableLongLiteral.of(42)
@@ -274,7 +274,7 @@ class ExpressionParserTest {
 
     @Test
     void lessThanEquals() throws ParseException {
-        var actual = new ExpressionParser().parse("1337 <= 42");
+        var actual = ExpressionParser.parse("1337 <= 42");
         assertThat(actual).isEqualTo(ImmutableLessThanEquals.of(
             ImmutableLongLiteral.of(1337),
             ImmutableLongLiteral.of(42)

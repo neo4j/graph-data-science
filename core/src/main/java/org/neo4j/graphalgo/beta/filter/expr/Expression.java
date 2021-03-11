@@ -27,7 +27,7 @@ import java.util.List;
 public interface Expression {
     double TRUE = 1.0D;
     double FALSE = 0.0D;
-    double EPSILON = 0.000001D;
+    double EPSILON = 1E-5;
     double VARIABLE = Double.NaN;
 
     double evaluate(EvaluationContext context);
