@@ -19,15 +19,15 @@
  */
 package org.neo4j.graphalgo.beta.filter.expr;
 
+import com.carrotsearch.hppc.ObjectIntMap;
+import com.carrotsearch.hppc.ObjectIntScatterMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.GraphStore;
 
 import java.util.List;
+import java.util.Map;
 
 public abstract class EvaluationContext {
-    protected final GraphStore graphStore;
-
-    EvaluationContext(GraphStore graphStore) {this.graphStore = graphStore;}
 
     abstract double getProperty(String propertyKey);
 
@@ -35,10 +35,12 @@ public abstract class EvaluationContext {
 
     public static class NodeEvaluationContext extends EvaluationContext {
 
+        private final GraphStore graphStore;
+
         private long nodeId;
 
         public NodeEvaluationContext(GraphStore graphStore) {
-            super(graphStore);
+            this.graphStore = graphStore;
         }
 
         @Override
@@ -67,13 +69,16 @@ public abstract class EvaluationContext {
 
         private double[] properties;
 
-        public RelationshipEvaluationContext(GraphStore graphStore) {
-            super(graphStore);
+        private final ObjectIntMap<String> propertyTokens;
+
+        RelationshipEvaluationContext(Map<String, Integer> propertyTokens) {
+            this.propertyTokens = new ObjectIntScatterMap<>();
+            propertyTokens.forEach(this.propertyTokens::put);
         }
 
         @Override
         double getProperty(String propertyKey) {
-            return properties[0];
+            return properties[propertyTokens.get(propertyKey)];
         }
 
         @Override

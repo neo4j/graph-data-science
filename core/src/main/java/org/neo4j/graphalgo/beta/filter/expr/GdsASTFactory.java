@@ -71,7 +71,10 @@ class GdsASTFactory extends ASTFactoryAdapter {
     }
 
     @Override
-    public Expression.LeafExpression.Property property(Expression subject, ASTFactory.StringPos<InputPosition> propertyKeyName) {
+    public Expression.LeafExpression.Property property(
+        Expression subject,
+        ASTFactory.StringPos<InputPosition> propertyKeyName
+    ) {
         return ImmutableProperty.of(propertyKeyName.string);
     }
 
