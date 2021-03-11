@@ -333,7 +333,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
         private float[] computeRandomVector(long nodeId, Random random, float entryValue) {
             float[] randomVector = new float[embeddingDimension];
-            for (int i = 0; i < embeddingDimension; i++) {
+            for (int i = 0; i < baseEmbeddingDimension; i++) {
                 randomVector[i] = computeRandomEntry(random, entryValue);
             }
 
