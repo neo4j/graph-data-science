@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.schema.PropertySchema;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,14 +39,5 @@ public abstract class CsvVisitorTest extends CsvTest {
 
     void assertHeaderFile(String fileName, Map<String, ? extends PropertySchema> properties) {
        assertHeaderFile(fileName, defaultHeaderColumns(), properties);
-    }
-
-    protected void assertDataContent(String fileName, List<List<String>> data) {
-        var expectedContent = data
-            .stream()
-            .map(row -> String.join(",", row))
-            .collect(Collectors.joining("\n"));
-
-        assertThat(tempDir.resolve(fileName)).hasContent(expectedContent);
     }
 }

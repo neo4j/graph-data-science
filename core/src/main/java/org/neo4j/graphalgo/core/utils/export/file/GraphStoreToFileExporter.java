@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
+import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNamedDatabaseIdVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSchemaVisitor;
@@ -32,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.export.file.schema.NodeSchemaVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.schema.RelationshipSchemaVisitor;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -62,6 +64,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         return GraphStoreToFileExporter.of(
             graphStore,
             config,
+            new CsvNamedDatabaseIdVisitor(exportPath),
             new CsvNodeSchemaVisitor(exportPath),
             new CsvRelationshipSchemaVisitor(exportPath),
             (index) -> new CsvNodeVisitor(exportPath, graphStore.schema().nodeSchema(), headerFiles, index, config.exportNeoNodeIds()),
@@ -72,6 +75,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private static GraphStoreToFileExporter of(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
+        SingleRowVisitor<NamedDatabaseId> namedDatabaseIdVisitor,
         NodeSchemaVisitor nodeSchemaVisitor,
         RelationshipSchemaVisitor relationshipSchemaVisitor,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
@@ -82,6 +86,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             return new FullGraphStoreToFileExporter(
                 graphStore,
                 config,
+                namedDatabaseIdVisitor,
                 nodeSchemaVisitor,
                 relationshipSchemaVisitor,
                 nodeVisitorSupplier,
@@ -172,27 +177,36 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     }
 
     private static final class FullGraphStoreToFileExporter extends GraphStoreToFileExporter {
+        private SingleRowVisitor<NamedDatabaseId> namedDatabaseIdVisitor;
         private final NodeSchemaVisitor nodeSchemaVisitor;
         private final RelationshipSchemaVisitor relationshipSchemaVisitor;
 
         private FullGraphStoreToFileExporter(
             GraphStore graphStore,
             GraphStoreToFileExporterConfig config,
+            SingleRowVisitor<NamedDatabaseId> namedDatabaseIdVisitor,
             NodeSchemaVisitor nodeSchemaVisitor,
             RelationshipSchemaVisitor relationshipSchemaVisitor,
             VisitorProducer<NodeVisitor> nodeVisitorSupplier,
             VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
         ) {
             super(graphStore, config, nodeVisitorSupplier, relationshipVisitorSupplier);
+            this.namedDatabaseIdVisitor = namedDatabaseIdVisitor;
             this.nodeSchemaVisitor = nodeSchemaVisitor;
             this.relationshipSchemaVisitor = relationshipSchemaVisitor;
         }
 
         @Override
         protected void export(GraphStoreInput graphStoreInput) {
+            exportNamedDatabaseId(graphStoreInput);
             exportNodeSchema(graphStoreInput);
             exportRelationshipSchema(graphStoreInput);
             super.export(graphStoreInput);
+        }
+
+        private void exportNamedDatabaseId(GraphStoreInput graphStoreInput) {
+            NamedDatabaseId namedDatabaseId = graphStoreInput.metaDataStore().databaseId();
+            namedDatabaseIdVisitor.export(namedDatabaseId);
         }
 
         private void exportNodeSchema(GraphStoreInput graphStoreInput) {
