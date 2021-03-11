@@ -28,6 +28,12 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This algorithm takes as input a list of node property names and a same-sized list of scalers.
+ * It applies the scalers to the node property values, respectively, and outputs a single node property.
+ * The output node property values are lists of the same size as the input lists, and contain the scaled values
+ * of the input node properties scaled according to the specified scalers.
+ */
 public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.Result> {
 
     private final Graph graph;
