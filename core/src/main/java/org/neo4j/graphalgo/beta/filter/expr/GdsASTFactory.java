@@ -30,7 +30,7 @@ class GdsASTFactory extends ASTFactoryAdapter {
     private static final String LONG_MIN_VALUE_DECIMAL_STRING = Long.toString(Long.MIN_VALUE).substring(1);
 
     @Override
-    public Expression newVariable(InputPosition p, String name) {
+    public Expression.LeafExpression.Variable newVariable(InputPosition p, String name) {
         return ImmutableVariable.builder().build();
     }
 
@@ -71,7 +71,7 @@ class GdsASTFactory extends ASTFactoryAdapter {
     }
 
     @Override
-    public Expression property(Expression subject, ASTFactory.StringPos<InputPosition> propertyKeyName) {
+    public Expression.LeafExpression.Property property(Expression subject, ASTFactory.StringPos<InputPosition> propertyKeyName) {
         return ImmutableProperty.of(propertyKeyName.string);
     }
 
