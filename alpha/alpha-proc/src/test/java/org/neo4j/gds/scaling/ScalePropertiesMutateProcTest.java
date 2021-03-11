@@ -79,7 +79,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
                 "createMillis", greaterThan(-1L),
                 "computeMillis", greaterThan(-1L),
                 "mutateMillis", greaterThan(-1L),
-                "postProcessingMillis", greaterThan(-1L),
+                "postProcessingMillis", 0L,
                 "configuration", isA(Map.class),
                 "nodePropertiesWritten", 6L
             )
