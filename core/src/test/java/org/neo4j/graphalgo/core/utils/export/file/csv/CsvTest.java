@@ -19,9 +19,12 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,9 +61,16 @@ public abstract class CsvTest {
         var expectedContent = data
             .stream()
             .map(row -> String.join(",", row))
-            .collect(Collectors.joining("\n"));
+            .collect(Collectors.toList());
 
-        assertThat(tempDir.resolve(fileName)).hasContent(expectedContent);
+        Path path = tempDir.resolve(fileName);
+        try {
+            List<String> fileLines = FileUtils.readLines(path.toFile(), StandardCharsets.UTF_8);
+            assertThat(fileLines).containsExactlyInAnyOrder(expectedContent.toArray(String[]::new));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }
 
