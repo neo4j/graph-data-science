@@ -35,7 +35,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
-class NormalizeFeatureMutateProcTest extends BaseProcTest {
+class ScalePropertiesMutateProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
@@ -51,7 +51,7 @@ class NormalizeFeatureMutateProcTest extends BaseProcTest {
     void setup() throws Exception {
         runQuery(DB_CYPHER);
 
-        registerProcedures(GraphCreateProc.class, NormalizeFeatureMutateProc.class);
+        registerProcedures(GraphCreateProc.class, ScalePropertiesMutateProc.class);
         var loadQuery = GdsCypher
             .call()
             .withAnyRelationshipType()
@@ -67,10 +67,10 @@ class NormalizeFeatureMutateProcTest extends BaseProcTest {
         var query = GdsCypher
             .call()
             .explicitCreation(GRAPH_NAME)
-            .algo("gds.alpha.ml.normalizeFeatures")
+            .algo("gds.alpha.scaleProperties")
             .mutateMode()
             .addParameter("featureProperties", List.of("id"))
-            .addParameter("normalizers", List.of("Mean"))
+            .addParameter("scalers", List.of("Mean"))
             .addParameter("mutateProperty", "mean")
             .yields();
 

@@ -31,16 +31,16 @@ import java.util.Optional;
 
 @Configuration
 @ValueClass
-interface NormalizeFeaturesConfig extends MutatePropertyConfig, FeaturePropertiesConfig {
-    List<String> normalizers();
+interface ScalePropertiesConfig extends MutatePropertyConfig, FeaturePropertiesConfig {
+    List<String> scalers();
 
-    static NormalizeFeaturesConfig of(
+    static ScalePropertiesConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new NormalizeFeaturesConfigImpl(
+        return new ScalePropertiesConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

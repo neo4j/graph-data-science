@@ -51,7 +51,7 @@ class MeanNormalizerTest {
         assertThat(normalizer.avg).isEqualTo(avg);
         assertThat(normalizer.maxMinDiff).isEqualTo(maxMinDiff);
 
-        double[] actual = IntStream.range(0, 10).mapToDouble(normalizer::normalize).toArray();
+        double[] actual = IntStream.range(0, 10).mapToDouble(normalizer::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);
     }
 
@@ -64,7 +64,7 @@ class MeanNormalizerTest {
         assertThat(normalizer.maxMinDiff).isEqualTo(0D);
 
         for (int i = 0; i < 10; i++) {
-            assertThat(normalizer.normalize(i)).isEqualTo(0D);
+            assertThat(normalizer.scaleProperty(i)).isEqualTo(0D);
         }
     }
 

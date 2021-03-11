@@ -31,7 +31,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 @GdlExtension
-class NormalizeFeaturesTest {
+class ScalePropertiesTest {
 
     @GdlGraph
     static String GDL =
@@ -46,15 +46,15 @@ class NormalizeFeaturesTest {
 
     @Test
     void minmaxNormalisation() {
-        var config = ImmutableNormalizeFeaturesConfig.builder()
+        var config = ImmutableScalePropertiesConfig.builder()
             .featureProperties(List.of("a"))
             .mutateProperty("mutateProp")
-            .normalizers(List.of("MinMax"))
+            .scalers(List.of("MinMax"))
             .build();
-        var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
 
         var result = algo.compute();
-        var resultProperties = result.normalizedProperties().toArray();
+        var resultProperties = result.scaledProperties().toArray();
 
         assertArrayEquals(new double[]{11.1/13D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
         assertArrayEquals(new double[]{12.8/13D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
@@ -65,15 +65,15 @@ class NormalizeFeaturesTest {
 
     @Test
     void minmaxNormalisationOverMultipleProperties() {
-        var config = ImmutableNormalizeFeaturesConfig.builder()
+        var config = ImmutableScalePropertiesConfig.builder()
             .featureProperties(List.of("a", "b", "c"))
-            .normalizers(List.of("MinMax", "MinMax", "MinMax"))
+            .scalers(List.of("MinMax", "MinMax", "MinMax"))
             .mutateProperty("mutateProp")
             .build();
-        var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
 
         var result = algo.compute();
-        var resultProperties = result.normalizedProperties().toArray();
+        var resultProperties = result.scaledProperties().toArray();
 
         assertArrayEquals(new double[]{11.1/13D, 0D, 0D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
         assertArrayEquals(new double[]{12.8/13D, 0.25, 1/50D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
@@ -84,14 +84,14 @@ class NormalizeFeaturesTest {
 
     @Test
     void differentNormalizers() {
-        var config = ImmutableNormalizeFeaturesConfig.builder()
+        var config = ImmutableScalePropertiesConfig.builder()
             .featureProperties(List.of("a", "b"))
-            .normalizers(List.of("MinMax", "Mean"))
+            .scalers(List.of("MinMax", "Mean"))
             .mutateProperty("mutateProp")
             .build();
-        var algo = new NormalizeFeatures(graph, config, AllocationTracker.empty());
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
         var result = algo.compute();
-        var resultProperties = result.normalizedProperties().toArray();
+        var resultProperties = result.scaledProperties().toArray();
 
         assertArrayEquals(new double[]{11.1 / 13D, -0.5D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
         assertArrayEquals(new double[]{12.8 / 13D, -0.25D}, resultProperties[(int) graph.toOriginalNodeId("b")]);

@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.normalizing;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 
-final class MeanNormalizer implements Normalizer {
+final class MeanNormalizer implements Scaler {
 
     private final NodeProperties properties;
     final double avg;
@@ -57,7 +57,7 @@ final class MeanNormalizer implements Normalizer {
     }
 
     @Override
-    public double normalize(long nodeId) {
+    public double scaleProperty(long nodeId) {
         if (Math.abs(maxMinDiff) < 1e-15) {
             return 0D;
         }

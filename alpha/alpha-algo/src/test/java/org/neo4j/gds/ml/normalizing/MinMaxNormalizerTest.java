@@ -50,7 +50,7 @@ class MinMaxNormalizerTest {
         assertThat(minMaxNormalizer.max).isEqualTo(max);
 
         for (int i = 0; i < 10; i++) {
-            assertThat(minMaxNormalizer.normalize(i)).isEqualTo(i / 9D);
+            assertThat(minMaxNormalizer.scaleProperty(i)).isEqualTo(i / 9D);
         }
     }
 
@@ -63,7 +63,7 @@ class MinMaxNormalizerTest {
         assertThat(minMaxNormalizer.max).isEqualTo(4D);
 
         for (int i = 0; i < 10; i++) {
-            assertThat(minMaxNormalizer.normalize(i)).isEqualTo(0D);
+            assertThat(minMaxNormalizer.scaleProperty(i)).isEqualTo(0D);
         }
     }
 

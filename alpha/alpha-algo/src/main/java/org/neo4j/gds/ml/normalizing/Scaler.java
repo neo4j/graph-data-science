@@ -21,14 +21,15 @@ package org.neo4j.gds.ml.normalizing;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 
-public interface Normalizer {
-    double normalize(long nodeId);
+public interface Scaler {
+
+    double scaleProperty(long nodeId);
 
     final class Factory {
         private Factory() {}
 
-        static Normalizer create(String normalizer, NodeProperties properties, long nodeCount) {
-            switch (normalizer) {
+        static Scaler create(String name, NodeProperties properties, long nodeCount) {
+            switch (name) {
                 case "MinMax": return MinMaxNormalizer.create(properties, nodeCount);
                 case "Mean": return MeanNormalizer.create(properties, nodeCount);
                 default: return null;

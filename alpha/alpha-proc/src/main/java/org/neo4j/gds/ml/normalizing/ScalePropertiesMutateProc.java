@@ -36,9 +36,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class NormalizeFeatureMutateProc extends MutatePropertyProc<NormalizeFeatures, NormalizeFeatures.Result, NormalizeFeatureMutateProc.MutateResult, NormalizeFeaturesConfig> {
+public class ScalePropertiesMutateProc extends MutatePropertyProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateProc.MutateResult, ScalePropertiesConfig> {
 
-    @Procedure("gds.alpha.ml.normalizeFeatures.mutate")
+    @Procedure("gds.alpha.scaleProperties.mutate")
     @Description("Normalize node properties")
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -48,23 +48,23 @@ public class NormalizeFeatureMutateProc extends MutatePropertyProc<NormalizeFeat
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<NormalizeFeatures, NormalizeFeatures.Result, NormalizeFeaturesConfig> computationResult) {
-        return (DoubleArrayNodeProperties) computationResult.result().normalizedProperties()::get;
+    protected NodeProperties nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesConfig> computationResult) {
+        return (DoubleArrayNodeProperties) computationResult.result().scaledProperties()::get;
     }
 
     @Override
-    protected NormalizeFeaturesConfig newConfig(
+    protected ScalePropertiesConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return NormalizeFeaturesConfig.of(username, graphName, maybeImplicitCreate, config);
+        return ScalePropertiesConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<NormalizeFeatures, NormalizeFeaturesConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<NormalizeFeatures, NormalizeFeaturesConfig>) (graph, configuration, tracker, log, eventTracker) -> new NormalizeFeatures(
+    protected AlgorithmFactory<ScaleProperties, ScalePropertiesConfig> algorithmFactory() {
+        return (AlphaAlgorithmFactory<ScaleProperties, ScalePropertiesConfig>) (graph, configuration, tracker, log, eventTracker) -> new ScaleProperties(
             graph,
             configuration,
             tracker
@@ -72,7 +72,7 @@ public class NormalizeFeatureMutateProc extends MutatePropertyProc<NormalizeFeat
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<NormalizeFeatures, NormalizeFeatures.Result, NormalizeFeaturesConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesConfig> computeResult) {
         return new MutateResult.Builder();
     }
 

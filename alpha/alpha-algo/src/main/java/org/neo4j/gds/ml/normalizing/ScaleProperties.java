@@ -28,13 +28,13 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFeatures.Result> {
+public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.Result> {
 
     private final Graph graph;
-    private final NormalizeFeaturesConfig config;
+    private final ScalePropertiesConfig config;
     private final AllocationTracker tracker;
 
-    public NormalizeFeatures(Graph graph, NormalizeFeaturesConfig config, AllocationTracker tracker) {
+    public ScaleProperties(Graph graph, ScalePropertiesConfig config, AllocationTracker tracker) {
         this.graph = graph;
         this.config = config;
         this.tracker = tracker;
@@ -42,23 +42,23 @@ public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFea
 
     @Override
     public Result compute() {
-        var normalizedProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
-        normalizedProperties.setAll(nodeId -> {
+        var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
+        scaledProperties.setAll(nodeId -> {
             var propertyCount = config.featureProperties().size();
             var resultProperties = new double[propertyCount];
             for (int i = 0; i < propertyCount; i++) {
                 var normalizer = resolveNormalizers().get(i);
-                var afterValue = normalizer.normalize(nodeId);
+                var afterValue = normalizer.scaleProperty(nodeId);
                 resultProperties[i] = afterValue;
             }
             return resultProperties;
         });
 
-        return Result.of(normalizedProperties);
+        return Result.of(scaledProperties);
     }
 
     @Override
-    public NormalizeFeatures me() {
+    public ScaleProperties me() {
         return this;
     }
 
@@ -67,26 +67,26 @@ public class NormalizeFeatures extends Algorithm<NormalizeFeatures, NormalizeFea
 
     @ValueClass
     interface Result {
-        HugeObjectArray<double[]> normalizedProperties();
+        HugeObjectArray<double[]> scaledProperties();
 
         static Result of(HugeObjectArray<double[]> properties) {
             return ImmutableResult.of(properties);
         }
     }
 
-    private List<Normalizer> resolveNormalizers() {
-        assert config.normalizers().size() == config.featureProperties().size();
+    private List<Scaler> resolveNormalizers() {
+        assert config.scalers().size() == config.featureProperties().size();
 
-        List<Normalizer> normalizers = new ArrayList<>();
+        List<Scaler> scalers = new ArrayList<>();
 
-        for (int i = 0; i < config.normalizers().size(); i++) {
-            String normalizer = config.normalizers().get(i);
+        for (int i = 0; i < config.scalers().size(); i++) {
+            String scalerName = config.scalers().get(i);
             String property = config.featureProperties().get(i);
 
             var nodeProperties = graph.nodeProperties(property);
-            normalizers.add(Normalizer.Factory.create(normalizer, nodeProperties, graph.nodeCount()));
+            scalers.add(Scaler.Factory.create(scalerName, nodeProperties, graph.nodeCount()));
         }
-        return normalizers;
+        return scalers;
     }
 
 }
