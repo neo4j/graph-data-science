@@ -58,7 +58,7 @@ final class Mean implements Scaler {
 
     @Override
     public double scaleProperty(long nodeId) {
-        if (Math.abs(maxMinDiff) < 1e-15) {
+        if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
             return 0D;
         }
         return (properties.doubleValue(nodeId) - avg) / maxMinDiff;

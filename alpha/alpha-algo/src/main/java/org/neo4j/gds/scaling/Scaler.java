@@ -23,6 +23,8 @@ import org.neo4j.graphalgo.api.NodeProperties;
 
 public interface Scaler {
 
+    double CLOSE_TO_ZERO = 1e-15;
+
     double scaleProperty(long nodeId);
 
     final class Factory {

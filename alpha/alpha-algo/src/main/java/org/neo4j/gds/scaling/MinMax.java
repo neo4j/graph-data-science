@@ -52,7 +52,7 @@ final class MinMax implements Scaler {
 
     @Override
     public double scaleProperty(long nodeId) {
-        if (Math.abs(max - min) < 1e-15) {
+        if (Math.abs(max - min) < CLOSE_TO_ZERO) {
             return 0D;
         }
         return (properties.doubleValue(nodeId) - min) / (max - min);
