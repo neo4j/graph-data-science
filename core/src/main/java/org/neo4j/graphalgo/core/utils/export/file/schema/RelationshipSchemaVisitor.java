@@ -33,7 +33,7 @@ public abstract class RelationshipSchemaVisitor extends InputRelationshipSchemaV
 
     @Override
     public Aggregation aggregation() {
-        return null;
+        return aggregation;
     }
 
     @Override
