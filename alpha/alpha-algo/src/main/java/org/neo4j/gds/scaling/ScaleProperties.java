@@ -22,6 +22,7 @@ package org.neo4j.gds.scaling;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -49,7 +50,9 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     @Override
     public Result compute() {
         var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
-        scaledProperties.setAll(nodeId -> {
+
+        ParallelUtil.parallelForEachNode(graph.nodeCount(), config.concurrency(), (nodeId) ->
+        {
             var propertyCount = config.featureProperties().size();
             var resultProperties = new double[propertyCount];
             for (int i = 0; i < propertyCount; i++) {
@@ -57,7 +60,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
                 var afterValue = normalizer.scaleProperty(nodeId);
                 resultProperties[i] = afterValue;
             }
-            return resultProperties;
+
+            scaledProperties.set(nodeId, resultProperties);
         });
 
         return Result.of(scaledProperties);

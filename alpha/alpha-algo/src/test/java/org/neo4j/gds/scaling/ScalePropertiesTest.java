@@ -20,6 +20,8 @@
 package org.neo4j.gds.scaling;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -44,11 +46,13 @@ class ScalePropertiesTest {
     @Inject
     TestGraph graph;
 
-    @Test
-    void minmaxNormalisation() {
+    @ParameterizedTest
+    @ValueSource(ints = {1,4})
+    void minmaxNormalisation(int concurrency) {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .featureProperties(List.of("a"))
             .scalers(List.of("MinMax"))
+            .concurrency(concurrency)
             .build();
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
 
@@ -62,11 +66,13 @@ class ScalePropertiesTest {
         assertArrayEquals(new double[]{0D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
     }
 
-    @Test
-    void minmaxNormalisationOverMultipleProperties() {
+    @ParameterizedTest
+    @ValueSource(ints = {1,4})
+    void minmaxNormalisationOverMultipleProperties(int concurrency) {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .featureProperties(List.of("a", "b", "c"))
             .scalers(List.of("MinMax", "MinMax", "MinMax"))
+            .concurrency(concurrency)
             .build();
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
 
@@ -80,11 +86,13 @@ class ScalePropertiesTest {
         assertArrayEquals(new double[]{0D, 1D, 1D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
     }
 
-    @Test
-    void differentNormalizers() {
+    @ParameterizedTest
+    @ValueSource(ints = {1,4})
+    void differentNormalizers(int concurrency) {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .featureProperties(List.of("a", "b"))
             .scalers(List.of("MinMax", "Mean"))
+            .concurrency(concurrency)
             .build();
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
         var result = algo.compute();
