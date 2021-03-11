@@ -20,41 +20,18 @@
 package org.neo4j.graphalgo.beta.filter.expr;
 
 
-import org.opencypher.v9_0.ast.factory.ASTExceptionFactory;
 import org.opencypher.v9_0.parser.javacc.Cypher;
 import org.opencypher.v9_0.parser.javacc.CypherCharStream;
 import org.opencypher.v9_0.parser.javacc.ParseException;
-
-import java.util.List;
 
 public class ExpressionParser {
 
     public Expression parse(String cypher) throws ParseException {
         var astFactory = new GdsASTFactory();
-        var exceptionFactory = new DummyExceptionFactory();
+        var exceptionFactory = new ExceptionFactory();
         var charstream = new CypherCharStream(cypher);
 
         return new Cypher<>(astFactory, exceptionFactory, charstream).Expression();
-    }
-
-    static class DummyExceptionFactory implements ASTExceptionFactory {
-
-        @Override
-        public Exception syntaxException(
-            String got,
-            List<String> expected,
-            Exception source,
-            int offset,
-            int line,
-            int column
-        ) {
-            return new IllegalArgumentException("wrong syntax brah");
-        }
-
-        @Override
-        public Exception syntaxException(Exception source, int offset, int line, int column) {
-            return new IllegalArgumentException("wrong syntax brah");
-        }
     }
 
 }
