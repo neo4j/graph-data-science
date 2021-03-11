@@ -34,6 +34,7 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
     static final String VALUE_TYPE_COLUMN_NAME = "valueType";
     static final String DEFAULT_VALUE_COLUMN_NAME = "defaultValue";
     static final String STATE_COLUMN_NAME = "state";
+
     static final String NODE_SCHEMA_FILE_NAME = "node-schema.csv";
 
     private final CsvAppender csvAppender;

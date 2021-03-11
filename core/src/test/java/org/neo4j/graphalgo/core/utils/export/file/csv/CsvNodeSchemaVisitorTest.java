@@ -42,10 +42,18 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
         var nodeSchemaVisitor = new CsvNodeSchemaVisitor(tempDir);
         NodeLabel labelA = NodeLabel.of("A");
         nodeSchemaVisitor.nodeLabel(labelA);
-        nodeSchemaVisitor.key("prop");
+        nodeSchemaVisitor.key("prop1");
         nodeSchemaVisitor.valueType(ValueType.LONG);
         nodeSchemaVisitor.defaultValue(DefaultValue.of(42L));
         nodeSchemaVisitor.state(GraphStore.PropertyState.PERSISTENT);
+        nodeSchemaVisitor.endOfEntity();
+
+        NodeLabel labelB = NodeLabel.of("B");
+        nodeSchemaVisitor.nodeLabel(labelB);
+        nodeSchemaVisitor.key("prop2");
+        nodeSchemaVisitor.valueType(ValueType.DOUBLE);
+        nodeSchemaVisitor.defaultValue(DefaultValue.of(13.37D));
+        nodeSchemaVisitor.state(GraphStore.PropertyState.TRANSIENT);
         nodeSchemaVisitor.endOfEntity();
 
         nodeSchemaVisitor.close();
@@ -54,7 +62,8 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
             NODE_SCHEMA_FILE_NAME,
             List.of(
                 defaultHeaderColumns(),
-                List.of("A", "prop", "long", "DefaultValue(42)", "PERSISTENT")
+                List.of("A", "prop1", "long", "DefaultValue(42)", "PERSISTENT"),
+                List.of("B", "prop2", "double", "DefaultValue(13.37)", "TRANSIENT")
             )
         );
     }
