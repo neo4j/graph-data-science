@@ -198,7 +198,7 @@ public interface Expression {
                 var lhsValue = lhs().evaluate(context);
                 var rhsValue = rhs().evaluate(context);
 
-                return lhsValue < rhsValue || (rhsValue - lhsValue) > EPSILON ? TRUE : FALSE;
+                return lhsValue < rhsValue || (rhsValue - lhsValue) > -EPSILON ? TRUE : FALSE;
             }
         }
     }
