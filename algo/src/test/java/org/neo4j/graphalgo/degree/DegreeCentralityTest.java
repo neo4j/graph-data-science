@@ -22,20 +22,27 @@ package org.neo4j.graphalgo.degree;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 
 @GdlExtension
 final class DegreeCentralityTest {
@@ -69,10 +76,30 @@ final class DegreeCentralityTest {
         ", (f)-[:TYPE1 {weight: -2.0}]->(e)";
 
     @Inject
-    private Graph graph;
+    private TestGraph graph;
 
-    @Inject
-    private IdFunction idFunction;
+    static Stream<Arguments> degreeCentralityParameters() {
+        return TestSupport.crossArguments(
+            () -> Stream.of(
+                Arguments.of(
+                    true,
+                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D),
+                    true
+                ),
+                Arguments.of(
+                    true,
+                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D),
+                    false
+                ),
+                Arguments.of(
+                    false,
+                    Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D),
+                    false
+                )
+            ),
+            () -> Stream.of(Arguments.of(1), Arguments.of(4))
+        );
+    }
 
     @ParameterizedTest
     @MethodSource("degreeCentralityParameters")
@@ -97,31 +124,63 @@ final class DegreeCentralityTest {
 
         var degreeFunction = degreeCentrality.compute();
         expected.forEach((variable, expectedDegree) -> {
-            long nodeId = graph.toMappedNodeId(idFunction.of(variable));
+            long nodeId = graph.toMappedNodeId(variable);
             assertEquals(expectedDegree, degreeFunction.get(nodeId), 1E-6);
         });
     }
 
-    static Stream<Arguments> degreeCentralityParameters() {
-        return TestSupport.crossArguments(
-            () -> Stream.of(
-                Arguments.of(
-                    true,
-                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D),
-                    true
-                ),
-                Arguments.of(
-                    true,
-                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D),
-                    false
-                ),
-                Arguments.of(
-                    false,
-                    Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D),
-                    false
-                )
-            ),
-            () -> Stream.of(Arguments.of(1), Arguments.of(4))
+    static Stream<Arguments> configParamsAndExpectedMemory() {
+        return Stream.of(
+            Arguments.of(true, 1, MemoryUsage.sizeOfInstance(DegreeCentrality.class) + HugeDoubleArray.memoryEstimation(10_000L)),
+            Arguments.of(true, 4, MemoryUsage.sizeOfInstance(DegreeCentrality.class) + HugeDoubleArray.memoryEstimation(10_000L)),
+            Arguments.of(false, 1, MemoryUsage.sizeOfInstance(DegreeCentrality.class)),
+            Arguments.of(false, 4, MemoryUsage.sizeOfInstance(DegreeCentrality.class))
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("configParamsAndExpectedMemory")
+    void testMemoryEstimation(boolean weighted, int concurrency, long expectedMemory) {
+        var configBuilder = ImmutableDegreeCentralityConfig.builder();
+        if (weighted) {
+            configBuilder.relationshipWeightProperty("weight");
+        }
+        configBuilder.concurrency(concurrency);
+        var config = configBuilder.build();
+        assertMemoryEstimation(
+            () -> new DegreeCentralityFactory<>().memoryEstimation(config),
+            10_000L,
+            concurrency,
+            expectedMemory,
+            expectedMemory
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testProgressLogging(boolean weighted) {
+        var configBuilder = ImmutableDegreeCentralityConfig.builder();
+        if (weighted) {
+            configBuilder.relationshipWeightProperty("weight");
+        }
+        var config = configBuilder.build();
+
+        TestProgressLogger progressLogger = new TestProgressLogger(graph.nodeCount(), "Degree centrality", 1);
+        var degreeCentrality = new DegreeCentrality(
+            graph,
+            Pools.DEFAULT,
+            config,
+            progressLogger,
+            AllocationTracker.empty()
+        );
+
+        degreeCentrality.compute();
+        List<AtomicLong> progresses = progressLogger.getProgresses();
+
+        assertEquals(1, progresses.size());
+        assertEquals(graph.nodeCount(), progresses.get(0).longValue());
+
+        progressLogger.containsMessage(TestLog.INFO, ":: Start");
+        progressLogger.containsMessage(TestLog.INFO, ":: Finish");
     }
 }
