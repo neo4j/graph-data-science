@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.core.utils.export.file.NodeSchemaUtils.computeNodeSchema;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNamedDatabaseIdVisitor.DATABASE_ID_FILE_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
@@ -242,7 +243,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
     }
 
     @Test
-    void exportSchema() {
+    void exportSchemaAndDatabaseId() {
         var config = ImmutableGraphStoreToFileExporterConfig
             .builder()
             .exportName(tempDir.toString())
@@ -253,7 +254,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
         exporter.run(AllocationTracker.empty());
 
-        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME));
+        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, DATABASE_ID_FILE_NAME));
 
         assertDataContent(
             NODE_SCHEMA_FILE_NAME,
@@ -277,6 +278,14 @@ class GraphStoreToFileExporterTest extends CsvTest {
                 CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
                 List.of("REL1", "prop2", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), GraphStore.PropertyState.PERSISTENT.name()),
                 List.of("REL2", "prop4", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), GraphStore.PropertyState.PERSISTENT.name())
+            )
+        );
+
+        assertDataContent(
+            DATABASE_ID_FILE_NAME,
+            List.of(
+                List.of(CsvNamedDatabaseIdVisitor.DATABASE_ID_COLUMN_NAME),
+                List.of(graphStore.databaseId().toString())
             )
         );
     }

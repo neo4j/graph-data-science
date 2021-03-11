@@ -207,6 +207,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         private void exportNamedDatabaseId(GraphStoreInput graphStoreInput) {
             NamedDatabaseId namedDatabaseId = graphStoreInput.metaDataStore().databaseId();
             namedDatabaseIdVisitor.export(namedDatabaseId);
+            namedDatabaseIdVisitor.close();
         }
 
         private void exportNodeSchema(GraphStoreInput graphStoreInput) {
