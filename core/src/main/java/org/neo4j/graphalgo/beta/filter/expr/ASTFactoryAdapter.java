@@ -53,11 +53,6 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL,
     InputPosition> {
 
     @Override
-    public Expression neq2(InputPosition p, Expression lhs, Expression rhs) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Expression regeq(InputPosition p, Expression lhs, Expression rhs) {
         throw new UnsupportedOperationException();
     }

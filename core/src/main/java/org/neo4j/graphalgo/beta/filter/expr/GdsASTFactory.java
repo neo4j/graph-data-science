@@ -56,12 +56,12 @@ class GdsASTFactory extends ASTFactoryAdapter {
 
     @Override
     public Expression newTrueLiteral(InputPosition p) {
-        return ImmutableTrueLiteral.builder().build();
+        return Expression.Literal.TrueLiteral.INSTANCE;
     }
 
     @Override
     public Expression newFalseLiteral(InputPosition p) {
-        return ImmutableFalseLiteral.builder().build();
+        return Expression.Literal.FalseLiteral.INSTANCE;
     }
 
     @Override
@@ -91,17 +91,22 @@ class GdsASTFactory extends ASTFactoryAdapter {
     }
 
     @Override
-    public Expression eq(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableEqual.of(lhs, rhs);
-    }
-
-    @Override
     public Expression not(Expression e) {
         return ImmutableNot.of(e);
     }
 
     @Override
+    public Expression eq(InputPosition p, Expression lhs, Expression rhs) {
+        return ImmutableEqual.of(lhs, rhs);
+    }
+
+    @Override
     public Expression neq(InputPosition p, Expression lhs, Expression rhs) {
+        return ImmutableNotEqual.of(lhs, rhs);
+    }
+
+    @Override
+    public Expression neq2(InputPosition p, Expression lhs, Expression rhs) {
         return ImmutableNotEqual.of(lhs, rhs);
     }
 

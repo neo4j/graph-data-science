@@ -235,6 +235,8 @@ public interface Expression {
         @ValueClass
         interface TrueLiteral extends Literal {
 
+            TrueLiteral INSTANCE = ImmutableTrueLiteral.builder().build();
+
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
@@ -244,6 +246,8 @@ public interface Expression {
 
         @ValueClass
         interface FalseLiteral extends Literal {
+
+            FalseLiteral INSTANCE = ImmutableFalseLiteral.builder().build();
 
             @Value.Derived
             @Override
