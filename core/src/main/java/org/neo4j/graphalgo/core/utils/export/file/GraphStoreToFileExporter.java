@@ -35,16 +35,22 @@ import org.neo4j.internal.batchimport.input.Collector;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFileExporterConfig> {
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-    private final NodeSchemaVisitor nodeSchemaVisitor;
-    private final RelationshipSchemaVisitor relationshipSchemaVisitor;
-    private final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
-    private final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
+public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFileExporterConfig> {
+
+    protected final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
+    protected final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
+
+    public enum Mode {
+        FULL,
+        PARTIAL
+    }
 
     public static GraphStoreToFileExporter csv(
         GraphStore graphStore,
@@ -53,7 +59,7 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
     ) {
          Set<String> headerFiles = ConcurrentHashMap.newKeySet();
 
-        return new GraphStoreToFileExporter(
+        return GraphStoreToFileExporter.of(
             graphStore,
             config,
             new CsvNodeSchemaVisitor(exportPath),
@@ -63,7 +69,7 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
         );
     }
 
-    private GraphStoreToFileExporter(
+    private static GraphStoreToFileExporter of(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
         NodeSchemaVisitor nodeSchemaVisitor,
@@ -71,48 +77,43 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
     ) {
+        Mode mode = config.mode();
+        if (mode == Mode.FULL) {
+            return new FullGraphStoreToFileExporter(
+                graphStore,
+                config,
+                nodeSchemaVisitor,
+                relationshipSchemaVisitor,
+                nodeVisitorSupplier,
+                relationshipVisitorSupplier
+            );
+        }
+        if (mode == Mode.PARTIAL) {
+            return new GraphStoreToFileExporter(graphStore, config, nodeVisitorSupplier, relationshipVisitorSupplier);
+        }
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "Expected config parameter `mode` to be one of %s, but was %s",
+            Arrays.toString(Mode.values()),
+            mode
+        ));
+    }
+
+    protected GraphStoreToFileExporter(
+        GraphStore graphStore,
+        GraphStoreToFileExporterConfig config,
+        VisitorProducer<NodeVisitor> nodeVisitorSupplier,
+        VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
+    ) {
         super(graphStore, config);
-        this.nodeSchemaVisitor = nodeSchemaVisitor;
-        this.relationshipSchemaVisitor = relationshipSchemaVisitor;
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;
     }
 
     @Override
     protected void export(GraphStoreInput graphStoreInput) {
-        exportNodeSchema(graphStoreInput);
-        exportRelationshipSchema(graphStoreInput);
         exportNodes(graphStoreInput);
         exportRelationships(graphStoreInput);
-    }
-
-    private void exportNodeSchema(GraphStoreInput graphStoreInput) {
-        var nodeSchema = graphStoreInput.metaDataStore().nodeSchema();
-        nodeSchema.properties().forEach((nodeLabel, properties) -> {
-            properties.forEach((propertyKey, propertySchema) -> {
-                nodeSchemaVisitor.nodeLabel(nodeLabel);
-                nodeSchemaVisitor.key(propertyKey);
-                nodeSchemaVisitor.defaultValue(propertySchema.defaultValue());
-                nodeSchemaVisitor.valueType(propertySchema.valueType());
-                nodeSchemaVisitor.state(propertySchema.state());
-                nodeSchemaVisitor.endOfEntity();
-            });
-        });
-    }
-
-    private void exportRelationshipSchema(GraphStoreInput graphStoreInput) {
-        var relationshipSchema = graphStoreInput.metaDataStore().relationshipSchema();
-        relationshipSchema.properties().forEach((relationshipType, properties) -> {
-            properties.forEach((propertyKey, propertySchema) -> {
-                relationshipSchemaVisitor.relationshipType(relationshipType);
-                relationshipSchemaVisitor.key(propertyKey);
-                relationshipSchemaVisitor.defaultValue(propertySchema.defaultValue());
-                relationshipSchemaVisitor.valueType(propertySchema.valueType());
-                relationshipSchemaVisitor.aggregation(propertySchema.aggregation());
-                relationshipSchemaVisitor.state(propertySchema.state());
-                relationshipSchemaVisitor.endOfEntity();
-            });
-        });
     }
 
     private void exportNodes(GraphStoreInput graphStoreInput) {
@@ -168,5 +169,59 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
     }
 
     private interface VisitorProducer<VISITOR> extends Function<Integer, VISITOR> {
+    }
+
+    private static final class FullGraphStoreToFileExporter extends GraphStoreToFileExporter {
+        private final NodeSchemaVisitor nodeSchemaVisitor;
+        private final RelationshipSchemaVisitor relationshipSchemaVisitor;
+
+        private FullGraphStoreToFileExporter(
+            GraphStore graphStore,
+            GraphStoreToFileExporterConfig config,
+            NodeSchemaVisitor nodeSchemaVisitor,
+            RelationshipSchemaVisitor relationshipSchemaVisitor,
+            VisitorProducer<NodeVisitor> nodeVisitorSupplier,
+            VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
+        ) {
+            super(graphStore, config, nodeVisitorSupplier, relationshipVisitorSupplier);
+            this.nodeSchemaVisitor = nodeSchemaVisitor;
+            this.relationshipSchemaVisitor = relationshipSchemaVisitor;
+        }
+
+        @Override
+        protected void export(GraphStoreInput graphStoreInput) {
+            exportNodeSchema(graphStoreInput);
+            exportRelationshipSchema(graphStoreInput);
+            super.export(graphStoreInput);
+        }
+
+        private void exportNodeSchema(GraphStoreInput graphStoreInput) {
+            var nodeSchema = graphStoreInput.metaDataStore().nodeSchema();
+            nodeSchema.properties().forEach((nodeLabel, properties) -> {
+                properties.forEach((propertyKey, propertySchema) -> {
+                    nodeSchemaVisitor.nodeLabel(nodeLabel);
+                    nodeSchemaVisitor.key(propertyKey);
+                    nodeSchemaVisitor.defaultValue(propertySchema.defaultValue());
+                    nodeSchemaVisitor.valueType(propertySchema.valueType());
+                    nodeSchemaVisitor.state(propertySchema.state());
+                    nodeSchemaVisitor.endOfEntity();
+                });
+            });
+        }
+
+        private void exportRelationshipSchema(GraphStoreInput graphStoreInput) {
+            var relationshipSchema = graphStoreInput.metaDataStore().relationshipSchema();
+            relationshipSchema.properties().forEach((relationshipType, properties) -> {
+                properties.forEach((propertyKey, propertySchema) -> {
+                    relationshipSchemaVisitor.relationshipType(relationshipType);
+                    relationshipSchemaVisitor.key(propertyKey);
+                    relationshipSchemaVisitor.defaultValue(propertySchema.defaultValue());
+                    relationshipSchemaVisitor.valueType(propertySchema.valueType());
+                    relationshipSchemaVisitor.aggregation(propertySchema.aggregation());
+                    relationshipSchemaVisitor.state(propertySchema.state());
+                    relationshipSchemaVisitor.endOfEntity();
+                });
+            });
+        }
     }
 }
