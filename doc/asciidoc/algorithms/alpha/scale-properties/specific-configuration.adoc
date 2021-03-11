@@ -1,0 +1,7 @@
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                          | Type          | Default         | Optional | Description
+| featureProperties             | List<String>  | n/a             | no       | The names of the node properties that should be used as input features. All property names must exist in the in-memory graph and be of type Float or Integer.
+| scalers                       | String[]      | n/a             | no       | The names of the scalers applied for the properties. Supported values are `MinMax` and `Mean`.
+|===

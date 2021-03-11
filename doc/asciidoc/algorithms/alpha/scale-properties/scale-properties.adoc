@@ -1,0 +1,162 @@
+[[algorithms-scale-properties]]
+[.alpha]
+= Scale Properties
+
+:algorithm: Scale Properties
+
+[abstract]
+--
+This section describes the Scale Properties algorithm in the Neo4j Graph Data Science library.
+--
+
+[[algorithms-scale-properties-intro]]
+== Introduction
+
+The Scale Properties algorithm is a utility algorithm that is used to pre-process node properties for model training or post-process algorithm results such as PageRank scores.
+It scales the node properties based on the specified scalers.
+Multiple properties can be scaled at once and are returned in a list property.
+
+The input properties must be numbers.
+The output property will always be a list of the same size as the number of input properties.
+
+There are a number of supported scalers for the Scale Properties algorithm.
+These can be configured using the `scalers` configuration parameter.
+
+
+=== Min-max scaler
+
+Scales all property values into the range `[0, 1]` where the minimum value(s) get the scaled value `0` and the maximum value(s) get the scaled value `1`, according to this formula:
+
+image::equations/min-max.svg[minmax of p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
+
+=== Mean scaler
+
+Scales all property values into the range `[-1, 1]` where the average value(s) get the scaled value `0`.
+
+image::equations/mean.svg[mean of p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
+
+
+[[algorithms-scale-properties-syntax]]
+== Syntax
+
+include::../../shared/syntax-intro-named-graph.adoc[]
+
+.Scale Properties syntax per mode
+[.tabbed-example]
+====
+
+[.include-with-mutate]
+======
+.Run Scale Properties in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scaleProperties.mutate(
+  graphName: String,
+  configuration: Map
+) YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| createMillis          | Integer   | Milliseconds for loading data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| mutateMillis          | Integer   | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten | Integer   | Number of node properties written.
+| configuration         | Map       | Configuration used for running the algorithm.
+|===
+======
+====
+
+
+[[algorithms-scale-properties-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: hotel
+:image-file: scale-properties.svg
+include::../../shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (:Hotel {avgReview: 4.2, buildYear: 1978, name: 'East'}),
+  (:Hotel {avgReview: 8.1, buildYear: 1958, name: 'Plaza'}),
+  (:Hotel {avgReview: 19.0, buildYear: 1999, name: 'Central'}),
+  (:Hotel {avgReview: -4.12, buildYear: 2005, name: 'West'}),
+  (:Hotel {avgReview: 0.01, buildYear: 2020, name: 'Polar'}),
+  (:Hotel {avgReview: 3.3, buildYear: 1981, name: 'Beach'}),
+  (:Hotel {avgReview: 6.7, buildYear: 1984, name: 'Mountain'}),
+  (:Hotel {avgReview: -1.2, buildYear: 2010, name: 'Forest'})
+----
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `Hotel` nodes, including their numeric properties.
+Note that no relationships are necessary to scale the node properties.
+Thus we use a star projection ('*') for relationships.
+
+include::../../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'Hotel',
+  '*',
+  { nodeProperties: ['avgReview', 'buildYear'] }
+)
+----
+
+In the following examples we will demonstrate how to scale the node properties of this graph.
+
+
+[[algorithms-scale-properties-examples-mutate]]
+=== Mutate
+
+The `mutate` execution mode enables updating the named graph with a new node property containing the scaled properties for that node.
+The name of the new property is specified using the mandatory configuration parameter `mutateProperty`.
+The result is a single summary row containing metrics from the computation.
+The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
+
+For more details on the `mutate` mode in general, see <<running-algos-mutate>>.
+
+In this example we will scale the two hotel properties of `buildYear` and `avgReview` using the <<Min-max scaler>> and <<Mean scaler>>, respectively.
+The output is a list property which we will call `hotelFeatures`, imagining that we will use this as input for a machine learning model later on.
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scaleProperties.mutate('myGraph', {
+  featureProperties: ['buildYear', 'avgReview'],
+  scalers: ['MinMax', 'Mean'],
+  mutateProperty: 'hotelFeatures'
+}) YIELD nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten
+| 8
+|===
+--
+
+The result shows that there are now six new node properties in the in-memory graph.
+These contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
+To find out how to inspect the new schema of the in-memory graph, see <<catalog-graph-list, Listing graphs in the catalog>>.

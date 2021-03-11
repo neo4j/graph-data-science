@@ -220,6 +220,9 @@
                 <d:tocentry linkend="algorithms-collapse-path">
                     <?dbhtml filename="alpha-algorithms/collapse-path/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-scale-properties">
+                    <?dbhtml filename="alpha-algorithms/scale-properties/index.html"?>
+                </d:tocentry>
                 <d:tocentry linkend="alpha-algorithms-one-hot-encoding">
                     <?dbhtml filename="alpha-algorithms/one-hot-encoding/index.html"?>
                 </d:tocentry>

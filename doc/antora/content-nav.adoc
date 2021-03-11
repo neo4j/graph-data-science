@@ -72,6 +72,7 @@
 *** xref:algorithms/auxiliary/index.adoc[]
 **** xref:alpha-algorithms/graph-generation/index.adoc[]
 **** xref:alpha-algorithms/collapse-path/index.adoc[]
+**** xref:alpha-algorithms/scale-properties/index.adoc[]
 **** xref:alpha-algorithms/one-hot-encoding/index.adoc[]
 **** xref:alpha-algorithms/split-relationships/index.adoc[]
 *** xref:algorithms/pregel-api/index.adoc[]

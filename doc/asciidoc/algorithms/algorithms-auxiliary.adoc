@@ -13,12 +13,15 @@ The Neo4j GDS library includes the following auxiliary procedures, grouped by qu
 ** <<graph-generation, Graph Generation>>
 * Alpha
 ** <<algorithms-collapse-path, Collapse Path>>
+** <<algorithms-scale-properties, Scale Properties>>
 ** <<algorithms-one-hot-encoding-sample, One Hot Encoding>>
 ** <<algorithms-split-relationships, Split Relationships>>
 
 include::beta/graph-generation.adoc[leveloffset=+1]
 
 include::alpha/collapse-path/collapse-path.adoc[leveloffset=+1]
+
+include::alpha/scale-properties/scale-properties.adoc[leveloffset=+1]
 
 include::alpha/alpha-one-hot-encoding.adoc[leveloffset=+1]
 
