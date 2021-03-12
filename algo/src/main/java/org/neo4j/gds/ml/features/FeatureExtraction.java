@@ -119,7 +119,7 @@ public final class FeatureExtraction {
                     );
                     return new ArrayPropertyExtractor(propertyValues.length, graph, propertyKey);
                 }
-                if ((ValueType.LONG_ARRAY == propertyType)) {
+                if (ValueType.LONG_ARRAY == propertyType) {
                     var propertyValues = EmbeddingUtils.getCheckedLongArrayNodeProperty(
                         graph,
                         propertyKey,

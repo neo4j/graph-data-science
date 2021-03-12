@@ -40,6 +40,11 @@ public class LongArrayPropertyExtractor implements ArrayFeatureExtractor {
 
     @Override
     public double[] extract(long nodeId) {
-        return EmbeddingUtils.getCheckedLongArrayNodeProperty(graph, propertyKey, nodeId, dimension);
+        var longProperties = EmbeddingUtils.getCheckedLongArrayNodeProperty(graph, propertyKey, nodeId, dimension);
+        var result = new double[longProperties.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = longProperties[i];
+        }
+        return result;
     }
 }
