@@ -184,7 +184,7 @@ class LinkMetricTest {
         var signedProbabilites = SignedProbabilities.create(1000);
         IOUtils.readLines(resourceAsStream, StandardCharsets.UTF_8).forEach(line -> {
             var split = line.split(",");
-            var prob = Float.valueOf(split[1]);
+            var prob = Float.parseFloat(split[1]);
             signedProbabilites.add(split[0].equals("+") ? prob : -prob);
         });
         assertThat(LinkMetric.AUCPR.compute(signedProbabilites, 1.0)).isEqualTo(expectedAUC, Offset.offset(1e-24));

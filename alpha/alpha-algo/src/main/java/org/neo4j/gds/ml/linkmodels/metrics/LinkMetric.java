@@ -48,8 +48,7 @@ public enum LinkMetric {
         private final long negativeCount;
         private final double classRatio;
 
-        private boolean hasSeenAValue;
-        private double lastThreshold = 42;
+        private double lastThreshold;
 
         private long positivesSeen;
         private long negativesSeen;
@@ -64,14 +63,13 @@ public enum LinkMetric {
             this.positiveCount = positiveCount;
             this.negativeCount = negativeCount;
             this.classRatio = classRatio;
-            this.hasSeenAValue = false;
             this.positivesSeen = 0;
             this.negativesSeen = 0;
         }
 
         void accept(double signedProbability) {
-            var hasSeenAvalue = positivesSeen > 0 || negativesSeen > 0;
-            if (hasSeenAvalue) {
+            var hasSeenAValue = positivesSeen > 0 || negativesSeen > 0;
+            if (hasSeenAValue) {
                 if (Math.abs(signedProbability) != lastThreshold) {
                     reportPointOnCurve();
                 }

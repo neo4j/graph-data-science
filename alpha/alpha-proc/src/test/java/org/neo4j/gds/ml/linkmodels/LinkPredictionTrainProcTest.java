@@ -151,19 +151,19 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "bestParameters", Map.of("penalty", 0.5, "maxIterations", 1),
             "metrics", Map.of(
                 "AUCPR", Map.of(
-                    "outerTrain", 0.9999999999999996,
-                    "test", 0.9999999999999999,
+                    "outerTrain", 1.0,
+                    "test", 1.0,
                     "train", List.of(
                         Map.of(
                             "avg", 1.0,
                             "max", 1.0,
-                            "min", 0.9999999999999999,
+                            "min", 1.0,
                             "params", Map.of("penalty", 0.5, "maxIterations", 1)
                         ),
                         Map.of(
                             "avg", 1.0,
                             "max", 1.0,
-                            "min", 0.9999999999999999,
+                            "min", 1.0,
                             "params", Map.of("penalty", 2.0, "maxIterations", 100)
                         )
                     ),
@@ -171,13 +171,13 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
                         Map.of(
                             "avg", 1.0,
                             "max", 1.0,
-                            "min", 0.9999999999999999,
+                            "min", 1.0,
                             "params", Map.of("penalty", 0.5, "maxIterations", 1)
                         ),
                         Map.of(
                             "avg", 1.0,
                             "max", 1.0,
-                            "min", 0.9999999999999999,
+                            "min", 1.0,
                             "params", Map.of("penalty", 2.0, "maxIterations", 100)
                         )
                     )
