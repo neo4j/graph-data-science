@@ -189,14 +189,14 @@ class CompressedLongArrayTest {
 
         byte[] bytes = {};
         // Override the internal `length` field to be the requested `length`
-        UnsafeUtil.putInt(bytes, arrayLengthOffset, length);
+        UnsafeUtil.putIntVolatile(bytes, arrayLengthOffset, length);
         assertEquals(length, bytes.length);
 
         try {
             code.accept(bytes);
         } finally {
             // Set it back to 0 to avoid shenanigans when it is cleaned up
-            UnsafeUtil.putInt(bytes, arrayLengthOffset, 0);
+            UnsafeUtil.putIntVolatile(bytes, arrayLengthOffset, 0);
         }
     }
 }
