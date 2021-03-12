@@ -29,26 +29,26 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LinkFeatureCombinerTest {
+class LinkFeatureCombinersTest {
 
     @ParameterizedTest
     @MethodSource("l2InputArrays")
     void shouldCombineArraysUsingL2(double[] sourceArray, double[] targetArray, double[] expectedCombined) {
-        var combined = LinkFeatureCombiner.L2.combine(sourceArray, targetArray);
+        var combined = LinkFeatureCombiners.L2.combine(sourceArray, targetArray);
         assertThat(combined).containsExactly(expectedCombined);
     }
 
     @ParameterizedTest
     @MethodSource("hadamardInputArrays")
     void shouldCombineArraysUsingHADAMARD(double[] sourceArray, double[] targetArray, double[] expectedCombined) {
-        var combined = LinkFeatureCombiner.HADAMARD.combine(sourceArray, targetArray);
+        var combined = LinkFeatureCombiners.HADAMARD.combine(sourceArray, targetArray);
         assertThat(combined).containsExactly(expectedCombined);
     }
 
     @ParameterizedTest
     @MethodSource("cosineInputArrays")
     void shouldCombineArraysUsingCOSINE(double[] sourceArray, double[] targetArray, double[] expectedCombined) {
-        var combined = LinkFeatureCombiner.COSINE.combine(sourceArray, targetArray);
+        var combined = LinkFeatureCombiners.COSINE.combine(sourceArray, targetArray);
         assertThat(combined).containsExactly(expectedCombined, Offset.offset(1e-6));
     }
 

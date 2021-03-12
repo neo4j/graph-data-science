@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 import org.immutables.value.Value;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.ml.DoubleArrayCombiner;
+import org.neo4j.gds.ml.LinkFeatureCombiner;
 import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
@@ -34,33 +34,33 @@ public interface LinkLogisticRegressionData {
 
     Weights<Matrix> weights();
 
-    DoubleArrayCombiner linkFeatureCombiner();
+    LinkFeatureCombiner linkFeatureCombiner();
 
     List<String> featureProperties();
 
     @Value.Derived
-    default int numberOfFeatures() {
-        return linkFeatureCombiner().outputDimension(numberOfNodeFeatures());
+    default int linkFeatureDimension() {
+        return linkFeatureCombiner().linkFeatureDimension(nodeFeatureDimension());
     }
 
-    int numberOfNodeFeatures();
+    int nodeFeatureDimension();
 
     static LinkLogisticRegressionData from(
         Graph graph,
         List<String> featureProperties,
-        DoubleArrayCombiner linkFeatureCombiner
+        LinkFeatureCombiner linkFeatureCombiner
     ) {
-        var numberOfNodeFeatures = FeatureExtraction.featureCount(
+        var nodeFeatureDimension = FeatureExtraction.featureCount(
             FeatureExtraction.propertyExtractors(graph, featureProperties)
         );
-        var numberOfFeatures = linkFeatureCombiner.outputDimension(numberOfNodeFeatures);
+        var numberOfFeatures = linkFeatureCombiner.linkFeatureDimension(nodeFeatureDimension);
         var weights = Weights.ofMatrix(1, numberOfFeatures);
 
         return builder()
             .weights(weights)
             .linkFeatureCombiner(linkFeatureCombiner)
             .featureProperties(featureProperties)
-            .numberOfNodeFeatures(numberOfNodeFeatures)
+            .nodeFeatureDimension(nodeFeatureDimension)
             .build();
     }
 

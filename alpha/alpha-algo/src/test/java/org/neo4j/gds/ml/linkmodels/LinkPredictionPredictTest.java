@@ -23,7 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiner;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 import org.neo4j.graphalgo.Orientation;
@@ -65,8 +65,8 @@ class LinkPredictionPredictTest {
             .weights(new Weights<>(new Matrix(new double[]{
                 -2.0, -1.0, 3.0,
             }, 1, numberOfFeatures)))
-            .linkFeatureCombiner(LinkFeatureCombiner.L2)
-            .numberOfNodeFeatures(numberOfNodeFeatures)
+            .linkFeatureCombiner(LinkFeatureCombiners.L2)
+            .nodeFeatureDimension(numberOfNodeFeatures)
             .featureProperties(List.of("a", "b"))
             .build();
 

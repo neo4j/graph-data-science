@@ -19,10 +19,15 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
-import org.neo4j.gds.ml.DoubleArrayCombiner;
+import org.neo4j.gds.ml.LinkFeatureCombiner;
 import org.neo4j.graphalgo.core.utils.Intersections;
 
-public enum LinkFeatureCombiner implements DoubleArrayCombiner {
+public enum LinkFeatureCombiners implements LinkFeatureCombiner {
+
+    /**
+     * Computes component-wise squared differences of node features
+     * and appends a bias feature which always has value 1.0.
+     */
     L2 {
         @Override
         public double[] combine(double[] sourceArray, double[] targetArray) {
@@ -36,10 +41,14 @@ public enum LinkFeatureCombiner implements DoubleArrayCombiner {
         }
 
         @Override
-        public int outputDimension(int inputDimension) {
-            return inputDimension + 1;
+        public int linkFeatureDimension(int nodeFeatureDimension) {
+            return nodeFeatureDimension + 1;
         }
     },
+    /**
+     * Computes component-wise product of node features
+     * and appends a bias feature which always has value 1.0.
+     */
     HADAMARD {
         @Override
         public double[] combine(double[] sourceArray, double[] targetArray) {
@@ -53,10 +62,14 @@ public enum LinkFeatureCombiner implements DoubleArrayCombiner {
         }
 
         @Override
-        public int outputDimension(int inputDimension) {
-            return inputDimension + 1;
+        public int linkFeatureDimension(int nodeFeatureDimension) {
+            return nodeFeatureDimension + 1;
         }
     },
+    /**
+     * Computes the cosine similarity of the node feature vectors
+     * and appends a bias feature which always has value 1.0.
+     */
     COSINE {
         @Override
         public double[] combine(double[] sourceArray, double[] targetArray) {
@@ -68,7 +81,7 @@ public enum LinkFeatureCombiner implements DoubleArrayCombiner {
         }
 
         @Override
-        public int outputDimension(int inputDimension) {
+        public int linkFeatureDimension(int nodeFeatureDimension) {
             return 2;
         }
     }

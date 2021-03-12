@@ -66,7 +66,7 @@ class LinkLogisticRegressionObjectiveTest {
         var data = LinkLogisticRegressionData.from(
             graph,
             List.of("a", "b"),
-            LinkFeatureCombiner.L2
+            LinkFeatureCombiners.L2
         );
         var objective = new LinkLogisticRegressionObjective(data, 1.0, graph);
         var loss = objective.loss(allNodesBatch, graph.relationshipCount());
@@ -81,7 +81,7 @@ class LinkLogisticRegressionObjectiveTest {
         var data = LinkLogisticRegressionData.from(
             graph,
             List.of("a", "b"),
-            LinkFeatureCombiner.L2
+            LinkFeatureCombiners.L2
         );
         var objective = new LinkLogisticRegressionObjective(data, 1.0, graph);
         // we proceed to "injecting" non-zero values for the weights of the model

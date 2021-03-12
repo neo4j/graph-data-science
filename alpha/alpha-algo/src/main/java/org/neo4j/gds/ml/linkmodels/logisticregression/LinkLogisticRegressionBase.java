@@ -50,7 +50,7 @@ public class LinkLogisticRegressionBase {
         // assume batching has been done so that relationship count does not overflow int
         batch.nodeIds().forEach(nodeId -> relationshipCount.add(graph.degree(nodeId)));
         int rows = relationshipCount.intValue();
-        int cols = modelData.numberOfFeatures();
+        int cols = modelData.linkFeatureDimension();
         double[] features = new double[rows * cols];
         var relationshipOffset = new MutableInt();
         batch.nodeIds().forEach(nodeId -> {
@@ -71,7 +71,7 @@ public class LinkLogisticRegressionBase {
     }
 
     protected double[] nodeFeatures(Graph graph, long nodeId) {
-        var features = new double[modelData.numberOfNodeFeatures()];
+        var features = new double[modelData.nodeFeatureDimension()];
 
         var consumer = featureConsumer(features);
         FeatureExtraction.extract(

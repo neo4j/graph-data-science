@@ -51,7 +51,7 @@ public class LinkLogisticRegressionTrain {
         var llrData = LinkLogisticRegressionData.from(
             graph,
             config.featureProperties(),
-            LinkFeatureCombiner.valueOf(config.linkFeatureCombiner())
+            LinkFeatureCombiners.valueOf(config.linkFeatureCombiner())
         );
         var objective = new LinkLogisticRegressionObjective(
             llrData,

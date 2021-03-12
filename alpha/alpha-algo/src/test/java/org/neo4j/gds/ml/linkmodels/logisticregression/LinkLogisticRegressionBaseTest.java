@@ -60,9 +60,9 @@ class LinkLogisticRegressionBaseTest {
         double[] weightsArray = new double[nodePropertyKeys.size() + 1];
         var weights = new Weights<>(new Matrix(weightsArray, 1, weightsArray.length));
         var base = new LinkLogisticRegressionBase(LinkLogisticRegressionData.builder()
-            .linkFeatureCombiner(LinkFeatureCombiner.L2)
+            .linkFeatureCombiner(LinkFeatureCombiners.L2)
             .featureProperties(nodePropertyKeys)
-            .numberOfNodeFeatures(2)
+            .nodeFeatureDimension(2)
             .weights(weights)
             .build()
         );

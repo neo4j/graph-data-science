@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiner;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -147,9 +147,9 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
                         new double[]{-0.0016811290857949518, 7.441367814815001E-4}, 1, 2)
                     )
                 )
-                .linkFeatureCombiner(LinkFeatureCombiner.L2)
+                .linkFeatureCombiner(LinkFeatureCombiners.L2)
                 .featureProperties(List.of("a"))
-                .numberOfNodeFeatures(2)
+                .nodeFeatureDimension(2)
                 .build(),
             ImmutableLinkPredictionTrainConfig.builder()
                 .modelName("model")

@@ -45,7 +45,7 @@ public interface LinkLogisticRegressionTrainConfig extends FeaturePropertiesConf
 
     @Value.Default
     default String linkFeatureCombiner() {
-        return LinkFeatureCombiner.L2.name();
+        return LinkFeatureCombiners.L2.name();
     }
 
     @Configuration.CollectKeys

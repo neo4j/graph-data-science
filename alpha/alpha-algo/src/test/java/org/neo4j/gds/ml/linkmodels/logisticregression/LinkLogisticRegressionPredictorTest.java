@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.ml.DoubleArrayCombiner;
+import org.neo4j.gds.ml.LinkFeatureCombiner;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -91,7 +91,7 @@ class LinkLogisticRegressionPredictorTest {
         assertThat(result).isCloseTo(expectedResult, Offset.offset(1e-10));
     }
 
-    private static class SumCombiner implements DoubleArrayCombiner {
+    private static class SumCombiner implements LinkFeatureCombiner {
         @Override
         public double[] combine(double[] sourceArray, double[] targetArray) {
             var result =  new double[sourceArray.length];
@@ -102,8 +102,8 @@ class LinkLogisticRegressionPredictorTest {
         }
 
         @Override
-        public int outputDimension(int inputDimension) {
-            return inputDimension;
+        public int linkFeatureDimension(int nodeFeatureDimension) {
+            return nodeFeatureDimension;
         }
     }
 }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml;
 
-public interface DoubleArrayCombiner {
+public interface LinkFeatureCombiner {
     double[] combine(double[] sourceArray, double[] targetArray);
-    int outputDimension(int inputDimension);
+    int linkFeatureDimension(int nodeFeatureDimension);
 }
