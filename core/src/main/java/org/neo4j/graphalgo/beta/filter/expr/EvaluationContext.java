@@ -45,6 +45,7 @@ public abstract class EvaluationContext {
 
         @Override
         double getProperty(String propertyKey) {
+            // TODO: this will always construct a new UnionProperties instance. Should at least be cached.
             var nodeProperties = graphStore.nodePropertyValues(propertyKey);
             return nodeProperties.doubleValue(nodeId);
         }

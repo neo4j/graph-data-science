@@ -31,7 +31,7 @@ class GdsASTFactory extends ASTFactoryAdapter {
 
     @Override
     public Expression.LeafExpression.Variable newVariable(InputPosition p, String name) {
-        return ImmutableVariable.builder().build();
+        return ImmutableVariable.builder().name(name).build();
     }
 
     @Override
@@ -67,15 +67,15 @@ class GdsASTFactory extends ASTFactoryAdapter {
     @Override
     public Expression hasLabelsOrTypes(Expression subject, List<ASTFactory.StringPos<InputPosition>> labels) {
         var labelStrings = labels.stream().map(l -> l.string).collect(Collectors.toList());
-        return ImmutableHasLabelsOrTypes.of(labelStrings);
+        return ImmutableHasLabelsOrTypes.of(subject, labelStrings);
     }
 
     @Override
-    public Expression.LeafExpression.Property property(
+    public Expression.UnaryExpression.Property property(
         Expression subject,
         ASTFactory.StringPos<InputPosition> propertyKeyName
     ) {
-        return ImmutableProperty.of(propertyKeyName.string);
+        return ImmutableProperty.of(subject, propertyKeyName.string);
     }
 
     @Override

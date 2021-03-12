@@ -43,7 +43,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL,
     Expression,
     Expression,
     Expression.LeafExpression.Variable,
-    Expression.LeafExpression.Property,
+    Expression.UnaryExpression.Property,
     NULL,
     NULL,
     NULL,
@@ -433,7 +433,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL,
     }
 
     @Override
-    public NULL setProperty(Expression.LeafExpression.Property property, Expression value) {
+    public NULL setProperty(Expression.UnaryExpression.Property property, Expression value) {
         throw new UnsupportedOperationException();
     }
 
@@ -458,7 +458,7 @@ abstract class ASTFactoryAdapter implements ASTFactory<NULL,
     }
 
     @Override
-    public NULL removeProperty(Expression.LeafExpression.Property property) {
+    public NULL removeProperty(Expression.UnaryExpression.Property property) {
         throw new UnsupportedOperationException();
     }
 

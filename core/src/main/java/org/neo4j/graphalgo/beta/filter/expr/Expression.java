@@ -23,6 +23,10 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.List;
+import java.util.Set;
+
+import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface Expression {
     double TRUE = 1.0D;
@@ -30,23 +34,61 @@ public interface Expression {
     double EPSILON = 1E-5;
     double VARIABLE = Double.NaN;
 
+    @Value.Derived
     double evaluate(EvaluationContext context);
+
+    @Value.Derived
+    default ValidationContext validate(ValidationContext context) {
+        return context;
+    }
 
     interface LeafExpression extends Expression {
 
         @ValueClass
         interface Variable extends LeafExpression {
 
-            @Value.Derived
+            String name();
+
             @Override
             default double evaluate(EvaluationContext context) {
                 return VARIABLE;
             }
+
+            @Override
+            default ValidationContext validate(ValidationContext context) {
+                if (context.context() == ValidationContext.Context.NODE) {
+                    if (!name().equals("n")) {
+                        return context.withError(SemanticErrors.SemanticError.of(formatWithLocale(
+                            "Invalid variable `%s`. Only `n` is allowed for nodes",
+                            name()
+                        )));
+                    }
+                } else if (context.context() == ValidationContext.Context.RELATIONSHIP) {
+                    if (!name().equals("r")) {
+                        return context.withError(SemanticErrors.SemanticError.of(formatWithLocale(
+                            "Invalid variable `%s`. Only `r` is allowed for relationships",
+                            name()
+                        )));
+                    }
+                }
+
+                return context;
+            }
         }
 
+    }
+
+    interface UnaryExpression extends Expression {
+
+        Expression in();
+
+        @Override
+        default ValidationContext validate(ValidationContext context) {
+            return in().validate(context);
+        }
 
         @ValueClass
-        interface Property extends LeafExpression {
+        interface Property extends UnaryExpression {
 
             String propertyKey();
 
@@ -55,10 +97,30 @@ public interface Expression {
             default double evaluate(EvaluationContext context) {
                 return context.getProperty(propertyKey());
             }
+
+            @Override
+            default ValidationContext validate(ValidationContext context) {
+                context = in().validate(context);
+
+                Set<String> availablePropertyKeys = context.availableProperties();
+
+                if (!availablePropertyKeys.contains(propertyKey())) {
+                    return context.withError(SemanticErrors.SemanticError.of(prettySuggestions(
+                        formatWithLocale(
+                            "Unknown property `%s`.",
+                            propertyKey()
+                        ),
+                        propertyKey(),
+                        availablePropertyKeys
+                    )));
+                }
+
+                return context;
+            }
         }
 
         @ValueClass
-        interface HasLabelsOrTypes extends LeafExpression {
+        interface HasLabelsOrTypes extends UnaryExpression {
             List<String> labelsOrTypes();
 
             @Value.Derived
@@ -66,12 +128,33 @@ public interface Expression {
             default double evaluate(EvaluationContext context) {
                 return context.hasLabelsOrTypes(labelsOrTypes()) ? TRUE : FALSE;
             }
+
+            @Override
+            default ValidationContext validate(ValidationContext context) {
+                context = in().validate(context);
+
+                Set<String> availableLabelsOrTypes = context.availableLabelsOrTypes();
+                String elementType = context.context() == ValidationContext.Context.NODE
+                    ? "label"
+                    : "relationship type";
+
+                for (String labelOrType : labelsOrTypes()) {
+                    if (!availableLabelsOrTypes.contains(labelOrType)) {
+                        context = context.withError(SemanticErrors.SemanticError.of(prettySuggestions(
+                            formatWithLocale(
+                                "Unknown %s `%s`.",
+                                elementType,
+                                labelOrType
+                            ),
+                            labelOrType,
+                            availableLabelsOrTypes
+                        )));
+                    }
+                }
+
+                return context;
+            }
         }
-    }
-
-    interface UnaryExpression extends Expression {
-
-        Expression in();
 
         @ValueClass
         interface Not extends UnaryExpression {
@@ -81,6 +164,7 @@ public interface Expression {
             default double evaluate(EvaluationContext context) {
                 return in().evaluate(context) == TRUE ? FALSE : TRUE;
             }
+
         }
     }
 
@@ -89,6 +173,12 @@ public interface Expression {
         Expression lhs();
 
         Expression rhs();
+
+        @Override
+        default ValidationContext validate(ValidationContext context) {
+            context = lhs().validate(context);
+            return rhs().validate(context);
+        }
 
         @ValueClass
         interface And extends BinaryExpression {
