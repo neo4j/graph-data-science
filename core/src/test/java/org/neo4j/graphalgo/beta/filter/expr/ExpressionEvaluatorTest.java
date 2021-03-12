@@ -22,13 +22,20 @@ package org.neo4j.graphalgo.beta.filter.expr;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.constraints.DoubleRange;
+import org.immutables.value.Value;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.beta.filter.expr.Expression.FALSE;
@@ -177,11 +184,34 @@ class ExpressionEvaluatorTest {
         assertThat(expr.evaluate(EMPTY_CONTEXT) == TRUE).isEqualTo(expected);
     }
 
-    @Test
-    void property() throws ParseException {
-        var expr = ExpressionParser.parse("n.foo");
-        var context = TestEvaluationContext.of("foo", 42, true);
-        assertThat(expr.evaluate(context) == 42).isTrue();
+    @ParameterizedTest
+    @CsvSource(value = {
+        "foo,42",
+        "bar,1.337"
+    })
+    void property(String propertyKey, double propertyValue) throws ParseException {
+        var expr = ExpressionParser.parse("n." + propertyKey);
+        var context = ImmutableTestContext.builder().propertyKey(propertyKey).propertyValue(propertyValue).build();
+        assertThat(expr.evaluate(context) == propertyValue).isTrue();
+    }
+
+    static Stream<Arguments> hasLabelInput() {
+        return Stream.of(
+            Arguments.arguments(List.of("A"), List.of("A"), true),
+            Arguments.arguments(List.of("A", "B"), List.of("A"), true),
+            Arguments.arguments(List.of("A", "B"), List.of("A", "B"), true),
+            Arguments.arguments(List.of("A"), List.of("B"), false),
+            Arguments.arguments(List.of("A", "B"), List.of("B", "C"), false)
+        );
+    }
+
+    @ParameterizedTest()
+    @MethodSource("org.neo4j.graphalgo.beta.filter.expr.ExpressionEvaluatorTest#hasLabelInput")
+    void hasLabelsOrTypes(Iterable<String> actual, Collection<String> requested, boolean expected) throws ParseException {
+        var labelExpression = requested.stream().map(label -> ":" + label).collect(Collectors.joining());
+        var expr = ExpressionParser.parse("n" + labelExpression);
+        var context = ImmutableTestContext.builder().addAllLabelsOrTypes(actual).build();
+        assertThat(expr.evaluate(context) == TRUE).isEqualTo(expected);
     }
 
     private static final EvaluationContext EMPTY_CONTEXT = new EvaluationContext() {
@@ -196,32 +226,35 @@ class ExpressionEvaluatorTest {
         }
     };
 
-    static class TestEvaluationContext extends EvaluationContext {
+    @ValueClass
+    static class TestContext extends EvaluationContext {
 
-        private final String propertyKey;
-        private final double value;
-
-        private final boolean hasLabelOrRelType;
-
-        TestEvaluationContext(String propertyKey, double value, boolean hasLabelOrRelType) {
-            this.propertyKey = propertyKey;
-            this.value = value;
-            this.hasLabelOrRelType = hasLabelOrRelType;
+        @Value.Default
+        public String propertyKey() {
+            return "";
         }
 
-        static EvaluationContext of(String propertyKey, double value, boolean hasLabelOrRelType) {
-            return new TestEvaluationContext(propertyKey, value, hasLabelOrRelType);
+        @Value.Default
+        public double propertyValue() {
+            return Double.NaN;
+        }
+
+        @Value.Default
+        public List<String> labelsOrTypes() {
+            return List.of();
         }
 
         @Override
+        @Value.Derived
         double getProperty(String propertyKey) {
-            assertThat(propertyKey).isEqualTo(this.propertyKey);
-            return value;
+            assertThat(propertyKey).isEqualTo(propertyKey());
+            return propertyValue();
         }
 
         @Override
+        @Value.Derived
         boolean hasLabelsOrTypes(List<String> labelsOrTypes) {
-            return hasLabelOrRelType;
+            return labelsOrTypes().containsAll(labelsOrTypes);
         }
     }
 
