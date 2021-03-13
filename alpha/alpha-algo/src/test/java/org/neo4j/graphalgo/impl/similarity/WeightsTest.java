@@ -31,31 +31,31 @@ class WeightsTest {
 
     @Test
     void shouldTransformListToArray() {
-        Number[] values = {1.0, 2.0, 3.0, 4.0};
-        List<Number> weightList = Arrays.asList(values);
+        Double[] values = {1.0, 2.0, 3.0, 4.0};
+        List<Double> weightList = Arrays.asList(values);
         assertArrayEquals(new double[]{1.0, 2.0, 3.0, 4.0}, Weights.buildWeights(weightList), 0.01);
     }
 
     @Test
     void nans() {
-        Number[] values = {Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
-        List<Number> weightList = Arrays.asList(values);
+        Double[] values = {Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+        List<Double> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 3);
         assertArrayEquals(new double[]{Double.POSITIVE_INFINITY, 5.0, Double.NaN}, actuals, 0.01);
     }
 
     @Test
     void rleWithOneRepeatedValue() {
-        Number[] values = {4.0, 4.0};
-        List<Number> weightList = Arrays.asList(values);
+        Double[] values = {4.0, 4.0};
+        List<Double> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
         assertArrayEquals(new double[]{Double.POSITIVE_INFINITY, 2.0, 4.0}, actuals, 0.01);
     }
 
     @Test
     void rleWithMoreThanOneRepeatedValue() {
-        Number[] values = {2.0, 2.0, 4.0, 4.0, 6.0, 6.0};
-        List<Number> weightList = Arrays.asList(values);
+        Double[] values = {2.0, 2.0, 4.0, 4.0, 6.0, 6.0};
+        List<Double> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
         assertArrayEquals(new double[]{
                 Double.POSITIVE_INFINITY, 2.0, 2.0,
@@ -65,8 +65,8 @@ class WeightsTest {
 
     @Test
     void rleWithMoreThanOneRepeatedValueOfDifferentSizes() {
-        Number[] values = {2.0, 2.0, 4.0, 4.0, 4.0, 4.0, 6.0, 6.0};
-        List<Number> weightList = Arrays.asList(values);
+        Double[] values = {2.0, 2.0, 4.0, 4.0, 4.0, 4.0, 6.0, 6.0};
+        List<Double> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
         assertArrayEquals(new double[]{
                 Double.POSITIVE_INFINITY, 2.0, 2.0,
@@ -76,8 +76,8 @@ class WeightsTest {
 
     @Test
     void rleWithMixedValues() {
-        Number[] values = {7.0, 2.0, 2.0, 4.0, 4.0, 6.0, 6.0, 7.0};
-        List<Number> weightList = Arrays.asList(values);
+        Double[] values = {7.0, 2.0, 2.0, 4.0, 4.0, 6.0, 6.0, 7.0};
+        List<Double> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 1);
         assertArrayEquals(new double[]{
                 7.0,
@@ -89,15 +89,15 @@ class WeightsTest {
 
     @Test
     void rleWithNoRepeats() {
-        Number[] values = {7.0, 2.0, 2.0, 4.0, 4.0, 6.0, 6.0, 7.0};
-        List<Number> weightList = Arrays.asList(values);
+        Double[] values = {7.0, 2.0, 2.0, 4.0, 4.0, 6.0, 6.0, 7.0};
+        List<Double> weightList = Arrays.asList(values);
         double[] actuals = Weights.buildRleWeights(weightList, 5);
         assertArrayEquals(new double[]{7.0, 2.0, 2.0, 4.0, 4.0, 6.0, 6.0, 7.0}, actuals, 0.01);
     }
 
     @Test
     void rleWithEmptyArray() {
-        List<Number> weightList = Collections.emptyList();
+        List<Double> weightList = Collections.emptyList();
         double[] actuals = Weights.buildRleWeights(weightList, 5);
         assertArrayEquals(new double[0], actuals, 0.01);
     }

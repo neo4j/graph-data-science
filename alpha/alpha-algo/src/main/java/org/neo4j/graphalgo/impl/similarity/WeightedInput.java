@@ -81,7 +81,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
             if (!row.containsKey("weights") || !row.containsKey("item")) {
                 throw new IllegalArgumentException("Input data requires 'item' and 'weights' for every row.");
             }
-            List<Number> weightList = SimilarityInput
+            List<Double> weightList = SimilarityInput
                 .extractValues(row.get("weights"))
                 .stream()
                 .map(NumberUtils::getDoubleValue)
@@ -99,8 +99,8 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         return inputs;
     }
 
-    private static long skipSize(Double skipValue, boolean skipNan, List<Number> weightList) {
-        return weightList.stream().filter(value -> !Intersections.shouldSkip(value.doubleValue(), skipValue, skipNan)).count();
+    private static long skipSize(Double skipValue, boolean skipNan, List<Double> weightList) {
+        return weightList.stream().filter(value -> !Intersections.shouldSkip(value, skipValue, skipNan)).count();
     }
 
     public int compareTo(WeightedInput o) {

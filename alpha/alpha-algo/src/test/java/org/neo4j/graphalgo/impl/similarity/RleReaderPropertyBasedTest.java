@@ -31,7 +31,7 @@ class RleReaderPropertyBasedTest {
 
     @Property
     void mixedRepeats(
-            @ForAll List<@IntRange(min = 0, max = 2) Number> vector1List,
+            @ForAll List<@IntRange(min = 0, max = 2) Double> vector1List,
             @ForAll @IntRange(min = 1, max = 3) int limit
     ) {
         // when

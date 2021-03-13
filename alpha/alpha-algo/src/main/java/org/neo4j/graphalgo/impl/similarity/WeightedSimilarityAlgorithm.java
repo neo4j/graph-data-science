@@ -96,7 +96,7 @@ public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityA
                 LongDoubleMap sparseWeights = entry.getValue();
 
                 if (sparseWeights.size() > degreeCutoff) {
-                    List<Number> weightsList = new ArrayList<>(ids.size());
+                    var weightsList = new ArrayList<Double>(ids.size());
                     for (long id : idsArray) {
                         weightsList.add(sparseWeights.getOrDefault(id, skipValue));
                     }
