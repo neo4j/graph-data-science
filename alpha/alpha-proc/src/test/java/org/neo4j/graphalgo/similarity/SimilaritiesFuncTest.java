@@ -88,7 +88,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
 
         runQueryWithResultConsumer(
             "MATCH (p1:Employee)-[x:HAS_SKILL]->(sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
-            "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) AS v1, COLLECT(coalesce(y.proficiency, 0.0d)) AS v2\n" +
+            "WITH p1, COLLECT(coalesce(x.proficiency, 0.0)) AS v1, COLLECT(coalesce(y.proficiency, 0.0)) AS v2\n" +
             "WITH p1.name AS name, gds.alpha.similarity.cosine(v1, v2) AS cosineSim ORDER BY name ASC\n" +
             "RETURN name, toString(toInteger(cosineSim*10000)/10000.0) AS cosineSim",
             result -> {
@@ -123,7 +123,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
             "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
-            "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) AS v1, COLLECT(coalesce(y.proficiency, 0.0d)) AS v2\n" +
+            "WITH p1, COLLECT(coalesce(x.proficiency, 0.0)) AS v1, COLLECT(coalesce(y.proficiency, 0.0)) AS v2\n" +
             "WITH p1.name AS name, gds.alpha.similarity.cosine(v1, v2) AS cosineSim ORDER BY name ASC\n" +
             "RETURN name, toString(toInteger(cosineSim*10000)/10000.0) AS cosineSim", result -> {
 
@@ -159,7 +159,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
             "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
-            "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) AS v1, COLLECT(coalesce(y.proficiency, 0.0d)) AS v2\n" +
+            "WITH p1, COLLECT(coalesce(x.proficiency, 0.0)) AS v1, COLLECT(coalesce(y.proficiency, 0.0)) AS v2\n" +
             "WITH p1.name AS name, gds.alpha.similarity.pearson(v1, v2) AS pearsonSim ORDER BY name ASC\n" +
             "RETURN name, toString(toInteger(pearsonSim*10000)/10000.0) AS pearsonSim", result -> {
 
@@ -188,7 +188,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
             "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
-            "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) AS v1, COLLECT(coalesce(y.proficiency, 0.0d)) AS v2\n" +
+            "WITH p1, COLLECT(coalesce(x.proficiency, 0.0)) AS v1, COLLECT(coalesce(y.proficiency, 0.0)) AS v2\n" +
             "WITH p1.name AS name, gds.alpha.similarity.euclideanDistance(v1, v2) AS euclidDist ORDER BY name ASC\n" +
             "RETURN name, toString(toInteger(euclidDist*10000)/10000.0) AS euclidDist", result -> {
 
@@ -343,7 +343,7 @@ class SimilaritiesFuncTest extends BaseProcTest {
             "MATCH (sk:Skill)<-[y:REQUIRES_SKILL]-(p2:Role {name:'Role 1-Analytics Manager'})\n" +
             "MATCH (p1:Employee)\n" +
             "OPTIONAL MATCH (p1)-[x:HAS_SKILL]->(sk)\n" +
-            "WITH p1, COLLECT(coalesce(x.proficiency, 0.0d)) as v1, COLLECT(coalesce(y.proficiency, 0.0d)) as v2\n" +
+            "WITH p1, COLLECT(coalesce(x.proficiency, 0.0)) as v1, COLLECT(coalesce(y.proficiency, 0.0)) as v2\n" +
             "WITH p1.name as name, gds.alpha.similarity.euclidean(v1, v2) as euclidSim ORDER BY name ASC\n" +
             "RETURN name, toString(toInteger(euclidSim*10000)/10000.0) as euclidSim", result -> {
                 assertEquals(bobSim.get(), result.next().get("euclidSim"));
