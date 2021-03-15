@@ -3,4 +3,4 @@ The intention is to illustrate what the results look like and to provide a guide
 We will do this on a small {graph-description} graph of a handful nodes connected in a particular pattern.
 The example graph looks like this:
 
-image::example-graphs/{image-file}[align="center"]
+image::example-graphs/{image-file}[Visualization of the example graph,align="center"]
