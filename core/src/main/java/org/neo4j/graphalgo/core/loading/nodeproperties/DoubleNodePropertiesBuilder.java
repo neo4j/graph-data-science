@@ -59,14 +59,14 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    void setValue(long nodeId, Value value) {
+    public void setValue(long nodeId, Value value) {
         double doubleValue = ValueConversion.getDoubleValue(value);
         valuesBuilder.set(nodeId, Double.doubleToLongBits(doubleValue));
         updateMaxValue(doubleValue);
     }
 
     @Override
-    DoubleNodeProperties build(long size) {
+    public DoubleNodeProperties build(long size) {
         HugeSparseLongArray propertyValues = valuesBuilder.build();
         var maybeMaxValue = size > 0
             ? OptionalDouble.of((double) MAX_VALUE.getVolatile(DoubleNodePropertiesBuilder.this))

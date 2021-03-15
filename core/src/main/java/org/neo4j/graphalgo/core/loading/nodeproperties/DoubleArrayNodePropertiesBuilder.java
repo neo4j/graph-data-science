@@ -26,23 +26,23 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.utils.ValueConversion;
 import org.neo4j.values.storable.Value;
 
-class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
+public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
     private final HugeObjectArray<double[]> objectArray;
     private final DefaultValue defaultValue;
 
-    DoubleArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
+    public DoubleArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
         this.defaultValue = defaultValue;
         this.objectArray = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
     }
 
     @Override
-    void setValue(long nodeId, Value value) {
+    public void setValue(long nodeId, Value value) {
         objectArray.set(nodeId, ValueConversion.getDoubleArray(value));
     }
 
     @Override
-    DoubleArrayNodeProperties build(long size) {
+    public DoubleArrayNodeProperties build(long size) {
         return new DoubleArrayStoreNodeProperties(objectArray, defaultValue, size);
     }
 

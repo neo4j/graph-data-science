@@ -30,6 +30,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -143,6 +144,13 @@ public final class TestSupport {
         var gdlFactory = GdlFactory.of(config, GdlSupportExtension.DATABASE_ID);
 
         return new TestGraph(gdlFactory.build().graphStore().getUnion(), gdlFactory::nodeId, name);
+    }
+
+    public static GraphStore graphStoreFromGDL(String gdl) {
+        Objects.requireNonNull(gdl);
+        var gdlFactory = GdlFactory.of(gdl);
+
+        return gdlFactory.build().graphStore();
     }
 
     public static long[][] ids(IdFunction idFunction, String[][] variables) {

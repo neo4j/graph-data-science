@@ -60,14 +60,14 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    void setValue(long nodeId, Value value) {
+    public void setValue(long nodeId, Value value) {
         var longValue = ValueConversion.getLongValue(value);
         valuesBuilder.set(nodeId, longValue);
         updateMaxValue(longValue);
     }
 
     @Override
-    NodeProperties build(long size) {
+    public NodeProperties build(long size) {
         HugeSparseLongArray propertyValues = valuesBuilder.build();
 
         var maybeMaxValue = size > 0

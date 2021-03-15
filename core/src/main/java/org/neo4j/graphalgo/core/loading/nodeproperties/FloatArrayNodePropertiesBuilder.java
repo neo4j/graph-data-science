@@ -37,12 +37,12 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
     }
 
     @Override
-    void setValue(long nodeId, Value value) {
+    public void setValue(long nodeId, Value value) {
         objectArray.set(nodeId, ValueConversion.getFloatArray(value));
     }
 
     @Override
-    FloatArrayNodeProperties build(long size) {
+    public FloatArrayNodeProperties build(long size) {
         return new FloatArrayStoreNodeProperties(objectArray, defaultValue, size);
     }
 

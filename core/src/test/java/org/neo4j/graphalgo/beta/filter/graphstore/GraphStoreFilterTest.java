@@ -20,81 +20,135 @@
 package org.neo4j.graphalgo.beta.filter.graphstore;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.beta.filter.expr.Expression.Literal.TrueLiteral;
+import org.neo4j.graphalgo.NodeLabel;
 import org.opencypher.v9_0.parser.javacc.ParseException;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.beta.filter.expr.Expression;
-import org.neo4j.graphalgo.beta.filter.expr.ExpressionParser;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
-import org.neo4j.graphalgo.extension.Inject;
 
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.graphStoreFromGDL;
 import static org.neo4j.graphalgo.beta.filter.graphstore.GraphStoreFilter.subGraph;
 
-@GdlExtension
 class GraphStoreFilterTest {
 
-    @GdlGraph
-    public static final String GDL = "(a:A {foo: 42})-[:REL]->(b:B { foo: 84 })";
-    @GdlGraph(graphNamePrefix = "relProps")
-    public static final String GDL2 = "(a:A {foo: 42})-[:REL { w: 42.0 }]->(b:B { foo: 84 })";
-
-    @Inject
-    private GraphStore graphStore;
-
-    @Inject
-    private GraphStore relPropsGraphStore;
-
-    @Inject
-    private IdFunction idFunction;
-
     @Test
-    void propertyFilterAnd() throws ParseException {
-        var nodeExpr = ExpressionParser.parse("n.foo > 42 AND n.foo <= 84");
-        var filteredGraphStore = subGraph(graphStore, nodeExpr, TrueLiteral.INSTANCE);
-        assertGraphEquals(fromGdl("(:B {foo: 84})"), filteredGraphStore.getUnion());
-    }
+    void filterNodesOnLabels() throws ParseException {
+        var graphStore = graphStoreFromGDL("(:A), (:B), (:C)");
 
-    @ParameterizedTest
-    @ValueSource(strings = {"true OR false AND true", "true AND false OR true"})
-    void propertyFilterOrAnd(String expression) throws ParseException {
-        var nodeExpr = ExpressionParser.parse(expression);
-        var filteredGraphStore = subGraph(graphStore, nodeExpr, TrueLiteral.INSTANCE);
-        assertGraphEquals(fromGdl("(a:A {foo: 42})-[:REL]->(b:B { foo: 84 })"), filteredGraphStore.getUnion());
-    }
-
-    @Test
-    void singleLabelFilter() throws ParseException {
-        var nodeExpr = ExpressionParser.parse("n:A");
-        var filteredGraphStore = subGraph(graphStore, nodeExpr, TrueLiteral.INSTANCE);
-        assertGraphEquals(fromGdl("(:A {foo: 42})"), filteredGraphStore.getUnion());
-    }
-
-    @Test
-    void singleRelationshipFilter() throws ParseException {
         var filteredGraphStore = subGraph(
             graphStore,
-            TrueLiteral.INSTANCE,
-            ExpressionParser.parse("r:REL")
+            "n:A",
+            "true"
         );
-        assertGraphEquals(fromGdl("(a:A {foo: 42})-[:REL]->(b:B { foo: 84 })"), filteredGraphStore.getUnion());
+
+        assertThat(filteredGraphStore.nodes().availableNodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"));
+        assertGraphEquals(fromGdl("(:A)"), filteredGraphStore.getUnion());
     }
 
     @Test
-    void singleRelationshipFilterWithProperty() throws ParseException {
+    void filterMultipleNodesOnLabels() throws ParseException {
+        var graphStore = graphStoreFromGDL("(:A), (:B), (:C)");
+
         var filteredGraphStore = subGraph(
-            relPropsGraphStore,
-            TrueLiteral.INSTANCE,
-            ExpressionParser.parse("r:REL AND r.w >= 42.0")
+            graphStore,
+            "n:A OR n:B",
+            "true"
         );
-        assertGraphEquals(
-            fromGdl("(a:A {foo: 42})-[:REL { w: 42.0 }]->(b:B { foo: 84 })"),
-            filteredGraphStore.getUnion()
+
+        assertThat(filteredGraphStore.nodes().availableNodeLabels()).containsExactlyInAnyOrder(
+            NodeLabel.of("A"),
+            NodeLabel.of("B")
         );
+        assertGraphEquals(fromGdl("(:A), (:B)"), filteredGraphStore.getUnion());
     }
+
+    @Test
+    void filterNodeProperties() throws ParseException {
+        var graphStore = graphStoreFromGDL(
+            "({prop: 42, ignore: 0}), ({prop: 84, ignore: 0}), ({prop: 1337, ignore: 0})");
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "n.prop >= 42 AND n.prop <= 84",
+            "true"
+        );
+
+        assertGraphEquals(fromGdl("({prop: 42, ignore: 0}), ({prop: 84, ignore: 0})"), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void filterMultipleNodeProperties() throws ParseException {
+        var graphStore = graphStoreFromGDL("({prop1: 42, prop2: 84}), ({prop1: 42, prop2: 42}), ({{prop1: 84, prop2: 84}})");
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "n.prop1 = 42 AND n.prop2 = 84",
+            "true"
+        );
+
+        assertGraphEquals(fromGdl("({prop1: 42, prop2: 84})"), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void filterPropertiesAndLabels() throws ParseException {
+        var graphStore = graphStoreFromGDL("(:A {prop: 42}), (:B {prop: 84}), (:C)");
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "(n:A AND n.prop = 42) OR (n:B AND n.prop = 84)",
+            "true"
+        );
+
+        assertGraphEquals(fromGdl("(:A {prop: 42}), (:B {prop: 84})"), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void filterMissingNodeProperties() throws ParseException {
+        var graphStore = graphStoreFromGDL("(:A {prop: 42}), (:B)");
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "n.prop = 42",
+            "true"
+        );
+
+        assertGraphEquals(fromGdl("(:A {prop: 42}))"), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void keepAllNodeProperties() throws ParseException {
+        var gdl = "(:A {long: 42L, double: 42.0D, longArray: [42L], floatArray: [42.0F], doubleArray: [42.0D]})";
+        var graphStore = graphStoreFromGDL(gdl);
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "true",
+            "true"
+        );
+
+        assertThat(filteredGraphStore.schema().nodeSchema()).isEqualTo(graphStore.schema().nodeSchema());
+        assertGraphEquals(fromGdl(gdl), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void removeEmptyNodeSchemaEntries() throws ParseException {
+        var graphStore = graphStoreFromGDL("(:A {aProp: 42L}), (:B {bProp: 42L})");
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "n:A",
+            "true"
+        );
+
+        var aSchema = graphStore
+            .schema()
+            .nodeSchema()
+            .filter(Set.of(NodeLabel.of("A")));
+
+        assertThat(filteredGraphStore.schema().nodeSchema()).isEqualTo(aSchema);
+        assertGraphEquals(fromGdl("(:A {aProp: 42L})"), filteredGraphStore.getUnion());
+    }
+
 }

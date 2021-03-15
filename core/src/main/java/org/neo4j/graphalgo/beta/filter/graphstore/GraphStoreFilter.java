@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.NodeProperty;
 import org.neo4j.graphalgo.api.NodePropertyStore;
 import org.neo4j.graphalgo.api.RelationshipProperty;
@@ -33,13 +32,19 @@ import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.beta.filter.expr.EvaluationContext;
 import org.neo4j.graphalgo.beta.filter.expr.Expression;
+import org.neo4j.graphalgo.beta.filter.expr.ExpressionParser;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.nodeproperties.DoubleArrayNodePropertiesBuilder;
+import org.neo4j.graphalgo.core.loading.nodeproperties.DoubleNodePropertiesBuilder;
+import org.neo4j.graphalgo.core.loading.nodeproperties.FloatArrayNodePropertiesBuilder;
+import org.neo4j.graphalgo.core.loading.nodeproperties.InnerNodePropertiesBuilder;
+import org.neo4j.graphalgo.core.loading.nodeproperties.LongArrayNodePropertiesBuilder;
+import org.neo4j.graphalgo.core.loading.nodeproperties.LongNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.values.storable.NumberType;
+import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +57,11 @@ public final class GraphStoreFilter {
     private GraphStoreFilter() {}
 
     @NotNull
-    public static GraphStore subGraph(GraphStore graphStore, Expression nodeExpr, Expression relationshipExpr) {
+    public static GraphStore subGraph(GraphStore graphStore, String nodeFilter, String relationshipFilter)
+    throws ParseException {
+        var nodeExpr = ExpressionParser.parse(nodeFilter);
+        var relationshipExpr = ExpressionParser.parse(relationshipFilter);
+
         var nodeContext = new EvaluationContext.NodeEvaluationContext(graphStore);
         var relationshipContext = new EvaluationContext.RelationshipEvaluationContext(Map.of());
         var inputNodes = graphStore.nodes();
@@ -223,72 +232,109 @@ public final class GraphStoreFilter {
         return relationshipsBuilder.build();
     }
 
-    static Map<NodeLabel, NodePropertyStore> filterNodeProperties(NodeMapping nodeMapping, GraphStore graphStore) {
-        return graphStore.nodePropertyKeys()
-            .entrySet()
+    private static Map<NodeLabel, NodePropertyStore> filterNodeProperties(
+        NodeMapping filteredNodeMapping,
+        GraphStore inputGraphStore
+    ) {
+        return filteredNodeMapping
+            .availableNodeLabels()
             .stream()
             .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> nodePropertyStore(nodeMapping, entry.getKey(), entry.getValue(), graphStore)
-            ));
+                nodeLabel -> nodeLabel,
+                nodeLabel -> {
+                    var propertyKeys = inputGraphStore.nodePropertyKeys(nodeLabel);
+                    return nodePropertyStore(filteredNodeMapping, nodeLabel, propertyKeys, inputGraphStore);
+                })
+            );
     }
 
-    static NodePropertyStore nodePropertyStore(
+    private static NodePropertyStore nodePropertyStore(
         NodeMapping filteredMapping,
         NodeLabel nodeLabel,
         Set<String> propertyKeys,
-        GraphStore graphStore
+        GraphStore inputGraphStore
     ) {
         var builder = NodePropertyStore.builder();
         var filteredNodeCount = filteredMapping.nodeCount();
-        var inputMapping = graphStore.nodes();
+        var inputMapping = inputGraphStore.nodes();
 
         var allocationTracker = AllocationTracker.empty();
 
         // TODO: parallel?
         propertyKeys.forEach(propertyKey -> {
-            var nodeProperties = graphStore.nodePropertyValues(nodeLabel, propertyKey);
-            var propertyState = graphStore.nodePropertyState(propertyKey);
+            var nodeProperties = inputGraphStore.nodePropertyValues(nodeLabel, propertyKey);
+            var propertyState = inputGraphStore.nodePropertyState(propertyKey);
             var propertyType = nodeProperties.valueType();
 
 
-            NodeProperties filteredNodeProperties = null;
+            InnerNodePropertiesBuilder propertiesBuilder = getPropertiesBuilder(
+                filteredNodeCount,
+                allocationTracker,
+                propertyType
+            );
 
-            switch (propertyType) {
-                case LONG:
-                    var hla = HugeLongArray.newArray(filteredNodeCount, allocationTracker);
-                    filteredMapping.forEachNode(filteredNode -> {
-                        var inputNode = inputMapping.toMappedNodeId(filteredMapping.toOriginalNodeId(filteredNode));
-                        hla.set(filteredNode, nodeProperties.longValue(inputNode));
-                        return true;
-                    });
-                    filteredNodeProperties = hla.asNodeProperties();
-                    break;
-                case DOUBLE:
-                    var hda = HugeDoubleArray.newArray(filteredNodeCount, allocationTracker);
-                    filteredMapping.forEachNode(filteredNode -> {
-                        var inputNode = inputMapping.toMappedNodeId(filteredMapping.toOriginalNodeId(filteredNode));
-                        hda.set(filteredNode, nodeProperties.doubleValue(inputNode));
-                        return true;
-                    });
-                    filteredNodeProperties = hda.asNodeProperties();
-                    break;
-                case DOUBLE_ARRAY:
-                    break;
-                case FLOAT_ARRAY:
-                    break;
-                case LONG_ARRAY:
-                    break;
-                case UNKNOWN:
-                    break;
-            }
+            filteredMapping.forEachNode(filteredNode -> {
+                var inputNode = inputMapping.toMappedNodeId(filteredMapping.toOriginalNodeId(filteredNode));
+                // TODO: can we get rid of the `value` conversion here?
+                propertiesBuilder.setValue(filteredNode, nodeProperties.value(inputNode));
+                return true;
+            });
 
             builder.putNodeProperty(
                 propertyKey,
-                NodeProperty.of(propertyKey, propertyState, filteredNodeProperties)
+                NodeProperty.of(propertyKey, propertyState, propertiesBuilder.build(filteredNodeCount))
             );
         });
 
         return builder.build();
+    }
+
+    private static InnerNodePropertiesBuilder getPropertiesBuilder(
+        long filteredNodeCount,
+        AllocationTracker allocationTracker,
+        org.neo4j.graphalgo.api.nodeproperties.ValueType propertyType
+    ) {
+        InnerNodePropertiesBuilder propertiesBuilder = null;
+        switch (propertyType) {
+            case LONG:
+                propertiesBuilder = new LongNodePropertiesBuilder(
+                    filteredNodeCount,
+                    DefaultValue.forLong(),
+                    allocationTracker
+                );
+                break;
+            case DOUBLE:
+                propertiesBuilder = new DoubleNodePropertiesBuilder(
+                    filteredNodeCount,
+                    DefaultValue.forDouble(),
+                    allocationTracker
+                );
+                break;
+            case DOUBLE_ARRAY:
+                propertiesBuilder = new DoubleArrayNodePropertiesBuilder(
+                    filteredNodeCount,
+                    DefaultValue.forDoubleArray(),
+                    allocationTracker
+                );
+                break;
+            case FLOAT_ARRAY:
+                propertiesBuilder = new FloatArrayNodePropertiesBuilder(
+                    filteredNodeCount,
+                    DefaultValue.forFloatArray(),
+                    allocationTracker
+                );
+                break;
+            case LONG_ARRAY:
+                propertiesBuilder = new LongArrayNodePropertiesBuilder(
+                    filteredNodeCount,
+                    DefaultValue.forLongArray(),
+                    allocationTracker
+                );
+                break;
+            case UNKNOWN:
+                throw new UnsupportedOperationException("Cannot import properties of type UNKNOWN");
+        }
+
+        return propertiesBuilder;
     }
 }
