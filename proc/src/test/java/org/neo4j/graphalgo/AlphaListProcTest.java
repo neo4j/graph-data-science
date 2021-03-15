@@ -32,6 +32,8 @@ import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphalgo.functions.OneHotEncodingFunc;
+import org.neo4j.graphalgo.influenceΜaximization.CELFProc;
+import org.neo4j.graphalgo.influenceΜaximization.GreedyProc;
 import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.scc.SccProc;
 import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
@@ -102,7 +104,9 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.ml.ann.write",
         "gds.alpha.ml.ann.stream",
         "gds.alpha.ml.nodeClassification.train",
-        "gds.alpha.ml.splitRelationships.mutate"
+        "gds.alpha.ml.splitRelationships.mutate",
+        "gds.alpha.greedy.stream",
+        "gds.alpha.celf.stream"
     ));
 
     private static final Collection<String> FUNCTIONS = new HashSet<>(asList(
@@ -156,7 +160,9 @@ class AlphaListProcTest extends BaseProcTest {
             SimilaritiesFunc.class,
             SccProc.class,
             TraverseProc.class,
-            TriangleProc.class
+            TriangleProc.class,
+            GreedyProc.class,
+            CELFProc.class
         );
         registerFunctions(
             LinkPredictionFunc.class,

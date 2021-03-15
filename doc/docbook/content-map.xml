@@ -212,6 +212,13 @@
                 </d:tocentry>
             </d:tocentry>
 
+            <d:tocentry linkend="algorithms-influence-maximization"><?dbhtml filename="algorithms/influence-maximization/index.html"?>
+                <d:tocentry linkend="algorithms-greedy"><?dbhtml filename="algorithms/greedy/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-celf"><?dbhtml filename="algorithms/celf/index.html"?>
+                </d:tocentry>
+            </d:tocentry>
+
             <d:tocentry linkend="algorithms-auxiliary">
                 <?dbhtml filename="algorithms/auxiliary/index.html"?>
                 <d:tocentry linkend="graph-generation">

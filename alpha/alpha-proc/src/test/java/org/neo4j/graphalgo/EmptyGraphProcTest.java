@@ -23,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.HarmonicCentralityProc;
+import org.neo4j.graphalgo.influenceΜaximization.CELFProc;
+import org.neo4j.graphalgo.influenceΜaximization.GreedyProc;
 import org.neo4j.graphalgo.scc.SccProc;
 import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
 import org.neo4j.graphalgo.shortestpaths.AllShortestPathsProc;
@@ -46,7 +48,9 @@ class EmptyGraphProcTest extends BaseProcTest {
             SpanningTreeProc.class,
             ShortestPathDeltaSteppingProc.class,
             SccProc.class,
-            TriangleProc.class
+            TriangleProc.class,
+            GreedyProc.class,
+            CELFProc.class
         );
     }
 
