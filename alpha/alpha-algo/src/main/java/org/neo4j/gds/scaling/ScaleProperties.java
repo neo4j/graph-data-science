@@ -118,7 +118,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
             String property = config.featureProperties().get(i);
 
             var nodeProperties = graph.nodeProperties(property);
-            scalers.add(Scaler.Factory.create(scalerName, nodeProperties, graph.nodeCount(), config.concurrency()));
+            scalers.add(Scaler.Factory.create(scalerName, nodeProperties, graph.nodeCount(), config.concurrency(), executor));
         }
         return scalers;
     }

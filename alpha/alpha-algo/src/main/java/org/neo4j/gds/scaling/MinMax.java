@@ -21,8 +21,9 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+
+import java.util.concurrent.ExecutorService;
 
 final class MinMax implements Scaler {
 
@@ -36,14 +37,14 @@ final class MinMax implements Scaler {
         this.maxMinDiff = maxMinDiff;
     }
 
-    static MinMax create(NodeProperties properties, long nodeCount, int concurrency) {
+    static MinMax create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
             partition -> new ComputeMinMax(partition.startNode(), partition.nodeCount(), properties)
         );
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
         var min = tasks.stream().mapToDouble(ComputeMinMax::min).min().orElse(Double.MAX_VALUE);
         var max = tasks.stream().mapToDouble(ComputeMinMax::max).max().orElse(Double.MIN_VALUE);

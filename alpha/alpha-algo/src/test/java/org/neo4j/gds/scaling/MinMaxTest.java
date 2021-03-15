@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 
 import java.util.stream.Stream;
 
@@ -44,7 +45,7 @@ class MinMaxTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodeProperties properties, double min, double max) {
-        var minMaxNormalizer = MinMax.create(properties, 10, 1);
+        var minMaxNormalizer = MinMax.create(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(minMaxNormalizer.min).isEqualTo(min);
         assertThat(minMaxNormalizer.maxMinDiff).isEqualTo(max - min);
@@ -57,7 +58,7 @@ class MinMaxTest {
     @Test
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 4D;
-        var minMaxNormalizer = MinMax.create(properties, 10, 1);
+        var minMaxNormalizer = MinMax.create(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(minMaxNormalizer.min).isEqualTo(4D);
         assertThat(minMaxNormalizer.maxMinDiff).isEqualTo(0D);
