@@ -25,9 +25,11 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * This algorithm takes as input a list of node property names and a same-sized list of scalers.
@@ -40,11 +42,13 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     private final Graph graph;
     private final ScalePropertiesBaseConfig config;
     private final AllocationTracker tracker;
+    private final ExecutorService executor;
 
     public ScaleProperties(Graph graph, ScalePropertiesBaseConfig config, AllocationTracker tracker) {
         this.graph = graph;
         this.config = config;
         this.tracker = tracker;
+        this.executor = Pools.DEFAULT;
     }
 
     @Override
@@ -63,19 +67,28 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     }
 
     private void initializeArrays(HugeObjectArray<double[]> scaledProperties, int propertyCount) {
-        ParallelUtil.parallelForEachNode(
-            graph.nodeCount(),
+        var tasks = PartitionUtils.rangePartition(
             config.concurrency(),
-            (nodeId) -> scaledProperties.set(nodeId, new double[propertyCount])
+            graph.nodeCount(),
+            (partition) -> (Runnable) () -> partition.consume((nodeId) -> scaledProperties.set(
+                nodeId,
+                new double[propertyCount]
+            ))
         );
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
     }
 
     private void scaleProperty(HugeObjectArray<double[]> scaledProperties, Scaler scaler, int index) {
-        ParallelUtil.parallelForEachNode(graph.nodeCount(), config.concurrency(), (nodeId) -> {
-            var afterValue = scaler.scaleProperty(nodeId);
-            double[] existingResult = scaledProperties.get(nodeId);
-            existingResult[index] = afterValue;
-        });
+        var tasks = PartitionUtils.rangePartition(
+            config.concurrency(),
+            graph.nodeCount(),
+            (partition) -> (Runnable) () -> partition.consume((nodeId) -> {
+                var afterValue = scaler.scaleProperty(nodeId);
+                double[] existingResult = scaledProperties.get(nodeId);
+                existingResult[index] = afterValue;
+            })
+        );
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
     }
 
     @Override

@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.core.utils.partition;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 
+import java.util.function.LongConsumer;
+
 @ValueClass
 public interface Partition {
 
@@ -32,6 +34,13 @@ public interface Partition {
 
     default boolean fits(int otherPartitionsCount) {
         return MAX_NODE_COUNT - otherPartitionsCount >= nodeCount();
+    }
+
+    default void consume(LongConsumer consumer) {
+        long endNode = startNode() + nodeCount();
+        for (long id = startNode(); id < endNode; id++) {
+            consumer.accept(id);
+        }
     }
 
     static Partition of(long startNode, long nodeCount) {
