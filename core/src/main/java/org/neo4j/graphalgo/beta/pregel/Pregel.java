@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -131,7 +130,17 @@ public final class Pregel<CONFIG extends PregelConfig> {
         // Tracks if a node voted to halt in the previous iteration
         HugeAtomicBitSet voteBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
 
-        var computeSteps = createComputeSteps(voteBits);
+        var computeSteps = partitionGraph(partition -> new ComputeStep<>(
+            graph,
+            computation,
+            config,
+            0,
+            partition,
+            nodeValues,
+            messenger,
+            voteBits,
+            graph
+        ));
 
         int iterations;
         for (iterations = 0; iterations < config.maxIterations(); iterations++) {
@@ -170,39 +179,17 @@ public final class Pregel<CONFIG extends PregelConfig> {
         messenger.release();
     }
 
-    private List<ComputeStep<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
-
-        List<Partition> partitions = partitionGraph();
-
-        List<ComputeStep<CONFIG, ?>> computeSteps = new ArrayList<>(concurrency);
-
-        for (Partition partition : partitions) {
-            computeSteps.add(new ComputeStep<>(
-                graph,
-                computation,
-                config,
-                0,
-                partition,
-                nodeValues,
-                messenger,
-                voteBits,
-                graph
-            ));
-        }
-        return computeSteps;
-    }
-
     @NotNull
-    private List<Partition> partitionGraph() {
+    private List<ComputeStep<CONFIG, ?>> partitionGraph(Function<Partition, ComputeStep<CONFIG, ?>> partitionFunction) {
         switch (config.partitioning()) {
             case RANGE:
-                return PartitionUtils.rangePartition(concurrency, graph.nodeCount(), Function.identity());
+                return PartitionUtils.rangePartition(concurrency, graph.nodeCount(), partitionFunction);
             case DEGREE:
                 var batchSize = Math.max(
                     ParallelUtil.DEFAULT_BATCH_SIZE,
                     BitUtil.ceilDiv(graph.relationshipCount(), concurrency)
                 );
-                return PartitionUtils.degreePartition(graph, batchSize);
+                return PartitionUtils.degreePartition(graph, batchSize, partitionFunction);
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Unsupported partitioning `%s`",

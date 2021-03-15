@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 import java.util.stream.LongStream;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
@@ -186,7 +187,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         }
 
         var degreeBatchSize = BitUtil.ceilDiv(graph.relationshipCount(), concurrency);
-        List<Partition> partitions = PartitionUtils.degreePartition(graph, degreeBatchSize);
+        var partitions = PartitionUtils.degreePartition(graph, degreeBatchSize, Function.identity());
 
         ExecutorService executor = ParallelUtil.canRunInParallel(this.executor)
             ? this.executor

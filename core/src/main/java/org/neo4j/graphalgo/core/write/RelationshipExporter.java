@@ -138,9 +138,7 @@ public final class RelationshipExporter extends StatementApi {
         progressLogger.logStart();
         // We use MIN_BATCH_SIZE since writing relationships
         // is performed batch-wise, but single-threaded.
-        PartitionUtils.degreePartition(graph, MIN_BATCH_SIZE)
-            .stream()
-            .map(partition -> createBatchRunnable(
+        PartitionUtils.degreePartition(graph, MIN_BATCH_SIZE, partition -> createBatchRunnable(
                 relationshipToken,
                 propertyKeyToken,
                 partition.startNode(),

@@ -67,16 +67,17 @@ public final class PartitionUtils {
         return partitions;
     }
 
-    public static List<Partition> degreePartition(Graph graph, long batchSize) {
-        return degreePartition(graph.nodeIterator(), graph, batchSize);
+    public static <R> List<R> degreePartition(Graph graph, long batchSize, Function<Partition, R> partitionFunction) {
+        return degreePartition(graph.nodeIterator(), graph, batchSize, partitionFunction);
     }
 
-    public static List<Partition> degreePartition(
+    public static <R> List<R> degreePartition(
         PrimitiveLongIterator nodes,
         Degrees degrees,
-        long batchSize
+        long batchSize,
+        Function<Partition, R> partitionFunction
     ) {
-        List<Partition> partitions = new ArrayList<>();
+        var result = new ArrayList<R>();
         long start = 0L;
         while (nodes.hasNext()) {
             assert batchSize > 0L;
@@ -88,10 +89,10 @@ public final class PartitionUtils {
             }
 
             long end = nodeId + 1;
-            partitions.add(Partition.of(start, end - start));
+            result.add(partitionFunction.apply(Partition.of(start, end - start)));
             start = end;
         }
-        return partitions;
+        return result;
     }
 
 }

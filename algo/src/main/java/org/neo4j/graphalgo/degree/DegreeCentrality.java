@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrality.DegreeFunction> {
 
@@ -85,10 +84,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
             var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
             var degreeBatchSize = BitUtil.ceilDiv(graph.relationshipCount(), config.concurrency());
             var tasks = PartitionUtils
-                .degreePartition(graph, degreeBatchSize)
-                .stream()
-                .map(partition -> new WeightedDegreeTask(graph.concurrentCopy(), degrees, partition))
-                .collect(Collectors.toList());
+                .degreePartition(
+                    graph,
+                    degreeBatchSize,
+                    partition -> new WeightedDegreeTask(graph.concurrentCopy(), degrees, partition)
+                );
             ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
             result = degrees::get;
         }
