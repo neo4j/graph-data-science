@@ -17,19 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.export;
+package org.neo4j.graphalgo.core.utils.export.file;
 
-import org.neo4j.internal.batchimport.input.InputEntityVisitor;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
 
-public interface GdsInputEntityVisitor extends InputEntityVisitor {
+import static org.neo4j.graphalgo.core.utils.export.file.NodeVisitor.NEO_ID_KEY;
 
-    boolean originalId(long id);
+public final class NodeSchemaUtils {
 
-    class Adapter extends InputEntityVisitor.Adapter implements GdsInputEntityVisitor {
+    private NodeSchemaUtils() {}
 
-        @Override
-        public boolean originalId(long id) {
-            return true;
+    public static NodeSchema computeNodeSchema(NodeSchema nodeSchema, boolean reverseIdMapping) {
+        NodeSchema.Builder builder = NodeSchema.builder();
+        if (reverseIdMapping) {
+            nodeSchema.availableLabels().forEach(nodeLabel -> builder.addProperty(nodeLabel, NEO_ID_KEY, ValueType.LONG));
         }
+        return nodeSchema.union(builder.build());
     }
 }

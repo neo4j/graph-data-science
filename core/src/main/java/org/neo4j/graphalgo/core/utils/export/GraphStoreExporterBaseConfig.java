@@ -28,6 +28,11 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 public interface GraphStoreExporterBaseConfig extends BaseConfig {
 
     @Value.Default
+    default boolean reverseIdMapping() {
+        return false;
+    }
+
+    @Value.Default
     default String defaultRelationshipType() {
         return RelationshipType.ALL_RELATIONSHIPS.name;
     }

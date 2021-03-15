@@ -38,14 +38,12 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class CsvNodeVisitor extends NodeVisitor {
 
     public static final String ID_COLUMN_NAME = ":ID";
-    public static final String REVERSE_ID_COLUMN_NAME = ":NEO_ID";
 
     private final Path fileLocation;
     private final int visitorId;
     private final Map<String, CsvAppender> csvAppenders;
     private final CsvWriter csvWriter;
     private final Set<String> headerFiles;
-    private final NodeIdFieldAppender nodeIdFieldAppender;
 
     public CsvNodeVisitor(
         Path fileLocation,
@@ -54,16 +52,12 @@ public class CsvNodeVisitor extends NodeVisitor {
         int visitorId,
         boolean reverseIdMapping
     ) {
-        super(nodeSchema);
+        super(nodeSchema, reverseIdMapping);
         this.fileLocation = fileLocation;
         this.headerFiles = headerFiles;
         this.visitorId = visitorId;
         this.csvAppenders = new HashMap<>();
         this.csvWriter = new CsvWriter();
-        NodeIdFieldAppender internalIdAppender = this::appendInternalId;
-        this.nodeIdFieldAppender = reverseIdMapping
-            ? internalIdAppender.andThen(this::appendNeo4jId)
-            : internalIdAppender;
     }
 
     @TestOnly
@@ -76,7 +70,7 @@ public class CsvNodeVisitor extends NodeVisitor {
         // do the export
         var csvAppender = getAppender();
         try {
-            nodeIdFieldAppender.appendIdField(csvAppender);
+            csvAppender.appendField(Long.toString(id()));
 
             // write properties
             forEachProperty(((key, value, type) -> {
@@ -106,14 +100,6 @@ public class CsvNodeVisitor extends NodeVisitor {
         });
     }
 
-    private void appendInternalId(CsvAppender csvAppender) throws IOException {
-        csvAppender.appendField(Long.toString(id()));
-    }
-
-    private void appendNeo4jId(CsvAppender csvAppender) throws IOException {
-        csvAppender.appendField(Long.toString(originalId()));
-    }
-
     private CsvAppender getAppender() {
         var labelsString = String.join("_", labels());
 
@@ -137,7 +123,6 @@ public class CsvNodeVisitor extends NodeVisitor {
     private void writeHeaderFile(String headerFileName) {
         try (var headerAppender = csvWriter.append(fileLocation.resolve(headerFileName), StandardCharsets.UTF_8)) {
             headerAppender.appendField(ID_COLUMN_NAME);
-            headerAppender.appendField(REVERSE_ID_COLUMN_NAME);
 
             forEachProperty(((key, value, type) -> {
                 var propertyHeader = formatWithLocale(
@@ -155,18 +140,6 @@ public class CsvNodeVisitor extends NodeVisitor {
             headerAppender.endLine();
         } catch (IOException e) {
             throw new RuntimeException("Could not write header file", e);
-        }
-    }
-
-    @FunctionalInterface
-    interface NodeIdFieldAppender {
-        void appendIdField(CsvAppender csvAppender) throws IOException;
-
-        default NodeIdFieldAppender andThen(NodeIdFieldAppender nextNodeIdFieldAppender) {
-            return (csvAppender -> {
-                appendIdField(csvAppender);
-                nextNodeIdFieldAppender.appendIdField(csvAppender);
-            });
         }
     }
 }

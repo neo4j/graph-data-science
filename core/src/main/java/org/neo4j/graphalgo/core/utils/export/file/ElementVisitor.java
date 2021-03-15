@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.utils.export.file;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.api.schema.ElementSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
-import org.neo4j.graphalgo.core.utils.export.GdsInputEntityVisitor;
+import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -33,7 +33,7 @@ import java.util.Map;
 abstract class ElementVisitor<
     ELEMENT_SCHEMA extends ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA>,
     I extends ElementIdentifier,
-    PROPERTY_SCHEMA extends PropertySchema> extends GdsInputEntityVisitor.Adapter {
+    PROPERTY_SCHEMA extends PropertySchema> extends InputEntityVisitor.Adapter {
 
     final ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema;
 

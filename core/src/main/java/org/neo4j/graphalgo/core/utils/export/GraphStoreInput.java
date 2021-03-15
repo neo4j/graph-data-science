@@ -183,10 +183,6 @@ public final class GraphStoreInput implements CompatInput {
             if (id < endId) {
                 visitor.id(id);
 
-                if (visitor instanceof GdsInputEntityVisitor) {
-                    ((GdsInputEntityVisitor) visitor).originalId(nodeStore.nodeMapping.toOriginalNodeId(id));
-                }
-
                 if (hasLabels) {
                     String[] labels = nodeStore.labels(id);
                     visitor.labels(labels);

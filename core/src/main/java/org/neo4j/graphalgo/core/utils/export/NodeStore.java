@@ -23,12 +23,15 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.core.utils.export.file.NodeVisitor.NEO_ID_KEY;
 
 public class NodeStore {
 
@@ -97,7 +100,7 @@ public class NodeStore {
         return labels;
     }
 
-    static NodeStore of(GraphStore graphStore, AllocationTracker tracker) {
+    static NodeStore of(GraphStore graphStore, boolean reverseIdMapping, AllocationTracker tracker) {
         HugeIntArray labelCounts = null;
         Map<String, Map<String, NodeProperties>> nodeProperties;
 
@@ -126,7 +129,11 @@ public class NodeStore {
                     propertyKey -> graphStore.nodePropertyValues(entry.getKey(), propertyKey)
                 ))
             ));
+            if (reverseIdMapping) {
+                nodeProperties.forEach((label, propertyMap) -> propertyMap.put(NEO_ID_KEY, (LongNodeProperties) graphStore.nodes()::toOriginalNodeId));
+            }
         }
+
         return new NodeStore(
             graphStore.nodeCount(),
             labelCounts,

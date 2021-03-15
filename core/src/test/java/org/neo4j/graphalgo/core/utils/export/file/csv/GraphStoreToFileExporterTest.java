@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporter;
 import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -41,8 +42,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.core.utils.export.file.NodeSchemaUtils.computeNodeSchema;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
-import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.REVERSE_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -90,7 +91,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
     @Inject
     private IdFunction concurrentIdFunction;
 
-    public static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME, REVERSE_ID_COLUMN_NAME);
+    public static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME);
     public static final List<String> RELATIONSHIP_COLUMNS = List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);
 
     @Test
@@ -112,9 +113,10 @@ class GraphStoreToFileExporterTest extends CsvTest {
         var rel1Type = RelationshipType.of("REL1");
         var rel2Type = RelationshipType.of("REL2");
 
-        var abSchema = graphStore.schema().nodeSchema().filter(Set.of(aLabel, bLabel)).unionProperties();
-        var acSchema = graphStore.schema().nodeSchema().filter(Set.of(aLabel, cLabel)).unionProperties();
-        var bSchema = graphStore.schema().nodeSchema().filter(Set.of(bLabel)).unionProperties();
+        NodeSchema nodeSchema = computeNodeSchema(graphStore.schema().nodeSchema(), config.reverseIdMapping());
+        var abSchema = nodeSchema.filter(Set.of(aLabel, bLabel)).unionProperties();
+        var acSchema = nodeSchema.filter(Set.of(aLabel, cLabel)).unionProperties();
+        var bSchema = nodeSchema.filter(Set.of(bLabel)).unionProperties();
         var rel1Schema = graphStore.schema().relationshipSchema().filter(Set.of(rel1Type)).unionProperties();
         var rel2Schema = graphStore.schema().relationshipSchema().filter(Set.of(rel2Type)).unionProperties();
 
@@ -191,7 +193,8 @@ class GraphStoreToFileExporterTest extends CsvTest {
         exporter.run(AllocationTracker.empty());
 
         // Assert headers
-        assertHeaderFile("nodes_header.csv", NODE_COLUMNS, Collections.emptyMap());
+        NodeSchema nodeSchema = computeNodeSchema(concurrentGraphStore.schema().nodeSchema(), config.reverseIdMapping());
+        assertHeaderFile("nodes_header.csv", NODE_COLUMNS, nodeSchema.unionProperties());
         assertHeaderFile("relationships_REL1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
 
         // Sometimes we end up with only one file, so we cannot make absolute assumptions about the files created
