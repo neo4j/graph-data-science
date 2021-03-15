@@ -27,7 +27,6 @@ import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.gdl.GdlFactory;
@@ -81,20 +80,6 @@ class ModelToFileExporterTest {
             var modelDataBytes = modelDataInputStream.readAllBytes();
             assertThat(modelDataBytes).isNotEmpty();
         }
-    }
-
-    @Test
-    void shouldReadFromFile(@TempDir Path persistencePath) throws IOException {
-        ModelToFileExporter.toFile(persistencePath, MODEL);
-        Model<ModelData, GraphSageTrainConfig> deserializedModel = ModelToFileExporter.fromFile(persistencePath);
-        assertThat(deserializedModel)
-            .usingRecursiveComparison()
-            .withStrictTypeChecking()
-            .ignoringFieldsOfTypes(DefaultValue.class)
-            .ignoringFields("stored")
-            .isEqualTo(MODEL);
-
-        assertThat(deserializedModel.stored()).isTrue();
     }
 
     @Test

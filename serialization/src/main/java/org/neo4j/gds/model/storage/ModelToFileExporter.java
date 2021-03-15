@@ -40,10 +40,4 @@ public final class ModelToFileExporter {
     ) throws IOException {
         new ModelFileWriter<>(exportDir, model).write();
     }
-
-    public static <DATA, CONFIG extends BaseConfig & ModelConfig> Model<DATA, CONFIG> fromFile(
-        Path exportDir
-    ) throws IOException {
-        return (Model<DATA, CONFIG>) new ModelFileReader(exportDir).read();
-    }
 }

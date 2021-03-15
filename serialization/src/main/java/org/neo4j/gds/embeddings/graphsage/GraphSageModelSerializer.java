@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import com.google.protobuf.Parser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.core.model.Model;
@@ -30,7 +31,7 @@ import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.IOException;
 
-public final class GraphSageModelSerializer implements ModelSerializer<ModelData, GraphSageTrainConfig, GraphSageProto.GraphSageModel> {
+public final class GraphSageModelSerializer implements ModelSerializer<ModelData, GraphSageProto.GraphSageModel> {
 
     @Override
     public GraphSageProto.GraphSageModel toSerializable(ModelData modelData) throws IOException {
@@ -47,18 +48,6 @@ public final class GraphSageModelSerializer implements ModelSerializer<ModelData
     }
 
     @Override
-    public Model<ModelData, GraphSageTrainConfig> fromSerializable(
-        GraphSageProto.GraphSageModel protoModel,
-        ModelProto.ModelMetaData modelMetaData
-    ) throws IOException {
-        return ModelMetaDataSerializer
-            .<ModelData, GraphSageTrainConfig>fromSerializable(modelMetaData)
-            .data(deserializeModelData(protoModel))
-            .customInfo(Model.Mappable.EMPTY)
-            .build();
-    }
-
-    @Override
     @NotNull
     public ModelData deserializeModelData(GraphSageProto.GraphSageModel protoModel) throws IOException {
         return ModelData.of(
@@ -70,5 +59,17 @@ public final class GraphSageModelSerializer implements ModelSerializer<ModelData
     @Override
     public Parser<GraphSageProto.GraphSageModel> modelParser() {
         return GraphSageProto.GraphSageModel.parser();
+    }
+
+    @TestOnly
+    Model<ModelData, GraphSageTrainConfig> fromSerializable(
+        GraphSageProto.GraphSageModel protoModel,
+        ModelProto.ModelMetaData modelMetaData
+    ) throws IOException {
+        return ModelMetaDataSerializer
+            .<ModelData, GraphSageTrainConfig>fromSerializable(modelMetaData)
+            .data(deserializeModelData(protoModel))
+            .customInfo(Model.Mappable.EMPTY)
+            .build();
     }
 }

@@ -22,12 +22,11 @@ package org.neo4j.gds.model.storage;
 import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
-import org.neo4j.graphalgo.config.ModelConfig;
 
 public final class ModelSerializerFactory {
     private ModelSerializerFactory() {}
 
-    public static <D, TC extends ModelConfig, PD extends GeneratedMessageV3, R extends ModelSerializer<D, TC, PD>> R serializer(String algoType) {
+    public static <D, PD extends GeneratedMessageV3, R extends ModelSerializer<D, PD>> R serializer(String algoType) {
         return (R) new GraphSageModelSerializer();
     }
 

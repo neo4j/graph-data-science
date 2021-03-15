@@ -22,20 +22,12 @@ package org.neo4j.gds;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Parser;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.IOException;
 
-public interface ModelSerializer<DATA, TRAIN_CONFIG extends ModelConfig, PROTO_DATA extends GeneratedMessageV3> {
+public interface ModelSerializer<DATA, PROTO_DATA extends GeneratedMessageV3> {
 
     PROTO_DATA toSerializable(DATA modelData) throws IOException;
-
-    Model<DATA, TRAIN_CONFIG> fromSerializable(
-        PROTO_DATA protoModel,
-        ModelProto.ModelMetaData modelMetaData
-    ) throws IOException;
 
     @NotNull
     DATA deserializeModelData(PROTO_DATA protoModel) throws IOException;
