@@ -54,7 +54,7 @@ public final class GraphStoreFilter {
     @NotNull
     public static GraphStore subGraph(GraphStore graphStore, Expression nodeExpr, Expression relationshipExpr) {
         var nodeContext = new EvaluationContext.NodeEvaluationContext(graphStore);
-        var relationshipContext = new EvaluationContext.RelationshipEvaluationContext(graphStore);
+        var relationshipContext = new EvaluationContext.RelationshipEvaluationContext(Map.of());
         var inputNodes = graphStore.nodes();
 
         NodeMapping outputNodes = filterNodes(graphStore, nodeExpr, nodeContext, inputNodes);

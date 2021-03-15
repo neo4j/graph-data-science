@@ -22,7 +22,8 @@ package org.neo4j.graphalgo.beta.filter.graphstore;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.cypher.internal.parser.javacc.ParseException;
+import org.neo4j.graphalgo.beta.filter.expr.Expression.Literal.TrueLiteral;
+import org.opencypher.v9_0.parser.javacc.ParseException;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.beta.filter.expr.Expression;
 import org.neo4j.graphalgo.beta.filter.expr.ExpressionParser;
@@ -54,23 +55,23 @@ class GraphStoreFilterTest {
 
     @Test
     void propertyFilterAnd() throws ParseException {
-        var nodeExpr = new ExpressionParser().parse("n.foo > 42 AND n.foo <= 84");
-        var filteredGraphStore = subGraph(graphStore, nodeExpr, new Expression.Literal.TrueLiteral());
+        var nodeExpr = ExpressionParser.parse("n.foo > 42 AND n.foo <= 84");
+        var filteredGraphStore = subGraph(graphStore, nodeExpr, TrueLiteral.INSTANCE);
         assertGraphEquals(fromGdl("(:B {foo: 84})"), filteredGraphStore.getUnion());
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"true OR false AND true", "true AND false OR true"})
     void propertyFilterOrAnd(String expression) throws ParseException {
-        var nodeExpr = new ExpressionParser().parse(expression);
-        var filteredGraphStore = subGraph(graphStore, nodeExpr, new Expression.Literal.TrueLiteral());
+        var nodeExpr = ExpressionParser.parse(expression);
+        var filteredGraphStore = subGraph(graphStore, nodeExpr, TrueLiteral.INSTANCE);
         assertGraphEquals(fromGdl("(a:A {foo: 42})-[:REL]->(b:B { foo: 84 })"), filteredGraphStore.getUnion());
     }
 
     @Test
     void singleLabelFilter() throws ParseException {
-        var nodeExpr = new ExpressionParser().parse("n:A");
-        var filteredGraphStore = subGraph(graphStore, nodeExpr, new Expression.Literal.TrueLiteral());
+        var nodeExpr = ExpressionParser.parse("n:A");
+        var filteredGraphStore = subGraph(graphStore, nodeExpr, TrueLiteral.INSTANCE);
         assertGraphEquals(fromGdl("(:A {foo: 42})"), filteredGraphStore.getUnion());
     }
 
@@ -78,8 +79,8 @@ class GraphStoreFilterTest {
     void singleRelationshipFilter() throws ParseException {
         var filteredGraphStore = subGraph(
             graphStore,
-            new Expression.Literal.TrueLiteral(),
-            new ExpressionParser().parse("r:REL")
+            TrueLiteral.INSTANCE,
+            ExpressionParser.parse("r:REL")
         );
         assertGraphEquals(fromGdl("(a:A {foo: 42})-[:REL]->(b:B { foo: 84 })"), filteredGraphStore.getUnion());
     }
@@ -88,8 +89,8 @@ class GraphStoreFilterTest {
     void singleRelationshipFilterWithProperty() throws ParseException {
         var filteredGraphStore = subGraph(
             relPropsGraphStore,
-            new Expression.Literal.TrueLiteral(),
-            new ExpressionParser().parse("r:REL AND r.w >= 42.0")
+            TrueLiteral.INSTANCE,
+            ExpressionParser.parse("r:REL AND r.w >= 42.0")
         );
         assertGraphEquals(
             fromGdl("(a:A {foo: 42})-[:REL { w: 42.0 }]->(b:B { foo: 84 })"),

@@ -72,7 +72,7 @@ public abstract class EvaluationContext {
 
         private final ObjectIntMap<String> propertyTokens;
 
-        RelationshipEvaluationContext(Map<String, Integer> propertyTokens) {
+        public RelationshipEvaluationContext(Map<String, Integer> propertyTokens) {
             this.propertyTokens = new ObjectIntScatterMap<>();
             propertyTokens.forEach(this.propertyTokens::put);
         }
