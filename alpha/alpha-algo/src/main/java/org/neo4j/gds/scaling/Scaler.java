@@ -30,9 +30,9 @@ public interface Scaler {
     final class Factory {
         private Factory() {}
 
-        static Scaler create(String name, NodeProperties properties, long nodeCount) {
+        static Scaler create(String name, NodeProperties properties, long nodeCount, int concurrency) {
             switch (name) {
-                case "MinMax": return MinMax.create(properties, nodeCount);
+                case "MinMax": return MinMax.create(properties, nodeCount, concurrency);
                 case "Mean": return Mean.create(properties, nodeCount);
                 default: return null;
             }

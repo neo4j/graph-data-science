@@ -20,6 +20,9 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 final class MinMax implements Scaler {
 
@@ -33,19 +36,17 @@ final class MinMax implements Scaler {
         this.maxMinDiff = maxMinDiff;
     }
 
-    static MinMax create(NodeProperties properties, long nodeCount) {
-        var max = Double.MIN_VALUE;
-        var min = Double.MAX_VALUE;
+    static MinMax create(NodeProperties properties, long nodeCount, int concurrency) {
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            nodeCount,
+            partition -> new ComputeMinMax(partition.startNode(), partition.nodeCount(), properties)
+        );
 
-        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            var propertyValue = properties.doubleValue(nodeId);
-            if (propertyValue < min) {
-                min = propertyValue;
-            }
-            if (propertyValue > max) {
-                max = propertyValue;
-            }
-        }
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+
+        var min = tasks.stream().mapToDouble(ComputeMinMax::min).min().orElse(Double.MAX_VALUE);
+        var max = tasks.stream().mapToDouble(ComputeMinMax::max).max().orElse(Double.MIN_VALUE);
 
         return new MinMax(properties, min, max - min);
     }
@@ -56,6 +57,44 @@ final class MinMax implements Scaler {
             return 0D;
         }
         return (properties.doubleValue(nodeId) - min) / maxMinDiff;
+    }
+
+    static class ComputeMinMax implements Runnable {
+
+        private final long start;
+        private final long length;
+        private final NodeProperties properties;
+        private double min;
+        private double max;
+
+        ComputeMinMax(long start, long length, NodeProperties property) {
+            this.start = start;
+            this.length = length;
+            this.properties = property;
+            this.min = Double.MAX_VALUE;
+            this.max = Double.MIN_VALUE;
+        }
+
+        @Override
+        public void run() {
+            for (long nodeId = start; nodeId < (start + length); nodeId++) {
+                var propertyValue = properties.doubleValue(nodeId);
+                if (propertyValue < min) {
+                    min = propertyValue;
+                }
+                if (propertyValue > max) {
+                    max = propertyValue;
+                }
+            }
+        }
+
+        double max() {
+            return max;
+        }
+
+        double min() {
+            return min;
+        }
     }
 
 }
