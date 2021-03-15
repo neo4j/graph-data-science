@@ -47,7 +47,7 @@ class MinMaxTest {
         var minMaxNormalizer = MinMax.create(properties, 10);
 
         assertThat(minMaxNormalizer.min).isEqualTo(min);
-        assertThat(minMaxNormalizer.max).isEqualTo(max);
+        assertThat(minMaxNormalizer.maxMinDiff).isEqualTo(max - min);
 
         for (int i = 0; i < 10; i++) {
             assertThat(minMaxNormalizer.scaleProperty(i)).isEqualTo(i / 9D);
@@ -60,7 +60,7 @@ class MinMaxTest {
         var minMaxNormalizer = MinMax.create(properties, 10);
 
         assertThat(minMaxNormalizer.min).isEqualTo(4D);
-        assertThat(minMaxNormalizer.max).isEqualTo(4D);
+        assertThat(minMaxNormalizer.maxMinDiff).isEqualTo(0D);
 
         for (int i = 0; i < 10; i++) {
             assertThat(minMaxNormalizer.scaleProperty(i)).isEqualTo(0D);

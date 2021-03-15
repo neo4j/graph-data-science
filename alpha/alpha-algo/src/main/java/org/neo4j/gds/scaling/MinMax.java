@@ -25,12 +25,12 @@ final class MinMax implements Scaler {
 
     private final NodeProperties properties;
     final double min;
-    final double max;
+    final double maxMinDiff;
 
-    private MinMax(NodeProperties properties, double min, double max) {
+    private MinMax(NodeProperties properties, double min, double maxMinDiff) {
         this.properties = properties;
         this.min = min;
-        this.max = max;
+        this.maxMinDiff = maxMinDiff;
     }
 
     static MinMax create(NodeProperties properties, long nodeCount) {
@@ -47,15 +47,15 @@ final class MinMax implements Scaler {
             }
         }
 
-        return new MinMax(properties, min, max);
+        return new MinMax(properties, min, max - min);
     }
 
     @Override
     public double scaleProperty(long nodeId) {
-        if (Math.abs(max - min) < CLOSE_TO_ZERO) {
+        if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
             return 0D;
         }
-        return (properties.doubleValue(nodeId) - min) / (max - min);
+        return (properties.doubleValue(nodeId) - min) / maxMinDiff;
     }
 
 }
