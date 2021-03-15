@@ -35,7 +35,7 @@ public interface Scaler {
         static Scaler create(String name, NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
             switch (name) {
                 case "MinMax": return MinMax.create(properties, nodeCount, concurrency, executor);
-                case "Mean": return Mean.create(properties, nodeCount);
+                case "Mean": return Mean.create(properties, nodeCount, concurrency, executor);
                 default: return null;
             }
         }
