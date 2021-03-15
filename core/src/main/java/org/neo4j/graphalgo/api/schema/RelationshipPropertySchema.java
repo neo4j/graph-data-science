@@ -40,6 +40,16 @@ public interface RelationshipPropertySchema extends PropertySchema {
         );
     }
 
+    static RelationshipPropertySchema of(String propertyKey, ValueType valueType, Aggregation aggregation) {
+        return ImmutableRelationshipPropertySchema.of(
+            propertyKey,
+            valueType,
+            valueType.fallbackValue(),
+            GraphStore.PropertyState.PERSISTENT,
+            aggregation
+        );
+    }
+
     static RelationshipPropertySchema of(
         String propertyKey,
         ValueType valueType,

@@ -146,7 +146,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                         NumberType.FLOATING_POINT,
                         GraphStore.PropertyState.PERSISTENT,
                         propertyValues,
-                        DefaultValue.forDoubleArray(),
+                        DefaultValue.forDouble(),
                         graphCreateConfig.aggregation()
                     )
                 );

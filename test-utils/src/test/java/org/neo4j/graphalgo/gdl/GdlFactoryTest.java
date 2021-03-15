@@ -27,6 +27,10 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
+import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.List;
 import java.util.Optional;
@@ -168,6 +172,46 @@ class GdlFactoryTest {
         });
         assertThat(relProps.size()).isEqualTo(3);
         assertThat(relProps).isEqualTo(Set.of(1D, 2D, 3D));
+    }
+
+    @Test
+    void correctSchema() {
+        var graph = fromGdl(
+                            "  (a1:A   {double: 42.0D, long: 42L, doubleArray: [42.0D], longArray: [42L]})" +
+                            ", (a2b:A  {double: 84.0D})" +
+                            ", (ab:A:B {double: 84.0D, long: 1337L})" +
+                            ", (c:C)" +
+                            ", (a1)-[:A {prop1: 42.0D, prop2: 42.0D}]->(c)" +
+                            ", (a1)-[:A {prop1: 84.0D}]->(c)" +
+                            ", (a1)-[:B {prop1: 84.0D, prop3: 1337.0D}]->(c)" +
+                            ", (a1)-[:C]->(c)"
+        );
+
+        var nodeSchema = graph.schema().nodeSchema();
+        var expectedNodeSchema = NodeSchema
+            .builder()
+            .addProperty(NodeLabel.of("A"), "double", ValueType.DOUBLE)
+            .addProperty(NodeLabel.of("A"), "long", ValueType.LONG)
+            .addProperty(NodeLabel.of("A"), "doubleArray", ValueType.DOUBLE_ARRAY)
+            .addProperty(NodeLabel.of("A"), "longArray", ValueType.LONG_ARRAY)
+            .addProperty(NodeLabel.of("B"), "double", ValueType.DOUBLE)
+            .addProperty(NodeLabel.of("B"), "long", ValueType.LONG)
+            .addLabel(NodeLabel.of("C"))
+            .build();
+
+        assertThat(nodeSchema).isEqualTo(expectedNodeSchema);
+
+        var relationshipSchema = graph.schema().relationshipSchema();
+        var expectedRelationshipSchema = RelationshipSchema
+            .builder()
+            .addProperty(RelationshipType.of("A"), "prop1", ValueType.DOUBLE, Aggregation.NONE)
+            .addProperty(RelationshipType.of("A"), "prop2", ValueType.DOUBLE, Aggregation.NONE)
+            .addProperty(RelationshipType.of("B"), "prop1", ValueType.DOUBLE, Aggregation.NONE)
+            .addProperty(RelationshipType.of("B"), "prop3", ValueType.DOUBLE, Aggregation.NONE)
+            .addRelationshipType(RelationshipType.of("C"))
+            .build();
+
+        assertThat(relationshipSchema).isEqualTo(expectedRelationshipSchema);
     }
 
     private void assertRelationshipProperty(

@@ -23,8 +23,8 @@ import org.immutables.builder.Builder.AccessibleFields;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.core.Aggregation;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -92,6 +92,10 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
 
         public Builder addProperty(RelationshipType type, String propertyName, ValueType valueType) {
             return addProperty(type, propertyName, RelationshipPropertySchema.of(propertyName, valueType));
+        }
+
+        public Builder addProperty(RelationshipType type, String propertyName, ValueType valueType, Aggregation aggregation) {
+            return addProperty(type, propertyName, RelationshipPropertySchema.of(propertyName, valueType, aggregation));
         }
 
         public Builder addProperty(
