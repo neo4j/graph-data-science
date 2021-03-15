@@ -41,13 +41,13 @@ final class MinMax implements Scaler {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new ComputeMinMax(partition.startNode(), partition.nodeCount(), properties)
+            partition -> new ComputeAggregates(partition.startNode(), partition.nodeCount(), properties)
         );
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
-        var min = tasks.stream().mapToDouble(ComputeMinMax::min).min().orElse(Double.MAX_VALUE);
-        var max = tasks.stream().mapToDouble(ComputeMinMax::max).max().orElse(Double.MIN_VALUE);
+        var min = tasks.stream().mapToDouble(ComputeAggregates::min).min().orElse(Double.MAX_VALUE);
+        var max = tasks.stream().mapToDouble(ComputeAggregates::max).max().orElse(Double.MIN_VALUE);
 
         return new MinMax(properties, min, max - min);
     }
@@ -60,7 +60,7 @@ final class MinMax implements Scaler {
         return (properties.doubleValue(nodeId) - min) / maxMinDiff;
     }
 
-    static class ComputeMinMax implements Runnable {
+    static class ComputeAggregates implements Runnable {
 
         private final long start;
         private final long length;
@@ -68,7 +68,7 @@ final class MinMax implements Scaler {
         private double min;
         private double max;
 
-        ComputeMinMax(long start, long length, NodeProperties property) {
+        ComputeAggregates(long start, long length, NodeProperties property) {
             this.start = start;
             this.length = length;
             this.properties = property;
