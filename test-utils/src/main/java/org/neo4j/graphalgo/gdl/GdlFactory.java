@@ -19,23 +19,22 @@
  */
 package org.neo4j.graphalgo.gdl;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.CSRGraphStoreFactory;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipProperty;
 import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -63,9 +62,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -133,29 +132,31 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     public ImportResult<CSRGraphStore> build() {
         var nodes = loadNodes();
         var relationships = loadRelationships(nodes.idMap());
-        var topologies = relationships.entrySet().stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> entry.getValue().getTwo().topology()
-            ));
-        var properties = relationships.entrySet().stream()
-            .filter(entry -> entry.getValue().getOne().isPresent())
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> RelationshipPropertyStore
-                    .builder()
-                    .putIfAbsent(
-                        entry.getValue().getOne().get(),
-                        RelationshipProperty.of(
-                            entry.getValue().getOne().get(),
-                            NumberType.FLOATING_POINT,
-                            GraphStore.PropertyState.PERSISTENT,
-                            entry.getValue().getTwo().properties().get(),
-                            ValueType.DOUBLE.fallbackValue(),
-                            Aggregation.NONE
-                        )
-                    ).build()
-            ));
+
+        var topologies = new HashMap<RelationshipType, Relationships.Topology>();
+        var properties = new HashMap<RelationshipType, RelationshipPropertyStore>();
+
+        relationships.forEach(loadResult -> {
+            var builder = RelationshipPropertyStore.builder();
+            loadResult.properties().forEach((propertyKey, propertyValues) -> {
+                builder.putIfAbsent(
+                    propertyKey,
+                    RelationshipProperty.of(
+                        propertyKey,
+                        NumberType.FLOATING_POINT,
+                        GraphStore.PropertyState.PERSISTENT,
+                        propertyValues,
+                        DefaultValue.forDoubleArray(),
+                        graphCreateConfig.aggregation()
+                    )
+                );
+            });
+
+            topologies.put(loadResult.relationshipType(), loadResult.topology());
+            properties.put(loadResult.relationshipType(), builder.build());
+
+        });
+
         CSRGraphStore graphStore = CSRGraphStore.of(
             databaseId,
             nodes.idMap(),
@@ -264,61 +265,112 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         return array;
     }
 
-    private Map<RelationshipType, Pair<Optional<String>, Relationships>> loadRelationships(NodeMapping nodeMapping) {
-        var propertyKeysByRelType = new HashMap<String, Optional<String>>();
+    @ValueClass
+    interface RelationshipsLoadResult {
+        RelationshipType relationshipType();
 
-        gdlHandler.getEdges()
-            .forEach(edge -> propertyKeysByRelType
-                .putIfAbsent(edge.getLabel(), edge.getProperties().keySet().stream().findFirst()));
+        Relationships.Topology topology();
+
+        Map<String, Relationships.Properties> properties();
+    }
+
+    private List<RelationshipsLoadResult> loadRelationships(IdMapping nodeMapping) {
+        var propertyKeysByRelType = new HashMap<RelationshipType, List<String>>();
+
+        var schemaBuilder = RelationshipSchema.builder();
+        gdlHandler.getEdges().forEach(edge -> {
+            var relType = RelationshipType.of(edge.getLabel());
+            schemaBuilder.addRelationshipType(relType);
+            edge.getProperties().keySet().forEach(propertyKey ->
+                schemaBuilder.addProperty(relType, propertyKey, ValueType.DOUBLE)
+            );
+        });
+        var schema = schemaBuilder.build();
+
+        schema.properties().forEach((relType, properties) -> {
+            propertyKeysByRelType.put(relType, properties.keySet().stream().sorted().collect(Collectors.toList()));
+        });
 
         var relTypeImporters = propertyKeysByRelType.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                relTypeAndProperty -> GraphFactory.initRelationshipsBuilder()
-                    .nodes(nodeMapping)
-                    .orientation(graphCreateConfig.orientation())
-                    .aggregation(graphCreateConfig.aggregation())
-                    .addAllPropertyConfigs(relTypeAndProperty.getValue().isPresent()
-                        ? List.of(GraphFactory.PropertyConfig.of(graphCreateConfig.aggregation(), DefaultValue.forDouble()))
-                        : List.of()
-                    )
-                    .executorService(loadingContext.executor())
-                    .tracker(loadingContext.tracker())
-                    .build()
+                relTypeAndProperty -> {
+                    var propertyKeys = relTypeAndProperty.getValue();
+                    var propertyConfigs = propertyKeys
+                        .stream()
+                        .map(key -> GraphFactory.PropertyConfig.of(
+                            graphCreateConfig.aggregation(),
+                            DefaultValue.forDouble()
+                        ))
+                        .collect(Collectors.toList());
+
+                    return GraphFactory.initRelationshipsBuilder()
+                        .nodes(nodeMapping)
+                        .orientation(graphCreateConfig.orientation())
+                        .aggregation(graphCreateConfig.aggregation())
+                        .addAllPropertyConfigs(propertyConfigs)
+                        .executorService(loadingContext.executor())
+                        .tracker(loadingContext.tracker())
+                        .build();
+                }
             ));
 
         gdlHandler.getEdges()
             .forEach(edge -> {
-                var relationshipsBuilder = relTypeImporters.get(edge.getLabel());
-                var maybePropertyKey = propertyKeysByRelType.get(edge.getLabel());
-                if (maybePropertyKey.isPresent()) {
+                var relType = RelationshipType.of(edge.getLabel());
+                var relationshipsBuilder = relTypeImporters.get(relType);
+                var propertyKeys = propertyKeysByRelType.get(relType);
+
+                if (propertyKeys.isEmpty()) {
+                    relationshipsBuilder.add(edge.getSourceVertexId(), edge.getTargetVertexId());
+                } else if (propertyKeys.size() == 1) {
                     relationshipsBuilder.add(
                         edge.getSourceVertexId(),
                         edge.getTargetVertexId(),
-                        gdsValue(edge, maybePropertyKey.get(), edge.getProperties().get(maybePropertyKey.get()))
+                        gdsValue(edge, propertyKeys.get(0), edge.getProperties().get(propertyKeys.get(0)))
                     );
                 } else {
-                    relationshipsBuilder.add(edge.getSourceVertexId(), edge.getTargetVertexId());
+                    var values = propertyKeys
+                        .stream()
+                        .map(key -> gdsValue(edge, key, edge.getProperties().get(key)))
+                        .mapToDouble(d -> d)
+                        .toArray();
+                    relationshipsBuilder.add(edge.getSourceVertexId(), edge.getTargetVertexId(), values);
                 }
             });
 
         // Add fake relationship type since we do not
         // support GraphStores with zero relationships.
         if (relTypeImporters.isEmpty()) {
-            relTypeImporters.put(RelationshipType.ALL_RELATIONSHIPS.name, GraphFactory.initRelationshipsBuilder()
+            relTypeImporters.put(RelationshipType.ALL_RELATIONSHIPS, GraphFactory.initRelationshipsBuilder()
                 .nodes(nodeMapping)
                 .orientation(graphCreateConfig.orientation())
                 .executorService(loadingContext.executor())
                 .tracker(loadingContext.tracker())
                 .build()
             );
-            propertyKeysByRelType.put(RelationshipType.ALL_RELATIONSHIPS.name, Optional.empty());
+            propertyKeysByRelType.put(RelationshipType.ALL_RELATIONSHIPS, List.of());
         }
 
-        return relTypeImporters.entrySet().stream().collect(Collectors.toMap(
-            entry -> RelationshipType.of(entry.getKey()),
-            entry -> Tuples.pair(propertyKeysByRelType.get(entry.getKey()), entry.getValue().build())
-        ));
+        return relTypeImporters.entrySet()
+            .stream()
+            .map(entry -> {
+                    var relationships = entry.getValue().buildAll();
+
+                    var topology = relationships.get(0).topology();
+                    var propertyKeys = propertyKeysByRelType.get(entry.getKey());
+
+                    var properties = IntStream.range(0, propertyKeys.size())
+                        .boxed()
+                        .collect(Collectors.toMap(propertyKeys::get, idx -> relationships.get(idx).properties().get()));
+
+                    return ImmutableRelationshipsLoadResult.builder()
+                        .relationshipType(entry.getKey())
+                        .topology(topology)
+                        .properties(properties)
+                        .build();
+                }
+            ).collect(Collectors.toList());
     }
 
     private double gdsValue(Element element, String propertyKey, Object gdlValue) {

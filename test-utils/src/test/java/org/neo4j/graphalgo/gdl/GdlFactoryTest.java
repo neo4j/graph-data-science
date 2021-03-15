@@ -25,8 +25,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipIterator;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -76,6 +78,29 @@ class GdlFactoryTest {
         assertThat(rel2Graph.relationshipCount()).isEqualTo(1);
         rel2Graph.forEachRelationship(gdlFactory.nodeId("b"), (sourceNodeId, targetNodeId) -> {
             assertThat(targetNodeId).isEqualTo(gdlFactory.nodeId("c"));
+            return true;
+        });
+    }
+
+    @Test
+    void testRelationshipProperties() {
+        var gdlFactory = GdlFactory.of(("(a)-[:REL { foo: 42, bar: 1337, baz: 84 }]->(b)"));
+        var graphStore = gdlFactory.build().graphStore();
+
+        assertRelationshipProperty(gdlFactory, 42.0,
+            graphStore.getGraph(RelationshipType.of("REL"), Optional.of("foo"))
+        );
+        assertRelationshipProperty(gdlFactory, 1337.0,
+            graphStore.getGraph(RelationshipType.of("REL"), Optional.of("bar"))
+        );
+        assertRelationshipProperty(gdlFactory, 84.0,
+            graphStore.getGraph(RelationshipType.of("REL"), Optional.of("baz"))
+        );
+    }
+
+    private void assertRelationshipProperty(GdlFactory gdlFactory, double expected, RelationshipIterator graph) {
+        graph.forEachRelationship(gdlFactory.nodeId("a"), Double.NaN, (sourceNodeId, targetNodeId, property) -> {
+            assertThat(property).isEqualTo(expected);
             return true;
         });
     }

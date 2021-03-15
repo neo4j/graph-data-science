@@ -106,7 +106,7 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
         }
 
         public Builder addRelationshipType(RelationshipType type) {
-            this.properties.putIfAbsent(type, Collections.emptyMap());
+            this.properties.putIfAbsent(type, new LinkedHashMap<>());
             return this;
         }
     }
