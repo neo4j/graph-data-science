@@ -257,7 +257,7 @@ class ExpressionParserTest {
     @Test
     void greaterThanEquals() throws ParseException {
         var actual = ExpressionParser.parse("1337 >= 42");
-        assertThat(actual).isEqualTo(ImmutableGreaterThanEquals.of(
+        assertThat(actual).isEqualTo(ImmutableGreaterThanOrEquals.of(
             ImmutableLongLiteral.of(1337),
             ImmutableLongLiteral.of(42)
         ));
@@ -275,7 +275,7 @@ class ExpressionParserTest {
     @Test
     void lessThanEquals() throws ParseException {
         var actual = ExpressionParser.parse("1337 <= 42");
-        assertThat(actual).isEqualTo(ImmutableLessThanEquals.of(
+        assertThat(actual).isEqualTo(ImmutableLessThanOrEquals.of(
             ImmutableLongLiteral.of(1337),
             ImmutableLongLiteral.of(42)
         ));

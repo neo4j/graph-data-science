@@ -255,7 +255,7 @@ public interface Expression {
         }
 
         @ValueClass
-        interface GreaterThanEquals extends BinaryExpression {
+        interface GreaterThanOrEquals extends BinaryExpression {
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
@@ -280,7 +280,7 @@ public interface Expression {
         }
 
         @ValueClass
-        interface LessThanEquals extends BinaryExpression {
+        interface LessThanOrEquals extends BinaryExpression {
 
             @Value.Derived
             @Override

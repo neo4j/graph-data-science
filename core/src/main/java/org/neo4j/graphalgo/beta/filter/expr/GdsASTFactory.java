@@ -115,12 +115,12 @@ class GdsASTFactory extends ASTFactoryAdapter {
 
     @Override
     public Expression lte(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableLessThanEquals.of(lhs, rhs);
+        return ImmutableLessThanOrEquals.of(lhs, rhs);
     }
 
     @Override
     public Expression gte(InputPosition p, Expression lhs, Expression rhs) {
-        return ImmutableGreaterThanEquals.of(lhs, rhs);
+        return ImmutableGreaterThanOrEquals.of(lhs, rhs);
     }
 
     @Override
