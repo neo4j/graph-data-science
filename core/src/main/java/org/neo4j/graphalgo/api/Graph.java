@@ -42,6 +42,11 @@ public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, Rela
     }
 
     @Override
+    default void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
+        nodeMapping().forEachNodeLabel(nodeId, consumer);
+    }
+
+    @Override
     default Set<NodeLabel> availableNodeLabels() {
         return nodeMapping().availableNodeLabels();
     }

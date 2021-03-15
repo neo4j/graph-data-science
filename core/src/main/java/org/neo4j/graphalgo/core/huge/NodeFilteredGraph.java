@@ -169,6 +169,11 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     }
 
     @Override
+    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
+        filteredIdMap.forEachNodeLabel(nodeId, consumer);
+    }
+
+    @Override
     public NodeProperties nodeProperties(String propertyKey) {
         NodeProperties properties = graph.nodeProperties(propertyKey);
         if (properties == null) {

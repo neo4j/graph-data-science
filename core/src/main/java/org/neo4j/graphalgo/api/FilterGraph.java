@@ -138,6 +138,11 @@ public abstract class FilterGraph implements Graph {
     }
 
     @Override
+    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
+        graph.forEachNodeLabel(nodeId, consumer);
+    }
+
+    @Override
     public Set<NodeLabel> availableNodeLabels() {
         return graph.availableNodeLabels();
     }

@@ -28,6 +28,8 @@ public interface NodeMapping extends IdMapping, NodeIterator, BatchNodeIterable 
 
     Set<NodeLabel> nodeLabels(long nodeId);
 
+    void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer);
+
     Set<NodeLabel> availableNodeLabels();
 
     boolean hasLabel(long nodeId, NodeLabel label);
@@ -38,5 +40,12 @@ public interface NodeMapping extends IdMapping, NodeIterator, BatchNodeIterable 
 
     default NodeMapping withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         throw new UnsupportedOperationException("This node mapping does not support label filtering");
+    }
+
+    @FunctionalInterface
+    interface NodeLabelConsumer {
+
+        boolean accept(NodeLabel nodeLabel);
+
     }
 }
