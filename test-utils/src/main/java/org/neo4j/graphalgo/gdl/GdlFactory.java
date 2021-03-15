@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
-import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
@@ -374,7 +373,9 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     }
 
     private double gdsValue(Element element, String propertyKey, Object gdlValue) {
-        if (gdlValue instanceof Number) {
+        if (gdlValue == null) {
+            return DefaultValue.forDouble().doubleValue();
+        } else if (gdlValue instanceof Number) {
             return ((Number) gdlValue).doubleValue();
         } else if (gdlValue instanceof String && gdlValue.equals("NaN")) {
             return Double.NaN;

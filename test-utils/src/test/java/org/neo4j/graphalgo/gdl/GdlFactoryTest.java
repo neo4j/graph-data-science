@@ -24,8 +24,9 @@ import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.GraphStore;
 
 import java.util.List;
 import java.util.Optional;
@@ -86,23 +87,41 @@ class GdlFactoryTest {
     void testRelationshipProperties() {
         var gdlFactory = GdlFactory.of(("(a)-[:REL { foo: 42, bar: 1337, baz: 84 }]->(b)"));
         var graphStore = gdlFactory.build().graphStore();
+        var sourceNodeId = gdlFactory.nodeId("a");
 
-        assertRelationshipProperty(gdlFactory, 42.0,
-            graphStore.getGraph(RelationshipType.of("REL"), Optional.of("foo"))
-        );
-        assertRelationshipProperty(gdlFactory, 1337.0,
-            graphStore.getGraph(RelationshipType.of("REL"), Optional.of("bar"))
-        );
-        assertRelationshipProperty(gdlFactory, 84.0,
-            graphStore.getGraph(RelationshipType.of("REL"), Optional.of("baz"))
-        );
+        assertRelationshipProperty(graphStore, "REL", "foo", sourceNodeId, 42.0);
+        assertRelationshipProperty(graphStore, "REL", "bar", sourceNodeId, 1337.0);
+        assertRelationshipProperty(graphStore, "REL", "baz", sourceNodeId, 84.0);
     }
 
-    private void assertRelationshipProperty(GdlFactory gdlFactory, double expected, RelationshipIterator graph) {
-        graph.forEachRelationship(gdlFactory.nodeId("a"), Double.NaN, (sourceNodeId, targetNodeId, property) -> {
-            assertThat(property).isEqualTo(expected);
-            return true;
-        });
+    @Test
+    void testRelationshipPropertiesDifferentProperties() {
+        var gdlFactory = GdlFactory.of((
+            "(a)-[:REL { foo: 42, bar: 1337, baz: 84 }]->(b)" +
+            "(b)-[:REL { foo: 42 }]->(c)")
+        );
+        var graphStore = gdlFactory.build().graphStore();
+        var sourceNodeId = gdlFactory.nodeId("b");
+
+        assertRelationshipProperty(graphStore, "REL", "foo", sourceNodeId, 42.0);
+        assertRelationshipProperty(graphStore, "REL", "bar", sourceNodeId, DefaultValue.forDouble().doubleValue());
+        assertRelationshipProperty(graphStore, "REL", "baz", sourceNodeId, DefaultValue.forDouble().doubleValue());
+    }
+
+    @Test
+    void testRelationshipPropertiesMixedSchema() {
+        var gdlFactory = GdlFactory.of((
+            "(a)-[:REL1 { foo: 42, bar: 1337, baz: 84 }]->(b)" +
+            "(b)-[:REL2 { foo: 4.2D, bob: 13.37D }]->(c)")
+        );
+        var graphStore = gdlFactory.build().graphStore();
+        var idA = gdlFactory.nodeId("a");
+        var idB = gdlFactory.nodeId("b");
+
+        assertRelationshipProperty(graphStore, "REL1", "foo", idA, 42.0);
+        assertRelationshipProperty(graphStore, "REL2", "foo", idB, 4.2);
+        assertRelationshipProperty(graphStore, "REL1", "baz", idA, 84.0);
+        assertRelationshipProperty(graphStore, "REL2", "bob", idB, 13.37);
     }
 
     @Test
@@ -149,5 +168,23 @@ class GdlFactoryTest {
         });
         assertThat(relProps.size()).isEqualTo(3);
         assertThat(relProps).isEqualTo(Set.of(1D, 2D, 3D));
+    }
+
+    private void assertRelationshipProperty(
+        GraphStore graphStore,
+        String relType,
+        String propertyKey,
+        long sourceNodeId,
+        double expected
+    ) {
+        graphStore.getGraph(RelationshipType.of(relType), Optional.of(propertyKey))
+            .forEachRelationship(sourceNodeId, Double.POSITIVE_INFINITY, (ignored, targetNodeId, property) -> {
+                if (Double.isNaN(expected)) {
+                    assertThat(property).isNaN();
+                } else {
+                    assertThat(property).isEqualTo(expected);
+                }
+                return true;
+            });
     }
 }
