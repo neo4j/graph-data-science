@@ -37,8 +37,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CsvRelationshipVisitor extends RelationshipVisitor {
 
-    public static final String START_ID_COLUMN_NAME = ":START_ID";
-    public static final String END_ID_COLUMN_NAME = ":END_ID";
+    static final String START_ID_COLUMN_NAME = ":START_ID";
+    static final String END_ID_COLUMN_NAME = ":END_ID";
 
     private final Path fileLocation;
     private final Set<String> headerFiles;
@@ -61,10 +61,7 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
     }
 
     @TestOnly
-    CsvRelationshipVisitor(
-        Path fileLocation,
-        RelationshipSchema relationshipSchema
-    ) {
+    CsvRelationshipVisitor(Path fileLocation, RelationshipSchema relationshipSchema) {
         this(fileLocation, relationshipSchema, new HashSet<>(), 0);
     }
 

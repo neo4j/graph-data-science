@@ -145,7 +145,7 @@ public class HugeGraph implements CSRGraph {
         );
     }
 
-    public HugeGraph(
+    protected HugeGraph(
         NodeMapping idMapping,
         GraphSchema schema,
         Map<String, NodeProperties> nodeProperties,
