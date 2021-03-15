@@ -70,10 +70,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
             if (config.cacheDegrees()) {
                 var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
                 var tasks = PartitionUtils
-                    .rangePartition(config.concurrency(), graph.nodeCount())
-                    .stream()
-                    .map(partition -> new CacheDegreeTask(graph, degrees, partition))
-                    .collect(Collectors.toList());
+                    .rangePartition(
+                        config.concurrency(),
+                        graph.nodeCount(),
+                        partition -> new CacheDegreeTask(graph, degrees, partition)
+                    );
                 ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
                 result = degrees::get;
             } else {

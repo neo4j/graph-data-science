@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -113,7 +114,7 @@ class PartitionUtilsTest {
     @ParameterizedTest
     @MethodSource("ranges")
     void testRangePartitioning(int concurrency, long nodeCount, List<Partition> expectedPartitions) {
-        assertEquals(expectedPartitions, PartitionUtils.rangePartition(concurrency, nodeCount));
+        assertEquals(expectedPartitions, PartitionUtils.rangePartition(concurrency, nodeCount, Function.identity()));
     }
 
     @Test

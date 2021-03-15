@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -195,7 +196,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     private List<Partition> partitionGraph() {
         switch (config.partitioning()) {
             case RANGE:
-                return PartitionUtils.rangePartition(concurrency, graph.nodeCount());
+                return PartitionUtils.rangePartition(concurrency, graph.nodeCount(), Function.identity());
             case DEGREE:
                 var batchSize = Math.max(
                     ParallelUtil.DEFAULT_BATCH_SIZE,

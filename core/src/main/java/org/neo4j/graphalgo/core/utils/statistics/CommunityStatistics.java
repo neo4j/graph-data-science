@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
-import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
@@ -109,10 +108,7 @@ public final class CommunityStatistics {
         var capacity = communitySizes.getCapacity();
 
         var tasks = PartitionUtils
-            .rangePartition(concurrency, capacity)
-            .stream()
-            .map(partition -> new CountTask(communitySizes, partition))
-            .collect(Collectors.toList());
+            .rangePartition(concurrency, capacity, partition -> new CountTask(communitySizes, partition));
 
         ParallelUtil.run(tasks, executorService);
 
@@ -164,10 +160,7 @@ public final class CommunityStatistics {
             var capacity = communitySizes.getCapacity();
 
             var tasks = PartitionUtils
-                .rangePartition(concurrency, capacity)
-                .stream()
-                .map(partition -> new CountAndRecordTask(communitySizes, partition))
-                .collect(Collectors.toList());
+                .rangePartition(concurrency, capacity, partition -> new CountAndRecordTask(communitySizes, partition));
 
             ParallelUtil.run(tasks, executorService);
 

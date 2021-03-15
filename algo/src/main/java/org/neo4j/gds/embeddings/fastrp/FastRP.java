@@ -40,7 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -159,13 +158,15 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
         long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
         float sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
-        List<Runnable> tasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(), batchSize)
-            .stream()
-            .map(partition -> new InitRandomVectorTask(
+        List<Runnable> tasks = PartitionUtils.rangePartition(
+            concurrency,
+            graph.nodeCount(),
+            batchSize,
+            partition -> new InitRandomVectorTask(
                 partition,
                 sqrtEmbeddingDimension
-            ))
-            .collect(Collectors.toList());
+            )
+        );
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
         progressLogger.logMessage("Initialising Random Vectors :: Finished");
@@ -181,16 +182,17 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
             double iterationWeight = iterationWeights.get(i).doubleValue();
 
-            List<Runnable> tasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(), batchSize)
-                .stream()
-                .map(partition -> new PropagateEmbeddingsTask(
-                        partition,
-                        localCurrent,
-                        localPrevious,
-                        iterationWeight
-                    )
+            List<Runnable> tasks = PartitionUtils.rangePartition(
+                concurrency,
+                graph.nodeCount(),
+                batchSize,
+                partition -> new PropagateEmbeddingsTask(
+                    partition,
+                    localCurrent,
+                    localPrevious,
+                    iterationWeight
                 )
-                .collect(Collectors.toList());
+            );
             ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
             progressLogger.logMessage(formatWithLocale("Iteration %s :: Finished", i + 1));

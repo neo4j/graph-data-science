@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.neo4j.graphalgo.core.utils.partition.Partition.MAX_NODE_COUNT;
 
@@ -33,19 +34,19 @@ public final class PartitionUtils {
 
     private PartitionUtils() {}
 
-    public static List<Partition> rangePartition(int concurrency, long nodeCount) {
+    public static <R> List<R> rangePartition(int concurrency, long nodeCount, Function<Partition, R> partitionFunction) {
         long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
-        return rangePartition(concurrency, nodeCount, batchSize);
+        return rangePartition(concurrency, nodeCount, batchSize, partitionFunction);
     }
 
-    public static List<Partition> rangePartition(int concurrency, long nodeCount, long batchSize) {
-        List<Partition> partitions = new ArrayList<>(concurrency);
+    public static <R> List<R> rangePartition(int concurrency, long nodeCount, long batchSize, Function<Partition, R> partitionFunction) {
+        var result = new ArrayList<R>(concurrency);
         for (long i = 0; i < nodeCount; i += batchSize) {
             long actualBatchSize = i + batchSize < nodeCount ? batchSize : nodeCount - i;
-            partitions.add(Partition.of(i, actualBatchSize));
+            result.add(partitionFunction.apply(Partition.of(i, actualBatchSize)));
         }
 
-        return partitions;
+        return result;
     }
 
 

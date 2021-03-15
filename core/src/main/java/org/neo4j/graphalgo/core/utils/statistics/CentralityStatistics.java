@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongToDoubleFunction;
-import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
@@ -47,10 +46,7 @@ public final class CentralityStatistics {
             }
         } else {
             var tasks = PartitionUtils
-                .rangePartition(concurrency, nodeCount)
-                .stream()
-                .map(partition -> new RecordTask(partition, centralityFunction))
-                .collect(Collectors.toList());
+                .rangePartition(concurrency, nodeCount, partition -> new RecordTask(partition, centralityFunction));
 
             ParallelUtil.run(tasks, executorService);
 

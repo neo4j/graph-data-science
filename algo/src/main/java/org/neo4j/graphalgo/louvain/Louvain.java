@@ -47,7 +47,6 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -221,16 +220,13 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             .build();
 
         var relationshipCreators = PartitionUtils
-            .rangePartition(config.concurrency(), workingGraph.nodeCount())
-            .stream()
-            .map(partition ->
+            .rangePartition(config.concurrency(), workingGraph.nodeCount(), partition ->
                 new RelationshipCreator(
                     relationshipsBuilder,
                     modularityOptimization,
                     workingGraph.concurrentCopy(),
                     partition
-                ))
-            .collect(Collectors.toList());
+                ));
 
         ParallelUtil.run(relationshipCreators, executorService);
 
