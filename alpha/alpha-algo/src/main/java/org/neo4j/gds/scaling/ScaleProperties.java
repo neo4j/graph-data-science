@@ -51,18 +51,22 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     public Result compute() {
         var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
 
-        ParallelUtil.parallelForEachNode(graph.nodeCount(), config.concurrency(), (nodeId) ->
-        {
-            var propertyCount = config.featureProperties().size();
-            var resultProperties = new double[propertyCount];
-            for (int i = 0; i < propertyCount; i++) {
-                var normalizer = resolveNormalizers().get(i);
-                var afterValue = normalizer.scaleProperty(nodeId);
-                resultProperties[i] = afterValue;
-            }
+        var propertyCount = config.featureProperties().size();
+        ParallelUtil.parallelForEachNode(
+            graph.nodeCount(),
+            config.concurrency(),
+            (nodeId) -> scaledProperties.set(nodeId, new double[propertyCount])
+        );
 
-            scaledProperties.set(nodeId, resultProperties);
-        });
+        for (int i = 0; i < propertyCount; i++) {
+            var normalizer = resolveNormalizers().get(i);
+            final int index = i;
+            ParallelUtil.parallelForEachNode(graph.nodeCount(), config.concurrency(), (nodeId) -> {
+                var afterValue = normalizer.scaleProperty(nodeId);
+                double[] existingResult = scaledProperties.get(nodeId);
+                existingResult[index] = afterValue;
+            });
+        }
 
         return Result.of(scaledProperties);
     }
