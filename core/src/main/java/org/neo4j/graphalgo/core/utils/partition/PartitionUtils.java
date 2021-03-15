@@ -34,16 +34,16 @@ public final class PartitionUtils {
 
     private PartitionUtils() {}
 
-    public static <R> List<R> rangePartition(int concurrency, long nodeCount, Function<Partition, R> partitionFunction) {
+    public static <TASK> List<TASK> rangePartition(int concurrency, long nodeCount, Function<Partition, TASK> taskCreator) {
         long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
-        return rangePartition(concurrency, nodeCount, batchSize, partitionFunction);
+        return rangePartition(concurrency, nodeCount, batchSize, taskCreator);
     }
 
-    public static <R> List<R> rangePartition(int concurrency, long nodeCount, long batchSize, Function<Partition, R> partitionFunction) {
-        var result = new ArrayList<R>(concurrency);
+    public static <TASK> List<TASK> rangePartition(int concurrency, long nodeCount, long batchSize, Function<Partition, TASK> taskCreator) {
+        var result = new ArrayList<TASK>(concurrency);
         for (long i = 0; i < nodeCount; i += batchSize) {
             long actualBatchSize = i + batchSize < nodeCount ? batchSize : nodeCount - i;
-            result.add(partitionFunction.apply(Partition.of(i, actualBatchSize)));
+            result.add(taskCreator.apply(Partition.of(i, actualBatchSize)));
         }
 
         return result;
@@ -67,17 +67,17 @@ public final class PartitionUtils {
         return partitions;
     }
 
-    public static <R> List<R> degreePartition(Graph graph, long batchSize, Function<Partition, R> partitionFunction) {
-        return degreePartition(graph.nodeIterator(), graph, batchSize, partitionFunction);
+    public static <TASK> List<TASK> degreePartition(Graph graph, long batchSize, Function<Partition, TASK> taskCreator) {
+        return degreePartition(graph.nodeIterator(), graph, batchSize, taskCreator);
     }
 
-    public static <R> List<R> degreePartition(
+    public static <TASK> List<TASK> degreePartition(
         PrimitiveLongIterator nodes,
         Degrees degrees,
         long batchSize,
-        Function<Partition, R> partitionFunction
+        Function<Partition, TASK> taskCreator
     ) {
-        var result = new ArrayList<R>();
+        var result = new ArrayList<TASK>();
         long start = 0L;
         while (nodes.hasNext()) {
             assert batchSize > 0L;
@@ -89,7 +89,7 @@ public final class PartitionUtils {
             }
 
             long end = nodeId + 1;
-            result.add(partitionFunction.apply(Partition.of(start, end - start)));
+            result.add(taskCreator.apply(Partition.of(start, end - start)));
             start = end;
         }
         return result;
