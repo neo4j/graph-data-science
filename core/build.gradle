@@ -17,14 +17,16 @@ dependencies {
     api(
             project(':annotations'),
             project(':neo4j-kernel-adapter'),
-            [group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'],
-            [group: 'com.carrotsearch', name: 'hppc', version: ver.'hppc'],
-            [group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'],
-            [group: 'org.jctools', name: 'jctools-core', version: ver.'jctools-core'],
-            [group: 'io.jsonwebtoken', name: 'jjwt-api', version: ver.'jjwt'],
-            [group: 'org.ejml', name: 'ejml-core', version: ver.'ejml'],
-            [group: 'org.ejml', name: 'ejml-ddense', version: ver.'ejml'],
-            [group: 'de.siegmar', name: 'fastcsv', version: ver.'fastcsv']
+            [group: 'org.hdrhistogram', name: 'HdrHistogram',               version: ver.'HdrHistogram'],
+            [group: 'com.carrotsearch', name: 'hppc',                       version: ver.'hppc'],
+            [group: 'org.openjdk.jol',  name: 'jol-core',                   version: ver.'jol'],
+            [group: 'org.jctools',      name: 'jctools-core',               version: ver.'jctools-core'],
+            [group: 'io.jsonwebtoken',  name: 'jjwt-api',                   version: ver.'jjwt'],
+            [group: 'org.ejml',         name: 'ejml-core',                  version: ver.'ejml'],
+            [group: 'org.ejml',         name: 'ejml-ddense',                version: ver.'ejml'],
+            [group: 'de.siegmar',       name: 'fastcsv',                    version: ver.'fastcsv'],
+            [group: 'org.opencypher',   name: 'cypher-javacc-parser-9.0',   version: ver.'opencypher-front-end']
+
     )
 
     implementation(

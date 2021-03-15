@@ -32,7 +32,7 @@ class RleReaderTest {
     @Test
     void nothingRepeats() {
         // given
-        List<Number> vector1List = asList(5.0, 4.0, 5.0, 4.0, 5.0);
+        List<Double> vector1List = asList(5.0, 4.0, 5.0, 4.0, 5.0);
 
         // when
         double[] vector1Rle = Weights.buildRleWeights(vector1List, 3);
@@ -47,7 +47,7 @@ class RleReaderTest {
     @Test
     void everythingRepeats() {
         // given
-        List<Number> vector1List = asList(5.0, 5.0, 5.0, 5.0, 5.0);
+        List<Double> vector1List = asList(5.0, 5.0, 5.0, 5.0, 5.0);
 
         // when
         double[] vector1Rle = Weights.buildRleWeights(vector1List, 3);
@@ -62,7 +62,7 @@ class RleReaderTest {
     @Test
     void mixedRepeats() {
         // given
-        List<Number> vector1List = asList(5.0, 5.0, 5.0, 5.0, 5.0, 4.0, 5.0);
+        List<Double> vector1List = asList(5.0, 5.0, 5.0, 5.0, 5.0, 4.0, 5.0);
 
         // when
         double[] vector1Rle = Weights.buildRleWeights(vector1List, 3);
@@ -77,7 +77,7 @@ class RleReaderTest {
     @Test
     void readTheSameItemMultipleTimes() {
         // given
-        List<Number> vector1List = asList(5.0, 5.0, 5.0, 5.0, 5.0, 4.0, 5.0);
+        List<Double> vector1List = asList(5.0, 5.0, 5.0, 5.0, 5.0, 4.0, 5.0);
 
         // when
         double[] vector1Rle = Weights.buildRleWeights(vector1List, 3);

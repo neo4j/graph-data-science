@@ -24,7 +24,7 @@ import java.util.List;
 
 public final class Weights {
 
-    public static double[] buildWeights(List<Number> weightList) {
+    public static double[] buildWeights(List<Double> weightList) {
         double[] weights = new double[weightList.size()];
         int i = 0;
         for (Number value : weightList) {
@@ -33,7 +33,7 @@ public final class Weights {
         return weights;
     }
 
-    public static double[] buildRleWeights(List<Number> weightList, int limit) {
+    public static double[] buildRleWeights(List<Double> weightList, int limit) {
         double[] weights = new double[weightList.size() + (weightList.size() / (limit * 2))];
 
         double latestValue = Double.POSITIVE_INFINITY;
