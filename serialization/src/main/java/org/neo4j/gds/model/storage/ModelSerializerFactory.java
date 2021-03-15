@@ -25,7 +25,6 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeClassificationSerializer;
-import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.utils.StringJoining;
 
 import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;

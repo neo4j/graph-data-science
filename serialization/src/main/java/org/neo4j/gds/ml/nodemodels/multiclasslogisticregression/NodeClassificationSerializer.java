@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import com.google.protobuf.Parser;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
@@ -31,7 +32,7 @@ import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.ml.model.proto.NodeClassificationProto;
 
-public class NodeClassificationSerializer implements ModelSerializer<MultiClassNLRData, NodeClassificationTrainConfig, NodeClassificationProto.NodeClassificationModelData> {
+public class NodeClassificationSerializer implements ModelSerializer<MultiClassNLRData, NodeClassificationProto.NodeClassificationModelData> {
 
     @Override
     public NodeClassificationProto.NodeClassificationModelData toSerializable(MultiClassNLRData modelData) {
@@ -42,28 +43,6 @@ public class NodeClassificationSerializer implements ModelSerializer<MultiClassN
             .setLocalIdMap(NodeClassificationProto.LocalIdMap
                 .newBuilder()
                 .addAllOriginalIds(modelData.classIdMap().originalIdsList()))
-            .build();
-    }
-
-    @Override
-    public Model<MultiClassNLRData, NodeClassificationTrainConfig> fromSerializable(
-        NodeClassificationProto.NodeClassificationModelData serializedData,
-        ModelProto.ModelMetaData modelMetaData
-    ) {
-
-        var weights = new Weights<>(TensorSerializer.fromSerializable(serializedData.getWeights()));
-
-        var localIdMap = new LocalIdMap();
-        serializedData.getLocalIdMap()
-            .getOriginalIdsList()
-            .forEach(localIdMap::toMapped);
-
-        return ModelMetaDataSerializer
-            .<MultiClassNLRData, NodeClassificationTrainConfig>fromSerializable(modelMetaData)
-            .data(MultiClassNLRData.builder()
-                .weights(weights)
-                .classIdMap(localIdMap)
-                .build())
             .build();
     }
 
@@ -86,5 +65,27 @@ public class NodeClassificationSerializer implements ModelSerializer<MultiClassN
     @Override
     public Parser<NodeClassificationProto.NodeClassificationModelData> modelParser() {
         return NodeClassificationProto.NodeClassificationModelData.parser();
+    }
+
+    @TestOnly
+    Model<MultiClassNLRData, NodeClassificationTrainConfig> fromSerializable(
+        NodeClassificationProto.NodeClassificationModelData serializedData,
+        ModelProto.ModelMetaData modelMetaData
+    ) {
+
+        var weights = new Weights<>(TensorSerializer.fromSerializable(serializedData.getWeights()));
+
+        var localIdMap = new LocalIdMap();
+        serializedData.getLocalIdMap()
+            .getOriginalIdsList()
+            .forEach(localIdMap::toMapped);
+
+        return ModelMetaDataSerializer
+            .<MultiClassNLRData, NodeClassificationTrainConfig>fromSerializable(modelMetaData)
+            .data(MultiClassNLRData.builder()
+                .weights(weights)
+                .classIdMap(localIdMap)
+                .build())
+            .build();
     }
 }

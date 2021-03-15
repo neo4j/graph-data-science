@@ -46,7 +46,7 @@ public class ModelFileReader {
         return ModelProto.ModelMetaData.parseFrom(readDataFromFile(file));
     }
 
-    public <D, PD extends GeneratedMessageV3> Object readData(String algoType) throws IOException {
+    public <D, PD extends GeneratedMessageV3> D readData(String algoType) throws IOException {
         return ModelSupport.onValidAlgoType(algoType, () -> {
             ModelSerializer<D, PD> serializer = ModelSerializerFactory.serializer(algoType);
             var parser = serializer.modelParser();
