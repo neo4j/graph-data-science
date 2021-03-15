@@ -50,7 +50,7 @@ public final class GraphStoreToFileExporter extends GraphStoreExporter<GraphStor
         return new GraphStoreToFileExporter(
             graphStore,
             config,
-            (index) -> new CsvNodeVisitor(exportPath, graphStore.schema().nodeSchema(), headerFiles, index, config.reverseIdMapping()),
+            (index) -> new CsvNodeVisitor(exportPath, graphStore.schema().nodeSchema(), headerFiles, index, config.exportNeoNodeIds()),
             (index) -> new CsvRelationshipVisitor(exportPath, graphStore.schema().relationshipSchema(), headerFiles, index)
         );
     }

@@ -41,7 +41,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
     protected abstract void export(GraphStoreInput graphStoreInput);
 
     public ImportedProperties run(AllocationTracker tracker) {
-        var nodeStore = NodeStore.of(graphStore, config.reverseIdMapping(), tracker);
+        var nodeStore = NodeStore.of(graphStore, config.exportNeoNodeIds(), tracker);
         var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
         var graphStoreInput = new GraphStoreInput(
             nodeStore,

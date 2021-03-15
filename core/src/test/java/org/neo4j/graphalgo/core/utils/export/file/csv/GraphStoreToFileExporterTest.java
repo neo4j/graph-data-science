@@ -100,7 +100,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(1)
-            .reverseIdMapping(true)
+            .exportNeoNodeIds(true)
             .build();
 
         // export db
@@ -113,7 +113,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         var rel1Type = RelationshipType.of("REL1");
         var rel2Type = RelationshipType.of("REL2");
 
-        NodeSchema nodeSchema = computeNodeSchema(graphStore.schema().nodeSchema(), config.reverseIdMapping());
+        NodeSchema nodeSchema = computeNodeSchema(graphStore.schema().nodeSchema(), config.exportNeoNodeIds());
         var abSchema = nodeSchema.filter(Set.of(aLabel, bLabel)).unionProperties();
         var acSchema = nodeSchema.filter(Set.of(aLabel, cLabel)).unionProperties();
         var bSchema = nodeSchema.filter(Set.of(bLabel)).unionProperties();
@@ -185,7 +185,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(2)
-            .reverseIdMapping(true)
+            .exportNeoNodeIds(true)
             .build();
 
         // export db
@@ -193,7 +193,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         exporter.run(AllocationTracker.empty());
 
         // Assert headers
-        NodeSchema nodeSchema = computeNodeSchema(concurrentGraphStore.schema().nodeSchema(), config.reverseIdMapping());
+        NodeSchema nodeSchema = computeNodeSchema(concurrentGraphStore.schema().nodeSchema(), config.exportNeoNodeIds());
         assertHeaderFile("nodes_header.csv", NODE_COLUMNS, nodeSchema.unionProperties());
         assertHeaderFile("relationships_REL1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
 
