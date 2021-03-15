@@ -159,18 +159,18 @@ It is however still possible to filter for nodes with label `'A'` or `'B'` in or
 .Example usage of node label filters:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('myGraph', ['Person', 'City', '*'])
+CALL gds.graph.create('my-graph', ['Person', 'City', '*'])
 
- // using all nodes projected in 'myGraph' (the star projection)
-CALL gds.pageRank.stats('myGraph', {nodeLabels: ['*']})
-CALL gds.pageRank.stats('myGraph', {nodeLabels: ['Person', 'City', '*']}) // equivalent
-CALL gds.pageRank.stats('myGraph') // equivalent
+ // using all nodes projected in 'my-graph' (the star projection)
+CALL gds.pageRank.stats('my-graph', {nodeLabels: ['*']})
+CALL gds.pageRank.stats('my-graph', {nodeLabels: ['Person', 'City', '*']}) // equivalent
+CALL gds.pageRank.stats('my-graph') // equivalent
 
-// will use only nodes projected as 'Person' in 'myGraph'
-CALL gds.pageRank.stats('myGraph', {nodeLabels: ['Person']})
+// will use only nodes projected as 'Person' in 'my-graph'
+CALL gds.pageRank.stats('my-graph', {nodeLabels: ['Person']})
 
-// will use nodes projected as 'Person' or 'City' in 'myGraph'
-CALL gds.pageRank.stats('myGraph', {nodeLabels: ['Person', 'City']})
+// will use nodes projected as 'Person' or 'City' in 'my-graph'
+CALL gds.pageRank.stats('my-graph', {nodeLabels: ['Person', 'City']})
 ----
 
 === Node properties
