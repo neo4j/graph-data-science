@@ -28,4 +28,9 @@ enum EmptyProgressEventStore implements ProgressEventStore {
     public List<LogEvent> query(String username) {
         return List.of();
     }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
 }

@@ -23,4 +23,6 @@ import java.util.List;
 
 public interface ProgressEventStore {
     List<LogEvent> query(String username);
+
+    boolean isEmpty();
 }

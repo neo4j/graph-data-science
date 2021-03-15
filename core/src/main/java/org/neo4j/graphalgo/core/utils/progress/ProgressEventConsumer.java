@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static java.util.Collections.emptyMap;
 import static java.util.function.Predicate.not;
@@ -84,6 +85,22 @@ final class ProgressEventConsumer implements Runnable, ProgressEventStore {
             .filter(not(List::isEmpty))
             .map(items -> items.get(items.size() - 1))
             .collect(toList());
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return events
+            .values()
+            .stream()
+            .flatMap(it -> it.values().stream())
+            .allMatch(List::isEmpty);
+    }
+
+    public Stream<List<LogEvent>> get() {
+        return events
+            .values()
+            .stream()
+            .flatMap(it -> it.values().stream());
     }
 
     @Override

@@ -20,17 +20,26 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventStore;
 import org.neo4j.procedure.Admin;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
 public class RestartCheckProc {
 
+    @Context
+    public ProgressEventStore progress;
+
     @Admin
     @Procedure("gds.internal.safeToRestart")
     public Stream<SafeToRestartResult> safeToRestart() {
-        return Stream.of(new SafeToRestartResult(GraphStoreCatalog.graphStoresCount() == 0));
+        return Stream.of(new SafeToRestartResult(compute()));
+    }
+
+    private boolean compute() {
+        return GraphStoreCatalog.graphStoresCount() == 0 && progress.isEmpty();
     }
 
     public static final class SafeToRestartResult {

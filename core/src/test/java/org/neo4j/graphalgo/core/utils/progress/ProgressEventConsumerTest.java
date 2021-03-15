@@ -70,6 +70,50 @@ class ProgressEventConsumerTest {
     }
 
     @Test
+    void shouldKnowWhenEventStoreIsEmpty() {
+        var username = AuthSubject.ANONYMOUS.username();
+
+        var fakeClockScheduler = new FakeClockJobScheduler();
+        var runner = Neo4jProxy.runnerFromScheduler(fakeClockScheduler, Group.TESTING);
+        var queue = new ArrayBlockingQueue<LogEvent>(1);
+        var consumer = new ProgressEventConsumer(runner, queue);
+
+        var jobId = new JobId();
+
+        // initial set is empty
+        assertThat(consumer.isEmpty()).isTrue();
+
+        var event1 = ImmutableLogEvent.of(username, jobId, "foo", "bar", 42.0);
+        queue.add(event1);
+
+        // nothing polled yet
+        assertThat(consumer.isEmpty()).isTrue();
+
+        consumer.start();
+
+        // starting the component will trigger the initial polling
+        assertThat(consumer.isEmpty()).isFalse();
+
+        // add another event and advance time
+        var event2 = ImmutableLogEvent.of(username, jobId, "baz", "qux", 1337.0);
+        queue.add(event2);
+        fakeClockScheduler.forward(100, TimeUnit.MILLISECONDS);
+
+        // the store is still not empty
+        assertThat(consumer.isEmpty()).isFalse();
+
+        // add a terminal event and advance time
+        var endOfStreamEvent = LogEvent.endOfStreamEvent(username, jobId);
+        queue.add(endOfStreamEvent);
+        fakeClockScheduler.forward(100, TimeUnit.MILLISECONDS);
+
+        // and the queue should now be empty again
+        assertThat(consumer.isEmpty()).isTrue();
+
+        consumer.stop();
+    }
+
+    @Test
     void testConsumerStartStop() {
         var consumer = new ProgressEventConsumer(
             // empty runner that does nothing
