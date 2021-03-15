@@ -152,6 +152,14 @@ public final class ModelCatalog {
         return model;
     }
 
+    public static int size() {
+        return userCatalogs
+            .values()
+            .stream()
+            .mapToInt(userCatalog -> userCatalog.list().size())
+            .sum();
+    }
+
     public static void removeAllLoadedModels() {
         userCatalogs.clear();
         publicModels.removeAllLoadedModels();
