@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -274,6 +275,47 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     }
 
     private List<RelationshipsLoadResult> loadRelationships(IdMapping nodeMapping) {
+        var propertyKeysByRelType = propertyKeysByRelType();
+        var relationshipBuilders = createRelationshipBuilders(nodeMapping, propertyKeysByRelType);
+
+        importRelationships(propertyKeysByRelType, relationshipBuilders);
+
+        // Add fake relationship type since we do not
+        // support GraphStores with no Relationships objects.
+        if (relationshipBuilders.isEmpty()) {
+            relationshipBuilders.put(RelationshipType.ALL_RELATIONSHIPS, GraphFactory.initRelationshipsBuilder()
+                .nodes(nodeMapping)
+                .orientation(graphCreateConfig.orientation())
+                .executorService(loadingContext.executor())
+                .tracker(loadingContext.tracker())
+                .build()
+            );
+            propertyKeysByRelType.put(RelationshipType.ALL_RELATIONSHIPS, List.of());
+        }
+
+        return relationshipBuilders.entrySet()
+            .stream()
+            .map(entry -> {
+                    var relationships = entry.getValue().buildAll();
+
+                    var topology = relationships.get(0).topology();
+                    var propertyKeys = propertyKeysByRelType.get(entry.getKey());
+
+                    var properties = IntStream.range(0, propertyKeys.size())
+                        .boxed()
+                        .collect(Collectors.toMap(propertyKeys::get, idx -> relationships.get(idx).properties().get()));
+
+                    return ImmutableRelationshipsLoadResult.builder()
+                        .relationshipType(entry.getKey())
+                        .topology(topology)
+                        .properties(properties)
+                        .build();
+                }
+            ).collect(Collectors.toList());
+    }
+
+    @NotNull
+    private HashMap<RelationshipType, List<String>> propertyKeysByRelType() {
         var propertyKeysByRelType = new HashMap<RelationshipType, List<String>>();
 
         var schemaBuilder = RelationshipSchema.builder();
@@ -289,8 +331,44 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         schema.properties().forEach((relType, properties) -> {
             propertyKeysByRelType.put(relType, properties.keySet().stream().sorted().collect(Collectors.toList()));
         });
+        return propertyKeysByRelType;
+    }
 
-        var relTypeImporters = propertyKeysByRelType.entrySet().stream()
+    private void importRelationships(
+        Map<RelationshipType, List<String>> propertyKeysByRelType,
+        Map<RelationshipType, RelationshipsBuilder> relationshipBuilders
+    ) {
+        gdlHandler.getEdges()
+            .forEach(edge -> {
+                var relType = RelationshipType.of(edge.getLabel());
+                var relationshipsBuilder = relationshipBuilders.get(relType);
+                var propertyKeys = propertyKeysByRelType.get(relType);
+
+                if (propertyKeys.isEmpty()) {
+                    relationshipsBuilder.add(edge.getSourceVertexId(), edge.getTargetVertexId());
+                } else if (propertyKeys.size() == 1) {
+                    relationshipsBuilder.add(
+                        edge.getSourceVertexId(),
+                        edge.getTargetVertexId(),
+                        gdsValue(edge, propertyKeys.get(0), edge.getProperties().get(propertyKeys.get(0)))
+                    );
+                } else {
+                    var values = propertyKeys
+                        .stream()
+                        .map(key -> gdsValue(edge, key, edge.getProperties().get(key)))
+                        .mapToDouble(d -> d)
+                        .toArray();
+                    relationshipsBuilder.add(edge.getSourceVertexId(), edge.getTargetVertexId(), values);
+                }
+            });
+    }
+
+    @NotNull
+    private Map<RelationshipType, RelationshipsBuilder> createRelationshipBuilders(
+        IdMapping nodeMapping,
+        Map<RelationshipType, List<String>> propertyKeysByRelType
+    ) {
+        return propertyKeysByRelType.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 relTypeAndProperty -> {
@@ -313,63 +391,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                         .build();
                 }
             ));
-
-        gdlHandler.getEdges()
-            .forEach(edge -> {
-                var relType = RelationshipType.of(edge.getLabel());
-                var relationshipsBuilder = relTypeImporters.get(relType);
-                var propertyKeys = propertyKeysByRelType.get(relType);
-
-                if (propertyKeys.isEmpty()) {
-                    relationshipsBuilder.add(edge.getSourceVertexId(), edge.getTargetVertexId());
-                } else if (propertyKeys.size() == 1) {
-                    relationshipsBuilder.add(
-                        edge.getSourceVertexId(),
-                        edge.getTargetVertexId(),
-                        gdsValue(edge, propertyKeys.get(0), edge.getProperties().get(propertyKeys.get(0)))
-                    );
-                } else {
-                    var values = propertyKeys
-                        .stream()
-                        .map(key -> gdsValue(edge, key, edge.getProperties().get(key)))
-                        .mapToDouble(d -> d)
-                        .toArray();
-                    relationshipsBuilder.add(edge.getSourceVertexId(), edge.getTargetVertexId(), values);
-                }
-            });
-
-        // Add fake relationship type since we do not
-        // support GraphStores with zero relationships.
-        if (relTypeImporters.isEmpty()) {
-            relTypeImporters.put(RelationshipType.ALL_RELATIONSHIPS, GraphFactory.initRelationshipsBuilder()
-                .nodes(nodeMapping)
-                .orientation(graphCreateConfig.orientation())
-                .executorService(loadingContext.executor())
-                .tracker(loadingContext.tracker())
-                .build()
-            );
-            propertyKeysByRelType.put(RelationshipType.ALL_RELATIONSHIPS, List.of());
-        }
-
-        return relTypeImporters.entrySet()
-            .stream()
-            .map(entry -> {
-                    var relationships = entry.getValue().buildAll();
-
-                    var topology = relationships.get(0).topology();
-                    var propertyKeys = propertyKeysByRelType.get(entry.getKey());
-
-                    var properties = IntStream.range(0, propertyKeys.size())
-                        .boxed()
-                        .collect(Collectors.toMap(propertyKeys::get, idx -> relationships.get(idx).properties().get()));
-
-                    return ImmutableRelationshipsLoadResult.builder()
-                        .relationshipType(entry.getKey())
-                        .topology(topology)
-                        .properties(properties)
-                        .build();
-                }
-            ).collect(Collectors.toList());
     }
 
     private double gdsValue(Element element, String propertyKey, Object gdlValue) {
