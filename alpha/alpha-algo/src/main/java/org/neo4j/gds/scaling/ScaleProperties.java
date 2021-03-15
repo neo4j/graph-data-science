@@ -52,23 +52,30 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
 
         var propertyCount = config.featureProperties().size();
+        initializeArrays(scaledProperties, propertyCount);
+
+        List<Scaler> scalers = resolveScalers();
+        for (int i = 0; i < propertyCount; i++) {
+            scaleProperty(scaledProperties, scalers.get(i), i);
+        }
+
+        return Result.of(scaledProperties);
+    }
+
+    private void initializeArrays(HugeObjectArray<double[]> scaledProperties, int propertyCount) {
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
             config.concurrency(),
             (nodeId) -> scaledProperties.set(nodeId, new double[propertyCount])
         );
+    }
 
-        for (int i = 0; i < propertyCount; i++) {
-            var normalizer = resolveNormalizers().get(i);
-            final int index = i;
-            ParallelUtil.parallelForEachNode(graph.nodeCount(), config.concurrency(), (nodeId) -> {
-                var afterValue = normalizer.scaleProperty(nodeId);
-                double[] existingResult = scaledProperties.get(nodeId);
-                existingResult[index] = afterValue;
-            });
-        }
-
-        return Result.of(scaledProperties);
+    private void scaleProperty(HugeObjectArray<double[]> scaledProperties, Scaler scaler, int index) {
+        ParallelUtil.parallelForEachNode(graph.nodeCount(), config.concurrency(), (nodeId) -> {
+            var afterValue = scaler.scaleProperty(nodeId);
+            double[] existingResult = scaledProperties.get(nodeId);
+            existingResult[index] = afterValue;
+        });
     }
 
     @Override
@@ -88,7 +95,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         }
     }
 
-    private List<Scaler> resolveNormalizers() {
+    private List<Scaler> resolveScalers() {
         assert config.scalers().size() == config.featureProperties().size();
 
         List<Scaler> scalers = new ArrayList<>();
