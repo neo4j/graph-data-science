@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import java.util.List;
 
 @ValueClass
-interface ScalePropertiesBaseConfig extends AlgoBaseConfig, FeaturePropertiesConfig {
+public interface ScalePropertiesBaseConfig extends AlgoBaseConfig, FeaturePropertiesConfig {
 
     List<String> scalers();
 
