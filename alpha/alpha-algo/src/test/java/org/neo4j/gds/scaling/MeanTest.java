@@ -47,7 +47,7 @@ class MeanTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodeProperties properties, double avg, double maxMinDiff, double[] expected) {
-        var normalizer = Mean.create(properties, 10, 1, Pools.DEFAULT);
+        var normalizer = (Mean) Mean.create(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(normalizer.avg).isEqualTo(avg);
         assertThat(normalizer.maxMinDiff).isEqualTo(maxMinDiff);
@@ -60,9 +60,6 @@ class MeanTest {
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 4D;
         var normalizer = Mean.create(properties, 10, 1, Pools.DEFAULT);
-
-        assertThat(normalizer.avg).isEqualTo(4D);
-        assertThat(normalizer.maxMinDiff).isEqualTo(0D);
 
         for (int i = 0; i < 10; i++) {
             assertThat(normalizer.scaleProperty(i)).isEqualTo(0D);

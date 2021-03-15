@@ -37,7 +37,7 @@ final class MinMax implements Scaler {
         this.maxMinDiff = maxMinDiff;
     }
 
-    static MinMax create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+    static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
@@ -49,14 +49,17 @@ final class MinMax implements Scaler {
         var min = tasks.stream().mapToDouble(ComputeAggregates::min).min().orElse(Double.MAX_VALUE);
         var max = tasks.stream().mapToDouble(ComputeAggregates::max).max().orElse(Double.MIN_VALUE);
 
-        return new MinMax(properties, min, max - min);
+        var maxMinDiff = max - min;
+
+        if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
+            return ZERO_SCALER;
+        } else {
+            return new MinMax(properties, min, maxMinDiff);
+        }
     }
 
     @Override
     public double scaleProperty(long nodeId) {
-        if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
-            return 0D;
-        }
         return (properties.doubleValue(nodeId) - min) / maxMinDiff;
     }
 

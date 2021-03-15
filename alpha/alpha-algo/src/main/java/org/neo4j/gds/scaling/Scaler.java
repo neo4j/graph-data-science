@@ -32,12 +32,23 @@ public interface Scaler {
     final class Factory {
         private Factory() {}
 
-        static Scaler create(String name, NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+        static Scaler create(
+            String name,
+            NodeProperties properties,
+            long nodeCount,
+            int concurrency,
+            ExecutorService executor
+        ) {
             switch (name) {
-                case "MinMax": return MinMax.create(properties, nodeCount, concurrency, executor);
-                case "Mean": return Mean.create(properties, nodeCount, concurrency, executor);
-                default: return null;
+                case "MinMax":
+                    return MinMax.create(properties, nodeCount, concurrency, executor);
+                case "Mean":
+                    return Mean.create(properties, nodeCount, concurrency, executor);
+                default:
+                    return null;
             }
         }
     }
+
+    Scaler ZERO_SCALER = nodeId -> 0;
 }
