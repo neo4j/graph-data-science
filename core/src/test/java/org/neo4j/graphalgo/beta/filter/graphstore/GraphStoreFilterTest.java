@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.filter.graphstore;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Set;
@@ -151,4 +152,115 @@ class GraphStoreFilterTest {
         assertGraphEquals(fromGdl("(:A {aProp: 42L})"), filteredGraphStore.getUnion());
     }
 
+    @Test
+    void filterRelationshipTypes() throws ParseException {
+        var graphStore = graphStoreFromGDL("(a)-[:A]->(b), (a)-[:B]->(b), (a)-[:C]->(b)");
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "true",
+            "r:A"
+        );
+
+        assertThat(filteredGraphStore.relationshipTypes()).containsExactlyInAnyOrder(RelationshipType.of("A"));
+        assertGraphEquals(fromGdl("(a)-[:A]->(b)"), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void filterMultipleRelationshipTypes() throws ParseException {
+        var graphStore = graphStoreFromGDL("(a)-[:A]->(b), (a)-[:B]->(b), (a)-[:C]->(b)");
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "true",
+            "r:A OR r:B"
+        );
+
+        assertThat(filteredGraphStore.relationshipTypes()).containsExactlyInAnyOrder(
+            RelationshipType.of("A"),
+            RelationshipType.of("B")
+        );
+        assertGraphEquals(fromGdl("(a)-[:A]->(b), (a)-[:B]->(b)"), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void filterRelationshipProperties() throws ParseException {
+        var graphStore = graphStoreFromGDL(
+            "  (a)-[{prop: 42, ignore: 0}]->(b)" +
+            ", (a)-[{prop: 84, ignore: 0}]->(b)" +
+            ", (a)-[{prop: 1337, ignore: 0}]->(b)"
+        );
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "true",
+            "r.prop >= 42 AND r.prop <= 84"
+        );
+
+        assertGraphEquals(fromGdl("(a)-[{prop: 42, ignore: 0}]->(b), (a)-[{prop: 84, ignore: 0}]->(b)"), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void filterMultipleRelationshipProperties() throws ParseException {
+        var graphStore = graphStoreFromGDL(
+            "  (a)-[{prop1: 42, prop2: 84}]->(b)" +
+            ", (a)-[{prop1: 42, prop2: 42}]->(b)" +
+            ", (a)-[{prop1: 84, prop2: 84}]->(b)"
+        );
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "true",
+            "r.prop1 = 42 AND r.prop2 = 84"
+        );
+
+        assertGraphEquals(fromGdl("(a)-[{prop1: 42, prop2: 84}]->(b)"), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void filterMissingRelationshipProperties() throws ParseException {
+        var graphStore = graphStoreFromGDL("(a)-[{prop1: 42}]->(b), (a)-[]->(b)");
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "true",
+            "r.prop = 42"
+        );
+
+        assertGraphEquals(fromGdl("(a)-[{prop1: 42}]->(b)"), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void keepAllRelationshipProperties() throws ParseException {
+        var gdl = "()-[:A {double: 42.0D, anotherDouble: 42.0D, yetAnotherDouble: 42.0D}]->()";
+        var graphStore = graphStoreFromGDL(gdl);
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "true",
+            "true"
+        );
+
+        assertThat(filteredGraphStore.schema().nodeSchema()).isEqualTo(graphStore.schema().nodeSchema());
+        assertGraphEquals(fromGdl(gdl), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void removeEmptyRelationshipSchemaEntries() throws ParseException {
+        var graphStore = graphStoreFromGDL("(a)-[:A {aProp: 42L}]->(b), (a)-[:B {bProp: 42L}]->(b)");
+
+        var filteredGraphStore = subGraph(
+            graphStore,
+            "true",
+            "r:A"
+            );
+
+        var aSchema = graphStore
+            .schema()
+            .relationshipSchema()
+            .filter(Set.of(RelationshipType.of("A")));
+
+        assertThat(filteredGraphStore.schema().relationshipSchema()).isEqualTo(aSchema);
+        assertGraphEquals(fromGdl("(a)->[:A {aProp: 42L}]->(b)"), filteredGraphStore.getUnion());
+    }
 }
