@@ -32,6 +32,7 @@ This chapter is divided into the following sections:
 * <<algorithms-linkprediction>>
 * <<algorithms-node-embeddings>>
 * <<algorithms-ml-models>>
+* <<algorithms-influence-maximization>>
 * <<algorithms-auxiliary>>
 * <<algorithms-pregel-api>>
 
