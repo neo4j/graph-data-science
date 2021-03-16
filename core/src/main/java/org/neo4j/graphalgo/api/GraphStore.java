@@ -169,6 +169,11 @@ public interface GraphStore {
 
     Graph getUnion();
 
+    CompositeRelationshipIterator getCompositeRelationshipIterator(
+        RelationshipType relationshipType,
+        List<String> propertyKeys
+    );
+
     void canRelease(boolean canRelease);
 
     void release();

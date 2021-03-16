@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.similarity.nil;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
@@ -34,6 +35,7 @@ import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -198,6 +200,13 @@ public class NullGraphStore implements GraphStore {
     @Override
     public Graph getUnion() {
         return new NullGraph();
+    }
+
+    @Override
+    public CompositeRelationshipIterator getCompositeRelationshipIterator(
+        RelationshipType relationshipType, List<String> propertyKeys
+    ) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRGraph;
+import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
@@ -40,6 +41,7 @@ import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.graphalgo.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
@@ -68,6 +70,7 @@ import java.util.stream.Stream;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
+import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CSRGraphStore implements GraphStore {
@@ -495,6 +498,53 @@ public class CSRGraphStore implements GraphStore {
     @Override
     public void canRelease(boolean canRelease) {
         createdGraphs.forEach(graph -> graph.canRelease(canRelease));
+    }
+
+    @Override
+    public CompositeRelationshipIterator getCompositeRelationshipIterator(
+        RelationshipType relationshipType, List<String> propertyKeys
+    ) {
+        if (!relationshipTypes().contains(relationshipType)) {
+            throw new IllegalArgumentException(
+                prettySuggestions(
+                    formatWithLocale(
+                        "Unknown relationship type `%s`.",
+                        relationshipType
+                    ),
+                    relationshipType.name(),
+                    relationshipTypes().stream().map(RelationshipType::name).collect(Collectors.toSet())
+                )
+            );
+        }
+
+        var availableProperties = relationshipPropertyKeys(relationshipType);
+        if (!availableProperties.containsAll(propertyKeys)) {
+            var missingPropertyKeys = propertyKeys
+                .stream()
+                .filter(propertyKey -> !availableProperties.contains(propertyKey))
+                .collect(Collectors.toList());
+            throw new IllegalArgumentException(formatWithLocale(
+                "Missing property keys %s for relationship type %s. Available property keys are %s",
+                StringJoining.join(missingPropertyKeys),
+                relationshipType.name,
+                StringJoining.join(availableProperties)
+            ));
+        }
+
+        var topology = relationships.get(relationshipType);
+
+        var relationshipPropertyStore = relationshipProperties.get(relationshipType);
+        var properties = propertyKeys
+            .stream()
+            .map(relationshipPropertyStore::get)
+            .map(RelationshipProperty::values)
+            .toArray(Relationships.Properties[]::new);
+
+        return new CSRCompositeRelationshipIterator(
+            topology,
+            propertyKeys.toArray(new String[0]),
+            properties
+        );
     }
 
     @Override
