@@ -44,6 +44,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.core.utils.export.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.graphalgo.core.utils.export.file.NodeSchemaUtils.computeNodeSchema;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
@@ -259,7 +260,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             NODE_SCHEMA_FILE_NAME,
             List.of(
-                CsvNodeSchemaVisitorTest.LABEL_SCHEMA_COLUMNS,
+                NODE_SCHEMA_COLUMNS,
                 List.of("A", "prop1", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name()),
                 List.of("A", "prop2", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name()),
                 List.of("A", "prop3", ValueType.LONG_ARRAY.csvName(), ValueType.LONG_ARRAY.fallbackValue().toString(), GraphStore.PropertyState.PERSISTENT.name()),

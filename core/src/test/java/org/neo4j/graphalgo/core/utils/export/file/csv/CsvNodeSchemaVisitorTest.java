@@ -28,22 +28,10 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import java.io.IOException;
 import java.util.List;
 
-import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.DEFAULT_VALUE_COLUMN_NAME;
-import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.LABEL_COLUMN_NAME;
+import static org.neo4j.graphalgo.core.utils.export.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
-import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.PROPERTY_KEY_COLUMN_NAME;
-import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.STATE_COLUMN_NAME;
-import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.VALUE_TYPE_COLUMN_NAME;
 
 class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
-
-    public static final List<String> LABEL_SCHEMA_COLUMNS = List.of(
-        LABEL_COLUMN_NAME,
-        PROPERTY_KEY_COLUMN_NAME,
-        VALUE_TYPE_COLUMN_NAME,
-        DEFAULT_VALUE_COLUMN_NAME,
-        STATE_COLUMN_NAME
-    );
 
     @Test
     void writesVisitedNodeSchema() throws IOException {
@@ -78,6 +66,6 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
 
     @Override
     protected List<String> defaultHeaderColumns() {
-        return LABEL_SCHEMA_COLUMNS;
+        return NODE_SCHEMA_COLUMNS;
     }
 }

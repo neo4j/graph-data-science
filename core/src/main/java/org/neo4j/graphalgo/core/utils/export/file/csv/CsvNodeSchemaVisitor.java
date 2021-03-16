@@ -29,11 +29,11 @@ import java.nio.file.Path;
 
 public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
 
-    static final String LABEL_COLUMN_NAME = "label";
-    static final String PROPERTY_KEY_COLUMN_NAME = "propertyKey";
-    static final String VALUE_TYPE_COLUMN_NAME = "valueType";
-    static final String DEFAULT_VALUE_COLUMN_NAME = "defaultValue";
-    static final String STATE_COLUMN_NAME = "state";
+    public static final String LABEL_COLUMN_NAME = "label";
+    public static final String PROPERTY_KEY_COLUMN_NAME = "propertyKey";
+    public static final String VALUE_TYPE_COLUMN_NAME = "valueType";
+    public static final String DEFAULT_VALUE_COLUMN_NAME = "defaultValue";
+    public static final String STATE_COLUMN_NAME = "state";
 
     static final String NODE_SCHEMA_FILE_NAME = "node-schema.csv";
 
