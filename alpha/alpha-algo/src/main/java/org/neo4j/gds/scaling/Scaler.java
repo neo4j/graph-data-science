@@ -21,7 +21,13 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface Scaler {
 
@@ -29,26 +35,53 @@ public interface Scaler {
 
     double scaleProperty(long nodeId);
 
-    final class Factory {
-        private Factory() {}
+    Scaler ZERO_SCALER = nodeId -> 0;
 
-        static Scaler create(
-            String name,
+    enum Variant {
+        MINMAX {
+            @Override
+            public Scaler create(
+                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return MinMax.create(properties, nodeCount, concurrency, executor);
+            }
+        },
+        MEAN {
+            @Override
+            public Scaler create(
+                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return Mean.create(properties, nodeCount, concurrency, executor);
+            }
+        };
+
+        public static Variant lookup(String name) {
+            try {
+                return valueOf(name.toUpperCase(Locale.ENGLISH));
+            } catch (IllegalArgumentException e) {
+                String availableStrategies = Arrays
+                    .stream(values())
+                    .map(Variant::name)
+                    .collect(Collectors.joining(", "));
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Scaler `%s` is not supported. Must be one of: %s.",
+                    name,
+                    availableStrategies
+                ));
+            }
+        }
+
+        public abstract Scaler create(
             NodeProperties properties,
             long nodeCount,
             int concurrency,
             ExecutorService executor
-        ) {
-            switch (name) {
-                case "MinMax":
-                    return MinMax.create(properties, nodeCount, concurrency, executor);
-                case "Mean":
-                    return Mean.create(properties, nodeCount, concurrency, executor);
-                default:
-                    return null;
-            }
+        );
+
+        public static List<String> variantsToString(List<Variant> variants) {
+            return variants.stream()
+                .map(Variant::name)
+                .collect(Collectors.toList());
         }
     }
-
-    Scaler ZERO_SCALER = nodeId -> 0;
 }

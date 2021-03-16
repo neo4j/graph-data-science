@@ -37,7 +37,9 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
     @Configuration.ConvertWith("parsePropertyNames")
     List<String> nodeProperties();
 
-    List<String> scalers();
+    @Configuration.ConvertWith("parseScalars")
+    @Configuration.ToMapValue("org.neo4j.gds.scaling.Scaler.Variant#variantsToString")
+    List<Scaler.Variant> scalers();
 
     static List<String> parsePropertyNames(Object propertyMapping) {
         return fromObject(propertyMapping)
@@ -45,6 +47,10 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
             .stream()
             .map(PropertyMapping::propertyKey)
             .collect(Collectors.toList());
+    }
+
+    static List<Scaler.Variant> parseScalars(List<String> scalars) {
+        return scalars.stream().map(Scaler.Variant::lookup).collect(Collectors.toList());
     }
 
 

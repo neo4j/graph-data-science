@@ -39,7 +39,7 @@ public class ScalePropertiesBaseConfigTest {
             IllegalArgumentException.class,
             () -> ImmutableScalePropertiesBaseConfig
                 .builder()
-                .scalers(List.of("MinMax", "Mean"))
+                .scalers(List.of(Scaler.Variant.MINMAX, Scaler.Variant.MEAN))
                 .nodeProperties(List.of("a", "b", "c"))
                 .build()
         );
@@ -63,5 +63,25 @@ public class ScalePropertiesBaseConfigTest {
         );
 
         assertEquals(config.nodeProperties(), List.of("a"));
+    }
+
+    @Test
+    void failOnNonExistentScalar() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> new ScalePropertiesMutateConfigImpl(
+                Optional.of("graph"),
+                Optional.empty(),
+                "",
+                CypherMapWrapper.create(
+                    Map.of(
+                        "mutateProperty", "test",
+                        "scalers", List.of("nonExistent"),
+                        "nodeProperties", "test")
+                    )
+                )
+        );
+
+        assertThat(ex.getMessage(), containsString("Scaler `nonExistent` is not supported."));
     }
 }

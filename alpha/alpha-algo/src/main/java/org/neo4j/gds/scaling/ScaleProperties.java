@@ -119,17 +119,10 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         List<Scaler> scalers = new ArrayList<>();
 
         for (int i = 0; i < config.scalers().size(); i++) {
-            String scalerName = config.scalers().get(i);
+            var scaler = config.scalers().get(i);
             String property = config.nodeProperties().get(i);
-
             var nodeProperties = graph.nodeProperties(property);
-            scalers.add(Scaler.Factory.create(
-                scalerName,
-                nodeProperties,
-                graph.nodeCount(),
-                config.concurrency(),
-                executor
-            ));
+            scalers.add(scaler.create(nodeProperties, graph.nodeCount(), config.concurrency(), executor));
         }
         return scalers;
     }
