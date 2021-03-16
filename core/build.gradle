@@ -39,6 +39,7 @@ dependencies {
         exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
     }
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.6'
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: ver['jackson']
 
     testImplementation project(':test-utils')
     testCompileOnly group: 'org.immutables',    name: 'value-annotations',  version: ver.'immutables'
