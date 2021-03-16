@@ -23,20 +23,22 @@ import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.compress.utils.Sets;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
+import org.neo4j.graphalgo.core.Aggregation;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GdlFactoryTest {
 
@@ -46,58 +48,120 @@ class GdlFactoryTest {
 
     @Test
     void testInvariants() {
-        Graph graph = fromGdl("(a { foo: 42, bar: NaN }), (b { foo: 23, bar: 42.0d }), (a)-[{ weight: 42 }]->(b)");
-        assertEquals(2, graph.nodeCount());
-        assertEquals(1, graph.relationshipCount());
-        assertEquals(Sets.newHashSet("foo", "bar"), graph.availableNodeProperties());
-        assertTrue(graph.hasRelationshipProperty());
-        assertFalse(graph.isUndirected());
-        assertFalse(graph.isEmpty());
+        var graph = fromGdl("(a { foo: 42, bar: NaN }), (b { foo: 23, bar: 42.0d }), (a)-[{ weight: 42 }]->(b)");
+        assertThat(graph.nodeCount()).isEqualTo(2);
+        assertThat(graph.relationshipCount()).isEqualTo(1);
+        assertThat(graph.availableNodeProperties()).isEqualTo(Set.of("foo", "bar"));
+        assertThat(graph.hasRelationshipProperty()).isTrue();
+        assertThat(graph.isUndirected()).isFalse();
+        assertThat(graph.isEmpty()).isFalse();
     }
 
     @Test
     void testNodeLabels() {
         Graph graph = fromGdl("(a:A),(b:B1:B2),(c)");
-        assertEquals(3, graph.nodeCount());
-        assertEquals(0, graph.relationshipCount());
-        Set<NodeLabel> expectedLabels = Sets.newHashSet("A", "B1", "B2").stream()
+        assertThat(graph.nodeCount()).isEqualTo(3);
+        assertThat(graph.relationshipCount()).isEqualTo(0);
+        var expectedLabels = Set.of("A", "B1", "B2").stream()
             .map(NodeLabel::new)
             .collect(Collectors.toSet());
-        assertEquals(expectedLabels, graph.availableNodeLabels());
+        assertThat(graph.availableNodeLabels()).isEqualTo(expectedLabels);
+    }
+
+    @Test
+    void testRelationshipTypes() {
+        var gdlFactory = GdlFactory.of("(a)-[:REL1]->(b)-[:REL2]->(c)");
+        var graphStore = gdlFactory.build().graphStore();
+        var rel1Graph = graphStore.getGraph(RelationshipType.of("REL1"));
+        assertThat(rel1Graph.relationshipCount()).isEqualTo(1);
+        rel1Graph.forEachRelationship(gdlFactory.nodeId("a"), (sourceNodeId, targetNodeId) -> {
+            assertThat(targetNodeId).isEqualTo(gdlFactory.nodeId("b"));
+            return true;
+        });
+
+        var rel2Graph = graphStore.getGraph(RelationshipType.of("REL2"));
+        assertThat(rel2Graph.relationshipCount()).isEqualTo(1);
+        rel2Graph.forEachRelationship(gdlFactory.nodeId("b"), (sourceNodeId, targetNodeId) -> {
+            assertThat(targetNodeId).isEqualTo(gdlFactory.nodeId("c"));
+            return true;
+        });
+    }
+
+    @Test
+    void testRelationshipProperties() {
+        var gdlFactory = GdlFactory.of(("(a)-[:REL { foo: 42, bar: 1337, baz: 84 }]->(b)"));
+        var graphStore = gdlFactory.build().graphStore();
+        var sourceNodeId = gdlFactory.nodeId("a");
+
+        assertRelationshipProperty(graphStore, "REL", "foo", sourceNodeId, 42.0);
+        assertRelationshipProperty(graphStore, "REL", "bar", sourceNodeId, 1337.0);
+        assertRelationshipProperty(graphStore, "REL", "baz", sourceNodeId, 84.0);
+    }
+
+    @Test
+    void testRelationshipPropertiesDifferentProperties() {
+        var gdlFactory = GdlFactory.of((
+            "(a)-[:REL { foo: 42, bar: 1337, baz: 84 }]->(b)" +
+            "(b)-[:REL { foo: 42 }]->(c)")
+        );
+        var graphStore = gdlFactory.build().graphStore();
+        var sourceNodeId = gdlFactory.nodeId("b");
+
+        assertRelationshipProperty(graphStore, "REL", "foo", sourceNodeId, 42.0);
+        assertRelationshipProperty(graphStore, "REL", "bar", sourceNodeId, DefaultValue.forDouble().doubleValue());
+        assertRelationshipProperty(graphStore, "REL", "baz", sourceNodeId, DefaultValue.forDouble().doubleValue());
+    }
+
+    @Test
+    void testRelationshipPropertiesMixedSchema() {
+        var gdlFactory = GdlFactory.of((
+            "(a)-[:REL1 { foo: 42, bar: 1337, baz: 84 }]->(b)" +
+            "(b)-[:REL2 { foo: 4.2D, bob: 13.37D }]->(c)")
+        );
+        var graphStore = gdlFactory.build().graphStore();
+        var idA = gdlFactory.nodeId("a");
+        var idB = gdlFactory.nodeId("b");
+
+        assertRelationshipProperty(graphStore, "REL1", "foo", idA, 42.0);
+        assertRelationshipProperty(graphStore, "REL2", "foo", idB, 4.2);
+        assertRelationshipProperty(graphStore, "REL1", "baz", idA, 84.0);
+        assertRelationshipProperty(graphStore, "REL2", "bob", idB, 13.37);
     }
 
     @Test
     void testCompatibleListProperties() {
-        Graph graph = fromGdl("({f1: [1L, 3L, 3L, 7L], f2: [1.0D, 3.0D, 3.0D, 7.0D], f3: [1.0F, 3.0F, 3.0F, 7.0F]})");
-        assertArrayEquals(new long[]{1, 3, 3, 7}, graph.nodeProperties("f1").longArrayValue(0));
-        assertArrayEquals(new double[]{1, 3, 3, 7}, graph.nodeProperties("f2").doubleArrayValue(0));
-        assertArrayEquals(new float[]{1, 3, 3, 7}, graph.nodeProperties("f3").floatArrayValue(0));
+        var graph = fromGdl("({f1: [1L, 3L, 3L, 7L], f2: [1.0D, 3.0D, 3.0D, 7.0D], f3: [1.0F, 3.0F, 3.0F, 7.0F]})");
+        assertThat(graph.nodeProperties("f1").longArrayValue(0)).isEqualTo(new long[]{1, 3, 3, 7});
+        assertThat(graph.nodeProperties("f2").doubleArrayValue(0)).isEqualTo(new double[]{1, 3, 3, 7});
+        assertThat(graph.nodeProperties("f3").floatArrayValue(0)).isEqualTo(new float[]{1, 3, 3, 7});
     }
 
     @Test
     void testIncompatibleListProperties() {
-        var ex = assertThrows(IllegalArgumentException.class, () -> fromGdl("({f1: [1, 3, 3, 7]})"));
-        assertThat(ex.getMessage(), containsString("Integer"));
+        assertThatThrownBy(() -> fromGdl("({f1: [1, 3, 3, 7]})"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Integer");
     }
 
     @Test
     void testMixedListProperties() {
-        var ex = assertThrows(IllegalArgumentException.class, () -> fromGdl("({f1: [4L, 2.0D, 4.2]})"));
-        assertThat(ex.getMessage(), containsString("[Long, Double, Float]"));
+        assertThatThrownBy(() -> fromGdl("({f1: [4L, 2.0D, 4.2]})"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("[Long, Double, Float]");
     }
 
     @Test
     void testForAllNodes() {
-        Graph graph = fromGdl("({w:1}),({w:2}),({w:3})");
+        var graph = fromGdl("({w:1}),({w:2}),({w:3})");
         List<Double> nodeProps = Lists.newArrayList();
         graph.forEachNode(nodeId -> nodeProps.add(graph.nodeProperties("w").doubleValue(nodeId)));
-        assertEquals(3, nodeProps.size());
-        assertEquals(Arrays.asList(1d, 2d, 3d), nodeProps);
+        assertThat(nodeProps.size()).isEqualTo(3);
+        assertThat(nodeProps).isEqualTo(List.of(1D, 2D, 3D));
     }
 
     @Test
     void testForAllRelationships() {
-        Graph graph = fromGdl("(a),(b),(c),(a)-[{w:1}]->(b),(a)-[{w:2}]->(c),(b)-[{w:3}]->(c)");
+        var graph = fromGdl("(a),(b),(c),(a)-[{w:1}]->(b),(a)-[{w:2}]->(c),(b)-[{w:3}]->(c)");
         Set<Double> relProps = Sets.newHashSet();
         graph.forEachNode(nodeId -> {
             graph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
@@ -106,7 +170,65 @@ class GdlFactoryTest {
             });
             return true;
         });
-        assertEquals(3, relProps.size());
-        assertEquals(Sets.newHashSet(1d, 2d, 3d), relProps);
+        assertThat(relProps.size()).isEqualTo(3);
+        assertThat(relProps).isEqualTo(Set.of(1D, 2D, 3D));
+    }
+
+    @Test
+    void correctSchema() {
+        var graph = fromGdl(
+                            "  (a1:A   {double: 42.0D, long: 42L, doubleArray: [42.0D], longArray: [42L]})" +
+                            ", (a2b:A  {double: 84.0D})" +
+                            ", (ab:A:B {double: 84.0D, long: 1337L})" +
+                            ", (c:C)" +
+                            ", (a1)-[:A {prop1: 42.0D, prop2: 42.0D}]->(c)" +
+                            ", (a1)-[:A {prop1: 84.0D}]->(c)" +
+                            ", (a1)-[:B {prop1: 84.0D, prop3: 1337.0D}]->(c)" +
+                            ", (a1)-[:C]->(c)"
+        );
+
+        var nodeSchema = graph.schema().nodeSchema();
+        var expectedNodeSchema = NodeSchema
+            .builder()
+            .addProperty(NodeLabel.of("A"), "double", ValueType.DOUBLE)
+            .addProperty(NodeLabel.of("A"), "long", ValueType.LONG)
+            .addProperty(NodeLabel.of("A"), "doubleArray", ValueType.DOUBLE_ARRAY)
+            .addProperty(NodeLabel.of("A"), "longArray", ValueType.LONG_ARRAY)
+            .addProperty(NodeLabel.of("B"), "double", ValueType.DOUBLE)
+            .addProperty(NodeLabel.of("B"), "long", ValueType.LONG)
+            .addLabel(NodeLabel.of("C"))
+            .build();
+
+        assertThat(nodeSchema).isEqualTo(expectedNodeSchema);
+
+        var relationshipSchema = graph.schema().relationshipSchema();
+        var expectedRelationshipSchema = RelationshipSchema
+            .builder()
+            .addProperty(RelationshipType.of("A"), "prop1", ValueType.DOUBLE, Aggregation.NONE)
+            .addProperty(RelationshipType.of("A"), "prop2", ValueType.DOUBLE, Aggregation.NONE)
+            .addProperty(RelationshipType.of("B"), "prop1", ValueType.DOUBLE, Aggregation.NONE)
+            .addProperty(RelationshipType.of("B"), "prop3", ValueType.DOUBLE, Aggregation.NONE)
+            .addRelationshipType(RelationshipType.of("C"))
+            .build();
+
+        assertThat(relationshipSchema).isEqualTo(expectedRelationshipSchema);
+    }
+
+    private void assertRelationshipProperty(
+        GraphStore graphStore,
+        String relType,
+        String propertyKey,
+        long sourceNodeId,
+        double expected
+    ) {
+        graphStore.getGraph(RelationshipType.of(relType), Optional.of(propertyKey))
+            .forEachRelationship(sourceNodeId, Double.POSITIVE_INFINITY, (ignored, targetNodeId, property) -> {
+                if (Double.isNaN(expected)) {
+                    assertThat(property).isNaN();
+                } else {
+                    assertThat(property).isEqualTo(expected);
+                }
+                return true;
+            });
     }
 }

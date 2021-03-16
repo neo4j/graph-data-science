@@ -161,9 +161,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "relationships_REL1_0.csv",
             List.of(
-                List.of("0", "0", "42.0"),
-                List.of("0", "1", "43.0"),
-                List.of("1", "0", "44.0")
+                List.of("0", "0", "0.0", "42.0"),
+                List.of("0", "1", "1.0", "43.0"),
+                List.of("1", "0", "2.0", "44.0")
             )
         );
 
@@ -171,9 +171,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "relationships_REL2_0.csv",
             List.of(
-                List.of("1", "2", "45.0"),
-                List.of("2", "3", "46.0"),
-                List.of("3", "0", "47.0")
+                List.of("1", "2", "3.0", "45.0"),
+                List.of("2", "3", "4.0", "46.0"),
+                List.of("3", "0", "5.0", "47.0")
             )
         );
 
