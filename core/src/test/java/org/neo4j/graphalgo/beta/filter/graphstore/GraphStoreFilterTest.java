@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.graphStoreFromGDL;
-import static org.neo4j.graphalgo.beta.filter.graphstore.GraphStoreFilter.subGraph;
+import static org.neo4j.graphalgo.beta.filter.graphstore.GraphStoreFilter.filter;
 
 class GraphStoreFilterTest {
 
@@ -38,7 +38,7 @@ class GraphStoreFilterTest {
     void filterNodesOnLabels() throws ParseException {
         var graphStore = graphStoreFromGDL("(:A), (:B), (:C)");
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "n:A",
             "true"
@@ -52,7 +52,7 @@ class GraphStoreFilterTest {
     void filterMultipleNodesOnLabels() throws ParseException {
         var graphStore = graphStoreFromGDL("(:A), (:B), (:C)");
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "n:A OR n:B",
             "true"
@@ -70,7 +70,7 @@ class GraphStoreFilterTest {
         var graphStore = graphStoreFromGDL(
             "({prop: 42, ignore: 0}), ({prop: 84, ignore: 0}), ({prop: 1337, ignore: 0})");
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "n.prop >= 42 AND n.prop <= 84",
             "true"
@@ -83,7 +83,7 @@ class GraphStoreFilterTest {
     void filterMultipleNodeProperties() throws ParseException {
         var graphStore = graphStoreFromGDL("({prop1: 42, prop2: 84}), ({prop1: 42, prop2: 42}), ({prop1: 84, prop2: 84})");
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "n.prop1 = 42 AND n.prop2 = 84",
             "true"
@@ -96,7 +96,7 @@ class GraphStoreFilterTest {
     void filterPropertiesAndLabels() throws ParseException {
         var graphStore = graphStoreFromGDL("(:A {prop: 42}), (:B {prop: 84}), (:C)");
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "(n:A AND n.prop = 42) OR (n:B AND n.prop = 84)",
             "true"
@@ -109,7 +109,7 @@ class GraphStoreFilterTest {
     void filterMissingNodeProperties() throws ParseException {
         var graphStore = graphStoreFromGDL("(:A {prop: 42}), (:B)");
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "n.prop = 42",
             "true"
@@ -123,7 +123,7 @@ class GraphStoreFilterTest {
         var gdl = "(:A {long: 42L, double: 42.0D, longArray: [42L], floatArray: [42.0F], doubleArray: [42.0D]})";
         var graphStore = graphStoreFromGDL(gdl);
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "true",
             "true"
@@ -137,7 +137,7 @@ class GraphStoreFilterTest {
     void removeEmptyNodeSchemaEntries() throws ParseException {
         var graphStore = graphStoreFromGDL("(:A {aProp: 42L}), (:B {bProp: 42L})");
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "n:A",
             "true"
@@ -156,7 +156,7 @@ class GraphStoreFilterTest {
     void filterRelationshipTypes() throws ParseException {
         var graphStore = graphStoreFromGDL("(a)-[:A]->(b), (a)-[:B]->(b), (a)-[:C]->(b)");
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "true",
             "r:A"
@@ -170,7 +170,7 @@ class GraphStoreFilterTest {
     void filterMultipleRelationshipTypes() throws ParseException {
         var graphStore = graphStoreFromGDL("(a)-[:A]->(b), (a)-[:B]->(b), (a)-[:C]->(b)");
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "true",
             "r:A OR r:B"
@@ -191,7 +191,7 @@ class GraphStoreFilterTest {
             ", (a)-[{prop: 1337, ignore: 0}]->(b)"
         );
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "true",
             "r.prop >= 42 AND r.prop <= 84"
@@ -208,7 +208,7 @@ class GraphStoreFilterTest {
             ", (a)-[{prop1: 84, prop2: 84}]->(b)"
         );
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "true",
             "r.prop1 = 42 AND r.prop2 = 84"
@@ -221,7 +221,7 @@ class GraphStoreFilterTest {
     void filterMissingRelationshipProperties() throws ParseException {
         var graphStore = graphStoreFromGDL("(a)-[{prop1: 42}]->(b), (a)-[]->(b)");
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "true",
             "r.prop = 42"
@@ -235,7 +235,7 @@ class GraphStoreFilterTest {
         var gdl = "()-[:A {double: 42.0D, anotherDouble: 42.0D, yetAnotherDouble: 42.0D}]->()";
         var graphStore = graphStoreFromGDL(gdl);
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "true",
             "true"
@@ -249,7 +249,7 @@ class GraphStoreFilterTest {
     void removeEmptyRelationshipSchemaEntries() throws ParseException {
         var graphStore = graphStoreFromGDL("(a)-[:A {aProp: 42L}]->(b), (a)-[:B {bProp: 42L}]->(b)");
 
-        var filteredGraphStore = subGraph(
+        var filteredGraphStore = filter(
             graphStore,
             "true",
             "r:A"
