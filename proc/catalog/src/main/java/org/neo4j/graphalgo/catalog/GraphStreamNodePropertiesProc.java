@@ -108,15 +108,12 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             .boxed()
             .flatMap(nodeId -> {
                 var originalId = subGraph.toOriginalNodeId(nodeId);
-                var label = subGraph.nodeLabels(nodeId).iterator().next();
 
-                return nodePropertyKeysAndValues.stream().map(propertyKeyAndValues -> {
-                    return producer.produce(
-                        originalId,
-                        usesPropertyNameColumn ? propertyKeyAndValues.getKey() : null,
-                        propertyKeyAndValues.getValue().getObject(nodeId)
-                    );
-                });
+                return nodePropertyKeysAndValues.stream().map(propertyKeyAndValues -> producer.produce(
+                    originalId,
+                    usesPropertyNameColumn ? propertyKeyAndValues.getKey() : null,
+                    propertyKeyAndValues.getValue().getObject(nodeId)
+                ));
             });
     }
 

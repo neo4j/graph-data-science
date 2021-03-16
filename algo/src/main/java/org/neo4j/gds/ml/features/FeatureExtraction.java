@@ -118,6 +118,14 @@ public final class FeatureExtraction {
                         initNodeId
                     );
                     return new ArrayPropertyExtractor(propertyValues.length, graph, propertyKey);
+                }
+                if (ValueType.LONG_ARRAY == propertyType) {
+                    var propertyValues = EmbeddingUtils.getCheckedLongArrayNodeProperty(
+                        graph,
+                        propertyKey,
+                        initNodeId
+                    );
+                    return new LongArrayPropertyExtractor(propertyValues.length, graph, propertyKey);
                 } else if ((ValueType.DOUBLE == propertyType) || (ValueType.LONG == propertyType)) {
                     return new ScalarPropertyExtractor(graph, propertyKey);
                 } else {

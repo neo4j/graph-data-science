@@ -58,9 +58,9 @@ class NodeClassificationCoraIntegrationTest {
     private static final String MODEL_NAME = "model";
 
     // Minimum score ('test') for the F1_WEIGHTED metric
-    private static final double MIN_F1_SCORE = 0.8;
+    private static final double MIN_F1_SCORE = 0.82;
     // The ratio of nodes being classified with the correct subject
-    private static final double MIN_ACCURACY = 0.83;
+    private static final double MIN_ACCURACY = 0.82;
 
     private static final Map<String, Integer> SUBJECT_DICTIONARY = Map.of(
         "Neural_Networks", 0,

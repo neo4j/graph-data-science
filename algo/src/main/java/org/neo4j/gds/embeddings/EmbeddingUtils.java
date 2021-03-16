@@ -52,7 +52,20 @@ public final class EmbeddingUtils {
     }
 
     public static double[] getCheckedDoubleArrayNodeProperty(Graph graph, String propertyKey, long nodeId, int expectedLength) {
-        var propertyValue = graph.nodeProperties(propertyKey).doubleArrayValue(nodeId);
+        var propertyValue = getCheckedDoubleArrayNodeProperty(graph, propertyKey, nodeId);
+        if (propertyValue.length != expectedLength) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The property `%s` contains arrays of differing lengths `%s` and `%s`.",
+                propertyKey,
+                propertyValue.length,
+                expectedLength
+            ));
+        }
+        return propertyValue;
+    }
+
+    public static long[] getCheckedLongArrayNodeProperty(Graph graph, String propertyKey, long nodeId) {
+        var propertyValue = graph.nodeProperties(propertyKey).longArrayValue(nodeId);
         if (propertyValue == null) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Missing node property for property key `%s` on node with id `%s`. Consider using a default value in the property projection.",
@@ -60,6 +73,11 @@ public final class EmbeddingUtils {
                 graph.toOriginalNodeId(nodeId)
             ));
         }
+        return propertyValue;
+    }
+
+    public static long[] getCheckedLongArrayNodeProperty(Graph graph, String propertyKey, long nodeId, int expectedLength) {
+        var propertyValue = getCheckedLongArrayNodeProperty(graph, propertyKey, nodeId);
         if (propertyValue.length != expectedLength) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The property `%s` contains arrays of differing lengths `%s` and `%s`.",

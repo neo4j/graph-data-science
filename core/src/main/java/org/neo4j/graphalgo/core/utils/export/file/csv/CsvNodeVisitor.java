@@ -37,7 +37,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CsvNodeVisitor extends NodeVisitor {
 
-    public static final String ID_COLUMN_NAME = ":ID";
+    static final String ID_COLUMN_NAME = ":ID";
 
     private final Path fileLocation;
     private final int visitorId;
@@ -45,8 +45,14 @@ public class CsvNodeVisitor extends NodeVisitor {
     private final CsvWriter csvWriter;
     private final Set<String> headerFiles;
 
-    public CsvNodeVisitor(Path fileLocation, NodeSchema nodeSchema, Set<String> headerFiles, int visitorId) {
-        super(nodeSchema);
+    public CsvNodeVisitor(
+        Path fileLocation,
+        NodeSchema nodeSchema,
+        Set<String> headerFiles,
+        int visitorId,
+        boolean reverseIdMapping
+    ) {
+        super(nodeSchema, reverseIdMapping);
         this.fileLocation = fileLocation;
         this.headerFiles = headerFiles;
         this.visitorId = visitorId;
@@ -55,8 +61,8 @@ public class CsvNodeVisitor extends NodeVisitor {
     }
 
     @TestOnly
-    public CsvNodeVisitor(Path fileLocation, NodeSchema nodeSchema) {
-        this(fileLocation, nodeSchema, new HashSet<>(), 0);
+    public CsvNodeVisitor(Path fileLocation, NodeSchema nodeSchema, boolean reverseIdMapping) {
+        this(fileLocation, nodeSchema, new HashSet<>(), 0, reverseIdMapping);
     }
 
     @Override
@@ -64,7 +70,6 @@ public class CsvNodeVisitor extends NodeVisitor {
         // do the export
         var csvAppender = getAppender();
         try {
-            // write Id
             csvAppender.appendField(Long.toString(id()));
 
             // write properties

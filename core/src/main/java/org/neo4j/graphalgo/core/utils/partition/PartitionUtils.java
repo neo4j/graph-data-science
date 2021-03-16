@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.neo4j.graphalgo.core.utils.partition.Partition.MAX_NODE_COUNT;
 
@@ -33,19 +34,19 @@ public final class PartitionUtils {
 
     private PartitionUtils() {}
 
-    public static List<Partition> rangePartition(int concurrency, long nodeCount) {
+    public static <TASK> List<TASK> rangePartition(int concurrency, long nodeCount, Function<Partition, TASK> taskCreator) {
         long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
-        return rangePartition(concurrency, nodeCount, batchSize);
+        return rangePartition(concurrency, nodeCount, batchSize, taskCreator);
     }
 
-    public static List<Partition> rangePartition(int concurrency, long nodeCount, long batchSize) {
-        List<Partition> partitions = new ArrayList<>(concurrency);
+    public static <TASK> List<TASK> rangePartition(int concurrency, long nodeCount, long batchSize, Function<Partition, TASK> taskCreator) {
+        var result = new ArrayList<TASK>(concurrency);
         for (long i = 0; i < nodeCount; i += batchSize) {
             long actualBatchSize = i + batchSize < nodeCount ? batchSize : nodeCount - i;
-            partitions.add(Partition.of(i, actualBatchSize));
+            result.add(taskCreator.apply(Partition.of(i, actualBatchSize)));
         }
 
-        return partitions;
+        return result;
     }
 
 
@@ -66,16 +67,17 @@ public final class PartitionUtils {
         return partitions;
     }
 
-    public static List<Partition> degreePartition(Graph graph, long batchSize) {
-        return degreePartition(graph.nodeIterator(), graph, batchSize);
+    public static <TASK> List<TASK> degreePartition(Graph graph, long batchSize, Function<Partition, TASK> taskCreator) {
+        return degreePartition(graph.nodeIterator(), graph, batchSize, taskCreator);
     }
 
-    public static List<Partition> degreePartition(
+    public static <TASK> List<TASK> degreePartition(
         PrimitiveLongIterator nodes,
         Degrees degrees,
-        long batchSize
+        long batchSize,
+        Function<Partition, TASK> taskCreator
     ) {
-        List<Partition> partitions = new ArrayList<>();
+        var result = new ArrayList<TASK>();
         long start = 0L;
         while (nodes.hasNext()) {
             assert batchSize > 0L;
@@ -87,10 +89,10 @@ public final class PartitionUtils {
             }
 
             long end = nodeId + 1;
-            partitions.add(Partition.of(start, end - start));
+            result.add(taskCreator.apply(Partition.of(start, end - start)));
             start = end;
         }
-        return partitions;
+        return result;
     }
 
 }

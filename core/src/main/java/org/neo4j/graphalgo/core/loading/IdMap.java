@@ -177,6 +177,17 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     }
 
     @Override
+    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
+        for (var labelAndBitSet : labelInformation.entrySet()) {
+            if (labelAndBitSet.getValue().get(nodeId)) {
+                if (!consumer.accept(labelAndBitSet.getKey())) {
+                    break;
+                }
+            }
+        }
+    }
+
+    @Override
     public boolean hasLabel(long nodeId, NodeLabel label) {
         if (labelInformation.isEmpty() && label.equals(NodeLabel.ALL_NODES)) {
             return true;
@@ -261,6 +272,11 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         @Override
         public Set<NodeLabel> nodeLabels(long nodeId) {
             return super.nodeLabels(toOriginalNodeId(nodeId));
+        }
+
+        @Override
+        public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
+            super.forEachNodeLabel(toOriginalNodeId(nodeId), consumer);
         }
 
         @Override

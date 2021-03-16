@@ -184,21 +184,20 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
             Integer.MAX_VALUE
         );
 
-        List<Partition> degreePartitions = PartitionUtils.degreePartition(
+        var steps = PartitionUtils.degreePartition(
             new SetBitsIterable(nodesToColor).primitiveLongIterator(),
             graph,
-            adjustedBatchSize
+            adjustedBatchSize,
+            partition -> new ColoringStep(
+                graph.concurrentCopy(),
+                colors,
+                nodesToColor,
+                nodeCount,
+                partition.startNode(),
+                partition.nodeCount(),
+                getProgressLogger()
+            )
         );
-
-        List<ColoringStep> steps = degreePartitions.stream().map(partition -> new ColoringStep(
-            graph.concurrentCopy(),
-            colors,
-            nodesToColor,
-            nodeCount,
-            partition.startNode(),
-            partition.nodeCount(),
-            getProgressLogger()
-        )).collect(Collectors.toList());
 
         ParallelUtil.runWithConcurrency(concurrency, steps, executor);
     }

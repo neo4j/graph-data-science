@@ -26,6 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Map;
@@ -54,11 +55,25 @@ public class MultiLabelFeatureFunction implements FeatureFunction {
      */
     @Override
     public Variable<Matrix> apply(Graph graph, long[] nodeIds, HugeObjectArray<double[]> features) {
-        NodeLabel[] labels = new NodeLabel[nodeIds.length];
+        var labels = new NodeLabel[nodeIds.length];
+        var consumer = new SingleNodeLabelConsumer();
+
         for (int i = 0; i < nodeIds.length; i++) {
-            labels[i] = graph.nodeLabels(nodeIds[i]).iterator().next();
+            graph.forEachNodeLabel(nodeIds[i], consumer);
+            labels[i] = consumer.nodeLabel;
         }
         return new LabelwiseFeatureProjection(nodeIds, features, weightsByLabel, projectedFeatureDimension, labels);
+    }
+
+    private static class SingleNodeLabelConsumer implements NodeMapping.NodeLabelConsumer {
+
+        NodeLabel nodeLabel;
+
+        @Override
+        public boolean accept(NodeLabel nodeLabel) {
+            this.nodeLabel = nodeLabel;
+            return false;
+        }
     }
 
     public int projectedFeatureDimension() {
