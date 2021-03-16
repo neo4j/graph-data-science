@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
@@ -35,6 +37,7 @@ import org.neo4j.internal.batchimport.input.ReadableGroups;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
@@ -220,9 +223,22 @@ public final class GraphStoreInput implements CompatInput {
     static class RelationshipChunk extends EntityChunk {
 
         private final RelationshipStore relationshipStore;
+        private final Map<RelationshipType, RelationshipConsumer> relationshipConsumers;
 
         RelationshipChunk(RelationshipStore relationshipStore) {
             this.relationshipStore = relationshipStore;
+
+            this.relationshipConsumers = relationshipStore
+                .relationshipIterators
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    e -> new RelationshipConsumer(
+                        e.getKey().name,
+                        e.getValue().propertyKeys()
+                    )
+                ));
         }
 
         @Override
@@ -231,16 +247,55 @@ public final class GraphStoreInput implements CompatInput {
                 for (var entry : relationshipStore.relationshipIterators.entrySet()) {
                     var relationshipType = entry.getKey();
                     var relationshipIterator = entry.getValue();
-                    try {
-                        relationshipIterator.forEachRelationship(id, relationshipType.name, visitor);
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
+                    var relationshipConsumer = relationshipConsumers.get(relationshipType);
+                    relationshipConsumer.setVisitor(visitor);
+
+                    relationshipIterator.forEachRelationship(id, relationshipConsumer);
                 }
                 id++;
                 return true;
             }
             return false;
+        }
+
+        private static final class RelationshipConsumer implements CompositeRelationshipIterator.RelationshipConsumer {
+            private final String relationshipType;
+            private final String[] propertyKeys;
+            private InputEntityVisitor visitor;
+
+            private RelationshipConsumer(
+                String relationshipType,
+                String[] propertyKeys
+            ) {
+                this.relationshipType = relationshipType;
+                this.propertyKeys = propertyKeys;
+            }
+
+            private void setVisitor(InputEntityVisitor visitor) {
+                this.visitor = visitor;
+            }
+
+            @Override
+            public boolean consume(long source, long target, double[] properties) {
+                visitor.startId(source);
+                visitor.endId(target);
+                visitor.type(relationshipType);
+
+                for (int propertyIdx = 0; propertyIdx < propertyKeys.length; propertyIdx++) {
+                    visitor.property(
+                        propertyKeys[propertyIdx],
+                        properties[propertyIdx]
+                    );
+                }
+
+                try {
+                    visitor.endOfEntity();
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+
+                return true;
+            }
         }
     }
 }

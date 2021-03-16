@@ -88,6 +88,11 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
     }
 
     @Override
+    public String[] propertyKeys() {
+        return propertyKeys;
+    }
+
+    @Override
     public CompositeRelationshipIterator concurrentCopy() {
         return new CSRCompositeRelationshipIterator(
             topology,

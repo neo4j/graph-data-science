@@ -19,120 +19,72 @@
  */
 package org.neo4j.graphalgo.core.utils.export;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.Relationships;
-import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static org.eclipse.collections.impl.tuple.Tuples.pair;
-
-public class RelationshipStore {
+public final class RelationshipStore {
 
     final long nodeCount;
     final long relationshipCount;
+    private final long propertyCount;
 
     final Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators;
 
-    RelationshipStore(
+    private RelationshipStore(
         long nodeCount,
         long relationshipCount,
+        long propertyCount,
         Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators
     ) {
         this.nodeCount = nodeCount;
         this.relationshipCount = relationshipCount;
+        this.propertyCount = propertyCount;
         this.relationshipIterators = relationshipIterators;
     }
 
     public long propertyCount() {
-        return relationshipIterators.values().stream().mapToInt(CompositeRelationshipIterator::propertyCount).sum();
+        return propertyCount;
     }
 
     RelationshipStore concurrentCopy() {
+        var copyIterators = relationshipIterators.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            entry -> entry.getValue().concurrentCopy()
+        ));
+
         return new RelationshipStore(
             nodeCount,
             relationshipCount,
-            relationshipIterators.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> entry.getValue().concurrentCopy()
-            ))
+            propertyCount,
+            copyIterators
         );
     }
 
     static RelationshipStore of(GraphStore graphStore, String defaultRelationshipType) {
-        Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>();
-        Map<RelationshipType, Map<String, Relationships.Properties>> properties = new HashMap<>();
-
-        graphStore.relationshipTypes().stream()
-            // extract (relationshipType, propertyKey) tuples
-            .flatMap(relType -> graphStore.relationshipPropertyKeys(relType).isEmpty()
-                ? Stream.of(pair(relType, Optional.<String>empty()))
-                : graphStore
-                    .relationshipPropertyKeys(relType)
-                    .stream()
-                    .map(propertyKey -> pair(relType, Optional.of(propertyKey))))
-            // extract graph for relationship type and property
-            .map(relTypeAndProperty -> pair(
-                relTypeAndProperty,
-                graphStore.getGraph(relTypeAndProperty.getOne(), relTypeAndProperty.getTwo())
-            ))
-            // extract Topology list and associated Properties lists
-            .forEach(relTypeAndPropertyAndGraph -> {
-                var relationshipType = relTypeAndPropertyAndGraph.getOne().getOne();
-                var maybePropertyKey = relTypeAndPropertyAndGraph.getOne().getTwo();
-                var graph = relTypeAndPropertyAndGraph.getTwo();
-
-                topologies.computeIfAbsent(relationshipType, ignored -> ((HugeGraph) graph).relationshipTopology());
-                maybePropertyKey.ifPresent(propertyKey -> properties
-                    .computeIfAbsent(relationshipType, ignored -> new HashMap<>())
-                    // .get() is safe, since we have a property key
-                    .put(propertyKey, ((HugeGraph) graph).relationships().properties().get()));
-            });
-
         Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators = new HashMap<>();
+        var propertyCount = new MutableLong(0);
 
-        // for each relationship type, merge its Topology list and all associated Property lists
-        topologies.forEach((relationshipType, topology) -> {
-            var adjacencyDegrees = topology.degrees();
-            var adjacencyList = topology.list();
-            var adjacencyOffsets = topology.offsets();
+        graphStore.relationshipTypes().forEach(relationshipType -> {
+            var outputProperties = new ArrayList<>(graphStore.relationshipPropertyKeys(relationshipType));
 
-            var propertyLists = properties.getOrDefault(relationshipType, Map.of())
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    entry -> (TransientAdjacencyList) entry.getValue().list()
-                ));
+            propertyCount.add(outputProperties.size() * graphStore.relationshipCount(relationshipType));
 
-            var propertyOffsets = properties.getOrDefault(relationshipType, Map.of())
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    entry -> (TransientAdjacencyOffsets) entry.getValue().offsets()
-                ));
-
-            // iff relationshipType is '*', change it the given default
             var outputRelationshipType = relationshipType.equals(RelationshipType.ALL_RELATIONSHIPS)
                 ? RelationshipType.of(defaultRelationshipType)
                 : relationshipType;
 
             relationshipIterators.put(
                 outputRelationshipType,
-                new CompositeRelationshipIterator(
-                    adjacencyDegrees,
-                    adjacencyList,
-                    adjacencyOffsets,
-                    propertyLists,
-                    propertyOffsets
+                graphStore.getCompositeRelationshipIterator(
+                    relationshipType,
+                    outputProperties
                 )
             );
         });
@@ -140,6 +92,7 @@ public class RelationshipStore {
         return new RelationshipStore(
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
+            propertyCount.getValue(),
             relationshipIterators
         );
     }

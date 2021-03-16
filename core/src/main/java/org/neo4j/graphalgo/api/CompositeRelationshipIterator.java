@@ -25,6 +25,8 @@ public interface CompositeRelationshipIterator {
 
     CompositeRelationshipIterator concurrentCopy();
 
+    String[] propertyKeys();
+
     @FunctionalInterface
     interface RelationshipConsumer {
         boolean consume(long source, long target, double[] properties);
