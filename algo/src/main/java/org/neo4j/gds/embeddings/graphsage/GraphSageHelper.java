@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
@@ -31,6 +32,7 @@ import org.neo4j.gds.ml.features.FeatureExtractor;
 import org.neo4j.gds.ml.features.HugeObjectArrayFeatureConsumer;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -45,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -303,13 +306,21 @@ public final class GraphSageHelper {
             ));
     }
 
-    private static NodeLabel labelOf(Graph graph, long n) {
-        var nodeLabels = graph.nodeLabels(n);
-        if (nodeLabels.size() != 1) {
+    private static NodeLabel labelOf(NodeMapping nodeMapping, long nodeId) {
+        var labelRef = new AtomicReference<NodeLabel>();
+        var labelCount = new MutableInt(0);
+
+        nodeMapping.forEachNodeLabel(nodeId, nodeLabel -> {
+            labelRef.set(nodeLabel);
+            return labelCount.getAndIncrement() == 0;
+        });
+
+        if (labelCount.intValue() != 1) {
             throw new IllegalArgumentException(
-                formatWithLocale("Each node must have exactly one label: nodeId=%d, labels=%s", n, nodeLabels)
+                formatWithLocale("Each node must have exactly one label: nodeId=%d, labels=%s", nodeId, nodeMapping.nodeLabels(nodeId))
             );
         }
-        return graph.nodeLabels(n).iterator().next();
+
+        return labelRef.get();
     }
 }
