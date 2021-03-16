@@ -68,12 +68,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         if (config.relationshipWeightProperty() == null) {
             if (config.cacheDegrees()) {
                 var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
-                var tasks = PartitionUtils
-                    .rangePartition(
-                        config.concurrency(),
-                        graph.nodeCount(),
-                        partition -> new CacheDegreeTask(graph, degrees, partition)
-                    );
+                var tasks = PartitionUtils.rangePartition(
+                    config.concurrency(),
+                    graph.nodeCount(),
+                    partition -> new CacheDegreeTask(graph, degrees, partition)
+                );
                 ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
                 result = degrees::get;
             } else {
@@ -83,12 +82,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         } else {
             var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
             var degreeBatchSize = BitUtil.ceilDiv(graph.relationshipCount(), config.concurrency());
-            var tasks = PartitionUtils
-                .degreePartition(
-                    graph,
-                    degreeBatchSize,
-                    partition -> new WeightedDegreeTask(graph.concurrentCopy(), degrees, partition)
-                );
+            var tasks = PartitionUtils.degreePartition(
+                graph,
+                degreeBatchSize,
+                partition -> new WeightedDegreeTask(graph.concurrentCopy(), degrees, partition)
+            );
             ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
             result = degrees::get;
         }

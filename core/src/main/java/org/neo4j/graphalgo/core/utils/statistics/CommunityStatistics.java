@@ -107,8 +107,11 @@ public final class CommunityStatistics {
     ) {
         var capacity = communitySizes.getCapacity();
 
-        var tasks = PartitionUtils
-            .rangePartition(concurrency, capacity, partition -> new CountTask(communitySizes, partition));
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            capacity,
+            partition -> new CountTask(communitySizes, partition)
+        );
 
         ParallelUtil.run(tasks, executorService);
 
@@ -159,8 +162,11 @@ public final class CommunityStatistics {
         } else {
             var capacity = communitySizes.getCapacity();
 
-            var tasks = PartitionUtils
-                .rangePartition(concurrency, capacity, partition -> new CountAndRecordTask(communitySizes, partition));
+            var tasks = PartitionUtils.rangePartition(
+                concurrency,
+                capacity,
+                partition -> new CountAndRecordTask(communitySizes, partition)
+            );
 
             ParallelUtil.run(tasks, executorService);
 

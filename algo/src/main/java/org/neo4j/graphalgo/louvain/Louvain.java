@@ -219,14 +219,17 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             .tracker(tracker)
             .build();
 
-        var relationshipCreators = PartitionUtils
-            .rangePartition(config.concurrency(), workingGraph.nodeCount(), partition ->
+        var relationshipCreators = PartitionUtils.rangePartition(
+            config.concurrency(),
+            workingGraph.nodeCount(),
+            partition ->
                 new RelationshipCreator(
                     relationshipsBuilder,
                     modularityOptimization,
                     workingGraph.concurrentCopy(),
                     partition
-                ));
+                )
+        );
 
         ParallelUtil.run(relationshipCreators, executorService);
 

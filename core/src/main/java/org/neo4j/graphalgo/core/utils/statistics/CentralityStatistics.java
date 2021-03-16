@@ -45,8 +45,11 @@ public final class CentralityStatistics {
                 histogram.recordValue(centralityFunction.applyAsDouble(id));
             }
         } else {
-            var tasks = PartitionUtils
-                .rangePartition(concurrency, nodeCount, partition -> new RecordTask(partition, centralityFunction));
+            var tasks = PartitionUtils.rangePartition(
+                concurrency,
+                nodeCount,
+                partition -> new RecordTask(partition, centralityFunction)
+            );
 
             ParallelUtil.run(tasks, executorService);
 
