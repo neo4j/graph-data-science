@@ -30,7 +30,7 @@ import java.nio.file.Path;
 
 public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
 
-    static final String GRAPH_INFO_FILE_NAME = "graph_info.csv";
+    public static final String GRAPH_INFO_FILE_NAME = "graph_info.csv";
     static final String DATABASE_ID_COLUMN_NAME = "databaseId";
     static final String DATABASE_NAME_COLUMN_NAME = "databaseName";
     static final String NODE_COUNT_COLUMN_NAME = "nodeCount";
