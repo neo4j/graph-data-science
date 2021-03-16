@@ -20,11 +20,15 @@
 package org.neo4j.gds.scaling;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ScalePropertiesBaseConfigTest {
@@ -41,5 +45,23 @@ public class ScalePropertiesBaseConfigTest {
         );
 
         assertThat(ex.getMessage(), containsString("Specify a scaler for each nodeProperties"));
+    }
+
+    @Test
+    void supportNodePropertyMap() {
+        var config = new ScalePropertiesMutateConfigImpl(
+            Optional.of("graph"),
+            Optional.empty(),
+            "",
+            CypherMapWrapper.create(
+                Map.of(
+                    "mutateProperty", "test",
+                    "scalers", List.of("Mean"),
+                    "nodeProperties", Map.of("a", Map.of("neoProperty", "noeA", "defaultValue", 0))
+                )
+            )
+        );
+
+        assertEquals(config.nodeProperties(), List.of("a"));
     }
 }
