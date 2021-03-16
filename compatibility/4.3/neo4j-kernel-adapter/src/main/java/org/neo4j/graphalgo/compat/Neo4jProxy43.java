@@ -347,6 +347,7 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
         return factory.instantiate(
             directoryStructure,
             fileSystem,
+            null, // no external page cache
             pageCacheTracer,
             config,
             logService,
