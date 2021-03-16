@@ -42,13 +42,13 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
             GRAPH_INFO_FILE_NAME,
             List.of(
                 defaultHeaderColumns(),
-                List.of(namedDatabaseId.toString(), Long.toString(1337L))
+                List.of(namedDatabaseId.databaseId().uuid().toString(), namedDatabaseId.name(), Long.toString(1337L))
             )
         );
     }
 
     @Override
     protected List<String> defaultHeaderColumns() {
-        return List.of(CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME, CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME);
+        return List.of(CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME, CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME, CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME);
     }
 }

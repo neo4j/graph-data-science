@@ -32,6 +32,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
 
     static final String GRAPH_INFO_FILE_NAME = "graph_info.csv";
     static final String DATABASE_ID_COLUMN_NAME = "databaseId";
+    static final String DATABASE_NAME_COLUMN_NAME = "databaseName";
     static final String NODE_COUNT_COLUMN_NAME = "nodeCount";
 
     private final CsvAppender csvAppender;
@@ -48,7 +49,8 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
     @Override
     public void export(GraphInfo graphInfo) {
         try {
-            this.csvAppender.appendField(graphInfo.namedDatabaseId().toString());
+            this.csvAppender.appendField(graphInfo.namedDatabaseId().databaseId().uuid().toString());
+            this.csvAppender.appendField(graphInfo.namedDatabaseId().name());
             this.csvAppender.appendField(Long.toString(graphInfo.nodeCount()));
             this.csvAppender.endLine();
         } catch (IOException e) {
@@ -68,6 +70,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
 
     private void writeHeader() throws IOException {
         this.csvAppender.appendField(DATABASE_ID_COLUMN_NAME);
+        this.csvAppender.appendField(DATABASE_NAME_COLUMN_NAME);
         this.csvAppender.appendField(NODE_COUNT_COLUMN_NAME);
         this.csvAppender.endLine();
     }
