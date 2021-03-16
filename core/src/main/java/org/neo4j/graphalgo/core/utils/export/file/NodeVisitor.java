@@ -30,17 +30,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.core.utils.export.file.NodeSchemaUtils.computeNodeSchema;
+
 public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, PropertySchema> {
+
+    public static final String NEO_ID_KEY = "neoId";
 
     private final List<String> EMPTY_LABELS = Collections.emptyList();
     private final Set<NodeLabel> EMPTY_LABELS_LABEL = Set.of(NodeLabel.ALL_NODES);
 
-
     private long currentId;
     private List<String> currentLabels;
 
-    protected NodeVisitor(NodeSchema nodeSchema) {
-        super(nodeSchema);
+    protected NodeVisitor(NodeSchema nodeSchema, boolean reverseIdMapping) {
+        super(computeNodeSchema(nodeSchema, reverseIdMapping));
         reset();
     }
 
@@ -53,7 +56,6 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
     public List<String> labels() {
         return currentLabels;
     }
-
 
     // Additional listeners for node related data
 
