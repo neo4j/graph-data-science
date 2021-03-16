@@ -37,7 +37,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CsvNodeVisitor extends NodeVisitor {
 
-    public static final String ID_COLUMN_NAME = ":ID";
+    static final String ID_COLUMN_NAME = ":ID";
 
     private final Path fileLocation;
     private final int visitorId;

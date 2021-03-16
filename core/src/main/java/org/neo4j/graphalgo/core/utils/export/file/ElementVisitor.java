@@ -19,6 +19,10 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
+import com.carrotsearch.hppc.ObjectIntMap;
+import com.carrotsearch.hppc.ObjectIntScatterMap;
+import com.carrotsearch.hppc.ObjectObjectMap;
+import com.carrotsearch.hppc.ObjectObjectScatterMap;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.api.schema.ElementSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
@@ -26,9 +30,7 @@ import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 abstract class ElementVisitor<
     ELEMENT_SCHEMA extends ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA>,
@@ -38,17 +40,16 @@ abstract class ElementVisitor<
     final ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema;
 
     private final Object[] currentProperties;
-    private final Map<String, List<PROPERTY_SCHEMA>> propertySchemas;
-    private final Map<String, Integer> propertyKeyPositions;
+    private final ObjectObjectMap<String, List<PROPERTY_SCHEMA>> propertySchemas;
+    private final ObjectIntMap<String> propertyKeyPositions;
 
     ElementVisitor(ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema) {
         this.elementSchema = elementSchema;
-        this.propertySchemas = new HashMap<>();
+        this.propertySchemas = new ObjectObjectScatterMap<>();
+        this.propertyKeyPositions = new ObjectIntScatterMap<>();
 
-        this.propertyKeyPositions = new HashMap<>();
-        var allProperties = elementSchema.allProperties();
         var i = 0;
-        for (String propertyKey : allProperties) {
+        for (String propertyKey : elementSchema.allProperties()) {
             propertyKeyPositions.put(propertyKey, i++);
         }
 
@@ -74,7 +75,7 @@ abstract class ElementVisitor<
     public void endOfEntity() {
         // Check if we encounter a new label combination
         if (!propertySchemas.containsKey(elementIdentifier())) {
-            calculateElementSchema();
+            computeElementSchema();
         }
 
         // do the export
@@ -93,7 +94,7 @@ abstract class ElementVisitor<
         }
     }
 
-    private void calculateElementSchema() {
+    private void computeElementSchema() {
         var propertySchema = getPropertySchema();
         propertySchema.sort(Comparator.comparing(PropertySchema::key));
         propertySchemas.put(elementIdentifier(), propertySchema);
