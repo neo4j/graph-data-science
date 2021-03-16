@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.filter.graphstore;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.beta.filter.expr.SemanticErrors;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Set;
@@ -35,7 +36,7 @@ import static org.neo4j.graphalgo.beta.filter.graphstore.GraphStoreFilter.filter
 class GraphStoreFilterTest {
 
     @Test
-    void filterNodesOnLabels() throws ParseException {
+    void filterNodesOnLabels() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL("(:A), (:B), (:C)");
 
         var filteredGraphStore = filter(
@@ -49,7 +50,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void filterMultipleNodesOnLabels() throws ParseException {
+    void filterMultipleNodesOnLabels() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL("(:A), (:B), (:C)");
 
         var filteredGraphStore = filter(
@@ -66,7 +67,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void filterNodeProperties() throws ParseException {
+    void filterNodeProperties() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL(
             "({prop: 42, ignore: 0}), ({prop: 84, ignore: 0}), ({prop: 1337, ignore: 0})");
 
@@ -80,7 +81,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void filterMultipleNodeProperties() throws ParseException {
+    void filterMultipleNodeProperties() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL("({prop1: 42, prop2: 84}), ({prop1: 42, prop2: 42}), ({prop1: 84, prop2: 84})");
 
         var filteredGraphStore = filter(
@@ -93,7 +94,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void filterPropertiesAndLabels() throws ParseException {
+    void filterPropertiesAndLabels() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL("(:A {prop: 42}), (:B {prop: 84}), (:C)");
 
         var filteredGraphStore = filter(
@@ -106,7 +107,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void filterMissingNodeProperties() throws ParseException {
+    void filterMissingNodeProperties() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL("(:A {prop: 42}), (:B)");
 
         var filteredGraphStore = filter(
@@ -119,7 +120,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void keepAllNodeProperties() throws ParseException {
+    void keepAllNodeProperties() throws ParseException, SemanticErrors {
         var gdl = "(:A {long: 42L, double: 42.0D, longArray: [42L], floatArray: [42.0F], doubleArray: [42.0D]})";
         var graphStore = graphStoreFromGDL(gdl);
 
@@ -134,7 +135,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void removeEmptyNodeSchemaEntries() throws ParseException {
+    void removeEmptyNodeSchemaEntries() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL("(:A {aProp: 42L}), (:B {bProp: 42L})");
 
         var filteredGraphStore = filter(
@@ -153,7 +154,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void filterRelationshipTypes() throws ParseException {
+    void filterRelationshipTypes() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL("(a)-[:A]->(b), (a)-[:B]->(b), (a)-[:C]->(b)");
 
         var filteredGraphStore = filter(
@@ -167,7 +168,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void filterMultipleRelationshipTypes() throws ParseException {
+    void filterMultipleRelationshipTypes() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL("(a)-[:A]->(b), (a)-[:B]->(b), (a)-[:C]->(b)");
 
         var filteredGraphStore = filter(
@@ -184,7 +185,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void filterRelationshipProperties() throws ParseException {
+    void filterRelationshipProperties() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL(
             "  (a)-[{prop: 42, ignore: 0}]->(b)" +
             ", (a)-[{prop: 84, ignore: 0}]->(b)" +
@@ -201,7 +202,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void filterMultipleRelationshipProperties() throws ParseException {
+    void filterMultipleRelationshipProperties() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL(
             "  (a)-[{prop1: 42, prop2: 84}]->(b)" +
             ", (a)-[{prop1: 42, prop2: 42}]->(b)" +
@@ -218,20 +219,20 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void filterMissingRelationshipProperties() throws ParseException {
+    void filterMissingRelationshipProperties() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL("(a)-[{prop1: 42}]->(b), (a)-[]->(b)");
 
         var filteredGraphStore = filter(
             graphStore,
             "true",
-            "r.prop = 42"
+            "r.prop1 = 42"
         );
 
         assertGraphEquals(fromGdl("(a)-[{prop1: 42}]->(b)"), filteredGraphStore.getUnion());
     }
 
     @Test
-    void keepAllRelationshipProperties() throws ParseException {
+    void keepAllRelationshipProperties() throws ParseException, SemanticErrors {
         var gdl = "()-[:A {double: 42.0D, anotherDouble: 42.0D, yetAnotherDouble: 42.0D}]->()";
         var graphStore = graphStoreFromGDL(gdl);
 
@@ -246,7 +247,7 @@ class GraphStoreFilterTest {
     }
 
     @Test
-    void removeEmptyRelationshipSchemaEntries() throws ParseException {
+    void removeEmptyRelationshipSchemaEntries() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL("(a)-[:A {aProp: 42L}]->(b), (a)-[:B {bProp: 42L}]->(b)");
 
         var filteredGraphStore = filter(

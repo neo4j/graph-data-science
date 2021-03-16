@@ -76,6 +76,5 @@ public interface ValidationContext {
     enum Context {
         NODE,
         RELATIONSHIP
-
     }
 }

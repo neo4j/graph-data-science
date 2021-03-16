@@ -20,28 +20,29 @@
 package org.neo4j.graphalgo.beta.filter.graphstore;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.beta.filter.expr.Expression;
 import org.neo4j.graphalgo.beta.filter.expr.ExpressionParser;
+import org.neo4j.graphalgo.beta.filter.expr.SemanticErrors;
+import org.neo4j.graphalgo.beta.filter.expr.ValidationContext;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 public final class GraphStoreFilter {
 
-    private GraphStoreFilter() {}
-
     @NotNull
     public static GraphStore filter(GraphStore graphStore, String nodeFilter, String relationshipFilter)
-    throws ParseException {
-        var nodeExpression = ExpressionParser.parse(nodeFilter);
-        var relationshipExpression = ExpressionParser.parse(relationshipFilter);
+    throws ParseException, SemanticErrors {
+        var expressions = parseAndValidate(graphStore, nodeFilter, relationshipFilter);
 
         var inputNodes = graphStore.nodes();
 
-        var filteredNodes = NodesFilter.filterNodes(graphStore, nodeExpression, inputNodes);
+        var filteredNodes = NodesFilter.filterNodes(graphStore, expressions.nodeExpression(), inputNodes);
         var filteredRelationships = RelationshipsFilter.filterRelationships(
             graphStore,
-            relationshipExpression,
+            expressions.relationshipExpression(),
             inputNodes,
             filteredNodes.nodeMapping()
         );
@@ -57,4 +58,27 @@ public final class GraphStoreFilter {
             AllocationTracker.empty()
         );
     }
+
+    @ValueClass
+    interface Expressions {
+        Expression nodeExpression();
+
+        Expression relationshipExpression();
+    }
+
+    private static Expressions parseAndValidate(
+        GraphStore graphStore,
+        String nodeFilter,
+        String relationshipFilter
+    ) throws ParseException, SemanticErrors {
+        var nodeExpression = ExpressionParser.parse(nodeFilter);
+        var relationshipExpression = ExpressionParser.parse(relationshipFilter);
+
+        nodeExpression.validate(ValidationContext.forNodes(graphStore)).validate();
+        relationshipExpression.validate(ValidationContext.forRelationships(graphStore)).validate();
+
+        return ImmutableExpressions.of(nodeExpression, relationshipExpression);
+    }
+
+    private GraphStoreFilter() {}
 }
