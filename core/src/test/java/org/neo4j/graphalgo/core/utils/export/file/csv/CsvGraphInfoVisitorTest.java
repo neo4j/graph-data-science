@@ -20,34 +20,35 @@
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphInfo;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNamedDatabaseIdVisitor.DATABASE_ID_FILE_NAME;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 
-class CsvNamedDatabaseIdVisitorTest extends CsvVisitorTest {
+class CsvGraphInfoVisitorTest extends CsvVisitorTest {
 
     @Test
     void shouldExportDatabaseId() {
         NamedDatabaseId namedDatabaseId = TestDatabaseIdRepository.randomNamedDatabaseId();
-        CsvNamedDatabaseIdVisitor databaseIdVisitor = new CsvNamedDatabaseIdVisitor(tempDir);
-        databaseIdVisitor.export(namedDatabaseId);
-        databaseIdVisitor.close();
+        CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
+        graphInfoVisitor.export(ImmutableGraphInfo.of(namedDatabaseId, 1337L));
+        graphInfoVisitor.close();
 
-        assertCsvFiles(List.of(DATABASE_ID_FILE_NAME));
+        assertCsvFiles(List.of(GRAPH_INFO_FILE_NAME));
         assertDataContent(
-            DATABASE_ID_FILE_NAME,
+            GRAPH_INFO_FILE_NAME,
             List.of(
                 defaultHeaderColumns(),
-                List.of(namedDatabaseId.toString())
+                List.of(namedDatabaseId.toString(), Long.toString(1337L))
             )
         );
     }
 
     @Override
     protected List<String> defaultHeaderColumns() {
-        return List.of(CsvNamedDatabaseIdVisitor.DATABASE_ID_COLUMN_NAME);
+        return List.of(CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME, CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME);
     }
 }

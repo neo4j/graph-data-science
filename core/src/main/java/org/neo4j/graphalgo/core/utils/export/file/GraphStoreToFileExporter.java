@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
-import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNamedDatabaseIdVisitor;
+import org.neo4j.graphalgo.core.utils.export.file.csv.CsvGraphInfoVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSchemaVisitor;
@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.core.utils.export.file.schema.NodeSchemaVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.schema.RelationshipSchemaVisitor;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -65,7 +64,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         return GraphStoreToFileExporter.of(
             graphStore,
             config,
-            () -> new CsvNamedDatabaseIdVisitor(exportPath),
+            () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
             () -> new CsvRelationshipSchemaVisitor(exportPath),
             (index) -> new CsvNodeVisitor(exportPath, graphStore.schema().nodeSchema(), headerFiles, index, config.exportNeoNodeIds()),
@@ -76,7 +75,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private static GraphStoreToFileExporter of(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
-        Supplier<SingleRowVisitor<NamedDatabaseId>> namedDatabaseIdVisitor,
+        Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitor,
         Supplier<NodeSchemaVisitor> nodeSchemaVisitor,
         Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitor,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
@@ -87,7 +86,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             return new FullGraphStoreToFileExporter(
                 graphStore,
                 config,
-                namedDatabaseIdVisitor,
+                graphInfoVisitor,
                 nodeSchemaVisitor,
                 relationshipSchemaVisitor,
                 nodeVisitorSupplier,
@@ -178,37 +177,37 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     }
 
     private static final class FullGraphStoreToFileExporter extends GraphStoreToFileExporter {
-        private final Supplier<SingleRowVisitor<NamedDatabaseId>> namedDatabaseIdVisitorSupplier;
+        private final Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier;
         private final Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier;
         private final Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier;
 
         private FullGraphStoreToFileExporter(
             GraphStore graphStore,
             GraphStoreToFileExporterConfig config,
-            Supplier<SingleRowVisitor<NamedDatabaseId>> namedDatabaseIdVisitorSupplier,
+            Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
             Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
             Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
             VisitorProducer<NodeVisitor> nodeVisitorSupplier,
             VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
         ) {
             super(graphStore, config, nodeVisitorSupplier, relationshipVisitorSupplier);
-            this.namedDatabaseIdVisitorSupplier = namedDatabaseIdVisitorSupplier;
+            this.graphInfoVisitorSupplier = graphInfoVisitorSupplier;
             this.nodeSchemaVisitorSupplier = nodeSchemaVisitorSupplier;
             this.relationshipSchemaVisitorSupplier = relationshipSchemaVisitorSupplier;
         }
 
         @Override
         protected void export(GraphStoreInput graphStoreInput) {
-            exportNamedDatabaseId(graphStoreInput);
+            exportGraphInfo(graphStoreInput);
             exportNodeSchema(graphStoreInput);
             exportRelationshipSchema(graphStoreInput);
             super.export(graphStoreInput);
         }
 
-        private void exportNamedDatabaseId(GraphStoreInput graphStoreInput) {
-            NamedDatabaseId namedDatabaseId = graphStoreInput.metaDataStore().databaseId();
-            try (var namedDatabaseIdVisitor = namedDatabaseIdVisitorSupplier.get()) {
-                namedDatabaseIdVisitor.export(namedDatabaseId);
+        private void exportGraphInfo(GraphStoreInput graphStoreInput) {
+            GraphInfo graphInfo = graphStoreInput.metaDataStore().graphInfo();
+            try (var namedDatabaseIdVisitor = graphInfoVisitorSupplier.get()) {
+                namedDatabaseIdVisitor.export(graphInfo);
             }
         }
 

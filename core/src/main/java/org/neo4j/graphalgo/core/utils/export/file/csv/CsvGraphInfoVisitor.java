@@ -21,23 +21,24 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
+import org.neo4j.graphalgo.core.utils.export.file.GraphInfo;
 import org.neo4j.graphalgo.core.utils.export.file.SingleRowVisitor;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
-public class CsvNamedDatabaseIdVisitor implements SingleRowVisitor<NamedDatabaseId> {
+public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
 
-    static final String DATABASE_ID_FILE_NAME = "database_id.csv";
+    static final String GRAPH_INFO_FILE_NAME = "graph_info.csv";
     static final String DATABASE_ID_COLUMN_NAME = "databaseId";
+    static final String NODE_COUNT_COLUMN_NAME = "nodeCount";
 
     private final CsvAppender csvAppender;
 
-    public CsvNamedDatabaseIdVisitor(Path fileLocation) {
+    public CsvGraphInfoVisitor(Path fileLocation) {
         try {
-            this.csvAppender = new CsvWriter().append(fileLocation.resolve(DATABASE_ID_FILE_NAME), StandardCharsets.UTF_8);
+            this.csvAppender = new CsvWriter().append(fileLocation.resolve(GRAPH_INFO_FILE_NAME), StandardCharsets.UTF_8);
             writeHeader();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -45,9 +46,10 @@ public class CsvNamedDatabaseIdVisitor implements SingleRowVisitor<NamedDatabase
     }
 
     @Override
-    public void export(NamedDatabaseId namedDatabaseId) {
+    public void export(GraphInfo graphInfo) {
         try {
-            this.csvAppender.appendField(namedDatabaseId.toString());
+            this.csvAppender.appendField(graphInfo.namedDatabaseId().toString());
+            this.csvAppender.appendField(Long.toString(graphInfo.nodeCount()));
             this.csvAppender.endLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -66,6 +68,7 @@ public class CsvNamedDatabaseIdVisitor implements SingleRowVisitor<NamedDatabase
 
     private void writeHeader() throws IOException {
         this.csvAppender.appendField(DATABASE_ID_COLUMN_NAME);
+        this.csvAppender.appendField(NODE_COUNT_COLUMN_NAME);
         this.csvAppender.endLine();
     }
 }

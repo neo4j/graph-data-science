@@ -23,18 +23,19 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
-import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.graphalgo.core.utils.export.file.GraphInfo;
+import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphInfo;
 
 @ValueClass
 public interface MetaDataStore {
-    NamedDatabaseId databaseId();
+    GraphInfo graphInfo();
     NodeSchema nodeSchema();
     RelationshipSchema relationshipSchema();
 
     static MetaDataStore of(GraphStore graphStore) {
-        NamedDatabaseId namedDatabaseId = graphStore.databaseId();
+        GraphInfo graphInfo = ImmutableGraphInfo.of(graphStore.databaseId(), graphStore.nodeCount());
         NodeSchema nodeSchema = graphStore.schema().nodeSchema();
         RelationshipSchema relationshipSchema = graphStore.schema().relationshipSchema();
-        return ImmutableMetaDataStore.of(namedDatabaseId, nodeSchema, relationshipSchema);
+        return ImmutableMetaDataStore.of(graphInfo, nodeSchema, relationshipSchema);
     }
 }

@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.core.utils.export.file.NodeSchemaUtils.computeNodeSchema;
-import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNamedDatabaseIdVisitor.DATABASE_ID_FILE_NAME;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
@@ -254,7 +254,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
         exporter.run(AllocationTracker.empty());
 
-        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, DATABASE_ID_FILE_NAME));
+        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, GRAPH_INFO_FILE_NAME));
 
         assertDataContent(
             NODE_SCHEMA_FILE_NAME,
@@ -282,10 +282,10 @@ class GraphStoreToFileExporterTest extends CsvTest {
         );
 
         assertDataContent(
-            DATABASE_ID_FILE_NAME,
+            GRAPH_INFO_FILE_NAME,
             List.of(
-                List.of(CsvNamedDatabaseIdVisitor.DATABASE_ID_COLUMN_NAME),
-                List.of(graphStore.databaseId().toString())
+                List.of(CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME, CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME),
+                List.of(graphStore.databaseId().toString(), Long.toString(graphStore.nodeCount()))
             )
         );
     }
