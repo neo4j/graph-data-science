@@ -149,6 +149,23 @@ class CSRCompositeRelationshipIteratorTest {
     }
 
     @Test
+    void worksWithoutAnyProperty() {
+        var iterator = graphStore.getCompositeRelationshipIterator(
+            RelationshipType.of("T1"),
+            List.of()
+        );
+
+        assertIteration(
+            iterator,
+            idFunction.of("b"),
+            Map.of(
+                idFunction.of("a"), List.of(),
+                idFunction.of("c"), List.of()
+            )
+        );
+    }
+
+    @Test
     void abortWhenConsumerReturnsFalse() {
         var iterator = graphStore.getCompositeRelationshipIterator(
             RelationshipType.of("T1"),

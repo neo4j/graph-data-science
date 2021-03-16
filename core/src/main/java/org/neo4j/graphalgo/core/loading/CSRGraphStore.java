@@ -534,7 +534,10 @@ public class CSRGraphStore implements GraphStore {
         var topology = relationships.get(relationshipType);
 
         var relationshipPropertyStore = relationshipProperties.get(relationshipType);
-        var properties = propertyKeys
+
+        var properties = propertyKeys.isEmpty()
+        ? new Relationships.Properties[0]
+        : propertyKeys
             .stream()
             .map(relationshipPropertyStore::get)
             .map(RelationshipProperty::values)
