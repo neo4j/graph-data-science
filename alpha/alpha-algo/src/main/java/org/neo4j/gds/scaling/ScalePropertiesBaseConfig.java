@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.AbstractPropertyMappings.fromObject;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
@@ -44,5 +45,17 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
             .stream()
             .map(PropertyMapping::propertyKey)
             .collect(Collectors.toList());
+    }
+
+
+    @Value.Check
+    default void propertiesSizeMustEqualScalersSize() {
+        if (scalers().size() != nodeProperties().size()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Specify a scaler for each nodeProperties. Found %d scalers for %d nodeProperties",
+                scalers().size(),
+                nodeProperties().size()
+            ));
+        }
     }
 }
