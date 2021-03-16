@@ -21,14 +21,31 @@ package org.neo4j.graphalgo.api;
 
 public interface CompositeRelationshipIterator {
 
+    /**
+     * Applies the given consumer on all relationships of the given node id.
+     */
     void forEachRelationship(long nodeId, RelationshipConsumer consumer);
 
-    CompositeRelationshipIterator concurrentCopy();
-
+    /**
+     * Returns the property keys that are managed by this iterator.
+     * The order is equivalent to the order of the value array in
+     * {@link org.neo4j.graphalgo.api.CompositeRelationshipIterator.RelationshipConsumer#consume(long, long, double[])}.
+     */
     String[] propertyKeys();
+
+    /**
+     * Creates a thread-safe copy of the iterator.
+     */
+    CompositeRelationshipIterator concurrentCopy();
 
     @FunctionalInterface
     interface RelationshipConsumer {
+
+        /**
+         * This method is called for every relationship of the specified iterator.
+         * The order of the `properties` is equivalent to the order of the property
+         * key array returned by {@link CompositeRelationshipIterator#propertyKeys()}.
+         */
         boolean consume(long source, long target, double[] properties);
     }
 }
