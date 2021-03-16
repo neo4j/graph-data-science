@@ -152,12 +152,11 @@ public final class ModelCatalog {
         return model;
     }
 
-    public static int size() {
+    public static boolean isEmpty() {
         return userCatalogs
             .values()
             .stream()
-            .mapToInt(userCatalog -> userCatalog.list().size())
-            .sum();
+            .allMatch(userCatalog -> userCatalog.list().isEmpty());
     }
 
     public static void removeAllLoadedModels() {

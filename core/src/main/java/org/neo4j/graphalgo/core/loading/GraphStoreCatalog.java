@@ -94,6 +94,10 @@ public final class GraphStoreCatalog {
             .sum();
     }
 
+    public static boolean isEmpty() {
+        return graphStoresCount() == 0;
+    }
+
     public static Optional<Map<String, Object>> getDegreeDistribution(
         String username,
         NamedDatabaseId databaseId,

@@ -56,7 +56,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
         String message = ExceptionUtil.rootCause(exception).getMessage();
         String messageTemplate =
             "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(21 Bytes\\).";
-        if (GraphStoreCatalog.graphStoresCount() > 0) {
+        if (GraphStoreCatalog.isEmpty()) {
             messageTemplate += formatWithLocale(
                 " Note: there are %s graphs currently loaded into memory.",
                 GraphStoreCatalog.graphStoresCount()

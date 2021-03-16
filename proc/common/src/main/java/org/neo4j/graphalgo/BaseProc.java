@@ -200,7 +200,7 @@ public abstract class BaseProc {
         long minBytesProcedure = memoryTreeWithDimensions.memoryTree.memoryUsage().min;
         if (minBytesProcedure > freeMemory) {
             String template = "Procedure was blocked since minimum estimated memory (%s) exceeds current free memory (%s).";
-            if (GraphStoreCatalog.graphStoresCount() > 0) {
+            if (GraphStoreCatalog.isEmpty()) {
                 template += formatWithLocale(
                     " Note: there are %s graphs currently loaded into memory.",
                     GraphStoreCatalog.graphStoresCount()

@@ -40,7 +40,7 @@ public class RestartCheckProc {
     }
 
     private boolean compute() {
-        return GraphStoreCatalog.graphStoresCount() == 0 && ModelCatalog.size() == 0 && progress.isEmpty();
+        return GraphStoreCatalog.isEmpty() && ModelCatalog.isEmpty() && progress.isEmpty();
     }
 
     public static final class SafeToRestartResult {
