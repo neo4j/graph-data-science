@@ -53,7 +53,7 @@ class ScalePropertiesTest {
     @Test
     void minmaxNormalisation() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
-            .featureProperties(List.of("a"))
+            .nodeProperties(List.of("a"))
             .scalers(List.of("MinMax"))
             .concurrency(1)
             .build();
@@ -72,7 +72,7 @@ class ScalePropertiesTest {
     @Test
     void minmaxNormalisationOverMultipleProperties() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
-            .featureProperties(List.of("a", "b", "c"))
+            .nodeProperties(List.of("a", "b", "c"))
             .scalers(List.of("MinMax", "MinMax", "MinMax"))
             .concurrency(1)
             .build();
@@ -91,7 +91,7 @@ class ScalePropertiesTest {
     @Test
     void differentNormalizers() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
-            .featureProperties(List.of("a", "b"))
+            .nodeProperties(List.of("a", "b"))
             .scalers(List.of("MinMax", "Mean"))
             .concurrency(1)
             .build();

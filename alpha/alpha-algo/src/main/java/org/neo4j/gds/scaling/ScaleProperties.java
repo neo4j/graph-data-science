@@ -60,7 +60,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     public Result compute() {
         var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
 
-        var propertyCount = config.featureProperties().size();
+        var propertyCount = config.nodeProperties().size();
         initializeArrays(scaledProperties, propertyCount);
 
         List<Scaler> scalers = resolveScalers();
@@ -114,13 +114,13 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     }
 
     private List<Scaler> resolveScalers() {
-        assert config.scalers().size() == config.featureProperties().size();
+        assert config.scalers().size() == config.nodeProperties().size();
 
         List<Scaler> scalers = new ArrayList<>();
 
         for (int i = 0; i < config.scalers().size(); i++) {
             String scalerName = config.scalers().get(i);
-            String property = config.featureProperties().get(i);
+            String property = config.nodeProperties().get(i);
 
             var nodeProperties = graph.nodeProperties(property);
             scalers.add(Scaler.Factory.create(

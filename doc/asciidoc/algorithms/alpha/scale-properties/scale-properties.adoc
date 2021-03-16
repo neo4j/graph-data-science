@@ -143,7 +143,7 @@ The output is a list property which we will call `hotelFeatures`, imagining that
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.scaleProperties.mutate('myGraph', {
-  featureProperties: ['buildYear', 'avgReview'],
+  nodeProperties: ['buildYear', 'avgReview'],
   scalers: ['MinMax', 'Mean'],
   mutateProperty: 'hotelFeatures'
 }) YIELD nodePropertiesWritten
