@@ -23,11 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporter;
 import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
 import java.io.File;
@@ -40,9 +42,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.core.utils.export.file.NodeSchemaUtils.computeNodeSchema;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class GraphStoreToFileExporterTest extends CsvTest {
@@ -64,6 +68,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
     @Inject
     public GraphStore graphStore;
 
+    @Inject
+    private IdFunction idFunction;
+
     @GdlGraph(graphNamePrefix = "concurrent")
     private static final String GDL_FOR_CONCURRENCY =
         "CREATE" +
@@ -80,6 +87,10 @@ class GraphStoreToFileExporterTest extends CsvTest {
 
     @Inject
     public GraphStore concurrentGraphStore;
+
+    @Inject
+    private IdFunction concurrentIdFunction;
+
     public static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME);
     public static final List<String> RELATIONSHIP_COLUMNS = List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);
 
@@ -89,6 +100,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(1)
+            .exportNeoNodeIds(true)
             .build();
 
         // export db
@@ -101,9 +113,10 @@ class GraphStoreToFileExporterTest extends CsvTest {
         var rel1Type = RelationshipType.of("REL1");
         var rel2Type = RelationshipType.of("REL2");
 
-        var abSchema = graphStore.schema().nodeSchema().filter(Set.of(aLabel, bLabel)).unionProperties();
-        var acSchema = graphStore.schema().nodeSchema().filter(Set.of(aLabel, cLabel)).unionProperties();
-        var bSchema = graphStore.schema().nodeSchema().filter(Set.of(bLabel)).unionProperties();
+        NodeSchema nodeSchema = computeNodeSchema(graphStore.schema().nodeSchema(), config.exportNeoNodeIds());
+        var abSchema = nodeSchema.filter(Set.of(aLabel, bLabel)).unionProperties();
+        var acSchema = nodeSchema.filter(Set.of(aLabel, cLabel)).unionProperties();
+        var bSchema = nodeSchema.filter(Set.of(bLabel)).unionProperties();
         var rel1Schema = graphStore.schema().relationshipSchema().filter(Set.of(rel1Type)).unionProperties();
         var rel2Schema = graphStore.schema().relationshipSchema().filter(Set.of(rel2Type)).unionProperties();
 
@@ -121,8 +134,8 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "nodes_A_B_0.csv",
             List.of(
-                List.of("0", "0", "42", "1;3;3;7"),
-                List.of("1", "1", "43", "")
+                List.of("0", Long.toString(idFunction.of("a")), "0", "42", "1;3;3;7"),
+                List.of("1", Long.toString(idFunction.of("b")), "1", "43", "")
             )
         );
 
@@ -130,7 +143,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "nodes_A_C_0.csv",
             List.of(
-                List.of("2", "2", "44", "1;9;8;4")
+                List.of("2", Long.toString(idFunction.of("c")), "2", "44", "1;9;8;4")
             )
         );
 
@@ -138,7 +151,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "nodes_B_0.csv",
             List.of(
-                List.of("3", "3", "", "")
+                List.of("3", Long.toString(idFunction.of("d")), "3", "", "")
             )
         );
 
@@ -172,6 +185,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(2)
+            .exportNeoNodeIds(true)
             .build();
 
         // export db
@@ -179,7 +193,8 @@ class GraphStoreToFileExporterTest extends CsvTest {
         exporter.run(AllocationTracker.empty());
 
         // Assert headers
-        assertHeaderFile("nodes_header.csv", NODE_COLUMNS, Collections.emptyMap());
+        NodeSchema nodeSchema = computeNodeSchema(concurrentGraphStore.schema().nodeSchema(), config.exportNeoNodeIds());
+        assertHeaderFile("nodes_header.csv", NODE_COLUMNS, nodeSchema.unionProperties());
         assertHeaderFile("relationships_REL1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
 
         // Sometimes we end up with only one file, so we cannot make absolute assumptions about the files created
@@ -194,7 +209,12 @@ class GraphStoreToFileExporterTest extends CsvTest {
                     throw new RuntimeException(e);
                 }
             }).collect(Collectors.toList());
-        assertThat(nodeContents).containsExactlyInAnyOrder("0", "1", "2", "3");
+        assertThat(nodeContents).containsExactlyInAnyOrder(
+            stringPair(0, "a"),
+            stringPair(1, "b"),
+            stringPair(2, "c"),
+            stringPair(3, "d")
+        );
 
         var relationshipContents = Arrays.stream(tempDir
             .toFile()
@@ -215,5 +235,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
             "2,3",
             "3,0"
         );
+    }
+
+    private String stringPair(long id, String variable) {
+        return formatWithLocale("%s,%s", id, idFunction.of(variable));
     }
 }
