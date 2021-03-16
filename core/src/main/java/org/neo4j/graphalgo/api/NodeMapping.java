@@ -30,10 +30,7 @@ public interface NodeMapping extends IdMapping, NodeIterator, BatchNodeIterable 
 
     Set<NodeLabel> availableNodeLabels();
 
-    // TODO: remove this slow default
-    default boolean hasLabel(long nodeId, NodeLabel label) {
-        return nodeLabels(nodeId).contains(label);
-    }
+    boolean hasLabel(long nodeId, NodeLabel label);
 
     default boolean containsOnlyAllNodesLabel() {
         return availableNodeLabels().size() == 1 && availableNodeLabels().contains(NodeLabel.ALL_NODES);
