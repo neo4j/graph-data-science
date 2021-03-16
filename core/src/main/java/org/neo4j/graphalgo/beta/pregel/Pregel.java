@@ -130,17 +130,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         // Tracks if a node voted to halt in the previous iteration
         HugeAtomicBitSet voteBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
 
-        var computeSteps = partitionGraph(partition -> new ComputeStep<>(
-            graph,
-            computation,
-            config,
-            0,
-            partition,
-            nodeValues,
-            messenger,
-            voteBits,
-            graph
-        ));
+        var computeSteps = createComputeSteps(voteBits);
 
         int iterations;
         for (iterations = 0; iterations < config.maxIterations(); iterations++) {
@@ -180,7 +170,19 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     @NotNull
-    private List<ComputeStep<CONFIG, ?>> partitionGraph(Function<Partition, ComputeStep<CONFIG, ?>> partitionFunction) {
+    private List<ComputeStep<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
+        Function<Partition, ComputeStep<CONFIG, ?>> partitionFunction = partition -> new ComputeStep<>(
+            graph,
+            computation,
+            config,
+            0,
+            partition,
+            nodeValues,
+            messenger,
+            voteBits,
+            graph
+        );
+
         switch (config.partitioning()) {
             case RANGE:
                 return PartitionUtils.rangePartition(concurrency, graph.nodeCount(), partitionFunction);
