@@ -81,7 +81,7 @@ class GraphStoreFilterTest {
 
     @Test
     void filterMultipleNodeProperties() throws ParseException {
-        var graphStore = graphStoreFromGDL("({prop1: 42, prop2: 84}), ({prop1: 42, prop2: 42}), ({{prop1: 84, prop2: 84}})");
+        var graphStore = graphStoreFromGDL("({prop1: 42, prop2: 84}), ({prop1: 42, prop2: 42}), ({prop1: 84, prop2: 84})");
 
         var filteredGraphStore = subGraph(
             graphStore,
@@ -115,7 +115,7 @@ class GraphStoreFilterTest {
             "true"
         );
 
-        assertGraphEquals(fromGdl("(:A {prop: 42}))"), filteredGraphStore.getUnion());
+        assertGraphEquals(fromGdl("(:A {prop: 42})"), filteredGraphStore.getUnion());
     }
 
     @Test
@@ -253,7 +253,7 @@ class GraphStoreFilterTest {
             graphStore,
             "true",
             "r:A"
-            );
+        );
 
         var aSchema = graphStore
             .schema()
@@ -261,6 +261,6 @@ class GraphStoreFilterTest {
             .filter(Set.of(RelationshipType.of("A")));
 
         assertThat(filteredGraphStore.schema().relationshipSchema()).isEqualTo(aSchema);
-        assertGraphEquals(fromGdl("(a)->[:A {aProp: 42L}]->(b)"), filteredGraphStore.getUnion());
+        assertGraphEquals(fromGdl("(a)-[:A {aProp: 42L}]->(b)"), filteredGraphStore.getUnion());
     }
 }

@@ -70,16 +70,16 @@ public abstract class EvaluationContext {
 
         private double[] properties;
 
-        private final ObjectIntMap<String> propertyTokens;
+        private final ObjectIntMap<String> propertyIndices;
 
-        public RelationshipEvaluationContext(Map<String, Integer> propertyTokens) {
-            this.propertyTokens = new ObjectIntScatterMap<>();
-            propertyTokens.forEach(this.propertyTokens::put);
+        public RelationshipEvaluationContext(Map<String, Integer> propertyIndices) {
+            this.propertyIndices = new ObjectIntScatterMap<>();
+            propertyIndices.forEach(this.propertyIndices::put);
         }
 
         @Override
         double getProperty(String propertyKey) {
-            return properties[propertyTokens.get(propertyKey)];
+            return properties[propertyIndices.get(propertyKey)];
         }
 
         @Override
