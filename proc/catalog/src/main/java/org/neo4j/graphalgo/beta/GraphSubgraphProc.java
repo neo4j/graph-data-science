@@ -79,6 +79,7 @@ public class GraphSubgraphProc extends CatalogProc {
         );
 
         var subgraphCreateConfig = ImmutableGraphCreateFromGraphConfig.builder()
+            .username(username())
             .graphName(config.subgraphName())
             .nodeFilter(config.nodeFilter())
             .relationshipFilter(config.relationshipFilter())
