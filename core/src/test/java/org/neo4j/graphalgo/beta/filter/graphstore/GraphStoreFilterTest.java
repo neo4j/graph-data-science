@@ -22,7 +22,11 @@ package org.neo4j.graphalgo.beta.filter.graphstore;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.beta.filter.GraphStoreFilterConfig;
+import org.neo4j.graphalgo.beta.filter.ImmutableGraphStoreFilterConfig;
 import org.neo4j.graphalgo.beta.filter.expr.SemanticErrors;
+import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Set;
@@ -35,14 +39,23 @@ import static org.neo4j.graphalgo.beta.filter.graphstore.GraphStoreFilter.filter
 
 class GraphStoreFilterTest {
 
+    private static GraphStoreFilterConfig config(String nodeFilter, String relationshipFilter) {
+        return ImmutableGraphStoreFilterConfig.builder()
+            .concurrency(1)
+            .nodeFilter(nodeFilter)
+            .relationshipFilter(relationshipFilter)
+            .build();
+    }
+
     @Test
     void filterNodesOnLabels() throws ParseException, SemanticErrors {
         var graphStore = graphStoreFromGDL("(:A), (:B), (:C)");
 
         var filteredGraphStore = filter(
             graphStore,
-            "n:A",
-            "true"
+            config("n:A", "true"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertThat(filteredGraphStore.nodes().availableNodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"));
@@ -55,8 +68,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "n:A OR n:B",
-            "true"
+            config("n:A OR n:B", "true"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertThat(filteredGraphStore.nodes().availableNodeLabels()).containsExactlyInAnyOrder(
@@ -73,8 +87,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "n.prop >= 42 AND n.prop <= 84",
-            "true"
+            config("n.prop >= 42 AND n.prop <= 84", "true"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertGraphEquals(fromGdl("({prop: 42, ignore: 0}), ({prop: 84, ignore: 0})"), filteredGraphStore.getUnion());
@@ -82,12 +97,14 @@ class GraphStoreFilterTest {
 
     @Test
     void filterMultipleNodeProperties() throws ParseException, SemanticErrors {
-        var graphStore = graphStoreFromGDL("({prop1: 42, prop2: 84}), ({prop1: 42, prop2: 42}), ({prop1: 84, prop2: 84})");
+        var graphStore = graphStoreFromGDL(
+            "({prop1: 42, prop2: 84}), ({prop1: 42, prop2: 42}), ({prop1: 84, prop2: 84})");
 
         var filteredGraphStore = filter(
             graphStore,
-            "n.prop1 = 42 AND n.prop2 = 84",
-            "true"
+            config("n.prop1 = 42 AND n.prop2 = 84", "true"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertGraphEquals(fromGdl("({prop1: 42, prop2: 84})"), filteredGraphStore.getUnion());
@@ -99,8 +116,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "(n:A AND n.prop = 42) OR (n:B AND n.prop = 84)",
-            "true"
+            config("(n:A AND n.prop = 42) OR (n:B AND n.prop = 84)", "true"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertGraphEquals(fromGdl("(:A {prop: 42}), (:B {prop: 84})"), filteredGraphStore.getUnion());
@@ -112,8 +130,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "n.prop = 42",
-            "true"
+            config("n.prop = 42", "true"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertGraphEquals(fromGdl("(:A {prop: 42})"), filteredGraphStore.getUnion());
@@ -126,8 +145,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "true",
-            "true"
+            config("true", "true"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertThat(filteredGraphStore.schema().nodeSchema()).isEqualTo(graphStore.schema().nodeSchema());
@@ -140,8 +160,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "n:A",
-            "true"
+            config("n:A", "true"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         var aSchema = graphStore
@@ -159,8 +180,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "true",
-            "r:A"
+            config("true", "r:A"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertThat(filteredGraphStore.relationshipTypes()).containsExactlyInAnyOrder(RelationshipType.of("A"));
@@ -173,8 +195,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "true",
-            "r:A OR r:B"
+            config("true", "r:A OR r:B"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertThat(filteredGraphStore.relationshipTypes()).containsExactlyInAnyOrder(
@@ -194,11 +217,15 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "true",
-            "r.prop >= 42 AND r.prop <= 84"
+            config("true", "r.prop >= 42 AND r.prop <= 84"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
-        assertGraphEquals(fromGdl("(a)-[{prop: 42, ignore: 0}]->(b), (a)-[{prop: 84, ignore: 0}]->(b)"), filteredGraphStore.getUnion());
+        assertGraphEquals(
+            fromGdl("(a)-[{prop: 42, ignore: 0}]->(b), (a)-[{prop: 84, ignore: 0}]->(b)"),
+            filteredGraphStore.getUnion()
+        );
     }
 
     @Test
@@ -211,8 +238,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "true",
-            "r.prop1 = 42 AND r.prop2 = 84"
+            config("true", "r.prop1 = 42 AND r.prop2 = 84"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertGraphEquals(fromGdl("(a)-[{prop1: 42, prop2: 84}]->(b)"), filteredGraphStore.getUnion());
@@ -224,8 +252,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "true",
-            "r.prop1 = 42"
+            config("true", "r.prop1 = 42"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertGraphEquals(fromGdl("(a)-[{prop1: 42}]->(b)"), filteredGraphStore.getUnion());
@@ -238,8 +267,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "true",
-            "true"
+            config("true", "true"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         assertThat(filteredGraphStore.schema().nodeSchema()).isEqualTo(graphStore.schema().nodeSchema());
@@ -252,8 +282,9 @@ class GraphStoreFilterTest {
 
         var filteredGraphStore = filter(
             graphStore,
-            "true",
-            "r:A"
+            config("true", "r:A"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
         );
 
         var aSchema = graphStore

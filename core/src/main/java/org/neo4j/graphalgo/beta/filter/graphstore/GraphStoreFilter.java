@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.filter.graphstore;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.beta.filter.GraphStoreFilterConfig;
 import org.neo4j.graphalgo.beta.filter.expr.Expression;
 import org.neo4j.graphalgo.beta.filter.expr.ExpressionParser;
 import org.neo4j.graphalgo.beta.filter.expr.SemanticErrors;
@@ -30,12 +31,19 @@ import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
+import java.util.concurrent.ExecutorService;
+
 public final class GraphStoreFilter {
 
     @NotNull
-    public static GraphStore filter(GraphStore graphStore, String nodeFilter, String relationshipFilter)
+    public static GraphStore filter(
+        GraphStore graphStore,
+        GraphStoreFilterConfig config,
+        ExecutorService executorService,
+        AllocationTracker tracker
+    )
     throws ParseException, SemanticErrors {
-        var expressions = parseAndValidate(graphStore, nodeFilter, relationshipFilter);
+        var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
 
         var inputNodes = graphStore.nodes();
 
@@ -53,9 +61,8 @@ public final class GraphStoreFilter {
             filteredNodes.propertyStores(),
             filteredRelationships.topology(),
             filteredRelationships.propertyStores(),
-            // TODO
-            1,
-            AllocationTracker.empty()
+            config.concurrency(),
+            tracker
         );
     }
 
