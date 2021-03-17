@@ -328,7 +328,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     private RelationshipType relationshipType() {
-        return availableRelationshipTypes().iterator().next();
+        return schema().relationshipSchema().availableTypes().iterator().next();
     }
 
     @Override

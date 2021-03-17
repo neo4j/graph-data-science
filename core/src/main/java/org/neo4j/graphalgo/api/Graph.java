@@ -28,10 +28,6 @@ public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, Rela
 
     GraphSchema schema();
 
-    default Set<RelationshipType> availableRelationshipTypes() {
-        return schema().relationshipSchema().properties().keySet();
-    }
-
     default boolean isEmpty() {
         return nodeCount() == 0;
     }

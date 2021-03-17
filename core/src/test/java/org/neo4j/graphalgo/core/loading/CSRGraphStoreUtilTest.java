@@ -61,7 +61,7 @@ class CSRGraphStoreUtilTest {
         assertThat(graph).isInstanceOf(HugeGraph.class);
         assertThat(graph.availableNodeLabels()).contains(NodeLabel.of("A"), NodeLabel.of("B"));
         assertThat(graph.availableNodeProperties()).contains("foo", "bar");
-        assertThat(graph.availableRelationshipTypes()).contains(RelationshipType.of("REL1"));
+        assertThat(graph.schema().relationshipSchema().availableTypes()).contains(RelationshipType.of("REL1"));
         assertThat(graph.hasRelationshipProperty()).isTrue();
 
         var convertedGraphStore = CSRGraphStoreUtil.createFromGraph(

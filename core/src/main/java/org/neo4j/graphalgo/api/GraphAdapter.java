@@ -183,11 +183,6 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public Set<RelationshipType> availableRelationshipTypes() {
-        return graph.availableRelationshipTypes();
-    }
-
-    @Override
     public boolean exists(long sourceNodeId, long targetNodeId) {
         return graph.exists(sourceNodeId, targetNodeId);
     }

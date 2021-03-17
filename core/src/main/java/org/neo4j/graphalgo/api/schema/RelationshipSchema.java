@@ -45,6 +45,10 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
         return of(unionSchema(other.properties()));
     }
 
+    default Set<RelationshipType> availableTypes() {
+        return properties().keySet();
+    }
+
     default RelationshipSchema singleTypeAndProperty(
         RelationshipType relationshipType,
         Optional<String> maybeProperty

@@ -198,11 +198,6 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public Set<RelationshipType> availableRelationshipTypes() {
-        return Set.of();
-    }
-
-    @Override
     public boolean exists(long sourceNodeId, long targetNodeId) {
         return false;
     }
