@@ -17,12 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.filter.graphstore;
+package org.neo4j.graphalgo.beta.filter;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.beta.filter.GraphStoreFilterConfig;
 import org.neo4j.graphalgo.beta.filter.expr.Expression;
 import org.neo4j.graphalgo.beta.filter.expr.ExpressionParser;
 import org.neo4j.graphalgo.beta.filter.expr.SemanticErrors;

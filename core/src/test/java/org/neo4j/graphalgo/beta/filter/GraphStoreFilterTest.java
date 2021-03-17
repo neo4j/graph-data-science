@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.filter.graphstore;
+package org.neo4j.graphalgo.beta.filter;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.graphStoreFromGDL;
-import static org.neo4j.graphalgo.beta.filter.graphstore.GraphStoreFilter.filter;
+import static org.neo4j.graphalgo.beta.filter.GraphStoreFilter.filter;
 
 class GraphStoreFilterTest {
 
