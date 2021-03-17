@@ -24,14 +24,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphListProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
+import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
@@ -92,5 +95,66 @@ class GraphSubgraphProcTest extends BaseProcTest {
         ).graphStore();
 
         assertGraphEquals(fromGdl("(:A)"), subgraphStore.getUnion());
+    }
+
+    @Test
+    void throwsOnExistingGraph() {
+        runQuery(GdsCypher.call()
+            .withNodeLabel("A")
+            .withNodeLabel("B")
+            .withAnyRelationshipType()
+            .graphCreate("subgraph")
+            .yields());
+
+        var subGraphQuery = "CALL gds.beta.graph.subgraph('graph', 'subgraph', {" +
+                            "   nodeFilter: 'n:A'," +
+                            "   relationshipFilter: 'true'" +
+                            "})";
+
+        assertThatThrownBy(() -> runQuery(subGraphQuery))
+            .getRootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("A graph with name 'subgraph' already exists.");
+    }
+
+    @Test
+    void throwsOnParserError() {
+        var subGraphQuery = "CALL gds.beta.graph.subgraph('graph', 'subgraph', {" +
+                            "   nodeFilter: 'GIMME NODES, JOANNA, GIMME NODES'," +
+                            "   relationshipFilter: 'true'" +
+                            "})";
+
+        assertThatThrownBy(() -> runQuery(subGraphQuery))
+            .getRootCause()
+            .isInstanceOf(ParseException.class)
+            .hasMessageContaining("GIMME NODES, JOANNA, GIMME NODES");
+    }
+
+    @Test
+    void throwsOnSemanticNodeError() {
+        var subGraphQuery = "CALL gds.beta.graph.subgraph('graph', 'subgraph', {" +
+                            "   nodeFilter: 'r:Foo'," +
+                            "   relationshipFilter: 'true'" +
+                            "})";
+
+        assertThatThrownBy(() -> runQuery(subGraphQuery))
+            .getRootCause()
+            .isInstanceOf(SemanticErrors.class)
+            .hasMessageContaining("Only `n` is allowed for nodes")
+            .hasMessageContaining("Unknown label `Foo`");
+    }
+
+    @Test
+    void throwsOnSemanticRelationshipError() {
+        var subGraphQuery = "CALL gds.beta.graph.subgraph('graph', 'subgraph', {" +
+                            "   nodeFilter: 'true'," +
+                            "   relationshipFilter: 'r:BAR AND r.weight > 42'" +
+                            "})";
+
+        assertThatThrownBy(() -> runQuery(subGraphQuery))
+            .getRootCause()
+            .isInstanceOf(SemanticErrors.class)
+            .hasMessageContaining("Unknown property `weight`.")
+            .hasMessageContaining("Unknown relationship type `BAR`.");
     }
 }
