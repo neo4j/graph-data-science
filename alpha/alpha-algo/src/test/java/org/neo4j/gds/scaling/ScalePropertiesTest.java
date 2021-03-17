@@ -33,15 +33,18 @@ import org.neo4j.graphalgo.extension.TestGraph;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @GdlExtension
 class ScalePropertiesTest {
 
     @GdlGraph
     static String GDL =
-        "(a:A {a: 1.1D, b: 20, c: 50}), " +
+        "(a:A {a: 1.1D, b: 20, c: 50, array:[1.0,2.0]}), " +
         "(b:A {a: 2.8D, b: 21, c: 51}), " +
         "(c:A {a: 3, b: 22, c: 52}), " +
         "(d:A {a: -1, b: 23, c: 60}), " +
@@ -137,5 +140,31 @@ class ScalePropertiesTest {
         ).compute().scaledProperties();
 
         IntStream.range(0, nodeCount).forEach(id -> assertEquals(expected.get(id)[0], parallelResult.get(id)[0]));
+    }
+
+    @Test
+    void failOnArrayProperty() {
+        var config = ImmutableScalePropertiesBaseConfig.builder()
+            .nodeProperties(List.of("array"))
+            .scalers(List.of(Scaler.Variant.MINMAX))
+            .build();
+
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
+        var error = assertThrows(UnsupportedOperationException.class, algo::compute);
+
+        assertThat(error.getMessage(), containsString("Scaling node property `array` of type `List of Float` is currently not supported"));
+    }
+
+    @Test
+    void failOnNonExistentProperty() {
+        var config = ImmutableScalePropertiesBaseConfig.builder()
+            .nodeProperties(List.of("IMAGINARY_PROP"))
+            .scalers(List.of(Scaler.Variant.MINMAX))
+            .build();
+
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
+        var error = assertThrows(IllegalArgumentException.class, algo::compute);
+
+        assertThat(error.getMessage(), containsString("Node property `IMAGINARY_PROP` not found in graph"));
     }
 }

@@ -22,6 +22,8 @@ package org.neo4j.gds.scaling;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -29,7 +31,10 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * This algorithm takes as input a list of node property names and a same-sized list of scalers.
@@ -121,10 +126,32 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         for (int i = 0; i < config.scalers().size(); i++) {
             var scaler = config.scalers().get(i);
             String property = config.nodeProperties().get(i);
-            var nodeProperties = graph.nodeProperties(property);
+            var nodeProperties = resolveNodeProperty(property);
             scalers.add(scaler.create(nodeProperties, graph.nodeCount(), config.concurrency(), executor));
         }
         return scalers;
+    }
+
+    // TODO move nodeProperty check to org.neo4j.graphalgo.api.GraphStoreValidation when moving to beta
+    private NodeProperties resolveNodeProperty(String property) {
+        NodeProperties result = graph.nodeProperties(property);
+        var supportedTypes = Set.of(ValueType.DOUBLE, ValueType.LONG);
+
+        if (result == null) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Node property `%s` not found in graph with node properties: %s",
+                property,
+                graph.availableNodeProperties()
+            ));
+        } else if (!supportedTypes.contains(result.valueType())) {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Scaling node property `%s` of type `%s` is currently not supported",
+                property,
+                result.valueType().cypherName()
+            ));
+        }
+
+        return result;
     }
 
 }
