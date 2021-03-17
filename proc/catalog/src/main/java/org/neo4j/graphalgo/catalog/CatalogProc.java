@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.catalog;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-abstract class CatalogProc extends BaseProc {
+public abstract class CatalogProc extends BaseProc {
 
     void validateGraphName(String graphName) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
