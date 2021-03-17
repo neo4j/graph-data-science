@@ -43,8 +43,10 @@ public interface CompositeRelationshipIterator {
 
         /**
          * This method is called for every relationship of the specified iterator.
-         * The order of the `properties` is equivalent to the order of the property
+         * The order of the {@code properties} is equivalent to the order of the property
          * key array returned by {@link CompositeRelationshipIterator#propertyKeys()}.
+         * The provided array for {@code properties} might be reused across different invocations
+         * and should not be stored without making a copy.
          */
         boolean consume(long source, long target, double[] properties);
     }

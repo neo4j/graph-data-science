@@ -51,7 +51,13 @@ class CSRCompositeRelationshipIteratorTest {
         ", (a)-[:T1 {prop1: 42.0D, prop2: 84.0D, prop3: 1337.0D}]->(b)" +
         ", (b)-[:T1 {prop1: 1.0D, prop2: 2.0D, prop3: 3.0D}]->(a)" +
         ", (b)-[:T1 {prop1: 4.0D, prop2: 5.0D, prop3: 6.0D}]->(c)" +
-        ", (a)-[:T2 {prop4: 0.0D}]->(b)";
+
+        ", (a)-[:T2 {prop4: 0.0D}]->(b)" +
+
+        ", (b)-[:T3 {             prop2: 5.0D, prop3: 6.0D}]->(a)" +
+        ", (b)-[:T3 {prop1: 4.0D,              prop3: 6.0D}]->(b)" +
+        ", (b)-[:T3 {prop1: 4.0D, prop2: 5.0D             }]->(c)";
+
 
     @Inject
     GraphStore graphStore;
@@ -247,7 +253,25 @@ class CSRCompositeRelationshipIteratorTest {
             return true;
         });
 
-        assertThat(seenTargets).containsExactlyInAnyOrder(expected.keySet().toArray(new Long[0]));
+        assertThat(seenTargets).containsExactlyInAnyOrderElementsOf(expected.keySet());
+    }
+
+    @Test
+    void canIterateMultiplePropertiesWithSomeMissing() {
+        var iterator = graphStore.getCompositeRelationshipIterator(
+            RelationshipType.of("T3"),
+            List.of("prop1", "prop2", "prop3")
+        );
+
+        assertIteration(
+            iterator,
+            idFunction.of("b"),
+            Map.of(
+                idFunction.of("a"), List.of(Double.NaN, 5.0D, 6.0D),
+                idFunction.of("b"), List.of(4.0D, Double.NaN, 6.0D),
+                idFunction.of("c"), List.of(4.0D, 5.0D, Double.NaN)
+            )
+        );
     }
 
     private static class IterationTask implements Runnable {

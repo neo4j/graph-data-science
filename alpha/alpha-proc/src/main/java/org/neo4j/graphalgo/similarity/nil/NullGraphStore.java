@@ -206,7 +206,7 @@ public class NullGraphStore implements GraphStore {
     public CompositeRelationshipIterator getCompositeRelationshipIterator(
         RelationshipType relationshipType, List<String> propertyKeys
     ) {
-        throw new UnsupportedOperationException();
+        throw new NullGraphException();
     }
 
     @Override
