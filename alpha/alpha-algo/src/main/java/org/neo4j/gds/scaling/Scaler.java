@@ -61,6 +61,14 @@ public interface Scaler {
             ) {
                 return LogTransformer.create(properties);
             }
+        },
+        STDSCORE {
+            @Override
+            public Scaler create(
+                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return StdScore.create(properties, nodeCount, concurrency, executor);
+            }
         };
 
         public static Variant lookup(String name) {
