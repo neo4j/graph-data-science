@@ -50,7 +50,6 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.test.TestProc;
-import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -71,13 +70,13 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.AbstractNodeProjection.LABEL_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
@@ -688,7 +687,7 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnTooBigGraphNative() {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+        assertThatThrownBy(() -> {
             applyOnProcedure(proc -> {
                 GraphCreateConfig config = GraphCreateFromStoreConfig.fromProcedureConfig(
                     "",
@@ -698,11 +697,9 @@ class GraphCreateProcTest extends BaseProcTest {
                 );
                 proc.tryValidateMemoryUsage(config, proc::memoryTreeWithDimensions, () -> 42);
             });
-        });
-
-        String message = ExceptionUtil.rootCause(exception).getMessage();
-        assertTrue(message.matches(
-            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)."));
+        }).isInstanceOf(IllegalStateException.class)
+            .hasMessageMatching(
+                "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)\\.");
     }
 
     @Test
@@ -737,22 +734,21 @@ class GraphCreateProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnTooBigGraphCypher() {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+        assertThatThrownBy(() -> {
             applyOnProcedure(proc -> {
                 GraphCreateConfig config = GraphCreateFromCypherConfig.fromProcedureConfig(
                     "",
                     CypherMapWrapper.create(MapUtil.map(
                         NODE_QUERY_KEY, "MATCH (n) RETURN n",
                         RELATIONSHIP_QUERY_KEY, "MATCH ()-[r]->() RETURN r",
-                        "sudo", false))
+                        "sudo", false
+                    ))
                 );
                 proc.tryValidateMemoryUsage(config, c -> proc.memoryTreeWithDimensions(c), () -> 42);
             });
-        });
-
-        String message = ExceptionUtil.rootCause(exception).getMessage();
-        assertTrue(message.matches(
-            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)."));
+        }).isInstanceOf(IllegalStateException.class)
+            .hasMessageMatching(
+                "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(42 Bytes\\)\\.");
     }
 
     void applyOnProcedure(Consumer<GraphCreateProc> func) {

@@ -24,12 +24,10 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.utils.ExceptionUtil;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
@@ -47,22 +45,21 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
 
     @Test
     default void shouldFailOnInsufficientMemory() {
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> applyOnProcedure(proc -> {
-            loadGraph(heapGraphName());
-            CONFIG config = proc.newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
-            proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 21);
-        }));
-
-        String message = ExceptionUtil.rootCause(exception).getMessage();
         String messageTemplate =
-            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(21 Bytes\\).";
-        if (GraphStoreCatalog.isEmpty()) {
+            "Procedure was blocked since minimum estimated memory \\(.+\\) exceeds current free memory \\(21 Bytes\\)\\.";
+        if (!GraphStoreCatalog.isEmpty()) {
             messageTemplate += formatWithLocale(
-                " Note: there are %s graphs currently loaded into memory.",
+                " Note: there are %s graphs currently loaded into memory\\.",
                 GraphStoreCatalog.graphStoresCount()
             );
         }
-        assertTrue(message.matches(messageTemplate));
+
+        assertThatThrownBy(() -> applyOnProcedure(proc -> {
+            loadGraph(heapGraphName());
+            CONFIG config = proc.newConfig(Optional.of(heapGraphName()), createMinimalConfig(CypherMapWrapper.empty()));
+            proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 21);
+        })).isInstanceOf(IllegalStateException.class)
+            .hasMessageMatching(messageTemplate);
     }
 
     @Test
