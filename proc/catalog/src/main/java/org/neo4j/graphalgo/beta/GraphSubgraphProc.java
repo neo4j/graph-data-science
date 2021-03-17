@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.opencypher.v9_0.parser.javacc.ParseException;
@@ -40,7 +41,10 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphSubgraphProc extends CatalogProc {
 
+    private static final String DESCRIPTION = "Creates a subgraph of an existing graph and stores it in the catalog.";
+
     @Procedure(name = "gds.beta.graph.subgraph", mode = READ)
+    @Description(DESCRIPTION)
     public Stream<GraphSubgraphResult> generate(
         @Name(value = "graphName") String graphName,
         @Name(value = "subgraphName") String subgraphName,
@@ -48,20 +52,18 @@ public class GraphSubgraphProc extends CatalogProc {
     ) {
         validateGraphName(username(), subgraphName);
 
-        // input
-        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphStoreFilterConfig config = GraphStoreFilterConfig.of(
+        var cypherConfig = CypherMapWrapper.create(configuration);
+        var filterConfig = GraphStoreFilterConfig.of(
             username(),
             graphName,
             subgraphName,
             cypherConfig
         );
-        validateConfig(cypherConfig, config);
+        validateConfig(cypherConfig, filterConfig);
 
         GraphSubgraphResult result = runWithExceptionLogging(
             "Subgraph creation failed",
-            ExceptionUtil.supplier(() -> compute(config)
-            )
+            ExceptionUtil.supplier(() -> compute(filterConfig))
         );
 
         return Stream.of(result);
