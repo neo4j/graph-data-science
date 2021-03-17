@@ -24,6 +24,8 @@ import org.opencypher.v9_0.parser.javacc.Cypher;
 import org.opencypher.v9_0.parser.javacc.CypherCharStream;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public final class ExpressionParser {
 
     public static Expression parse(String cypher) throws ParseException {
@@ -31,7 +33,20 @@ public final class ExpressionParser {
         var exceptionFactory = new ExceptionFactory();
         var charstream = new CypherCharStream(cypher);
 
-        return new Cypher<>(astFactory, exceptionFactory, charstream).Expression();
+        var parser = new Cypher<>(
+            astFactory,
+            exceptionFactory,
+            charstream
+        );
+
+        var expression = parser.Expression();
+
+        // We need to make sure that the parser consumed the whole input.
+        if (!parser.getNextToken().toString().isEmpty()) {
+            throw new ParseException(formatWithLocale("Expected a single filter expression, got '%s'", cypher));
+        }
+
+        return expression;
     }
 
     private ExpressionParser() {}

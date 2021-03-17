@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.beta.filter.expression.Expression;
 import org.neo4j.graphalgo.beta.filter.expression.ExpressionParser;
 import org.opencypher.v9_0.parser.javacc.ParseException;
@@ -30,6 +31,8 @@ import org.opencypher.v9_0.parser.javacc.ParseException;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ExpressionParserTest {
 
@@ -281,6 +284,18 @@ class ExpressionParserTest {
             ImmutableLongLiteral.of(1337),
             ImmutableLongLiteral.of(42)
         ));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "foo AND TRUE bar",
+        "TRUE FALSE",
+        "TRUE, FALSE",
+    })
+    void shouldThrowOnMultipleExpressions(String input) {
+        assertThatThrownBy(() -> ExpressionParser.parse(input))
+            .isInstanceOf(ParseException.class)
+            .hasMessageContaining(formatWithLocale("Expected a single filter expression, got '%s'", input));
     }
 
 }
