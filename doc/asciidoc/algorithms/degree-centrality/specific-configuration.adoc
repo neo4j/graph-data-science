@@ -2,7 +2,6 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                                                                             | Type          | Default         | Optional  | Description
-| cacheDegrees                                                                     | Boolean       | false           | yes       | Flag that determines whether the degrees should be cached in a separate array rather than computing them from the graph
 | <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String        | null            | yes       | The name of the relationship property used for weighted random projection
 |===
 
