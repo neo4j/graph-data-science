@@ -51,6 +51,10 @@ import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.internal.kernel.api.procs.FieldSignature;
+import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
+import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.schema.IndexOrder;
@@ -429,6 +433,28 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     @Override
     public ExecutionMonitor invisibleExecutionMonitor() {
         return ExecutionMonitors.invisible();
+    }
+
+    @Override
+    public UserFunctionSignature userFunctionSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        Neo4jTypes.AnyType type,
+        String deprecated,
+        String[] allowed,
+        String description,
+        String category,
+        boolean caseInsensitive
+    ) {
+        return new UserFunctionSignature(
+            name,
+            inputSignature,
+            type,
+            deprecated,
+            allowed,
+            description,
+            caseInsensitive
+        );
     }
 
     private static final class InputFromCompatInput implements Input {

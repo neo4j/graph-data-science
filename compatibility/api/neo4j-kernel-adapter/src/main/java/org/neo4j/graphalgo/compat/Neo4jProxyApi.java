@@ -42,6 +42,10 @@ import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.internal.kernel.api.procs.FieldSignature;
+import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
+import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.schema.IndexOrder;
@@ -246,4 +250,15 @@ public interface Neo4jProxyApi {
     JobRunner runnerFromScheduler(JobScheduler scheduler, Group group);
 
     ExecutionMonitor invisibleExecutionMonitor();
+
+    UserFunctionSignature userFunctionSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        Neo4jTypes.AnyType type,
+        String deprecated,
+        String[] allowed,
+        String description,
+        String category,
+        boolean caseInsensitive
+    );
 }

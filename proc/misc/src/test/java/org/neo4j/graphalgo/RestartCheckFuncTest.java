@@ -32,13 +32,13 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-class RestartCheckProcTest extends BaseTest {
+class RestartCheckFuncTest extends BaseTest {
 
     @BeforeEach
     void setUp() throws Exception {
         GraphDatabaseApiProxy.registerProcedures(
             db,
-            RestartCheckProc.class
+            RestartCheckFunc.class
         );
     }
 
@@ -49,8 +49,8 @@ class RestartCheckProcTest extends BaseTest {
 
     @Test
     void enableProcToRegisterTheSafeToRestartProc() {
-        assertThatCode(() -> runQuery("CALL gds.internal.safeToRestart()"))
-            .hasMessageStartingWith("There is no procedure with the name `gds.internal.safeToRestart` registered for this database instance.");
+        assertThatCode(() -> runQuery("RETURN gds.internal.safeToRestart()"))
+            .hasMessageStartingWith("Unknown function 'gds.internal.safeToRestart'");
 
         // This is gonna be replaced with some code that runs on DB startup and
         // checks the version to see if we're in the correct environment
@@ -67,7 +67,7 @@ class RestartCheckProcTest extends BaseTest {
     }
 
     void assertReturnTrueWhenCatalogIsEmpty() {
-        assertCypherResult("CALL gds.internal.safeToRestart()", List.of(
+        assertCypherResult("RETURN gds.internal.safeToRestart() AS safeToRestart", List.of(
             Map.of("safeToRestart", Boolean.TRUE)
         ));
     }
@@ -86,7 +86,7 @@ class RestartCheckProcTest extends BaseTest {
         GraphStoreCatalog.set(config, graphStore);
 
         runQuery("CALL gds.internal.enableProc()");
-        assertCypherResult("CALL gds.internal.safeToRestart()", List.of(
+        assertCypherResult("RETURN gds.internal.safeToRestart() AS safeToRestart", List.of(
             Map.of("safeToRestart", Boolean.FALSE)
         ));
     }
