@@ -28,7 +28,7 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.procedure.CallableUserFunction;
-import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.procedure.impl.GlobalProceduresRegistry;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.Values;
 
@@ -72,7 +72,7 @@ public class AuraMaintenanceFunction implements CallableUserFunction {
     public AnyValue apply(org.neo4j.kernel.api.procedure.Context ctx, AnyValue[] input) throws ProcedureException {
         var globalProcedures = ctx
             .dependencyResolver()
-            .resolveDependency(GlobalProcedures.class, DependencyResolver.SelectionStrategy.SINGLE);
+            .resolveDependency(GlobalProceduresRegistry.class, DependencyResolver.SelectionStrategy.SINGLE);
         var lookupProgressStore = globalProcedures.lookupComponentProvider(
             ProgressEventStore.class,
             true
