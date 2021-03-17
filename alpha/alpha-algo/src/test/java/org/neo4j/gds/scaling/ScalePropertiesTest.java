@@ -21,6 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -53,7 +54,7 @@ class ScalePropertiesTest {
             .scalers(List.of("MinMax"))
             .concurrency(concurrency)
             .build();
-        var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
@@ -73,7 +74,7 @@ class ScalePropertiesTest {
             .scalers(List.of("MinMax", "MinMax", "MinMax"))
             .concurrency(concurrency)
             .build();
-        var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
@@ -93,7 +94,7 @@ class ScalePropertiesTest {
             .scalers(List.of("MinMax", "Mean"))
             .concurrency(concurrency)
             .build();
-        var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
 

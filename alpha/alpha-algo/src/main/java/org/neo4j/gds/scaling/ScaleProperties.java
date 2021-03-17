@@ -44,11 +44,16 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     private final AllocationTracker tracker;
     private final ExecutorService executor;
 
-    public ScaleProperties(Graph graph, ScalePropertiesBaseConfig config, AllocationTracker tracker) {
+    public ScaleProperties(
+        Graph graph,
+        ScalePropertiesBaseConfig config,
+        AllocationTracker tracker,
+        ExecutorService executor
+    ) {
         this.graph = graph;
         this.config = config;
         this.tracker = tracker;
-        this.executor = Pools.DEFAULT;
+        this.executor = executor;
     }
 
     @Override
@@ -118,7 +123,13 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
             String property = config.featureProperties().get(i);
 
             var nodeProperties = graph.nodeProperties(property);
-            scalers.add(Scaler.Factory.create(scalerName, nodeProperties, graph.nodeCount(), config.concurrency(), executor));
+            scalers.add(Scaler.Factory.create(
+                scalerName,
+                nodeProperties,
+                graph.nodeCount(),
+                config.concurrency(),
+                executor
+            ));
         }
         return scalers;
     }
