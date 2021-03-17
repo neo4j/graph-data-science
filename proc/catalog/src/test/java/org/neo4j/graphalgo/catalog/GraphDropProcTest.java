@@ -95,6 +95,8 @@ class GraphDropProcTest extends BaseProcTest {
                     ),
                     "nodeQuery", null,
                     "relationshipQuery", null,
+                    "nodeFilter", null,
+                    "relationshipFilter", null,
                     "nodeCount", 2L,
                     "relationshipCount", 1L,
                     "creationTime", isA(ZonedDateTime.class),
