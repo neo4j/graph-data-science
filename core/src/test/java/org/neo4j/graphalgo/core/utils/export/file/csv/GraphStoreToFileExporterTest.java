@@ -105,7 +105,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(1)
-            .exportNeoNodeIds(true)
+            .includeMetaData(true)
             .build();
 
         // export db
@@ -118,7 +118,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         var rel1Type = RelationshipType.of("REL1");
         var rel2Type = RelationshipType.of("REL2");
 
-        NodeSchema nodeSchema = computeNodeSchema(graphStore.schema().nodeSchema(), config.exportNeoNodeIds());
+        NodeSchema nodeSchema = computeNodeSchema(graphStore.schema().nodeSchema(), config.includeMetaData());
         var abSchema = nodeSchema.filter(Set.of(aLabel, bLabel)).unionProperties();
         var acSchema = nodeSchema.filter(Set.of(aLabel, cLabel)).unionProperties();
         var bSchema = nodeSchema.filter(Set.of(bLabel)).unionProperties();
@@ -190,7 +190,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(2)
-            .exportNeoNodeIds(true)
+            .includeMetaData(true)
             .build();
 
         // export db
@@ -198,7 +198,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         exporter.run(AllocationTracker.empty());
 
         // Assert headers
-        NodeSchema nodeSchema = computeNodeSchema(concurrentGraphStore.schema().nodeSchema(), config.exportNeoNodeIds());
+        NodeSchema nodeSchema = computeNodeSchema(concurrentGraphStore.schema().nodeSchema(), config.includeMetaData());
         assertHeaderFile("nodes_header.csv", NODE_COLUMNS, nodeSchema.unionProperties());
         assertHeaderFile("relationships_REL1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
 
@@ -248,7 +248,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
             .builder()
             .exportName(tempDir.toString())
             .writeConcurrency(1)
-            .mode(GraphStoreToFileExporter.Mode.FULL)
+            .includeMetaData(true)
             .build();
 
         var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);

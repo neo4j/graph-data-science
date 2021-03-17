@@ -36,23 +36,15 @@ import org.neo4j.internal.batchimport.input.Collector;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-
 public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFileExporterConfig> {
 
     protected final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
     protected final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
-
-    public enum Mode {
-        FULL,
-        PARTIAL
-    }
 
     public static GraphStoreToFileExporter csv(
         GraphStore graphStore,
@@ -67,7 +59,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
             () -> new CsvRelationshipSchemaVisitor(exportPath),
-            (index) -> new CsvNodeVisitor(exportPath, graphStore.schema().nodeSchema(), headerFiles, index, config.exportNeoNodeIds()),
+            (index) -> new CsvNodeVisitor(exportPath, graphStore.schema().nodeSchema(), headerFiles, index, config.includeMetaData()),
             (index) -> new CsvRelationshipVisitor(exportPath, graphStore.schema().relationshipSchema(), headerFiles, index)
         );
     }
@@ -81,8 +73,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
     ) {
-        Mode mode = config.mode();
-        if (mode == Mode.FULL) {
+        if (config.includeMetaData()) {
             return new FullGraphStoreToFileExporter(
                 graphStore,
                 config,
@@ -92,16 +83,9 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                 nodeVisitorSupplier,
                 relationshipVisitorSupplier
             );
-        }
-        if (mode == Mode.PARTIAL) {
+        } else {
             return new GraphStoreToFileExporter(graphStore, config, nodeVisitorSupplier, relationshipVisitorSupplier);
         }
-
-        throw new IllegalArgumentException(formatWithLocale(
-            "Expected config parameter `mode` to be one of %s, but was %s",
-            Arrays.toString(Mode.values()),
-            mode
-        ));
     }
 
     protected GraphStoreToFileExporter(

@@ -30,7 +30,7 @@ public interface GraphStoreExporterBaseConfig extends BaseConfig {
 
     @Configuration.Ignore
     @Value.Default
-    default boolean exportNeoNodeIds() {
+    default boolean includeMetaData() {
         return false;
     }
 
