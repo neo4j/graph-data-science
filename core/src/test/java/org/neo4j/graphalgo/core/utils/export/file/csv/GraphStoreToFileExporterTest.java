@@ -276,7 +276,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
             RELATIONSHIP_SCHEMA_FILE_NAME,
             List.of(
                 CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
+                List.of("REL1", "prop1", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), GraphStore.PropertyState.PERSISTENT.name()),
                 List.of("REL1", "prop2", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), GraphStore.PropertyState.PERSISTENT.name()),
+                List.of("REL2", "prop3", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), GraphStore.PropertyState.PERSISTENT.name()),
                 List.of("REL2", "prop4", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), GraphStore.PropertyState.PERSISTENT.name())
             )
         );
