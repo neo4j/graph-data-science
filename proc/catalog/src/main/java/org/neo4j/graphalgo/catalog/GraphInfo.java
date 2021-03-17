@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.catalog;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
@@ -46,6 +47,8 @@ public class GraphInfo {
     public final String relationshipQuery;
     public final long nodeCount;
     public final long relationshipCount;
+    public final String nodeFilter;
+    public final String relationshipFilter;
     public final double density;
     public final ZonedDateTime creationTime;
     public final ZonedDateTime modificationTime;
@@ -61,6 +64,8 @@ public class GraphInfo {
         Map<String, Object> relationshipProjection,
         String nodeQuery,
         String relationshipQuery,
+        String nodeFilter,
+        String relationshipFilter,
         long nodeCount,
         long relationshipCount,
         ZonedDateTime creationTime,
@@ -76,6 +81,8 @@ public class GraphInfo {
         this.relationshipProjection = relationshipProjection;
         this.nodeQuery = nodeQuery;
         this.relationshipQuery = relationshipQuery;
+        this.nodeFilter = nodeFilter;
+        this.relationshipFilter = relationshipFilter;
         this.nodeCount = nodeCount;
         this.relationshipCount = relationshipCount;
         this.density = density(nodeCount, relationshipCount);
@@ -121,6 +128,8 @@ public class GraphInfo {
             configVisitor.relationshipProjection,
             configVisitor.nodeQuery,
             configVisitor.relationshipQuery,
+            configVisitor.nodeFilter,
+            configVisitor.relationshipFilter,
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             creationTime,
@@ -133,6 +142,7 @@ public class GraphInfo {
 
         String nodeQuery, relationshipQuery = null;
         Map<String, Object> nodeProjection, relationshipProjection = null;
+        String nodeFilter, relationshipFilter = null;
 
         @Override
         public void visit(GraphCreateFromStoreConfig storeConfig) {
@@ -144,6 +154,13 @@ public class GraphInfo {
         public void visit(GraphCreateFromCypherConfig cypherConfig) {
             nodeQuery = cypherConfig.nodeQuery();
             relationshipQuery = cypherConfig.relationshipQuery();
+        }
+
+        @Override
+        public void visit(GraphCreateFromGraphConfig graphConfig) {
+            graphConfig.originalConfig().accept(this);
+            nodeFilter = graphConfig.nodeFilter();
+            relationshipFilter = graphConfig.relationshipFilter();
         }
 
         @Override

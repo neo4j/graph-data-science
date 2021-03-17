@@ -46,6 +46,8 @@ public class GraphInfoWithHistogram extends GraphInfo {
             graphInfo.relationshipProjection,
             graphInfo.nodeQuery,
             graphInfo.relationshipQuery,
+            graphInfo.nodeFilter,
+            graphInfo.relationshipFilter,
             graphInfo.nodeCount,
             graphInfo.relationshipCount,
             graphInfo.creationTime,

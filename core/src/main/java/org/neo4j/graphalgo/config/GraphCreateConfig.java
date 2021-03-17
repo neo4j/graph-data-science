@@ -112,6 +112,8 @@ public interface GraphCreateConfig extends BaseConfig {
 
         R cypher(GraphCreateFromCypherConfig cypherConfig);
 
+        R graph(GraphCreateFromGraphConfig graphConfig);
+
         R random(RandomGraphGeneratorConfig randomGraphConfig);
     }
 
@@ -130,6 +132,12 @@ public interface GraphCreateConfig extends BaseConfig {
         }
 
         @Override
+        default Void graph(GraphCreateFromGraphConfig graphConfig) {
+            visit(graphConfig);
+            return null;
+        }
+
+        @Override
         default Void random(RandomGraphGeneratorConfig randomGraphConfig) {
             visit(randomGraphConfig);
             return null;
@@ -138,6 +146,8 @@ public interface GraphCreateConfig extends BaseConfig {
         default void visit(GraphCreateFromStoreConfig storeConfig) {}
 
         default void visit(GraphCreateFromCypherConfig cypherConfig) {}
+
+        default void visit(GraphCreateFromGraphConfig graphConfig) {}
 
         default void visit(RandomGraphGeneratorConfig randomGraphConfig) {}
     }
@@ -152,6 +162,11 @@ public interface GraphCreateConfig extends BaseConfig {
         @Override
         default GraphCreateConfig cypher(GraphCreateFromCypherConfig cypherConfig) {
             return cypherConfig;
+        }
+
+        @Override
+        default GraphCreateConfig graph(GraphCreateFromGraphConfig graphConfig) {
+            return graphConfig;
         }
 
         @Override

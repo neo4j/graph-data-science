@@ -109,6 +109,8 @@ class GraphListProcTest extends BaseProcTest {
                 ),
                 "nodeQuery", null,
                 "relationshipQuery", null,
+                "nodeFilter", null,
+                "relationshipFilter", null,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "density", 0.5D,
@@ -191,6 +193,8 @@ class GraphListProcTest extends BaseProcTest {
                 ),
                 "nodeQuery", null,
                 "relationshipQuery", null,
+                "nodeFilter", null,
+                "relationshipFilter", null,
                 "nodeCount", 10L,
                 "relationshipCount", 50L,
                 "degreeDistribution", map(
@@ -252,6 +256,8 @@ class GraphListProcTest extends BaseProcTest {
                 ),
                 "nodeQuery", ALL_NODES_QUERY,
                 "relationshipQuery", ALL_RELATIONSHIPS_QUERY,
+                "nodeFilter", null,
+                "relationshipFilter", null,
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "degreeDistribution", map(
