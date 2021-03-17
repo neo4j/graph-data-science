@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.filter.expr;
+package org.neo4j.graphalgo.beta.filter.expression;
 
 import org.immutables.value.Value;
 import org.junit.jupiter.api.Test;
@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.neo4j.graphalgo.beta.filter.expr.ValidationContext.Context.NODE;
-import static org.neo4j.graphalgo.beta.filter.expr.ValidationContext.Context.RELATIONSHIP;
+import static org.neo4j.graphalgo.beta.filter.expression.ValidationContext.Context.NODE;
+import static org.neo4j.graphalgo.beta.filter.expression.ValidationContext.Context.RELATIONSHIP;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ExpressionValidationTest {

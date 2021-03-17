@@ -17,12 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.filter.expr;
+package org.neo4j.graphalgo.beta.filter.expression;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.beta.filter.expression.Expression;
+import org.neo4j.graphalgo.beta.filter.expression.ExpressionParser;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.stream.Stream;

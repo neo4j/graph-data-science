@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.filter.expr;
+package org.neo4j.graphalgo.beta.filter.expression;
 
 
 import org.opencypher.v9_0.ast.factory.ASTFactory;

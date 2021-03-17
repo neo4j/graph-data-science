@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.filter.expr;
+package org.neo4j.graphalgo.beta.filter.expression;
 
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
@@ -38,8 +38,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.beta.filter.expr.Expression.FALSE;
-import static org.neo4j.graphalgo.beta.filter.expr.Expression.TRUE;
+import static org.neo4j.graphalgo.beta.filter.expression.Expression.FALSE;
+import static org.neo4j.graphalgo.beta.filter.expression.Expression.TRUE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ExpressionEvaluatorTest {
@@ -206,7 +206,7 @@ class ExpressionEvaluatorTest {
     }
 
     @ParameterizedTest()
-    @MethodSource("org.neo4j.graphalgo.beta.filter.expr.ExpressionEvaluatorTest#hasLabelInput")
+    @MethodSource("org.neo4j.graphalgo.beta.filter.expression.ExpressionEvaluatorTest#hasLabelInput")
     void hasLabelsOrTypes(Iterable<String> actual, Collection<String> requested, boolean expected) throws ParseException {
         var labelExpression = requested.stream().map(label -> ":" + label).collect(Collectors.joining());
         var expr = ExpressionParser.parse("n" + labelExpression);
