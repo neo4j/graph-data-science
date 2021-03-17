@@ -50,8 +50,8 @@ class NodeSchemaLoaderTest {
         );
         FileUtils.writeLines(nodeSchemaFile, lines);
 
-        var exporter = new NodeSchemaLoader(exportDir);
-        var nodeSchema = exporter.load();
+        var schemaLoader = new NodeSchemaLoader(exportDir);
+        var nodeSchema = schemaLoader.load();
 
         assertThat(nodeSchema).isNotNull();
 
