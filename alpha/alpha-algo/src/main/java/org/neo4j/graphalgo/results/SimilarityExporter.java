@@ -77,7 +77,7 @@ public class SimilarityExporter extends StatementApi {
                 try {
                     createRelationship(similarityResult, statement);
                     ++progress;
-                    if (progress % Math.min(TerminationFlag.RUN_CHECK_NODE_COUNT, similarityResults.size() / 2) == 0) {
+                    if (progress % Math.min(TerminationFlag.RUN_CHECK_NODE_COUNT, Math.max(similarityResults.size() / 2, 1)) == 0) {
                         terminationFlag.assertRunning();
                     }
                 } catch (Exception e) {
