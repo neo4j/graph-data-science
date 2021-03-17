@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperty;
 import org.neo4j.graphalgo.api.NodePropertyStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.filter.expression.EvaluationContext;
 import org.neo4j.graphalgo.beta.filter.expression.Expression;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
@@ -52,7 +53,8 @@ final class NodesFilter {
     static FilteredNodes filterNodes(
         GraphStore graphStore,
         Expression expression,
-        NodeMapping nodeMapping
+        NodeMapping nodeMapping,
+        AllocationTracker allocationTracker
     ) {
         var nodeContext = new EvaluationContext.NodeEvaluationContext(graphStore);
 
@@ -60,7 +62,7 @@ final class NodesFilter {
             .concurrency(1)
             .maxOriginalId(graphStore.nodeCount())
             .hasLabelInformation(true)
-            .tracker(AllocationTracker.empty())
+            .tracker(allocationTracker)
             .build();
 
         nodeMapping.forEachNode(node -> {
@@ -142,7 +144,7 @@ final class NodesFilter {
     private static InnerNodePropertiesBuilder getPropertiesBuilder(
         long filteredNodeCount,
         AllocationTracker allocationTracker,
-        org.neo4j.graphalgo.api.nodeproperties.ValueType propertyType
+        ValueType propertyType
     ) {
         InnerNodePropertiesBuilder propertiesBuilder = null;
         switch (propertyType) {

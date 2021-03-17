@@ -40,18 +40,18 @@ public final class GraphStoreFilter {
         GraphStoreFilterConfig config,
         ExecutorService executorService,
         AllocationTracker tracker
-    )
-    throws ParseException, SemanticErrors {
+    ) throws ParseException, SemanticErrors {
         var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
 
         var inputNodes = graphStore.nodes();
 
-        var filteredNodes = NodesFilter.filterNodes(graphStore, expressions.nodeExpression(), inputNodes);
+        var filteredNodes = NodesFilter.filterNodes(graphStore, expressions.nodeExpression(), inputNodes, tracker);
         var filteredRelationships = RelationshipsFilter.filterRelationships(
             graphStore,
             expressions.relationshipExpression(),
             inputNodes,
-            filteredNodes.nodeMapping()
+            filteredNodes.nodeMapping(),
+            tracker
         );
 
         return CSRGraphStore.of(

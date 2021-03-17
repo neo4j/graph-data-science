@@ -56,7 +56,8 @@ final class RelationshipsFilter {
         GraphStore graphStore,
         Expression expression,
         NodeMapping inputNodes,
-        NodeMapping outputNodes
+        NodeMapping outputNodes,
+        AllocationTracker allocationTracker
     ) {
         Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>();
         Map<RelationshipType, RelationshipPropertyStore> relPropertyStores = new HashMap<>();
@@ -102,7 +103,7 @@ final class RelationshipsFilter {
             var emptyTopology = GraphFactory.initRelationshipsBuilder()
                 .nodes(outputNodes)
                 .concurrency(1)
-                .tracker(AllocationTracker.empty())
+                .tracker(allocationTracker)
                 .build()
                 .build()
                 .topology();
