@@ -75,9 +75,9 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private static GraphStoreToFileExporter of(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
-        Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitor,
-        Supplier<NodeSchemaVisitor> nodeSchemaVisitor,
-        Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitor,
+        Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
+        Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
+        Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
     ) {
@@ -86,9 +86,9 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             return new FullGraphStoreToFileExporter(
                 graphStore,
                 config,
-                graphInfoVisitor,
-                nodeSchemaVisitor,
-                relationshipSchemaVisitor,
+                graphInfoVisitorSupplier,
+                nodeSchemaVisitorSupplier,
+                relationshipSchemaVisitorSupplier,
                 nodeVisitorSupplier,
                 relationshipVisitorSupplier
             );
