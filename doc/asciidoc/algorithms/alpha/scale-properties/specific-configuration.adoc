@@ -3,5 +3,5 @@
 |===
 | Name                          | Type               | Default         | Optional | Description
 | nodeProperties                | List<String>       | n/a             | no       | The names of the node properties that are to be scaled. All property names must exist in the in-memory graph and be of type Float or Integer.
-| scalers                       | String[] or String | n/a             | no       | The names of the scalers applied for the properties. Supported values are `MinMax` and `Mean`. If only one scaler is specified, it will be used for all node properties.
+| scalers                       | String[] or String | n/a             | no       | The names of the scalers applied for the properties. Supported values are `MinMax`, `Mean` and `Log. If only one scaler is specified, it will be used for all node properties.
 |===

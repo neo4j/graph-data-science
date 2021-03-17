@@ -53,6 +53,14 @@ public interface Scaler {
             ) {
                 return Mean.create(properties, nodeCount, concurrency, executor);
             }
+        },
+        LOG {
+            @Override
+            public Scaler create(
+                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return LogTransformer.create(properties);
+            }
         };
 
         public static Variant lookup(String name) {

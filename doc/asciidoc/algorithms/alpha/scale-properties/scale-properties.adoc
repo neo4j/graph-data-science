@@ -37,6 +37,9 @@ Scales all property values into the range `[-1, 1]` where the average value(s) g
 
 image::equations/mean.svg[mean of p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
 
+=== Log scaler
+
+Transforms all property values using the natural logrithm.
 
 [[algorithms-scale-properties-syntax]]
 == Syntax
