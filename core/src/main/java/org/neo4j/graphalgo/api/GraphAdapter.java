@@ -148,11 +148,6 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public boolean containsOnlyAllNodesLabel() {
-        return graph.containsOnlyAllNodesLabel();
-    }
-
-    @Override
     public NodeProperties nodeProperties(String propertyKey) {
         return graph.nodeProperties(propertyKey);
     }

@@ -34,10 +34,6 @@ public interface NodeMapping extends IdMapping, NodeIterator, BatchNodeIterable 
 
     boolean hasLabel(long nodeId, NodeLabel label);
 
-    default boolean containsOnlyAllNodesLabel() {
-        return availableNodeLabels().size() == 1 && availableNodeLabels().contains(NodeLabel.ALL_NODES);
-    }
-
     default NodeMapping withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         throw new UnsupportedOperationException("This node mapping does not support label filtering");
     }

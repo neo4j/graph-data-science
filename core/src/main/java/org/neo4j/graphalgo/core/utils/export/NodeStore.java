@@ -53,13 +53,14 @@ public class NodeStore {
         long nodeCount,
         HugeIntArray labelCounts,
         NodeMapping nodeMapping,
+        boolean hasLabels,
         Map<String, Map<String, NodeProperties>> nodeProperties
     ) {
         this.nodeCount = nodeCount;
         this.labelCounts = labelCounts;
         this.nodeMapping = nodeMapping;
         this.nodeProperties = nodeProperties;
-        this.hasLabels = !nodeMapping.containsOnlyAllNodesLabel();
+        this.hasLabels = hasLabels;
         this.availableNodeLabels = nodeMapping.availableNodeLabels();
     }
 
@@ -106,7 +107,8 @@ public class NodeStore {
 
         var nodeLabels = graphStore.nodes();
 
-        if (!nodeLabels.containsOnlyAllNodesLabel()) {
+        boolean hasNodeLabels = !graphStore.schema().nodeSchema().containsOnlyAllNodesLabel();
+        if (hasNodeLabels) {
             labelCounts = HugeIntArray.newArray(graphStore.nodeCount(), tracker);
             labelCounts.setAll(i -> {
                 int labelCount = 0;
@@ -138,6 +140,7 @@ public class NodeStore {
             graphStore.nodeCount(),
             labelCounts,
             nodeLabels,
+            hasNodeLabels,
             nodeProperties
         );
     }

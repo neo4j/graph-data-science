@@ -39,6 +39,10 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
         return properties().keySet();
     }
 
+    default boolean containsOnlyAllNodesLabel() {
+        return availableLabels().size() == 1 && availableLabels().contains(NodeLabel.ALL_NODES);
+    }
+
     default NodeSchema filter(Set<NodeLabel> labelsToKeep) {
         return of(filterProperties(labelsToKeep));
     }

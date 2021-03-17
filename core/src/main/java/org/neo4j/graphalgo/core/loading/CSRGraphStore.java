@@ -574,7 +574,7 @@ public class CSRGraphStore implements GraphStore {
     private Optional<NodeMapping> getFilteredNodeMapping(Collection<NodeLabel> filteredLabels) {
         boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
 
-        return loadAllNodes || nodes.containsOnlyAllNodesLabel()
+        return loadAllNodes || schema().nodeSchema().containsOnlyAllNodesLabel()
             ? Optional.empty()
             : Optional.of(nodes.withFilteredLabels(filteredLabels, concurrency));
     }
@@ -615,7 +615,7 @@ public class CSRGraphStore implements GraphStore {
         if (this.nodeProperties.isEmpty()) {
             return Collections.emptyMap();
         }
-        if (labels.size() == 1 || nodes.containsOnlyAllNodesLabel()) {
+        if (labels.size() == 1 || schema().nodeSchema().containsOnlyAllNodesLabel()) {
             return this.nodeProperties
                 .getOrDefault(labels.iterator().next(), NodePropertyStore.empty())
                 .nodePropertyValues();
