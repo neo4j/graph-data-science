@@ -88,7 +88,7 @@ class NodeClassificationEndToEndTest {
 
     @ParameterizedTest
     @EnumSource(Metric.class)
-    void selectsTheBestModel(Metric metric) throws IOException {
+    void shouldProduceTheSamePredictionsAfterDeserialization(Metric metric) throws IOException {
 
         Map<String, Object> model2 = Map.of("penalty", 1, "maxIterations", 10000, "tolerance", 1e-5);
 
