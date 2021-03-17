@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventStore;
 import org.neo4j.procedure.Admin;
 import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
@@ -34,6 +35,7 @@ public class RestartCheckProc {
     public ProgressEventStore progress;
 
     @Admin
+    @Internal
     @Procedure("gds.internal.safeToRestart")
     public Stream<SafeToRestartResult> safeToRestart() {
         return Stream.of(new SafeToRestartResult(compute()));

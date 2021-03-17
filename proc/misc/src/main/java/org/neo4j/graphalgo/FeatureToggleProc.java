@@ -22,6 +22,7 @@ package org.neo4j.graphalgo;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -36,12 +37,14 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
  */
 public final class FeatureToggleProc {
 
+    @Internal
     @Procedure("gds.features.importer.skipOrphanNodes")
     @Description("Toggle whether orphan nodes should be skipped during import.")
     public void skipOrphanNodes(@Name(value = "skipOrphanNodes") boolean skipOrphanNodes) {
         GdsFeatureToggles.SKIP_ORPHANS.toggle(skipOrphanNodes);
     }
 
+    @Internal
     @Procedure("gds.features.importer.skipOrphanNodes.reset")
     @Description("Set the behavior of whether to skip orphan nodes to the default. That value is returned.")
     public Stream<FeatureState> resetSkipOrphanNodes() {
@@ -49,12 +52,14 @@ public final class FeatureToggleProc {
         return Stream.of(new FeatureState(GdsFeatureToggles.SKIP_ORPHANS.isEnabled()));
     }
 
+    @Internal
     @Procedure("gds.features.importer.usePreAggregation")
     @Description("Toggle whether the importer should pre-aggregate relationships.")
     public void usePreAggregation(@Name(value = "usePreAggregation") boolean usePreAggregation) {
         GdsFeatureToggles.USE_PRE_AGGREGATION.toggle(usePreAggregation);
     }
 
+    @Internal
     @Procedure("gds.features.importer.usePreAggregation.reset")
     @Description("Set the behavior of whether to pre-aggregate relationships to the default. That value is returned.")
     public Stream<FeatureState> resetUsePreAggregation() {
@@ -62,12 +67,14 @@ public final class FeatureToggleProc {
         return Stream.of(new FeatureState(GdsFeatureToggles.USE_PRE_AGGREGATION.isEnabled()));
     }
 
+    @Internal
     @Procedure("gds.features.useKernelTracker")
     @Description("Toggle whether the native memory tracking feature on Neo4j 4.1+ should be used.")
     public void useKernelTracker(@Name(value = "useKernelTracker") boolean useKernelTracker) {
         GdsFeatureToggles.USE_KERNEL_TRACKER.toggle(useKernelTracker);
     }
 
+    @Internal
     @Procedure("gds.features.useKernelTracker.reset")
     @Description("Set the behavior of whether to use the native memory tracking to the default. That value is returned.")
     public Stream<FeatureState> resetUseKernelTracker() {
@@ -75,12 +82,14 @@ public final class FeatureToggleProc {
         return Stream.of(new FeatureState(GdsFeatureToggles.USE_KERNEL_TRACKER.isEnabled()));
     }
 
+    @Internal
     @Procedure("gds.features.usePropertyValueIndex")
     @Description("Toggle whether the property value index should be used during node property loading.")
     public void usePropertyValueIndex(@Name(value = "usePropertyValueIndex") boolean usePropertyValueIndex) {
         GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.toggle(usePropertyValueIndex);
     }
 
+    @Internal
     @Procedure("gds.features.usePropertyValueIndex.reset")
     @Description("Set the behavior of whether to use the property value index to the default. That value is returned.")
     public Stream<FeatureState> resetUsePropertyValueIndex() {
@@ -88,12 +97,14 @@ public final class FeatureToggleProc {
         return Stream.of(new FeatureState(GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.isEnabled()));
     }
 
+    @Internal
     @Procedure("gds.features.useParallelPropertyValueIndex")
     @Description("Toggle whether the property value index should be read in parallel during node property loading. Only works if usePropertyValueIndex is set as well")
     public void useParallelPropertyValueIndex(@Name(value = "useParallelPropertyValueIndex") boolean useParallelPropertyValueIndex) {
         GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.toggle(useParallelPropertyValueIndex);
     }
 
+    @Internal
     @Procedure("gds.features.useParallelPropertyValueIndex.reset")
     @Description("Set the behavior of whether to use the property value index to the default. That value is returned.")
     public Stream<FeatureState> resetUseParallelPropertyValueIndex() {
@@ -101,6 +112,7 @@ public final class FeatureToggleProc {
         return Stream.of(new FeatureState(GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled()));
     }
 
+    @Internal
     @Procedure("gds.features.maxArrayLengthShift")
     @Description("Toggle how large arrays are allowed to get before they are being paged; value is a power of two.")
     public void maxArrayLengthShift(@Name(value = "maxArrayLengthShift") long maxArrayLengthShift) {
@@ -113,6 +125,7 @@ public final class FeatureToggleProc {
         GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.set((int) maxArrayLengthShift);
     }
 
+    @Internal
     @Procedure("gds.features.useBitIdMap.reset")
     @Description("Set the behavior of whether to use the bit id map. That value is returned.")
     public Stream<FeatureState> resetUseBitIdMap() {
@@ -127,6 +140,7 @@ public final class FeatureToggleProc {
         }
     }
 
+    @Internal
     @Procedure("gds.features.useBitIdMap")
     @Description("Toggle whether the bit id map should be used during graph creation.")
     public void useBitIdMap(@Name(value = "useBitIdMap") boolean useBitIdMap) {
@@ -140,6 +154,7 @@ public final class FeatureToggleProc {
         }
     }
 
+    @Internal
     @Procedure("gds.features.maxArrayLengthShift.reset")
     @Description("Set the value of the max array size before paging to the default. That value is returned.")
     public Stream<FeatureValue> resetMaxArrayLengthShift() {

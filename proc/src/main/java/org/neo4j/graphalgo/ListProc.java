@@ -41,11 +41,10 @@ public class ListProc {
             " YIELD name, signature, description " +
             " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.')" +
             " AND name <> 'gds.list'" +
-            " AND NOT name STARTS WITH 'gds.features.'" +
-            " AND NOT name STARTS WITH 'gds.internal.'" +
             " AND ($name IS NULL OR name CONTAINS $name) " +
             " RETURN name, signature, description, 'procedure' AS type " +
-            " ORDER BY name UNION " +
+            " ORDER BY name " +
+            " UNION " +
             " CALL dbms.functions() " +
             " YIELD name, signature, description " +
             " WHERE (name STARTS WITH 'algo.' OR name STARTS WITH 'gds.') AND ($name IS NULL OR name CONTAINS $name) " +
