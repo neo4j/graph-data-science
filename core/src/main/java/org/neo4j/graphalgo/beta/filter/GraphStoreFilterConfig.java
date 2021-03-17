@@ -19,18 +19,46 @@
  */
 package org.neo4j.graphalgo.beta.filter;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphStoreFilterConfig extends BaseConfig, ConcurrencyConfig {
 
-    String nodeFilter();
+    @Configuration.Parameter
+    String graphName();
 
-    String relationshipFilter();
+    @Configuration.Parameter
+    String subgraphName();
+
+    @Value.Default
+    default String nodeFilter() {
+        return "true";
+    }
+
+    @Value.Default
+    default String relationshipFilter() {
+        return "true";
+    }
+
+    static GraphStoreFilterConfig of(
+        String username,
+        String graphName,
+        String subgraphName,
+        CypherMapWrapper config
+    ) {
+        return new GraphStoreFilterConfigImpl(
+            graphName,
+            subgraphName,
+            username,
+            config
+        );
+    }
 
 }
