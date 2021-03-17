@@ -28,21 +28,24 @@ public enum LinkMetric {
         var positiveCount = signedProbabilities.positiveCount();
         var negativeCount = signedProbabilities.negativeCount();
         if (positiveCount == 0) return 0.0;
-        var firstPrecision = positiveCount / (positiveCount + classRatio * negativeCount);
-        var curveConsumer = new CurveConsumer(firstPrecision, 1.0);
+        var curveConsumer = new CurveConsumer();
         var signedProbabilitiesConsumer = new SignedProbabilitiesConsumer(
             curveConsumer,
             positiveCount,
             negativeCount,
             classRatio
         );
+        curveConsumer.acceptFirstPoint(
+            signedProbabilitiesConsumer.recall(positiveCount),
+            signedProbabilitiesConsumer.precision(positiveCount)
+        );
         signedProbabilities.stream().forEach(signedProbabilitiesConsumer::accept);
-        curveConsumer.accept(1.0, 0.0);
+        curveConsumer.accept(0.0, 1.0);
 
         return curveConsumer.auc();
     }
 
-    private class SignedProbabilitiesConsumer {
+    private static class SignedProbabilitiesConsumer {
         private final CurveConsumer innerConsumer;
         private final long positiveCount;
         private final long negativeCount;
@@ -85,33 +88,40 @@ public enum LinkMetric {
 
         private void reportPointOnCurve() {
             var truePositives = positiveCount - positivesSeen;
-            var falsePositives = negativeCount - negativesSeen;
-            var falseNegatives = positivesSeen;
             if (truePositives == 0) {
-                innerConsumer.accept(0, 0);
-                return;
+                innerConsumer.accept(0.0, 0.0);
+            } else {
+                innerConsumer.accept(recall(truePositives), precision(truePositives));
             }
-            var precision = truePositives/(truePositives + classRatio * falsePositives);
-            var recall = truePositives/((double)(truePositives + falseNegatives));
-            innerConsumer.accept(precision, recall);
+        }
+
+        private double precision(double truePositives) {
+            var falsePositives = negativeCount - negativesSeen;
+            return truePositives / (truePositives + classRatio * falsePositives);
+        }
+
+        private double recall(double truePositives) {
+            var falseNegatives = positivesSeen;
+            return truePositives / (truePositives + falseNegatives);
+
         }
     }
 
-    private class CurveConsumer {
+    private static class CurveConsumer {
 
         private double auc;
-        private double previousPrecision;
-        private double previousRecall;
+        private double previousYcoordinate;
+        private double previousXcoordinate;
 
-        CurveConsumer(double previousPrecision, double previousRecall) {
-            this.previousPrecision = previousPrecision;
-            this.previousRecall = previousRecall;
+        void acceptFirstPoint(double x, double y) {
+            this.previousXcoordinate = x;
+            this.previousYcoordinate = y;
         }
 
-        void accept(double precision, double recall) {
-            auc += (previousPrecision + precision)/2.0 * (previousRecall - recall);
-            this.previousPrecision = precision;
-            this.previousRecall = recall;
+        void accept(double x, double y) {
+            auc += (previousYcoordinate + y) / 2.0 * (previousXcoordinate - x);
+            this.previousXcoordinate = x;
+            this.previousYcoordinate = y;
         }
 
         double auc() {
