@@ -119,4 +119,21 @@ class ScalePropertiesBaseConfigTest {
         assertThat(config.scalers()).isEqualTo(List.of(Scaler.Variant.MEAN));
     }
 
+    @Test
+    void canSpecifySamePropertyMultipleTimes() {
+        var config = new ScalePropertiesMutateConfigImpl(
+            Optional.of("graph"),
+            Optional.empty(),
+            "",
+            CypherMapWrapper.create(
+                Map.of(
+                    "mutateProperty", "test",
+                    "scalers", "mean",
+                    "nodeProperties", List.of("a", "b", "b", "a", "a")
+                )
+            )
+        );
+
+        assertThat(config.nodeProperties()).isEqualTo(List.of("a", "b", "b", "a", "a"));
+    }
 }
