@@ -136,4 +136,25 @@ class ScalePropertiesBaseConfigTest {
 
         assertThat(config.nodeProperties()).isEqualTo(List.of("a", "b", "b", "a", "a"));
     }
+
+    @Test
+    void failOnNonStringNodeProperties() {
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> new ScalePropertiesMutateConfigImpl(
+                Optional.of("graph"),
+                Optional.empty(),
+                "",
+                CypherMapWrapper.create(
+                    Map.of(
+                        "mutateProperty", "test",
+                        "scalers", "mean",
+                        "nodeProperties", List.of(1)
+                    )
+                )
+            )
+        );
+
+        assertThat(ex.getMessage()).contains("nodeProperties must be strings");
+    }
 }

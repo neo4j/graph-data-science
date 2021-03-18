@@ -123,7 +123,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
 
         for (int i = 0; i < config.nodeProperties().size(); i++) {
             var scalerVariant = pickScaler(config.scalers(), i);
-            String property = config.nodeProperties().get(i);
+            var property = config.nodeProperties().get(i);
             var nodeProperties = resolveNodeProperty(property);
             scalers.add(scalerVariant.create(nodeProperties, graph.nodeCount(), config.concurrency(), executor));
         }
