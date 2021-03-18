@@ -149,11 +149,6 @@ public class NodeFilteredGraph extends CSRFilterGraph {
     }
 
     @Override
-    public NodeMapping nodeMapping() {
-        return filteredIdMap;
-    }
-
-    @Override
     public Set<NodeLabel> availableNodeLabels() {
         return filteredIdMap.availableNodeLabels();
     }

@@ -117,7 +117,7 @@ class UndirectedEdgeSplitterTest {
         );
         var nestedSplit = splitter.split(graph, huuuuugeDenseGraph, 0.9);
         Relationships nestedHoldout = nestedSplit.selectedRels();
-        HugeGraph nestedHoldoutGraph = GraphFactory.create(graph.nodeMapping(), nestedHoldout, AllocationTracker.empty());
+        HugeGraph nestedHoldoutGraph = GraphFactory.create(graph, nestedHoldout, AllocationTracker.empty());
         nestedHoldoutGraph.forEachNode(nodeId -> {
             nestedHoldoutGraph.forEachRelationship(nodeId, Double.NaN, (src, trg, val) -> {
                 if (Double.compare(val, NEGATIVE) == 0) {
@@ -151,14 +151,14 @@ class UndirectedEdgeSplitterTest {
         var splitResult1 = new UndirectedEdgeSplitter(12L).split(graph, 0.5);
         var splitResult2 = new UndirectedEdgeSplitter(12L).split(graph, 0.5);
         var remainingAreEqual = relationshipsAreEqual(
-            graph.nodeMapping(),
+            graph,
             splitResult1.remainingRels(),
             splitResult2.remainingRels()
         );
         assertTrue(remainingAreEqual);
 
         var holdoutAreEqual = relationshipsAreEqual(
-            graph.nodeMapping(),
+            graph,
             splitResult1.selectedRels(),
             splitResult2.selectedRels()
         );
@@ -184,14 +184,14 @@ class UndirectedEdgeSplitterTest {
         var splitResult1 = new UndirectedEdgeSplitter(Optional.empty()).split(graph, 0.5);
         var splitResult2 = new UndirectedEdgeSplitter(Optional.empty()).split(graph, 0.5);
         var remainingAreEqual = relationshipsAreEqual(
-            graph.nodeMapping(),
+            graph,
             splitResult1.remainingRels(),
             splitResult2.remainingRels()
         );
         assertFalse(remainingAreEqual);
 
         var holdoutAreEqual = relationshipsAreEqual(
-            graph.nodeMapping(),
+            graph,
             splitResult1.selectedRels(),
             splitResult2.selectedRels()
         );

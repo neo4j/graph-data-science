@@ -148,7 +148,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
     ) {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)
-            .nodes(computationResult.graph().nodeMapping())
+            .nodes(computationResult.graph())
             .orientation(Orientation.UNDIRECTED)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(1)

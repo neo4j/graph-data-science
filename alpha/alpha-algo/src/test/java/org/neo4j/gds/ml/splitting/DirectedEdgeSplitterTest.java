@@ -123,7 +123,7 @@ class DirectedEdgeSplitterTest {
         );
         var nestedSplit = splitter.split(graph, huuuuugeDenseGraph, 0.9);
         Relationships nestedHoldout = nestedSplit.selectedRels();
-        HugeGraph nestedHoldoutGraph = GraphFactory.create(graph.nodeMapping(), nestedHoldout, AllocationTracker.empty());
+        HugeGraph nestedHoldoutGraph = GraphFactory.create(graph, nestedHoldout, AllocationTracker.empty());
         nestedHoldoutGraph.forEachNode(nodeId -> {
             nestedHoldoutGraph.forEachRelationship(nodeId, Double.NaN, (src, trg, val) -> {
                 if (Double.compare(val, NEGATIVE) == 0) {

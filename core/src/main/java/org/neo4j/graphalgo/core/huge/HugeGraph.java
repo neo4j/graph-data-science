@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
@@ -196,11 +197,6 @@ public class HugeGraph implements CSRGraph {
     @Override
     public GraphSchema schema() {
         return schema;
-    }
-
-    @Override
-    public NodeMapping nodeMapping() {
-        return idMapping;
     }
 
     public Map<String, NodeProperties> nodeProperties() { return nodeProperties; }
@@ -552,6 +548,26 @@ public class HugeGraph implements CSRGraph {
                 break;
             }
         }
+    }
+
+    @Override
+    public Set<NodeLabel> nodeLabels(long nodeId) {
+        return idMapping.nodeLabels(nodeId);
+    }
+
+    @Override
+    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
+        idMapping.forEachNodeLabel(nodeId, consumer);
+    }
+
+    @Override
+    public Set<NodeLabel> availableNodeLabels() {
+        return idMapping.availableNodeLabels();
+    }
+
+    @Override
+    public boolean hasLabel(long nodeId, NodeLabel label) {
+        return idMapping.hasLabel(nodeId, label);
     }
 
     public static class GetTargetConsumer implements RelationshipConsumer {

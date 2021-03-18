@@ -47,7 +47,7 @@ class FilteredNodePropertiesTest {
     void testDoubleArray() {
         var filteredNodeProperties = new FilteredNodeProperties(
             graph.nodeProperties("doubleArray"),
-            new NodeFilteredGraph(graph, graph.nodeMapping())
+            new NodeFilteredGraph(graph, graph)
         );
 
         assertThat(filteredNodeProperties.doubleArrayValue(idFunction.of("a"))).containsExactly(1D);
@@ -61,7 +61,7 @@ class FilteredNodePropertiesTest {
     void testLongArray() {
         var filteredNodeProperties = new FilteredNodeProperties(
             graph.nodeProperties("longArray"),
-            new NodeFilteredGraph(graph, graph.nodeMapping())
+            new NodeFilteredGraph(graph, graph)
         );
 
         assertThat(filteredNodeProperties.longArrayValue(idFunction.of("a"))).containsExactly(1L);
@@ -72,7 +72,7 @@ class FilteredNodePropertiesTest {
     void testFloatArray() {
         var filteredNodeProperties = new FilteredNodeProperties(
             graph.nodeProperties("floatArray"),
-            new NodeFilteredGraph(graph, graph.nodeMapping())
+            new NodeFilteredGraph(graph, graph)
         );
 
         assertThat(filteredNodeProperties.floatArrayValue(idFunction.of("a"))).containsExactly(1.0F);

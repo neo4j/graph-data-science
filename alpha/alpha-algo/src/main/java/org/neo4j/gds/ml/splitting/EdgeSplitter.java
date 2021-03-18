@@ -85,7 +85,7 @@ public abstract class EdgeSplitter {
     private RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation, boolean loadRelationshipProperty) {
         return GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)
-            .nodes(graph.nodeMapping())
+            .nodes(graph)
             .orientation(orientation)
             .addAllPropertyConfigs(loadRelationshipProperty
                 ? List.of(GraphFactory.PropertyConfig.of(Aggregation.SINGLE, DefaultValue.forDouble()))

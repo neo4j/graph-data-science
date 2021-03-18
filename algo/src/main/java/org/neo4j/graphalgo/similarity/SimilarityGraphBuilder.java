@@ -91,7 +91,7 @@ public class SimilarityGraphBuilder {
         this.executorService = executorService;
         this.tracker = tracker;
         this.baseGraph = baseGraph;
-        this.baseIdMap = baseGraph.nodeMapping();
+        this.baseIdMap = baseGraph;
     }
 
     public Graph build(Stream<SimilarityResult> stream) {

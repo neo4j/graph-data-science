@@ -74,7 +74,7 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
                 .orElseThrow(() -> new IllegalArgumentException("No intersect factory found for graph type " + innerGraph.getClass()))
                 .load(innerGraph, config);
 
-            return new NodeFilteredGraphIntersect(graph.nodeMapping(), relationshipIntersect);
+            return new NodeFilteredGraphIntersect(graph, relationshipIntersect);
         }
     }
 }

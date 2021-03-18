@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 
@@ -29,34 +28,12 @@ public interface Graph extends NodeMapping, NodePropertyContainer, Degrees, Rela
 
     GraphSchema schema();
 
-    NodeMapping nodeMapping();
-
-    @Override
-    default Set<NodeLabel> nodeLabels(long nodeId) {
-        return nodeMapping().nodeLabels(nodeId);
-    }
-
-    @Override
-    default boolean hasLabel(long nodeId, NodeLabel label) {
-        return nodeMapping().hasLabel(nodeId, label);
-    }
-
-    @Override
-    default void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        nodeMapping().forEachNodeLabel(nodeId, consumer);
-    }
-
-    @Override
-    default Set<NodeLabel> availableNodeLabels() {
-        return nodeMapping().availableNodeLabels();
-    }
-
     default Set<RelationshipType> availableRelationshipTypes() {
         return schema().relationshipSchema().properties().keySet();
     }
 
     default boolean isEmpty() {
-        return nodeMapping().nodeCount() == 0;
+        return nodeCount() == 0;
     }
 
     /**

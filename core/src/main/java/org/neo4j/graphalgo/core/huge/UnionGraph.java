@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.huge;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyDegrees;
@@ -28,7 +29,6 @@ import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.ImmutableTopology;
-import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
@@ -89,11 +89,6 @@ public final class UnionGraph implements CSRGraph {
             .map(Graph::schema)
             .reduce(GraphSchema::union)
             .get();
-    }
-
-    @Override
-    public NodeMapping nodeMapping() {
-        return first.nodeMapping();
     }
 
     @Override
@@ -313,6 +308,26 @@ public final class UnionGraph implements CSRGraph {
             .elementCount(relationshipCount())
             .isMultiGraph(true)
             .build();
+    }
+
+    @Override
+    public Set<NodeLabel> nodeLabels(long nodeId) {
+        return first.nodeLabels(nodeId);
+    }
+
+    @Override
+    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
+        first.forEachNodeLabel(nodeId, consumer);
+    }
+
+    @Override
+    public Set<NodeLabel> availableNodeLabels() {
+        return first.availableNodeLabels();
+    }
+
+    @Override
+    public boolean hasLabel(long nodeId, NodeLabel label) {
+        return first.hasLabel(nodeId, label);
     }
 
     private static class ParallelRelationshipDegreeCounter implements RelationshipConsumer {

@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.similarity.nil;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
@@ -100,11 +99,6 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public NodeMapping nodeMapping() {
-        throw new NullGraphStore.NullGraphException();
-    }
-
-    @Override
     public long toMappedNodeId(long nodeId) {
         throw new NullGraphStore.NullGraphException();
     }
@@ -148,8 +142,18 @@ public class NullGraph implements Graph {
     }
 
     @Override
+    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
+
+    }
+
+    @Override
     public Set<NodeLabel> availableNodeLabels() {
         return Set.of();
+    }
+
+    @Override
+    public boolean hasLabel(long nodeId, NodeLabel label) {
+        return false;
     }
 
     @Override
