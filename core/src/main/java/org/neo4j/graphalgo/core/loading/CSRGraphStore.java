@@ -45,6 +45,7 @@ import org.neo4j.graphalgo.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.utils.TimeUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
@@ -102,11 +103,16 @@ public class CSRGraphStore implements GraphStore {
         int concurrency,
         AllocationTracker tracker
     ) {
+        // A graph store must contain at least one topology, even if it is empty.
+        var topologies = relationships.isEmpty()
+            ? Map.of(RelationshipType.ALL_RELATIONSHIPS, GraphFactory.emptyRelationships(nodes, tracker).topology())
+            : relationships;
+
         return new CSRGraphStore(
             databaseId,
             nodes,
             nodePropertyStores,
-            relationships,
+            topologies,
             relationshipPropertyStores,
             concurrency,
             tracker

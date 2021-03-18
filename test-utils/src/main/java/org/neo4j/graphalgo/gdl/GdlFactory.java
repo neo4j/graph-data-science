@@ -280,19 +280,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
 
         importRelationships(propertyKeysByRelType, relationshipBuilders);
 
-        // Add fake relationship type since we do not
-        // support GraphStores with no Relationships objects.
-        if (relationshipBuilders.isEmpty()) {
-            relationshipBuilders.put(RelationshipType.ALL_RELATIONSHIPS, GraphFactory.initRelationshipsBuilder()
-                .nodes(nodeMapping)
-                .orientation(graphCreateConfig.orientation())
-                .executorService(loadingContext.executor())
-                .tracker(loadingContext.tracker())
-                .build()
-            );
-            propertyKeysByRelType.put(RelationshipType.ALL_RELATIONSHIPS, List.of());
-        }
-
         return relationshipBuilders.entrySet()
             .stream()
             .map(entry -> {
