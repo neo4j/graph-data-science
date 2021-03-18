@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.triangle.intersect;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
-import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 
@@ -34,22 +33,22 @@ import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 
 public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
 
-    private final NodeMapping filteredIdMap;
+    private final NodeFilteredGraph filteredGraph;
     private final RelationshipIntersect wrappedRelationshipIntersect;
 
-    private NodeFilteredGraphIntersect(NodeMapping filteredIdMap, RelationshipIntersect wrappedRelationshipIntersect) {
-        this.filteredIdMap = filteredIdMap;
+    private NodeFilteredGraphIntersect(NodeFilteredGraph filteredGraph, RelationshipIntersect wrappedRelationshipIntersect) {
+        this.filteredGraph = filteredGraph;
         this.wrappedRelationshipIntersect = wrappedRelationshipIntersect;
     }
 
     @Override
     public void intersectAll(long nodeIdA, IntersectionConsumer consumer) {
-        wrappedRelationshipIntersect.intersectAll(filteredIdMap.toOriginalNodeId(nodeIdA), (a, b, c) -> {
-            if (filteredIdMap.contains(a) && filteredIdMap.contains(b) && filteredIdMap.contains(c)) {
+        wrappedRelationshipIntersect.intersectAll(nodeIdA, (a, b, c) -> {
+            if (filteredGraph.contains(a) && filteredGraph.contains(b) && filteredGraph.contains(c)) {
                 consumer.accept(
-                    filteredIdMap.toMappedNodeId(a),
-                    filteredIdMap.toMappedNodeId(b),
-                    filteredIdMap.toMappedNodeId(c)
+                    filteredGraph.toMappedNodeId(a),
+                    filteredGraph.toMappedNodeId(b),
+                    filteredGraph.toMappedNodeId(c)
                 );
             }
         });
@@ -74,7 +73,7 @@ public final class NodeFilteredGraphIntersect implements RelationshipIntersect {
                 .orElseThrow(() -> new IllegalArgumentException("No intersect factory found for graph type " + innerGraph.getClass()))
                 .load(innerGraph, config);
 
-            return new NodeFilteredGraphIntersect(graph, relationshipIntersect);
+            return new NodeFilteredGraphIntersect(nodeFilteredGraph, relationshipIntersect);
         }
     }
 }

@@ -38,9 +38,13 @@ public class NodeFilteredGraph extends CSRFilterGraph {
 
     private final NodeMapping filteredIdMap;
 
-    public NodeFilteredGraph(CSRGraph graph, NodeMapping filteredIdMap) {
-        super(graph);
+    public NodeFilteredGraph(CSRGraph originalGraph, NodeMapping filteredIdMap) {
+        super(originalGraph);
         this.filteredIdMap = filteredIdMap;
+    }
+
+    public NodeMapping nodeMapping() {
+        return filteredIdMap;
     }
 
     @Override
