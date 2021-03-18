@@ -46,6 +46,7 @@ shadowJar {
     archiveBaseName.set("neo4j-graph-data-science")
     archiveClassifier.set("")
     exclude 'META-INF/versions/**/*'
+    exclude 'module-info.class'
     from licenseFile
     from file("$buildDir/reports/license")
 }

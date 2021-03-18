@@ -5,6 +5,12 @@ ext {
         '4.2': properties.getOrDefault('neo4jVersion42', '4.2.4'),
         '4.3': properties.getOrDefault('neo4jVersion43', '4.3.0-drop03.0'),
     ]
+    scalas = [
+        '4.0': '2.12.7',
+        '4.1': '2.12.10',
+        '4.2': '2.12.10',
+        '4.3': '2.12.13',
+    ]
     ver = [
             doc: [
                 'asciidoctorj':                 '2.4.3',
@@ -49,6 +55,7 @@ ext {
             'picocli':                      '4.6.1',
             'qala-datagen':                 '2.3.0',
             'RoaringBitmap':                '0.9.0',
+            'scala':                        scalas[properties.getOrDefault('neo4jVersion', neos.'4.2').toString().split('\\.')[0..1].join('.')],
             'spotbugsToolVersion':          '4.0.6',
             'protobuf':                     '3.11.0',
     ]
@@ -57,12 +64,6 @@ ext {
         junit5jupiter:      "org.junit.jupiter:junit-jupiter",
         junit5platform:     "org.junit.platform:junit-platform-launcher",
         junit5migration:    "org.junit.jupiter:junit-jupiter-migrationsupport",
-    ]
-    scalas = [
-        '4.0': '2.12.7',
-        '4.1': '2.12.10',
-        '4.2': '2.12.10',
-        '4.3': '2.12.13',
     ]
     neodeps = [
         'annotations',

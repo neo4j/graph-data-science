@@ -18,13 +18,15 @@ dependencies {
             transitive = false
         }
     }
+    compileOnly group: 'org.scala-lang', name: 'scala-library', version: ver.'scala'
 
     api(
             project(':annotations'),
             project(':neo4j-kernel-adapter'),
             [group: 'org.bouncycastle',        name: 'bcpkix-jdk15on',           version: ver.'bouncycastle'],
             [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],
-            [group: 'org.opencypher',          name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end'],
+            [group: 'org.opencypher',          name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false],
+            [group: 'org.opencypher',          name: 'cypher-ast-factory-9.0',   version: ver.'opencypher-front-end', transitive: false],
             [group: 'org.eclipse.collections', name: 'eclipse-collections-api',  version: ver.'eclipse-collections'],
             [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
             [group: 'org.ejml',                name: 'ejml-core',                version: ver.'ejml'],
