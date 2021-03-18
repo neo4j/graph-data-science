@@ -93,18 +93,6 @@ public class CSRGraphStore implements GraphStore {
 
     private ZonedDateTime modificationTime;
 
-    public interface CSRGraphStoreConstructor<T> {
-        T construct(
-            NamedDatabaseId databaseId,
-            NodeMapping nodes,
-            Map<NodeLabel, NodePropertyStore> nodeProperties,
-            Map<RelationshipType, Relationships.Topology> relationships,
-            Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
-            int concurrency,
-            AllocationTracker tracker
-        );
-    }
-
     public static CSRGraphStore of(
         NamedDatabaseId databaseId,
         NodeMapping nodes,
@@ -125,28 +113,6 @@ public class CSRGraphStore implements GraphStore {
         );
     }
 
-
-    public static <T extends CSRGraphStore> T of(
-        NamedDatabaseId databaseId,
-        NodeMapping nodes,
-        Map<NodeLabel, NodePropertyStore> nodePropertyStores,
-        Map<RelationshipType, Relationships.Topology> relationships,
-        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
-        int concurrency,
-        AllocationTracker tracker,
-        CSRGraphStoreConstructor<T> constructor
-    ) {
-        return constructor.construct(
-            databaseId,
-            nodes,
-            nodePropertyStores,
-            relationships,
-            relationshipPropertyStores,
-            concurrency,
-            tracker
-        );
-    }
-
     public static CSRGraphStore of(
         NamedDatabaseId databaseId,
         HugeGraph graph,
@@ -157,19 +123,26 @@ public class CSRGraphStore implements GraphStore {
     ) {
         Relationships relationships = graph.relationships();
 
-        RelationshipType relationshipType = RelationshipType.of(relationshipTypeString);
-        Map<RelationshipType, Relationships.Topology> topology = singletonMap(relationshipType, relationships.topology());
+        var relationshipType = RelationshipType.of(relationshipTypeString);
+        var topology = Map.of(relationshipType, relationships.topology());
 
-        Map<NodeLabel, NodePropertyStore> nodeProperties = constructNodePropertiesFromGraph(graph);
-
-        Map<RelationshipType, RelationshipPropertyStore> relationshipProperties = constructRelationshipPropertiesFromGraph(
+        var nodeProperties = constructNodePropertiesFromGraph(graph);
+        var relationshipProperties = constructRelationshipPropertiesFromGraph(
             graph,
             relationshipProperty,
             relationships,
             relationshipType
         );
 
-        return new CSRGraphStore(databaseId, graph.idMap(), nodeProperties, topology, relationshipProperties, concurrency, tracker);
+        return new CSRGraphStore(
+            databaseId,
+            graph.idMap(),
+            nodeProperties,
+            topology,
+            relationshipProperties,
+            concurrency,
+            tracker
+        );
     }
 
     @NotNull
