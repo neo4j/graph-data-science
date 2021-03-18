@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.neo4j.graphalgo.core.utils.export.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
@@ -34,8 +33,8 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisito
 class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
 
     @Test
-    void writesVisitedNodeSchema() throws IOException {
-        var nodeSchemaVisitor = new CsvNodeSchemaVisitor(tempDir);
+    void writesVisitedNodeSchema() {
+        var nodeSchemaVisitor = new CsvNodeSchemaVisitor(tempDir, true);
         NodeLabel labelA = NodeLabel.of("A");
         nodeSchemaVisitor.nodeLabel(labelA);
         nodeSchemaVisitor.key("prop1");
@@ -60,6 +59,29 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
                 defaultHeaderColumns(),
                 List.of("A", "prop1", "long", "DefaultValue(42)", "PERSISTENT"),
                 List.of("B", "prop2", "double", "DefaultValue(13.37)", "TRANSIENT")
+            )
+        );
+    }
+
+    @Test
+    void writesSchemaWithoutProperties() {
+        var nodeSchemaVisitor = new CsvNodeSchemaVisitor(tempDir, false);
+        NodeLabel labelA = NodeLabel.of("A");
+        nodeSchemaVisitor.nodeLabel(labelA);
+        nodeSchemaVisitor.endOfEntity();
+
+        NodeLabel labelB = NodeLabel.of("B");
+        nodeSchemaVisitor.nodeLabel(labelB);
+        nodeSchemaVisitor.endOfEntity();
+
+        nodeSchemaVisitor.close();
+        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME));
+        assertDataContent(
+            NODE_SCHEMA_FILE_NAME,
+            List.of(
+                defaultHeaderColumns(),
+                List.of("A"),
+                List.of("B")
             )
         );
     }

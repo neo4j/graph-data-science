@@ -40,8 +40,10 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisito
 
 class NodeSchemaLoaderTest {
 
+    @TempDir Path exportDir;
+
     @Test
-    void shouldLoadNodeSchemaCorrectly(@TempDir Path exportDir) throws IOException {
+    void shouldLoadNodeSchemaCorrectly() throws IOException {
         var nodeSchemaFile = exportDir.resolve(NODE_SCHEMA_FILE_NAME).toFile();
         var lines = List.of(
             String.join(", ", NODE_SCHEMA_COLUMNS),
@@ -86,6 +88,23 @@ class NodeSchemaLoaderTest {
                     )
                 )
             ));
+    }
+
+    @Test
+    void shouldLoadSchemaWithoutProperties() throws IOException {
+        var nodeSchemaFile = exportDir.resolve(NODE_SCHEMA_FILE_NAME).toFile();
+        var lines = List.of(
+            String.join(", ", NODE_SCHEMA_COLUMNS),
+            "A",
+            "B"
+        );
+        FileUtils.writeLines(nodeSchemaFile, lines);
+
+        var schemaLoader = new NodeSchemaLoader(exportDir);
+        var nodeSchema = schemaLoader.load();
+
+        assertThat(nodeSchema).isNotNull();
+        assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
     }
 
 }

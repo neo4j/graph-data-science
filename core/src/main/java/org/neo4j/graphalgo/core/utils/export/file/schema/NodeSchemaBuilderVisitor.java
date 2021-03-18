@@ -33,7 +33,16 @@ public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
 
     @Override
     protected void export() {
-        schemaBuilder.addProperty(nodeLabel(), key(), PropertySchema.of(key(), valueType(), defaultValue(), state()));
+        // If the key is null we expect no properties but a label
+        if (key() == null) {
+            schemaBuilder.addLabel(nodeLabel());
+        } else {
+            schemaBuilder.addProperty(
+                nodeLabel(),
+                key(),
+                PropertySchema.of(key(), valueType(), defaultValue(), state())
+            );
+        }
     }
 
     public NodeSchema schema() {
