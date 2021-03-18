@@ -164,7 +164,12 @@ public class CSRGraphStore implements GraphStore {
             .flatMap(map -> map.values().stream())
             .forEach(propertySchema -> nodePropertyStoreBuilder.putIfAbsent(
                 propertySchema.key(),
-                NodeProperty.of(propertySchema.key(), propertySchema.state(), graph.nodeProperties(propertySchema.key()), propertySchema.defaultValue())
+                NodeProperty.of(
+                    propertySchema.key(),
+                    propertySchema.state(),
+                    graph.nodeProperties(propertySchema.key()),
+                    propertySchema.defaultValue()
+                )
             ));
 
         nodePropertyStores.put(ALL_NODES, nodePropertyStoreBuilder.build());
@@ -173,7 +178,7 @@ public class CSRGraphStore implements GraphStore {
 
     @NotNull
     private static Map<RelationshipType, RelationshipPropertyStore> constructRelationshipPropertiesFromGraph(
-        HugeGraph graph,
+        Graph graph,
         Optional<String> relationshipProperty,
         Relationships relationships,
         RelationshipType relationshipType
@@ -212,7 +217,8 @@ public class CSRGraphStore implements GraphStore {
                         relationshipPropertySchema.defaultValue().isUserDefined()
                             ? relationshipPropertySchema.defaultValue()
                             : ValueType.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
-                        relationshipPropertySchema.aggregation())
+                        relationshipPropertySchema.aggregation()
+                    )
                 ).build()
             );
         }
@@ -293,7 +299,9 @@ public class CSRGraphStore implements GraphStore {
         if (!nodeLabels().contains(nodeLabel)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Adding '%s.%s' to the graph store failed. Node label '%s' does not exist in the store. Available node labels: %s",
-                nodeLabel.name, propertyKey, nodeLabel.name,
+                nodeLabel.name,
+                propertyKey,
+                nodeLabel.name,
                 StringJoining.join(nodeLabels().stream().map(NodeLabel::name))
             ));
         }
@@ -457,11 +465,12 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public CSRGraph getUnion() {
-        return UnionGraph.of(relationships
+        var graphs = relationships
             .keySet()
             .stream()
             .flatMap(relationshipType -> {
-                if (relationshipProperties.containsKey(relationshipType) && !relationshipProperties.get(relationshipType).isEmpty()) {
+                if (relationshipProperties.containsKey(relationshipType)
+                    && !relationshipProperties.get(relationshipType).isEmpty()) {
                     return relationshipProperties
                         .get(relationshipType)
                         .keySet()
@@ -471,7 +480,9 @@ public class CSRGraphStore implements GraphStore {
                     return Stream.of(createGraph(nodeLabels(), relationshipType, Optional.empty()));
                 }
             })
-            .collect(Collectors.toList()));
+            .collect(Collectors.toList());
+
+        return UnionGraph.of(graphs);
     }
 
     @Override
@@ -515,12 +526,12 @@ public class CSRGraphStore implements GraphStore {
         var relationshipPropertyStore = relationshipProperties.get(relationshipType);
 
         var properties = propertyKeys.isEmpty()
-        ? new Relationships.Properties[0]
-        : propertyKeys
-            .stream()
-            .map(relationshipPropertyStore::get)
-            .map(RelationshipProperty::values)
-            .toArray(Relationships.Properties[]::new);
+            ? new Relationships.Properties[0]
+            : propertyKeys
+                .stream()
+                .map(relationshipPropertyStore::get)
+                .map(RelationshipProperty::values)
+                .toArray(Relationships.Properties[]::new);
 
         return new CSRCompositeRelationshipIterator(
             topology,
@@ -631,7 +642,12 @@ public class CSRGraphStore implements GraphStore {
     ) {
         Optional<NodeMapping> filteredNodes = getFilteredNodeMapping(nodeLabels);
         Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(nodeLabels);
-        return createGraphFromRelType(filteredNodes, filteredNodeProperties, relationshipType, maybeRelationshipProperty);
+        return createGraphFromRelationshipType(
+            filteredNodes,
+            filteredNodeProperties,
+            relationshipType,
+            maybeRelationshipProperty
+        );
     }
 
     private CSRGraph createGraph(
@@ -644,10 +660,10 @@ public class CSRGraphStore implements GraphStore {
 
         List<CSRGraph> filteredGraphs = relationships.keySet().stream()
             .filter(relationshipTypes::contains)
-            .map(topology -> createGraphFromRelType(
+            .map(relationshipType -> createGraphFromRelationshipType(
                 filteredNodes,
                 filteredNodeProperties,
-                topology,
+                relationshipType,
                 maybeRelationshipProperty
             ))
             .collect(Collectors.toList());
@@ -666,13 +682,12 @@ public class CSRGraphStore implements GraphStore {
             : Optional.of(nodes.withFilteredLabels(filteredLabels, concurrency));
     }
 
-    private CSRGraph createGraphFromRelType(
+    private CSRGraph createGraphFromRelationshipType(
         Optional<NodeMapping> filteredNodes,
         Map<String, NodeProperties> filteredNodeProperties,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
-        Relationships.Topology topology = relationships.get(relationshipType);
         var graphSchema = GraphSchema.of(
             schema().nodeSchema(),
             schema()
@@ -680,22 +695,23 @@ public class CSRGraphStore implements GraphStore {
                 .singleTypeAndProperty(relationshipType, maybeRelationshipProperty)
         );
 
-        HugeGraph initialGraph = HugeGraph.create(
+        var topology = relationships.get(relationshipType);
+        var properties = maybeRelationshipProperty.map(propertyKey -> relationshipProperties
+            .get(relationshipType)
+            .get(propertyKey).values());
+
+        var initialGraph = HugeGraph.create(
             nodes,
             graphSchema,
             filteredNodeProperties,
             topology,
-            maybeRelationshipProperty.map(propertyKey -> relationshipProperties
-                .get(relationshipType)
-                .get(propertyKey).values()),
+            properties,
             tracker
         );
 
-        if (filteredNodes.isPresent()) {
-            return new NodeFilteredGraph(initialGraph, filteredNodes.get());
-        } else {
-            return initialGraph;
-        }
+        return filteredNodes.isPresent()
+            ? new NodeFilteredGraph(initialGraph, filteredNodes.get())
+            : initialGraph;
     }
 
     private Map<String, NodeProperties> filterNodeProperties(Collection<NodeLabel> labels) {
@@ -703,7 +719,9 @@ public class CSRGraphStore implements GraphStore {
             return Collections.emptyMap();
         }
         if (labels.size() == 1 || nodes.containsOnlyAllNodesLabel()) {
-            return this.nodeProperties.getOrDefault(labels.iterator().next(), NodePropertyStore.empty()).nodePropertyValues();
+            return this.nodeProperties
+                .getOrDefault(labels.iterator().next(), NodePropertyStore.empty())
+                .nodePropertyValues();
         }
 
         Map<String, Map<NodeLabel, NodeProperties>> invertedNodeProperties = new HashMap<>();
@@ -729,7 +747,10 @@ public class CSRGraphStore implements GraphStore {
             ));
     }
 
-    private void validateInput(Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty) {
+    private void validateInput(
+        Collection<RelationshipType> relationshipTypes,
+        Optional<String> maybeRelationshipProperty
+    ) {
         if (relationshipTypes.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "The parameter '%s' should not be empty. Use '*' to load all relationship types.",
@@ -765,7 +786,8 @@ public class CSRGraphStore implements GraphStore {
                 nodePropsBuilder.addProperty(
                     label,
                     propertyName,
-                    nodeProperty.propertySchema())
+                    nodeProperty.propertySchema()
+                )
             ));
 
         for (NodeLabel nodeLabel : nodeLabels()) {
