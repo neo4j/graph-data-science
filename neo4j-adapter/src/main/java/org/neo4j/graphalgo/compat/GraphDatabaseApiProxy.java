@@ -46,9 +46,11 @@ public final class GraphDatabaseApiProxy {
     }
 
     public static <T> T resolveDependency(GraphDatabaseService db, Class<T> dependency) {
-        return ((GraphDatabaseAPI) db)
-            .getDependencyResolver()
-            .resolveDependency(dependency, DependencyResolver.SelectionStrategy.SINGLE);
+        return resolveDependency(((GraphDatabaseAPI) db).getDependencyResolver(), dependency);
+    }
+
+    public static <T> T resolveDependency(DependencyResolver resolver, Class<T> dependency) {
+        return resolver.resolveDependency(dependency, DependencyResolver.SelectionStrategy.SINGLE);
     }
 
     public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws Exception {
