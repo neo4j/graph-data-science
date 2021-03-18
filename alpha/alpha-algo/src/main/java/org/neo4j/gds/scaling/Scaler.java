@@ -84,8 +84,20 @@ public interface Scaler {
                 .collect(Collectors.toList());
         }
 
-        public static List<Variant> fromCypher(List<String> scalers) {
-            return scalers.stream().map(Scaler.Variant::lookup).collect(Collectors.toList());
+        public static List<Variant> fromCypher(Object scalers) {
+            List<String> scalerNames;
+            if (scalers instanceof String) {
+                var singleScalar = (String) scalers;
+                scalerNames = List.of(singleScalar);
+            } else if (scalers instanceof List) {
+                scalerNames = (List<String>) scalers;
+            } else {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Expected String or List for scalers. Got %s.",
+                    scalers.getClass().getSimpleName()
+                ));
+            }
+            return scalerNames.stream().map(Scaler.Variant::lookup).collect(Collectors.toList());
         }
     }
 }

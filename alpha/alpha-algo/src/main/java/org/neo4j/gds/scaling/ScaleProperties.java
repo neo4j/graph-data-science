@@ -119,17 +119,24 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     }
 
     private List<Scaler> resolveScalers() {
-        assert config.scalers().size() == config.nodeProperties().size();
-
         List<Scaler> scalers = new ArrayList<>();
 
-        for (int i = 0; i < config.scalers().size(); i++) {
-            var scaler = config.scalers().get(i);
+        for (int i = 0; i < config.nodeProperties().size(); i++) {
+            var scalerVariant = pickScaler(config.scalers(), i);
             String property = config.nodeProperties().get(i);
             var nodeProperties = resolveNodeProperty(property);
-            scalers.add(scaler.create(nodeProperties, graph.nodeCount(), config.concurrency(), executor));
+            scalers.add(scalerVariant.create(nodeProperties, graph.nodeCount(), config.concurrency(), executor));
         }
         return scalers;
+    }
+
+    private Scaler.Variant pickScaler(List<Scaler.Variant> scalerVariants, int i) {
+        if (scalerVariants.size() == 1) {
+            // this supports syntactic sugar variant
+            return scalerVariants.get(0);
+        } else {
+            return scalerVariants.get(i);
+        }
     }
 
     // TODO move nodeProperty check to org.neo4j.graphalgo.api.GraphStoreValidation when moving to beta

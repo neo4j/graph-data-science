@@ -20,6 +20,9 @@
 package org.neo4j.gds.scaling;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
@@ -32,6 +35,7 @@ import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.List;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -72,11 +76,19 @@ class ScalePropertiesTest {
         assertArrayEquals(new double[]{0D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
     }
 
-    @Test
-    void minmaxScalingOverMultipleProperties() {
+    private static Stream<Arguments> scalers() {
+        return Stream.of(
+            Arguments.of(List.of(Scaler.Variant.MINMAX)),
+            Arguments.of(List.of(Scaler.Variant.MINMAX, Scaler.Variant.MINMAX, Scaler.Variant.MINMAX))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("scalers")
+    void minmaxScalingOverMultipleProperties(List<Scaler.Variant> scalers) {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "b", "c"))
-            .scalers(List.of(Scaler.Variant.MINMAX, Scaler.Variant.MINMAX, Scaler.Variant.MINMAX))
+            .scalers(scalers)
             .concurrency(1)
             .build();
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);

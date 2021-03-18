@@ -51,9 +51,9 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
 
     @Value.Check
     default void propertiesSizeMustEqualScalersSize() {
-        if (scalers().size() != nodeProperties().size()) {
+        if (scalers().size() != 1 && scalers().size() != nodeProperties().size()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Specify a scaler for each nodeProperties. Found %d scalers for %d nodeProperties",
+                "Specify a scaler for each node property. Found %d scalers for %d node properties.",
                 scalers().size(),
                 nodeProperties().size()
             ));
