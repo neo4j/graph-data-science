@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
-import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.ProcedureConstants;
@@ -69,7 +68,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -117,112 +115,6 @@ public class CSRGraphStore implements GraphStore {
             concurrency,
             tracker
         );
-    }
-
-    public static CSRGraphStore of(
-        NamedDatabaseId databaseId,
-        HugeGraph graph,
-        String relationshipTypeString,
-        Optional<String> relationshipProperty,
-        int concurrency,
-        AllocationTracker tracker
-    ) {
-        Relationships relationships = graph.relationships();
-
-        var relationshipType = RelationshipType.of(relationshipTypeString);
-        var topology = Map.of(relationshipType, relationships.topology());
-
-        var nodeProperties = constructNodePropertiesFromGraph(graph);
-        var relationshipProperties = constructRelationshipPropertiesFromGraph(
-            graph,
-            relationshipProperty,
-            relationships,
-            relationshipType
-        );
-
-        return new CSRGraphStore(
-            databaseId,
-            graph.idMap(),
-            nodeProperties,
-            topology,
-            relationshipProperties,
-            concurrency,
-            tracker
-        );
-    }
-
-    @NotNull
-    private static Map<NodeLabel, NodePropertyStore> constructNodePropertiesFromGraph(HugeGraph graph) {
-        Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>();
-        NodePropertyStore.Builder nodePropertyStoreBuilder = NodePropertyStore.builder();
-        graph
-            .schema()
-            .nodeSchema()
-            .properties()
-            .values()
-            .stream()
-            .flatMap(map -> map.values().stream())
-            .forEach(propertySchema -> nodePropertyStoreBuilder.putIfAbsent(
-                propertySchema.key(),
-                NodeProperty.of(
-                    propertySchema.key(),
-                    propertySchema.state(),
-                    graph.nodeProperties(propertySchema.key()),
-                    propertySchema.defaultValue()
-                )
-            ));
-
-        nodePropertyStores.put(ALL_NODES, nodePropertyStoreBuilder.build());
-        return nodePropertyStores;
-    }
-
-    @NotNull
-    private static Map<RelationshipType, RelationshipPropertyStore> constructRelationshipPropertiesFromGraph(
-        Graph graph,
-        Optional<String> relationshipProperty,
-        Relationships relationships,
-        RelationshipType relationshipType
-    ) {
-        Map<RelationshipType, RelationshipPropertyStore> relationshipProperties = Collections.emptyMap();
-        if (relationshipProperty.isPresent() && relationships.properties().isPresent()) {
-            Map<String, RelationshipPropertySchema> relationshipPropertySchemas = graph
-                .schema()
-                .relationshipSchema()
-                .properties()
-                .get(relationshipType);
-
-            if (relationshipPropertySchemas.size() != 1) {
-                throw new IllegalStateException(formatWithLocale(
-                    "Relationship schema is expected to have exactly one property but had %s",
-                    relationshipPropertySchemas.size()
-                ));
-            }
-
-            RelationshipPropertySchema relationshipPropertySchema = relationshipPropertySchemas
-                .values()
-                .stream()
-                .findFirst()
-                .get();
-
-            String propertyKey = relationshipProperty.get();
-            relationshipProperties = singletonMap(
-                relationshipType,
-                RelationshipPropertyStore.builder().putIfAbsent(
-                    propertyKey,
-                    RelationshipProperty.of(
-                        propertyKey,
-                        NumberType.FLOATING_POINT,
-                        relationshipPropertySchema.state(),
-                        relationships.properties().get(),
-                        relationshipPropertySchema.defaultValue().isUserDefined()
-                            ? relationshipPropertySchema.defaultValue()
-                            : ValueType.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
-                        relationshipPropertySchema.aggregation()
-                    )
-                ).build()
-            );
-        }
-        return relationshipProperties;
     }
 
     protected CSRGraphStore(

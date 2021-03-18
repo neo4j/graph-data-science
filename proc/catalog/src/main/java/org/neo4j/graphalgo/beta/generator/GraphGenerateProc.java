@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.loading.CSRGraphStore;
+import org.neo4j.graphalgo.core.loading.CSRGraphStoreUtil;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.procedure.Name;
@@ -94,7 +94,7 @@ public final class GraphGenerateProc extends BaseProc {
                 .map(PropertyProducer::getPropertyName)
                 .orElse("PROPERTY"));
 
-            GraphStore graphStore = CSRGraphStore.of(
+            GraphStore graphStore = CSRGraphStoreUtil.createFromGraph(
                 api.databaseId(),
                 graph,
                 DUMMY_RELATIONSHIP_NAME,
