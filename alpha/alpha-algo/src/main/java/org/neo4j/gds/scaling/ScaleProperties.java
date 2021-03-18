@@ -22,11 +22,14 @@ package org.neo4j.gds.scaling;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * This algorithm takes as input a list of node property names and a same-sized list of scalers.
@@ -39,28 +42,58 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     private final Graph graph;
     private final ScalePropertiesBaseConfig config;
     private final AllocationTracker tracker;
+    private final ExecutorService executor;
 
-    public ScaleProperties(Graph graph, ScalePropertiesBaseConfig config, AllocationTracker tracker) {
+    public ScaleProperties(
+        Graph graph,
+        ScalePropertiesBaseConfig config,
+        AllocationTracker tracker,
+        ExecutorService executor
+    ) {
         this.graph = graph;
         this.config = config;
         this.tracker = tracker;
+        this.executor = executor;
     }
 
     @Override
     public Result compute() {
         var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
-        scaledProperties.setAll(nodeId -> {
-            var propertyCount = config.featureProperties().size();
-            var resultProperties = new double[propertyCount];
-            for (int i = 0; i < propertyCount; i++) {
-                var normalizer = resolveNormalizers().get(i);
-                var afterValue = normalizer.scaleProperty(nodeId);
-                resultProperties[i] = afterValue;
-            }
-            return resultProperties;
-        });
+
+        var propertyCount = config.featureProperties().size();
+        initializeArrays(scaledProperties, propertyCount);
+
+        List<Scaler> scalers = resolveScalers();
+        for (int i = 0; i < propertyCount; i++) {
+            scaleProperty(scaledProperties, scalers.get(i), i);
+        }
 
         return Result.of(scaledProperties);
+    }
+
+    private void initializeArrays(HugeObjectArray<double[]> scaledProperties, int propertyCount) {
+        var tasks = PartitionUtils.rangePartition(
+            config.concurrency(),
+            graph.nodeCount(),
+            (partition) -> (Runnable) () -> partition.consume((nodeId) -> scaledProperties.set(
+                nodeId,
+                new double[propertyCount]
+            ))
+        );
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+    }
+
+    private void scaleProperty(HugeObjectArray<double[]> scaledProperties, Scaler scaler, int index) {
+        var tasks = PartitionUtils.rangePartition(
+            config.concurrency(),
+            graph.nodeCount(),
+            (partition) -> (Runnable) () -> partition.consume((nodeId) -> {
+                var afterValue = scaler.scaleProperty(nodeId);
+                double[] existingResult = scaledProperties.get(nodeId);
+                existingResult[index] = afterValue;
+            })
+        );
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
     }
 
     @Override
@@ -80,7 +113,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         }
     }
 
-    private List<Scaler> resolveNormalizers() {
+    private List<Scaler> resolveScalers() {
         assert config.scalers().size() == config.featureProperties().size();
 
         List<Scaler> scalers = new ArrayList<>();
@@ -90,7 +123,13 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
             String property = config.featureProperties().get(i);
 
             var nodeProperties = graph.nodeProperties(property);
-            scalers.add(Scaler.Factory.create(scalerName, nodeProperties, graph.nodeCount()));
+            scalers.add(Scaler.Factory.create(
+                scalerName,
+                nodeProperties,
+                graph.nodeCount(),
+                config.concurrency(),
+                executor
+            ));
         }
         return scalers;
     }

@@ -20,6 +20,10 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+
+import java.util.concurrent.ExecutorService;
 
 final class Mean implements Scaler {
 
@@ -33,35 +37,80 @@ final class Mean implements Scaler {
         this.maxMinDiff = maxMinDiff;
     }
 
-    static Mean create(NodeProperties properties, long nodeCount) {
+    static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         if (nodeCount == 0) {
             return new Mean(properties, 0, 0);
         }
 
-        var max = Double.MIN_VALUE;
-        var min = Double.MAX_VALUE;
-        var sum = 0D;
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            nodeCount,
+            partition -> new ComputeAggregates(partition.startNode(), partition.nodeCount(), properties)
+        );
 
-        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            var propertyValue = properties.doubleValue(nodeId);
-            sum += propertyValue;
-            if (propertyValue < min) {
-                min = propertyValue;
-            }
-            if (propertyValue > max) {
-                max = propertyValue;
-            }
+        ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
+
+        var min = tasks.stream().mapToDouble(ComputeAggregates::min).min().orElse(Double.MAX_VALUE);
+        var max = tasks.stream().mapToDouble(ComputeAggregates::max).max().orElse(Double.MIN_VALUE);
+        var sum = tasks.stream().mapToDouble(ComputeAggregates::sum).sum();
+
+        var maxMinDiff = max - min;
+
+        if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
+            return ZERO_SCALER;
+        } else {
+            return new Mean(properties, sum / nodeCount, maxMinDiff);
         }
-
-        return new Mean(properties, sum / nodeCount, max - min);
     }
 
     @Override
     public double scaleProperty(long nodeId) {
-        if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
-            return 0D;
-        }
         return (properties.doubleValue(nodeId) - avg) / maxMinDiff;
+    }
+
+    static class ComputeAggregates implements Runnable {
+
+        private final long start;
+        private final long length;
+        private final NodeProperties properties;
+        private double max;
+        private double min;
+        private double sum;
+
+        ComputeAggregates(long start, long length, NodeProperties property) {
+            this.start = start;
+            this.length = length;
+            this.properties = property;
+            this.min = Double.MAX_VALUE;
+            this.max = Double.MIN_VALUE;
+            this.sum = 0D;
+        }
+
+        @Override
+        public void run() {
+            for (long nodeId = start; nodeId < (start + length); nodeId++) {
+                var propertyValue = properties.doubleValue(nodeId);
+                sum += propertyValue;
+                if (propertyValue < min) {
+                    min = propertyValue;
+                }
+                if (propertyValue > max) {
+                    max = propertyValue;
+                }
+            }
+        }
+
+        double max() {
+            return max;
+        }
+
+        double min() {
+            return min;
+        }
+
+        double sum() {
+            return sum;
+        }
     }
 
 }

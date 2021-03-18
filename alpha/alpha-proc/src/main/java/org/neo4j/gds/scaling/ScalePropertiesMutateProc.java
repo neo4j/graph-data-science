@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
@@ -67,7 +68,8 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
         return (AlphaAlgorithmFactory<ScaleProperties, ScalePropertiesMutateConfig>) (graph, configuration, tracker, log, eventTracker) -> new ScaleProperties(
             graph,
             configuration,
-            tracker
+            tracker,
+            Pools.DEFAULT
         );
     }
 

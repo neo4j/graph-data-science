@@ -21,6 +21,8 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 
+import java.util.concurrent.ExecutorService;
+
 public interface Scaler {
 
     double CLOSE_TO_ZERO = 1e-15;
@@ -30,12 +32,23 @@ public interface Scaler {
     final class Factory {
         private Factory() {}
 
-        static Scaler create(String name, NodeProperties properties, long nodeCount) {
+        static Scaler create(
+            String name,
+            NodeProperties properties,
+            long nodeCount,
+            int concurrency,
+            ExecutorService executor
+        ) {
             switch (name) {
-                case "MinMax": return MinMax.create(properties, nodeCount);
-                case "Mean": return Mean.create(properties, nodeCount);
-                default: return null;
+                case "MinMax":
+                    return MinMax.create(properties, nodeCount, concurrency, executor);
+                case "Mean":
+                    return Mean.create(properties, nodeCount, concurrency, executor);
+                default:
+                    return null;
             }
         }
     }
+
+    Scaler ZERO_SCALER = nodeId -> 0;
 }

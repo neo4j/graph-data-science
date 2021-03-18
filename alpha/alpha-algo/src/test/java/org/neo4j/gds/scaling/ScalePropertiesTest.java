@@ -20,6 +20,10 @@
 package org.neo4j.gds.scaling;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.beta.generator.PropertyProducer;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -27,8 +31,10 @@ import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
 class ScalePropertiesTest {
@@ -49,16 +55,17 @@ class ScalePropertiesTest {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .featureProperties(List.of("a"))
             .scalers(List.of("MinMax"))
+            .concurrency(1)
             .build();
-        var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
 
-        assertArrayEquals(new double[]{11.1/13D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
-        assertArrayEquals(new double[]{12.8/13D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
+        assertArrayEquals(new double[]{11.1 / 13D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
+        assertArrayEquals(new double[]{12.8 / 13D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
         assertArrayEquals(new double[]{1D}, resultProperties[(int) graph.toOriginalNodeId("c")]);
-        assertArrayEquals(new double[]{9/13D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
+        assertArrayEquals(new double[]{9 / 13D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
         assertArrayEquals(new double[]{0D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
     }
 
@@ -67,16 +74,17 @@ class ScalePropertiesTest {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .featureProperties(List.of("a", "b", "c"))
             .scalers(List.of("MinMax", "MinMax", "MinMax"))
+            .concurrency(1)
             .build();
-        var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
 
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
 
-        assertArrayEquals(new double[]{11.1/13D, 0D, 0D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
-        assertArrayEquals(new double[]{12.8/13D, 0.25, 1/50D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
-        assertArrayEquals(new double[]{1D, 0.5, 2/50D}, resultProperties[(int) graph.toOriginalNodeId("c")]);
-        assertArrayEquals(new double[]{9/13D, 0.75, 10/50D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
+        assertArrayEquals(new double[]{11.1 / 13D, 0D, 0D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
+        assertArrayEquals(new double[]{12.8 / 13D, 0.25, 1 / 50D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
+        assertArrayEquals(new double[]{1D, 0.5, 2 / 50D}, resultProperties[(int) graph.toOriginalNodeId("c")]);
+        assertArrayEquals(new double[]{9 / 13D, 0.75, 10 / 50D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
         assertArrayEquals(new double[]{0D, 1D, 1D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
     }
 
@@ -85,8 +93,9 @@ class ScalePropertiesTest {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .featureProperties(List.of("a", "b"))
             .scalers(List.of("MinMax", "Mean"))
+            .concurrency(1)
             .build();
-        var algo = new ScaleProperties(graph, config, AllocationTracker.empty());
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
 
@@ -95,5 +104,38 @@ class ScalePropertiesTest {
         assertArrayEquals(new double[]{1D, 0}, resultProperties[(int) graph.toOriginalNodeId("c")]);
         assertArrayEquals(new double[]{9 / 13D, 0.25D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
         assertArrayEquals(new double[]{0D, 0.5D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
+    }
+
+    @Test
+    void parallelScaler() {
+        int nodeCount = 50_000;
+        var bigGraph = RandomGraphGenerator
+            .builder()
+            .nodeCount(nodeCount)
+            .averageDegree(1)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .nodePropertyProducer(PropertyProducer.random("a", -100, 100))
+            .build()
+            .generate();
+
+        var config = ImmutableScalePropertiesBaseConfig.builder()
+            .featureProperties(List.of("a"))
+            .scalers(List.of("MinMax"));
+
+        var parallelResult = new ScaleProperties(
+            bigGraph,
+            config.concurrency(4).build(),
+            AllocationTracker.empty(),
+            Pools.DEFAULT
+        ).compute().scaledProperties();
+
+        var expected = new ScaleProperties(
+            bigGraph,
+            config.concurrency(1).build(),
+            AllocationTracker.empty(),
+            Pools.DEFAULT
+        ).compute().scaledProperties();
+
+        IntStream.range(0, nodeCount).forEach(id -> assertEquals(expected.get(id)[0], parallelResult.get(id)[0]));
     }
 }

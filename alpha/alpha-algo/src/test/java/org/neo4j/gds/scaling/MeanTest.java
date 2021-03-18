@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -46,7 +47,7 @@ class MeanTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodeProperties properties, double avg, double maxMinDiff, double[] expected) {
-        var normalizer = Mean.create(properties, 10);
+        var normalizer = (Mean) Mean.create(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(normalizer.avg).isEqualTo(avg);
         assertThat(normalizer.maxMinDiff).isEqualTo(maxMinDiff);
@@ -58,10 +59,7 @@ class MeanTest {
     @Test
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 4D;
-        var normalizer = Mean.create(properties, 10);
-
-        assertThat(normalizer.avg).isEqualTo(4D);
-        assertThat(normalizer.maxMinDiff).isEqualTo(0D);
+        var normalizer = Mean.create(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
             assertThat(normalizer.scaleProperty(i)).isEqualTo(0D);
