@@ -31,17 +31,24 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ScalePropertiesBaseConfigTest {
+class ScalePropertiesBaseConfigTest {
 
     @Test
     void unequalNodePropertiesScalerSizes() {
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ImmutableScalePropertiesBaseConfig
-                .builder()
-                .scalers(List.of(Scaler.Variant.MINMAX, Scaler.Variant.MEAN))
-                .nodeProperties(List.of("a", "b", "c"))
-                .build()
+            () -> new ScalePropertiesMutateConfigImpl(
+                Optional.of("graph"),
+                Optional.empty(),
+                "",
+                CypherMapWrapper.create(
+                    Map.of(
+                        "mutateProperty", "test",
+                        "scalers", List.of("Mean", "Minmax"),
+                        "nodeProperties", List.of("a", "b", "c")
+                    )
+                )
+            )
         );
 
         assertThat(ex.getMessage(), containsString("Specify a scaler for each nodeProperties"));
