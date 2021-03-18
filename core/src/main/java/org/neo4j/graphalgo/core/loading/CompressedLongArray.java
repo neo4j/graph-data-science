@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.apache.lucene.util.ArrayUtil;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
@@ -129,7 +129,7 @@ public final class CompressedLongArray {
                 required
             ));
         } else if (storage.length <= targetLength) {
-            int newLength = ArrayUtil.oversize(targetLength, Byte.BYTES);
+            int newLength = BitUtil.nextHighestPowerOfTwo(targetLength);
             tracker.remove(sizeOfByteArray(storage.length));
             tracker.add(sizeOfByteArray(newLength));
             this.storage = Arrays.copyOf(storage, newLength);
@@ -145,7 +145,7 @@ public final class CompressedLongArray {
                 required
             ));
         } else if (weights[weightIndex].length <= pos + required) {
-            int newLength = ArrayUtil.oversize(pos + required, Long.BYTES);
+            int newLength = BitUtil.nextHighestPowerOfTwo(pos + required);
             tracker.remove(sizeOfDoubleArray(weights[weightIndex].length));
             tracker.add(sizeOfDoubleArray(newLength));
             weights[weightIndex] = Arrays.copyOf(weights[weightIndex], newLength);

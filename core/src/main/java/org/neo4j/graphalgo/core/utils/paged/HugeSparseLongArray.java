@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
@@ -29,7 +30,6 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.apache.lucene.util.ArrayUtil.oversize;
 
 public final class HugeSparseLongArray {
 
@@ -276,7 +276,7 @@ public final class HugeSparseLongArray {
                     return;
                 }
 
-                AtomicReferenceArray<long[]> newPages = new AtomicReferenceArray<>(oversize(newSize, MemoryUsage.BYTES_OBJECT_REF));
+                AtomicReferenceArray<long[]> newPages = new AtomicReferenceArray<>(BitUtil.nextHighestPowerOfTwo(newSize));
                 for (int pageIndex = 0; pageIndex < pages.length(); pageIndex++) {
                     long[] page = pages.get(pageIndex);
                     if (page != null) {

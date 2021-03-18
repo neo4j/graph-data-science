@@ -37,7 +37,6 @@ dependencies {
             [group: 'org.openjdk.jol',         name: 'jol-core',                 version: ver.'jol'],
             [group: 'org.jctools',             name: 'jctools-core',             version: ver.'jctools-core'],
             [group: 'io.jsonwebtoken',         name: 'jjwt-api',                 version: ver.'jjwt'],
-            [group: 'org.apache.lucene',       name: 'lucene-core',              version: ver.'lucene'],
     )
 
     implementation(
