@@ -97,6 +97,23 @@ class GraphStoreToFileExporterTest extends CsvTest {
     @Inject
     private IdFunction concurrentIdFunction;
 
+    @GdlGraph(graphNamePrefix = "noProperties")
+    private static final String GDL_WITHOUT_PROPERTIES =
+        "CREATE" +
+        "  (a:A)" +
+        ", (b:A)" +
+        ", (c:B)" +
+        ", (d:C)" +
+        ", (a)-[:REL1]->(a)" +
+        ", (a)-[:REL1]->(b)" +
+        ", (b)-[:REL2]->(a)" +
+        ", (b)-[:REL2]->(c)" +
+        ", (c)-[:REL3]->(d)" +
+        ", (d)-[:REL4]->(a)";
+
+    @Inject
+    public GraphStore noPropertiesGraphStore;
+
     public static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME);
     public static final List<String> RELATIONSHIP_COLUMNS = List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);
 
@@ -289,6 +306,42 @@ class GraphStoreToFileExporterTest extends CsvTest {
             List.of(
                 List.of(CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME, CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME),
                 List.of(graphStore.databaseId().toString(), Long.toString(graphStore.nodeCount()))
+            )
+        );
+    }
+
+    @Test
+    void exportSchemaWithoutProperties() {
+        var config = ImmutableGraphStoreToFileExporterConfig
+            .builder()
+            .exportName(tempDir.toString())
+            .writeConcurrency(1)
+            .includeMetaData(true)
+            .build();
+
+        var exporter = GraphStoreToFileExporter.csv(noPropertiesGraphStore, config, tempDir);
+        exporter.run(AllocationTracker.empty());
+
+        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, GRAPH_INFO_FILE_NAME));
+
+        assertDataContent(
+            NODE_SCHEMA_FILE_NAME,
+            List.of(
+                NODE_SCHEMA_COLUMNS,
+                List.of("A"),
+                List.of("B"),
+                List.of("C")
+            )
+        );
+
+        assertDataContent(
+            RELATIONSHIP_SCHEMA_FILE_NAME,
+            List.of(
+                CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
+                List.of("REL1"),
+                List.of("REL2"),
+                List.of("REL3"),
+                List.of("REL4")
             )
         );
     }

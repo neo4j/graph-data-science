@@ -204,14 +204,19 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             var nodeSchema = graphStoreInput.metaDataStore().nodeSchema();
             try (var nodeSchemaVisitor = nodeSchemaVisitorSupplier.get()) {
                 nodeSchema.properties().forEach((nodeLabel, properties) -> {
-                    properties.forEach((propertyKey, propertySchema) -> {
+                    if (properties.isEmpty()) {
                         nodeSchemaVisitor.nodeLabel(nodeLabel);
-                        nodeSchemaVisitor.key(propertyKey);
-                        nodeSchemaVisitor.defaultValue(propertySchema.defaultValue());
-                        nodeSchemaVisitor.valueType(propertySchema.valueType());
-                        nodeSchemaVisitor.state(propertySchema.state());
                         nodeSchemaVisitor.endOfEntity();
-                    });
+                    } else {
+                        properties.forEach((propertyKey, propertySchema) -> {
+                            nodeSchemaVisitor.nodeLabel(nodeLabel);
+                            nodeSchemaVisitor.key(propertyKey);
+                            nodeSchemaVisitor.defaultValue(propertySchema.defaultValue());
+                            nodeSchemaVisitor.valueType(propertySchema.valueType());
+                            nodeSchemaVisitor.state(propertySchema.state());
+                            nodeSchemaVisitor.endOfEntity();
+                        });
+                    }
                 });
             }
         }
@@ -220,15 +225,20 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             var relationshipSchema = graphStoreInput.metaDataStore().relationshipSchema();
             try (var relationshipSchemaVisitor = relationshipSchemaVisitorSupplier.get()) {
                 relationshipSchema.properties().forEach((relationshipType, properties) -> {
-                    properties.forEach((propertyKey, propertySchema) -> {
+                    if (properties.isEmpty()) {
                         relationshipSchemaVisitor.relationshipType(relationshipType);
-                        relationshipSchemaVisitor.key(propertyKey);
-                        relationshipSchemaVisitor.defaultValue(propertySchema.defaultValue());
-                        relationshipSchemaVisitor.valueType(propertySchema.valueType());
-                        relationshipSchemaVisitor.aggregation(propertySchema.aggregation());
-                        relationshipSchemaVisitor.state(propertySchema.state());
                         relationshipSchemaVisitor.endOfEntity();
-                    });
+                    } else {
+                        properties.forEach((propertyKey, propertySchema) -> {
+                            relationshipSchemaVisitor.relationshipType(relationshipType);
+                            relationshipSchemaVisitor.key(propertyKey);
+                            relationshipSchemaVisitor.defaultValue(propertySchema.defaultValue());
+                            relationshipSchemaVisitor.valueType(propertySchema.valueType());
+                            relationshipSchemaVisitor.aggregation(propertySchema.aggregation());
+                            relationshipSchemaVisitor.state(propertySchema.state());
+                            relationshipSchemaVisitor.endOfEntity();
+                        });
+                    }
                 });
             }
         }
