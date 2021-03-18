@@ -37,8 +37,8 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
     @Configuration.ConvertWith("parsePropertyNames")
     List<String> nodeProperties();
 
-    @Configuration.ConvertWith("parseScalars")
-    @Configuration.ToMapValue("org.neo4j.gds.scaling.Scaler.Variant#variantsToString")
+    @Configuration.ConvertWith("org.neo4j.gds.scaling.Scaler.Variant#fromCypher")
+    @Configuration.ToMapValue("org.neo4j.gds.scaling.Scaler.Variant#toCypher")
     List<Scaler.Variant> scalers();
 
     static List<String> parsePropertyNames(Object propertyMapping) {
@@ -48,11 +48,6 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
             .map(PropertyMapping::propertyKey)
             .collect(Collectors.toList());
     }
-
-    static List<Scaler.Variant> parseScalars(List<String> scalars) {
-        return scalars.stream().map(Scaler.Variant::lookup).collect(Collectors.toList());
-    }
-
 
     @Value.Check
     default void propertiesSizeMustEqualScalersSize() {

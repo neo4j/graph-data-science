@@ -78,10 +78,14 @@ public interface Scaler {
             ExecutorService executor
         );
 
-        public static List<String> variantsToString(List<Variant> variants) {
+        public static List<String> toCypher(List<Variant> variants) {
             return variants.stream()
                 .map(Variant::name)
                 .collect(Collectors.toList());
+        }
+
+        public static List<Variant> fromCypher(List<String> scalers) {
+            return scalers.stream().map(Scaler.Variant::lookup).collect(Collectors.toList());
         }
     }
 }
