@@ -23,11 +23,11 @@ import org.neo4j.graphalgo.RelationshipType;
 
 import java.util.Map;
 
-public abstract class CSRFilterGraph extends FilterGraph implements CSRGraph {
+public abstract class CSRGraphAdapter extends GraphAdapter implements CSRGraph {
 
     protected final CSRGraph graph;
 
-    public CSRFilterGraph(CSRGraph graph) {
+    public CSRGraphAdapter(CSRGraph graph) {
         super(graph);
         this.graph = graph;
     }

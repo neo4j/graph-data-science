@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.spanningTrees;
 
-import org.neo4j.graphalgo.api.FilterGraph;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphAdapter;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 
 import java.util.Arrays;
 
-public class SpanningGraph extends FilterGraph {
+public class SpanningGraph extends GraphAdapter {
 
     private final SpanningTree spanningTree;
 

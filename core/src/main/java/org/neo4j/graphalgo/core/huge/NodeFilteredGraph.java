@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.api.CSRFilterGraph;
 import org.neo4j.graphalgo.api.CSRGraph;
+import org.neo4j.graphalgo.api.CSRGraphAdapter;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
@@ -34,7 +34,7 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
-public class NodeFilteredGraph extends CSRFilterGraph {
+public class NodeFilteredGraph extends CSRGraphAdapter {
 
     private final NodeMapping filteredIdMap;
 

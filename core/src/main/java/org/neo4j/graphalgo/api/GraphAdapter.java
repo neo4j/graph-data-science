@@ -30,11 +30,11 @@ import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
-public abstract class FilterGraph implements Graph {
+public abstract class GraphAdapter implements Graph {
 
     protected final Graph graph;
 
-    public FilterGraph(Graph graph) {
+    public GraphAdapter(Graph graph) {
         this.graph = graph;
     }
 

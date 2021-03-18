@@ -21,15 +21,15 @@ package org.neo4j.graphalgo.extension;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.graphalgo.api.CSRFilterGraph;
 import org.neo4j.graphalgo.api.CSRGraph;
+import org.neo4j.graphalgo.api.CSRGraphAdapter;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectConfig;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactory;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactoryLocator;
 
-public class TestGraph extends CSRFilterGraph {
+public class TestGraph extends CSRGraphAdapter {
 
     private final IdFunction idFunction;
     private final String name;
