@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -51,7 +50,7 @@ class ScalePropertiesBaseConfigTest {
             )
         );
 
-        assertThat(ex.getMessage(), containsString("Specify a scaler for each nodeProperties"));
+        assertThat(ex.getMessage()).contains("Specify a scaler for each nodeProperties");
     }
 
     @Test
@@ -84,11 +83,12 @@ class ScalePropertiesBaseConfigTest {
                     Map.of(
                         "mutateProperty", "test",
                         "scalers", List.of("nonExistent"),
-                        "nodeProperties", "test")
+                        "nodeProperties", "test"
                     )
                 )
+            )
         );
 
-        assertThat(ex.getMessage(), containsString("Scaler `nonExistent` is not supported."));
+        assertThat(ex.getMessage()).contains("Scaler `nonExistent` is not supported.");
     }
 }
