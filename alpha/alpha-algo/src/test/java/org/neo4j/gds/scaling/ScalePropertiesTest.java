@@ -54,7 +54,7 @@ class ScalePropertiesTest {
     TestGraph graph;
 
     @Test
-    void minmaxNormalisation() {
+    void minmaxScaling() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a"))
             .scalers(List.of(Scaler.Variant.MINMAX))
@@ -73,7 +73,7 @@ class ScalePropertiesTest {
     }
 
     @Test
-    void minmaxNormalisationOverMultipleProperties() {
+    void minmaxScalingOverMultipleProperties() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "b", "c"))
             .scalers(List.of(Scaler.Variant.MINMAX, Scaler.Variant.MINMAX, Scaler.Variant.MINMAX))
@@ -92,7 +92,7 @@ class ScalePropertiesTest {
     }
 
     @Test
-    void differentNormalizers() {
+    void differentScalers() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "b"))
             .scalers(List.of(Scaler.Variant.MINMAX, Scaler.Variant.MEAN))
