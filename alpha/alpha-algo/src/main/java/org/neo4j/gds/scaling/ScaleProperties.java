@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -152,9 +153,10 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
             ));
         } else if (!supportedTypes.contains(result.valueType())) {
             throw new UnsupportedOperationException(formatWithLocale(
-                "Scaling node property `%s` of type `%s` is currently not supported",
+                "Scaling node property `%s` of type `%s` is not supported. Supported types are %s",
                 property,
-                result.valueType().cypherName()
+                result.valueType().cypherName(),
+                supportedTypes.stream().map(ValueType::cypherName).collect(Collectors.joining(", "))
             ));
         }
 

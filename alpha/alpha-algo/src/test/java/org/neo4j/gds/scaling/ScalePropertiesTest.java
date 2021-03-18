@@ -164,7 +164,7 @@ class ScalePropertiesTest {
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
         var error = assertThrows(UnsupportedOperationException.class, algo::compute);
 
-        assertThat(error.getMessage(), containsString("Scaling node property `array` of type `List of Float` is currently not supported"));
+        assertThat(error.getMessage(), containsString("Scaling node property `array` of type `List of Float` is not supported"));
     }
 
     @Test
