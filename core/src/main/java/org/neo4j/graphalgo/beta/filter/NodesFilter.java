@@ -61,7 +61,7 @@ final class NodesFilter {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(1)
             .maxOriginalId(graphStore.nodeCount())
-            .hasLabelInformation(true)
+            .hasLabelInformation(!graphStore.nodeLabels().isEmpty())
             .tracker(allocationTracker)
             .build();
 
