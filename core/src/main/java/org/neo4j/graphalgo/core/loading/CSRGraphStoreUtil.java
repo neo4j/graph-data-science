@@ -41,7 +41,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Collections.singletonMap;
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class CSRGraphStoreUtil {
@@ -81,25 +80,27 @@ public final class CSRGraphStoreUtil {
     @NotNull
     private static Map<NodeLabel, NodePropertyStore> constructNodePropertiesFromGraph(HugeGraph graph) {
         Map<NodeLabel, NodePropertyStore> nodePropertyStores = new HashMap<>();
-        NodePropertyStore.Builder nodePropertyStoreBuilder = NodePropertyStore.builder();
         graph
             .schema()
             .nodeSchema()
             .properties()
-            .values()
-            .stream()
-            .flatMap(map -> map.values().stream())
-            .forEach(propertySchema -> nodePropertyStoreBuilder.putIfAbsent(
-                propertySchema.key(),
-                NodeProperty.of(
-                    propertySchema.key(),
-                    propertySchema.state(),
-                    graph.nodeProperties(propertySchema.key()),
-                    propertySchema.defaultValue()
-                )
-            ));
+            .forEach((nodeLabel, propertySchemas) -> {
+                var nodePropertyStoreBuilder = NodePropertyStore.builder();
 
-        nodePropertyStores.put(ALL_NODES, nodePropertyStoreBuilder.build());
+                propertySchemas.forEach((propertyKey, propertySchema) -> {
+                    nodePropertyStoreBuilder.putIfAbsent(
+                        propertyKey,
+                        NodeProperty.of(propertyKey,
+                            propertySchema.state(),
+                            graph.nodeProperties(propertyKey),
+                            propertySchema.defaultValue()
+                        )
+                    );
+                });
+                nodePropertyStores.put(nodeLabel, nodePropertyStoreBuilder.build());
+
+            });
+
         return nodePropertyStores;
     }
 
