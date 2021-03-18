@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
@@ -52,18 +51,21 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         GraphStoreToFileExporterConfig config,
         Path exportPath
     ) {
-         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
+        Set<String> headerFiles = ConcurrentHashMap.newKeySet();
 
-        NodeSchema nodeSchema = graphStore.schema().nodeSchema();
-        boolean hasProperties = !nodeSchema.allProperties().isEmpty();
+        var nodeSchema = graphStore.schema().nodeSchema();
+        var hasNodeProperties = !nodeSchema.allProperties().isEmpty();
+        var relationshipSchema = graphStore.schema().relationshipSchema();
+        var hasRelationshipProperties = !relationshipSchema.allProperties().isEmpty();
         return GraphStoreToFileExporter.of(
             graphStore,
             config,
             () -> new CsvGraphInfoVisitor(exportPath),
-            () -> new CsvNodeSchemaVisitor(exportPath, hasProperties),
-            () -> new CsvRelationshipSchemaVisitor(exportPath),
+            () -> new CsvNodeSchemaVisitor(exportPath, hasNodeProperties),
+            () -> new CsvRelationshipSchemaVisitor(exportPath, hasRelationshipProperties),
             (index) -> new CsvNodeVisitor(exportPath, nodeSchema, headerFiles, index, config.includeMetaData()),
-            (index) -> new CsvRelationshipVisitor(exportPath, graphStore.schema().relationshipSchema(), headerFiles, index)
+            (index) -> new CsvRelationshipVisitor(exportPath,
+                relationshipSchema, headerFiles, index)
         );
     }
 

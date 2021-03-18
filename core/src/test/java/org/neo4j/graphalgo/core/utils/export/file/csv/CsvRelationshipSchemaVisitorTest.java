@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.Aggregation;
 
-import java.io.IOException;
 import java.util.List;
 
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.DEFAULT_VALUE_COLUMN_NAME;
@@ -49,8 +48,8 @@ class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
     );
 
     @Test
-    void writesVisitedNodeSchema() throws IOException {
-        var relationshipSchemaVisitor = new CsvRelationshipSchemaVisitor(tempDir);
+    void writesVisitedNodeSchema() {
+        var relationshipSchemaVisitor = new CsvRelationshipSchemaVisitor(tempDir, true);
         var relType1 = RelationshipType.of("REL1");
         relationshipSchemaVisitor.relationshipType(relType1);
         relationshipSchemaVisitor.key("prop1");
@@ -77,6 +76,29 @@ class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
                 defaultHeaderColumns(),
                 List.of("REL1", "prop1", "long", "DefaultValue(42)", "COUNT", "PERSISTENT"),
                 List.of("REL2", "prop2", "double", "DefaultValue(13.37)", "DEFAULT", "TRANSIENT")
+            )
+        );
+    }
+
+    @Test
+    void writesSchemaWithoutProperties() {
+        var relationshipSchemaVisitor = new CsvRelationshipSchemaVisitor(tempDir, false);
+        RelationshipType rel1 = RelationshipType.of("REL1");
+        relationshipSchemaVisitor.relationshipType(rel1);
+        relationshipSchemaVisitor.endOfEntity();
+
+        RelationshipType rel2 = RelationshipType.of("REL2");
+        relationshipSchemaVisitor.relationshipType(rel2);
+        relationshipSchemaVisitor.endOfEntity();
+
+        relationshipSchemaVisitor.close();
+        assertCsvFiles(List.of(RELATIONSHIP_SCHEMA_FILE_NAME));
+        assertDataContent(
+            RELATIONSHIP_SCHEMA_FILE_NAME,
+            List.of(
+                defaultHeaderColumns(),
+                List.of("REL1"),
+                List.of("REL2")
             )
         );
     }

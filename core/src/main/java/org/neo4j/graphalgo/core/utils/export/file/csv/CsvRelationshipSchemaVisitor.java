@@ -40,25 +40,29 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
     static final String RELATIONSHIP_SCHEMA_FILE_NAME = "relationship-schema.csv";
 
     private final CsvAppender csvAppender;
+    private final boolean hasProperties;
 
-    public CsvRelationshipSchemaVisitor(Path fileLocation) {
+    public CsvRelationshipSchemaVisitor(Path fileLocation, boolean hasProperties) {
         try {
             this.csvAppender = new CsvWriter().append(fileLocation.resolve(RELATIONSHIP_SCHEMA_FILE_NAME), StandardCharsets.UTF_8);
             writeHeader();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        this.hasProperties = hasProperties;
     }
 
     @Override
     protected void export() {
         try {
             csvAppender.appendField(relationshipType().name());
-            csvAppender.appendField(key());
-            csvAppender.appendField(valueType().csvName());
-            csvAppender.appendField(defaultValue().toString());
-            csvAppender.appendField(aggregation().name());
-            csvAppender.appendField(state().name());
+            if (hasProperties) {
+                csvAppender.appendField(key());
+                csvAppender.appendField(valueType().csvName());
+                csvAppender.appendField(defaultValue().toString());
+                csvAppender.appendField(aggregation().name());
+                csvAppender.appendField(state().name());
+            }
             csvAppender.endLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
