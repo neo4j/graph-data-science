@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvImportUtil;
@@ -43,9 +44,13 @@ import java.util.stream.Collectors;
 public final class FileInput implements CompatInput {
 
     private final Path importPath;
+    private final GraphInfo graphInfo;
+    private final NodeSchema nodeSchema;
 
     FileInput(Path importPath) {
         this.importPath = importPath;
+        this.graphInfo = new GraphInfoLoader(importPath).load();
+        this.nodeSchema = new NodeSchemaLoader(importPath).load();
     }
 
     @Override
@@ -76,6 +81,14 @@ public final class FileInput implements CompatInput {
     @Override
     public Input.Estimates calculateEstimates(CompatPropertySizeCalculator propertySizeCalculator) throws IOException {
         return null;
+    }
+
+    public GraphInfo graphInfo() {
+        return graphInfo;
+    }
+
+    public NodeSchema nodeSchema() {
+        return nodeSchema;
     }
 
     abstract static class FileImporter implements InputIterator {

@@ -19,25 +19,40 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
+import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.ImmutableImportedProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 public final class CsvToGraphStoreExporter {
 
-    private final VisitorProducer<NodeVisitor> nodeVisitorVisitorSupplier;
+    private final GraphStoreNodeVisitor.Builder nodeVisitorBuilder;
     private final Path importPath;
     private final GraphStoreToFileExporterConfig config;
 
+    public static CsvToGraphStoreExporter create(
+        GraphStoreToFileExporterConfig config,
+        Path importPath
+    ) {
+        return new CsvToGraphStoreExporter(
+            new GraphStoreNodeVisitor.Builder(),
+            config,
+            importPath
+        );
+    }
+
     private CsvToGraphStoreExporter(
-        VisitorProducer<NodeVisitor> nodeVisitorVisitorSupplier,
+        GraphStoreNodeVisitor.Builder nodeVisitorBuilder,
         GraphStoreToFileExporterConfig config,
         Path importPath
     ) {
         this.config = config;
-        this.nodeVisitorVisitorSupplier = nodeVisitorVisitorSupplier;
+        this.nodeVisitorBuilder = nodeVisitorBuilder.withReverseIdMapping(config.includeMetaData());
         this.importPath = importPath;
     }
 
@@ -48,7 +63,6 @@ public final class CsvToGraphStoreExporter {
     }
 
     private void export(FileInput fileInput) {
-        exportMetaData(fileInput);
         exportNodes(fileInput);
         exportRelationships(fileInput);
     }
