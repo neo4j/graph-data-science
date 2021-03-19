@@ -31,7 +31,7 @@ class AccuracyMetricTest {
     void shouldComputeAccuracy() {
         var predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
         var targets = HugeLongArray.of(4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5);
-        var metric = Metric.ACCURACY;
+        var metric = AllClassMetric.ACCURACY;
         assertThat(metric.compute(targets, predictions, targets)).isCloseTo(7.0 / 15, Offset.offset(1e-8));
     }
 
@@ -39,7 +39,7 @@ class AccuracyMetricTest {
     void shouldComputeAccuracyAllCorrect() {
         var predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
         var targets = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
-        var metric = Metric.ACCURACY;
+        var metric = AllClassMetric.ACCURACY;
         assertThat(metric.compute(targets, predictions, targets)).isCloseTo(1.0, Offset.offset(1e-8));
     }
 
@@ -47,7 +47,7 @@ class AccuracyMetricTest {
     void shouldComputeAccuracyAllWrong() {
         var predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
         var targets = HugeLongArray.of(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-        var metric = Metric.ACCURACY;
+        var metric = AllClassMetric.ACCURACY;
         assertThat(metric.compute(targets, predictions, targets)).isCloseTo(0.0, Offset.offset(1e-8));
     }
 }

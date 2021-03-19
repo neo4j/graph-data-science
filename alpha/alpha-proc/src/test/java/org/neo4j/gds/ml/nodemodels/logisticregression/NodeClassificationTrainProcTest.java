@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 class NodeClassificationTrainProcTest extends BaseProcTest {
 
@@ -159,7 +160,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .addParameter("params", List.of(Map.of("penalty", 1)))
             .yields();
 
-        assertError(query, "Invalid metric `foo`.");
+        assertError(query, "Invalid metric expression `foo`.");
     }
 
     @Test

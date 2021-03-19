@@ -19,40 +19,38 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
+
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+public enum AllClassMetric implements Metric {
+    F1_WEIGHTED(new F1Weighted()),
+    F1_MACRO(new F1Macro()),
+    ACCURACY(new AccuracyMetric());
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+    private final MetricStrategy strategy;
 
-public class AccuracyMetric implements AllClassMetric.MetricStrategy {
+    AllClassMetric(MetricStrategy strategy) {
+        this.strategy = strategy;
+    }
 
-    @Override
     public double compute(
         HugeLongArray targets,
         HugeLongArray predictions,
         HugeLongArray globalTargets
     ) {
-        long accuratePredictions = 0;
-        assert targets.size() == predictions.size() : formatWithLocale(
-            "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
-            targets.size(),
-            predictions.size());
+        return strategy.compute(targets, predictions, globalTargets);
+    }
 
-        for (long row = 0; row < targets.size(); row++) {
-            long targetClass = targets.get(row);
-            long predictedClass = predictions.get(row);
-            if (predictedClass == targetClass) {
-                accuratePredictions++;
-            }
-        }
+    interface MetricStrategy {
+        double compute(
+            HugeLongArray targets,
+            HugeLongArray predictions,
+            HugeLongArray globalTargets
+        );
+    }
 
-        if (targets.size() == 0) {
-            return 0.0;
-        }
-        return BigDecimal.valueOf(accuratePredictions)
-            .divide(BigDecimal.valueOf(targets.size()), 8, RoundingMode.UP)
-            .doubleValue();
+    @Override
+    public String asString() {
+        return name();
     }
 }

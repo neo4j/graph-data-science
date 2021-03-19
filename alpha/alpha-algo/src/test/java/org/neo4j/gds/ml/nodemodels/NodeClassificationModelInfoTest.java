@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.nodemodels.metrics.Metric;
+import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 
 import java.util.List;
 import java.util.Map;
@@ -53,7 +53,7 @@ class NodeClassificationModelInfoTest {
         var info = NodeClassificationModelInfo.of(
             List.of(42L, Long.MAX_VALUE),
             params,
-            Map.of(Metric.F1_WEIGHTED, metricData)
+            Map.of(AllClassMetric.F1_WEIGHTED, metricData)
         );
         var expected = Map.of(
             "bestParameters", params,

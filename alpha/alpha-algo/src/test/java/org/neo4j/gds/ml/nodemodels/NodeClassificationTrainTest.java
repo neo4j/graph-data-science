@@ -21,6 +21,11 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -31,8 +36,10 @@ import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
@@ -65,7 +72,7 @@ class NodeClassificationTrainTest {
     TestGraph graph;
 
     @ParameterizedTest
-    @EnumSource(Metric.class)
+    @MethodSource("metricArguments")
     void selectsTheBestModel(Metric metric) {
 
         Map<String, Object> model1 = Map.of("penalty", 1, "maxIterations", 0);
@@ -102,7 +109,7 @@ class NodeClassificationTrainTest {
 
     @GdsEditionTest(Edition.EE)
     @ParameterizedTest
-    @EnumSource(Metric.class)
+    @MethodSource("metricArguments")
     void shouldProduceDifferentMetricsForDifferentTrainings(Metric metric) {
 
         var modelCandidates = List.of(
@@ -185,5 +192,11 @@ class NodeClassificationTrainTest {
             .metrics(List.of(metric))
             .params(modelCandidates)
             .build();
+    }
+
+    static Stream<Arguments> metricArguments() {
+        var singleClassMetrics = Stream.of(Arguments.arguments(Metric.resolveMetric("F1(class=1)")));
+        var allClassMetrics = Arrays.stream(AllClassMetric.values()).map(Arguments::of);
+        return Stream.concat(singleClassMetrics, allClassMetrics);
     }
 }

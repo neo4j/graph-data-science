@@ -49,7 +49,7 @@ class F1WeightedTest {
 
     @Test
     void shouldComputeF1AllCorrectMultiple() {
-        var metric = Metric.F1_WEIGHTED;
+        var metric = AllClassMetric.F1_WEIGHTED;
         var totalF1 = 2 * 1.0 + 2 * 2.0/3.0 + 2 * 2.0/3.0 + 3 * 2.0/3.0;
         var totalExamples = predictions.size();
         assertThat(metric.compute(targets, predictions, globalTargets))

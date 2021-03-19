@@ -39,6 +39,33 @@ class F1ScoreTest {
     }
 
     @Test
+    void shouldComputeF1BinaryBadModel() {
+        var binaryPredictions = HugeLongArray.of(0, 0, 0, 0, 0);
+        var binaryTargets = HugeLongArray.of(0, 0, 0, 0, 1);
+        var metric = new F1Score(1);
+        assertThat(metric.compute(binaryTargets, binaryPredictions)).isEqualTo(0.0);
+    }
+
+    @Test
+    void shouldComputeF1BinaryMediumModel() {
+        var binaryPredictions = HugeLongArray.of(0, 0, 0, 0, 1);
+        var binaryTargets = HugeLongArray.of(0, 0, 0, 1, 1);
+        var metric = new F1Score(1);
+        var precision = 1.0;
+        var recall = 0.5;
+        var f1 = 2.0/(1.0/precision + 1.0/recall);
+        assertThat(metric.compute(binaryTargets, binaryPredictions)).isCloseTo(f1, Offset.offset(1e-8));
+    }
+
+    @Test
+    void shouldComputeF1BinaryPerfectModel() {
+        var binaryPredictions = HugeLongArray.of(0, 0, 0, 1, 1);
+        var binaryTargets = HugeLongArray.of(0, 0, 0, 1, 1);
+        var metric = new F1Score(1);
+        assertThat(metric.compute(binaryTargets, binaryPredictions)).isCloseTo(1.0, Offset.offset(1e-8));
+    }
+
+    @Test
     void shouldComputeF1AllCorrectMultiple() {
         var metric = new F1Score(1);
         assertThat(metric.compute(targets, predictions)).isCloseTo(1.0, Offset.offset(1e-8));

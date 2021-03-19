@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.nodemodels.metrics;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
-public class F1Weighted implements Metric.MetricStrategy {
+public class F1Weighted implements AllClassMetric.MetricStrategy {
 
     @Override
     public double compute(

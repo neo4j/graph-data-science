@@ -21,9 +21,11 @@ package org.neo4j.gds.ml.nodemodels.metrics;
 
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
+import java.util.Objects;
+
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class F1Score {
+public class F1Score implements Metric {
 
     private static final double EPSILON = 1e-8;
 
@@ -33,9 +35,9 @@ public class F1Score {
         this.positiveTarget = positiveTarget;
     }
 
+    @Override
     public double compute(
-        HugeLongArray targets,
-        HugeLongArray predictions
+        HugeLongArray targets, HugeLongArray predictions, HugeLongArray globalTargets
     ) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
                     "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
@@ -74,5 +76,38 @@ public class F1Score {
         var result = 2 * (precision * recall) / (precision + recall + EPSILON);
         assert result <= 1.0;
         return result;
+    }
+
+    public double compute(
+        HugeLongArray targets, HugeLongArray predictions
+    ) {
+        return compute(targets, predictions, null);
+    }
+
+    @Override
+    public String asString() {
+        return "F1(class=" + positiveTarget + ")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        F1Score f1Score = (F1Score) o;
+        return positiveTarget == f1Score.positiveTarget;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(asString());
+    }
+
+    @Override
+    public String toString() {
+        return asString();
+    }
+
+    long positiveTarget() {
+        return positiveTarget;
     }
 }

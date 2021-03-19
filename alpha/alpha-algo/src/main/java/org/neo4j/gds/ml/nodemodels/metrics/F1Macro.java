@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class F1Macro implements Metric.MetricStrategy {
+public class F1Macro implements AllClassMetric.MetricStrategy {
 
     @Override
     public double compute(

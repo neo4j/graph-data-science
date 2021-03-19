@@ -19,32 +19,34 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric.F1_MACRO;
 
-class F1MacroTest {
+public class MetricTest {
 
-    private HugeLongArray targets;
-    private HugeLongArray predictions;
-
-    @BeforeEach
-    void setup() {
-        predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
-        targets = HugeLongArray.of(4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5);
-
+    @Test
+    void shouldCreateF1Metric() {
+        var metric = Metric.resolveMetric("F1(class=42)");
+        assertThat(metric.getClass()).isEqualTo(F1Score.class);
+        assertThat(((F1Score)metric).positiveTarget()).isEqualTo(42L);
     }
 
     @Test
-    void shouldComputeF1AllCorrectMultiple() {
-        var metric = F1_MACRO;
-        var totalF1 = 1.0 + 2.0/3.0 + 2.0/3.0 + 2.0/3.0;
-        var totalClasses = 7;
-        assertThat(metric.compute(targets, predictions, targets))
-            .isCloseTo(totalF1 / totalClasses, Offset.offset(1e-8));
+    void shouldCreateAccuracyMetric() {
+        var metric = Metric.resolveMetric("Accuracy");
+        assertThat(metric).isEqualTo(AllClassMetric.ACCURACY);
+    }
+
+    @Test
+    void shouldCreateF1WeightedMetric() {
+        var metric = Metric.resolveMetric("F1_WeIGhTED");
+        assertThat(metric).isEqualTo(AllClassMetric.F1_WEIGHTED);
+    }
+
+    @Test
+    void shouldCreateF1MacroMetric() {
+        var metric = Metric.resolveMetric("F1_maCRo");
+        assertThat(metric).isEqualTo(AllClassMetric.F1_MACRO);
     }
 }
