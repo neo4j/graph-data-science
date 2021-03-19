@@ -42,7 +42,7 @@ public final class FileToGraphStoreExporter {
     }
 
     public GraphStoreExporter.ImportedProperties run(AllocationTracker tracker) {
-        var fileInput = new FileInput();
+        var fileInput = new FileInput(importPath);
         export(fileInput);
         return ImmutableImportedProperties.of(0, 0);
     }

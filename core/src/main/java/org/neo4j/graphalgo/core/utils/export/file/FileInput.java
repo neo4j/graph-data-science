@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
+import org.neo4j.graphalgo.core.utils.export.file.csv.CsvImportUtil;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
@@ -40,9 +41,20 @@ import java.util.stream.Collectors;
 
 public final class FileInput implements CompatInput {
 
+    private final Path importPath;
+
+    FileInput(Path importPath) {
+        this.importPath = importPath;
+    }
+
     @Override
     public InputIterable nodes(Collector badCollector) {
-        return null;
+        Map<Path, List<Path>> pathMapping = CsvImportUtil.headerToFileMapping(importPath);
+        Map<NodeFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
+            entry -> CsvImportUtil.parseHeader(entry.getKey()),
+            Map.Entry::getValue
+        ));
+        return () -> new NodeImporter(headerToDataFilesMapping);
     }
 
     @Override
