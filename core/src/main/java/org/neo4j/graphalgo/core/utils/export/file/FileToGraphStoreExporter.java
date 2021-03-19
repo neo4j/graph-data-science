@@ -29,7 +29,7 @@ public final class FileToGraphStoreExporter {
 
     private final VisitorProducer<NodeVisitor> nodeVisitorVisitorSupplier;
     private final Path importPath;
-    private GraphStoreToFileExporterConfig config;
+    private final GraphStoreToFileExporterConfig config;
 
     private FileToGraphStoreExporter(
         VisitorProducer<NodeVisitor> nodeVisitorVisitorSupplier,
