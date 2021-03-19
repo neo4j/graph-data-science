@@ -23,9 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationTrainConfig;
-import org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecification;
+import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.util.ObjectMapperSingleton;
-import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +33,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecificationTest.allValidMetricSpecifications;
+import static org.neo4j.gds.ml.nodemodels.metrics.MetricSpecificationTest.allValidMetricSpecifications;
 
 class NodeClassificationTrainConfigSerializerTest {
 

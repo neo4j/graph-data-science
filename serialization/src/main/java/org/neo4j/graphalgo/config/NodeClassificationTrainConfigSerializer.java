@@ -20,9 +20,8 @@
 package org.neo4j.graphalgo.config;
 
 import org.neo4j.gds.TrainConfigSerializer;
+import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
-import org.neo4j.gds.ml.nodemodels.metrics.Metric;
-import org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecification;
 import org.neo4j.gds.ml.util.ObjectMapperSingleton;
 import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
 

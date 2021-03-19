@@ -23,7 +23,7 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecification;
+import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
