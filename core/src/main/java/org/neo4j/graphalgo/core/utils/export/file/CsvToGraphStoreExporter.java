@@ -25,13 +25,13 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.nio.file.Path;
 
-public final class FileToGraphStoreExporter {
+public final class CsvToGraphStoreExporter {
 
     private final VisitorProducer<NodeVisitor> nodeVisitorVisitorSupplier;
     private final Path importPath;
     private final GraphStoreToFileExporterConfig config;
 
-    private FileToGraphStoreExporter(
+    private CsvToGraphStoreExporter(
         VisitorProducer<NodeVisitor> nodeVisitorVisitorSupplier,
         GraphStoreToFileExporterConfig config,
         Path importPath
