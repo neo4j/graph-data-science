@@ -92,4 +92,23 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
         currentId = -1;
         currentLabels = EMPTY_LABELS;
     }
+
+    abstract static class Builder<SELF extends Builder<SELF, VISITOR>, VISITOR extends NodeVisitor> {
+        NodeSchema nodeSchema;
+        boolean reverseIdMapping;
+
+        public SELF withNodeSchema(NodeSchema nodeSchema) {
+            this.nodeSchema = nodeSchema;
+            return me();
+        }
+
+        public SELF withReverseIdMapping(boolean reverseIdMapping) {
+            this.reverseIdMapping = reverseIdMapping;
+            return me();
+        }
+
+        abstract SELF me();
+
+        abstract VISITOR build();
+    }
 }
