@@ -39,7 +39,11 @@ image::equations/mean.svg[mean of p equals p minus average of p divided by maxim
 
 === Log scaler
 
-Transforms all property values using the natural logrithm.
+Transforms all property values using the natural logarithm.
+
+=== L2 Norm
+
+Scaling the components of a feature vector such that the complete vector has length one by using the Euclidean length of the vector.
 
 [[algorithms-scale-properties-syntax]]
 == Syntax

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
@@ -33,8 +34,29 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
 
 class ScalePropertiesBaseConfigTest {
+
+    @ParameterizedTest
+    @ValueSource(strings = {"mean", "minmax", "log", "l2norm"})
+    void parseValidScalers(String scaler) {
+        ScalePropertiesMutateConfigImpl config = new ScalePropertiesMutateConfigImpl(
+            Optional.of("graph"),
+            Optional.empty(),
+            "",
+            CypherMapWrapper.create(
+                Map.of(
+                    "mutateProperty", "test",
+                    "scalers", List.of(scaler),
+                    "nodeProperties", List.of("a")
+                )
+            )
+        );
+
+        assertThat(config.scalers().size()).isEqualTo(1);
+        assertThat(toLowerCaseWithLocale(config.scalers().get(0).name())).isEqualTo(scaler);
+    }
 
     @Test
     void unequalNodePropertiesScalerSizes() {

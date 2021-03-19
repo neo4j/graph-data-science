@@ -69,6 +69,14 @@ public interface Scaler {
             ) {
                 return StdScore.create(properties, nodeCount, concurrency, executor);
             }
+        },
+        L2NORM {
+            @Override
+            public Scaler create(
+                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return L2Norm.create(properties, nodeCount, concurrency, executor);
+            }
         };
 
         public static Variant lookup(String name) {
