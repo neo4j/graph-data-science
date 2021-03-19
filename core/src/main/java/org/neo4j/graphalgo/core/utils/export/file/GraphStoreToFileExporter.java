@@ -54,18 +54,15 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
 
         var nodeSchema = graphStore.schema().nodeSchema();
-        var hasNodeProperties = !nodeSchema.allProperties().isEmpty();
         var relationshipSchema = graphStore.schema().relationshipSchema();
-        var hasRelationshipProperties = !relationshipSchema.allProperties().isEmpty();
         return GraphStoreToFileExporter.of(
             graphStore,
             config,
             () -> new CsvGraphInfoVisitor(exportPath),
-            () -> new CsvNodeSchemaVisitor(exportPath, hasNodeProperties),
-            () -> new CsvRelationshipSchemaVisitor(exportPath, hasRelationshipProperties),
+            () -> new CsvNodeSchemaVisitor(exportPath, nodeSchema.hasProperties()),
+            () -> new CsvRelationshipSchemaVisitor(exportPath, relationshipSchema.hasProperties()),
             (index) -> new CsvNodeVisitor(exportPath, nodeSchema, headerFiles, index, config.includeMetaData()),
-            (index) -> new CsvRelationshipVisitor(exportPath,
-                relationshipSchema, headerFiles, index)
+            (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index)
         );
     }
 
