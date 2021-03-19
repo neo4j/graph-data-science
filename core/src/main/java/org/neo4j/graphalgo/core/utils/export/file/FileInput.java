@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvImportUtil;
@@ -79,34 +80,20 @@ public final class FileInput implements CompatInput {
 
     abstract static class FileImporter implements InputIterator {
 
-        private final Iterator<Map.Entry<NodeFileHeader, List<Path>>> entryIterator;
-        private NodeFileHeader header;
-        private Iterator<Path> dataFilesIterator;
+        private final MappedListIterator<NodeFileHeader, Path> entryIterator;
 
         FileImporter(Map<NodeFileHeader, List<Path>> headerToDataFilesMapping) {
-            this.entryIterator = headerToDataFilesMapping.entrySet().iterator();
-            if (entryIterator.hasNext()) {
-                Map.Entry<NodeFileHeader, List<Path>> entry = entryIterator.next();
-                this.header = entry.getKey();
-                this.dataFilesIterator = entry.getValue().iterator();
-            }
+            this.entryIterator = new MappedListIterator<>(headerToDataFilesMapping);
         }
 
         @Override
         public synchronized boolean next(InputChunk chunk) throws IOException {
-            if (!dataFilesIterator.hasNext()) {
-                if (!entryIterator.hasNext()) {
-                    return false;
-                }
-                Map.Entry<NodeFileHeader, List<Path>> entry = entryIterator.next();
-                this.header = entry.getKey();
-                this.dataFilesIterator = entry.getValue().iterator();
+            if (entryIterator.hasNext()) {
+                Pair<NodeFileHeader, Path> entry = entryIterator.next();
+                ((LineChunk) chunk).initialize(entry.getKey(), entry.getValue());
+                return true;
             }
-
-            Path pathToDataFile = this.dataFilesIterator.next();
-
-            ((LineChunk) chunk).initialize(header, pathToDataFile);
-            return true;
+            return false;
         }
     }
 
