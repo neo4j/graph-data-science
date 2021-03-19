@@ -42,18 +42,21 @@ public final class FileToGraphStoreExporter {
     }
 
     public GraphStoreExporter.ImportedProperties run(AllocationTracker tracker) {
-        export();
+        var fileInput = new FileInput();
+        export(fileInput);
         return ImmutableImportedProperties.of(0, 0);
     }
 
-    private void export() {
-
+    private void export(FileInput fileInput) {
+        exportMetaData(fileInput);
+        exportNodes(fileInput);
+        exportRelationships(fileInput);
     }
 
-    private void exportMetaData() {}
+    private void exportMetaData(FileInput fileInput) {}
 
-    private void exportNodes() {}
+    private void exportNodes(FileInput fileInput) {}
 
-    private void exportRelationships() {}
+    private void exportRelationships(FileInput fileInput) {}
 
 }
