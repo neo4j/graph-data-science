@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
@@ -27,8 +29,8 @@ import org.neo4j.graphalgo.core.utils.export.ImmutableImportedProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.batchimport.input.Collector;
 
-import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 
 public final class CsvToGraphStoreExporter {
 
@@ -70,25 +72,22 @@ public final class CsvToGraphStoreExporter {
 
     private void exportNodes(FileInput fileInput) {
         NodeSchema nodeSchema = fileInput.nodeSchema();
+        int concurrency = config.writeConcurrency();
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
             .hasLabelInformation(!nodeSchema.availableLabels().isEmpty())
             .maxOriginalId(1337L) // TODO
-            .concurrency(config.writeConcurrency())
+            .concurrency(concurrency)
             .build();
         nodeVisitorBuilder.withNodeSchema(nodeSchema);
         nodeVisitorBuilder.withNodesBuilder(nodesBuilder);
-        GraphStoreNodeVisitor graphStoreNodeVisitor = nodeVisitorBuilder.build();
 
         var nodesIterator = fileInput.nodes(Collector.EMPTY).iterator();
-        try (var chunk = nodesIterator.newChunk()) {
-            while (nodesIterator.next(chunk)) {
-                while (chunk.next(graphStoreNodeVisitor)) {
+        Collection<Runnable> tasks = ParallelUtil.tasks(
+            concurrency,
+            (index) -> new ElementImportRunner(nodeVisitorBuilder.build(), nodesIterator)
+        );
 
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
     }
 
     private void exportRelationships(FileInput fileInput) {}

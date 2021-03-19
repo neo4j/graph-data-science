@@ -31,10 +31,8 @@ import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSchemaVisit
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.schema.NodeSchemaVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.schema.RelationshipSchemaVisitor;
-import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -128,34 +126,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         );
 
         ParallelUtil.runWithConcurrency(config.writeConcurrency(), tasks, Pools.DEFAULT);
-    }
-
-    private static final class ElementImportRunner implements Runnable {
-        private final ElementVisitor<?, ?, ?> visitor;
-        private final InputIterator inputIterator;
-
-        private ElementImportRunner(
-            ElementVisitor<?, ?, ?> visitor,
-            InputIterator inputIterator
-        ) {
-            this.visitor = visitor;
-            this.inputIterator = inputIterator;
-        }
-
-        @Override
-        public void run() {
-            try (var chunk = inputIterator.newChunk()) {
-                while (inputIterator.next(chunk)) {
-                    while (chunk.next(visitor)) {
-
-                    }
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            visitor.close();
-        }
     }
 
     private static final class FullGraphStoreToFileExporter extends GraphStoreToFileExporter {
