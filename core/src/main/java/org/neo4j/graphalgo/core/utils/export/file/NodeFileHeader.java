@@ -37,17 +37,17 @@ public interface NodeFileHeader {
         private String[] nodeLabels;
         private NodeFileHeaderBuilder() {}
 
-        NodeFileHeaderBuilder withHeaderLine(String headerLine) {
+        public NodeFileHeaderBuilder withHeaderLine(String headerLine) {
             this.headerLine = headerLine;
             return this;
         }
 
-        NodeFileHeaderBuilder withNodeLabels(String[] nodeLabels) {
+        public NodeFileHeaderBuilder withNodeLabels(String[] nodeLabels) {
             this.nodeLabels = nodeLabels;
             return this;
         }
 
-        NodeFileHeader build() {
+        public NodeFileHeader build() {
             var builder = ImmutableNodeFileHeader.builder();
             String[] csvColumns = headerLine.split(",");
             if (csvColumns.length > 1) {
