@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.extension.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 
@@ -201,19 +202,22 @@ class CSRCompositeRelationshipIteratorTest {
             .build()
             .generate();
 
-        String[] propertyKeys = {"prop"};
+        var maybeProperties = graph.relationships().properties();
+        assertThat(maybeProperties).isPresent();
+        var property = maybeProperties.get();
         Relationships.Properties[] properties = new Relationships.Properties[1];
         properties[0] = ImmutableProperties
             .builder()
-            .degrees(graph.adjacencyDegrees)
-            .offsets(graph.propertyOffsets)
-            .list(graph.properties)
+            .degrees(graph.relationshipTopology().degrees())
+            .offsets(property.offsets())
+            .list(property.list())
             .elementCount(nodeCount)
             .orientation(Orientation.NATURAL)
             .isMultiGraph(true)
             .defaultPropertyValue(Double.NaN)
             .build();
 
+        String[] propertyKeys = {"prop"};
         var iterator = new CSRCompositeRelationshipIterator(
             graph.relationshipTopology(),
             propertyKeys,
