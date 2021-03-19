@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecification;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
@@ -102,6 +101,6 @@ public class F1Score implements Metric {
 
     @Override
     public String toString() {
-        return MetricSpecification.composeSpecification(F1, positiveTarget);
+        return formatWithLocale("%s_class_%d", F1, positiveTarget);
     }
 }

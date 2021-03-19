@@ -37,7 +37,7 @@ public class MetricSpecificationTest {
         var metricSpecification = MetricSpecification.parse(List.of("F1(class=42)")).get(0);
         var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.getClass()).isEqualTo(F1Score.class);
-        assertThat(metric.toString()).isEqualTo("F1(class=42)");
+        assertThat(metric.toString()).isEqualTo("F1_class_42");
         assertThat(metricSpecification.asString()).isEqualTo("F1(class=42)");
     }
 
@@ -71,9 +71,9 @@ public class MetricSpecificationTest {
         var metricSpecification = MetricSpecification.parse(List.of("Accuracy", "F1")).get(1);
         List<Metric> metrics = metricSpecification.createMetrics(List.of(42L, 1337L)).collect(Collectors.toList());
         assertThat(metrics.get(0).getClass()).isEqualTo(F1Score.class);
-        assertThat(metrics.get(0).toString()).isEqualTo("F1(class=42)");
+        assertThat(metrics.get(0).toString()).isEqualTo("F1_class_42");
         assertThat(metrics.get(1).getClass()).isEqualTo(F1Score.class);
-        assertThat(metrics.get(1).toString()).isEqualTo("F1(class=1337)");
+        assertThat(metrics.get(1).toString()).isEqualTo("F1_class_1337");
     }
 
     public static List<String> allValidMetricSpecifications() {

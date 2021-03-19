@@ -141,8 +141,9 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
         String resultAsString = runQuery(query, Result::resultAsString);
 
         assertThat(resultAsString).doesNotContain("f1_weighted", "aCcUrAcY", "f1(  ClAss = 0  )", "f1");
-        assertThat(resultAsString).contains("F1_WEIGHTED", "ACCURACY", "F1(class=0)", "F1");
+        assertThat(resultAsString).contains("F1_WEIGHTED", "ACCURACY", "F1_class_0", "F1");
     }
+
     @Test
     void shouldFailWhenFirstMetricIsSyntacticSugar() {
         String query = GdsCypher
