@@ -20,9 +20,8 @@
 package org.neo4j.gds.ml.nodemodels.metrics;
 
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.openjdk.jol.util.Multiset;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class F1Macro implements AllClassMetric.MetricStrategy {
@@ -31,14 +30,9 @@ public class F1Macro implements AllClassMetric.MetricStrategy {
     public double compute(
         HugeLongArray targets,
         HugeLongArray predictions,
-        HugeLongArray globalTargets
+        Multiset<Long> globalClassCounts
     ) {
-        Set<Long> distinctTargets = new HashSet<>();
-        for (long offset = 0; offset < globalTargets.size(); offset++) {
-            distinctTargets.add(globalTargets.get(offset));
-        }
-
-        var metrics = distinctTargets.stream()
+        var metrics = globalClassCounts.keys().stream()
             .map(F1Score::new)
             .collect(Collectors.toList());
 

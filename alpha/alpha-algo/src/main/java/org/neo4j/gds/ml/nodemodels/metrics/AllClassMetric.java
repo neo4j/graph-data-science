@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.openjdk.jol.util.Multiset;
 
 public enum AllClassMetric implements Metric {
     F1_WEIGHTED(new F1Weighted()),
@@ -36,21 +36,16 @@ public enum AllClassMetric implements Metric {
     public double compute(
         HugeLongArray targets,
         HugeLongArray predictions,
-        HugeLongArray globalTargets
+        Multiset<Long> globalClassCounts
     ) {
-        return strategy.compute(targets, predictions, globalTargets);
+        return strategy.compute(targets, predictions, globalClassCounts);
     }
 
     interface MetricStrategy {
         double compute(
             HugeLongArray targets,
             HugeLongArray predictions,
-            HugeLongArray globalTargets
+            Multiset<Long> globalClassCounts
         );
-    }
-
-    @Override
-    public String asString() {
-        return name();
     }
 }

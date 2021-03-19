@@ -132,7 +132,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
         String query = "CALL gds.alpha.ml.nodeClassification.train('g', {" +
                        "  modelName: 'model'," +
                        "  targetProperty: 't'," +
-                       "  metrics: ['f1_weighted','aCcUrAcY']," +
+                       "  metrics: ['f1_weighted','aCcUrAcY', 'f1(  ClAss = 0  )']," +
                        "  holdoutFraction: 0.2," +
                        "  validationFolds: 5," +
                        "  params: [{penalty: 1.0}]" +
@@ -140,8 +140,25 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
 
         String resultAsString = runQuery(query, Result::resultAsString);
 
-        assertThat(resultAsString).doesNotContain("f1_weighted", "aCcUrAcY");
-        assertThat(resultAsString).contains("F1_WEIGHTED", "ACCURACY");
+        assertThat(resultAsString).doesNotContain("f1_weighted", "aCcUrAcY", "f1(  ClAss = 0  )", "f1");
+        assertThat(resultAsString).contains("F1_WEIGHTED", "ACCURACY", "F1(class=0)", "F1");
+    }
+    @Test
+    void shouldFailWhenFirstMetricIsSyntacticSugar() {
+        String query = GdsCypher
+            .call()
+            .explicitCreation("g")
+            .algo("gds.alpha.ml.nodeClassification")
+            .trainMode()
+            .addParameter("modelName", "model")
+            .addParameter("targetProperty", "t")
+            .addParameter("holdoutFraction", 0.2)
+            .addParameter("validationFolds", 4)
+            .addParameter("metrics", List.of("F1"))
+            .addParameter("params", List.of(Map.of("penalty", 1)))
+            .yields();
+
+        assertError(query,"The first metric provided must be one of" );
     }
 
     @Test

@@ -20,11 +20,10 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.neo4j.gds.ml.nodemodels.metrics.Metric;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecification;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictor;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -39,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecificationTest.allValidMetricSpecifications;
 import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
 
 @GdlExtension
@@ -87,12 +87,11 @@ class NodeClassificationEndToEndTest {
     TestGraph predictGraph;
 
     @ParameterizedTest
-    @EnumSource(Metric.class)
-    void shouldProduceTheSamePredictionsAfterDeserialization(Metric metric) throws IOException {
+    @MethodSource("allValidMetricSpecificationsProxy")
+    void shouldProduceTheSamePredictionsAfterDeserialization(String metric) throws IOException {
 
         Map<String, Object> model2 = Map.of("penalty", 1, "maxIterations", 10000, "tolerance", 1e-5);
 
-        var log = new TestLog();
         var config = createConfig(List.of(model2), List.of("a", "b"), metric);
 
 
@@ -135,7 +134,7 @@ class NodeClassificationEndToEndTest {
     private NodeClassificationTrainConfig createConfig(
         Iterable<Map<String, Object>> modelCandidates,
         Iterable<String> featureProperties,
-        Metric metric
+        String metric
     ) {
         return ImmutableNodeClassificationTrainConfig.builder()
             .modelName("model")
@@ -145,8 +144,12 @@ class NodeClassificationEndToEndTest {
             .concurrency(4)
             .randomSeed(19L)
             .targetProperty("t")
-            .metrics(List.of(metric))
+            .metrics(List.of(MetricSpecification.parse(metric)))
             .params(modelCandidates)
             .build();
+    }
+
+    static List<String> allValidMetricSpecificationsProxy() {
+        return allValidMetricSpecifications();
     }
 }

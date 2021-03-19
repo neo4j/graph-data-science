@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.config;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationTrainConfig;
-import org.neo4j.gds.ml.nodemodels.metrics.Metric;
+import org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecification;
 import org.neo4j.gds.ml.util.ObjectMapperSingleton;
 import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
 
@@ -34,12 +34,13 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecificationTest.allValidMetricSpecifications;
 
 class NodeClassificationTrainConfigSerializerTest {
 
     @ParameterizedTest
-    @EnumSource(Metric.class)
-    void shouldSerializeConfig(Metric metric) {
+    @MethodSource("allValidMetricSpecificationsProxy")
+    void shouldSerializeConfig(String metric) {
         Map<String, Object> model1 = Map.of("penalty", 1, "maxIterations", 0);
         Map<String, Object> model2 = Map.of("penalty", 1, "maxIterations", 10000, "tolerance", 1e-5);
 
@@ -51,7 +52,7 @@ class NodeClassificationTrainConfigSerializerTest {
             .concurrency(1)
             .randomSeed(19L)
             .targetProperty("t")
-            .metrics(List.of(metric))
+            .metrics(List.of(MetricSpecification.parse(metric)))
             .params(List.of(model1, model2))
             .build();
 
@@ -67,7 +68,7 @@ class NodeClassificationTrainConfigSerializerTest {
         assertThat(serializedConfig.getValidationFolds()).isEqualTo(config.validationFolds());
         assertThat(serializedConfig.getTargetProperty()).isEqualTo("t");
         assertThat(serializedConfig.getRandomSeed().getValue()).isEqualTo(19L);
-        assertThat(serializedConfig.getMetricsList()).containsExactly(TrainConfigsProto.Metric.valueOf(metric.name()));
+        assertThat(serializedConfig.getMetricsList()).containsExactly(metric);
 
         assertThat(serializedConfig.getParamsList()).hasSize(2);
 
@@ -90,7 +91,7 @@ class NodeClassificationTrainConfigSerializerTest {
             .concurrency(1)
             .randomSeed(19L)
             .targetProperty("t")
-            .metrics(List.of(Metric.ACCURACY, Metric.F1_MACRO, Metric.F1_WEIGHTED))
+            .metrics(MetricSpecification.parse(allValidMetricSpecifications()))
             .params(List.of(model1))
             .build();
 
@@ -99,11 +100,7 @@ class NodeClassificationTrainConfigSerializerTest {
 
         assertThat(serializedConfig).isNotNull();
 
-        assertThat(serializedConfig.getMetricsList()).containsExactly(
-            TrainConfigsProto.Metric.ACCURACY,
-            TrainConfigsProto.Metric.F1_MACRO,
-            TrainConfigsProto.Metric.F1_WEIGHTED
-        );
+        assertThat(serializedConfig.getMetricsList()).isEqualTo(allValidMetricSpecifications());
     }
 
     @Test
@@ -119,7 +116,7 @@ class NodeClassificationTrainConfigSerializerTest {
             .concurrency(1)
             .randomSeed(19L)
             .targetProperty("t")
-            .metrics(List.of(Metric.ACCURACY, Metric.F1_MACRO, Metric.F1_WEIGHTED))
+            .metrics(MetricSpecification.parse(allValidMetricSpecifications()))
             .params(List.of(model1, model2))
             .build();
 
@@ -136,11 +133,7 @@ class NodeClassificationTrainConfigSerializerTest {
         assertThat(deserializedConfig.validationFolds()).isEqualTo(2);
         assertThat(deserializedConfig.randomSeed()).isPresent().hasValue(19L);
         assertThat(deserializedConfig.targetProperty()).isEqualTo("t");
-        assertThat(deserializedConfig.metrics()).containsExactly(
-            Metric.ACCURACY,
-            Metric.F1_MACRO,
-            Metric.F1_WEIGHTED
-        );
+        assertThat(deserializedConfig.metrics()).isEqualTo(MetricSpecification.parse(allValidMetricSpecifications()));
 
         assertThat(deserializedConfig.params()).containsExactly(model1, model2);
     }
@@ -154,4 +147,7 @@ class NodeClassificationTrainConfigSerializerTest {
         return Collections.emptyMap();
     }
 
+    static List<String> allValidMetricSpecificationsProxy() {
+        return allValidMetricSpecifications();
+    }
 }

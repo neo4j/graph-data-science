@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.config;
 import org.neo4j.gds.TrainConfigSerializer;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
+import org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecification;
 import org.neo4j.gds.ml.util.ObjectMapperSingleton;
 import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
 
@@ -54,8 +55,7 @@ public final class NodeClassificationTrainConfigSerializer implements TrainConfi
 
         trainConfig.metrics()
             .stream()
-            .map(Enum::name)
-            .map(TrainConfigsProto.Metric::valueOf)
+            .map(MetricSpecification::asString)
             .forEach(builder::addMetrics);
 
         trainConfig.params().forEach(paramsMap -> {
@@ -88,8 +88,7 @@ public final class NodeClassificationTrainConfigSerializer implements TrainConfi
         var metrics = serializedTrainConfig
             .getMetricsList()
             .stream()
-            .map(TrainConfigsProto.Metric::name)
-            .map(Metric::valueOf)
+            .map(MetricSpecification::parse)
             .collect(Collectors.toList());
         builder.metrics(metrics);
 

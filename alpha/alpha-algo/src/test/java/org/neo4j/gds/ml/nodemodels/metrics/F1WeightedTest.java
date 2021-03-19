@@ -23,14 +23,15 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.openjdk.jol.util.Multiset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class F1WeightedTest {
 
     private HugeLongArray targets;
-    private HugeLongArray globalTargets;
     private HugeLongArray predictions;
+    private Multiset<Long> classCounts;
 
     @BeforeEach
     void setup() {
@@ -40,11 +41,10 @@ class F1WeightedTest {
         targets = HugeLongArray.of(
             4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5
         );
-        globalTargets = HugeLongArray.of(
-            4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5,
-            4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5
-        );
-
+        classCounts = new Multiset<>();
+        for (long target : targets.toArray()) {
+            classCounts.add(target, 2L);
+        }
     }
 
     @Test
@@ -52,7 +52,7 @@ class F1WeightedTest {
         var metric = AllClassMetric.F1_WEIGHTED;
         var totalF1 = 2 * 1.0 + 2 * 2.0/3.0 + 2 * 2.0/3.0 + 3 * 2.0/3.0;
         var totalExamples = predictions.size();
-        assertThat(metric.compute(targets, predictions, globalTargets))
+        assertThat(metric.compute(targets, predictions, classCounts))
             .isCloseTo(totalF1 / totalExamples, Offset.offset(1e-8));
     }
 }

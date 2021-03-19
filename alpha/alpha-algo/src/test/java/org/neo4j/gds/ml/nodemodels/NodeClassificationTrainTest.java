@@ -23,11 +23,8 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeClassificationTrainConfig;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecification;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -73,7 +70,9 @@ class NodeClassificationTrainTest {
 
     @ParameterizedTest
     @MethodSource("metricArguments")
-    void selectsTheBestModel(Metric metric) {
+    void selectsTheBestModel(MetricSpecification metricSpecification) {
+
+        var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
         Map<String, Object> model1 = Map.of("penalty", 1, "maxIterations", 0);
         Map<String, Object> model2 = Map.of("penalty", 1, "maxIterations", 10000, "tolerance", 1e-5);
@@ -83,7 +82,7 @@ class NodeClassificationTrainTest {
             List.of(model1, model2),
             "model",
             List.of("a", "b"),
-            metric,
+            metricSpecification,
             1L
         );
 
@@ -110,7 +109,9 @@ class NodeClassificationTrainTest {
     @GdsEditionTest(Edition.EE)
     @ParameterizedTest
     @MethodSource("metricArguments")
-    void shouldProduceDifferentMetricsForDifferentTrainings(Metric metric) {
+    void shouldProduceDifferentMetricsForDifferentTrainings(MetricSpecification metricSpecification) {
+
+        var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
         var modelCandidates = List.of(
             Map.<String, Object>of("penalty", 0.0625, "maxIterations", 1000),
@@ -126,7 +127,7 @@ class NodeClassificationTrainTest {
             modelCandidates,
             "bananasModel",
             List.of("bananas"),
-            metric,
+            metricSpecification,
             1337L
         );
         var bananasTrain = new NodeClassificationTrain(
@@ -140,7 +141,7 @@ class NodeClassificationTrainTest {
             modelCandidates,
             "arrayPropertyModel",
             List.of("arrayProperty"),
-            metric,
+            metricSpecification,
             42L
         );
         var arrayPropertyTrain = new NodeClassificationTrain(
@@ -179,7 +180,7 @@ class NodeClassificationTrainTest {
         Iterable<Map<String, Object>> modelCandidates,
         String modelName,
         Iterable<String> featureProperties,
-        Metric metric, long randomSeed
+        MetricSpecification metricSpecification, long randomSeed
     ) {
         return ImmutableNodeClassificationTrainConfig.builder()
             .modelName(modelName)
@@ -189,14 +190,18 @@ class NodeClassificationTrainTest {
             .concurrency(1)
             .randomSeed(randomSeed)
             .targetProperty("t")
-            .metrics(List.of(metric))
+            .metrics(List.of(metricSpecification))
             .params(modelCandidates)
             .build();
     }
 
     static Stream<Arguments> metricArguments() {
-        var singleClassMetrics = Stream.of(Arguments.arguments(Metric.resolveMetric("F1(class=1)")));
-        var allClassMetrics = Arrays.stream(AllClassMetric.values()).map(Arguments::of);
+        var singleClassMetrics = Stream.of(Arguments.arguments(MetricSpecification.parse("F1(class=1)")));
+        var allClassMetrics = Arrays
+            .stream(AllClassMetric.values())
+            .map(AllClassMetric::name)
+            .map(MetricSpecification::parse)
+            .map(Arguments::of);
         return Stream.concat(singleClassMetrics, allClassMetrics);
     }
 }

@@ -25,28 +25,4 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class MetricTest {
 
-    @Test
-    void shouldCreateF1Metric() {
-        var metric = Metric.resolveMetric("F1(class=42)");
-        assertThat(metric.getClass()).isEqualTo(F1Score.class);
-        assertThat(((F1Score)metric).positiveTarget()).isEqualTo(42L);
-    }
-
-    @Test
-    void shouldCreateAccuracyMetric() {
-        var metric = Metric.resolveMetric("Accuracy");
-        assertThat(metric).isEqualTo(AllClassMetric.ACCURACY);
-    }
-
-    @Test
-    void shouldCreateF1WeightedMetric() {
-        var metric = Metric.resolveMetric("F1_WeIGhTED");
-        assertThat(metric).isEqualTo(AllClassMetric.F1_WEIGHTED);
-    }
-
-    @Test
-    void shouldCreateF1MacroMetric() {
-        var metric = Metric.resolveMetric("F1_maCRo");
-        assertThat(metric).isEqualTo(AllClassMetric.F1_MACRO);
-    }
 }

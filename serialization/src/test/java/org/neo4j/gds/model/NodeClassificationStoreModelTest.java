@@ -25,7 +25,8 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
-import org.neo4j.gds.ml.nodemodels.metrics.Metric;
+import org.neo4j.gds.ml.nodemodels.logisticregression.MetricSpecification;
+import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
@@ -52,7 +53,7 @@ class NodeClassificationStoreModelTest extends BaseStoreModelTest<MultiClassNLRD
     Model<MultiClassNLRData, NodeClassificationTrainConfig> model() {
         var trainConfig = NodeClassificationTrainConfig.builder()
             .modelName(MODEL)
-            .metrics(List.of(Metric.ACCURACY))
+            .metrics(List.of(MetricSpecification.parse(AllClassMetric.ACCURACY.name())))
             .featureProperties(List.of("a", "b"))
             .targetProperty("t")
             .validationFolds(2)

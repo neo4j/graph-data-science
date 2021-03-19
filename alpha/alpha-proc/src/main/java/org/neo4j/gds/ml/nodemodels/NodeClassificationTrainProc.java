@@ -81,10 +81,6 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
         if (config.params().isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale("No model candidates (params) specified, we require at least one"));
         }
-
-        if (config.metrics().isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale("No metrics specified, we require at least one"));
-        }
     }
 
     @Override

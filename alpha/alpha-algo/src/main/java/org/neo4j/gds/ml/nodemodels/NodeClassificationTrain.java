@@ -21,11 +21,11 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.neo4j.gds.ml.batch.BatchQueue;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictor;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrain;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.openjdk.jol.util.Multiset;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,6 +72,10 @@ public class NodeClassificationTrain
 
     @Override
     public Model<MultiClassNLRData, NodeClassificationTrainConfig> compute() {
+        var globalTargets = makeGlobalTargets();
+        var globalClassCounts = countClassesGlobally();
+        var metrics = createMetrics(globalClassCounts);
+
         // 1. Init and shuffle node ids
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
         nodeIds.setAll(i -> i);
@@ -81,19 +86,18 @@ public class NodeClassificationTrain
         var outerSplit = outerSplitter.split(nodeIds, 1 - config.holdoutFraction());
 
         // model selection:
-        var globalTargets = makeGlobalTargets();
-        var modelSelectResult = modelSelect(outerSplit.trainSet(), globalTargets);
+        var modelSelectResult = modelSelect(outerSplit.trainSet(), globalTargets, globalClassCounts, metrics);
         var bestParameters = modelSelectResult.bestParameters();
 
         // 6. train best model on remaining
         MultiClassNLRData winnerModelData = trainModel(outerSplit.trainSet(), bestParameters);
 
         // 7. evaluate it on the holdout set and outer training set
-        var testMetrics = computeMetrics(globalTargets, outerSplit.testSet(), winnerModelData);
-        var outerTrainMetrics = computeMetrics(globalTargets, outerSplit.trainSet(), winnerModelData);
+        var testMetrics = computeMetrics(globalClassCounts, outerSplit.testSet(), winnerModelData, metrics);
+        var outerTrainMetrics = computeMetrics(globalClassCounts, outerSplit.trainSet(), winnerModelData, metrics);
 
         // we are done with all metrics!
-        var metrics = mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
+        var metricResults = mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
 
         // 8. retrain that model on the full graph
         MultiClassNLRData retrainedModelData = trainModel(nodeIds, bestParameters);
@@ -101,7 +105,7 @@ public class NodeClassificationTrain
         var modelInfo = NodeClassificationModelInfo.of(
             retrainedModelData.classIdMap().originalIdsList(),
             modelSelectResult.bestParameters(),
-            metrics
+            metricResults
         );
 
         // 9. persist the winning model in the model catalog
@@ -118,13 +122,20 @@ public class NodeClassificationTrain
         );
     }
 
+    private List<Metric> createMetrics(Multiset<Long> globalClassCounts) {
+        return config.metrics()
+            .stream()
+            .flatMap(spec -> spec.createMetrics(globalClassCounts.keys()))
+            .collect(Collectors.toList());
+    }
+
     private RandomDataGenerator getRandomDataGenerator() {
         var random = new RandomDataGenerator();
         config.randomSeed().ifPresent(random::reSeed);
         return random;
     }
 
-    private Map<Metric, MetricData> mergeMetrics(
+    private Map<Metric, MetricData> mergeMetricResults(
         ModelSelectResult modelSelectResult,
         Map<Metric, Double> outerTrainMetrics,
         Map<Metric, Double> testMetrics
@@ -141,14 +152,19 @@ public class NodeClassificationTrain
         ));
     }
 
-    private ModelSelectResult modelSelect(HugeLongArray remainingSet, HugeLongArray globalTargets) {
+    private ModelSelectResult modelSelect(
+        HugeLongArray remainingSet,
+        HugeLongArray globalTargets,
+        Multiset<Long> globalClassCounts,
+        List<Metric> metrics
+    ) {
 
         // 2b. Inner split: enumerate a number of train/validation splits of remaining
         var splitter = new StratifiedKFoldSplitter(config.validationFolds(), remainingSet, globalTargets, config.randomSeed());
         var splits = splitter.splits();
 
-        var trainStats = initStatsMap();
-        var validationStats = initStatsMap();
+        var trainStats = initStatsMap(metrics);
+        var validationStats = initStatsMap(metrics);
 
         config.params().forEach(modelParams -> {
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
@@ -160,18 +176,18 @@ public class NodeClassificationTrain
                 var modelData = trainModel(trainSet, modelParams);
 
                 // 4. evaluate each model candidate on the train and validation sets
-                computeMetrics(globalTargets, validationSet, modelData).forEach(validationStatsBuilder::update);
-                computeMetrics(globalTargets, trainSet, modelData).forEach(trainStatsBuilder::update);
+                computeMetrics(globalClassCounts, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
+                computeMetrics(globalClassCounts, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
             }
             // insert the candidates metrics into trainStats and validationStats
-            config.metrics().forEach(metric -> {
+            metrics.forEach(metric -> {
                 validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
                 trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
             });
         });
 
         // 5. pick the best-scoring model candidate, according to the main metric
-        var mainMetric = config.metrics().get(0);
+        var mainMetric = metrics.get(0);
         var modelStats = validationStats.get(mainMetric);
         var winner = Collections.max(modelStats, COMPARE_AVERAGE);
 
@@ -179,16 +195,17 @@ public class NodeClassificationTrain
         return ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
-    private Map<Metric, List<ModelStats>> initStatsMap() {
+    private Map<Metric, List<ModelStats>> initStatsMap(List<Metric> metrics) {
         var statsMap = new HashMap<Metric, List<ModelStats>>();
-        config.metrics().forEach(metric -> statsMap.put(metric, new ArrayList<>()));
+        metrics.forEach(metric -> statsMap.put(metric, new ArrayList<>()));
         return statsMap;
     }
 
     private Map<Metric, Double> computeMetrics(
-        HugeLongArray globalTargets,
+        Multiset<Long> globalClassCounts,
         HugeLongArray evaluationSet,
-        MultiClassNLRData modelData
+        MultiClassNLRData modelData,
+        List<Metric> metrics
     ) {
         var localTargets = makeLocalTargets(evaluationSet);
 
@@ -208,9 +225,9 @@ public class NodeClassificationTrain
         var queue = new BatchQueue(evaluationSet.size());
         queue.parallelConsume(consumer, config.concurrency());
 
-        return config.metrics().stream().collect(Collectors.toMap(
+        return metrics.stream().collect(Collectors.toMap(
             metric -> metric,
-            metric -> metric.compute(localTargets, predictedClasses, globalTargets)
+            metric -> metric.compute(localTargets, predictedClasses, globalClassCounts)
         ));
     }
 
@@ -230,6 +247,15 @@ public class NodeClassificationTrain
         );
         var train = new MultiClassNLRTrain(graph, trainSet, nlrConfig, progressLogger);
         return train.compute();
+    }
+
+    private Multiset<Long> countClassesGlobally() {
+        var globalClassCounts = new Multiset<Long>();
+        var targetNodeProperty = graph.nodeProperties(config.targetProperty());
+        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            globalClassCounts.add(targetNodeProperty.longValue(nodeId));
+        }
+        return globalClassCounts;
     }
 
     private HugeLongArray makeGlobalTargets() {

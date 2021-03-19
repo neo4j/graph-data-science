@@ -28,22 +28,17 @@ public class F1Weighted implements AllClassMetric.MetricStrategy {
     public double compute(
         HugeLongArray targets,
         HugeLongArray predictions,
-        HugeLongArray globalTargets
+        Multiset<Long> globalClassCounts
     ) {
-        if (globalTargets.size() == 0) {
+        if (globalClassCounts.size() == 0) {
             return 0.0;
         }
-        var targetCounts = new Multiset<Long>();
-        for (long offset = 0; offset < globalTargets.size(); offset++) {
-            targetCounts.add(globalTargets.get(offset));
-        }
 
-        var distinctTargets = targetCounts.keys().stream();
-        var weightedScores = distinctTargets
+        var weightedScores = globalClassCounts.keys().stream()
             .mapToDouble(target -> {
-                var weight = targetCounts.count(target);
+                var weight = globalClassCounts.count(target);
                 return weight * new F1Score(target).compute(targets, predictions);
             });
-        return weightedScores.sum() / globalTargets.size();
+        return weightedScores.sum() / globalClassCounts.size();
     }
 }

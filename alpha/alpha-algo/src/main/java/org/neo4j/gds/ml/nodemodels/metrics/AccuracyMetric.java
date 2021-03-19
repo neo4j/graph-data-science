@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.metrics;
 
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.openjdk.jol.util.Multiset;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -32,7 +33,7 @@ public class AccuracyMetric implements AllClassMetric.MetricStrategy {
     public double compute(
         HugeLongArray targets,
         HugeLongArray predictions,
-        HugeLongArray globalTargets
+        Multiset<Long> globalClassCounts
     ) {
         long accuratePredictions = 0;
         assert targets.size() == predictions.size() : formatWithLocale(
