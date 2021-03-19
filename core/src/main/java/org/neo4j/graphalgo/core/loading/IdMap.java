@@ -72,6 +72,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     private static final Set<NodeLabel> ALL_NODES_LABELS = Set.of(NodeLabel.ALL_NODES);
 
     private final long nodeCount;
+    private final long highestNeoId;
     private final AllocationTracker tracker;
 
     private final Map<NodeLabel, BitSet> labelInformation;
@@ -91,12 +92,14 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         HugeSparseLongArray nodeToGraphIds,
         Map<NodeLabel, BitSet> labelInformation,
         long nodeCount,
+        long highestNeoId,
         AllocationTracker tracker
     ) {
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
         this.labelInformation = labelInformation;
         this.nodeCount = nodeCount;
+        this.highestNeoId = highestNeoId; // TODO might need to add -1
         this.tracker = tracker;
     }
 
@@ -128,6 +131,11 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     @Override
     public long rootNodeCount() {
         return nodeCount;
+    }
+
+    @Override
+    public long highestNeoId() {
+        return highestNeoId;
     }
 
     @Override
@@ -235,6 +243,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             newNodeToGraphIds,
             newLabelInformation,
             newNodeCount,
+            highestNeoId,
             tracker
         );
     }
@@ -263,9 +272,10 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
             HugeSparseLongArray nodeToGraphIds,
             Map<NodeLabel, BitSet> filteredLabelMap,
             long nodeCount,
+            long highestNeoId,
             AllocationTracker tracker
         ) {
-            super(graphIds, nodeToGraphIds, filteredLabelMap, nodeCount, tracker);
+            super(graphIds, nodeToGraphIds, filteredLabelMap, nodeCount, highestNeoId, tracker);
             this.rootNodeCount = rootNodeCount;
         }
 

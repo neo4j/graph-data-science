@@ -99,6 +99,7 @@ public final class IdMapBuilder {
             nodeToGraphIds,
             convertedLabelInformation,
             idMapBuilder.size(),
+            idMapBuilder.capacity(),
             tracker
         );
     }
@@ -124,7 +125,7 @@ public final class IdMapBuilder {
             e -> e.getValue().toBitSet()
         ));
 
-        return new IdMap(graphIds, nodeToGraphIds, convertedLabelInformation, idMapBuilder.size(), tracker);
+        return new IdMap(graphIds, nodeToGraphIds, convertedLabelInformation, idMapBuilder.size(), idMapBuilder.capacity(), tracker);
     }
 
     @NotNull

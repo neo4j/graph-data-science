@@ -108,6 +108,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public long highestNeoId() {
+        return graph.highestNeoId();
+    }
+
+    @Override
     public void forEachNode(LongPredicate consumer) {
         graph.forEachNode(consumer);
     }

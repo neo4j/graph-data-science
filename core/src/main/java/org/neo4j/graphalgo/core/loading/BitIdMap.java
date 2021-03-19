@@ -117,6 +117,11 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     }
 
     @Override
+    public long highestNeoId() {
+        return sparseLongArray.highestNeoId();
+    }
+
+    @Override
     public void forEachNode(LongPredicate consumer) {
         final long count = nodeCount();
         for (long i = 0L; i < count; i++) {

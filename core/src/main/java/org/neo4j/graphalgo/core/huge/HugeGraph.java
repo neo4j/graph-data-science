@@ -190,6 +190,11 @@ public class HugeGraph implements CSRGraph {
         return idMapping.rootNodeCount();
     }
 
+    @Override
+    public long highestNeoId() {
+        return idMapping.highestNeoId();
+    }
+
     public NodeMapping idMap() {
         return idMapping;
     }

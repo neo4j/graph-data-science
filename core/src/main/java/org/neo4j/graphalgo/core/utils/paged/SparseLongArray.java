@@ -46,6 +46,8 @@ public final class SparseLongArray {
     // Number of mapped ids.
     private final long idCount;
 
+    private final long highestNeoId;
+
     // Each element (long) represents a page.
     // Each page represents 64 possible ids.
     private final long[] array;
@@ -99,12 +101,14 @@ public final class SparseLongArray {
 
     private SparseLongArray(
         long idCount,
+        long highestNeoId,
         long[] array,
         long[] blockOffsets,
         long[] sortedBlockOffsets,
         int[] blockMapping
     ) {
         this.idCount = idCount;
+        this.highestNeoId = highestNeoId;
         this.array = array;
         this.blockOffsets = blockOffsets;
         this.sortedBlockOffsets = sortedBlockOffsets;
@@ -113,6 +117,10 @@ public final class SparseLongArray {
 
     public long idCount() {
         return idCount;
+    }
+
+    public long highestNeoId() {
+        return highestNeoId;
     }
 
     public long toMappedNodeId(long originalId) {
@@ -208,10 +216,12 @@ public final class SparseLongArray {
 
     public static class Builder {
 
+        private final long capacity;
         private final long[] array;
         private final long[] blockOffsets;
 
         Builder(long capacity) {
+            this.capacity = capacity;
             var size = (int) BitUtil.ceilDiv(capacity, BLOCK_SIZE);
             this.array = new long[size];
             this.blockOffsets = new long[(size >>> BLOCK_SHIFT) + 1];
@@ -293,16 +303,18 @@ public final class SparseLongArray {
             }
 
             var layouts = ArrayLayout.constructEytzinger(sortedBlockOffsets, blockMapping);
-            return new SparseLongArray(idCount, array, blockOffsets, layouts.layout(), layouts.secondary());
+            return new SparseLongArray(idCount, capacity, array, blockOffsets, layouts.layout(), layouts.secondary());
         }
     }
 
     public static class SequentialBuilder {
 
+        private final long capacity;
         private final AutoCloseableThreadLocal<ThreadLocalBuilder> localBuilders;
         private final SparseLongArrayCombiner combiner;
 
         SequentialBuilder(long capacity) {
+            this.capacity = capacity;
             this.combiner = new SparseLongArrayCombiner(capacity);
             this.localBuilders = new AutoCloseableThreadLocal<>(
                 () -> new ThreadLocalBuilder(capacity),
@@ -352,7 +364,7 @@ public final class SparseLongArray {
             Arrays.setAll(blockMapping, i -> i);
             var layouts = ArrayLayout.constructEytzinger(blockOffsets, blockMapping);
 
-            return new SparseLongArray(count, array, blockOffsets, layouts.layout(), layouts.secondary());
+            return new SparseLongArray(count, capacity, array, blockOffsets, layouts.layout(), layouts.secondary());
         }
 
         private static class ThreadLocalBuilder implements AutoCloseable {

@@ -88,6 +88,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
+    public long highestNeoId() {
+        return filteredIdMap.highestNeoId();
+    }
+
+    @Override
     public long toMappedNodeId(long neoNodeId) {
         return filteredIdMap.toMappedNodeId(super.toMappedNodeId(neoNodeId));
     }

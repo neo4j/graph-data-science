@@ -67,6 +67,8 @@ public interface IdMapping {
      */
     long rootNodeCount();
 
+    long highestNeoId();
+
     default IdMapping cloneIdMapping() {
         return this;
     }

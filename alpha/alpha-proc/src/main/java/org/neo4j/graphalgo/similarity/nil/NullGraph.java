@@ -114,6 +114,11 @@ public class NullGraph implements Graph {
     }
 
     @Override
+    public long highestNeoId() {
+        throw new NullGraphStore.NullGraphException();
+    }
+
+    @Override
     public boolean contains(long nodeId) {
         return false;
     }

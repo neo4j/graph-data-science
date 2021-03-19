@@ -44,6 +44,11 @@ public final class DirectIdMapping implements IdMapping {
     }
 
     @Override
+    public long highestNeoId() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean contains(final long nodeId) {
         return nodeId < nodeCount;
     }

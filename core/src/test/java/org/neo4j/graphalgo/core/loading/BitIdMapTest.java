@@ -39,9 +39,9 @@ class BitIdMapTest {
 
     @ParameterizedTest
     @CsvSource({
-        "0,160,200,240",
-        "100,168,208,248",
-        "100000000000,12988281400,12988281440,12988281480"
+        "0,168,208,248",
+        "100,176,216,256",
+        "100000000000,12988281408,12988281448,12988281488"
     })
     void shouldComputeMemoryEstimation(
         long highestNeoId,

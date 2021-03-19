@@ -83,6 +83,11 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
+    public long highestNeoId() {
+        return first.highestNeoId();
+    }
+
+    @Override
     public GraphSchema schema() {
         return graphs
             .stream()
