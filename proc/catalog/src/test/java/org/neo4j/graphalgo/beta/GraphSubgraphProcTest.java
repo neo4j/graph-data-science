@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphListProc;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.opencypher.v9_0.parser.javacc.ParseException;
@@ -81,9 +82,28 @@ class GraphSubgraphProcTest extends BaseProcTest {
             "createMillis", greaterThan(0L)
         )));
 
-        var listQuery = "CALL gds.graph.list('subgraph') YIELD nodeFilter, relationshipFilter";
+        // Verify that we get the correct output for gds.graph.list().
+        // Projections are taken from the original graph, the graph
+        // name is the name of the new subgraph and the filters expressions
+        // are added.
+
+        var originalGraphCreateConfig = (GraphCreateFromStoreConfig) GraphStoreCatalog
+            .get(getUsername(), db.databaseId(), "graph")
+            .config();
+        var expectedNodeProjection = originalGraphCreateConfig.nodeProjections().toObject();
+        var expectedRelationshipProjection = originalGraphCreateConfig.relationshipProjections().toObject();
+        var originalCreationTime = originalGraphCreateConfig.creationTime();
+
+        var listQuery = "CALL gds.graph.list('subgraph') " +
+                        "YIELD graphName, nodeCount, relationshipCount, creationTime, nodeFilter, relationshipFilter, nodeProjection, relationshipProjection";
 
         assertCypherResult(listQuery, List.of(Map.of(
+            "graphName", "subgraph",
+            "nodeCount", 1L,
+            "relationshipCount", 0L,
+            "creationTime", greaterThan(originalCreationTime),
+            "nodeProjection", expectedNodeProjection,
+            "relationshipProjection", expectedRelationshipProjection,
             "nodeFilter", "n:A",
             "relationshipFilter", "true"
         )));
