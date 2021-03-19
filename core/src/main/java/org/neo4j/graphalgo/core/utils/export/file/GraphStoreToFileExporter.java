@@ -38,7 +38,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFileExporterConfig> {
@@ -157,9 +156,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
 
             visitor.close();
         }
-    }
-
-    private interface VisitorProducer<VISITOR> extends Function<Integer, VISITOR> {
     }
 
     private static final class FullGraphStoreToFileExporter extends GraphStoreToFileExporter {
