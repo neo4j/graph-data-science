@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo.api.schema;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -27,7 +30,9 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.Set;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -149,5 +154,19 @@ class RelationshipSchemaTest {
         assertTrue(ex
             .getMessage()
             .contains("Combining schema entries with value type {bar=DOUBLE} and {bar=LONG} is not supported."));
+    }
+
+
+    static Stream<Arguments> schemaAndHasProperties() {
+        return Stream.of(
+            Arguments.of(RelationshipSchema.builder().addRelationshipType(RelationshipType.of("A")).build(), false),
+            Arguments.of(RelationshipSchema.builder().addProperty(RelationshipType.of("A"), "foo", ValueType.LONG).build(), true)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("schemaAndHasProperties")
+    void shouldKnowIfPropertiesArePresent(RelationshipSchema relationshipSchema, boolean hasProperties) {
+        assertThat(relationshipSchema.hasProperties()).isEqualTo(hasProperties);
     }
 }

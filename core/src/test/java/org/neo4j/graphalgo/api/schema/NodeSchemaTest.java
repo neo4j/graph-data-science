@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo.api.schema;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -27,6 +30,7 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -181,5 +185,18 @@ class NodeSchemaTest {
         var exception = assertThrows(IllegalArgumentException.class, nodeSchema::unionProperties);
 
         assertThat(exception).hasMessage("Combining schema entries with value type DOUBLE and LONG is not supported.");
+    }
+
+    static Stream<Arguments> schemaAndHasProperties() {
+        return Stream.of(
+            Arguments.of(NodeSchema.builder().addLabel(NodeLabel.of("A")).build(), false),
+            Arguments.of(NodeSchema.builder().addProperty(NodeLabel.of("A"), "foo", ValueType.LONG).build(), true)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("schemaAndHasProperties")
+    void shouldKnowIfPropertiesArePresent(NodeSchema nodeSchema, boolean hasProperties) {
+        assertThat(nodeSchema.hasProperties()).isEqualTo(hasProperties);
     }
 }
