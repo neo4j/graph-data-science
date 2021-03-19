@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.ImmutableImportedProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.internal.batchimport.input.Collector;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -67,9 +68,28 @@ public final class CsvToGraphStoreExporter {
         exportRelationships(fileInput);
     }
 
-    private void exportMetaData(FileInput fileInput) {}
+    private void exportNodes(FileInput fileInput) {
+        NodeSchema nodeSchema = fileInput.nodeSchema();
+        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
+            .hasLabelInformation(!nodeSchema.availableLabels().isEmpty())
+            .maxOriginalId(1337L) // TODO
+            .concurrency(config.writeConcurrency())
+            .build();
+        nodeVisitorBuilder.withNodeSchema(nodeSchema);
+        nodeVisitorBuilder.withNodesBuilder(nodesBuilder);
+        GraphStoreNodeVisitor graphStoreNodeVisitor = nodeVisitorBuilder.build();
 
-    private void exportNodes(FileInput fileInput) {}
+        var nodesIterator = fileInput.nodes(Collector.EMPTY).iterator();
+        try (var chunk = nodesIterator.newChunk()) {
+            while (nodesIterator.next(chunk)) {
+                while (chunk.next(graphStoreNodeVisitor)) {
+
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private void exportRelationships(FileInput fileInput) {}
 
