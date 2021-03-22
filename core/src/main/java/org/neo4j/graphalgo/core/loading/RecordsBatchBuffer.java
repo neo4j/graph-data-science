@@ -41,7 +41,7 @@ public abstract class RecordsBatchBuffer<Reference> implements RecordConsumer<Re
         return length;
     }
 
-    int capacity() {
+    public int capacity() {
         return buffer.length;
     }
 

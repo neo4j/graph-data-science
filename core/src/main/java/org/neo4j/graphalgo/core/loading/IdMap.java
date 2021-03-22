@@ -99,7 +99,7 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         this.nodeToGraphIds = nodeToGraphIds;
         this.labelInformation = labelInformation;
         this.nodeCount = nodeCount;
-        this.highestNeoId = highestNeoId; // TODO might need to add -1
+        this.highestNeoId = highestNeoId;
         this.tracker = tracker;
     }
 
