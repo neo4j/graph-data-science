@@ -78,12 +78,14 @@ public final class GraphFactory {
     static NodesBuilder nodesBuilder(
         long maxOriginalId,
         Optional<Boolean> hasLabelInformation,
+        Optional<Boolean> hasProperties,
         Optional<Integer> concurrency,
         AllocationTracker tracker
     ) {
         return new NodesBuilder(
             maxOriginalId,
             hasLabelInformation.orElse(false),
+            hasProperties.orElse(false),
             concurrency.orElse(1),
             tracker
         );

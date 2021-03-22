@@ -72,6 +72,7 @@ public class NodesBuilder {
     NodesBuilder(
         long maxOriginalId,
         boolean hasLabelInformation,
+        boolean hasProperties,
         int concurrency,
         AllocationTracker tracker
     ) {
@@ -103,7 +104,7 @@ public class NodesBuilder {
             internalIdMappingBuilder,
             nodeLabelBitSetMap,
             labelTokenNodeLabelMapping,
-            false,
+            hasProperties,
             tracker
         );
 
@@ -114,6 +115,7 @@ public class NodesBuilder {
                 nodeImporter,
                 seenIds,
                 hasLabelInformation,
+                hasProperties,
                 this::labelTokenId
             )
         );
@@ -165,6 +167,7 @@ public class NodesBuilder {
             NodeImporter nodeImporter,
             HugeAtomicBitSet seenIds,
             boolean hasLabelInformation,
+            boolean hasProperties,
             Function<NodeLabel, Integer> labelTokenIdFn
         ) {
             this.seenIds = seenIds;
@@ -173,7 +176,7 @@ public class NodesBuilder {
             this.buffer = new NodesBatchBufferBuilder()
                 .capacity(SparseLongArray.toValidBatchSize(ParallelUtil.DEFAULT_BATCH_SIZE))
                 .hasLabelInformation(hasLabelInformation)
-                .readProperty(false)
+                .readProperty(hasProperties)
                 .build();
             this.nodeImporter = nodeImporter;
         }
