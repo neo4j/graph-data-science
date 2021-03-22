@@ -125,13 +125,11 @@ abstract class DocTestBase extends BaseProcTest {
             runInTransaction(db, tx -> {
                 try (Result result = runQueryWithoutClosingTheResult(tx, query, Collections.emptyMap())) {
                     if (printActuals()) {
-                        System.out.println(joinInGivenOrder(result.columns().stream(), DELIMITER));
-                        result.forEachRemaining(row -> {
-                            System.out.println(joinInGivenOrder(
-                                result.columns().stream().map(row::get).map(this::valueToString),
-                                DELIMITER
-                            ));
-                        });
+                        System.out.println(DELIMITER + joinInGivenOrder(result.columns().stream(), DELIMITER));
+                        result.forEachRemaining(row -> System.out.println(DELIMITER + joinInGivenOrder(
+                            result.columns().stream().map(row::get).map(this::valueToString),
+                            DELIMITER
+                        )));
                     }
                     assertEquals(
                         expectedColumns,
