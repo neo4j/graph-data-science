@@ -67,7 +67,7 @@ class GraphStoreNodeVisitorTest {
         });
 
         var actualNodeMapping = nodesBuilder.build();
-        var expectedNodeMapping = graph.nodeMapping();
+        var expectedNodeMapping = graph;
         assertNodeMapping(actualNodeMapping, expectedNodeMapping);
     }
 
