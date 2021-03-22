@@ -29,16 +29,22 @@ import org.neo4j.graphalgo.api.NodeProperty;
 import org.neo4j.graphalgo.api.NodePropertyStore;
 import org.neo4j.graphalgo.beta.filter.expression.EvaluationContext;
 import org.neo4j.graphalgo.beta.filter.expression.Expression;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.loading.nodeproperties.DoubleArrayNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.nodeproperties.DoubleNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.nodeproperties.FloatArrayNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.nodeproperties.InnerNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.nodeproperties.LongArrayNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.nodeproperties.LongNodePropertiesBuilder;
+import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 final class NodesFilter {
@@ -53,27 +59,26 @@ final class NodesFilter {
     static FilteredNodes filterNodes(
         GraphStore graphStore,
         Expression expression,
-        NodeMapping nodeMapping,
+        int concurrency,
+        ExecutorService executorService,
         AllocationTracker allocationTracker
     ) {
-        var nodeContext = new EvaluationContext.NodeEvaluationContext(graphStore);
-
         var nodesBuilder = GraphFactory.initNodesBuilder()
-            .concurrency(1)
+            .concurrency(concurrency)
             .maxOriginalId(graphStore.nodeCount())
             .hasLabelInformation(!graphStore.nodeLabels().isEmpty())
             .tracker(allocationTracker)
             .build();
 
-        nodeMapping.forEachNode(node -> {
-            nodeContext.init(node);
-            if (expression.evaluate(nodeContext) == Expression.TRUE) {
-                var neoId = nodeMapping.toOriginalNodeId(node);
-                NodeLabel[] labels = graphStore.nodes().nodeLabels(node).toArray(NodeLabel[]::new);
-                nodesBuilder.addNode(neoId, labels);
-            }
-            return true;
-        });
+        var batchSize = BitUtil.ceilDiv(graphStore.nodeCount(), concurrency);
+        var nodeFilterTasks = graphStore
+            .nodes()
+            .batchIterables(batchSize)
+            .stream()
+            .map(nodeIterator -> new NodeFilterTask(nodeIterator, expression, graphStore, nodesBuilder))
+            .collect(Collectors.toList());
+
+        ParallelUtil.runWithConcurrency(concurrency, nodeFilterTasks, executorService);
 
         var filteredNodeMapping = nodesBuilder.build();
         var filteredNodePropertyStores = filterNodeProperties(filteredNodeMapping, graphStore);
@@ -225,6 +230,45 @@ final class NodesFilter {
     }
 
     private NodesFilter() {}
+
+    private static final class NodeFilterTask implements Runnable {
+        private final PrimitiveLongIterator nodeIterator;
+        private final Expression expression;
+        private final EvaluationContext.NodeEvaluationContext nodeContext;
+        private final GraphStore graphStore;
+        private final NodesBuilder nodesBuilder;
+
+        private NodeFilterTask(
+            PrimitiveLongIterable nodeIterator,
+            Expression expression,
+            GraphStore graphStore,
+            NodesBuilder nodesBuilder
+        ) {
+            this.nodeIterator = nodeIterator.iterator();
+            this.expression = expression;
+            this.graphStore = graphStore;
+            this.nodesBuilder = nodesBuilder;
+
+            this.nodeContext = new EvaluationContext.NodeEvaluationContext(graphStore);
+        }
+
+
+        @Override
+        public void run() {
+            long node;
+            var nodeMapping = graphStore.nodes();
+
+            while (nodeIterator.hasNext()) {
+                node = nodeIterator.next();
+                nodeContext.init(node);
+                if (expression.evaluate(nodeContext) == Expression.TRUE) {
+                    var neoId = nodeMapping.toOriginalNodeId(node);
+                    NodeLabel[] labels = nodeMapping.nodeLabels(node).toArray(NodeLabel[]::new);
+                    nodesBuilder.addNode(neoId, labels);
+                }
+            }
+        }
+    }
 
     private abstract static class NodePropertiesBuilder<T extends InnerNodePropertiesBuilder> {
         final NodeProperties inputProperties;
