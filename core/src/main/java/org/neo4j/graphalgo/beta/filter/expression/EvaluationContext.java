@@ -22,10 +22,12 @@ package org.neo4j.graphalgo.beta.filter.expression;
 import com.carrotsearch.hppc.ObjectIntMap;
 import com.carrotsearch.hppc.ObjectIntScatterMap;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class EvaluationContext {
 
@@ -36,18 +38,33 @@ public abstract class EvaluationContext {
     public static class NodeEvaluationContext extends EvaluationContext {
 
         private final GraphStore graphStore;
+        private final AtomicReference<NodeLabel> labelForPropertyReference;
 
         private long nodeId;
 
         public NodeEvaluationContext(GraphStore graphStore) {
             this.graphStore = graphStore;
+            labelForPropertyReference = new AtomicReference<>();
         }
 
         @Override
         double getProperty(String propertyKey) {
-            // TODO: this will always construct a new UnionProperties instance. Should at least be cached.
-            var nodeProperties = graphStore.nodePropertyValues(propertyKey);
-            return nodeProperties.doubleValue(nodeId);
+            labelForPropertyReference.set(null);
+
+            graphStore.nodes().forEachNodeLabel(nodeId, (nodeLabel -> {
+                if (graphStore.hasNodeProperty(nodeLabel, propertyKey)) {
+                    labelForPropertyReference.set(nodeLabel);
+                    return false;
+                }
+                return true;
+            }));
+
+            var labelForProperty = labelForPropertyReference.get();
+            if (labelForProperty == null) {
+                return DefaultValue.DOUBLE_DEFAULT_FALLBACK;
+            } else {
+                return graphStore.nodePropertyValues(labelForProperty, propertyKey).doubleValue(nodeId);
+            }
         }
 
         @Override
