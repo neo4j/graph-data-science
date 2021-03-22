@@ -20,19 +20,26 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
+import org.neo4j.gds.scaling.ScalePropertiesStreamProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 
-import java.util.Arrays;
 import java.util.List;
 
 class ScalePropertiesDocTest extends DocTestBase {
 
     @Override
     List<Class<?>> procedures() {
-        return Arrays.asList(
+        return List.of(
             GraphCreateProc.class,
+            ScalePropertiesStreamProc.class,
             ScalePropertiesMutateProc.class
         );
+    }
+
+    @Override
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
     }
 
     @Override

@@ -154,7 +154,48 @@ CALL gds.graph.create(
 In the following examples we will demonstrate how to scale the node properties of this graph.
 
 
-[[algorithms-scale-properties-examples-mutate]]
+[[algorithms-scale-properties-examples-stream]]
+=== Stream
+
+:result: scaled properties
+:entity: node
+:stream-details: Note that the output is always a single list property, containing all scaled node properties in the input order.
+include::../../shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scaleProperties.stream('myGraph', {
+  nodeProperties: ['buildYear', 'avgReview'],
+  scalers: ['MinMax', 'Mean']
+}) YIELD nodeId, scaledProperty
+RETURN gds.util.asNode(nodeId).name AS name, scaledProperty
+  ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name       | scaledProperty
+| "Beach"    | [0.3709677419354839, -0.05184904844290659]
+| "Central"  | [0.6612903225806451, 0.62721669550173]
+| "East"     | [0.3225806451612903, -0.012921712802768168]
+| "Forest"   | [0.8387096774193549, -0.24648572664359863]
+| "Mountain" | [0.41935483870967744, 0.09520977508650519]
+| "Plaza"    | [0.0, 0.15576340830449822]
+| "Polar"    | [1.0, -0.19415008650519033]
+| "West"     | [0.7580645161290323, -0.3727833044982699]
+|===
+--
+
+In the results we can observe that the first element in the resulting `scaledProperty` we get the min-max-scaled values for `buildYear`, where the `Plaza` hotel has the minimum value and is scaled to zero, while the `Polar` hotel has the maximum value and is scaled to one.
+This can be verified with the example graph.
+The second value in the `scaledProperty` result are the mean-scaled values of the `avgReview` property.
+We can verify our expectation that the sum of the values add up to zero.
+
+
 === Mutate
 
 The `mutate` execution mode enables updating the named graph with a new node property containing the scaled properties for that node.
