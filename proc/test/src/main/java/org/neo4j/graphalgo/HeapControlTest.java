@@ -74,4 +74,17 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
             proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
         });
     }
+
+    @Test
+    default void shouldNotFailOnInsufficientMemoryIfInSudoModeAnonymous() {
+        applyOnProcedure(proc -> {
+            loadGraph(heapGraphName());
+            var configMap = CypherMapWrapper.empty()
+                .withBoolean(BaseConfig.SUDO_KEY, true)
+                .withString("nodeProjection", "*")
+                .withString("relationshipProjection", "*");
+            CONFIG config = proc.newConfig(Optional.empty(), createMinimalConfig(configMap));
+            proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
+        });
+    }
 }

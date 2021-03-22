@@ -47,6 +47,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -86,9 +87,11 @@ public abstract class AlgoBaseProc<
             CypherMapWrapper configWithoutCreateKeys = config.withoutAny(allowedKeys);
             // check if we have an explicit configured sudo key, as this one is
             // shared between create and algo configs
-            Boolean sudoValue = config.getChecked(SUDO_KEY, null, Boolean.class);
-            if (sudoValue != null) {
-                configWithoutCreateKeys = configWithoutCreateKeys.withBoolean(SUDO_KEY, sudoValue);
+            for (var entry : allSharedConfigKeys().entrySet()) {
+                var value = config.getChecked(entry.getKey(), null, entry.getValue());
+                if (value != null) {
+                    configWithoutCreateKeys = configWithoutCreateKeys.withEntry(entry.getKey(), value);
+                }
             }
             config = configWithoutCreateKeys;
         }
@@ -99,6 +102,19 @@ public abstract class AlgoBaseProc<
         allowedKeys.addAll(algoConfig.configKeys());
         validateConfig(config, allowedKeys);
         return algoConfig;
+    }
+
+    private Map<String, Class<?>> allSharedConfigKeys() {
+        var configKeys = new HashMap<String, Class<?>>(sharedConfigKeys());
+        configKeys.put(SUDO_KEY, Boolean.class);
+        return configKeys;
+    }
+
+    /**
+     * If the algorithm config shares any configuration parameters with anonymous projections, these must be declared here.
+     */
+    protected Map<String, Class<?>> sharedConfigKeys() {
+        return Map.of();
     }
 
     protected abstract CONFIG newConfig(
