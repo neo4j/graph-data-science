@@ -212,7 +212,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
+    public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
         return idMapping.batchIterables(batchSize);
     }
 

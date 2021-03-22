@@ -102,7 +102,7 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public Collection<PrimitiveLongIterable> batchIterables(final int batchSize) {
+    public Collection<PrimitiveLongIterable> batchIterables(final long batchSize) {
         return first.batchIterables(batchSize);
     }
 
