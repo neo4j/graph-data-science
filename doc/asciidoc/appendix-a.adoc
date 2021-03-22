@@ -303,8 +303,9 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<alpha-algorithms-single-source-shortest-path, Single Source Shortest Path>>
 | `gds.alpha.shortestPath.deltaStepping.write`
 | `gds.alpha.shortestPath.deltaStepping.stream`
-.1+<.^|<<algorithms-scale-properties, Scale Properties>>
+.2+<.^|<<algorithms-scale-properties, Scale Properties>>
 | `gds.alpha.scaleProperties.mutate`
+| `gds.alpha.scaleProperties.stream`
 .3+<.^|<<alpha-algorithms-similarity-cosine, Cosine Similarity>>
 | `gds.alpha.similarity.cosine.stats`
 | `gds.alpha.similarity.cosine.stream`
