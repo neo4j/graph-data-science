@@ -81,7 +81,7 @@ final class NodesFilter {
         ParallelUtil.runWithConcurrency(concurrency, nodeFilterTasks, executorService);
 
         var filteredNodeMapping = nodesBuilder.build();
-        var filteredNodePropertyStores = filterNodeProperties(filteredNodeMapping, graphStore);
+        var filteredNodePropertyStores = filterNodeProperties(filteredNodeMapping, graphStore, concurrency);
 
         return ImmutableFilteredNodes.builder()
             .nodeMapping(filteredNodeMapping)
@@ -91,7 +91,8 @@ final class NodesFilter {
 
     private static Map<NodeLabel, NodePropertyStore> filterNodeProperties(
         NodeMapping filteredNodeMapping,
-        GraphStore inputGraphStore
+        GraphStore inputGraphStore,
+        int concurrency
     ) {
         return filteredNodeMapping
             .availableNodeLabels()
@@ -100,8 +101,15 @@ final class NodesFilter {
                 nodeLabel -> nodeLabel,
                 nodeLabel -> {
                     var propertyKeys = inputGraphStore.nodePropertyKeys(nodeLabel);
-                    return createNodePropertyStore(inputGraphStore, filteredNodeMapping, nodeLabel, propertyKeys);
-                })
+                    return createNodePropertyStore(
+                        inputGraphStore,
+                        filteredNodeMapping,
+                        nodeLabel,
+                        propertyKeys,
+                        concurrency
+                    );
+                }
+                )
             );
     }
 
@@ -109,7 +117,8 @@ final class NodesFilter {
         GraphStore inputGraphStore,
         NodeMapping filteredMapping,
         NodeLabel nodeLabel,
-        Iterable<String> propertyKeys
+        Iterable<String> propertyKeys,
+        int concurrency
     ) {
         var builder = NodePropertyStore.builder();
         var filteredNodeCount = filteredMapping.nodeCount();
@@ -117,7 +126,6 @@ final class NodesFilter {
 
         var allocationTracker = AllocationTracker.empty();
 
-        // TODO: parallel?
         propertyKeys.forEach(propertyKey -> {
             var nodeProperties = inputGraphStore.nodePropertyValues(nodeLabel, propertyKey);
             var propertyState = inputGraphStore.nodePropertyState(propertyKey);
@@ -128,11 +136,14 @@ final class NodesFilter {
                 nodeProperties
             );
 
-            filteredMapping.forEachNode(filteredNode -> {
-                var inputNode = inputMapping.toMappedNodeId(filteredMapping.toOriginalNodeId(filteredNode));
-                nodePropertiesBuilder.accept(inputNode, filteredNode);
-                return true;
-            });
+            ParallelUtil.parallelForEachNode(
+                filteredNodeCount,
+                concurrency,
+                filteredNode -> {
+                    var inputNode = inputMapping.toMappedNodeId(filteredMapping.toOriginalNodeId(filteredNode));
+                    nodePropertiesBuilder.accept(inputNode, filteredNode);
+                }
+            );
 
             builder.putNodeProperty(
                 propertyKey,
