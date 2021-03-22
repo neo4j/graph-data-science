@@ -38,7 +38,6 @@ import org.neo4j.graphalgo.extension.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 
