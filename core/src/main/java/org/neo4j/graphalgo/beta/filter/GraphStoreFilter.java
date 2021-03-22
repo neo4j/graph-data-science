@@ -58,6 +58,8 @@ public final class GraphStoreFilter {
             expressions.relationshipExpression(),
             inputNodes,
             filteredNodes.nodeMapping(),
+            config.concurrency(),
+            executorService,
             tracker
         );
 
