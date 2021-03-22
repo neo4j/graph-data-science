@@ -23,12 +23,14 @@ There are a number of supported scalers for the Scale Properties algorithm.
 These can be configured using the `scalers` configuration parameter.
 
 
+[[algorithms-scale-properties-minmax]]
 === Min-max scaler
 
 Scales all property values into the range `[0, 1]` where the minimum value(s) get the scaled value `0` and the maximum value(s) get the scaled value `1`, according to this formula:
 
 image::equations/min-max.svg[minmax of p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
 
+[[algorithms-scale-properties-mean]]
 === Mean scaler
 
 Scales all property values into the range `[-1, 1]` where the average value(s) get the scaled value `0`.
@@ -134,7 +136,7 @@ The `mutate` mode is especially useful when multiple algorithms are used in conj
 
 For more details on the `mutate` mode in general, see <<running-algos-mutate>>.
 
-In this example we will scale the two hotel properties of `buildYear` and `avgReview` using the <<Min-max scaler>> and <<Mean scaler>>, respectively.
+In this example we will scale the two hotel properties of `buildYear` and `avgReview` using the <<algorithms-scale-properties-minmax>> and <<algorithms-scale-properties-mean>>, respectively.
 The output is a list property which we will call `hotelFeatures`, imagining that we will use this as input for a machine learning model later on.
 
 [role=query-example]
