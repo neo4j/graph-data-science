@@ -36,6 +36,10 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
         this.objectArray = HugeObjectArray.newArray(double[].class, nodeCount, tracker);
     }
 
+    public void set(long nodeId, double[] value) {
+        objectArray.set(nodeId, value);
+    }
+
     @Override
     public void setValue(long nodeId, Value value) {
         objectArray.set(nodeId, ValueConversion.getDoubleArray(value));

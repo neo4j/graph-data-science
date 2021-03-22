@@ -36,6 +36,10 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
         this.objectArray = HugeObjectArray.newArray(float[].class, nodeCount, tracker);
     }
 
+    public void set(long nodeId, float[] value) {
+        objectArray.set(nodeId, value);
+    }
+
     @Override
     public void setValue(long nodeId, Value value) {
         objectArray.set(nodeId, ValueConversion.getFloatArray(value));

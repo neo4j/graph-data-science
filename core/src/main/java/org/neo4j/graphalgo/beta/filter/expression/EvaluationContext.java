@@ -102,7 +102,7 @@ public abstract class EvaluationContext {
         @Override
         boolean hasLabelsOrTypes(List<String> relTypes) {
             boolean hasAnyType = false;
-            for (String relType: relTypes) {
+            for (String relType : relTypes) {
                 hasAnyType |= this.relType.equals(relType);
             }
             return hasAnyType;

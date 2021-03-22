@@ -36,6 +36,10 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         this.objectArray = HugeObjectArray.newArray(long[].class, nodeCount, tracker);
     }
 
+    public void set(long nodeId, long[] value) {
+        objectArray.set(nodeId, value);
+    }
+
     @Override
     public void setValue(long nodeId, Value value) {
         objectArray.set(nodeId, ValueConversion.getLongArray(value));

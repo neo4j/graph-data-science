@@ -59,6 +59,11 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         this.valuesBuilder = HugeSparseLongArray.builder(nodeCount, defaultValue.longValue(), tracker);
     }
 
+    public void set(long nodeId, long value) {
+        valuesBuilder.set(nodeId, value);
+        updateMaxValue(value);
+    }
+
     @Override
     public void setValue(long nodeId, Value value) {
         var longValue = ValueConversion.getLongValue(value);

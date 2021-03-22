@@ -58,6 +58,11 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         this.valuesBuilder = HugeSparseLongArray.builder(nodeCount, Double.doubleToLongBits(defaultValue.doubleValue()), tracker);
     }
 
+    public void set(long nodeId, double value) {
+        valuesBuilder.set(nodeId, Double.doubleToLongBits(value));
+        updateMaxValue(value);
+    }
+
     @Override
     public void setValue(long nodeId, Value value) {
         double doubleValue = ValueConversion.getDoubleValue(value);

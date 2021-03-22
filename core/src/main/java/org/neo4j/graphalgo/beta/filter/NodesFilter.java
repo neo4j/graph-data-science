@@ -24,9 +24,9 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.NodeProperty;
 import org.neo4j.graphalgo.api.NodePropertyStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.filter.expression.EvaluationContext;
 import org.neo4j.graphalgo.beta.filter.expression.Expression;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
@@ -116,79 +116,129 @@ final class NodesFilter {
         propertyKeys.forEach(propertyKey -> {
             var nodeProperties = inputGraphStore.nodePropertyValues(nodeLabel, propertyKey);
             var propertyState = inputGraphStore.nodePropertyState(propertyKey);
-            var propertyType = nodeProperties.valueType();
 
-
-            InnerNodePropertiesBuilder propertiesBuilder = getPropertiesBuilder(
+            NodePropertiesBuilder<?> nodePropertiesBuilder = getPropertiesBuilder(
                 filteredNodeCount,
                 allocationTracker,
-                propertyType
+                nodeProperties
             );
 
             filteredMapping.forEachNode(filteredNode -> {
                 var inputNode = inputMapping.toMappedNodeId(filteredMapping.toOriginalNodeId(filteredNode));
-                // TODO: can we get rid of the `value` conversion here?
-                propertiesBuilder.setValue(filteredNode, nodeProperties.value(inputNode));
+                nodePropertiesBuilder.accept(inputNode, filteredNode);
                 return true;
             });
 
             builder.putNodeProperty(
                 propertyKey,
-                NodeProperty.of(propertyKey, propertyState, propertiesBuilder.build(filteredNodeCount))
+                NodeProperty.of(propertyKey, propertyState, nodePropertiesBuilder.build(filteredNodeCount))
             );
         });
 
         return builder.build();
     }
 
-    private static InnerNodePropertiesBuilder getPropertiesBuilder(
+    private static NodePropertiesBuilder<?> getPropertiesBuilder(
         long filteredNodeCount,
         AllocationTracker allocationTracker,
-        ValueType propertyType
+        NodeProperties inputNodeProperties
     ) {
-        InnerNodePropertiesBuilder propertiesBuilder = null;
-        switch (propertyType) {
+        NodePropertiesBuilder<?> propertiesBuilder = null;
+
+        switch (inputNodeProperties.valueType()) {
             case LONG:
-                propertiesBuilder = new LongNodePropertiesBuilder(
+                var longNodePropertiesBuilder = new LongNodePropertiesBuilder(
                     filteredNodeCount,
                     DefaultValue.forLong(),
                     allocationTracker
                 );
+                propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, longNodePropertiesBuilder) {
+                    @Override
+                    void accept(long inputNode, long filteredNode) {
+                        propertyBuilder.set(filteredNode, inputProperties.longValue(inputNode));
+                    }
+                };
                 break;
+
             case DOUBLE:
-                propertiesBuilder = new DoubleNodePropertiesBuilder(
+                var doubleNodePropertiesBuilder = new DoubleNodePropertiesBuilder(
                     filteredNodeCount,
                     DefaultValue.forDouble(),
                     allocationTracker
                 );
+                propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, doubleNodePropertiesBuilder) {
+                    @Override
+                    void accept(long inputNode, long filteredNode) {
+                        propertyBuilder.set(filteredNode, inputProperties.doubleValue(inputNode));
+                    }
+                };
                 break;
+
             case DOUBLE_ARRAY:
-                propertiesBuilder = new DoubleArrayNodePropertiesBuilder(
+                var doubleArrayNodePropertiesBuilder = new DoubleArrayNodePropertiesBuilder(
                     filteredNodeCount,
                     DefaultValue.forDoubleArray(),
                     allocationTracker
                 );
+                propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, doubleArrayNodePropertiesBuilder) {
+                    @Override
+                    void accept(long inputNode, long filteredNode) {
+                        propertyBuilder.set(filteredNode, inputProperties.doubleArrayValue(inputNode));
+                    }
+                };
                 break;
+
             case FLOAT_ARRAY:
-                propertiesBuilder = new FloatArrayNodePropertiesBuilder(
+                var floatArrayNodePropertiesBuilder = new FloatArrayNodePropertiesBuilder(
                     filteredNodeCount,
                     DefaultValue.forFloatArray(),
                     allocationTracker
                 );
+
+                propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, floatArrayNodePropertiesBuilder) {
+                    @Override
+                    void accept(long inputNode, long filteredNode) {
+                        propertyBuilder.set(filteredNode, inputProperties.floatArrayValue(inputNode));
+                    }
+                };
                 break;
+
             case LONG_ARRAY:
-                propertiesBuilder = new LongArrayNodePropertiesBuilder(
+                var longArrayNodePropertiesBuilder = new LongArrayNodePropertiesBuilder(
                     filteredNodeCount,
                     DefaultValue.forLongArray(),
                     allocationTracker
                 );
+
+                propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, longArrayNodePropertiesBuilder) {
+                    @Override
+                    void accept(long inputNode, long filteredNode) {
+                        propertyBuilder.set(filteredNode, inputProperties.longArrayValue(inputNode));
+                    }
+                };
                 break;
+
             case UNKNOWN:
                 throw new UnsupportedOperationException("Cannot import properties of type UNKNOWN");
         }
-
         return propertiesBuilder;
     }
 
     private NodesFilter() {}
+
+    private abstract static class NodePropertiesBuilder<T extends InnerNodePropertiesBuilder> {
+        final NodeProperties inputProperties;
+        final T propertyBuilder;
+
+        NodePropertiesBuilder(NodeProperties inputProperties, T propertyBuilder) {
+            this.inputProperties = inputProperties;
+            this.propertyBuilder = propertyBuilder;
+        }
+
+        abstract void accept(long inputNode, long filteredNode);
+
+        NodeProperties build(long size) {
+            return propertyBuilder.build(size);
+        }
+    }
 }
