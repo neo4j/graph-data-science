@@ -24,11 +24,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -48,9 +46,10 @@ class CsvImportUtilTest {
         for (String fileName : fileNames) {
             Files.createFile(tempDir.resolve(fileName));
         }
-        var nodeHeaderFiles = Arrays
-            .stream(CsvImportUtil.getNodeHeaderFiles(tempDir))
-            .map(File::getName)
+        var nodeHeaderFiles = CsvImportUtil.getNodeHeaderFiles(tempDir)
+            .stream()
+            .map(Path::getFileName)
+            .map(Path::toString)
             .collect(Collectors.toList());
 
         assertThat(nodeHeaderFiles).hasSize(3);
@@ -93,5 +92,4 @@ class CsvImportUtilTest {
             )
         );
     }
-
 }

@@ -50,10 +50,8 @@ public interface NodeFileHeader {
         public NodeFileHeader build() {
             var builder = ImmutableNodeFileHeader.builder();
             String[] csvColumns = headerLine.split(",");
-            if (csvColumns.length > 1) {
-                for (int i = 1; i < csvColumns.length; i++) {
-                    builder.addPropertyMapping(HeaderProperty.parse(i, csvColumns[i]));
-                }
+            for (int i = 1; i < csvColumns.length; i++) {
+                builder.addPropertyMapping(HeaderProperty.parse(i, csvColumns[i]));
             }
             builder.nodeLabels(nodeLabels);
             return builder.build();

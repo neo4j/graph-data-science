@@ -33,7 +33,7 @@ public interface HeaderProperty {
     static HeaderProperty parse(int position, String propertyString) {
         String[] propertyArgs = propertyString.split(":");
         if (propertyArgs.length != 2) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Header property column does not have expected format <string>:<string>, got " + propertyString);
         }
         return ImmutableHeaderProperty.of(position, propertyArgs[0], ValueType.valueOf(propertyArgs[1]));
     }

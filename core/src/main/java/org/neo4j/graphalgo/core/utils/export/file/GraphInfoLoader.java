@@ -26,9 +26,10 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
@@ -49,7 +50,7 @@ public class GraphInfoLoader {
 
     public GraphInfo load() {
 
-        try (var fileReader = new FileReader(graphInfoPath.toFile(), StandardCharsets.UTF_8)) {
+        try (var fileReader = Files.newBufferedReader(graphInfoPath, StandardCharsets.UTF_8)) {
             var mappingIterator = objectReader.<GraphInfoLine>readValues(fileReader);
 
             var line = mappingIterator.next();
@@ -60,7 +61,7 @@ public class GraphInfoLoader {
                 .build();
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
