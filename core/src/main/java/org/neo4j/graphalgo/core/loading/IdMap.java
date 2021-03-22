@@ -186,10 +186,14 @@ public class IdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
 
     @Override
     public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        for (var labelAndBitSet : labelInformation.entrySet()) {
-            if (labelAndBitSet.getValue().get(nodeId)) {
-                if (!consumer.accept(labelAndBitSet.getKey())) {
-                    break;
+        if (labelInformation.isEmpty()) {
+            consumer.accept(NodeLabel.ALL_NODES);
+        } else {
+            for (var labelAndBitSet : labelInformation.entrySet()) {
+                if (labelAndBitSet.getValue().get(nodeId)) {
+                    if (!consumer.accept(labelAndBitSet.getKey())) {
+                        break;
+                    }
                 }
             }
         }
