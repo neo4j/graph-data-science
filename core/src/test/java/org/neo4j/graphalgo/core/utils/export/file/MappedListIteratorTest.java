@@ -21,11 +21,15 @@ package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,4 +52,38 @@ class MappedListIteratorTest {
         assertThat(actual).isEqualTo(mapping);
     }
 
+    private static Stream<Arguments> emptyMaps() {
+        return Stream.of(
+            Arguments.of(Map.of(), Map.of()),
+            Arguments.of(Map.of("a", List.of()), Map.of()),
+            Arguments.of(
+                Map.of(
+                    "a", List.of(),
+                    "b", List.of(),
+                    "c", List.of(0, 1)
+                ),
+                Map.of("c", List.of(0, 1))
+            ),
+            Arguments.of(
+                Map.of(
+                    "a", List.of(0, 1),
+                    "b", List.of()
+                ),
+                Map.of("a", List.of(0, 1))
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("emptyMaps")
+    void shouldDealWithEmptyMapOrInnerList(Map<String, List<Integer>> mapping, Map<String, List<Integer>> expected) {
+        var mappedListIterator = new MappedListIterator<>(mapping);
+        Map<String, List<Integer>> actual = new HashMap<>();
+        while(mappedListIterator.hasNext()) {
+            Pair<String, Integer> entry = mappedListIterator.next();
+            actual.computeIfAbsent(entry.getKey(), __ -> new ArrayList<>()).add(entry.getValue());
+        }
+
+        assertThat(actual).isEqualTo(expected);
+    }
 }

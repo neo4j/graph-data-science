@@ -75,5 +75,4 @@ class GraphStoreNodeVisitorTest {
         assertThat(actual.nodeCount()).isEqualTo(expected.nodeCount());
         assertThat(actual.availableNodeLabels()).isEqualTo(expected.availableNodeLabels());
     }
-
 }

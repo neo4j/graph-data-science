@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,19 +38,22 @@ public class MappedListIterator<KEY, ENTRY> implements Iterator<Pair<KEY, ENTRY>
             Map.Entry<KEY, List<ENTRY>> mapEntry = mapEntryIterator.next();
             currentKey = mapEntry.getKey();
             listEntryIterator = mapEntry.getValue().listIterator();
+        } else {
+            listEntryIterator = Collections.emptyListIterator();
         }
     }
 
     @Override
     public boolean hasNext() {
-        if (!listEntryIterator.hasNext()) {
-            if (mapEntryIterator.hasNext()) {
-                Map.Entry<KEY, List<ENTRY>> mapEntry = mapEntryIterator.next();
-                currentKey = mapEntry.getKey();
-                listEntryIterator = mapEntry.getValue().listIterator();
+        while (!listEntryIterator.hasNext()) {
+            if (!mapEntryIterator.hasNext()) {
+                return false;
             }
+            Map.Entry<KEY, List<ENTRY>> mapEntry = mapEntryIterator.next();
+            currentKey = mapEntry.getKey();
+            listEntryIterator = mapEntry.getValue().listIterator();
         }
-        return mapEntryIterator.hasNext() || listEntryIterator.hasNext();
+        return true;
     }
 
     @Override
