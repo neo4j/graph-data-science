@@ -214,6 +214,10 @@ public final class GraphFactory {
         );
     }
 
+    public static Relationships emptyRelationships(IdMapping nodeMapping, AllocationTracker tracker) {
+        return initRelationshipsBuilder().nodes(nodeMapping).tracker(tracker).build().build();
+    }
+
     public static HugeGraph create(NodeMapping idMap, Relationships relationships, AllocationTracker tracker) {
         var nodeSchemaBuilder = NodeSchema.builder();
         idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);

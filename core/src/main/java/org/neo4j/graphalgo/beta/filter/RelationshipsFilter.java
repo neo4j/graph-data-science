@@ -96,21 +96,6 @@ final class RelationshipsFilter {
             relPropertyStores.put(relType, propertyStoreBuilder.build());
         }
 
-        // If all relationship types have been filtered, we need to add a dummy
-        // topology in order to be able to create a graph store.
-        // TODO: could live in GraphStore factory method
-        if (topologies.isEmpty()) {
-            var emptyTopology = GraphFactory.initRelationshipsBuilder()
-                .nodes(outputNodes)
-                .concurrency(1)
-                .tracker(allocationTracker)
-                .build()
-                .build()
-                .topology();
-
-            topologies.put(RelationshipType.ALL_RELATIONSHIPS, emptyTopology);
-        }
-
         return ImmutableFilteredRelationships.builder()
             .topology(topologies)
             .propertyStores(relPropertyStores)
