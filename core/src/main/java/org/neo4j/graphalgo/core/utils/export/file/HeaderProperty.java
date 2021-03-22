@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
@@ -33,8 +34,16 @@ public interface HeaderProperty {
     static HeaderProperty parse(int position, String propertyString) {
         String[] propertyArgs = propertyString.split(":");
         if (propertyArgs.length != 2) {
-            throw new IllegalArgumentException("Header property column does not have expected format <string>:<string>, got " + propertyString);
+            throw wrongHeaderFormatException(propertyString);
+        } else if (propertyArgs[0].isEmpty() || propertyArgs[1].isEmpty()) {
+            throw wrongHeaderFormatException(propertyString);
         }
         return ImmutableHeaderProperty.of(position, propertyArgs[0], ValueType.valueOf(propertyArgs[1]));
+    }
+
+    @NotNull
+    private static IllegalArgumentException wrongHeaderFormatException(String propertyString) {
+        return new IllegalArgumentException(
+            "Header property column does not have expected format <string>:<string>, got " + propertyString);
     }
 }

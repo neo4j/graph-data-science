@@ -20,9 +20,14 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class NodeFileHeaderTest {
 
@@ -43,5 +48,32 @@ class NodeFileHeaderTest {
             ImmutableHeaderProperty.of(3, "baz", ValueType.LONG),
             ImmutableHeaderProperty.of(4, "neoId", ValueType.LONG)
         );
+    }
+
+    @Test
+    void shouldFailIfIdColumnIsMissing() {
+        var headerLine = "foo:LONG,bar:DOUBLE";
+
+        assertThatThrownBy(() -> NodeFileHeader.builder()
+            .withHeaderLine(headerLine)
+            .withNodeLabels(new String[]{"A"})
+            .build()
+        )
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("First column")
+            .hasMessageContaining("must be " + ID_COLUMN_NAME);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"foo::Bar", ":BAR", "foo:", ":foo:BAR", ":"})
+    void shouldFailOnMalformedProperties(String propertyHeaderString) {
+        var headerString = formatWithLocale("%s,%s", ID_COLUMN_NAME, propertyHeaderString);
+        assertThatThrownBy(() -> NodeFileHeader.builder()
+            .withHeaderLine(headerString)
+            .withNodeLabels(new String[]{"A"})
+            .build()
+        )
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("does not have expected format <string>:<string>");
     }
 }

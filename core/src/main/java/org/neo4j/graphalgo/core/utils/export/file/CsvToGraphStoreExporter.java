@@ -87,7 +87,7 @@ public final class CsvToGraphStoreExporter {
             (index) -> new ElementImportRunner(nodeVisitorBuilder.build(), nodesIterator)
         );
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        ParallelUtil.run(tasks, Pools.DEFAULT);
     }
 
     private void exportRelationships(FileInput fileInput) {}

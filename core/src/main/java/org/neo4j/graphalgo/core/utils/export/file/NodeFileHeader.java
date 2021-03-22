@@ -23,6 +23,9 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Set;
 
+import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 @ValueClass
 public interface NodeFileHeader {
     Set<HeaderProperty> propertyMappings();
@@ -50,6 +53,9 @@ public interface NodeFileHeader {
         public NodeFileHeader build() {
             var builder = ImmutableNodeFileHeader.builder();
             String[] csvColumns = headerLine.split(",");
+            if (csvColumns.length == 0 || !csvColumns[0].equals(ID_COLUMN_NAME)) {
+                throw new IllegalArgumentException(formatWithLocale("First column of header must be %s.", ID_COLUMN_NAME));
+            }
             for (int i = 1; i < csvColumns.length; i++) {
                 builder.addPropertyMapping(HeaderProperty.parse(i, csvColumns[i]));
             }
