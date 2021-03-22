@@ -20,13 +20,11 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
@@ -40,7 +38,7 @@ import java.util.stream.Stream;
 public class ScalePropertiesMutateProc extends MutatePropertyProc<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateProc.MutateResult, ScalePropertiesMutateConfig> {
 
     @Procedure("gds.alpha.scaleProperties.mutate")
-    @Description("Normalize node properties")
+    @Description("Scale node properties")
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -65,12 +63,7 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
 
     @Override
     protected AlgorithmFactory<ScaleProperties, ScalePropertiesMutateConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<ScaleProperties, ScalePropertiesMutateConfig>) (graph, configuration, tracker, log, eventTracker) -> new ScaleProperties(
-            graph,
-            configuration,
-            tracker,
-            Pools.DEFAULT
-        );
+        return new ScalePropertiesFactory<>();
     }
 
     @Override

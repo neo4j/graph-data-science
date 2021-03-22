@@ -20,13 +20,11 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -66,12 +64,7 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
 
     @Override
     protected AlgorithmFactory<ScaleProperties, ScalePropertiesStreamConfig> algorithmFactory() {
-        return (AlphaAlgorithmFactory<ScaleProperties, ScalePropertiesStreamConfig>) (graph, configuration, tracker, log, eventTracker) -> new ScaleProperties(
-            graph,
-            configuration,
-            tracker,
-            Pools.DEFAULT
-        );
+        return new ScalePropertiesFactory<>();
     }
 
     @Override
