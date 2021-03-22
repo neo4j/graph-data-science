@@ -176,6 +176,11 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
+    public boolean hasNodeProperty(NodeLabel nodeLabel, String propertyKey) {
+        return nodeProperties.containsKey(nodeLabel) && nodeProperties.get(nodeLabel).containsKey(propertyKey);
+    }
+
+    @Override
     public boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey) {
         return labels
             .stream()

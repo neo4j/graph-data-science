@@ -101,6 +101,11 @@ public class NullGraphStore implements GraphStore {
     }
 
     @Override
+    public boolean hasNodeProperty(NodeLabel label, String propertyKey) {
+        return false;
+    }
+
+    @Override
     public boolean hasNodeProperty(Collection<NodeLabel> labels, String propertyKey) {
         return false;
     }
