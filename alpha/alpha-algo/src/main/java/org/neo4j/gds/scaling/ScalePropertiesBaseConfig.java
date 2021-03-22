@@ -41,6 +41,7 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
     @Configuration.ToMapValue("org.neo4j.gds.scaling.Scaler.Variant#toCypher")
     List<Scaler.Variant> scalers();
 
+    @SuppressWarnings("unused")
     static List<String> parsePropertyNames(Object nodePropertiesOrMappings) {
         if (nodePropertiesOrMappings instanceof List) {
             var nodeProperties = (List<?>) nodePropertiesOrMappings;

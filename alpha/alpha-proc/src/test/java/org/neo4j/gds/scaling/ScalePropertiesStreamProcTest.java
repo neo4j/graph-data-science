@@ -21,6 +21,8 @@ package org.neo4j.gds.scaling;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
@@ -65,6 +67,27 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
             .addParameter("nodeProperties", List.of("id"))
             .addParameter("scalers", List.of("Mean"))
             .yields();
+
+        assertCypherResult(query, List.of(
+            Map.of("nodeId", 0L, "scaledProperty", List.of(-1 / 2D)),
+            Map.of("nodeId", 1L, "scaledProperty", List.of(-3 / 10D)),
+            Map.of("nodeId", 2L, "scaledProperty", List.of(-1 / 10D)),
+            Map.of("nodeId", 3L, "scaledProperty", List.of(1 / 10D)),
+            Map.of("nodeId", 4L, "scaledProperty", List.of(3 / 10D)),
+            Map.of("nodeId", 5L, "scaledProperty", List.of(1 / 2D))
+        ));
+    }
+
+    @ValueSource(strings = {"'id'", "['id']", "{id: {}}", "{id: {defaultValue: 1}}"})
+    @ParameterizedTest
+    void anonymousOverloadingParameter(String nodePropertyProjection) {
+        var query =
+            "CALL gds.alpha.scaleProperties.stream({" +
+            "  nodeProjection: 'A'," +
+            "  relationshipProjection: '*'," +
+            "  nodeProperties: " + nodePropertyProjection + "," +
+            "  scalers: 'mean'" +
+            "})";
 
         assertCypherResult(query, List.of(
             Map.of("nodeId", 0L, "scaledProperty", List.of(-1 / 2D)),

@@ -53,6 +53,11 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
     }
 
     @Override
+    protected Map<String, Class<?>> sharedConfigKeys() {
+        return Map.of("nodeProperties", Object.class);
+    }
+
+    @Override
     protected ScalePropertiesStreamConfig newConfig(
         String username,
         Optional<String> graphName,
