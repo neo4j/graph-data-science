@@ -82,7 +82,7 @@ public final class GraphFactory {
         Optional<Integer> concurrency,
         AllocationTracker tracker
     ) {
-        return new NodesBuilder(
+        return NodesBuilder.withoutSchema(
             maxOriginalId,
             hasLabelInformation.orElse(false),
             hasProperties.orElse(false),
