@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.beta.filter;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.BaseConfig;
@@ -35,27 +34,27 @@ public interface GraphStoreFilterConfig extends BaseConfig, ConcurrencyConfig {
     String graphName();
 
     @Configuration.Parameter
-    String subgraphName();
+    String fromGraphName();
 
-    @Value.Default
-    default String nodeFilter() {
-        return "true";
-    }
+    @Configuration.Parameter
+    String nodeFilter();
 
-    @Value.Default
-    default String relationshipFilter() {
-        return "true";
-    }
+    @Configuration.Parameter
+    String relationshipFilter();
 
     static GraphStoreFilterConfig of(
         String username,
         String graphName,
-        String subgraphName,
+        String fromGraphName,
+        String nodeFilter,
+        String relationshipFilter,
         CypherMapWrapper config
     ) {
         return new GraphStoreFilterConfigImpl(
             graphName,
-            subgraphName,
+            fromGraphName,
+            nodeFilter,
+            relationshipFilter,
             username,
             config
         );

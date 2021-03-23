@@ -65,18 +65,17 @@ class GraphSubgraphProcTest extends BaseProcTest {
 
     @Test
     void executeProc() {
-        var subGraphQuery = "CALL gds.beta.graph.subgraph('graph', 'subgraph', {" +
-                            "   nodeFilter: 'n:A'," +
-                            "   relationshipFilter: 'true'" +
-                            "})";
+        var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'n:A', 'true')";
 
         assertCypherResult(subGraphQuery, List.of(Map.of(
             "configuration", Map.of(
-                "nodeFilter", "n:A",
-                "relationshipFilter", "true",
                 "sudo", false,
                 "concurrency", 4
             ),
+            "graphName", "subgraph",
+            "fromGraphName", "graph",
+            "nodeFilter", "n:A",
+            "relationshipFilter", "true",
             "nodeCount", 1L,
             "relationshipCount", 0L,
             "createMillis", greaterThan(0L)
@@ -126,10 +125,7 @@ class GraphSubgraphProcTest extends BaseProcTest {
             .graphCreate("subgraph")
             .yields());
 
-        var subGraphQuery = "CALL gds.beta.graph.subgraph('graph', 'subgraph', {" +
-                            "   nodeFilter: 'n:A'," +
-                            "   relationshipFilter: 'true'" +
-                            "})";
+        var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'n:A', 'true')";
 
         assertThatThrownBy(() -> runQuery(subGraphQuery))
             .getRootCause()
@@ -139,10 +135,7 @@ class GraphSubgraphProcTest extends BaseProcTest {
 
     @Test
     void throwsOnParserError() {
-        var subGraphQuery = "CALL gds.beta.graph.subgraph('graph', 'subgraph', {" +
-                            "   nodeFilter: 'GIMME NODES, JOANNA, GIMME NODES'," +
-                            "   relationshipFilter: 'true'" +
-                            "})";
+        var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'GIMME NODES, JOANNA, GIMME NODES', 'true')";
 
         assertThatThrownBy(() -> runQuery(subGraphQuery))
             .getRootCause()
@@ -152,10 +145,7 @@ class GraphSubgraphProcTest extends BaseProcTest {
 
     @Test
     void throwsOnSemanticNodeError() {
-        var subGraphQuery = "CALL gds.beta.graph.subgraph('graph', 'subgraph', {" +
-                            "   nodeFilter: 'r:Foo'," +
-                            "   relationshipFilter: 'true'" +
-                            "})";
+        var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'r:Foo', 'true')";
 
         assertThatThrownBy(() -> runQuery(subGraphQuery))
             .getRootCause()
@@ -166,10 +156,7 @@ class GraphSubgraphProcTest extends BaseProcTest {
 
     @Test
     void throwsOnSemanticRelationshipError() {
-        var subGraphQuery = "CALL gds.beta.graph.subgraph('graph', 'subgraph', {" +
-                            "   nodeFilter: 'true'," +
-                            "   relationshipFilter: 'r:BAR AND r.weight > 42'" +
-                            "})";
+        var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'true', 'r:BAR AND r.weight > 42')";
 
         assertThatThrownBy(() -> runQuery(subGraphQuery))
             .getRootCause()

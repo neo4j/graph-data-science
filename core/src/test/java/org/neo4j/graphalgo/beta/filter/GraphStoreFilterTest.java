@@ -42,8 +42,8 @@ class GraphStoreFilterTest {
             .concurrency(1)
             .nodeFilter(nodeFilter)
             .relationshipFilter(relationshipFilter)
-            .graphName("inputGraph")
-            .subgraphName("outputGraph")
+            .graphName("outputGraph")
+            .fromGraphName("inputGraph")
             .build();
     }
 

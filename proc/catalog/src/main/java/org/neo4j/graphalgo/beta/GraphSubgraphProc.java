@@ -43,20 +43,24 @@ public class GraphSubgraphProc extends CatalogProc {
 
     private static final String DESCRIPTION = "Creates a subgraph of an existing graph and stores it in the catalog.";
 
-    @Procedure(name = "gds.beta.graph.subgraph", mode = READ)
+    @Procedure(name = "gds.beta.graph.create.subgraph", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphSubgraphResult> generate(
         @Name(value = "graphName") String graphName,
-        @Name(value = "subgraphName") String subgraphName,
+        @Name(value = "fromGraphName") String fromGraphName,
+        @Name(value = "nodeFilter", defaultValue = "true") String nodeFilter,
+        @Name(value = "relationshipFilter", defaultValue = "true") String relationshipFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        validateGraphName(username(), subgraphName);
+        validateGraphName(username(), graphName);
 
         var cypherConfig = CypherMapWrapper.create(configuration);
         var filterConfig = GraphStoreFilterConfig.of(
             username(),
             graphName,
-            subgraphName,
+            fromGraphName,
+            nodeFilter,
+            relationshipFilter,
             cypherConfig
         );
         validateConfig(cypherConfig, filterConfig);
@@ -72,7 +76,7 @@ public class GraphSubgraphProc extends CatalogProc {
     private GraphSubgraphResult compute(GraphStoreFilterConfig config) throws ParseException, SemanticErrors {
         var progressTimer = ProgressTimer.start();
 
-        var graphStore = GraphStoreCatalog.get(username(), databaseId(), config.graphName());
+        var graphStore = GraphStoreCatalog.get(username(), databaseId(), config.fromGraphName());
         var subGraphStore = GraphStoreFilter.filter(
             graphStore.graphStore(),
             config,
@@ -82,7 +86,7 @@ public class GraphSubgraphProc extends CatalogProc {
 
         var subgraphCreateConfig = ImmutableGraphCreateFromGraphConfig.builder()
             .username(username())
-            .graphName(config.subgraphName())
+            .graphName(config.graphName())
             .nodeFilter(config.nodeFilter())
             .relationshipFilter(config.relationshipFilter())
             .originalConfig(graphStore.config())
@@ -93,6 +97,10 @@ public class GraphSubgraphProc extends CatalogProc {
         var createMillis = progressTimer.stop().getDuration();
 
         return new GraphSubgraphResult(
+            config.graphName(),
+            config.fromGraphName(),
+            config.nodeFilter(),
+            config.relationshipFilter(),
             subGraphStore.nodeCount(),
             subGraphStore.relationshipCount(),
             createMillis,
@@ -102,17 +110,31 @@ public class GraphSubgraphProc extends CatalogProc {
 
     public static class GraphSubgraphResult {
 
+        public final String graphName;
+        public final String fromGraphName;
+
+        public final String nodeFilter;
+        public final String relationshipFilter;
+
         public final long nodeCount;
         public final long relationshipCount;
         public final long createMillis;
         public final Map<String, Object> configuration;
 
         GraphSubgraphResult(
+            String graphName,
+            String fromGraphName,
+            String nodeFilter,
+            String relationshipFilter,
             long nodeCount,
             long relationshipCount,
             long createMillis,
             Map<String, Object> configuration
         ) {
+            this.graphName = graphName;
+            this.fromGraphName = fromGraphName;
+            this.nodeFilter = nodeFilter;
+            this.relationshipFilter = relationshipFilter;
 
             this.nodeCount = nodeCount;
             this.relationshipCount = relationshipCount;
