@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static java.time.temporal.ChronoUnit.MILLIS;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -68,7 +68,7 @@ abstract class BaseStoreModelTest<DATA, CONFIG extends ModelConfig> {
         assertThat(storedModel.name()).isEqualTo(model.name());
         assertThat(storedModel.trainConfig()).isEqualTo(model.trainConfig());
         assertThat(storedModel.creationTime())
-            .isCloseTo(model.creationTime(), new TemporalUnitWithinOffset(1, MILLIS));
+            .isCloseTo(model.creationTime(), new TemporalUnitWithinOffset(1, SECONDS));
         assertThat(storedModel.graphSchema()).isEqualTo(model.graphSchema());
         assertThat(storedModel.algoType()).isEqualTo(model.algoType());
         assertThat(storedModel.stored()).isTrue();
