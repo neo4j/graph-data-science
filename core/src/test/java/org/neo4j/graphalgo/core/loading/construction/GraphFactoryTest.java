@@ -87,7 +87,7 @@ class GraphFactoryTest {
             nodesBuilder.addNode(2, NodeLabel.of("C"));
             nodesBuilder.addNode(3);
 
-            NodeMapping idMap = nodesBuilder.build();
+            NodeMapping idMap = nodesBuilder.buildNodeMapping();
             RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(idMap)
                 .orientation(orientation)
@@ -159,7 +159,7 @@ class GraphFactoryTest {
             nodesBuilder.addNode(i);
         }
 
-        NodeMapping idMap = nodesBuilder.build();
+        NodeMapping idMap = nodesBuilder.buildNodeMapping();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)

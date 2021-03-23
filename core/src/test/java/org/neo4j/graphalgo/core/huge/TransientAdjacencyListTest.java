@@ -248,7 +248,7 @@ class TransientAdjacencyListTest {
         for (long target : targets) {
             nodesBuilder.addNode(target);
         }
-        NodeMapping idMap = nodesBuilder.build();
+        NodeMapping idMap = nodesBuilder.buildNodeMapping();
 
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)

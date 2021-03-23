@@ -19,15 +19,28 @@
  */
 package org.neo4j.graphalgo.core.loading.construction;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.values.storable.Values;
 
 import java.util.HashSet;
+import java.util.Map;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NodesBuilderTest {
@@ -50,7 +63,7 @@ class NodesBuilderTest {
                 stream -> stream.forEach(nodesBuilder::addNode)
             );
 
-            var idMap = nodesBuilder.build();
+            var idMap = nodesBuilder.buildNodeMapping();
 
             assertEquals(nodeCount, idMap.nodeCount());
         });
@@ -74,7 +87,7 @@ class NodesBuilderTest {
                 stream -> stream.forEach(originalId -> nodesBuilder.addNode(0))
             );
 
-            var idMap = nodesBuilder.build();
+            var idMap = nodesBuilder.buildNodeMapping();
 
             assertEquals(1, idMap.nodeCount());
         });
@@ -106,7 +119,7 @@ class NodesBuilderTest {
                 })
             );
 
-            var idMap = nodesBuilder.build();
+            var idMap = nodesBuilder.buildNodeMapping();
 
             var expectedLabels = new HashSet<NodeLabel>();
             expectedLabels.addAll(labels1);

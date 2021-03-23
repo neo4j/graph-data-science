@@ -23,9 +23,11 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.ObjectIntMap;
 import com.carrotsearch.hppc.ObjectIntScatterMap;
 import com.carrotsearch.hppc.IntObjectMap;
+import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -76,6 +78,8 @@ public class NodesBuilder {
     private final NodeImporter nodeImporter;
 
     private final Lock lock;
+
+    private final IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyToken;
 
     public static NodesBuilder withoutSchema(
         long maxOriginalId,
@@ -146,7 +150,7 @@ public class NodesBuilder {
         Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping,
         Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMap,
         IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping,
-        IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> builderByLabelTokenAndPropertyKey,
+        IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey,
         boolean hasLabelInformation,
         boolean hasProperties,
         boolean preAllocatedTokens,
@@ -163,6 +167,7 @@ public class NodesBuilder {
         this.nodeLabelBitSetMap = new ConcurrentHashMap<>();
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
         this.lock = new ReentrantLock(true);
+        this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyKey;
 
         // this is maxOriginalId + 1, because it is the capacity for the neo -> gds mapping, where we need to
         // be able to include the highest possible id
@@ -199,7 +204,7 @@ public class NodesBuilder {
                 hasLabelInformation,
                 hasProperties,
                 labelTokenIdFn,
-                builderByLabelTokenAndPropertyKey
+                buildersByLabelTokenAndPropertyKey
             )
         );
     }
@@ -208,7 +213,11 @@ public class NodesBuilder {
         this.threadLocalBuilder.get().addNode(originalId, nodeLabels);
     }
 
-    public NodeMapping build() {
+    public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {
+        this.threadLocalBuilder.get().addNode(originalId, properties, nodeLabels);
+    }
+
+    public NodeMapping buildNodeMapping() {
         this.threadLocalBuilder.close();
 
         var graphDimensions = ImmutableGraphDimensions.builder()
@@ -222,6 +231,16 @@ public class NodesBuilder {
             concurrency,
             tracker
         );
+    }
+
+    public Map<String, NodeProperties> buildProperties() {
+        this.threadLocalBuilder.close();
+
+        Map<String, NodeProperties> nodeProperties = new HashMap<>();
+        for (IntObjectCursor<Map<String, NodePropertiesFromStoreBuilder>> propertyBuilderByLabelToken : this.buildersByLabelTokenAndPropertyToken) {
+            propertyBuilderByLabelToken.value.forEach((propertyKey, propertyBuilder) -> nodeProperties.put(propertyKey, propertyBuilder.build()));
+        }
+        return nodeProperties;
     }
 
     private int getOrCreateLabelTokenId(NodeLabel nodeLabel) {

@@ -209,7 +209,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         assertRunning();
 
         Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
-        NodeMapping idMap = nodesBuilder.build();
+        NodeMapping idMap = nodesBuilder.buildNodeMapping();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)

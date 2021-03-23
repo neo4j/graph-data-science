@@ -98,6 +98,6 @@ class NewOldGraphTest {
         for (int i = 0; i < numberOfNodes; i++) {
             nodesBuilder.addNode(i);
         }
-        return nodesBuilder.build();
+        return nodesBuilder.buildNodeMapping();
     }
 }
