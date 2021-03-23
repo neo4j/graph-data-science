@@ -121,6 +121,7 @@ public final class GraphStoreInput implements CompatInput {
             long startId = id;
             id = Math.min(nodeCount, startId + batchSize);
 
+            assert chunk instanceof EntityChunk;
             ((EntityChunk) chunk).initialize(startId, id);
             return true;
         }

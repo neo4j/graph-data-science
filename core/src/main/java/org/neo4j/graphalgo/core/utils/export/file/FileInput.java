@@ -103,6 +103,8 @@ public final class FileInput implements CompatInput {
         public synchronized boolean next(InputChunk chunk) throws IOException {
             if (entryIterator.hasNext()) {
                 Pair<NodeFileHeader, Path> entry = entryIterator.next();
+
+                assert chunk instanceof LineChunk;
                 ((LineChunk) chunk).initialize(entry.getKey(), entry.getValue());
                 return true;
             }
