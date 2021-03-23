@@ -28,6 +28,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -56,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
@@ -63,7 +65,7 @@ import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-public class NodesBuilder {
+public final class NodesBuilder {
 
     private final long maxOriginalId;
     private final int concurrency;
@@ -83,7 +85,7 @@ public class NodesBuilder {
 
     private final IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyToken;
 
-    public static NodesBuilder withoutSchema(
+    static NodesBuilder withoutSchema(
         long maxOriginalId,
         boolean hasLabelInformation,
         boolean hasProperties,
@@ -99,7 +101,6 @@ public class NodesBuilder {
             null,
             hasLabelInformation,
             hasProperties,
-            false,
             tracker
         );
     }
@@ -119,7 +120,10 @@ public class NodesBuilder {
 
         MutableInt labelTokenCounter = new MutableInt(0);
         nodeLabels.forEach(nodeLabel -> {
-            int labelToken = labelTokenCounter.getAndIncrement();
+            int labelToken = nodeLabel == NodeLabel.ALL_NODES
+                ? ANY_LABEL
+                : labelTokenCounter.getAndIncrement();
+
             elementIdentifierLabelTokenMapping.put(nodeLabel, labelToken);
             labelTokenNodeLabelMapping.put(labelToken, List.of(nodeLabel));
             builderByLabelTokenAndPropertyToken.put(labelToken, new HashMap<>());
@@ -141,7 +145,6 @@ public class NodesBuilder {
             builderByLabelTokenAndPropertyToken,
             hasLabelInformation,
             nodeSchema.hasProperties(),
-            true,
             tracker
         );
     }
@@ -155,7 +158,6 @@ public class NodesBuilder {
         IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey,
         boolean hasLabelInformation,
         boolean hasProperties,
-        boolean preAllocatedTokens,
         AllocationTracker tracker
     ) {
         this.maxOriginalId = maxOriginalId;
@@ -193,9 +195,9 @@ public class NodesBuilder {
 
         var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, tracker);
 
-        Function<NodeLabel, Integer> labelTokenIdFn = preAllocatedTokens
-            ? this::getLabelTokenId
-            : this::getOrCreateLabelTokenId;
+        Function<NodeLabel, Integer> labelTokenIdFn = elementIdentifierLabelTokenMapping.isEmpty()
+            ? this::getOrCreateLabelTokenId
+            : this::getLabelTokenId;
         this.threadLocalBuilder = AutoCloseableThreadLocal.withInitial(
             () -> new NodesBuilder.ThreadLocalBuilder(
                 nodeImporter,
