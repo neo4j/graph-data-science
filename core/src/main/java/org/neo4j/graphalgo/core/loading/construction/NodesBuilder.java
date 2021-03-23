@@ -334,6 +334,9 @@ public final class NodesBuilder {
         }
 
         private long[] labelTokens(NodeLabel... nodeLabels) {
+            if (nodeLabels == null || nodeLabels.length == 0) {
+                return new long[]{ ANY_LABEL };
+            }
             long[] labelIds = new long[nodeLabels.length];
 
             for (int i = 0; i < nodeLabels.length; i++) {
