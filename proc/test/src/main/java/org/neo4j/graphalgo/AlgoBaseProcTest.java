@@ -593,6 +593,14 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             });
     }
 
+    default Stream<Method> getWriteStreamStatsProcedures(AlgoBaseProc<?, RESULT, CONFIG> proc) {
+        return getProcedureMethods(proc)
+            .filter(method -> {
+                var procedureMethodName = getProcedureMethodName(method);
+                return procedureMethodName.endsWith("stream") || procedureMethodName.endsWith("write") || procedureMethodName.endsWith("stats");
+            });
+    }
+
     @NotNull
     default GraphLoader graphLoader(GraphCreateConfig graphCreateConfig) {
         return graphLoader(graphDb(), graphCreateConfig);

@@ -77,7 +77,7 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
 
     @Test
     default void shouldNotFailOnInsufficientMemoryIfInSudoModeAnonymous() {
-        applyOnProcedure(proc -> {
+        applyOnProcedure(proc -> getWriteStreamStatsProcedures(proc).forEach(ignored -> {
             loadGraph(heapGraphName());
             var configMap = CypherMapWrapper.empty()
                 .withBoolean(BaseConfig.SUDO_KEY, true)
@@ -85,6 +85,6 @@ public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,
                 .withString("relationshipProjection", "*");
             CONFIG config = proc.newConfig(Optional.empty(), createMinimalConfig(configMap));
             proc.tryValidateMemoryUsage(config, proc::memoryEstimation, () -> 42);
-        });
+        }));
     }
 }
