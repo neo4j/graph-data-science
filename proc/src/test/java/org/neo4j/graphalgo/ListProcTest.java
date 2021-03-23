@@ -135,6 +135,7 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.fastRPExtended.write.estimate",
 
         "gds.beta.graph.generate",
+        "gds.beta.graph.create.subgraph",
 
         "gds.beta.k1coloring.mutate",
         "gds.beta.k1coloring.mutate.estimate",
