@@ -34,10 +34,9 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.ArrayList;
@@ -154,12 +153,9 @@ final class RelationshipsFilter {
             .boxed()
             .collect(Collectors.toMap(propertyKeys::get, idx -> idx));
 
-        var batchSize = BitUtil.ceilDiv(outputNodes.nodeCount(), concurrency);
-        var relationshipFilterTasks = outputNodes
-            .batchIterables(batchSize)
-            .stream()
-            .map(nodeIterator -> new RelationshipFilterTask(
-                nodeIterator,
+        var relationshipFilterTasks = PartitionUtils.rangePartition(concurrency, outputNodes.nodeCount(), partition ->
+            new RelationshipFilterTask(
+                partition,
                 relationshipExpr,
                 compositeIterator.concurrentCopy(),
                 inputNodes,
@@ -167,8 +163,8 @@ final class RelationshipsFilter {
                 relationshipsBuilder,
                 relType,
                 propertyIndices
-            ))
-            .collect(Collectors.toList());
+            )
+        );
 
         ParallelUtil.runWithConcurrency(concurrency, relationshipFilterTasks, executorService);
 
@@ -191,7 +187,7 @@ final class RelationshipsFilter {
     private RelationshipsFilter() {}
 
     private static final class RelationshipFilterTask implements Runnable {
-        private final PrimitiveLongIterator nodeIterator;
+        private final Partition partition;
         private final Expression expression;
         private final EvaluationContext.RelationshipEvaluationContext evaluationContext;
         private final CompositeRelationshipIterator relationshipIterator;
@@ -201,7 +197,7 @@ final class RelationshipsFilter {
         private final RelationshipType relType;
 
         private RelationshipFilterTask(
-            PrimitiveLongIterable nodeIterator,
+            Partition partition,
             Expression expression,
             CompositeRelationshipIterator relationshipIterator,
             NodeMapping inputNodes,
@@ -210,7 +206,7 @@ final class RelationshipsFilter {
             RelationshipType relType,
             Map<String, Integer> propertyIndices
         ) {
-            this.nodeIterator = nodeIterator.iterator();
+            this.partition = partition;
             this.expression = expression;
             this.relationshipIterator = relationshipIterator;
             this.inputNodes = inputNodes;
@@ -222,10 +218,7 @@ final class RelationshipsFilter {
 
         @Override
         public void run() {
-            long node;
-
-            while (nodeIterator.hasNext()) {
-                node = nodeIterator.next();
+            partition.consume(node -> {
                 var neoSource = outputNodes.toOriginalNodeId(node);
 
                 relationshipIterator.forEachRelationship(neoSource, (source, target, properties) -> {
@@ -249,7 +242,7 @@ final class RelationshipsFilter {
 
                     return true;
                 });
-            }
+            });
         }
     }
 

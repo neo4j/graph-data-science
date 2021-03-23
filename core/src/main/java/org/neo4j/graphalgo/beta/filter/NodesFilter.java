@@ -38,10 +38,9 @@ import org.neo4j.graphalgo.core.loading.nodeproperties.FloatArrayNodePropertiesB
 import org.neo4j.graphalgo.core.loading.nodeproperties.InnerNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.nodeproperties.LongArrayNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.nodeproperties.LongNodePropertiesBuilder;
-import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -70,13 +69,11 @@ final class NodesFilter {
             .tracker(allocationTracker)
             .build();
 
-        var batchSize = BitUtil.ceilDiv(graphStore.nodeCount(), concurrency);
-        var nodeFilterTasks = graphStore
-            .nodes()
-            .batchIterables(batchSize)
-            .stream()
-            .map(nodeIterator -> new NodeFilterTask(nodeIterator, expression, graphStore, nodesBuilder))
-            .collect(Collectors.toList());
+        var nodeFilterTasks = PartitionUtils.rangePartition(
+            concurrency,
+            graphStore.nodeCount(),
+            partition -> new NodeFilterTask(partition, expression, graphStore, nodesBuilder)
+        );
 
         ParallelUtil.runWithConcurrency(concurrency, nodeFilterTasks, executorService);
 
@@ -243,19 +240,19 @@ final class NodesFilter {
     private NodesFilter() {}
 
     private static final class NodeFilterTask implements Runnable {
-        private final PrimitiveLongIterator nodeIterator;
+        private final Partition partition;
         private final Expression expression;
         private final EvaluationContext.NodeEvaluationContext nodeContext;
         private final GraphStore graphStore;
         private final NodesBuilder nodesBuilder;
 
         private NodeFilterTask(
-            PrimitiveLongIterable nodeIterator,
+            Partition partition,
             Expression expression,
             GraphStore graphStore,
             NodesBuilder nodesBuilder
         ) {
-            this.nodeIterator = nodeIterator.iterator();
+            this.partition = partition;
             this.expression = expression;
             this.graphStore = graphStore;
             this.nodesBuilder = nodesBuilder;
@@ -263,21 +260,18 @@ final class NodesFilter {
             this.nodeContext = new EvaluationContext.NodeEvaluationContext(graphStore);
         }
 
-
         @Override
         public void run() {
-            long node;
             var nodeMapping = graphStore.nodes();
 
-            while (nodeIterator.hasNext()) {
-                node = nodeIterator.next();
+            partition.consume(node -> {
                 nodeContext.init(node);
                 if (expression.evaluate(nodeContext) == Expression.TRUE) {
                     var neoId = nodeMapping.toOriginalNodeId(node);
                     NodeLabel[] labels = nodeMapping.nodeLabels(node).toArray(NodeLabel[]::new);
                     nodesBuilder.addNode(neoId, labels);
                 }
-            }
+            });
         }
     }
 
