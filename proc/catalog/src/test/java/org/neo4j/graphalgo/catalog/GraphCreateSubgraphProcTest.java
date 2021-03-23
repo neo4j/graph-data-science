@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta;
+package org.neo4j.graphalgo.catalog;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.catalog.GraphListProc;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
@@ -40,14 +38,14 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
-class GraphSubgraphProcTest extends BaseProcTest {
+class GraphCreateSubgraphProcTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB = "CREATE (a:A)-[:REL]->(b:B)";
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphSubgraphProc.class, GraphCreateProc.class, GraphListProc.class);
+        registerProcedures(GraphCreateProc.class, GraphListProc.class);
 
         runQuery(GdsCypher.call()
             .withNodeLabel("A")
@@ -68,10 +66,6 @@ class GraphSubgraphProcTest extends BaseProcTest {
         var subGraphQuery = "CALL gds.beta.graph.create.subgraph('subgraph', 'graph', 'n:A', 'true')";
 
         assertCypherResult(subGraphQuery, List.of(Map.of(
-            "configuration", Map.of(
-                "sudo", false,
-                "concurrency", 4
-            ),
             "graphName", "subgraph",
             "fromGraphName", "graph",
             "nodeFilter", "n:A",

@@ -23,20 +23,27 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.beta.filter.GraphStoreFilter;
+import org.neo4j.graphalgo.beta.filter.GraphStoreFilterConfig;
+import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
+import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Map;
 import java.util.Set;
@@ -154,6 +161,72 @@ public class GraphCreateProc extends CatalogProc {
 
         validateConfig(cypherConfig, config);
         return estimateGraph(config);
+    }
+
+    @Procedure(name = "gds.beta.graph.create.subgraph", mode = READ)
+    @Description(DESCRIPTION)
+    public Stream<GraphCreateSubgraphResult> create(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "fromGraphName") String fromGraphName,
+        @Name(value = "nodeFilter") String nodeFilter,
+        @Name(value = "relationshipFilter") String relationshipFilter,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        validateGraphName(username(), graphName);
+
+        var cypherConfig = CypherMapWrapper.create(configuration);
+        var filterConfig = GraphStoreFilterConfig.of(
+            username(),
+            graphName,
+            fromGraphName,
+            nodeFilter,
+            relationshipFilter,
+            cypherConfig
+        );
+        validateConfig(cypherConfig, filterConfig);
+
+        GraphCreateSubgraphResult result = runWithExceptionLogging(
+            "Graph creation failed",
+            ExceptionUtil.supplier(() -> createGraphFromGraphStore(filterConfig))
+        );
+
+        return Stream.of(result);
+    }
+
+    private GraphCreateSubgraphResult createGraphFromGraphStore(GraphStoreFilterConfig config) throws
+        ParseException,
+        SemanticErrors {
+        var progressTimer = ProgressTimer.start();
+
+        var fromGraphStore = GraphStoreCatalog.get(username(), databaseId(), config.fromGraphName());
+        var graphStore = GraphStoreFilter.filter(
+            fromGraphStore.graphStore(),
+            config,
+            Pools.DEFAULT,
+            allocationTracker()
+        );
+
+        var graphCreateConfig = ImmutableGraphCreateFromGraphConfig.builder()
+            .username(username())
+            .graphName(config.graphName())
+            .nodeFilter(config.nodeFilter())
+            .relationshipFilter(config.relationshipFilter())
+            .originalConfig(fromGraphStore.config())
+            .build();
+
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+
+        var createMillis = progressTimer.stop().getDuration();
+
+        return new GraphCreateSubgraphResult(
+            config.graphName(),
+            config.fromGraphName(),
+            config.nodeFilter(),
+            config.relationshipFilter(),
+            graphStore.nodeCount(),
+            graphStore.relationshipCount(),
+            createMillis
+        );
     }
 
     private void validateConfig(CypherMapWrapper cypherConfig, GraphCreateConfig createConfig) {
@@ -335,6 +408,28 @@ public class GraphCreateProc extends CatalogProc {
                     createMillis
                 );
             }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static class GraphCreateSubgraphResult extends GraphCreateResult {
+        public final String fromGraphName;
+        public final String nodeFilter;
+        public final String relationshipFilter;
+
+        GraphCreateSubgraphResult(
+            String graphName,
+            String fromGraphName,
+            String nodeFilter,
+            String relationshipFilter,
+            long nodeCount,
+            long relationshipCount,
+            long createMillis
+        ) {
+            super(graphName, nodeCount, relationshipCount, createMillis);
+            this.fromGraphName = fromGraphName;
+            this.nodeFilter = nodeFilter;
+            this.relationshipFilter = relationshipFilter;
         }
     }
 }
