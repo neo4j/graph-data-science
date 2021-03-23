@@ -50,7 +50,11 @@ public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, 
         ProgressEventTracker eventTracker
     ) {
         var progressLogger = loggerFactory.newLogger(
-            log, taskVolume(graph, configuration), taskName(), configuration.concurrency(), eventTracker
+            log,
+            taskVolume(graph, configuration),
+            taskName(),
+            configuration.concurrency(),
+            eventTracker
         );
         return build(graph, configuration, tracker, progressLogger);
     }

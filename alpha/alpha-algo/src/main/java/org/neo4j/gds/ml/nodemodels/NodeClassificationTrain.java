@@ -34,9 +34,9 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,18 +54,19 @@ public class NodeClassificationTrain
 
     private final Graph graph;
     private final NodeClassificationTrainConfig config;
-    private final Log log;
+    private final ProgressLogger progressLogger;
     private final AllocationTracker allocationTracker;
 
     public NodeClassificationTrain(
         Graph graph,
         NodeClassificationTrainConfig config,
-        Log log
+        AllocationTracker allocationTracker,
+        ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.config = config;
-        this.log = log;
-        this.allocationTracker = AllocationTracker.empty();
+        this.allocationTracker = allocationTracker;
+        this.progressLogger = progressLogger;
     }
 
     @Override
@@ -227,7 +228,7 @@ public class NodeClassificationTrain
             config.concurrency(),
             modelParams
         );
-        var train = new MultiClassNLRTrain(graph, trainSet, nlrConfig, log);
+        var train = new MultiClassNLRTrain(graph, trainSet, nlrConfig, progressLogger);
         return train.compute();
     }
 

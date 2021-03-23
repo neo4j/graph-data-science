@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -67,7 +67,7 @@ class LinkLogisticRegressionTrainTest {
 
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         trainSet.setAll(i -> i);
-        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, new TestLog());
+        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, ProgressLogger.NULL_LOGGER);
 
         var result = linearRegression.compute().modelData();
 
@@ -97,7 +97,7 @@ class LinkLogisticRegressionTrainTest {
 
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         trainSet.setAll(i -> i);
-        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, new TestLog());
+        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, ProgressLogger.NULL_LOGGER);
 
         var result = linearRegression.compute().modelData();
 
@@ -131,7 +131,7 @@ class LinkLogisticRegressionTrainTest {
 
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         trainSet.setAll(i -> i);
-        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, new TestLog());
+        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, ProgressLogger.NULL_LOGGER);
 
         var result = linearRegression.compute().modelData();
 

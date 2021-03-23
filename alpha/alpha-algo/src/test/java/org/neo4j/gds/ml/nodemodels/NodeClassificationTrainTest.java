@@ -23,7 +23,7 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
-import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
 
 @GdlExtension
 class NodeClassificationTrainTest {
@@ -71,7 +72,6 @@ class NodeClassificationTrainTest {
         Map<String, Object> model2 = Map.of("penalty", 1, "maxIterations", 10000, "tolerance", 1e-5);
 
         Map<String, Object> expectedWinner = model2;
-        var log = new TestLog();
         var config = createConfig(
             List.of(model1, model2),
             "model",
@@ -83,7 +83,8 @@ class NodeClassificationTrainTest {
         var ncTrain = new NodeClassificationTrain(
             graph,
             config,
-            log
+            AllocationTracker.empty(),
+            NULL_LOGGER
         );
 
         var model = ncTrain.compute();
@@ -104,7 +105,6 @@ class NodeClassificationTrainTest {
     @EnumSource(Metric.class)
     void shouldProduceDifferentMetricsForDifferentTrainings(Metric metric) {
 
-        var log = new TestLog();
         var modelCandidates = List.of(
             Map.<String, Object>of("penalty", 0.0625, "maxIterations", 1000),
             Map.<String, Object>of("penalty", 0.125, "maxIterations", 1000),
@@ -125,7 +125,8 @@ class NodeClassificationTrainTest {
         var bananasTrain = new NodeClassificationTrain(
             graph,
             bananasConfig,
-            log
+            AllocationTracker.empty(),
+            NULL_LOGGER
         );
 
         var arrayPropertyConfig = createConfig(
@@ -138,7 +139,8 @@ class NodeClassificationTrainTest {
         var arrayPropertyTrain = new NodeClassificationTrain(
             graph,
             arrayPropertyConfig,
-            log
+            AllocationTracker.empty(),
+            NULL_LOGGER
         );
 
         var bananasModel = bananasTrain.compute();

@@ -237,7 +237,7 @@ public class LinkPredictionTrain
             trainGraph,
             trainSet,
             llrConfig,
-            log
+            progressLogger
         );
 
         return llrTrain.compute();

@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
 
 @GdlExtension
 class NodeClassificationEndToEndTest {
@@ -94,7 +95,8 @@ class NodeClassificationEndToEndTest {
         var log = new TestLog();
         var config = createConfig(List.of(model2), List.of("a", "b"), metric);
 
-        var ncTrain = new NodeClassificationTrain(trainGraph, config, log);
+
+        var ncTrain = new NodeClassificationTrain(trainGraph, config, AllocationTracker.empty(), NULL_LOGGER);
 
         var modelBeforeSerialization = ncTrain.compute();
 

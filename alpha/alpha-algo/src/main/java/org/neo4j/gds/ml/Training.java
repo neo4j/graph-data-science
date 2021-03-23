@@ -24,22 +24,20 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.batch.BatchQueue;
-import org.neo4j.logging.Log;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-
 public class Training {
     private final TrainingConfig config;
-    private final Log log;
+    private final ProgressLogger progressLogger;
     private final long trainSize;
 
-    public Training(TrainingConfig config, Log log, long trainSize) {
+    public Training(TrainingConfig config, ProgressLogger progressLogger, long trainSize) {
         this.config = config;
-        this.log = log;
+        this.progressLogger = progressLogger;
         this.trainSize = trainSize;
     }
 
@@ -58,16 +56,18 @@ public class Training {
             lastLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
             stopper.registerLoss(lastLoss);
             epoch++;
-            log.debug(formatWithLocale("Loss: %s, After Epoch: %d", lastLoss, epoch));
+            // TODO: Revisit below log line
+//            log.debug(formatWithLocale("Loss: %s, After Epoch: %d", lastLoss, epoch));
         }
-        log.debug(formatWithLocale(
-            "Training %s after %d epochs. Initial loss: %s, Last loss: %s.%s",
-            stopper.converged() ? "converged" : "terminated",
-            epoch,
-            initialLoss,
-            lastLoss,
-            stopper.converged() ? "" : " Did not converge"
-        ));
+        // TODO: Revisit below log line
+//        log.debug(formatWithLocale(
+//            "Training %s after %d epochs. Initial loss: %s, Last loss: %s.%s",
+//            stopper.converged() ? "converged" : "terminated",
+//            epoch,
+//            initialLoss,
+//            lastLoss,
+//            stopper.converged() ? "" : " Did not converge"
+//        ));
     }
 
     private double evaluateLoss(Objective<?> objective, BatchQueue batches, int concurrency) {

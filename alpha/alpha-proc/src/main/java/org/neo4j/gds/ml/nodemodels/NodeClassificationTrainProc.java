@@ -24,19 +24,13 @@ import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRDat
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.TrainProc;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
-import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.utils.StringJoining;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -110,22 +104,7 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
 
     @Override
     protected AlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
-            @Override
-            public NodeClassificationTrain build(
-                Graph graph,
-                NodeClassificationTrainConfig configuration,
-                AllocationTracker tracker,
-                Log log,
-                ProgressEventTracker eventTracker
-            ) {
-                return new NodeClassificationTrain(graph, configuration, log);
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(NodeClassificationTrainConfig configuration) {
-                throw new MemoryEstimationNotImplementedException();
-            }
-        };
+        return new NodeClassificationTrainAlgorithmFactory();
     }
+
 }

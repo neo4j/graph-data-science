@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
 
 @GdlExtension
 class NodeClassificationSerializerIntegrationTest {
@@ -67,7 +69,7 @@ class NodeClassificationSerializerIntegrationTest {
         var log = new TestLog();
         var config = createConfig(List.of(model2), List.of("a", "b"), metric);
 
-        var ncTrain = new NodeClassificationTrain(trainGraph, config, log);
+        var ncTrain = new NodeClassificationTrain(trainGraph, config, AllocationTracker.empty(), NULL_LOGGER);
 
         var modelBeforeSerialization = ncTrain.compute();
 

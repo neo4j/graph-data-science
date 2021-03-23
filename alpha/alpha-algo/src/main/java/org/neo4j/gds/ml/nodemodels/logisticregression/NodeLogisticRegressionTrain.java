@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.Training;
+import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.logging.Log;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 
 // TODO: remove?
 public class NodeLogisticRegressionTrain {
@@ -32,16 +32,16 @@ public class NodeLogisticRegressionTrain {
 
     private final Graph graph;
     private final MultiClassNLRTrainConfig config;
-    private final Log log;
+    private final ProgressLogger progressLogger;
 
     public NodeLogisticRegressionTrain(
         Graph graph,
         MultiClassNLRTrainConfig config,
-        Log log
+        ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.config = config;
-        this.log = log;
+        this.progressLogger = progressLogger;
     }
 
     public NodeLogisticRegressionData compute() {
@@ -51,7 +51,7 @@ public class NodeLogisticRegressionTrain {
             graph
         );
 
-        var training = new Training(config, log, graph.nodeCount());
+        var training = new Training(config, progressLogger, graph.nodeCount());
         training.train(objective, () -> new BatchQueue(graph.nodeCount(), config.batchSize()), 1);
         return objective.modelData();
     }

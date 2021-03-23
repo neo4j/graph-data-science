@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.ImmutableMultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -59,7 +59,7 @@ class NodeLogisticRegressionTrainTest {
                 .penalty(0.0)
                 .concurrency(1)
                 .build();
-        var linearRegression = new NodeLogisticRegressionTrain(graph, config, new TestLog());
+        var linearRegression = new NodeLogisticRegressionTrain(graph, config, ProgressLogger.NULL_LOGGER);
 
         var result = linearRegression.compute();
 
