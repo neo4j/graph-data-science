@@ -80,8 +80,20 @@ public final class GraphFactory {
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Integer> concurrency,
+        Optional<Long> nodeCount,
+        Optional<NodeSchema> nodeSchema,
         AllocationTracker tracker
     ) {
+        if (nodeCount.isPresent() && nodeSchema.isPresent()) {
+            return NodesBuilder.fromSchema(
+                maxOriginalId,
+                nodeCount.get(),
+                concurrency.orElse(1),
+                nodeSchema.get(),
+                tracker
+            );
+        }
+
         return NodesBuilder.withoutSchema(
             maxOriginalId,
             hasLabelInformation.orElse(false),
