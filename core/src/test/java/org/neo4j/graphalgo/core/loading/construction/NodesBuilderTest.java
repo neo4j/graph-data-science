@@ -43,7 +43,19 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@GdlExtension
 class NodesBuilderTest {
+
+    @GdlGraph
+    static final String DB_CYPHER = "CREATE" +
+                                    "  (a:A {prop1: 42, prop2: 1337})" +
+                                    ", (b:A {prop1: 43, prop2: 1338})";
+
+    @Inject
+    Graph graph;
+
+    @Inject
+    IdFunction idFunction;
 
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
@@ -135,6 +147,76 @@ class NodesBuilderTest {
 
                 return true;
             });
+        });
+    }
+
+
+    @Test
+    void shouldBuildNodesWithProperties() {
+        NodesBuilder nodesBuilder = NodesBuilder.fromSchema(
+            2,
+            graph.nodeCount(),
+            1,
+            graph.schema().nodeSchema(),
+            AllocationTracker.empty()
+        );
+
+        nodesBuilder.addNode(idFunction.of("a"), Map.of("prop1", Values.longValue(42), "prop2", Values.longValue(1337)), NodeLabel.of("A"));
+        nodesBuilder.addNode(idFunction.of("b"), Map.of("prop1", Values.longValue(43), "prop2", Values.longValue(1338)), NodeLabel.of("A"));
+
+        var nodeMapping = nodesBuilder.buildNodeMapping();
+        var nodeProperties = nodesBuilder.buildProperties();
+
+        assertThat(graph.nodeCount()).isEqualTo(nodeMapping.nodeCount());
+        assertThat(graph.availableNodeLabels()).isEqualTo(nodeMapping.availableNodeLabels());
+        graph.forEachNode(nodeId -> {
+            assertThat(nodeMapping.toOriginalNodeId(nodeId)).isEqualTo(graph.toOriginalNodeId(nodeId));
+            assertThat(nodeProperties.get("prop1").longValue(nodeId)).isEqualTo(graph.nodeProperties("prop1").longValue(nodeId));
+            assertThat(nodeProperties.get("prop2").longValue(nodeId)).isEqualTo(graph.nodeProperties("prop2").longValue(nodeId));
+            return true;
+        });
+    }
+
+    @Test
+    void shouldBuildNodesWithPropertiesInParallel() {
+        int nodeCount = 10000;
+        var nodeLabel = NodeLabel.of("A");
+        var nodeSchema = NodeSchema.builder()
+            .addProperty(nodeLabel, "prop1", ValueType.LONG)
+            .addProperty(nodeLabel, "prop2", ValueType.LONG)
+            .build();
+        int concurrency = 4;
+        var nodesBuilder = NodesBuilder.fromSchema(
+            nodeCount,
+            nodeCount,
+            concurrency,
+            nodeSchema,
+            AllocationTracker.empty()
+        );
+
+        var tasks = ParallelUtil.tasks(
+            concurrency,
+            (index) -> () -> IntStream.range(index * (nodeCount / concurrency), (index + 1) * (nodeCount / concurrency))
+                .forEach(originalNodeId -> nodesBuilder.addNode(
+                    originalNodeId,
+                    Map.of("prop1", Values.longValue(originalNodeId), "prop2", Values.longValue(nodeCount - originalNodeId)),
+                    nodeLabel
+                ))
+        );
+
+        ParallelUtil.run(tasks, Pools.DEFAULT);
+
+        var nodeMapping = nodesBuilder.buildNodeMapping();
+        var nodeProperties = nodesBuilder.buildProperties();
+
+        assertThat(nodeMapping.nodeCount()).isEqualTo(nodeCount);
+        assertThat(nodeMapping.availableNodeLabels()).containsExactly(nodeLabel);
+
+        nodeMapping.forEachNode(nodeId -> {
+            long originalNodeId = nodeMapping.toOriginalNodeId(nodeId);
+            assertThat(originalNodeId).isEqualTo(nodeProperties.get("prop1").longValue(nodeId));
+            assertThat(nodeCount - originalNodeId).isEqualTo(nodeProperties.get("prop2").longValue(nodeId));
+            return true;
         });
     }
 }
