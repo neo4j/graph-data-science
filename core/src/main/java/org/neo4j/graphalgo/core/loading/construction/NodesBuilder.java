@@ -56,6 +56,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_LABEL;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public class NodesBuilder {
@@ -92,6 +93,7 @@ public class NodesBuilder {
             null,
             hasLabelInformation,
             hasProperties,
+            false,
             tracker
         );
     }
@@ -133,6 +135,7 @@ public class NodesBuilder {
             builderByLabelTokenAndPropertyToken,
             hasLabelInformation,
             nodeSchema.hasProperties(),
+            true,
             tracker
         );
     }
@@ -146,6 +149,7 @@ public class NodesBuilder {
         IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> builderByLabelTokenAndPropertyKey,
         boolean hasLabelInformation,
         boolean hasProperties,
+        boolean preAllocatedTokens,
         AllocationTracker tracker
     ) {
         this.maxOriginalId = maxOriginalId;
@@ -185,13 +189,16 @@ public class NodesBuilder {
 
         var seenIds = HugeAtomicBitSet.create(maxOriginalId + 1, tracker);
 
+        Function<NodeLabel, Integer> labelTokenIdFn = preAllocatedTokens
+            ? this::getLabelTokenId
+            : this::getOrCreateLabelTokenId;
         this.threadLocalBuilder = AutoCloseableThreadLocal.withInitial(
             () -> new NodesBuilder.ThreadLocalBuilder(
                 nodeImporter,
                 seenIds,
                 hasLabelInformation,
                 hasProperties,
-                this::labelTokenId,
+                labelTokenIdFn,
                 builderByLabelTokenAndPropertyKey
             )
         );
@@ -217,7 +224,7 @@ public class NodesBuilder {
         );
     }
 
-    private int labelTokenId(NodeLabel nodeLabel) {
+    private int getOrCreateLabelTokenId(NodeLabel nodeLabel) {
         var token = elementIdentifierLabelTokenMapping.getOrDefault(nodeLabel, NO_SUCH_LABEL);
         if (token == NO_SUCH_LABEL) {
             lock.lock();
@@ -230,6 +237,13 @@ public class NodesBuilder {
             lock.unlock();
         }
         return token;
+    }
+
+    private int getLabelTokenId(NodeLabel nodeLabel) {
+        if (!elementIdentifierLabelTokenMapping.containsKey(nodeLabel)) {
+            throw new IllegalArgumentException(formatWithLocale("No token was specified for node label %s", nodeLabel));
+        }
+        return elementIdentifierLabelTokenMapping.get(nodeLabel);
     }
 
     private static class ThreadLocalBuilder implements AutoCloseable {
