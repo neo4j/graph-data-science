@@ -42,29 +42,20 @@ final class StdScore implements Scaler {
             return new StdScore(properties, 0, 0);
         }
 
-        // calculate mean
-        var sumTasks = PartitionUtils.rangePartition(
+        // calculate sum and squared sum
+        var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new ComputeSum(partition.startNode(), partition.nodeCount(), properties)
+            partition -> new ComputeSums(partition.startNode(), partition.nodeCount(), properties)
         );
+        ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
-        ParallelUtil.runWithConcurrency(concurrency, sumTasks, executor);
-
-        // calculate stdDev
-        var avg = sumTasks.stream().mapToDouble(ComputeSum::result).sum() / nodeCount;
-
-        var squaredSumTasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> new ComputeSquareSum(partition.startNode(), partition.nodeCount(), properties, avg)
-        );
-
-        ParallelUtil.runWithConcurrency(concurrency, squaredSumTasks, executor);
-
-
-        var squaredSum = squaredSumTasks.stream().mapToDouble(ComputeSquareSum::result).sum();
-        var std = Math.sqrt(squaredSum / nodeCount);
+        // calculate global metrics
+        var squaredSum = tasks.stream().mapToDouble(ComputeSums::squaredSum).sum();
+        var sum = tasks.stream().mapToDouble(ComputeSums::sum).sum();
+        var avg = sum / nodeCount;
+        var variance = (squaredSum - 2 * avg * sum + nodeCount * avg * avg) / nodeCount;
+        var std = Math.sqrt(variance);
 
         if (Math.abs(std) < CLOSE_TO_ZERO) {
             return ZERO_SCALER;
@@ -78,58 +69,37 @@ final class StdScore implements Scaler {
         return (properties.doubleValue(nodeId) - avg) / std;
     }
 
-    static class ComputeSum implements Runnable {
+    static class ComputeSums implements Runnable {
 
         private final long start;
         private final long length;
         private final NodeProperties properties;
+        private double squaredSum;
         private double sum;
 
-        ComputeSum(long start, long length, NodeProperties property) {
+        ComputeSums(long start, long length, NodeProperties property) {
             this.start = start;
             this.length = length;
             this.properties = property;
+            this.squaredSum = 0D;
             this.sum = 0D;
         }
 
         @Override
         public void run() {
             for (long nodeId = start; nodeId < (start + length); nodeId++) {
-                sum += properties.doubleValue(nodeId);
+                double propertyValue = properties.doubleValue(nodeId);
+                this.sum += propertyValue;
+                this.squaredSum += propertyValue * propertyValue;
             }
         }
 
-        double result() {
+        double squaredSum() {
+            return squaredSum;
+        }
+
+        double sum() {
             return sum;
-        }
-    }
-
-    // sum((x-avg)^2)
-    static class ComputeSquareSum implements Runnable {
-
-        private final long start;
-        private final long length;
-        private final NodeProperties properties;
-        private final double avg;
-        private double aggregate;
-
-        ComputeSquareSum(long start, long length, NodeProperties property, double avg) {
-            this.start = start;
-            this.length = length;
-            this.properties = property;
-            this.avg = avg;
-            this.aggregate = 0D;
-        }
-
-        @Override
-        public void run() {
-            for (long nodeId = start; nodeId < (start + length); nodeId++) {
-                aggregate += Math.pow(properties.doubleValue(nodeId) - avg, 2);
-            }
-        }
-
-        double result() {
-            return aggregate;
         }
     }
 
