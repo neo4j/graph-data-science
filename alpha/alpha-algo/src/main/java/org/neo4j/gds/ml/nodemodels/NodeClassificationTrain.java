@@ -55,7 +55,6 @@ public class NodeClassificationTrain
 
     private final Graph graph;
     private final NodeClassificationTrainConfig config;
-    private final ProgressLogger progressLogger;
     private final AllocationTracker allocationTracker;
 
     public NodeClassificationTrain(
@@ -70,6 +69,7 @@ public class NodeClassificationTrain
         this.progressLogger = progressLogger;
     }
 
+
     @Override
     public Model<MultiClassNLRData, NodeClassificationTrainConfig> compute() {
         var globalTargets = makeGlobalTargets();
@@ -77,30 +77,90 @@ public class NodeClassificationTrain
         var metrics = createMetrics(globalClassCounts);
 
         // 1. Init and shuffle node ids
+        progressLogger.logStart(":: ShuffleNodes");
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
         nodeIds.setAll(i -> i);
         ShuffleUtil.shuffleHugeLongArray(nodeIds, getRandomDataGenerator());
+        progressLogger.logFinish(":: ShuffleNodes");
 
         // 2a. Outer split nodes into holdout + remaining
+        progressLogger.logStart(":: OuterSplit");
         var outerSplitter = new FractionSplitter();
         var outerSplit = outerSplitter.split(nodeIds, 1 - config.holdoutFraction());
+        progressLogger.logFinish(":: OuterSplit");
 
-        // model selection:
-        var modelSelectResult = modelSelect(outerSplit.trainSet(), globalTargets, globalClassCounts, metrics);
+        // 2b. Inner split: enumerate a number of train/validation splits of remaining
+        progressLogger.logStart(":: InnerSplit");
+        var splitter = new StratifiedKFoldSplitter(config.validationFolds(), outerSplit.trainSet(), globalTargets, config.randomSeed());
+        var splits = splitter.splits();
+        progressLogger.logFinish(":: InnerSplit");
+
+        var trainStats = initStatsMap(metrics);
+        var validationStats = initStatsMap(metrics);
+
+        config.params().forEach(modelParams -> {
+            progressLogger.logMessage(modelParams.toString());
+            var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
+            var trainStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
+            for (NodeSplit split : splits) {
+                // 3. train each model candidate on the train sets
+                progressLogger.logStart(":: TrainParams");
+                var trainSet = split.trainSet();
+                var validationSet = split.testSet();
+                var modelData = trainModel(trainSet, modelParams);
+                progressLogger.logFinish(":: TrainParams");
+
+                // 4. evaluate each model candidate on the train and validation sets
+                progressLogger.logStart(":: EvaluateParamsValidation");
+                progressLogger.reset(validationSet.size());
+                computeMetrics(globalClassCounts, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
+                progressLogger.logFinish(":: EvaluateParamsValidation");
+                progressLogger.logStart(":: EvaluateParamsTrain");
+                progressLogger.reset(trainSet.size());
+                computeMetrics(globalClassCounts, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
+                progressLogger.logFinish(":: EvaluateParamsTrain");
+            }
+            // insert the candidates metrics into trainStats and validationStats
+            metrics.forEach(metric -> {
+                validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
+                trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
+            });
+        });
+
+        progressLogger.logStart(":: PickWinner");
+        // 5. pick the best-scoring model candidate, according to the main metric
+        var mainMetric = metrics.get(0);
+        var modelStats = validationStats.get(mainMetric);
+        var winner = Collections.max(modelStats, COMPARE_AVERAGE);
+        progressLogger.logFinish(":: PickWinner");
+
+        var bestConfig = winner.params();
+        var modelSelectResult = ModelSelectResult.of(bestConfig, trainStats, validationStats);
+
         var bestParameters = modelSelectResult.bestParameters();
 
         // 6. train best model on remaining
+        progressLogger.logStart(":: Train");
         MultiClassNLRData winnerModelData = trainModel(outerSplit.trainSet(), bestParameters);
+        progressLogger.logFinish(":: Train");
 
         // 7. evaluate it on the holdout set and outer training set
+        progressLogger.logStart(":: EvaluateOnTest");
+        progressLogger.reset(outerSplit.testSet().size());
         var testMetrics = computeMetrics(globalClassCounts, outerSplit.testSet(), winnerModelData, metrics);
+        progressLogger.logFinish(":: EvaluateOnTest");
+        progressLogger.logStart(":: EvaluateOnTrain");
+        progressLogger.reset(outerSplit.trainSet().size());
         var outerTrainMetrics = computeMetrics(globalClassCounts, outerSplit.trainSet(), winnerModelData, metrics);
+        progressLogger.logFinish(":: EvaluateOnTrain");
 
         // we are done with all metrics!
         var metricResults = mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
 
         // 8. retrain that model on the full graph
+        progressLogger.logStart(":: Retrain");
         MultiClassNLRData retrainedModelData = trainModel(nodeIds, bestParameters);
+        progressLogger.logFinish(":: Retrain");
 
         var modelInfo = NodeClassificationModelInfo.of(
             retrainedModelData.classIdMap().originalIdsList(),
@@ -150,49 +210,6 @@ public class NodeClassificationTrain
                     testMetrics.get(metric)
                 )
         ));
-    }
-
-    private ModelSelectResult modelSelect(
-        HugeLongArray remainingSet,
-        HugeLongArray globalTargets,
-        Multiset<Long> globalClassCounts,
-        List<Metric> metrics
-    ) {
-
-        // 2b. Inner split: enumerate a number of train/validation splits of remaining
-        var splitter = new StratifiedKFoldSplitter(config.validationFolds(), remainingSet, globalTargets, config.randomSeed());
-        var splits = splitter.splits();
-
-        var trainStats = initStatsMap(metrics);
-        var validationStats = initStatsMap(metrics);
-
-        config.params().forEach(modelParams -> {
-            var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
-            var trainStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
-            for (NodeSplit split : splits) {
-                // 3. train each model candidate on the train sets
-                var trainSet = split.trainSet();
-                var validationSet = split.testSet();
-                var modelData = trainModel(trainSet, modelParams);
-
-                // 4. evaluate each model candidate on the train and validation sets
-                computeMetrics(globalClassCounts, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
-                computeMetrics(globalClassCounts, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
-            }
-            // insert the candidates metrics into trainStats and validationStats
-            metrics.forEach(metric -> {
-                validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
-                trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
-            });
-        });
-
-        // 5. pick the best-scoring model candidate, according to the main metric
-        var mainMetric = metrics.get(0);
-        var modelStats = validationStats.get(mainMetric);
-        var winner = Collections.max(modelStats, COMPARE_AVERAGE);
-
-        var bestConfig = winner.params();
-        return ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
     private Map<Metric, List<ModelStats>> initStatsMap(List<Metric> metrics) {

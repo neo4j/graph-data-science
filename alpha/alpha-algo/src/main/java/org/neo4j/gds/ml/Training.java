@@ -42,6 +42,7 @@ public class Training {
     }
 
     public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
+        progressLogger.reset(config.maxIterations());
         Updater[] updaters = new Updater[concurrency];
         updaters[0] = Updater.defaultUpdater(objective.weights());
         for (int i = 1; i < concurrency; i++) {
@@ -56,18 +57,17 @@ public class Training {
             lastLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
             stopper.registerLoss(lastLoss);
             epoch++;
-            // TODO: Revisit below log line
-//            log.debug(formatWithLocale("Loss: %s, After Epoch: %d", lastLoss, epoch));
+            progressLogger.logProgress();
+            progressLogger.getLog().debug("Loss: %s, After Epoch: %d", lastLoss, epoch);
         }
-        // TODO: Revisit below log line
-//        log.debug(formatWithLocale(
-//            "Training %s after %d epochs. Initial loss: %s, Last loss: %s.%s",
-//            stopper.converged() ? "converged" : "terminated",
-//            epoch,
-//            initialLoss,
-//            lastLoss,
-//            stopper.converged() ? "" : " Did not converge"
-//        ));
+        progressLogger.getLog().debug(
+            "Training %s after %d epochs. Initial loss: %s, Last loss: %s.%s",
+            stopper.converged() ? "converged" : "terminated",
+            epoch,
+            initialLoss,
+            lastLoss,
+            stopper.converged() ? "" : " Did not converge"
+        );
     }
 
     private double evaluateLoss(Objective<?> objective, BatchQueue batches, int concurrency) {

@@ -23,9 +23,11 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
+import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -34,11 +36,15 @@ import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
 
 @GdlExtension
@@ -176,11 +182,78 @@ class NodeClassificationTrainTest {
             .isNotEqualTo(bananasValidationScore);
     }
 
+    @GdsEditionTest(Edition.EE)
+    @ParameterizedTest
+    @MethodSource("metricArguments")
+    void shouldLogProgress(MetricSpecification metricSpecification) {
+        var modelCandidates = List.of(
+            Map.<String, Object>of("penalty", 0.0625, "maxIterations", 100),
+            Map.<String, Object>of("penalty", 0.125, "maxIterations", 100)
+        );
+        var log = new TestLog();
+
+        var config = createConfig(
+            modelCandidates,
+            "bananasModel",
+            List.of("bananas"),
+            metricSpecification,
+            42L
+        );
+        var factory = new NodeClassificationTrainAlgorithmFactory();
+        var algorithm = factory.build(
+            graph,
+            config,
+            AllocationTracker.empty(),
+            log,
+            EmptyProgressEventTracker.INSTANCE
+        );
+
+        algorithm.compute();
+
+        var messagesInOrder = log.getMessages(INFO);
+
+        // something is logged
+        assertThat(messagesInOrder).hasSizeGreaterThan(20);
+
+        //  something should log percentage
+        assertThat(messagesInOrder.stream().filter(s -> s.contains("%"))).isNotEmpty();
+
+        //  logging percentages should never exceed 100
+        var pattern = Pattern.compile("^.*(100|[1-9]\\d|[1-9])%$");
+        messagesInOrder.stream()
+            .filter(s -> s.contains("%"))
+            .forEach(s -> assertThat(s).matches(pattern));
+
+        // For every Start there is a corresponding Finish
+        // For every start, there can be no more start before there is a finish
+        for (Iterator<String> iterator = messagesInOrder.iterator(); iterator.hasNext();) {
+            String message = iterator.next();
+            if (message.endsWith("Start")) {
+                var finish = message.replaceAll("Start$", "Finished");
+                while (iterator.hasNext()) {
+                    var next = iterator.next();
+                    if (next.equals(finish)) break;
+                    assertThat(next).as("Should not have another 'Start' message before 'Finished'").doesNotEndWith("Start");
+                }
+            } else {
+                assertThat(message).as("Should not have 'Finished' message before 'Start'").doesNotEndWith("Finished");
+                assertThat(message).as("Should not log percentages outside of a 'Start'/'Finished' block").doesNotEndWith("%");
+            }
+        }
+
+        assertThat(messagesInOrder)
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .as("All messages should start with the correct task name")
+            .allMatch(s -> s.startsWith(factory.taskName()));
+    }
+
     private NodeClassificationTrainConfig createConfig(
         Iterable<Map<String, Object>> modelCandidates,
         String modelName,
         Iterable<String> featureProperties,
-        MetricSpecification metricSpecification, long randomSeed
+        MetricSpecification metricSpecification,
+        long randomSeed
     ) {
         return ImmutableNodeClassificationTrainConfig.builder()
             .modelName(modelName)
