@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core.loading.construction;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.ObjectIntMap;
+import com.carrotsearch.hppc.ObjectIntScatterMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -46,6 +48,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
+import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public class NodesBuilder {
@@ -55,7 +58,7 @@ public class NodesBuilder {
     private final AllocationTracker tracker;
 
     private int nextLabelId;
-    private final Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping;
+    private final ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping;
     private final Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMap;
     private final IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
@@ -76,7 +79,7 @@ public class NodesBuilder {
         this.concurrency = concurrency;
         this.tracker = tracker;
         this.nextLabelId = 0;
-        this.elementIdentifierLabelTokenMapping = new ConcurrentHashMap<>();
+        this.elementIdentifierLabelTokenMapping = new ObjectIntScatterMap<>();
         this.nodeLabelBitSetMap = new ConcurrentHashMap<>();
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
         this.lock = new ReentrantLock(true);
@@ -137,11 +140,11 @@ public class NodesBuilder {
     }
 
     private int labelTokenId(NodeLabel nodeLabel) {
-        var token = elementIdentifierLabelTokenMapping.get(nodeLabel);
-        if (token == null) {
+        var token = elementIdentifierLabelTokenMapping.getOrDefault(nodeLabel, NO_SUCH_LABEL);
+        if (token == NO_SUCH_LABEL) {
             lock.lock();
-            token = elementIdentifierLabelTokenMapping.get(nodeLabel);
-            if (token == null) {
+            token = elementIdentifierLabelTokenMapping.getOrDefault(nodeLabel, NO_SUCH_LABEL);
+            if (token == NO_SUCH_LABEL) {
                 token = nextLabelId++;
                 labelTokenNodeLabelMapping.put(token, Collections.singletonList(nodeLabel));
                 elementIdentifierLabelTokenMapping.put(nodeLabel, token);
