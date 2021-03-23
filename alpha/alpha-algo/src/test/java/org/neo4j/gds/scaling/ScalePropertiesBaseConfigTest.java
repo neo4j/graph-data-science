@@ -22,8 +22,8 @@ package org.neo4j.gds.scaling;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
@@ -39,8 +39,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
 class ScalePropertiesBaseConfigTest {
 
     @ParameterizedTest
-    @ValueSource(strings = {"mean", "minmax", "log", "l2norm"})
-    void parseValidScalers(String scaler) {
+    @EnumSource(Scaler.Variant.class)
+    void parseValidScalers(Scaler.Variant scaler) {
         ScalePropertiesMutateConfigImpl config = new ScalePropertiesMutateConfigImpl(
             Optional.of("graph"),
             Optional.empty(),
@@ -48,7 +48,7 @@ class ScalePropertiesBaseConfigTest {
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
-                    "scalers", List.of(scaler),
+                    "scalers", List.of(scaler.name()),
                     "nodeProperties", List.of("a")
                 )
             )
