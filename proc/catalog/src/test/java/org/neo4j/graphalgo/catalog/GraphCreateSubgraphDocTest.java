@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta;
+package org.neo4j.graphalgo.catalog;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.AfterEach;
@@ -25,14 +25,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-final class GraphSubgraphDocTest extends BaseProcTest {
+final class GraphCreateSubgraphDocTest extends BaseProcTest {
 
     @Neo4jGraph
     public static final String DB =
@@ -47,7 +46,7 @@ final class GraphSubgraphDocTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(GraphCreateProc.class, GraphSubgraphProc.class);
+        registerProcedures(GraphCreateProc.class);
 
         runQuery(GdsCypher.call()
             .withNodeLabel("Person")
@@ -68,16 +67,15 @@ final class GraphSubgraphDocTest extends BaseProcTest {
     void testExample1() {
         @Language("Cypher")
         String query =
-            "CALL gds.beta.graph.subgraph('social-graph', 'teenagers', {" +
-            "  nodeFilter: 'n.age > 13 AND n.age <= 18'" +
-            "}) YIELD graphName, subgraphName, nodeCount, relationshipCount";
+            "CALL gds.beta.graph.create.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', 'true') " +
+            "YIELD graphName, fromGraphName, nodeCount, relationshipCount";
 
         String expected =
-            "+---------------------------------------------------------------+" + NL +
-            "| graphName      | subgraphName | nodeCount | relationshipCount |" + NL +
-            "+---------------------------------------------------------------+" + NL +
-            "| \"social-graph\" | \"teenagers\"  | 2         | 1                 |" + NL +
-            "+---------------------------------------------------------------+" + NL +
+            "+--------------------------------------------------------------+" + NL +
+            "| graphName   | fromGraphName  | nodeCount | relationshipCount |" + NL +
+            "+--------------------------------------------------------------+" + NL +
+            "| \"teenagers\" | \"social-graph\" | 2         | 1                 |" + NL +
+            "+--------------------------------------------------------------+" + NL +
             "1 row" + NL;
 
         String actual = runQuery(query, Result::resultAsString);
@@ -88,17 +86,15 @@ final class GraphSubgraphDocTest extends BaseProcTest {
     void testExample2() {
         @Language("Cypher")
         String query =
-            "CALL gds.beta.graph.subgraph('social-graph', 'teenagers', {" +
-            "  nodeFilter: 'n.age > 13 AND n.age <= 18'," +
-            "  relationshipFilter: 'r.since >= 2012'" +
-            "}) YIELD graphName, subgraphName, nodeCount, relationshipCount";
+            "CALL gds.beta.graph.create.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', 'r.since >= 2012') " +
+            "YIELD graphName, fromGraphName, nodeCount, relationshipCount";
 
         String expected =
-            "+---------------------------------------------------------------+" + NL +
-            "| graphName      | subgraphName | nodeCount | relationshipCount |" + NL +
-            "+---------------------------------------------------------------+" + NL +
-            "| \"social-graph\" | \"teenagers\"  | 2         | 0                 |" + NL +
-            "+---------------------------------------------------------------+" + NL +
+            "+--------------------------------------------------------------+" + NL +
+            "| graphName   | fromGraphName  | nodeCount | relationshipCount |" + NL +
+            "+--------------------------------------------------------------+" + NL +
+            "| \"teenagers\" | \"social-graph\" | 2         | 0                 |" + NL +
+            "+--------------------------------------------------------------+" + NL +
             "1 row" + NL;
 
         String actual = runQuery(query, Result::resultAsString);
