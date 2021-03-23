@@ -58,7 +58,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
-    public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
+    public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
         return filteredIdMap.batchIterables(batchSize);
     }
 

@@ -137,7 +137,7 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     }
 
     @Override
-    public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
+    public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
         return LazyBatchCollection.of(
             nodeCount(),
             batchSize,

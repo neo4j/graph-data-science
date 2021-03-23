@@ -84,7 +84,7 @@ public class NullGraph implements Graph {
     }
 
     @Override
-    public Collection<PrimitiveLongIterable> batchIterables(int batchSize) {
+    public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
         return Set.of();
     }
 

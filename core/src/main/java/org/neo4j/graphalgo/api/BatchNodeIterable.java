@@ -33,7 +33,7 @@ public interface BatchNodeIterable {
      * @return a collection of iterables over every node, partitioned by
      *         the given batch size.
      */
-    Collection<PrimitiveLongIterable> batchIterables(int batchSize);
+    Collection<PrimitiveLongIterable> batchIterables(long batchSize);
 
     final class IdIterable implements PrimitiveLongIterable {
         private final long start;

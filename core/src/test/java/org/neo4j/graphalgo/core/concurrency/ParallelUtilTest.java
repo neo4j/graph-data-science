@@ -65,7 +65,6 @@ import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -194,7 +193,7 @@ final class ParallelUtilTest {
     void shouldRunBatchesSequentialIfNoExecutorIsGiven() {
         PrimitiveLongIterable[] ints = {longs(0, 10), longs(10, 14)};
         BatchNodeIterable batches = mock(BatchNodeIterable.class);
-        when(batches.batchIterables(anyInt())).thenReturn(asList(ints));
+        when(batches.batchIterables(anyLong())).thenReturn(asList(ints));
         long currentThreadId = Thread.currentThread().getId();
         Runnable task = () -> assertEquals(Thread.currentThread().getId(), currentThreadId);
         @SuppressWarnings("unchecked") HugeParallelGraphImporter<Runnable> importer = mock(HugeParallelGraphImporter.class);

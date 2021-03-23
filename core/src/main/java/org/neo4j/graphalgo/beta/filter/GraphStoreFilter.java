@@ -45,12 +45,21 @@ public final class GraphStoreFilter {
 
         var inputNodes = graphStore.nodes();
 
-        var filteredNodes = NodesFilter.filterNodes(graphStore, expressions.nodeExpression(), inputNodes, tracker);
+        var filteredNodes = NodesFilter.filterNodes(
+            graphStore,
+            expressions.nodeExpression(),
+            config.concurrency(),
+            executorService,
+            tracker
+        );
+
         var filteredRelationships = RelationshipsFilter.filterRelationships(
             graphStore,
             expressions.relationshipExpression(),
             inputNodes,
             filteredNodes.nodeMapping(),
+            config.concurrency(),
+            executorService,
             tracker
         );
 

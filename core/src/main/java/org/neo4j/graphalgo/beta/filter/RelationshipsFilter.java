@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.filter;
 
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
@@ -30,13 +31,18 @@ import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.beta.filter.expression.EvaluationContext;
 import org.neo4j.graphalgo.beta.filter.expression.Expression;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -57,6 +63,8 @@ final class RelationshipsFilter {
         Expression expression,
         NodeMapping inputNodes,
         NodeMapping outputNodes,
+        int concurrency,
+        ExecutorService executorService,
         AllocationTracker allocationTracker
     ) {
         Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>();
@@ -68,7 +76,10 @@ final class RelationshipsFilter {
                 expression,
                 inputNodes,
                 outputNodes,
-                relType
+                relType,
+                concurrency,
+                executorService,
+                allocationTracker
             );
 
             // Drop relationship types that have been completely filtered out.
@@ -116,7 +127,10 @@ final class RelationshipsFilter {
         Expression relationshipExpr,
         NodeMapping inputNodes,
         NodeMapping outputNodes,
-        RelationshipType relType
+        RelationshipType relType,
+        int concurrency,
+        ExecutorService executorService,
+        AllocationTracker allocationTracker
     ) {
         var propertyKeys = new ArrayList<>(graphStore.relationshipPropertyKeys(relType));
 
@@ -127,8 +141,8 @@ final class RelationshipsFilter {
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(outputNodes)
-            .concurrency(1)
-            .tracker(AllocationTracker.empty())
+            .concurrency(concurrency)
+            .tracker(allocationTracker)
             .addAllPropertyConfigs(propertyConfigs)
             .build();
 
@@ -138,34 +152,21 @@ final class RelationshipsFilter {
             .range(0, propertyKeys.size())
             .boxed()
             .collect(Collectors.toMap(propertyKeys::get, idx -> idx));
-        var relationshipContext = new EvaluationContext.RelationshipEvaluationContext(propertyIndices);
 
-        outputNodes.forEachNode(node -> {
-            var neoSource = outputNodes.toOriginalNodeId(node);
+        var relationshipFilterTasks = PartitionUtils.rangePartition(concurrency, outputNodes.nodeCount(), partition ->
+            new RelationshipFilterTask(
+                partition,
+                relationshipExpr,
+                compositeIterator.concurrentCopy(),
+                inputNodes,
+                outputNodes,
+                relationshipsBuilder,
+                relType,
+                propertyIndices
+            )
+        );
 
-            compositeIterator.forEachRelationship(neoSource, (source, target, properties) -> {
-                var neoTarget = inputNodes.toOriginalNodeId(target);
-                var mappedTarget = outputNodes.toMappedNodeId(neoTarget);
-
-                if (mappedTarget != NOT_FOUND) {
-                    relationshipContext.init(relType.name, properties);
-
-                    if (relationshipExpr.evaluate(relationshipContext) == Expression.TRUE) {
-                        // TODO branching should happen somewhere else
-                        if (properties.length == 0) {
-                            relationshipsBuilder.add(neoSource, neoTarget);
-                        } else if (properties.length == 1) {
-                            relationshipsBuilder.add(neoSource, neoTarget, properties[0]);
-                        } else {
-                            relationshipsBuilder.add(neoSource, neoTarget, properties);
-                        }
-                    }
-                }
-
-                return true;
-            });
-            return true;
-        });
+        ParallelUtil.runWithConcurrency(concurrency, relationshipFilterTasks, executorService);
 
         var relationships = relationshipsBuilder.buildAll();
         var topology = relationships.get(0).topology();
@@ -184,4 +185,65 @@ final class RelationshipsFilter {
     }
 
     private RelationshipsFilter() {}
+
+    private static final class RelationshipFilterTask implements Runnable {
+        private final Partition partition;
+        private final Expression expression;
+        private final EvaluationContext.RelationshipEvaluationContext evaluationContext;
+        private final CompositeRelationshipIterator relationshipIterator;
+        private final NodeMapping inputNodes;
+        private final NodeMapping outputNodes;
+        private final RelationshipsBuilder relationshipsBuilder;
+        private final RelationshipType relType;
+
+        private RelationshipFilterTask(
+            Partition partition,
+            Expression expression,
+            CompositeRelationshipIterator relationshipIterator,
+            NodeMapping inputNodes,
+            NodeMapping outputNodes,
+            RelationshipsBuilder relationshipsBuilder,
+            RelationshipType relType,
+            Map<String, Integer> propertyIndices
+        ) {
+            this.partition = partition;
+            this.expression = expression;
+            this.relationshipIterator = relationshipIterator;
+            this.inputNodes = inputNodes;
+            this.outputNodes = outputNodes;
+            this.relationshipsBuilder = relationshipsBuilder;
+            this.relType = relType;
+            this.evaluationContext = new EvaluationContext.RelationshipEvaluationContext(propertyIndices);
+        }
+
+        @Override
+        public void run() {
+            partition.consume(node -> {
+                var neoSource = outputNodes.toOriginalNodeId(node);
+
+                relationshipIterator.forEachRelationship(neoSource, (source, target, properties) -> {
+                    var neoTarget = inputNodes.toOriginalNodeId(target);
+                    var mappedTarget = outputNodes.toMappedNodeId(neoTarget);
+
+                    if (mappedTarget != NOT_FOUND) {
+                        evaluationContext.init(relType.name, properties);
+
+                        if (expression.evaluate(evaluationContext) == Expression.TRUE) {
+                            // TODO branching should happen somewhere else
+                            if (properties.length == 0) {
+                                relationshipsBuilder.add(neoSource, neoTarget);
+                            } else if (properties.length == 1) {
+                                relationshipsBuilder.add(neoSource, neoTarget, properties[0]);
+                            } else {
+                                relationshipsBuilder.add(neoSource, neoTarget, properties);
+                            }
+                        }
+                    }
+
+                    return true;
+                });
+            });
+        }
+    }
+
 }
