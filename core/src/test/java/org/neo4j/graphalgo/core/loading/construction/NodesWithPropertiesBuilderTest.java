@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.loading.construction;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -61,12 +60,16 @@ class NodesWithPropertiesBuilderTest {
         nodesBuilder.addNode(idFunction.of("a"), Map.of("prop1", Values.longValue(42), "prop2", Values.longValue(1337)), NodeLabel.of("A"));
         nodesBuilder.addNode(idFunction.of("b"), Map.of("prop1", Values.longValue(43), "prop2", Values.longValue(1338)), NodeLabel.of("A"));
 
-        NodeMapping nodeMapping = nodesBuilder.build();
+        NodesWithPropertiesBuilder.NodeMappingWithProperties nodeMappingWithProperties = nodesBuilder.build();
+        var nodeMapping = nodeMappingWithProperties.nodeMapping();
+        var nodeProperties = nodeMappingWithProperties.nodeProperties();
 
         assertThat(graph.nodeCount()).isEqualTo(nodeMapping.nodeCount());
         assertThat(graph.availableNodeLabels()).isEqualTo(nodeMapping.availableNodeLabels());
         graph.forEachNode(nodeId -> {
-            assertThat(graph.toOriginalNodeId(nodeId)).isEqualTo(nodeMapping.toOriginalNodeId(nodeId));
+            assertThat(nodeMapping.toOriginalNodeId(nodeId)).isEqualTo(graph.toOriginalNodeId(nodeId));
+            assertThat(nodeProperties.get("prop1").longValue(nodeId)).isEqualTo(graph.nodeProperties("prop1").longValue(nodeId));
+            assertThat(nodeProperties.get("prop2").longValue(nodeId)).isEqualTo(graph.nodeProperties("prop2").longValue(nodeId));
             return true;
         });
     }

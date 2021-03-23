@@ -23,7 +23,9 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -183,7 +185,13 @@ public class NodesWithPropertiesBuilder {
         this.threadLocalBuilder.get().addNode(originalId, properties, nodeLabels);
     }
 
-    public NodeMapping build() {
+    @ValueClass
+    interface NodeMappingWithProperties {
+        NodeMapping nodeMapping();
+        Map<String, NodeProperties> nodeProperties();
+    }
+
+    public NodeMappingWithProperties build() {
         this.threadLocalBuilder.close();
 
         var graphDimensions = ImmutableGraphDimensions.builder()
@@ -191,12 +199,19 @@ public class NodesWithPropertiesBuilder {
             .highestNeoId(maxOriginalId)
             .build();
 
-        return this.nodeMappingBuilder.build(
+        Map<String, NodeProperties> nodeProperties = new HashMap<>();
+        for (var mapIntObjectCursor : builderByLabelTokenAndPropertyToken) {
+            Map<String, NodePropertiesFromStoreBuilder> propertyBuildersByKey = mapIntObjectCursor.value;
+            propertyBuildersByKey.forEach((propertyKey, propertyBuilder) -> nodeProperties.put(propertyKey, propertyBuilder.build()));
+        }
+
+        NodeMapping nodeMapping = this.nodeMappingBuilder.build(
             nodeLabelBitSetMap,
             graphDimensions,
             concurrency,
             tracker
         );
+        return ImmutableNodeMappingWithProperties.of(nodeMapping, nodeProperties);
     }
 
     private int labelTokenId(NodeLabel nodeLabel) {
