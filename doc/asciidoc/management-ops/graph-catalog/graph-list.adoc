@@ -20,6 +20,8 @@ CALL gds.graph.list(
   relationshipProjection,
   nodeQuery,
   relationshipQuery,
+  nodeFilter,
+  relationshipFilter,
   nodeCount,
   relationshipCount,
   schema,
@@ -41,6 +43,8 @@ CALL gds.graph.list(
 | relationshipProjection | Map      | Relationship projection used to create the graph. If a Cypher projection was used, this will be a derived relationship projection.
 | nodeQuery              | String   | Node query used to create the graph. If a native projection was used, this will be `null`.
 | relationshipQuery      | String   | Relationship query used to create the graph. If a native projection was used, this will be `null`.
+| nodeFilter             | String   | The node filter used when creating this subgraph from another in-memory graph. If the graph has been created from Neo4j, this will be `null`.
+| relationshipFilter     | String   | The relationship filter used when creating this subgraph from another in-memory graph. If the graph has been created from Neo4j, this will be `null`.
 | nodeCount              | Integer  | Number of nodes in the graph.
 | relationshipCount      | Integer  | Number of relationships in the graph.
 | schema                 | Map      | Node labels, Relationship types and properties contained in the in-memory graph.
