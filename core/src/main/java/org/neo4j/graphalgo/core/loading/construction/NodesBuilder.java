@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.core.loading.construction;
 
 import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.ObjectIntMap;
 import com.carrotsearch.hppc.ObjectIntScatterMap;
-import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.NodeLabel;
@@ -57,6 +57,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
+import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
+import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
 import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
@@ -91,7 +93,7 @@ public class NodesBuilder {
         return new NodesBuilder(
             maxOriginalId,
             concurrency,
-            new ConcurrentHashMap<>(),
+            new ObjectIntScatterMap<>(),
             new ConcurrentHashMap<>(),
             new IntObjectHashMap<>(),
             null,
@@ -111,7 +113,7 @@ public class NodesBuilder {
     ) {
         var nodeLabels = nodeSchema.availableLabels();
 
-        var elementIdentifierLabelTokenMapping = new ConcurrentHashMap<NodeLabel, Integer>();
+        var elementIdentifierLabelTokenMapping = new ObjectIntScatterMap<NodeLabel>();
         var labelTokenNodeLabelMapping = new IntObjectHashMap<List<NodeLabel>>();
         IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> builderByLabelTokenAndPropertyToken = new IntObjectHashMap<>();
 
@@ -147,7 +149,7 @@ public class NodesBuilder {
     private NodesBuilder(
         long maxOriginalId,
         int concurrency,
-        Map<NodeLabel, Integer> elementIdentifierLabelTokenMapping,
+        ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping,
         Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMap,
         IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey,
@@ -163,9 +165,6 @@ public class NodesBuilder {
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.tracker = tracker;
         this.nextLabelId = 0;
-        this.elementIdentifierLabelTokenMapping = new ObjectIntScatterMap<>();
-        this.nodeLabelBitSetMap = new ConcurrentHashMap<>();
-        this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
         this.lock = new ReentrantLock(true);
         this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyKey;
 
