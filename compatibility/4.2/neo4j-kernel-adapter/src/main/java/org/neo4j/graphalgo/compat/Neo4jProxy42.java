@@ -73,13 +73,10 @@ import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
-import org.neo4j.kernel.impl.store.NodeLabelsField;
-import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.impl.store.record.RecordLoad;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.kernel.lifecycle.LifeSupport;
@@ -158,15 +155,6 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
     }
 
     @Override
-    public <RECORD extends AbstractBaseRecord> PageCursor openPageCursorForReading(
-        RecordStore<RECORD> recordStore,
-        long pageId,
-        PageCursorTracer pageCursorTracer
-    ) {
-        return recordStore.openPageCursorForReading(pageId, pageCursorTracer);
-    }
-
-    @Override
     public PageCursor pageFileIO(
         PagedFile pagedFile,
         long pageId,
@@ -181,6 +169,7 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
         PageCache pageCache,
         File file,
         int pageSize,
+        String databaseName,
         OpenOption... openOptions
     ) throws IOException {
         return pageCache.map(file.toPath(), pageSize, Sets.immutable.of(openOptions));
@@ -223,11 +212,6 @@ public final class Neo4jProxy42 implements Neo4jProxyApi {
     @Override
     public long relationshipsReference(NodeCursor nodeCursor) {
         return nodeCursor.relationshipsReference();
-    }
-
-    @Override
-    public long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer) {
-        return NodeLabelsField.get(node, nodeStore, cursorTracer);
     }
 
     @Override

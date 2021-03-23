@@ -62,12 +62,10 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
-import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.impl.store.record.RecordLoad;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.Level;
@@ -141,14 +139,6 @@ public final class Neo4jProxy {
         return IMPL.getHighestPossibleIdInUse(recordStore, pageCursorTracer);
     }
 
-    public static <RECORD extends AbstractBaseRecord> PageCursor openPageCursorForReading(
-        RecordStore<RECORD> recordStore,
-        long pageId,
-        PageCursorTracer pageCursorTracer
-    ) {
-        return IMPL.openPageCursorForReading(recordStore, pageId, pageCursorTracer);
-    }
-
     public static PageCursor pageFileIO(
         PagedFile pagedFile,
         long pageId,
@@ -158,9 +148,15 @@ public final class Neo4jProxy {
         return IMPL.pageFileIO(pagedFile, pageId, pageFileFlags, pageCursorTracer);
     }
 
-    public static PagedFile pageCacheMap(PageCache pageCache, File file, int pageSize, OpenOption... openOptions)
+    public static PagedFile pageCacheMap(
+        PageCache pageCache,
+        File file,
+        int pageSize,
+        String databaseName,
+        OpenOption... openOptions
+    )
     throws IOException {
-        return IMPL.pageCacheMap(pageCache, file, pageSize, openOptions);
+        return IMPL.pageCacheMap(pageCache, file, pageSize, databaseName, openOptions);
     }
 
     public static Path pagedFile(PagedFile pagedFile) {
@@ -203,10 +199,6 @@ public final class Neo4jProxy {
 
     public static long relationshipsReference(NodeCursor nodeCursor) {
         return IMPL.relationshipsReference(nodeCursor);
-    }
-
-    public static long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer) {
-        return IMPL.getNodeLabelFields(node, nodeStore, cursorTracer);
     }
 
     public static void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {

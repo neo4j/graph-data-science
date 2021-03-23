@@ -62,12 +62,10 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
-import org.neo4j.kernel.impl.store.NodeStore;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.kernel.impl.store.record.NodeRecord;
 import org.neo4j.kernel.impl.store.record.RecordLoad;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.Level;
@@ -111,12 +109,6 @@ public interface Neo4jProxyApi {
         PageCursorTracer pageCursorTracer
     );
 
-    <RECORD extends AbstractBaseRecord> PageCursor openPageCursorForReading(
-        RecordStore<RECORD> recordStore,
-        long pageId,
-        PageCursorTracer pageCursorTracer
-    );
-
     PageCursor pageFileIO(
         PagedFile pagedFile,
         long pageId,
@@ -128,6 +120,7 @@ public interface Neo4jProxyApi {
         PageCache pageCache,
         File file,
         int pageSize,
+        String databaseName,
         OpenOption... openOptions
     ) throws IOException;
 
@@ -152,8 +145,6 @@ public interface Neo4jProxyApi {
     );
 
     long relationshipsReference(NodeCursor nodeCursor);
-
-    long[] getNodeLabelFields(NodeRecord node, NodeStore nodeStore, PageCursorTracer cursorTracer);
 
     void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor);
 
