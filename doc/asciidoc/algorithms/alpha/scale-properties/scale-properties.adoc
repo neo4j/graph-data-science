@@ -28,34 +28,34 @@ These can be configured using the `scalers` configuration parameter.
 
 Scales all property values into the range `[0, 1]` where the minimum value(s) get the scaled value `0` and the maximum value(s) get the scaled value `1`, according to this formula:
 
-image::equations/min-max.svg[minmax of p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
+image::equations/scale-properties/minmax.svg[minmax of p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
 
 [[algorithms-scale-properties-mean]]
 === Mean scaler
 
 Scales all property values into the range `[-1, 1]` where the average value(s) get the scaled value `0`.
 
-image::equations/mean.svg[mean of p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
+image::equations/scale-properties/mean.svg[mean of p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
 
 === Log scaler
 
 Transforms all property values using the natural logarithm.
 
-image::equations/log.svg[p equals natural logarithm of p,align="center"]
+image::equations/scale-properties/log.svg[p equals natural logarithm of p,align="center"]
 
 
 === Standard Score
 
 Scales all property values using the standard score.
 
-image::equations/standardScore.svg[p equals  p minus average of p divided by standard deviation of p,align="center"]
+image::equations/scale-properties/standardScore.svg[p equals  p minus average of p divided by standard deviation of p,align="center"]
 
 
 === L2 Norm
 
-Scaling the components of a feature vector such that the complete vector has length one by using the L2 norm of the vector.
+Scaling the components of a feature vector such that the complete vector has length one by dividing with the L2 norm of the vector:
 
-image::equations/l2norm.svg[p equals p divided by l2 norm of p ,align="center"]
+image::equations/scale-properties/l2norm.svg[p equals p divided by l2 norm of p ,align="center"]
 
 [[algorithms-scale-properties-syntax]]
 == Syntax
