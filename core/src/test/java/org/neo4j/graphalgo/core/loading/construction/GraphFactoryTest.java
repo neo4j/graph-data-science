@@ -29,7 +29,9 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.values.storable.Values;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -100,10 +102,54 @@ class GraphFactoryTest {
             }
             Graph graph = GraphFactory.create(
                 idMap,
-                relationshipsBuilder.build(), AllocationTracker.empty()
+                relationshipsBuilder.build(),
+                AllocationTracker.empty()
             );
 
             var expectedGraph = fromGdl("(a:A)-->(b:A:B)-->(c:C)-->(d)-->(a)", orientation);
+
+            assertGraphEquals(expectedGraph, graph);
+            assertEquals(nodeCount, graph.relationshipCount());
+        });
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("projectionsAndIdMaps")
+    void withNodeProperties(Orientation orientation, TestMethodRunner runTest) {
+        var expectedGraph = fromGdl("(a:A {p: 42L})-->(b:A:B {p: 1337L})-->(c:C {p: 13L})-->(d {p: 33L})-->(a)", orientation);
+        runTest.run(() -> {
+            int nodeCount = 4;
+            var nodesBuilder = GraphFactory.initNodesBuilder()
+                .maxOriginalId(nodeCount)
+                .nodeCount(nodeCount)
+                .nodeSchema(expectedGraph.schema().nodeSchema())
+                .tracker(AllocationTracker.empty())
+                .build();
+
+            nodesBuilder.addNode(0, Map.of("p", Values.longValue(42)), NodeLabel.of("A"));
+            nodesBuilder.addNode(1, Map.of("p", Values.longValue(1337)), NodeLabel.of("A"), NodeLabel.of("B"));
+            nodesBuilder.addNode(2, Map.of("p", Values.longValue(13)), NodeLabel.of("C"));
+            nodesBuilder.addNode(3, Map.of("p", Values.longValue(33)));
+
+            var idMap = nodesBuilder.buildNodeMapping();
+            var nodeProperties = nodesBuilder.buildProperties();
+            var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+                .nodes(idMap)
+                .orientation(orientation)
+                .aggregation(Aggregation.SUM)
+                .tracker(AllocationTracker.empty())
+                .build();
+
+            for (int i = 0; i < nodeCount; i++) {
+                relationshipsBuilder.add(i, (i + 1) % nodeCount);
+            }
+            Graph graph = GraphFactory.create(
+                idMap,
+                expectedGraph.schema().nodeSchema(),
+                nodeProperties,
+                relationshipsBuilder.build(),
+                AllocationTracker.empty()
+            );
 
             assertGraphEquals(expectedGraph, graph);
             assertEquals(nodeCount, graph.relationshipCount());
