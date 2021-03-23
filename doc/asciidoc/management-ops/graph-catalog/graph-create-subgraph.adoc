@@ -35,8 +35,8 @@ CALL gds.beta.graph.subgraph(
 | Name               | Type    | Description
 | graphName          | String  | The name of the new graph that is stored in the graph catalog.
 | fromGraphName      | String  | The name of the original graph in the graph catalog.
-| nodeFilter         | String  | A Cypher predicate for filtering nodes in the input graph.
-| relationshipFilter | String  | A Cypher predicate for filtering relationships in the input graph.
+| nodeFilter         | String  | A Cypher predicate for filtering nodes in the input graph. `*` can be used to allow all nodes.
+| relationshipFilter | String  | A Cypher predicate for filtering relationships in the input graph.  `*` can be used to allow all relationships.
 |===
 
 .Subgraph specific configuration
@@ -109,7 +109,7 @@ YIELD graphName, nodeCount, relationshipCount, createMillis;
 .Create a new graph containing only users of a certain age group:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', 'true')
+CALL gds.beta.graph.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', '*')
 YIELD graphName, subgraphName, nodeCount, relationshipCount;
 ----
 
