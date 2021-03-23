@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
 import org.neo4j.graphalgo.config.GraphCreateFromGraphConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -46,6 +47,7 @@ class GraphStoreFilterTest {
             .relationshipFilter(relationshipFilter)
             .graphName("outputGraph")
             .fromGraphName("inputGraph")
+            .originalConfig(GraphCreateFromStoreConfig.emptyWithName("user", "inputGraph"))
             .build();
     }
 
@@ -296,5 +298,19 @@ class GraphStoreFilterTest {
 
         assertThat(filteredGraphStore.schema().relationshipSchema()).isEqualTo(aSchema);
         assertGraphEquals(fromGdl("(a)-[:A {aProp: 42L}]->(b)"), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void filterOnStar() throws ParseException, SemanticErrors {
+        var graphStore = graphStoreFromGDL("(a)-[:A {aProp: 42L}]->(b), (a)-[:B {bProp: 42L}]->(b)");
+
+        var filteredGraphStore = filter(
+            graphStore,
+            config("*", "*"),
+            Pools.DEFAULT,
+            AllocationTracker.empty()
+        );
+
+        assertGraphEquals(graphStore.getUnion(), filteredGraphStore.getUnion());
     }
 }

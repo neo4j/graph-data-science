@@ -33,6 +33,8 @@ import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.concurrent.ExecutorService;
 
+import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
+
 public final class GraphStoreFilter {
 
     @NotNull
@@ -87,13 +89,17 @@ public final class GraphStoreFilter {
         String nodeFilter,
         String relationshipFilter
     ) throws ParseException, SemanticErrors {
-        var nodeExpression = ExpressionParser.parse(nodeFilter);
-        var relationshipExpression = ExpressionParser.parse(relationshipFilter);
+        var nodeExpression = ExpressionParser.parse(replaceStarWithTrue(nodeFilter));
+        var relationshipExpression = ExpressionParser.parse(replaceStarWithTrue(relationshipFilter));
 
         nodeExpression.validate(ValidationContext.forNodes(graphStore)).validate();
         relationshipExpression.validate(ValidationContext.forRelationships(graphStore)).validate();
 
         return ImmutableExpressions.of(nodeExpression, relationshipExpression);
+    }
+
+    private static String replaceStarWithTrue(String filter) {
+        return filter.equals(PROJECT_ALL) ? "true" : filter;
     }
 
     private GraphStoreFilter() {}
