@@ -237,11 +237,21 @@ public final class NodesBuilder {
     public Map<String, NodeProperties> buildProperties() {
         this.threadLocalBuilder.close();
 
-        Map<String, NodeProperties> nodeProperties = new HashMap<>();
+        var nodeMapping = buildNodeMapping(); // TODO: this should be solved differently
+        Map<String, Map<NodeLabel, NodeProperties>> nodePropertiesByKeyAndLabel = new HashMap<>();
         for (IntObjectCursor<Map<String, NodePropertiesFromStoreBuilder>> propertyBuilderByLabelToken : this.buildersByLabelTokenAndPropertyToken) {
-            propertyBuilderByLabelToken.value.forEach((propertyKey, propertyBuilder) -> nodeProperties.put(propertyKey, propertyBuilder.build()));
+            var nodeLabels = labelTokenNodeLabelMapping.get(propertyBuilderByLabelToken.key);
+            nodeLabels.forEach(nodeLabel ->
+                propertyBuilderByLabelToken.value.forEach((propertyKey, propertyBuilder) -> nodePropertiesByKeyAndLabel
+                    .computeIfAbsent(propertyKey, __ -> new HashMap<>()).put(nodeLabel, propertyBuilder.build())
+                )
+            );
         }
-        return nodeProperties;
+
+        return nodePropertiesByKeyAndLabel.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            entry -> new UnionNodeProperties(nodeMapping, entry.getValue())
+        ));
     }
 
     private int getOrCreateLabelTokenId(NodeLabel nodeLabel) {
