@@ -23,17 +23,38 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 @ValueClass
+@Configuration
+@SuppressWarnings("immutables:subtype")
 public interface GraphCreateFromGraphConfig extends GraphCreateConfig {
 
+    @Configuration.Parameter
     String graphName();
 
-    GraphCreateConfig originalConfig();
+    @Configuration.Parameter
+    String fromGraphName();
 
+    @Configuration.Parameter
     String nodeFilter();
 
+    @Configuration.Parameter
     String relationshipFilter();
+
+    @Configuration.Parameter
+    GraphCreateConfig originalConfig();
+
+    @Value.Default
+    @Value.Parameter(false)
+    default int concurrency() {
+        return ConcurrencyConfig.DEFAULT_CONCURRENCY;
+    }
+
+    @Value.Check
+    default void validateReadConcurrency() {
+        ConcurrencyConfig.validateConcurrency(concurrency(), "concurrency");
+    }
 
     @Value.Default
     @Override
@@ -45,5 +66,45 @@ public interface GraphCreateFromGraphConfig extends GraphCreateConfig {
     @Configuration.Ignore
     default <R> R accept(Cases<R> visitor) {
         return visitor.graph(this);
+    }
+
+    // Inherited, but ignored config keys
+
+    @Override
+    @Configuration.Ignore
+    default long nodeCount() {
+        return -1;
+    }
+
+    @Override
+    @Configuration.Ignore
+    default long relationshipCount() {
+        return -1;
+    }
+
+    @Override
+    @Configuration.Ignore
+    default boolean validateRelationships() {
+        return false;
+    }
+
+    static GraphCreateFromGraphConfig of(
+        String userName,
+        String graphName,
+        String fromGraphName,
+        String nodeFilter,
+        String relationshipFilter,
+        GraphCreateConfig originalConfig,
+        CypherMapWrapper procedureConfig
+    ) {
+        return new GraphCreateFromGraphConfigImpl(
+            graphName,
+            fromGraphName,
+            nodeFilter,
+            relationshipFilter,
+            originalConfig,
+            userName,
+            procedureConfig
+        );
     }
 }

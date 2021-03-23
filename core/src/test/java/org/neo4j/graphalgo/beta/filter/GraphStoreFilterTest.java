@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
+import org.neo4j.graphalgo.config.GraphCreateFromGraphConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.opencypher.v9_0.parser.javacc.ParseException;
@@ -37,8 +39,8 @@ import static org.neo4j.graphalgo.beta.filter.GraphStoreFilter.filter;
 
 class GraphStoreFilterTest {
 
-    private static GraphStoreFilterConfig config(String nodeFilter, String relationshipFilter) {
-        return ImmutableGraphStoreFilterConfig.builder()
+    private static GraphCreateFromGraphConfig config(String nodeFilter, String relationshipFilter) {
+        return ImmutableGraphCreateFromGraphConfig.builder()
             .concurrency(1)
             .nodeFilter(nodeFilter)
             .relationshipFilter(relationshipFilter)

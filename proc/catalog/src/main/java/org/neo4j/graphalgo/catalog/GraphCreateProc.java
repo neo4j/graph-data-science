@@ -24,12 +24,11 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.beta.filter.GraphStoreFilter;
-import org.neo4j.graphalgo.beta.filter.GraphStoreFilterConfig;
 import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.graphalgo.config.GraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.config.ImmutableGraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -174,47 +173,47 @@ public class GraphCreateProc extends CatalogProc {
     ) {
         validateGraphName(username(), graphName);
 
-        var cypherConfig = CypherMapWrapper.create(configuration);
-        var filterConfig = GraphStoreFilterConfig.of(
+        var procedureConfig = CypherMapWrapper.create(configuration);
+
+        var fromGraphStore = GraphStoreCatalog.get(username(), databaseId(), fromGraphName);
+
+        var graphCreateConfig = GraphCreateFromGraphConfig.of(
             username(),
             graphName,
             fromGraphName,
             nodeFilter,
             relationshipFilter,
-            cypherConfig
+            fromGraphStore.config(),
+            procedureConfig
         );
-        validateConfig(cypherConfig, filterConfig);
+
+        validateConfig(procedureConfig, graphCreateConfig);
 
         GraphCreateSubgraphResult result = runWithExceptionLogging(
             "Graph creation failed",
-            ExceptionUtil.supplier(() -> createGraphFromGraphStore(filterConfig))
+            ExceptionUtil.supplier(() -> createGraphFromGraphStore(fromGraphStore.graphStore(), graphCreateConfig))
         );
 
         return Stream.of(result);
     }
 
-    private GraphCreateSubgraphResult createGraphFromGraphStore(GraphStoreFilterConfig config) throws
+    private GraphCreateSubgraphResult createGraphFromGraphStore(
+        GraphStore fromGraphStore,
+        GraphCreateFromGraphConfig config
+    ) throws
         ParseException,
         SemanticErrors {
+
         var progressTimer = ProgressTimer.start();
 
-        var fromGraphStore = GraphStoreCatalog.get(username(), databaseId(), config.fromGraphName());
         var graphStore = GraphStoreFilter.filter(
-            fromGraphStore.graphStore(),
+            fromGraphStore,
             config,
             Pools.DEFAULT,
             allocationTracker()
         );
 
-        var graphCreateConfig = ImmutableGraphCreateFromGraphConfig.builder()
-            .username(username())
-            .graphName(config.graphName())
-            .nodeFilter(config.nodeFilter())
-            .relationshipFilter(config.relationshipFilter())
-            .originalConfig(fromGraphStore.config())
-            .build();
-
-        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+        GraphStoreCatalog.set(config, graphStore);
 
         var createMillis = progressTimer.stop().getDuration();
 

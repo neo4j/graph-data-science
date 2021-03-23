@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.beta.filter.expression.Expression;
 import org.neo4j.graphalgo.beta.filter.expression.ExpressionParser;
 import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
 import org.neo4j.graphalgo.beta.filter.expression.ValidationContext;
+import org.neo4j.graphalgo.config.GraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.opencypher.v9_0.parser.javacc.ParseException;
@@ -37,7 +38,7 @@ public final class GraphStoreFilter {
     @NotNull
     public static GraphStore filter(
         GraphStore graphStore,
-        GraphStoreFilterConfig config,
+        GraphCreateFromGraphConfig config,
         ExecutorService executorService,
         AllocationTracker tracker
     ) throws ParseException, SemanticErrors {
