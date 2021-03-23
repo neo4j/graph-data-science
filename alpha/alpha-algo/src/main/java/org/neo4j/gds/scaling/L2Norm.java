@@ -81,7 +81,7 @@ final class L2Norm implements Scaler {
         public void run() {
             for (long nodeId = start; nodeId < (start + length); nodeId++) {
                 var propertyValue = properties.doubleValue(nodeId);
-                squaredSum += Math.pow(propertyValue, 2);
+                squaredSum += propertyValue * propertyValue;
             }
         }
 
