@@ -29,7 +29,7 @@ The following table lists all production-quality graph operations in the GDS lib
 | `gds.graph.create.estimate`
 | `gds.graph.create.cypher`
 | `gds.graph.create.cypher.estimate`
-| Create a graph from a named graph | `gds.beta.graph.create.subgraph`
+|<<catalog-graph-create-subgraph, Create a graph from a named graph>> | `gds.beta.graph.create.subgraph`
 |<<catalog-graph-exists, Check if a named graph exists>> | `gds.graph.exists`
 |<<catalog-graph-list, List graphs>> | `gds.graph.list`
 |<<catalog-graph-write-node-properties, Remove node properties from a named graph>> | `gds.graph.removeNodeProperties`
