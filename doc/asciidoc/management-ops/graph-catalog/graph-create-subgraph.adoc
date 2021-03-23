@@ -1,4 +1,4 @@
-[[catalog-graph-subgraph]]
+[[catalog-graph-create-subgraph]]
 [.beta]
 = Create a subgraph in the catalog
 
@@ -10,28 +10,39 @@ The filter predicates in the subgraph procedure can take labels, relationship ty
 The new graph can be used in the same way as any other in-memory graph in the catalog.
 Creating subgraphs of subgraphs is also possible.
 
-.A new graph can be created by using the `gds.beta.graph.subgraph()` procedure:
+.A new graph can be created by using the `gds.beta.graph.create.subgraph()` procedure:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.graph.subgraph(
   graphName: String,
-  subgraphName: String,
+  fromGraphName: String,
+  nodeFilter: String,
+  relationshipFilter: String,
   configuration: Map
 ) YIELD
   graphName,
-  subgraphName,
+  fromGraphName,
+  nodeFilter,
+  relationshipFilter,
   nodeCount,
   relationshipCount,
-  createMillis,
-  configuration;
+  createMillis;
 ----
+
+.Subgraph specific configuration
+[opts="header",cols="1,1,4"]
+|===
+| Name               | Type    | Description
+| graphName          | String  | The name of the new graph that is stored in the graph catalog.
+| fromGraphName      | String  | The name of the original graph in the graph catalog.
+| nodeFilter         | String  | A Cypher predicate for filtering nodes in the input graph.
+| relationshipFilter | String  | A Cypher predicate for filtering relationships in the input graph.
+|===
 
 .Subgraph specific configuration
 [opts="header",cols="1,1,1m,1,5"]
 |===
 | Name               | Type    | Default | Optional | Description
-| nodeFilter         | String  | 'true'  | yes      | A Cypher predicate for filtering nodes in the input graph.
-| relationshipFilter | String  | 'true'  | yes      | A Cypher predicate for filtering relationships in the input graph.
 | concurrency        | Integer | 4       | yes      | The number of concurrent threads used for filtering the graph.
 |===
 
@@ -39,8 +50,8 @@ CALL gds.beta.graph.subgraph(
 [opts="header",cols="1,1,4"]
 |===
 | Name                   | Type     | Description
-| graphName              | String   | The name of the original graph in the graph catalog.
-| subgraphName           | String   | The name of the new subgraph that is stored in the graph catalog.
+| graphName              | String   | The name of the new graph that is stored in the graph catalog.
+| fromGraphName          | String   | The name of the original graph in the graph catalog.
 | nodeCount              | Integer  | Number of nodes in the subgraph.
 | relationshipCount      | Integer  | Number of relationships in the subgraph.
 | createMillis           | Integer  | Milliseconds for creating the subgraph.
@@ -98,18 +109,13 @@ YIELD graphName, nodeCount, relationshipCount, createMillis;
 .Create a new graph containing only users of a certain age group:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.subgraph('social-graph', 'teenagers', {
-  nodeFilter: 'n.age > 13 AND n.age <= 18'
-})
+CALL gds.beta.graph.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', 'true')
 YIELD graphName, subgraphName, nodeCount, relationshipCount;
 ----
 
 .Create a new graph containing only users of a certain age group that know each other since a given point a time:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.subgraph('social-graph', 'teenagers', {
-  nodeFilter: 'n.age > 13 AND n.age <= 18',
-  relationshipFilter: 'r.since >= 2012'
-})
+CALL gds.beta.graph.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', 'r.since >= 2012')
 YIELD graphName, subgraphName, nodeCount, relationshipCount, createMillis;
 ----

@@ -32,7 +32,7 @@ This chapter explains the available graph catalog operations.
 | Name                                                                                     | Description
 | <<catalog-graph-create, gds.graph.create>>                                               | Creates a graph in the catalog using a <<native-projection, Native projection>>.
 | <<catalog-graph-create, gds.graph.create.cypher>>                                        | Creates a graph in the catalog using a <<cypher-projection, Cypher projection>>.
-| <<catalog-graph-subgraph, gds.beta.graph.subgraph>>                                      | Creates a graph in the catalog by filtering an existing graph using node and relationship predicates.
+| <<catalog-graph-create-subgraph, gds.beta.graph.create.subgraph>>                        | Creates a graph in the catalog by filtering an existing graph using node and relationship predicates.
 | <<catalog-graph-list, gds.graph.list>>                                                   | Prints information about graphs that are currently stored in the catalog.
 | <<catalog-graph-exists, gds.graph.exists>>                                               | Checks if a named graph is stored in the catalog.
 | <<catalog-graph-remove-node-properties, gds.graph.removeNodeProperties>>                 | Removes node properties from a named graph.
@@ -57,7 +57,7 @@ Graphs created by a different Neo4j user are not accessible at any time.
 
 include::graph-create.adoc[leveloffset=+1]
 
-include::graph-subgraph.adoc[leveloffset=+1]
+include::graph-create-subgraph.adoc[leveloffset=+1]
 
 include::graph-list.adoc[leveloffset=+1]
 
