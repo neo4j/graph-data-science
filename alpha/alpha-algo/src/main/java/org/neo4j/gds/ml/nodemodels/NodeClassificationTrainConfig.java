@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.logisticregression;
+package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.graphalgo.annotation.Configuration;

@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;

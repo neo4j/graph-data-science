@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.Training;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.logging.Log;
 

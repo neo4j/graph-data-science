@@ -22,8 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeClassificationTrainConfig;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.extension.GdlExtension;

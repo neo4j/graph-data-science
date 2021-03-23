@@ -17,10 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
+package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.ml.batch.BatchQueue;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictor;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRResult;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;

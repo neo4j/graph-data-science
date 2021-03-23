@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainProc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.graphalgo.centrality.ArticleRankProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;

@@ -21,13 +21,11 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.neo4j.gds.ml.batch.BatchQueue;
-import org.neo4j.gds.ml.nodemodels.logisticregression.MultiClassNLRTrainConfig;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictor;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrain;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeClassificationPredictConsumer;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
