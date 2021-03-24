@@ -85,7 +85,8 @@ final class NodesFilter {
 
         ParallelUtil.runWithConcurrency(concurrency, nodeFilterTasks, executorService);
 
-        var filteredNodeMapping = nodesBuilder.buildNodeMapping();
+        var nodeMappingAndProperties = nodesBuilder.build();
+        var filteredNodeMapping = nodeMappingAndProperties.nodeMapping();
 
         progressLogger
             .finishSubTask("Nodes")

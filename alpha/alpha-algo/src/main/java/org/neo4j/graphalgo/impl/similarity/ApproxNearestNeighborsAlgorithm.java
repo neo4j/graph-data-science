@@ -284,7 +284,7 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
             nodesBuilder.addNode(input.getId());
         }
 
-        NodeMapping idMap = nodesBuilder.buildNodeMapping();
+        NodeMapping idMap = nodesBuilder.build().nodeMapping();
         return IdsAndProperties.of(idMap, Collections.emptyMap());
     }
 

@@ -89,7 +89,7 @@ class GraphFactoryTest {
             nodesBuilder.addNode(2, NodeLabel.of("C"));
             nodesBuilder.addNode(3);
 
-            NodeMapping idMap = nodesBuilder.buildNodeMapping();
+            NodeMapping idMap = nodesBuilder.build().nodeMapping();
             RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(idMap)
                 .orientation(orientation)
@@ -131,8 +131,9 @@ class GraphFactoryTest {
             nodesBuilder.addNode(2, Map.of("p", Values.longValue(13)), NodeLabel.of("C"));
             nodesBuilder.addNode(3, Map.of("p", Values.longValue(33)));
 
-            var idMap = nodesBuilder.buildNodeMapping();
-            var nodeProperties = nodesBuilder.buildProperties();
+            var nodeMappingAndProperties = nodesBuilder.build();
+            var idMap = nodeMappingAndProperties.nodeMapping();
+            var nodeProperties = nodeMappingAndProperties.nodePropertiesOrThrow();
             var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                 .nodes(idMap)
                 .orientation(orientation)
@@ -205,7 +206,7 @@ class GraphFactoryTest {
             nodesBuilder.addNode(i);
         }
 
-        NodeMapping idMap = nodesBuilder.buildNodeMapping();
+        NodeMapping idMap = nodesBuilder.build().nodeMapping();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)

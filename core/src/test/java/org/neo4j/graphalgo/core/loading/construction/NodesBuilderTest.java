@@ -75,7 +75,7 @@ class NodesBuilderTest {
                 stream -> stream.forEach(nodesBuilder::addNode)
             );
 
-            var idMap = nodesBuilder.buildNodeMapping();
+            var idMap = nodesBuilder.build().nodeMapping();
 
             assertEquals(nodeCount, idMap.nodeCount());
         });
@@ -99,7 +99,7 @@ class NodesBuilderTest {
                 stream -> stream.forEach(originalId -> nodesBuilder.addNode(0))
             );
 
-            var idMap = nodesBuilder.buildNodeMapping();
+            var idMap = nodesBuilder.build().nodeMapping();
 
             assertEquals(1, idMap.nodeCount());
         });
@@ -131,7 +131,7 @@ class NodesBuilderTest {
                 })
             );
 
-            var idMap = nodesBuilder.buildNodeMapping();
+            var idMap = nodesBuilder.build().nodeMapping();
 
             var expectedLabels = new HashSet<NodeLabel>();
             expectedLabels.addAll(labels1);
@@ -164,8 +164,11 @@ class NodesBuilderTest {
         nodesBuilder.addNode(idFunction.of("a"), Map.of("prop1", Values.longValue(42), "prop2", Values.longValue(1337)), NodeLabel.of("A"));
         nodesBuilder.addNode(idFunction.of("b"), Map.of("prop1", Values.longValue(43), "prop2", Values.longValue(1338)), NodeLabel.of("A"));
 
-        var nodeMapping = nodesBuilder.buildNodeMapping();
-        var nodeProperties = nodesBuilder.buildProperties();
+        var nodeMappingAndProperties = nodesBuilder.build();
+        var nodeMapping = nodeMappingAndProperties.nodeMapping();
+        var nodeProperties = nodeMappingAndProperties
+            .nodeProperties()
+            .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
 
         assertThat(graph.nodeCount()).isEqualTo(nodeMapping.nodeCount());
         assertThat(graph.availableNodeLabels()).isEqualTo(nodeMapping.availableNodeLabels());
@@ -206,8 +209,9 @@ class NodesBuilderTest {
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        var nodeMapping = nodesBuilder.buildNodeMapping();
-        var nodeProperties = nodesBuilder.buildProperties();
+        var nodeMappingAndProperties = nodesBuilder.build();
+        var nodeMapping = nodeMappingAndProperties.nodeMapping();
+        var nodeProperties = nodeMappingAndProperties.nodePropertiesOrThrow();
 
         assertThat(nodeMapping.nodeCount()).isEqualTo(nodeCount);
         assertThat(nodeMapping.availableNodeLabels()).containsExactly(nodeLabel);

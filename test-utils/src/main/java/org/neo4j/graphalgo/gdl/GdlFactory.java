@@ -185,7 +185,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
                 .toArray(NodeLabel[]::new)
         ));
 
-        var idMap = nodesBuilder.buildNodeMapping();
+        var idMap = nodesBuilder.build().nodeMapping();
 
         return IdsAndProperties.of(idMap, loadNodeProperties(idMap));
     }

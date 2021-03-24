@@ -26,6 +26,7 @@ import com.carrotsearch.hppc.ObjectIntScatterMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
@@ -53,6 +54,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -84,6 +86,7 @@ public final class NodesBuilder {
     private final Lock lock;
 
     private final IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyToken;
+    private final boolean hasProperties;
 
     static NodesBuilder withoutSchema(
         long maxOriginalId,
@@ -169,6 +172,7 @@ public final class NodesBuilder {
         this.nextLabelId = 0;
         this.lock = new ReentrantLock(true);
         this.buildersByLabelTokenAndPropertyToken = buildersByLabelTokenAndPropertyKey;
+        this.hasProperties = hasProperties;
 
         // this is maxOriginalId + 1, because it is the capacity for the neo -> gds mapping, where we need to
         // be able to include the highest possible id
@@ -218,7 +222,7 @@ public final class NodesBuilder {
         this.threadLocalBuilder.get().addNode(originalId, properties, nodeLabels);
     }
 
-    public NodeMapping buildNodeMapping() {
+    public NodeMappingAndProperties build() {
         this.threadLocalBuilder.close();
 
         var graphDimensions = ImmutableGraphDimensions.builder()
@@ -226,18 +230,23 @@ public final class NodesBuilder {
             .highestNeoId(maxOriginalId)
             .build();
 
-        return this.nodeMappingBuilder.build(
+        var nodeMapping = this.nodeMappingBuilder.build(
             nodeLabelBitSetMap,
             graphDimensions,
             concurrency,
             tracker
         );
+
+        Optional<Map<String, NodeProperties>> nodeProperties = Optional.empty();
+        if (hasProperties) {
+            nodeProperties = Optional.of(buildProperties(nodeMapping));
+        }
+        return ImmutableNodeMappingAndProperties.of(nodeMapping, nodeProperties);
     }
 
-    public Map<String, NodeProperties> buildProperties() {
+    private Map<String, NodeProperties> buildProperties(NodeMapping nodeMapping) {
         this.threadLocalBuilder.close();
 
-        var nodeMapping = buildNodeMapping(); // TODO: this should be solved differently
         Map<String, Map<NodeLabel, NodeProperties>> nodePropertiesByKeyAndLabel = new HashMap<>();
         for (IntObjectCursor<Map<String, NodePropertiesFromStoreBuilder>> propertyBuilderByLabelToken : this.buildersByLabelTokenAndPropertyToken) {
             var nodeLabels = labelTokenNodeLabelMapping.get(propertyBuilderByLabelToken.key);
@@ -274,6 +283,17 @@ public final class NodesBuilder {
             throw new IllegalArgumentException(formatWithLocale("No token was specified for node label %s", nodeLabel));
         }
         return elementIdentifierLabelTokenMapping.get(nodeLabel);
+    }
+
+    @ValueClass
+    public interface NodeMappingAndProperties {
+        NodeMapping nodeMapping();
+        Optional<Map<String, NodeProperties>> nodeProperties();
+
+        default Map<String, NodeProperties> nodePropertiesOrThrow() {
+            return nodeProperties()
+                .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
+        }
     }
 
     private static class ThreadLocalBuilder implements AutoCloseable {

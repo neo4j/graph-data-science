@@ -120,7 +120,7 @@ public final class RandomGraphGenerator {
             generateNodes(nodesBuilder);
         }
 
-        NodeMapping idMap = nodesBuilder.buildNodeMapping();
+        NodeMapping idMap = nodesBuilder.build().nodeMapping();
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)

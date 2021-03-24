@@ -192,7 +192,7 @@ class RelationshipsBuilderTest {
                 nodesBuilder.addNode(i);
             }
 
-            nodesBuilderRef.set(nodesBuilder.buildNodeMapping());
+            nodesBuilderRef.set(nodesBuilder.build().nodeMapping());
         });
 
         return nodesBuilderRef.get();
