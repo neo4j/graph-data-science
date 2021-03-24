@@ -26,7 +26,11 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.values.storable.Values;
@@ -118,7 +122,7 @@ class GraphFactoryTest {
     void withNodeProperties(Orientation orientation, TestMethodRunner runTest) {
         var expectedGraph = fromGdl("(a:A {p: 42L})-->(b:A:B {p: 1337L})-->(c:C {p: 13L})-->(d {p: 33L})-->(a)", orientation);
         runTest.run(() -> {
-            int nodeCount = 4;
+            int nodeCount = (int) expectedGraph.nodeCount();
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(nodeCount)
                 .nodeCount(nodeCount)
@@ -131,30 +135,80 @@ class GraphFactoryTest {
             nodesBuilder.addNode(2, Map.of("p", Values.longValue(13)), NodeLabel.of("C"));
             nodesBuilder.addNode(3, Map.of("p", Values.longValue(33)));
 
-            var nodeMappingAndProperties = nodesBuilder.build();
-            var idMap = nodeMappingAndProperties.nodeMapping();
-            var nodeProperties = nodeMappingAndProperties.nodePropertiesOrThrow();
-            var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-                .nodes(idMap)
-                .orientation(orientation)
-                .aggregation(Aggregation.SUM)
-                .tracker(AllocationTracker.empty())
-                .build();
-
-            for (int i = 0; i < nodeCount; i++) {
-                relationshipsBuilder.add(i, (i + 1) % nodeCount);
-            }
-            Graph graph = GraphFactory.create(
-                idMap,
+            Graph graph = buildGraphFromNodesBuilder(
+                orientation,
                 expectedGraph.schema().nodeSchema(),
-                nodeProperties,
-                relationshipsBuilder.build(),
-                AllocationTracker.empty()
+                nodeCount,
+                nodesBuilder
             );
 
             assertGraphEquals(expectedGraph, graph);
             assertEquals(nodeCount, graph.relationshipCount());
         });
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("projectionsAndIdMaps")
+    void withNodePropertiesWithDefaultValue(Orientation orientation, TestMethodRunner runTest) {
+        var expectedGraph = fromGdl("(a:A {p: 42L})-->(b:A {p: -1L})-->(c:B {p: -42L})-->(a)", orientation);
+        var nodeSchema = NodeSchema.builder()
+            .addProperty(
+                NodeLabel.of("A"),
+                "p",
+                PropertySchema.of("p", ValueType.LONG, DefaultValue.of(-1L), GraphStore.PropertyState.TRANSIENT)
+            )
+            .addProperty(
+                NodeLabel.of("B"),
+                "p",
+                PropertySchema.of("p", ValueType.LONG, DefaultValue.of(-42L), GraphStore.PropertyState.TRANSIENT)
+            )
+            .build();
+        runTest.run(() -> {
+            int nodeCount = (int) expectedGraph.nodeCount();
+            var nodesBuilder = GraphFactory.initNodesBuilder()
+                .maxOriginalId(nodeCount)
+                .nodeCount(nodeCount)
+                .nodeSchema(nodeSchema)
+                .tracker(AllocationTracker.empty())
+                .build();
+
+            nodesBuilder.addNode(0, Map.of("p", Values.longValue(42)), NodeLabel.of("A"));
+            nodesBuilder.addNode(1, NodeLabel.of("A"));
+            nodesBuilder.addNode(2, NodeLabel.of("B"));
+
+            Graph graph = buildGraphFromNodesBuilder(orientation, nodeSchema, nodeCount, nodesBuilder);
+
+            assertGraphEquals(expectedGraph, graph);
+            assertEquals(nodeCount, graph.relationshipCount());
+        });
+    }
+
+    private static Graph buildGraphFromNodesBuilder(
+        Orientation orientation,
+        NodeSchema nodeSchema,
+        int nodeCount,
+        NodesBuilder nodesBuilder
+    ) {
+        var nodeMappingAndProperties = nodesBuilder.build();
+        var idMap = nodeMappingAndProperties.nodeMapping();
+        var nodeProperties = nodeMappingAndProperties.nodePropertiesOrThrow();
+        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(idMap)
+            .orientation(orientation)
+            .aggregation(Aggregation.SUM)
+            .tracker(AllocationTracker.empty())
+            .build();
+
+        for (int i = 0; i < nodeCount; i++) {
+            relationshipsBuilder.add(i, (i + 1) % nodeCount);
+        }
+        return GraphFactory.create(
+            idMap,
+            nodeSchema,
+            nodeProperties,
+            relationshipsBuilder.build(),
+            AllocationTracker.empty()
+        );
     }
 
     @ParameterizedTest(name = "{0}")

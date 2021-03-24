@@ -245,8 +245,6 @@ public final class NodesBuilder {
     }
 
     private Map<String, NodeProperties> buildProperties(NodeMapping nodeMapping) {
-        this.threadLocalBuilder.close();
-
         Map<String, Map<NodeLabel, NodeProperties>> nodePropertiesByKeyAndLabel = new HashMap<>();
         for (IntObjectCursor<Map<String, NodePropertiesFromStoreBuilder>> propertyBuilderByLabelToken : this.buildersByLabelTokenAndPropertyToken) {
             var nodeLabels = labelTokenNodeLabelMapping.get(propertyBuilderByLabelToken.key);
@@ -368,12 +366,15 @@ public final class NodesBuilder {
 
         private void flushBuffer() {
             this.nodeImporter.importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
-                Map<String, Value> properties = batchNodeProperties.get((int) propertiesReference);
-                return properties
-                    .entrySet()
-                    .stream()
-                    .mapToInt(entry -> importProperty(internalId, labelIds, entry.getKey(), entry.getValue()))
-                    .sum();
+                if (propertiesReference != NO_SUCH_PROPERTY_KEY) {
+                    Map<String, Value> properties = batchNodeProperties.get((int) propertiesReference);
+                    return properties
+                        .entrySet()
+                        .stream()
+                        .mapToInt(entry -> importProperty(internalId, labelIds, entry.getKey(), entry.getValue()))
+                        .sum();
+                }
+                return 0;
             });
         }
 
