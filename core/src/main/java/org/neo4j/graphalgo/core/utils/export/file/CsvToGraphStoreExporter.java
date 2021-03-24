@@ -61,22 +61,27 @@ public final class CsvToGraphStoreExporter {
 
     public GraphStoreExporter.ImportedProperties run(AllocationTracker tracker) {
         var fileInput = new FileInput(importPath);
-        export(fileInput);
-        return ImmutableImportedProperties.of(0, 0);
+        return export(fileInput, tracker);
     }
 
-    private void export(FileInput fileInput) {
-        exportNodes(fileInput);
-        exportRelationships(fileInput);
+    private GraphStoreExporter.ImportedProperties export(FileInput fileInput, AllocationTracker tracker) {
+        var exportedNodes = exportNodes(fileInput, tracker);
+        var exportedRelationships = exportRelationships(fileInput);
+        return ImmutableImportedProperties.of(exportedNodes, exportedRelationships);
     }
 
-    private void exportNodes(FileInput fileInput) {
+    private long exportNodes(
+        FileInput fileInput,
+        AllocationTracker tracker
+    ) {
         NodeSchema nodeSchema = fileInput.nodeSchema();
+        GraphInfo graphInfo = fileInput.graphInfo();
         int concurrency = config.writeConcurrency();
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
             .hasLabelInformation(!nodeSchema.availableLabels().isEmpty())
-            .maxOriginalId(1337L) // TODO
+            .maxOriginalId(graphInfo.maxOriginalId())
             .concurrency(concurrency)
+            .tracker(tracker)
             .build();
         nodeVisitorBuilder.withNodeSchema(nodeSchema);
         nodeVisitorBuilder.withNodesBuilder(nodesBuilder);
@@ -88,8 +93,13 @@ public final class CsvToGraphStoreExporter {
         );
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
+
+        var nodeMappingAndProperties = nodesBuilder.build();
+        return nodeMappingAndProperties.nodeMapping().nodeCount();
     }
 
-    private void exportRelationships(FileInput fileInput) {}
+    private long exportRelationships(FileInput fileInput) {
+        return 0L;
+    }
 
 }
