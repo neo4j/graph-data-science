@@ -2,8 +2,8 @@
 [.beta]
 = Create a subgraph in the catalog
 
-In GDS, algorithms can be executed on a named graph that has been filtered based on its node labels and relationship types.
-However, that filtered graph only exists during the execution of the algorithm and filter predicates are not applicable to properties.
+In GDS, algorithms can be executed on a named graph that has been filtered based on its <<common-configuration-node-labels,node labels>> and <<common-configuration-relationship-types, relationship types>>.
+However, that filtered graph only exists during the execution of the algorithm and it is not possible to filter on property values.
 If a filtered graph needs to be used multiple times, one can use the subgraph catalog procedure to create a new graph in the graph catalog.
 
 The filter predicates in the subgraph procedure can take labels, relationship types as well as node and relationship properties into account.
@@ -61,7 +61,7 @@ CALL gds.beta.graph.subgraph(
 The `nodeFilter` and `relationshipFilter` configuration keys can be used to express filter predicates.
 Filter predicates are https://neo4j.com/docs/cypher-manual/current/clauses/where/#query-where[Cypher] predicates bound to a single entity.
 An entity is either a node or a relationship.
-The filter predicate always evaluates to `true` or `false`.
+The filter predicate always needs to evaluate to `true` or `false`.
 A node is contained in the subgraph if the node filter evaluates to `true`.
 A relationship is contained in the subgraph if the relationship filter evaluates to `true` and its source and target nodes are contained in the subgraph.
 
@@ -96,8 +96,19 @@ GDS supports the following boolean predicates:
 
 == Examples
 
+.Example graph with Person nodes connected by KNOWS relationships.
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (a:Person { age: 16 }),
+  (b:Person { age: 18 }),
+  (c:Person { age: 20 }),
+  (a)-[:KNOWS { since: 2010 }]->(b),
+  (a)-[:KNOWS { since: 2018 }]->(c)
+----
+
 .Create a graph using a native projection:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.graph.create('social-graph', 'Person', 'KNOWS', {
   nodeProperties: ['age'],
@@ -106,16 +117,35 @@ CALL gds.graph.create('social-graph', 'Person', 'KNOWS', {
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
+[role=query-example]
+--
 .Create a new graph containing only users of a certain age group:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', '*')
-YIELD graphName, subgraphName, nodeCount, relationshipCount;
+CALL gds.beta.graph.create.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', '*')
+YIELD graphName, fromGraphName, nodeCount, relationshipCount;
 ----
 
+.Results
+[opts="header"]
+|===
+| graphName    | fromGraphName    | nodeCount | relationshipCount
+| "teenagers"  | "social-graph"   | 2         | 1
+|===
+--
+
+[role=query-example]
+--
 .Create a new graph containing only users of a certain age group that know each other since a given point a time:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', 'r.since >= 2012')
-YIELD graphName, subgraphName, nodeCount, relationshipCount, createMillis;
+CALL gds.beta.graph.create.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', 'r.since >= 2012')
+YIELD graphName, fromGraphName, nodeCount, relationshipCount;
 ----
+.Results
+[opts="header"]
+|===
+| graphName    | fromGraphName    | nodeCount | relationshipCount
+| "teenagers"  | "social-graph"   | 2         | 0
+|===
+--
