@@ -23,8 +23,6 @@ import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 
-import java.util.function.DoubleUnaryOperator;
-
 public class CentralityResult {
 
     private final HugeDoubleArray result;
@@ -44,18 +42,7 @@ public class CentralityResult {
         );
     }
 
-    public void export(String propertyName, NodePropertyExporter exporter, DoubleUnaryOperator normalizationFunction) {
-        exporter.write(
-            propertyName,
-            (DoubleNodeProperties) nodeId -> normalizationFunction.applyAsDouble(result.get(nodeId))
-        );
-    }
-
     public double score(final long nodeId) {
-        return result.get(nodeId);
-    }
-
-    public double score(final int nodeId) {
         return result.get(nodeId);
     }
 

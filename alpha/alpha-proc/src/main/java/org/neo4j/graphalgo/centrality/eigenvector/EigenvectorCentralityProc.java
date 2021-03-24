@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.centrality.eigenvector;
 
+import org.neo4j.gds.scaling.Scaler;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
@@ -27,19 +28,17 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
 import org.neo4j.graphalgo.pagerank.PageRank;
 import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 import org.neo4j.graphalgo.result.CentralityResult;
-import org.neo4j.graphalgo.results.CentralityResultWithStatistics;
 import org.neo4j.graphalgo.results.CentralityScore;
+import org.neo4j.graphalgo.results.NormalizedCentralityResult;
 import org.neo4j.graphalgo.results.PageRankScore;
 import org.neo4j.graphalgo.utils.CentralityUtils;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -62,9 +61,9 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         );
         PageRank algorithm = computationResult.algorithm();
         Graph graph = computationResult.graph();
-        CentralityResultWithStatistics stats = CentralityResultWithStatistics.of(algorithm.result(), computationResult.config().concurrency());
+
         EigenvectorCentralityConfig config = computationResult.config();
-        CentralityResult normalizedResults = normalization(config.normalization()).apply(stats);
+        CentralityResult normalizedResults = normalize(config.normalization(), algorithm.result(), computationResult.config().concurrency());
 
         AbstractCentralityResultBuilder<PageRankScore.Stats> statsBuilder = new PageRankScore.Stats.Builder(callContext, config.concurrency())
             .withIterations(algorithm.iterations())
@@ -104,13 +103,16 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRank, PageRank, EigenvectorCentralityConfig> computationResult = compute(
+        var computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        CentralityResultWithStatistics centralityResult = CentralityResultWithStatistics.of(computationResult.result().result(), computationResult.config().concurrency());
-        String normalization = computationResult.config().normalization();
-        return CentralityUtils.streamResults(computationResult.graph(), normalization(normalization).apply(centralityResult));
+        var result = computationResult.result();
+        var config = computationResult.config();
+
+        String scalerName = computationResult.config().normalization();
+        var normalizedResult = normalize(scalerName, result.result(), config.concurrency());
+        return CentralityUtils.streamResults(computationResult.graph(), normalizedResult);
     }
 
 
@@ -129,8 +131,13 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
         return EigenvectorCentralityConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
-    private NormalizationFunction normalization(String normalization) {
-        return NormalizationFunction.valueOf(normalization.toUpperCase(Locale.ENGLISH));
+    private CentralityResult normalize(String scalerName, CentralityResult stats, int concurrency) {
+        var scaler = Scaler.Variant
+            .fromCypher(scalerName)
+            .get(0)
+            .create(stats.asNodeProperties(), stats.array().size(), concurrency, Pools.DEFAULT);
+        return new NormalizedCentralityResult(stats, scaler);
     }
+
 
 }

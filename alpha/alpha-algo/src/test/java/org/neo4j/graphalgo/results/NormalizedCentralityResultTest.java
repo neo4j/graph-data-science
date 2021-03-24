@@ -20,80 +20,22 @@
 package org.neo4j.graphalgo.results;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.impl.utils.NormalizationFunction;
+import org.neo4j.gds.scaling.Scaler;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.result.CentralityResult;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class NormalizedCentralityResultTest {
-
     @Test
-    void maxNormalization() {
-        CentralityResultWithStatistics centralityResult = mock(CentralityResultWithStatistics.class);
-        when(centralityResult.score(0)).thenReturn(1.0);
-        when(centralityResult.score(1)).thenReturn(2.0);
-        when(centralityResult.score(2)).thenReturn(3.0);
-        when(centralityResult.score(3)).thenReturn(4.0);
-        when(centralityResult.computeMax()).thenReturn(4.0);
+    void mapsThroughScaler() {
+        var unNormalizedResult = new CentralityResult(HugeDoubleArray.of(1, 2, 3, 4));
+        var normalizedResult = new NormalizedCentralityResult(unNormalizedResult, Scaler.ZERO_SCALER);
 
-        CentralityResult normalizedResult = NormalizationFunction.MAX.apply(centralityResult);
-
-        assertEquals(0.25, normalizedResult.score(0), 0.01);
-        assertEquals(0.5, normalizedResult.score(1), 0.01);
-        assertEquals(0.75, normalizedResult.score(2), 0.01);
-        assertEquals(1.0, normalizedResult.score(3), 0.01);
-    }
-
-    @Test
-    void noNormalization() {
-        CentralityResultWithStatistics centralityResult = mock(CentralityResultWithStatistics.class);
-        when(centralityResult.score(0)).thenReturn(1.0);
-        when(centralityResult.score(1)).thenReturn(2.0);
-        when(centralityResult.score(2)).thenReturn(3.0);
-        when(centralityResult.score(3)).thenReturn(4.0);
-        when(centralityResult.computeMax()).thenReturn(4.0);
-
-        CentralityResult normalizedResult = NormalizationFunction.NONE.apply(centralityResult);
-
-        assertEquals(1.0, normalizedResult.score(0), 0.01);
-        assertEquals(2.0, normalizedResult.score(1), 0.01);
-        assertEquals(3.0, normalizedResult.score(2), 0.01);
-        assertEquals(4.0, normalizedResult.score(3), 0.01);
-    }
-
-    @Test
-    void l2Norm() {
-        CentralityResultWithStatistics centralityResult = mock(CentralityResultWithStatistics.class);
-        when(centralityResult.score(0)).thenReturn(1.0);
-        when(centralityResult.score(1)).thenReturn(2.0);
-        when(centralityResult.score(2)).thenReturn(3.0);
-        when(centralityResult.score(3)).thenReturn(4.0);
-        when(centralityResult.computeL2Norm()).thenReturn(4.0);
-
-        CentralityResult normalizedResult = NormalizationFunction.L2NORM.apply(centralityResult);
-
-        assertEquals(0.25, normalizedResult.score(0), 0.01);
-        assertEquals(0.5, normalizedResult.score(1), 0.01);
-        assertEquals(0.75, normalizedResult.score(2), 0.01);
-        assertEquals(1.0, normalizedResult.score(3), 0.01);
-    }
-
-    @Test
-    void l1Norm() {
-        CentralityResultWithStatistics centralityResult = mock(CentralityResultWithStatistics.class);
-        when(centralityResult.score(0)).thenReturn(1.0);
-        when(centralityResult.score(1)).thenReturn(2.0);
-        when(centralityResult.score(2)).thenReturn(3.0);
-        when(centralityResult.score(3)).thenReturn(4.0);
-        when(centralityResult.computeL1Norm()).thenReturn(4.0);
-
-        CentralityResult normalizedResult = NormalizationFunction.L1NORM.apply(centralityResult);
-
-        assertEquals(0.25, normalizedResult.score(0), 0.01);
-        assertEquals(0.5, normalizedResult.score(1), 0.01);
-        assertEquals(0.75, normalizedResult.score(2), 0.01);
-        assertEquals(1.0, normalizedResult.score(3), 0.01);
+        var normalizedProperties = normalizedResult.asNodeProperties();
+        for (int i = 0; i < 4; i++) {
+            assertThat(normalizedResult.score(i)).isEqualTo(0D);
+            assertThat(normalizedProperties.doubleValue(i)).isEqualTo(0D);
+        }
     }
 }

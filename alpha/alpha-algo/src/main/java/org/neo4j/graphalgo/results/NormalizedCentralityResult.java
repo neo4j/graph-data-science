@@ -19,34 +19,25 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
+import org.neo4j.gds.scaling.Scaler;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.result.CentralityResult;
 
-import java.util.function.DoubleUnaryOperator;
-
 public class NormalizedCentralityResult extends CentralityResult {
-    private final CentralityResult result;
-    private final DoubleUnaryOperator normalizationFunction;
+    private final Scaler scaler;
 
-    public NormalizedCentralityResult(CentralityResult result, DoubleUnaryOperator normalizationFunction) {
+    public NormalizedCentralityResult(CentralityResult result, Scaler scaler) {
         super(result.array());
-        this.result = result;
-        this.normalizationFunction = normalizationFunction;
+        this.scaler = scaler;
     }
 
-    public void export(String propertyName, NodePropertyExporter exporter, DoubleUnaryOperator normalizationFunction) {
-        result.export(propertyName, exporter, normalizationFunction);
-    }
-
-    public double score(int nodeId) {
-        return normalizationFunction.applyAsDouble(result.score(nodeId));
-    }
-
+    @Override
     public double score(long nodeId) {
-        return normalizationFunction.applyAsDouble(result.score(nodeId));
+        return scaler.scaleProperty(nodeId);
     }
 
-    public void export(String propertyName, NodePropertyExporter exporter) {
-        export(propertyName, exporter, normalizationFunction);
+    @Override
+    public DoubleNodeProperties asNodeProperties() {
+        return scaler::scaleProperty;
     }
 }
