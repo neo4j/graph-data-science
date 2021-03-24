@@ -20,18 +20,20 @@
 package org.neo4j.gds.ml.nodemodels.metrics;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class MetricSpecificationTest {
     @Test
     void shouldCreateF1Metric() {
-        var metricSpecification = MetricSpecification.parse(List.of("F1(class=42)")).get(0);
+        var metricSpecification = MetricSpecification.parse(List.of("F1(clAss =  42 )")).get(0);
         var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.getClass()).isEqualTo(F1Score.class);
         assertThat(metric.toString()).isEqualTo("F1_class_42");
@@ -71,6 +73,20 @@ public class MetricSpecificationTest {
         assertThat(metrics.get(0).toString()).isEqualTo("F1_class_42");
         assertThat(metrics.get(1).getClass()).isEqualTo(F1Score.class);
         assertThat(metrics.get(1).toString()).isEqualTo("F1_class_1337");
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidSingleClassSpecifications")
+    void shouldFailOnInvalidSingleClassSpecifications(String metric) {
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> MetricSpecification.parse(metric))
+            .withMessageContaining(
+                "Invalid metric expression"
+            );
+    }
+
+    private static List<String> invalidSingleClassSpecifications() {
+        return List.of("F 1 ( class=2 3 4)", "F 1 ( class=000000003)", "f1(c las s = 01 0 30 2)", "JAMESBOND(class=0)");
     }
 
     public static List<String> allValidMetricSpecifications() {
