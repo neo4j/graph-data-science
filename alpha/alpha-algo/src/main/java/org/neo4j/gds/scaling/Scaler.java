@@ -38,6 +38,22 @@ public interface Scaler {
     Scaler ZERO_SCALER = nodeId -> 0;
 
     enum Variant {
+        NONE {
+            @Override
+            public Scaler create(
+                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return properties::doubleValue;
+            }
+        },
+        MAX {
+            @Override
+            public Scaler create(
+                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return Max.create(properties, nodeCount, concurrency, executor);
+            }
+        },
         MINMAX {
             @Override
             public Scaler create(
@@ -68,6 +84,14 @@ public interface Scaler {
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return StdScore.create(properties, nodeCount, concurrency, executor);
+            }
+        },
+        L1NORM {
+            @Override
+            public Scaler create(
+                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return L1Norm.create(properties, nodeCount, concurrency, executor);
             }
         },
         L2NORM {
