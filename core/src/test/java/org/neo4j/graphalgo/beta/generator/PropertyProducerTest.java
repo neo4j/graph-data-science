@@ -59,4 +59,26 @@ class PropertyProducerTest {
                 assertThat(value[0]).isEqualTo(expected);
             });
     }
+
+    @Test
+    void testRandomEmbeddingPropertyProducer() {
+        var producer = PropertyProducer.randomEmbeddings("foo", 7, 0.0F, 1.0F);
+        assertThat(producer)
+            .returns("foo", PropertyProducer::getPropertyName)
+            .returns(ValueType.FLOAT_ARRAY, PropertyProducer::propertyType)
+            .satisfies(p -> {
+                var random = new Random();
+
+                random.setSeed(42L);
+                var expected = new float[7];
+                for (int i = 0; i < expected.length; i++) {
+                    expected[i] = random.nextFloat();
+                }
+
+                random.setSeed(42L);
+                float[][] value = {null};
+                p.setProperty(value, 0, random);
+                assertThat(value[0]).containsExactly(expected);
+            });
+    }
 }
