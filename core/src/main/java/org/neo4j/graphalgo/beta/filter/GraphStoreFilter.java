@@ -28,7 +28,9 @@ import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
 import org.neo4j.graphalgo.beta.filter.expression.ValidationContext;
 import org.neo4j.graphalgo.config.GraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.logging.Log;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.concurrent.ExecutorService;
@@ -42,17 +44,28 @@ public final class GraphStoreFilter {
         GraphStore graphStore,
         GraphCreateFromGraphConfig config,
         ExecutorService executorService,
+        Log log,
         AllocationTracker tracker
     ) throws ParseException, SemanticErrors {
         var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
 
         var inputNodes = graphStore.nodes();
 
+        var progressLogger = new BatchingProgressLogger(
+            log,
+            inputNodes.nodeCount(),
+            "GraphStore Filter",
+            config.concurrency()
+        );
+
+        progressLogger.logStart();
+
         var filteredNodes = NodesFilter.filterNodes(
             graphStore,
             expressions.nodeExpression(),
             config.concurrency(),
             executorService,
+            progressLogger,
             tracker
         );
 
@@ -63,8 +76,11 @@ public final class GraphStoreFilter {
             filteredNodes.nodeMapping(),
             config.concurrency(),
             executorService,
+            progressLogger,
             tracker
         );
+
+        progressLogger.logFinish();
 
         return CSRGraphStore.of(
             graphStore.databaseId(),

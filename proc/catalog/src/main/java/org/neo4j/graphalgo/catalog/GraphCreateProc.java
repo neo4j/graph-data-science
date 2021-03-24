@@ -210,6 +210,7 @@ public class GraphCreateProc extends CatalogProc {
             fromGraphStore,
             config,
             Pools.DEFAULT,
+            log,
             allocationTracker()
         );
 
