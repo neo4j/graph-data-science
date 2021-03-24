@@ -58,7 +58,7 @@ public class GraphInfoWithHistogram extends GraphInfo {
     }
 
     static GraphInfoWithHistogram of(GraphCreateConfig graphCreateConfig, GraphStore graphStore) {
-        var graphInfo = GraphInfo.of(graphCreateConfig, graphStore);
+        var graphInfo = GraphInfo.withMemoryUsage(graphCreateConfig, graphStore);
 
         Optional<Map<String, Object>> maybeDegreeDistribution = GraphStoreCatalog.getDegreeDistribution(
             graphCreateConfig.username(),

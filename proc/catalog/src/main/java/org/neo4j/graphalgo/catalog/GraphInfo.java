@@ -33,7 +33,6 @@ import java.util.Optional;
 
 import static org.neo4j.graphalgo.api.GraphStatistics.density;
 
-@SuppressWarnings("unused")
 public class GraphInfo {
 
     public final String graphName;
@@ -91,10 +90,7 @@ public class GraphInfo {
         this.schema = schema;
     }
 
-    static GraphInfo of(GraphCreateConfig graphCreateConfig, GraphStore graphStore) {
-        var graphName = graphCreateConfig.graphName();
-        var creationTime = graphCreateConfig.creationTime();
-
+    static GraphInfo withMemoryUsage(GraphCreateConfig graphCreateConfig, GraphStore graphStore) {
         var memory = MemoryUsage.sizeOf2(graphStore);
         assert memory != null;
         var detailMemory = Map.of(
@@ -115,14 +111,34 @@ public class GraphInfo {
         );
         var memoryUsage = MemoryUsage.humanReadable(memory.total());
 
+        return create(
+            graphCreateConfig,
+            graphStore,
+            memoryUsage,
+            detailMemory,
+            memory.total()
+        );
+    }
+
+    static GraphInfo withoutMemoryUsage(GraphCreateConfig graphCreateConfig, GraphStore graphStore) {
+        return withMemoryUsage(graphCreateConfig, graphStore);
+    }
+
+    private static GraphInfo create(
+        GraphCreateConfig graphCreateConfig,
+        GraphStore graphStore,
+        String memoryUsage,
+        Map<String, Object> detailMemory,
+        long sizeInBytes
+    ) {
         var configVisitor = new Visitor();
         graphCreateConfig.accept(configVisitor);
 
         return new GraphInfo(
-            graphName,
+            graphCreateConfig.graphName(),
             graphStore.databaseId().name(),
             memoryUsage,
-            memory.total(),
+            sizeInBytes,
             detailMemory,
             configVisitor.nodeProjection,
             configVisitor.relationshipProjection,
@@ -132,7 +148,7 @@ public class GraphInfo {
             configVisitor.relationshipFilter,
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
-            creationTime,
+            graphCreateConfig.creationTime(),
             graphStore.modificationTime(),
             graphStore.schema().toMap()
         );
