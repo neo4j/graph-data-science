@@ -234,6 +234,29 @@ class RandomGraphGeneratorTest {
     }
 
     @Test
+    void shouldGenerateEmbeddingsForNodeProperties() {
+        float lowerBound = 0f;
+        float upperBound = 1f;
+        HugeGraph graph = RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(2)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .nodePropertyProducer(PropertyProducer.randomEmbeddings("foo", 42, lowerBound, upperBound))
+            .build()
+            .generate();
+
+        NodeProperties nodeProperties = graph.nodeProperties("foo");
+        graph.forEachNode(nodeId -> {
+            float[] values = nodeProperties.floatArrayValue(nodeId);
+            assertEquals(values.length, 42);
+            for (float value : values) {
+                assertThat(value).isBetween(lowerBound, upperBound);
+            }
+            return true;
+        });
+    }
+
+    @Test
     void shouldGenerateNodeLabelsAndProperties() {
         NodeLabel[] aLabel = new NodeLabel[]{NodeLabel.of("A"), NodeLabel.ALL_NODES};
         NodeLabel[] bLabel = new NodeLabel[]{NodeLabel.of("B"), NodeLabel.ALL_NODES};
