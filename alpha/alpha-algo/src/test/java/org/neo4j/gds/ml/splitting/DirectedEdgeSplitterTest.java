@@ -34,9 +34,6 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
-import java.util.Map;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -100,19 +97,17 @@ class DirectedEdgeSplitterTest {
 
     @Test
     void negativeEdgesShouldNotOverlapMasterGraph() {
-        var huuuuugeDenseGraph = new RandomGraphGenerator(
-            100,
-            95,
-            RelationshipDistribution.UNIFORM,
-            123L,
-            Optional.empty(),
-            Map.of(),
-            Optional.empty(),
-            Aggregation.SINGLE,
-            Orientation.NATURAL,
-            RandomGraphGeneratorConfig.AllowSelfLoops.NO,
-            AllocationTracker.empty()
-        ).generate();
+        var huuuuugeDenseGraph = RandomGraphGenerator.builder()
+            .nodeCount(100)
+            .averageDegree(95)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(123)
+            .aggregation(Aggregation.SINGLE)
+            .orientation(Orientation.NATURAL)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .allocationTracker(AllocationTracker.empty())
+            .build()
+            .generate();
 
         var splitter = new DirectedEdgeSplitter(42L);
         var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);

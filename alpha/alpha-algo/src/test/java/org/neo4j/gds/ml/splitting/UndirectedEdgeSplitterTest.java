@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -94,19 +93,17 @@ class UndirectedEdgeSplitterTest {
 
     @Test
     void negativeEdgesShouldNotOverlapMasterGraph() {
-        var huuuuugeDenseGraph = new RandomGraphGenerator(
-            100,
-            95,
-            RelationshipDistribution.UNIFORM,
-            123L,
-            Optional.empty(),
-            Map.of(),
-            Optional.empty(),
-            Aggregation.SINGLE,
-            Orientation.UNDIRECTED,
-            RandomGraphGeneratorConfig.AllowSelfLoops.NO,
-            AllocationTracker.empty()
-        ).generate();
+        var huuuuugeDenseGraph = RandomGraphGenerator.builder()
+            .nodeCount(100)
+            .averageDegree(95)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(123L)
+            .aggregation(Aggregation.SINGLE)
+            .orientation(Orientation.UNDIRECTED)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .allocationTracker(AllocationTracker.empty())
+            .build()
+            .generate();
 
         var splitter = new UndirectedEdgeSplitter(42L);
         var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);
@@ -134,19 +131,17 @@ class UndirectedEdgeSplitterTest {
 
     @Test
     void shouldProduceDeterministicResult() {
-        var graph = new RandomGraphGenerator(
-            100,
-            95,
-            RelationshipDistribution.UNIFORM,
-            123L,
-            Optional.empty(),
-            Map.of(),
-            Optional.empty(),
-            Aggregation.SINGLE,
-            Orientation.UNDIRECTED,
-            RandomGraphGeneratorConfig.AllowSelfLoops.NO,
-            AllocationTracker.empty()
-        ).generate();
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(100)
+            .averageDegree(95)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(123L)
+            .aggregation(Aggregation.SINGLE)
+            .orientation(Orientation.UNDIRECTED)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .allocationTracker(AllocationTracker.empty())
+            .build()
+            .generate();
 
         var splitResult1 = new UndirectedEdgeSplitter(12L).split(graph, 0.5);
         var splitResult2 = new UndirectedEdgeSplitter(12L).split(graph, 0.5);
@@ -167,19 +162,17 @@ class UndirectedEdgeSplitterTest {
 
     @Test
     void shouldProduceNonDeterministicResult() {
-        var graph = new RandomGraphGenerator(
-            100,
-            95,
-            RelationshipDistribution.UNIFORM,
-            123L,
-            Optional.empty(),
-            Map.of(),
-            Optional.empty(),
-            Aggregation.SINGLE,
-            Orientation.UNDIRECTED,
-            RandomGraphGeneratorConfig.AllowSelfLoops.NO,
-            AllocationTracker.empty()
-        ).generate();
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(100)
+            .averageDegree(95)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(123L)
+            .aggregation(Aggregation.SINGLE)
+            .orientation(Orientation.UNDIRECTED)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .allocationTracker(AllocationTracker.empty())
+            .build()
+            .generate();
 
         var splitResult1 = new UndirectedEdgeSplitter(Optional.empty()).split(graph, 0.5);
         var splitResult2 = new UndirectedEdgeSplitter(Optional.empty()).split(graph, 0.5);

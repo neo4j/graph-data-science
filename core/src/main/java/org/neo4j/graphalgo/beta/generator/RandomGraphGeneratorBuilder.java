@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.generator;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -43,6 +44,7 @@ public class RandomGraphGeneratorBuilder {
     private Orientation orientation = Orientation.NATURAL;
     private RandomGraphGeneratorConfig.AllowSelfLoops allowSelfLoops = RandomGraphGeneratorConfig.AllowSelfLoops.NO;
     private AllocationTracker allocationTracker = AllocationTracker.empty();
+    private RelationshipType relationshipType = RelationshipType.of("REL");
 
     public RandomGraphGeneratorBuilder nodeCount(long nodeCount) {
         this.nodeCount = nodeCount;
@@ -51,6 +53,11 @@ public class RandomGraphGeneratorBuilder {
 
     public RandomGraphGeneratorBuilder averageDegree(long averageDegree) {
         this.averageDegree = averageDegree;
+        return this;
+    }
+
+    public RandomGraphGeneratorBuilder relationshipType(RelationshipType relationshipType) {
+        this.relationshipType = relationshipType;
         return this;
     }
 
@@ -111,6 +118,7 @@ public class RandomGraphGeneratorBuilder {
         return new RandomGraphGenerator(
             nodeCount,
             averageDegree,
+            relationshipType,
             relationshipDistribution,
             seed,
             maybeNodeLabelProducer,

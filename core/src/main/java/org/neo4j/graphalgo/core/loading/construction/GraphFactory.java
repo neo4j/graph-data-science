@@ -225,6 +225,7 @@ public final class GraphFactory {
             idMap,
             nodeSchemaBuilder.build(),
             Collections.emptyMap(),
+            RelationshipType.of("REL"),
             relationships,
             tracker
         );
@@ -234,18 +235,19 @@ public final class GraphFactory {
         NodeMapping idMap,
         NodeSchema nodeSchema,
         Map<String, NodeProperties> nodeProperties,
+        RelationshipType relationshipType,
         Relationships relationships,
         AllocationTracker tracker
     ) {
         var relationshipSchemaBuilder = RelationshipSchema.builder();
         if (relationships.properties().isPresent()) {
             relationshipSchemaBuilder.addProperty(
-                RelationshipType.of("REL"),
+                relationshipType,
                 "property",
                 ValueType.DOUBLE
             );
         } else {
-            relationshipSchemaBuilder.addRelationshipType(RelationshipType.of("REL"));
+            relationshipSchemaBuilder.addRelationshipType(relationshipType);
         }
         return HugeGraph.create(
             idMap,

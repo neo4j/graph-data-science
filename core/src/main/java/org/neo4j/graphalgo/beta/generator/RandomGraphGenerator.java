@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.generator;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeMapping;
@@ -59,6 +60,7 @@ public final class RandomGraphGenerator {
     private final long nodeCount;
     private final long averageDegree;
     private final Random random;
+    private final RelationshipType relationshipType;
     private final RelationshipDistribution relationshipDistribution;
     private final Aggregation aggregation;
     private final Orientation orientation;
@@ -68,9 +70,10 @@ public final class RandomGraphGenerator {
     private final Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer;
     private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers;
 
-    public RandomGraphGenerator(
+    RandomGraphGenerator(
         long nodeCount,
         long averageDegree,
+        RelationshipType relationshipType,
         RelationshipDistribution relationshipDistribution,
         @Nullable Long seed,
         Optional<NodeLabelProducer> maybeNodeLabelProducer,
@@ -81,6 +84,7 @@ public final class RandomGraphGenerator {
         AllowSelfLoops allowSelfLoops,
         AllocationTracker allocationTracker
     ) {
+        this.relationshipType = relationshipType;
         this.relationshipDistribution = relationshipDistribution;
         this.maybeNodeLabelProducer = maybeNodeLabelProducer;
         this.nodePropertyProducers = nodePropertyProducers;
@@ -138,6 +142,7 @@ public final class RandomGraphGenerator {
                 idMap,
                 nodeProperties.nodeSchema(),
                 nodeProperties.nodeProperties(),
+                relationshipType,
                 relationshipsBuilder.build(),
                 allocationTracker
             );
