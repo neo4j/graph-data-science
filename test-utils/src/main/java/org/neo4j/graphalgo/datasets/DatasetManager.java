@@ -79,7 +79,7 @@ public final class DatasetManager {
             }
         }
 
-        String workingCopyId = UUID.randomUUID().toString();
+        String workingCopyId = datasetId + "-" + UUID.randomUUID();
         Path workingCopy = workingDir.resolve(workingCopyId);
         Path workingCopyGraph = workingCopy.resolve(workingCopyId);
 
