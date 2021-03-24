@@ -33,7 +33,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface MetricSpecification {
     Map<String, Function<Long, Metric>> SINGLE_CLASS_METRIC_FACTORIES = Map.of(
-        F1Score.F1, F1Score::new
+        F1Score.NAME, F1Score::new
     );
     Pattern SINGLE_CLASS_METRIC_PATTERN = Pattern.compile("([\\p{Alnum}]+)\\([\\s]*CLASS[\\s]*=[\\s]*([\\d]+)[\\s]*\\)");
 
@@ -106,7 +106,7 @@ public interface MetricSpecification {
 
     static MetricSpecification createSpecification(
         Function<Collection<Long>, Stream<Metric>> metricFactory,
-        String normalizedUserSpecification
+        String stringRepresentation
     ) {
         return new MetricSpecification() {
             @Override
@@ -116,7 +116,7 @@ public interface MetricSpecification {
 
             @Override
             public String asString() {
-                return normalizedUserSpecification;
+                return stringRepresentation;
             }
 
             @Override
