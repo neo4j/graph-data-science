@@ -74,7 +74,10 @@ public class RandomGraphGeneratorBuilder {
     }
 
     public RandomGraphGeneratorBuilder addNodePropertyProducer(NodeLabel nodeLabel, PropertyProducer<?> nodePropertyProducer) {
-        this.nodePropertyProducers.computeIfAbsent(nodeLabel, ignore -> new HashSet<>()).add(nodePropertyProducer);
+        // only add if the producer is not empty
+        if (nodePropertyProducer.getPropertyName() != null) {
+            this.nodePropertyProducers.computeIfAbsent(nodeLabel, ignore -> new HashSet<>()).add(nodePropertyProducer);
+        }
         return this;
     }
 

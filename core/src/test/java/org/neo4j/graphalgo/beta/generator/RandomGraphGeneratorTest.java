@@ -299,6 +299,22 @@ class RandomGraphGeneratorTest {
     }
 
     @Test
+    void shouldNotAddEmptyNodePropertyProducer() {
+        NodeLabel aLabel = NodeLabel.of("A");
+
+        HugeGraph graph = RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(2)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .nodePropertyProducer(new PropertyProducer.EmptyPropertyProducer())
+            .addNodePropertyProducer(aLabel, new PropertyProducer.EmptyPropertyProducer())
+            .build()
+            .generate();
+
+        assertThat(graph.nodeProperties()).isEmpty();
+    }
+
+    @Test
     void shouldFailForMultiplePropertyNames() {
         assertThatThrownBy(() -> RandomGraphGenerator.builder()
             .nodeCount(10)
