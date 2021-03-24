@@ -37,7 +37,9 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ExtendWith(SoftAssertionsExtension.class)
@@ -169,6 +171,23 @@ class BatchingProgressLoggerTest {
             logger.logFinish("finish message");
             softly.assertThat(messages).hasSize(6).last().isEqualTo("[log-test] Test finish message :: Finished");
         }
+    }
+
+    @Test
+    void shouldLogAfterResetWhereACallCountHigherThanBatchSizeIsLeftBehind() {
+        var concurrency = 1;
+        var taskVolume = 1337;
+
+        var logger = new TestProgressLogger(taskVolume, "Test", concurrency); // batchSize is 13
+        logger.logProgress(20); // callCount is 20, call count after logging == 20 - 13 = 7
+        assertThat(logger.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .containsExactly("Test 1%");
+        logger.reset(420); // batchSize is now 4, which is smaller than the callCount 7
+        logger.logProgress(10);
+        assertThat(logger.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .containsExactly("Test 1%", "Test 2%"); // regardless of previous callCount, this should log an additional message
     }
 
     private static List<Integer> performLogging(long taskVolume, int concurrency) {
