@@ -54,7 +54,7 @@ public interface MetricSpecification {
             throw new IllegalArgumentException(
                 formatWithLocale(
                     "The first metric provided must be one of %s",
-                    String.join(", ", validMetricExpressions(false))
+                    String.join(", ", validPrimaryMetricExpressions())
                 ));
         }
         return userSpecifications.stream()
@@ -99,7 +99,7 @@ public interface MetricSpecification {
             throw new IllegalArgumentException(formatWithLocale(
                 "Invalid metric expression `%s`. Available metrics are %s",
                 userSpecification,
-                String.join(", ", validMetricExpressions(true))
+                String.join(", ", allValidMetricExpressions())
             ));
         }
     }
@@ -134,15 +134,15 @@ public interface MetricSpecification {
         };
     }
 
-    static List<String> allValidMetricExpressions() {
+    private static List<String> allValidMetricExpressions() {
         return validMetricExpressions(true);
     }
 
-    static List<String> validPrimaryMetricExpressions() {
+    private static List<String> validPrimaryMetricExpressions() {
         return validMetricExpressions(false);
     }
 
-    static List<String> validMetricExpressions(boolean includeSyntacticSugarMetrics) {
+    private static List<String> validMetricExpressions(boolean includeSyntacticSugarMetrics) {
         var validExpressions = new LinkedList<String>();
         var allClassExpressions = AllClassMetric.values();
         for (AllClassMetric allClassExpression : allClassExpressions) {
