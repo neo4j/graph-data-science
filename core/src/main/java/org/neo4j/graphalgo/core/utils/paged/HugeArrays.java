@@ -51,7 +51,7 @@ public final class HugeArrays {
 
     /**
      * Huge version of Lucene oversize for arrays.
-     * @see org.apache.lucene.util.ArrayUtil#oversize(int, int)
+     * see org.apache.lucene.util.ArrayUtil#oversize(int, int)
      */
     public static long oversize(long minTargetSize, int bytesPerElement) {
 
