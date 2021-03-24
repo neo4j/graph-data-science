@@ -20,6 +20,12 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.net.URISyntaxException;
@@ -39,6 +45,22 @@ class CsvToGraphStoreExporterTest {
         var importedProperties = exporter.run(AllocationTracker.empty());
         assertThat(importedProperties).isNotNull();
         assertThat(importedProperties.nodePropertyCount()).isEqualTo(10);
+
+        var graph = exporter.graph();
+        assertThat(graph).isNotNull();
+        assertThat(graph.nodeCount()).isEqualTo(10L);
+        var loadedNodeSchema = graph.schema().nodeSchema();
+        var expectedNodeSchema = NodeSchema.builder()
+            .addProperty(
+                NodeLabel.of("A"),
+                "prop1",
+                PropertySchema.of("prop1", ValueType.LONG, DefaultValue.of(42L), GraphStore.PropertyState.PERSISTENT)
+            )
+            .addProperty(NodeLabel.of("A"), "neoId", ValueType.LONG)
+            .addProperty(NodeLabel.of("B"), "neoId", ValueType.LONG)
+            .build();
+
+        assertThat(loadedNodeSchema).isEqualTo(expectedNodeSchema);
     }
 
     private GraphStoreToFileExporterConfig config() {

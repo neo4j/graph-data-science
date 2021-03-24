@@ -22,6 +22,13 @@ package org.neo4j.graphalgo.core.utils.export.file;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class GraphStoreNodeVisitor extends NodeVisitor {
 
@@ -35,8 +42,33 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
     @Override
     protected void exportElement() {
         NodeLabel[] nodeLabels = labels().stream().map(NodeLabel::of).toArray(NodeLabel[]::new);
-        // TODO: this is wrong we need to export the neo id (and the mapped id)
-        nodesBuilder.addNode(id(), nodeLabels);
+        Map<String, Value> props = new HashMap<>();
+        forEachProperty((key, value, type) -> {
+            Value val;
+            switch (type) {
+                case LONG:
+                    val = Values.longValue(Long.parseLong(value.toString()));
+                break;
+                case DOUBLE:
+                    val = Values.doubleValue(Double.parseDouble(value.toString()));
+                break;
+                case LONG_ARRAY:
+                    val = Values.longArray((long[]) value);
+                break;
+                case DOUBLE_ARRAY:
+                    val = Values.doubleArray((double[]) value);
+                break;
+                case FLOAT_ARRAY:
+                    val = Values.floatArray((float[]) value);
+                break;
+                default:
+                    throw new IllegalArgumentException(formatWithLocale("Value of type %s is not supported", type));
+            }
+
+            props.put(key, val);
+        });
+
+        nodesBuilder.addNode(id(), props, nodeLabels);
     }
 
     static final class Builder extends NodeVisitor.Builder<Builder, GraphStoreNodeVisitor> {
