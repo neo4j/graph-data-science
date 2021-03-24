@@ -30,6 +30,8 @@ public interface ProgressLogger {
 
     ProgressLogger NULL_LOGGER = NullProgressLogger.INSTANCE;
 
+    String TASK_SEPARATOR = " :: ";
+
     Supplier<String> NO_MESSAGE = () -> null;
 
     String getTask();
@@ -59,15 +61,33 @@ public interface ProgressLogger {
     }
 
     default void logStart(String message) {
-        logMessage((message + " :: Start").trim());
+        logMessage((message + TASK_SEPARATOR + "Start").trim());
     }
 
     default void logFinish() {
         logFinish("");
     }
 
-    default void logFinish(String message) {
-        logMessage((message + " :: Finished").trim());
+    default ProgressLogger logFinish(String message) {
+        logMessage((message + TASK_SEPARATOR + "Finished").trim());
+        return this;
+    }
+
+    default ProgressLogger startSubTask(String subTaskName) {
+        setTask(getTask() + TASK_SEPARATOR + subTaskName);
+        logStart();
+        return this;
+    }
+
+    default ProgressLogger finishSubTask(String subTaskName) {
+        logFinish();
+        var endIndex = getTask().indexOf(TASK_SEPARATOR + subTaskName);
+        if (endIndex == -1) {
+            throw new IllegalArgumentException("Unknown subtask: " + subTaskName);
+        }
+        var task = getTask().substring(0, endIndex);
+        setTask(task);
+        return this;
     }
 
     long reset(long newTaskVolume);
