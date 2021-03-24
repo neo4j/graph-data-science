@@ -26,4 +26,5 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 public interface GraphInfo {
     NamedDatabaseId namedDatabaseId();
     long nodeCount();
+    long maxOriginalId();
 }

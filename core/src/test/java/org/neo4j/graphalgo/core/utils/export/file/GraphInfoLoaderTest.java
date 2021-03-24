@@ -42,8 +42,8 @@ class GraphInfoLoaderTest {
         var databaseId = DatabaseIdFactory.from("my-database", uuid);
         var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
         var lines = List.of(
-            String.join(", ", "databaseId", "databaseName", "nodeCount"),
-            String.join(", ", uuid.toString(), "my-database", "19")
+            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId"),
+            String.join(", ", uuid.toString(), "my-database", "19", "1337")
         );
         FileUtils.writeLines(graphInfoFile, lines);
 
@@ -55,6 +55,7 @@ class GraphInfoLoaderTest {
         assertThat(graphInfo.namedDatabaseId().name()).isEqualTo("my-database");
 
         assertThat(graphInfo.nodeCount()).isEqualTo(19L);
+        assertThat(graphInfo.maxOriginalId()).isEqualTo(1337L);
     }
 
 }

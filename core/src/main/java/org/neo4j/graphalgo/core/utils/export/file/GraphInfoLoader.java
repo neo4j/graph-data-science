@@ -58,6 +58,7 @@ public class GraphInfoLoader {
             return ImmutableGraphInfo.builder()
                 .namedDatabaseId(databaseId)
                 .nodeCount(line.nodeCount)
+                .maxOriginalId(line.maxOriginalId)
                 .build();
 
         } catch (IOException e) {
@@ -74,5 +75,8 @@ public class GraphInfoLoader {
 
         @JsonProperty
         long nodeCount;
+
+        @JsonProperty
+        long maxOriginalId;
     }
 }
