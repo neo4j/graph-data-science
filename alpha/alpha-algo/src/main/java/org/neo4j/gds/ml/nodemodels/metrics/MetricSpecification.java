@@ -35,7 +35,7 @@ public interface MetricSpecification {
     Map<String, Function<Long, Metric>> SINGLE_CLASS_METRIC_FACTORIES = Map.of(
         F1Score.F1, F1Score::new
     );
-    Pattern SINGLE_CLASS_METRIC_PATTERN = Pattern.compile("([A-Z0-9_]+)\\([\\s]*CLASS[\\s]*=[\\s]*([0-9]+)[\\s]*\\)");
+    Pattern SINGLE_CLASS_METRIC_PATTERN = Pattern.compile("([\\p{Alnum}]+)\\([\\s]*CLASS[\\s]*=[\\s]*([\\d]+)[\\s]*\\)");
 
     static String composeSpecification(String metricType, long classId) {
         return formatWithLocale("%s(class=%d)", metricType, classId);
