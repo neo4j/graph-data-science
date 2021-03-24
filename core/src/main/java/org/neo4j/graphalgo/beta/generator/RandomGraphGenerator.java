@@ -34,7 +34,10 @@ import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,8 +46,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class RandomGraphGenerator {
 
@@ -58,8 +64,8 @@ public final class RandomGraphGenerator {
     private final AllowSelfLoops allowSelfLoops;
 
     private final Optional<NodeLabelProducer> maybeNodeLabelProducer;
-    private final Optional<PropertyProducer> maybeRelationshipPropertyProducer;
-    private final Map<NodeLabel, Set<PropertyProducer>> nodePropertyProducers;
+    private final Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer;
+    private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers;
 
     public RandomGraphGenerator(
         long nodeCount,
@@ -67,8 +73,8 @@ public final class RandomGraphGenerator {
         RelationshipDistribution relationshipDistribution,
         @Nullable Long seed,
         Optional<NodeLabelProducer> maybeNodeLabelProducer,
-        Map<NodeLabel, Set<PropertyProducer>> nodePropertyProducers,
-        Optional<PropertyProducer> maybeRelationshipPropertyProducer,
+        Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers,
+        Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer,
         Aggregation aggregation,
         Orientation orientation,
         AllowSelfLoops allowSelfLoops,
@@ -143,7 +149,7 @@ public final class RandomGraphGenerator {
         return relationshipDistribution;
     }
 
-    public Optional<PropertyProducer> getMaybeRelationshipPropertyProducer() {
+    public Optional<PropertyProducer<double[]>> getMaybeRelationshipPropertyProducer() {
         return maybeRelationshipPropertyProducer;
     }
 
@@ -166,10 +172,11 @@ public final class RandomGraphGenerator {
             averageDegree,
             random
         );
-        PropertyProducer relationshipPropertyProducer = maybeRelationshipPropertyProducer.orElse(new PropertyProducer.EmptyPropertyProducer());
+        PropertyProducer<double[]> relationshipPropertyProducer =
+            maybeRelationshipPropertyProducer.orElseGet(PropertyProducer.EmptyPropertyProducer::new);
 
         long degree, targetId;
-        double property;
+        double[] property = new double[1];
 
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             degree = degreeProducer.applyAsLong(nodeId);
@@ -182,15 +189,15 @@ public final class RandomGraphGenerator {
                     }
                 }
                 assert (targetId < nodeCount);
-                property = relationshipPropertyProducer.getPropertyValue(random);
+                relationshipPropertyProducer.setProperty(property, 0, random);
                 // For POWER_LAW, we generate a normal distributed out-degree value
                 // and connect to nodes where the target is power-law-distributed.
                 // In order to have the out degree follow a power-law distribution,
                 // we have to swap the relationship.
                 if (relationshipDistribution == RelationshipDistribution.POWER_LAW) {
-                    relationshipsImporter.addFromInternal(targetId, nodeId, property);
+                    relationshipsImporter.addFromInternal(targetId, nodeId, property[0]);
                 } else {
-                    relationshipsImporter.addFromInternal(nodeId, targetId, property);
+                    relationshipsImporter.addFromInternal(nodeId, targetId, property[0]);
                 }
             }
         }
@@ -205,34 +212,27 @@ public final class RandomGraphGenerator {
 
     private NodePropertiesAndSchema generateNodeProperties(NodeMapping idMap) {
         var propertyToLabels = new HashMap<String, List<NodeLabel>>();
-        var propertyToArray = new HashMap<String, HugeDoubleArray>();
+        var propertyToArray = new HashMap<String, NodeProperties>();
 
         nodePropertyProducers.forEach((nodeLabel, propertyProducers) ->
             propertyProducers.forEach(propertyProducer -> {
-                    propertyToLabels
-                        .computeIfAbsent(propertyProducer.getPropertyName(), ignore -> new ArrayList<>())
-                        .add(nodeLabel);
-                    propertyToArray.put(
+                // map property names to all labels for that property
+                propertyToLabels
+                    .computeIfAbsent(propertyProducer.getPropertyName(), ignore -> new ArrayList<>())
+                    .add(nodeLabel);
+                // generate properties and store them
+                var properties = generateProperties(propertyProducer);
+                var previous = propertyToArray.put(propertyProducer.getPropertyName(), properties);
+                if (previous != null) {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Duplicate node properties with name [%s] of types [%s] and [%s].",
                         propertyProducer.getPropertyName(),
-                        HugeDoubleArray.newArray(nodeCount, allocationTracker)
-                    );
+                        previous.valueType(),
+                        properties.valueType()
+                    ));
                 }
-            ));
-
-        // Extract all property producers
-        var propertyProducers = nodePropertyProducers
-            .values()
-            .stream()
-            .flatMap(Set::stream)
-            .collect(Collectors.toSet());
-
-        // Fill property arrays
-        for (var propertyProducer : propertyProducers) {
-            var array = propertyToArray.get(propertyProducer.getPropertyName());
-            for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-               array.set(nodeId, propertyProducer.getPropertyValue(random));
-            }
-        }
+            })
+        );
 
         // Construct union node properties
         Map<String, NodeProperties> unionProperties = propertyToLabels.entrySet().stream().collect(Collectors.toMap(
@@ -240,10 +240,10 @@ public final class RandomGraphGenerator {
             entry -> {
                 var propertyKey = entry.getKey();
                 var nodeLabels = entry.getValue();
-                var nodeProperties = propertyToArray.get(propertyKey).asNodeProperties();
+                var nodeProperties = propertyToArray.get(propertyKey);
                 var nodeLabelToProperties = nodeLabels
                     .stream()
-                    .collect(Collectors.toMap(nodeLabel -> nodeLabel, nodeLabel -> (NodeProperties) nodeProperties));
+                    .collect(Collectors.toMap(nodeLabel -> nodeLabel, nodeLabel -> nodeProperties));
 
                 return new UnionNodeProperties(idMap, nodeLabelToProperties);
             }
@@ -264,5 +264,58 @@ public final class RandomGraphGenerator {
             .nodeProperties(unionProperties)
             .nodeSchema(nodeSchemaBuilder.build())
             .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private NodeProperties generateProperties(PropertyProducer<?> propertyProducer) {
+        switch (propertyProducer.propertyType()) {
+            case LONG:
+                return generateProperties(
+                    HugeLongArray.newArray(nodeCount, allocationTracker),
+                    (PropertyProducer<long[]>) propertyProducer,
+                    HugeLongArray::asNodeProperties
+                );
+            case DOUBLE:
+                return generateProperties(
+                    HugeDoubleArray.newArray(nodeCount, allocationTracker),
+                    (PropertyProducer<double[]>) propertyProducer,
+                    HugeDoubleArray::asNodeProperties
+                );
+            case DOUBLE_ARRAY:
+                return generateProperties(
+                    HugeObjectArray.newArray(double[].class, nodeCount, allocationTracker),
+                    (PropertyProducer<double[][]>) propertyProducer,
+                    HugeObjectArray::asNodeProperties
+                );
+            case FLOAT_ARRAY:
+                return generateProperties(
+                    HugeObjectArray.newArray(float[].class, nodeCount, allocationTracker),
+                    (PropertyProducer<float[][]>) propertyProducer,
+                    HugeObjectArray::asNodeProperties
+                );
+            case LONG_ARRAY:
+                return generateProperties(
+                    HugeObjectArray.newArray(long[].class, nodeCount, allocationTracker),
+                    (PropertyProducer<long[][]>) propertyProducer,
+                    HugeObjectArray::asNodeProperties
+                );
+            default:
+                throw new UnsupportedOperationException("properties producer must return a known value type");
+        }
+    }
+
+    private <T, A extends HugeArray<T, ?, A>> NodeProperties generateProperties(
+        A values,
+        PropertyProducer<T> propertyProducer,
+        Function<A, NodeProperties> toProperties
+    ) {
+        var cursor = values.initCursor(values.newCursor());
+        while (cursor.next()) {
+            var limit = cursor.limit;
+            for (int i = cursor.offset; i < limit; i++) {
+                propertyProducer.setProperty(cursor.array, i, random);
+            }
+        }
+        return toProperties.apply(values);
     }
 }

@@ -19,29 +19,34 @@
  */
 package org.neo4j.graphalgo.beta.generator;
 
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+
 import java.util.Objects;
 
-public interface PropertyProducer {
+public interface PropertyProducer<PROPERTY_SLICE> {
 
-    static PropertyProducer fixed(String propertyName, double value) {
+    static PropertyProducer<double[]> fixed(String propertyName, double value) {
         return new Fixed(propertyName, value);
     }
 
-    static PropertyProducer random(String propertyName, double min, double max) {
+    static PropertyProducer<double[]> random(String propertyName, double min, double max) {
         return new Random(propertyName, min, max);
     }
 
     String getPropertyName();
 
-    double getPropertyValue(java.util.Random random);
+    ValueType propertyType();
 
-    class Fixed implements PropertyProducer {
+    void setProperty(PROPERTY_SLICE slice, int index, java.util.Random random);
+
+    class Fixed implements PropertyProducer<double[]> {
         private final String propertyName;
         private final double value;
 
         public Fixed(String propertyName, double value) {
             this.propertyName = propertyName;
-            this.value = value;}
+            this.value = value;
+        }
 
         @Override
         public String getPropertyName() {
@@ -49,8 +54,13 @@ public interface PropertyProducer {
         }
 
         @Override
-        public double getPropertyValue(java.util.Random random) {
-            return value;
+        public ValueType propertyType() {
+            return ValueType.DOUBLE;
+        }
+
+        @Override
+        public void setProperty(double[] doubles, int index, java.util.Random random) {
+            doubles[index] = value;
         }
 
         @Override
@@ -76,7 +86,7 @@ public interface PropertyProducer {
         }
     }
 
-    class Random implements PropertyProducer {
+    class Random implements PropertyProducer<double[]> {
         private final String propertyName;
         private final double min;
         private final double max;
@@ -97,8 +107,13 @@ public interface PropertyProducer {
         }
 
         @Override
-        public double getPropertyValue(java.util.Random random) {
-            return min + (random.nextDouble() * (max - min));
+        public ValueType propertyType() {
+            return ValueType.DOUBLE;
+        }
+
+        @Override
+        public void setProperty(double[] doubles, int index, java.util.Random random) {
+            doubles[index] = min + (random.nextDouble() * (max - min));
         }
 
         @Override
@@ -126,15 +141,19 @@ public interface PropertyProducer {
         }
     }
 
-    class EmptyPropertyProducer implements PropertyProducer {
+    class EmptyPropertyProducer implements PropertyProducer<double[]> {
         @Override
         public String getPropertyName() {
             return null;
         }
 
         @Override
-        public double getPropertyValue(java.util.Random random) {
-            return 0;
+        public ValueType propertyType() {
+            return ValueType.DOUBLE;
+        }
+
+        @Override
+        public void setProperty(double[] doubles, int index, java.util.Random random) {
         }
     }
 }

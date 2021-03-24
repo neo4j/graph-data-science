@@ -124,14 +124,12 @@ public final class GraphGenerateProc extends BaseProc {
            builder.seed(config.relationshipSeed());
        }
 
-        Optional<PropertyProducer> maybeProducer = getRelationshipPropertyProducer(config.relationshipProperty());
-        if (maybeProducer.isPresent()) {
-            builder.relationshipPropertyProducer(maybeProducer.get());
-        }
+        Optional<PropertyProducer<double[]>> maybeProducer = getRelationshipPropertyProducer(config.relationshipProperty());
+        maybeProducer.ifPresent(builder::relationshipPropertyProducer);
         return builder.build();
     }
 
-    private Optional<PropertyProducer> getRelationshipPropertyProducer(Map<String, Object> configMap) {
+    private Optional<PropertyProducer<double[]>> getRelationshipPropertyProducer(Map<String, Object> configMap) {
         if (configMap.isEmpty()) {
             return Optional.empty();
         }
@@ -140,7 +138,7 @@ public final class GraphGenerateProc extends BaseProc {
         String propertyName = config.requireString(RELATIONSHIP_PROPERTY_NAME_KEY);
         String generatorString = config.requireString(RELATIONSHIP_PROPERTY_TYPE_KEY);
 
-        PropertyProducer propertyProducer;
+        PropertyProducer<double[]> propertyProducer;
         switch (generatorString.toLowerCase(Locale.ENGLISH)) {
             case "random":
                 double min = config.getDouble(RELATIONSHIP_PROPERTY_MIN_KEY, 0.0);
