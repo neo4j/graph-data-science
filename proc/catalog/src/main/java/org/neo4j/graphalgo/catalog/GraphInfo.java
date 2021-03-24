@@ -114,7 +114,13 @@ public class GraphInfo {
     }
 
     static GraphInfo withoutMemoryUsage(GraphCreateConfig graphCreateConfig, GraphStore graphStore) {
-        return withMemoryUsage(graphCreateConfig, graphStore);
+        return create(
+            graphCreateConfig,
+            graphStore,
+            "",
+            Map.of(),
+            -1L
+        );
     }
 
     private static GraphInfo create(
