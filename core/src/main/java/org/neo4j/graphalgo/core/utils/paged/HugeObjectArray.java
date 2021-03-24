@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -179,8 +182,50 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
 
     @Override
     public NodeProperties asNodeProperties() {
-        throw new UnsupportedOperationException("asNodeProperties() on HugeObjectArray");
+        var cls = elementClass();
+        if (cls == float[].class) {
+            return new FloatArrayNodeProperties() {
+                @Override
+                public float[] floatArrayValue(long nodeId) {
+                    return (float[]) get(nodeId);
+                }
+
+                @Override
+                public long size() {
+                    return HugeObjectArray.this.size();
+                }
+            };
+        }
+        if (cls == double[].class) {
+            return new DoubleArrayNodeProperties() {
+                @Override
+                public double[] doubleArrayValue(long nodeId) {
+                    return (double[]) get(nodeId);
+                }
+
+                @Override
+                public long size() {
+                    return HugeObjectArray.this.size();
+                }
+            };
+        }
+        if (cls == long[].class) {
+            return new LongArrayNodeProperties() {
+                @Override
+                public long[] longArrayValue(long nodeId) {
+                    return (long[]) get(nodeId);
+                }
+
+                @Override
+                public long size() {
+                    return HugeObjectArray.this.size();
+                }
+            };
+        }
+        throw new UnsupportedOperationException("This HugeObjectArray can not be converted to node properties.");
     }
+
+    abstract Class<T> elementClass();
 
     /**
      * Creates a new array of the given size, tracking the memory requirements into the given {@link AllocationTracker}.
@@ -365,6 +410,11 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         public String toString() {
             return Arrays.toString(page);
         }
+
+        @Override
+        Class<T> elementClass() {
+            return (Class<T>) page.getClass().getComponentType();
+        }
     }
 
     private static final class PagedHugeObjectArray<T> extends HugeObjectArray<T> {
@@ -520,6 +570,11 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         @Override
         public T[] toArray() {
             return dumpToArray((Class<T[]>) pages.getClass().getComponentType());
+        }
+
+        @Override
+        Class<T> elementClass() {
+            return (Class<T>) pages.getClass().getComponentType().getComponentType();
         }
     }
 }
