@@ -56,6 +56,12 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
         }
     }
 
+    @Override
+    public int degree(long nodeId) {
+        return topology.degrees().degree(nodeId);
+    }
+
+    @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         var offset = topology.offsets().get(nodeId);
 

@@ -188,6 +188,18 @@ class CSRCompositeRelationshipIteratorTest {
     }
 
     @Test
+    void degree() {
+        var iterator = graphStore.getCompositeRelationshipIterator(
+            RelationshipType.of("T1"),
+            List.of("prop1")
+        );
+
+        assertThat(iterator.degree(idFunction.of("a"))).isEqualTo(1);
+        assertThat(iterator.degree(idFunction.of("b"))).isEqualTo(2);
+        assertThat(iterator.degree(idFunction.of("c"))).isEqualTo(0);
+    }
+
+    @Test
     void multiThread() {
         var nodeCount = 4;
         var averageDegree = 100000;

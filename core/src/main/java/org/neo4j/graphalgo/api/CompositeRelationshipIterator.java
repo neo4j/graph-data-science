@@ -22,6 +22,11 @@ package org.neo4j.graphalgo.api;
 public interface CompositeRelationshipIterator {
 
     /**
+     * Returns the degree of the given node id.
+     */
+    int degree(long nodeId);
+
+    /**
      * Applies the given consumer on all relationships of the given node id.
      */
     void forEachRelationship(long nodeId, RelationshipConsumer consumer);
