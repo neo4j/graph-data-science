@@ -106,19 +106,19 @@ class ScalePropertiesTest {
     @Test
     void differentScalers() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
-            .nodeProperties(List.of("a", "b"))
-            .scalers(List.of(Scaler.Variant.MINMAX, Scaler.Variant.MEAN))
+            .nodeProperties(List.of("a", "b", "c"))
+            .scalers(List.of(Scaler.Variant.MINMAX, Scaler.Variant.MEAN, Scaler.Variant.LOG))
             .concurrency(1)
             .build();
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
         var result = algo.compute();
         var resultProperties = result.scaledProperties().toArray();
 
-        assertArrayEquals(new double[]{11.1 / 13D, -0.5D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
-        assertArrayEquals(new double[]{12.8 / 13D, -0.25D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
-        assertArrayEquals(new double[]{1D, 0}, resultProperties[(int) graph.toOriginalNodeId("c")]);
-        assertArrayEquals(new double[]{9 / 13D, 0.25D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
-        assertArrayEquals(new double[]{0D, 0.5D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
+        assertArrayEquals(new double[]{11.1 / 13D, -0.5D, 3.912023005428146D}, resultProperties[(int) graph.toOriginalNodeId("a")]);
+        assertArrayEquals(new double[]{12.8 / 13D, -0.25D, 3.9318256327243257D}, resultProperties[(int) graph.toOriginalNodeId("b")]);
+        assertArrayEquals(new double[]{1D, 0, 3.9512437185814275D}, resultProperties[(int) graph.toOriginalNodeId("c")]);
+        assertArrayEquals(new double[]{9 / 13D, 0.25D, 4.0943445622221D}, resultProperties[(int) graph.toOriginalNodeId("d")]);
+        assertArrayEquals(new double[]{0D, 0.5D, 4.605170185988092D}, resultProperties[(int) graph.toOriginalNodeId("e")]);
     }
 
     @Test

@@ -23,20 +23,41 @@ There are a number of supported scalers for the Scale Properties algorithm.
 These can be configured using the `scalers` configuration parameter.
 
 
+In the following equations, `p` denotes the vector containing all property values for a single property across all nodes in the graph.
+
 [[algorithms-scale-properties-minmax]]
 === Min-max scaler
 
 Scales all property values into the range `[0, 1]` where the minimum value(s) get the scaled value `0` and the maximum value(s) get the scaled value `1`, according to this formula:
 
-image::equations/min-max.svg[minmax of p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
+image::equations/scale-properties/minmax.svg[scaled p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
 
 [[algorithms-scale-properties-mean]]
 === Mean scaler
 
 Scales all property values into the range `[-1, 1]` where the average value(s) get the scaled value `0`.
 
-image::equations/mean.svg[mean of p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
+image::equations/scale-properties/mean.svg[scaled p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
 
+=== Log scaler
+
+Transforms all property values using the natural logarithm.
+
+image::equations/scale-properties/log.svg[scaled p equals natural logarithm of p,align="center"]
+
+
+=== Standard Score
+
+Scales all property values using the https://en.wikipedia.org/wiki/Standard_score[Standard Score (Wikipedia)].
+
+image::equations/scale-properties/standardScore.svg[scaled p equals  p minus average of p divided by standard deviation of p,align="center"]
+
+
+=== L2 Norm
+
+Scales all property values using the https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[L2 Norm (Wikipedia)].
+
+image::equations/scale-properties/l2norm.svg[scaled p equals p divided by l2 norm of p ,align="center"]
 
 [[algorithms-scale-properties-syntax]]
 == Syntax

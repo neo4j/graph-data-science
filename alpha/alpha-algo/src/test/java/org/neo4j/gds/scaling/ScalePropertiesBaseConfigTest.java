@@ -22,6 +22,7 @@ package org.neo4j.gds.scaling;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -33,8 +34,31 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
+import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 class ScalePropertiesBaseConfigTest {
+
+    @ParameterizedTest
+    @EnumSource(Scaler.Variant.class)
+    void parseValidScalers(Scaler.Variant scaler) {
+        ScalePropertiesMutateConfigImpl config = new ScalePropertiesMutateConfigImpl(
+            Optional.of("graph"),
+            Optional.empty(),
+            "",
+            CypherMapWrapper.create(
+                Map.of(
+                    "mutateProperty", "test",
+                    "scalers", List.of(toLowerCaseWithLocale(scaler.name()), toUpperCaseWithLocale(scaler.name())),
+                    "nodeProperties", List.of("a", "a")
+                )
+            )
+        );
+
+        assertThat(config.scalers().size()).isEqualTo(2);
+        assertThat(config.scalers().get(0)).isEqualTo(scaler);
+        assertThat(config.scalers().get(1)).isEqualTo(scaler);
+    }
 
     @Test
     void unequalNodePropertiesScalerSizes() {

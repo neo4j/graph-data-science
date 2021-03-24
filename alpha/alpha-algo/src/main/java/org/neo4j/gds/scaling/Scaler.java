@@ -53,6 +53,30 @@ public interface Scaler {
             ) {
                 return Mean.create(properties, nodeCount, concurrency, executor);
             }
+        },
+        LOG {
+            @Override
+            public Scaler create(
+                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return LogTransformer.create(properties);
+            }
+        },
+        STDSCORE {
+            @Override
+            public Scaler create(
+                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return StdScore.create(properties, nodeCount, concurrency, executor);
+            }
+        },
+        L2NORM {
+            @Override
+            public Scaler create(
+                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return L2Norm.create(properties, nodeCount, concurrency, executor);
+            }
         };
 
         public static Variant lookup(String name) {
