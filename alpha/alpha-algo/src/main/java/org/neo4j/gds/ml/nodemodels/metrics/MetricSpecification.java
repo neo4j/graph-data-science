@@ -53,7 +53,7 @@ public interface MetricSpecification {
         if (SINGLE_CLASS_METRIC_FACTORIES.keySet().stream().anyMatch(metric -> metric.equals(mainMetric))) {
             throw new IllegalArgumentException(
                 formatWithLocale(
-                    "The first metric provided must be one of %s",
+                    "The primary (first) metric provided must be one of %s",
                     String.join(", ", validPrimaryMetricExpressions())
                 ));
         }

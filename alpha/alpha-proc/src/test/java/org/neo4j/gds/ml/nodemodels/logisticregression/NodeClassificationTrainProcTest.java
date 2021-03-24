@@ -159,7 +159,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .addParameter("params", List.of(Map.of("penalty", 1)))
             .yields();
 
-        assertError(query,"The first metric provided must be one of" );
+        assertError(query,"The primary (first) metric provided must be one of" );
     }
 
     @Test
