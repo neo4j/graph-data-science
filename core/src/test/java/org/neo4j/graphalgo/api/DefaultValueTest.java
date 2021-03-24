@@ -19,11 +19,14 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,6 +34,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class DefaultValueTest {
@@ -45,10 +49,10 @@ class DefaultValueTest {
             arguments(42, 42L),
             arguments(42L, 42L),
             arguments(42.0F, 42L),
-            arguments(DefaultValue.FLOAT_DEFAULT_FALLBACK, DefaultValue.LONG_DEFAULT_FALLBACK),
+            arguments(DefaultValue.FLOAT_DEFAULT_FALLBACK, LONG_DEFAULT_FALLBACK),
             arguments(42.0D, 42L),
-            arguments(DefaultValue.DOUBLE_DEFAULT_FALLBACK, DefaultValue.LONG_DEFAULT_FALLBACK),
-            arguments(null, DefaultValue.LONG_DEFAULT_FALLBACK)
+            arguments(DefaultValue.DOUBLE_DEFAULT_FALLBACK, LONG_DEFAULT_FALLBACK),
+            arguments(null, LONG_DEFAULT_FALLBACK)
         );
     }
 
@@ -91,7 +95,7 @@ class DefaultValueTest {
         return Stream.of(
             arguments(42, 42.0D),
             arguments(42L, 42.0D),
-            arguments(DefaultValue.LONG_DEFAULT_FALLBACK, DefaultValue.DOUBLE_DEFAULT_FALLBACK),
+            arguments(LONG_DEFAULT_FALLBACK, DefaultValue.DOUBLE_DEFAULT_FALLBACK),
             arguments(42.123F, 42.123D),
             arguments(Float.MAX_VALUE, ((Float) Float.MAX_VALUE).doubleValue()),
             arguments(DefaultValue.FLOAT_DEFAULT_FALLBACK, DefaultValue.DOUBLE_DEFAULT_FALLBACK),
@@ -125,5 +129,26 @@ class DefaultValueTest {
         var e = assertThrows(UnsupportedOperationException.class, defaultValue::doubleValue);
 
         assertThat(e.getMessage(), containsString("Cannot safely convert"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("valuesWithValueType")
+    void shouldCreateDefaultValueUsingValueType(Object valueToSet, ValueType type, Function<DefaultValue, ?> fn, Object expectedValue) {
+        var defaultValue = DefaultValue.of(valueToSet, type, true);
+        Assertions.assertThat(fn.apply(defaultValue)).isEqualTo(expectedValue);
+    }
+
+    private static Stream<Arguments> valuesWithValueType() {
+        return Stream.of(
+            Arguments.of("42", ValueType.LONG, (Function<DefaultValue, ?>) DefaultValue::longValue, 42L),
+            Arguments.of("42", ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 42D),
+            Arguments.of("13.37", ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 13.37D)
+        );
+    }
+
+    @Test
+    void shouldCreateDefaultValueUsingValueTypeWithNullDefaultValueParameter() {
+        var longDefaultValue = DefaultValue.of(null, ValueType.LONG, true);
+        Assertions.assertThat(longDefaultValue.longValue()).isEqualTo(LONG_DEFAULT_FALLBACK);
     }
 }

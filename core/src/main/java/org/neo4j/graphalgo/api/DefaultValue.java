@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Objects;
 
@@ -49,6 +50,20 @@ public final class DefaultValue {
             return (DefaultValue) defaultValue;
         } else {
             return new DefaultValue(defaultValue, isUserDefined);
+        }
+    }
+
+    public static DefaultValue of(@Nullable Object defaultValue, ValueType type, boolean isUserDefined) {
+        if (defaultValue == null) {
+            return type.fallbackValue();
+        }
+        switch (type) {
+            case LONG:
+                return DefaultValue.of(Long.parseLong(defaultValue.toString()), isUserDefined);
+            case DOUBLE:
+                return DefaultValue.of(Double.parseDouble(defaultValue.toString()), isUserDefined);
+            default:
+                return DefaultValue.of(defaultValue, isUserDefined);
         }
     }
 
