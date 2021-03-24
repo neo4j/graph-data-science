@@ -34,6 +34,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
 import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -142,13 +143,11 @@ class DefaultValueTest {
         return Stream.of(
             Arguments.of("42", ValueType.LONG, (Function<DefaultValue, ?>) DefaultValue::longValue, 42L),
             Arguments.of("42", ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 42D),
-            Arguments.of("13.37", ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 13.37D)
+            Arguments.of("13.37", ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 13.37D),
+            Arguments.of("", ValueType.LONG, (Function<DefaultValue, ?>) DefaultValue::longValue, LONG_DEFAULT_FALLBACK),
+            Arguments.of(null, ValueType.LONG, (Function<DefaultValue, ?>) DefaultValue::longValue, LONG_DEFAULT_FALLBACK),
+            Arguments.of("", ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, DOUBLE_DEFAULT_FALLBACK),
+            Arguments.of(null, ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, DOUBLE_DEFAULT_FALLBACK)
         );
-    }
-
-    @Test
-    void shouldCreateDefaultValueUsingValueTypeWithNullDefaultValueParameter() {
-        var longDefaultValue = DefaultValue.of(null, ValueType.LONG, true);
-        Assertions.assertThat(longDefaultValue.longValue()).isEqualTo(LONG_DEFAULT_FALLBACK);
     }
 }

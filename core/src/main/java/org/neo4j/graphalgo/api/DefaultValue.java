@@ -54,7 +54,7 @@ public final class DefaultValue {
     }
 
     public static DefaultValue of(@Nullable Object defaultValue, ValueType type, boolean isUserDefined) {
-        if (defaultValue == null) {
+        if (defaultValue == null || defaultValue.toString().isBlank()) {
             return type.fallbackValue();
         }
         switch (type) {
