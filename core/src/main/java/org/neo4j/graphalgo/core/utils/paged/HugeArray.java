@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.function.LongFunction;
 
-abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
+public abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
 
     /**
      * Copies the content of this array into the target array.

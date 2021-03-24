@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -272,6 +273,20 @@ class RandomGraphGeneratorTest {
                 return true;
             }
         );
+    }
+
+    @Test
+    void shouldFailForMultiplePropertyNames() {
+        assertThatThrownBy(() -> RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(2)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .nodePropertyProducer(PropertyProducer.fixed("name", 1337.0))
+            .nodePropertyProducer(PropertyProducer.fixed("name", 42.0))
+            .build()
+            .generate())
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Duplicate node properties with name [name] of types [DOUBLE] and [DOUBLE].");
     }
 
     @Test

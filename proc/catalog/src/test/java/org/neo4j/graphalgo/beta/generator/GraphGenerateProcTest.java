@@ -157,7 +157,7 @@ class GraphGenerateProcTest extends BaseProcTest {
     @MethodSource("relationshipPropertyProducers")
     void shouldGenerateGraphWithRelationshipProperty(
         Map<String, Object> config,
-        PropertyProducer propertyProducer
+        PropertyProducer<double[]> propertyProducer
     ) {
         Map<String, Object> configMap = new HashMap<>();
         configMap.put(RELATIONSHIP_PROPERTY_KEY, config);
@@ -168,9 +168,9 @@ class GraphGenerateProcTest extends BaseProcTest {
         RandomGraphGenerator generator = proc.initializeGraphGenerator(10, 5, cfg);
 
         assertTrue(generator.getMaybeRelationshipPropertyProducer().isPresent());
-        PropertyProducer actuallPropertyProducer = generator.getMaybeRelationshipPropertyProducer().get();
+        PropertyProducer<double[]> actualPropertyProducer = generator.getMaybeRelationshipPropertyProducer().get();
 
-        assertEquals(propertyProducer, actuallPropertyProducer);
+        assertEquals(propertyProducer, actualPropertyProducer);
     }
 
     @ParameterizedTest(name = "{0}")

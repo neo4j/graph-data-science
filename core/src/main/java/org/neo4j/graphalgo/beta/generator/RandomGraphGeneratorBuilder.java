@@ -37,8 +37,8 @@ public class RandomGraphGeneratorBuilder {
     private RelationshipDistribution relationshipDistribution;
     private long seed = 0L;
     private Optional<NodeLabelProducer> maybeNodeLabelProducer = Optional.empty();
-    private final Map<NodeLabel, Set<PropertyProducer>> nodePropertyProducers = new HashMap<>();
-    private Optional<PropertyProducer> maybeRelationshipPropertyProducer = Optional.empty();
+    private final Map<NodeLabel, Set<PropertyProducer<?>>> nodePropertyProducers = new HashMap<>();
+    private Optional<PropertyProducer<double[]>> maybeRelationshipPropertyProducer = Optional.empty();
     private Aggregation aggregation = Aggregation.NONE;
     private Orientation orientation = Orientation.NATURAL;
     private RandomGraphGeneratorConfig.AllowSelfLoops allowSelfLoops = RandomGraphGeneratorConfig.AllowSelfLoops.NO;
@@ -69,16 +69,16 @@ public class RandomGraphGeneratorBuilder {
         return this;
     }
 
-    public RandomGraphGeneratorBuilder nodePropertyProducer(PropertyProducer nodePropertyProducer) {
+    public RandomGraphGeneratorBuilder nodePropertyProducer(PropertyProducer<?> nodePropertyProducer) {
         return addNodePropertyProducer(NodeLabel.ALL_NODES, nodePropertyProducer);
     }
 
-    public RandomGraphGeneratorBuilder addNodePropertyProducer(NodeLabel nodeLabel, PropertyProducer nodePropertyProducer) {
+    public RandomGraphGeneratorBuilder addNodePropertyProducer(NodeLabel nodeLabel, PropertyProducer<?> nodePropertyProducer) {
         this.nodePropertyProducers.computeIfAbsent(nodeLabel, ignore -> new HashSet<>()).add(nodePropertyProducer);
         return this;
     }
 
-    public RandomGraphGeneratorBuilder relationshipPropertyProducer(PropertyProducer relationshipPropertyProducer) {
+    public RandomGraphGeneratorBuilder relationshipPropertyProducer(PropertyProducer<double[]> relationshipPropertyProducer) {
         this.maybeRelationshipPropertyProducer = Optional.of(relationshipPropertyProducer);
         return this;
     }
