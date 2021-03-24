@@ -174,7 +174,7 @@ public class LinkPredictionTrain
     private List<NodeSplit> trainValidationSplits(HugeLongArray allNodeIds) {
         var globalTargets = HugeLongArray.newArray(trainGraph.nodeCount(), allocationTracker);
         globalTargets.setAll(i -> 0L);
-        var splitter = new StratifiedKFoldSplitter(config.validationFolds(), allNodeIds, globalTargets);
+        var splitter = new StratifiedKFoldSplitter(config.validationFolds(), allNodeIds, globalTargets, config.randomSeed());
         return splitter.splits();
     }
 

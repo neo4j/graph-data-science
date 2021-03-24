@@ -20,11 +20,14 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.math3.random.RandomDataGenerator;
+import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -41,12 +44,18 @@ public class StratifiedKFoldSplitter {
     private final int k;
     private final HugeLongArray targets;
     private final HugeLongArray ids;
+    private final RandomDataGenerator random;
 
-    public StratifiedKFoldSplitter(int k, HugeLongArray ids, HugeLongArray targets) {
+    public StratifiedKFoldSplitter(int k, HugeLongArray ids, HugeLongArray targets, Optional<Long> randomSeed) {
         this.k = k;
         this.ids = ids;
         this.targets = targets;
         this.allocationTracker = AllocationTracker.empty();
+        this.random = randomSeed.map(seed -> {
+            var randomDataGenerator = new RandomDataGenerator();
+            randomDataGenerator.reSeed(seed);
+            return randomDataGenerator;
+        }).orElseGet(RandomDataGenerator::new);
     }
 
     public List<NodeSplit> splits() {
@@ -80,7 +89,11 @@ public class StratifiedKFoldSplitter {
             }
         });
         return IntStream.range(0, k)
-            .mapToObj(fold -> NodeSplit.of(trainSets[fold], testSets[fold]))
+            .mapToObj(fold -> {
+                ShuffleUtil.shuffleHugeLongArray(trainSets[fold], random);
+                ShuffleUtil.shuffleHugeLongArray(testSets[fold], random);
+                return NodeSplit.of(trainSets[fold], testSets[fold]);
+            })
             .collect(Collectors.toList());
     }
 

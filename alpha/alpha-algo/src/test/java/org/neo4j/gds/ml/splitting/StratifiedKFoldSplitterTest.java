@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -66,7 +67,7 @@ class StratifiedKFoldSplitterTest {
         var totalClassCounts = classCounts(targets);
 
 
-        var kFoldSplitter = new StratifiedKFoldSplitter(k, nodeIds, targets);
+        var kFoldSplitter = new StratifiedKFoldSplitter(k, nodeIds, targets, Optional.of(42L));
         var splits = kFoldSplitter.splits();
         assertThat(splits.size()).isEqualTo(k);
         var unionOfTestSets = new HashSet<Long>();

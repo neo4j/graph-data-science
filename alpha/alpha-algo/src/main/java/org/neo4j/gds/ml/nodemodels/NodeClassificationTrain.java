@@ -144,7 +144,7 @@ public class NodeClassificationTrain
     private ModelSelectResult modelSelect(HugeLongArray remainingSet, HugeLongArray globalTargets) {
 
         // 2b. Inner split: enumerate a number of train/validation splits of remaining
-        var splitter = new StratifiedKFoldSplitter(config.validationFolds(), remainingSet, globalTargets);
+        var splitter = new StratifiedKFoldSplitter(config.validationFolds(), remainingSet, globalTargets, config.randomSeed());
         var splits = splitter.splits();
 
         var trainStats = initStatsMap();
