@@ -27,9 +27,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public final class CsvImportUtil {
 
@@ -46,17 +48,12 @@ public final class CsvImportUtil {
         }
     }
 
-    public static Map<Path, List<Path>> headerToFileMapping(Path csvDirectory) {
-        Map<Path, List<Path>> headerToDataFileMapping = new HashMap<>();
-        for (Path nodeHeaderFile : getNodeHeaderFiles(csvDirectory)) {
-            String nodeDataFilePattern = nodeHeaderFile.getFileName().toString().replace("_header", "(_\\d+)");
-            List<Path> nodeDataPaths = headerToDataFileMapping.computeIfAbsent(
-                nodeHeaderFile,
-                path -> new ArrayList<>()
-            );
-            nodeDataPaths.addAll(getFilesByRegex(csvDirectory, nodeDataFilePattern));
-        }
-        return headerToDataFileMapping;
+    public static Map<Path, List<Path>> nodeHeaderToFileMapping(Path csvDirectory) {
+        return headerToFileMapping(csvDirectory, CsvImportUtil::getNodeHeaderFiles);
+    }
+
+    public static Map<Path, List<Path>> relationshipHeaderToFileMapping(Path csvDirectory) {
+        return headerToFileMapping(csvDirectory, CsvImportUtil::getRelationshipHeaderFiles);
     }
 
     static List<Path> getNodeHeaderFiles(Path csvDirectory) {
@@ -67,6 +64,19 @@ public final class CsvImportUtil {
     static List<Path> getRelationshipHeaderFiles(Path csvDirectory) {
         String nodeFilesPattern = "^relationships(_\\w+)+_header.csv";
         return getFilesByRegex(csvDirectory, nodeFilesPattern);
+    }
+
+    private static Map<Path, List<Path>> headerToFileMapping(Path csvDirectory, Function<Path, Collection<Path>> headerPaths) {
+        Map<Path, List<Path>> headerToDataFileMapping = new HashMap<>();
+        for (Path relationshipHeaderFile : headerPaths.apply(csvDirectory)) {
+            String relationshipDataFilePattern = relationshipHeaderFile.getFileName().toString().replace("_header", "(_\\d+)");
+            List<Path> relationshipDataPaths = headerToDataFileMapping.computeIfAbsent(
+                relationshipHeaderFile,
+                path -> new ArrayList<>()
+            );
+            relationshipDataPaths.addAll(getFilesByRegex(csvDirectory, relationshipDataFilePattern));
+        }
+        return headerToDataFileMapping;
     }
 
     private static List<Path> getFilesByRegex(Path csvDirectory, String pattern) {

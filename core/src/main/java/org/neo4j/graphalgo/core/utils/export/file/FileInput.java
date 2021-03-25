@@ -60,7 +60,7 @@ public final class FileInput implements CompatInput {
 
     @Override
     public InputIterable nodes(Collector badCollector) {
-        Map<Path, List<Path>> pathMapping = CsvImportUtil.headerToFileMapping(importPath);
+        Map<Path, List<Path>> pathMapping = CsvImportUtil.nodeHeaderToFileMapping(importPath);
         Map<NodeFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
             entry -> CsvImportUtil.parseHeader(entry.getKey()),
             Map.Entry::getValue
