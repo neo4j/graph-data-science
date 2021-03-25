@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -31,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -66,12 +68,20 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     public Result compute() {
         var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
 
-        var propertyCount = config.nodeProperties().size();
-        initializeArrays(scaledProperties, propertyCount);
+        var resolvedProperties = config
+            .nodeProperties()
+            .stream()
+            .map(this::resolveNodeProperty)
+            .collect(Collectors.toList());
 
-        List<Scaler> scalers = resolveScalers();
-        for (int i = 0; i < propertyCount; i++) {
-            scaleProperty(scaledProperties, scalers.get(i), i);
+        int outputLength = resolvedProperties.stream()
+            .mapToInt(NodePropertyLength::propertyLength)
+            .sum();
+        initializeArrays(scaledProperties, outputLength);
+
+        var scalers = resolveScalers(resolvedProperties);
+        for (int idx = 0; idx < scalers.size(); idx++) {
+            scaleProperty(scaledProperties, scalers.get(idx), idx);
         }
 
         return Result.of(scaledProperties);
@@ -119,16 +129,51 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         }
     }
 
-    private List<Scaler> resolveScalers() {
-        List<Scaler> scalers = new ArrayList<>();
+    private List<Scaler> resolveScalers(List<NodePropertyLength> resolvedProperties) {
+        var scalers = new ArrayList<Scaler>();
 
-        for (int i = 0; i < config.nodeProperties().size(); i++) {
+        for (int i = 0; i < resolvedProperties.size(); i++) {
             var scalerVariant = pickScaler(config.scalers(), i);
-            var property = config.nodeProperties().get(i);
-            var nodeProperties = resolveNodeProperty(property);
-            scalers.add(scalerVariant.create(nodeProperties, graph.nodeCount(), config.concurrency(), executor));
+            var property = resolvedProperties.get(i);
+
+            if (property.properties().valueType() == ValueType.FLOAT_ARRAY) {
+                for (int arrayIdx = 0; arrayIdx < property.propertyLength(); arrayIdx++) {
+                    scalers.add(scalerVariant.create(
+                        transformToDoubleProperty(i, property, arrayIdx),
+                        graph.nodeCount(),
+                        config.concurrency(),
+                        executor
+                    ));
+                }
+            } else {
+                scalers.add(scalerVariant.create(
+                    property.properties(),
+                    graph.nodeCount(),
+                    config.concurrency(),
+                    executor
+                ));
+            }
         }
         return scalers;
+    }
+
+    private DoubleNodeProperties transformToDoubleProperty(int propertyIdx, NodePropertyLength property, int idx) {
+        return (nodeId) -> {
+            var array = property
+                .properties()
+                .floatArrayValue(nodeId);
+
+            if (array == null || array.length != property.propertyLength()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "For scaling property `%s` expected array of length %d but got length %d for node %d",
+                    config.nodeProperties().get(propertyIdx),
+                    property.propertyLength(),
+                    Optional.ofNullable(array).map(v -> v.length).orElse(0),
+                    nodeId
+                ));
+            }
+            return array[idx];
+        };
     }
 
     private Scaler.Variant pickScaler(List<Scaler.Variant> scalerVariants, int i) {
@@ -141,9 +186,10 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     }
 
     // TODO move nodeProperty check to org.neo4j.graphalgo.api.GraphStoreValidation when moving to beta
-    private NodeProperties resolveNodeProperty(String property) {
+    private NodePropertyLength resolveNodeProperty(String property) {
         NodeProperties result = graph.nodeProperties(property);
-        var supportedTypes = Set.of(ValueType.DOUBLE, ValueType.LONG);
+        // TODO support Long and Double arrays
+        var supportedTypes = Set.of(ValueType.DOUBLE, ValueType.LONG, ValueType.FLOAT_ARRAY);
 
         if (result == null) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -160,7 +206,26 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
             ));
         }
 
-        return result;
+        switch (result.valueType()) {
+            case LONG:
+            case DOUBLE:
+                return ImmutableNodePropertyLength.of(result, 1);
+            case FLOAT_ARRAY:
+                return ImmutableNodePropertyLength.of(result, result.doubleArrayValue(0).length);
+            case LONG_ARRAY:
+            case DOUBLE_ARRAY:
+            case UNKNOWN:
+
+        }
+
+        return null;
+    }
+
+    @ValueClass
+    interface NodePropertyLength {
+        NodeProperties properties();
+
+        int propertyLength();
     }
 
 }
