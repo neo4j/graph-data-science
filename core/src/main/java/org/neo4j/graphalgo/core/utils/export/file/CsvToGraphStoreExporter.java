@@ -20,25 +20,21 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.immutables.builder.Builder;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyDegrees;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
+import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.ImmutableImportedProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
 
 import java.nio.file.Path;
@@ -88,7 +84,8 @@ public final class CsvToGraphStoreExporter {
 
     private GraphStoreExporter.ImportedProperties export(FileInput fileInput, AllocationTracker tracker) {
         var exportedNodes = exportNodes(fileInput, tracker);
-        var exportedRelationships = exportRelationships(fileInput, tracker);
+        // FIXME: get the `nodes` parameter from the previous step
+        var exportedRelationships = exportRelationships(fileInput, null, AllocationTracker.empty());
         return ImmutableImportedProperties.of(exportedNodes, exportedRelationships);
     }
 
@@ -125,18 +122,23 @@ public final class CsvToGraphStoreExporter {
         return nodeMappingAndProperties.nodeMapping().nodeCount();
     }
 
-    private long exportRelationships(FileInput fileInput, AllocationTracker tracker) {
-        var dummyRelationships = Relationships.of(
-            0L,
-            Orientation.NATURAL,
-            false,
-            TransientAdjacencyDegrees.Factory.INSTANCE.newDegrees(HugeIntArray.newArray(0, tracker)),
-            new TransientAdjacencyList(new byte[][]{}),
-            new TransientAdjacencyOffsets(HugeLongArray.newArray(fileInput.graphInfo().nodeCount(), tracker))
+    private void exportRelationships(FileInput fileInput, IdMapping nodes, AllocationTracker tracker) {
+        var relationshipSchema = fileInput.relationshipSchema();
+        int concurrency = config.writeConcurrency();
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .concurrency(concurrency)
+            .nodes(nodes)
+            .tracker(tracker)
+            .build();
+
+        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipsBuilder);
+        var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
+        Collection<Runnable> tasks = ParallelUtil.tasks(
+            concurrency,
+            (index) -> new ElementImportRunner(relationshipVisitor, relationshipsIterator)
         );
-        graphBuilder.relationshipType(RelationshipType.of("DUMMY_RELATIONSHIP"));
-        graphBuilder.relationships(dummyRelationships);
-        return 0L;
+
+        ParallelUtil.run(tasks, Pools.DEFAULT);
     }
 
     @Builder.Factory
