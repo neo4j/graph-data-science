@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading.construction;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
@@ -151,76 +150,100 @@ class NodesBuilderTest {
     }
 
 
-    @Test
-    void shouldBuildNodesWithProperties() {
-        NodesBuilder nodesBuilder = NodesBuilder.fromSchema(
-            2,
-            graph.nodeCount(),
-            1,
-            graph.schema().nodeSchema(),
-            AllocationTracker.empty()
-        );
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    void shouldBuildNodesWithProperties(TestMethodRunner runTest) {
+        runTest.run(() -> {
+            NodesBuilder nodesBuilder = NodesBuilder.fromSchema(
+                2,
+                graph.nodeCount(),
+                1,
+                graph.schema().nodeSchema(),
+                AllocationTracker.empty()
+            );
 
-        nodesBuilder.addNode(idFunction.of("a"), Map.of("prop1", Values.longValue(42), "prop2", Values.longValue(1337)), NodeLabel.of("A"));
-        nodesBuilder.addNode(idFunction.of("b"), Map.of("prop1", Values.longValue(43), "prop2", Values.longValue(1338)), NodeLabel.of("A"));
+            nodesBuilder.addNode(
+                idFunction.of("a"),
+                Map.of("prop1", Values.longValue(42), "prop2", Values.longValue(1337)),
+                NodeLabel.of("A")
+            );
+            nodesBuilder.addNode(
+                idFunction.of("b"),
+                Map.of("prop1", Values.longValue(43), "prop2", Values.longValue(1338)),
+                NodeLabel.of("A")
+            );
 
-        var nodeMappingAndProperties = nodesBuilder.build();
-        var nodeMapping = nodeMappingAndProperties.nodeMapping();
-        var nodeProperties = nodeMappingAndProperties
-            .nodeProperties()
-            .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
+            var nodeMappingAndProperties = nodesBuilder.build();
+            var nodeMapping = nodeMappingAndProperties.nodeMapping();
+            var nodeProperties = nodeMappingAndProperties
+                .nodeProperties()
+                .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
 
-        assertThat(graph.nodeCount()).isEqualTo(nodeMapping.nodeCount());
-        assertThat(graph.availableNodeLabels()).isEqualTo(nodeMapping.availableNodeLabels());
-        graph.forEachNode(nodeId -> {
-            assertThat(nodeMapping.toOriginalNodeId(nodeId)).isEqualTo(graph.toOriginalNodeId(nodeId));
-            assertThat(nodeProperties.get("prop1").longValue(nodeId)).isEqualTo(graph.nodeProperties("prop1").longValue(nodeId));
-            assertThat(nodeProperties.get("prop2").longValue(nodeId)).isEqualTo(graph.nodeProperties("prop2").longValue(nodeId));
-            return true;
+            assertThat(graph.nodeCount()).isEqualTo(nodeMapping.nodeCount());
+            assertThat(graph.availableNodeLabels()).isEqualTo(nodeMapping.availableNodeLabels());
+            graph.forEachNode(nodeId -> {
+                assertThat(nodeMapping.toOriginalNodeId(nodeId)).isEqualTo(graph.toOriginalNodeId(nodeId));
+                assertThat(nodeProperties.get("prop1").longValue(nodeId)).isEqualTo(graph
+                    .nodeProperties("prop1")
+                    .longValue(nodeId));
+                assertThat(nodeProperties.get("prop2").longValue(nodeId)).isEqualTo(graph
+                    .nodeProperties("prop2")
+                    .longValue(nodeId));
+                return true;
+            });
         });
     }
 
-    @Test
-    void shouldBuildNodesWithPropertiesInParallel() {
-        int nodeCount = 10000;
-        var nodeLabel = NodeLabel.of("A");
-        var nodeSchema = NodeSchema.builder()
-            .addProperty(nodeLabel, "prop1", ValueType.LONG)
-            .addProperty(nodeLabel, "prop2", ValueType.LONG)
-            .build();
-        int concurrency = 4;
-        var nodesBuilder = NodesBuilder.fromSchema(
-            nodeCount,
-            nodeCount,
-            concurrency,
-            nodeSchema,
-            AllocationTracker.empty()
-        );
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    void shouldBuildNodesWithPropertiesInParallel(TestMethodRunner runTest) {
+        runTest.run(() -> {
+            int nodeCount = 10000;
+            var nodeLabel = NodeLabel.of("A");
+            var nodeSchema = NodeSchema.builder()
+                .addProperty(nodeLabel, "prop1", ValueType.LONG)
+                .addProperty(nodeLabel, "prop2", ValueType.LONG)
+                .build();
+            int concurrency = 4;
+            var nodesBuilder = NodesBuilder.fromSchema(
+                nodeCount,
+                nodeCount,
+                concurrency,
+                nodeSchema,
+                AllocationTracker.empty()
+            );
 
-        var tasks = ParallelUtil.tasks(
-            concurrency,
-            (index) -> () -> IntStream.range(index * (nodeCount / concurrency), (index + 1) * (nodeCount / concurrency))
-                .forEach(originalNodeId -> nodesBuilder.addNode(
-                    originalNodeId,
-                    Map.of("prop1", Values.longValue(originalNodeId), "prop2", Values.longValue(nodeCount - originalNodeId)),
-                    nodeLabel
-                ))
-        );
+            var tasks = ParallelUtil.tasks(
+                concurrency,
+                (index) -> () -> IntStream
+                    .range(index * (nodeCount / concurrency), (index + 1) * (nodeCount / concurrency))
+                    .forEach(originalNodeId -> nodesBuilder.addNode(
+                        originalNodeId,
+                        Map.of(
+                            "prop1",
+                            Values.longValue(originalNodeId),
+                            "prop2",
+                            Values.longValue(nodeCount - originalNodeId)
+                        ),
+                        nodeLabel
+                    ))
+            );
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+            ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        var nodeMappingAndProperties = nodesBuilder.build();
-        var nodeMapping = nodeMappingAndProperties.nodeMapping();
-        var nodeProperties = nodeMappingAndProperties.nodePropertiesOrThrow();
+            var nodeMappingAndProperties = nodesBuilder.build();
+            var nodeMapping = nodeMappingAndProperties.nodeMapping();
+            var nodeProperties = nodeMappingAndProperties.nodePropertiesOrThrow();
 
-        assertThat(nodeMapping.nodeCount()).isEqualTo(nodeCount);
-        assertThat(nodeMapping.availableNodeLabels()).containsExactly(nodeLabel);
+            assertThat(nodeMapping.nodeCount()).isEqualTo(nodeCount);
+            assertThat(nodeMapping.availableNodeLabels()).containsExactly(nodeLabel);
 
-        nodeMapping.forEachNode(nodeId -> {
-            long originalNodeId = nodeMapping.toOriginalNodeId(nodeId);
-            assertThat(originalNodeId).isEqualTo(nodeProperties.get("prop1").longValue(nodeId));
-            assertThat(nodeCount - originalNodeId).isEqualTo(nodeProperties.get("prop2").longValue(nodeId));
-            return true;
+            nodeMapping.forEachNode(nodeId -> {
+                long originalNodeId = nodeMapping.toOriginalNodeId(nodeId);
+                assertThat(originalNodeId).isEqualTo(nodeProperties.get("prop1").longValue(nodeId));
+                assertThat(nodeCount - originalNodeId).isEqualTo(nodeProperties.get("prop2").longValue(nodeId));
+                return true;
+            });
         });
     }
 }
