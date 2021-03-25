@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import org.neo4j.graphalgo.core.utils.export.file.NodeFileHeader;
+import org.neo4j.graphalgo.core.utils.export.file.RelationshipFileHeader;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -37,11 +38,22 @@ public final class CsvImportUtil {
 
     private CsvImportUtil() {}
 
-    public static NodeFileHeader parseHeader(Path headerFile) {
+    public static NodeFileHeader parseNodeHeader(Path headerFile) {
         try (var headerReader = Files.newBufferedReader(headerFile, StandardCharsets.UTF_8)) {
             return NodeFileHeader.builder()
                 .withHeaderLine(headerReader.readLine())
                 .withNodeLabels(inferNodeLabels(headerFile))
+                .build();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static RelationshipFileHeader parseRelationshipHeader(Path headerFile) {
+        try (var headerReader = Files.newBufferedReader(headerFile, StandardCharsets.UTF_8)) {
+            return RelationshipFileHeader.builder()
+                .withHeaderLine(headerReader.readLine())
+                .withRelationshipType(inferRelationshipType(headerFile))
                 .build();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -93,5 +105,10 @@ public final class CsvImportUtil {
     private static String[] inferNodeLabels(Path headerFile) {
         var headerFileName = headerFile.getFileName().toString();
         return headerFileName.replaceAll("nodes_|_header.csv", "").split("_");
+    }
+
+    private static String inferRelationshipType(Path headerFile) {
+        var headerFileName = headerFile.getFileName().toString();
+        return headerFileName.replaceAll("relationships_|_header.csv", "");
     }
 }

@@ -62,7 +62,7 @@ public final class FileInput implements CompatInput {
     public InputIterable nodes(Collector badCollector) {
         Map<Path, List<Path>> pathMapping = CsvImportUtil.nodeHeaderToFileMapping(importPath);
         Map<NodeFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
-            entry -> CsvImportUtil.parseHeader(entry.getKey()),
+            entry -> CsvImportUtil.parseNodeHeader(entry.getKey()),
             Map.Entry::getValue
         ));
         return () -> new NodeImporter(headerToDataFilesMapping);
@@ -70,7 +70,12 @@ public final class FileInput implements CompatInput {
 
     @Override
     public InputIterable relationships(Collector badCollector) {
-        return null;
+        Map<Path, List<Path>> pathMapping = CsvImportUtil.relationshipHeaderToFileMapping(importPath);
+        Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
+            entry -> CsvImportUtil.parseRelationshipHeader(entry.getKey()),
+            Map.Entry::getValue
+        ));
+        return () -> new RelationshipImporter(headerToDataFilesMapping);
     }
 
     @Override
@@ -100,28 +105,28 @@ public final class FileInput implements CompatInput {
         return relationshipSchema;
     }
 
-    abstract static class FileImporter implements InputIterator {
+    abstract static class FileImporter<HEADER> implements InputIterator {
 
-        private final MappedListIterator<NodeFileHeader, Path> entryIterator;
+        private final MappedListIterator<HEADER, Path> entryIterator;
 
-        FileImporter(Map<NodeFileHeader, List<Path>> headerToDataFilesMapping) {
+        FileImporter(Map<HEADER, List<Path>> headerToDataFilesMapping) {
             this.entryIterator = new MappedListIterator<>(headerToDataFilesMapping);
         }
 
         @Override
         public synchronized boolean next(InputChunk chunk) throws IOException {
             if (entryIterator.hasNext()) {
-                Pair<NodeFileHeader, Path> entry = entryIterator.next();
+                Pair<HEADER, Path> entry = entryIterator.next();
 
                 assert chunk instanceof LineChunk;
-                ((LineChunk) chunk).initialize(entry.getKey(), entry.getValue());
+                ((LineChunk<HEADER>) chunk).initialize(entry.getKey(), entry.getValue());
                 return true;
             }
             return false;
         }
     }
 
-    static class NodeImporter extends FileImporter {
+    static class NodeImporter extends FileImporter<NodeFileHeader> {
 
         NodeImporter(Map<NodeFileHeader, List<Path>> headerToDataFilesMapping) {
             super(headerToDataFilesMapping);
@@ -138,11 +143,28 @@ public final class FileInput implements CompatInput {
         }
     }
 
-    abstract static class LineChunk implements InputChunk {
-        NodeFileHeader header;
+    static class RelationshipImporter extends FileImporter<RelationshipFileHeader> {
+
+        RelationshipImporter(Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping) {
+            super(headerToDataFilesMapping);
+        }
+
+        @Override
+        public InputChunk newChunk() {
+            return new RelationshipLineChunk();
+        }
+
+        @Override
+        public void close() throws IOException {
+
+        }
+    }
+
+    abstract static class LineChunk<HEADER> implements InputChunk {
+        HEADER header;
         Iterator<String> lineIterator;
 
-        void initialize(NodeFileHeader header, Path path) throws IOException {
+        void initialize(HEADER header, Path path) throws IOException {
             this.header = header;
             this.lineIterator = Files.lines(path).iterator();
         }
@@ -157,10 +179,10 @@ public final class FileInput implements CompatInput {
             return false;
         }
 
-        abstract void visitLine(String line, NodeFileHeader header, InputEntityVisitor visitor) throws IOException;
+        abstract void visitLine(String line, HEADER header, InputEntityVisitor visitor) throws IOException;
     }
 
-    static class NodeLineChunk extends LineChunk {
+    static class NodeLineChunk extends LineChunk<NodeFileHeader> {
 
         @Override
         void visitLine(String line, NodeFileHeader header, InputEntityVisitor visitor) throws IOException {
@@ -192,14 +214,24 @@ public final class FileInput implements CompatInput {
         }
     }
 
-    static class RelationshipLineChunk extends LineChunk {
+    static class RelationshipLineChunk extends LineChunk<RelationshipFileHeader> {
 
         RelationshipLineChunk() {
         }
 
         @Override
-        void visitLine(String line, NodeFileHeader header, InputEntityVisitor visitor) {
+        void visitLine(String line, RelationshipFileHeader header, InputEntityVisitor visitor) throws IOException {
+            var lineValues = line.split(",");
 
+            visitor.type(header.relationshipType());
+            visitor.startId(Long.parseLong(lineValues[0]));
+            visitor.endId(Long.parseLong(lineValues[1]));
+
+            header
+                .propertyMappings()
+                .forEach(property -> visitor.property(property.propertyKey(), lineValues[property.position()]));
+
+            visitor.endOfEntity();
         }
 
         @Override
