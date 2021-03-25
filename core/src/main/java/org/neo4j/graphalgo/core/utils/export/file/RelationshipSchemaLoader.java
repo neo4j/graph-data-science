@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.utils.export.file;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.util.StdConverter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -39,7 +38,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Locale;
 
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 
@@ -82,53 +80,24 @@ public class RelationshipSchemaLoader {
     public static class SchemaLine {
 
         @JsonProperty
-        @JsonDeserialize(converter = RelationshipTypeConverter.class)
+        @JsonDeserialize(converter = JacksonConverters.RelationshipTypeConverter.class)
         RelationshipType relationshipType;
 
         @JsonProperty
         String propertyKey;
 
         @JsonProperty
-        @JsonDeserialize(converter = ValueTypeConverter.class)
+        @JsonDeserialize(converter = JacksonConverters.ValueTypeConverter.class)
         ValueType valueType;
 
         @JsonProperty
-        @JsonDeserialize(converter = DefaultValueConverter.class)
+        @JsonDeserialize(converter = JacksonConverters.DefaultValueConverter.class)
         DefaultValue defaultValue;
 
         @JsonProperty
         Aggregation aggregation;
 
         @JsonProperty
-        @JsonDeserialize(converter = PropertyStateConverter.class)
         GraphStore.PropertyState state;
-    }
-
-    private static class RelationshipTypeConverter extends StdConverter<String, RelationshipType> {
-        @Override
-        public RelationshipType convert(String value) {
-            return RelationshipType.of(value);
-        }
-    }
-
-    private static class ValueTypeConverter extends StdConverter<String, ValueType> {
-        @Override
-        public ValueType convert(String value) {
-            return ValueType.valueOf(value.toUpperCase(Locale.ENGLISH));
-        }
-    }
-
-    private static class DefaultValueConverter extends StdConverter<String, DefaultValue> {
-        @Override
-        public DefaultValue convert(String value) {
-            return DefaultValue.of(value.replaceAll("DefaultValue\\(|\\)", ""));
-        }
-    }
-
-    private static class PropertyStateConverter extends StdConverter<String, GraphStore.PropertyState> {
-        @Override
-        public GraphStore.PropertyState convert(String value) {
-            return GraphStore.PropertyState.valueOf(value);
-        }
     }
 }

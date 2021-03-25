@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.utils.export.file;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.util.StdConverter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -38,7 +37,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Locale;
 
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
 
@@ -80,50 +78,21 @@ public class NodeSchemaLoader {
     public static class SchemaLine {
 
         @JsonProperty
-        @JsonDeserialize(converter = NodeLabelConverter.class)
+        @JsonDeserialize(converter = JacksonConverters.NodeLabelConverter.class)
         NodeLabel label;
 
         @JsonProperty
         String propertyKey;
 
         @JsonProperty
-        @JsonDeserialize(converter = ValueTypeConverter.class)
+        @JsonDeserialize(converter = JacksonConverters.ValueTypeConverter.class)
         ValueType valueType;
 
         @JsonProperty
-        @JsonDeserialize(converter = DefaultValueConverter.class)
+        @JsonDeserialize(converter = JacksonConverters.DefaultValueConverter.class)
         DefaultValue defaultValue;
 
         @JsonProperty
-        @JsonDeserialize(converter = PropertyStateConverter.class)
         GraphStore.PropertyState state;
-    }
-
-    private static class NodeLabelConverter extends StdConverter<String, NodeLabel> {
-        @Override
-        public NodeLabel convert(String value) {
-            return NodeLabel.of(value);
-        }
-    }
-
-    private static class ValueTypeConverter extends StdConverter<String, ValueType> {
-        @Override
-        public ValueType convert(String value) {
-            return ValueType.valueOf(value.toUpperCase(Locale.ENGLISH));
-        }
-    }
-
-    private static class DefaultValueConverter extends StdConverter<String, DefaultValue> {
-        @Override
-        public DefaultValue convert(String value) {
-            return DefaultValue.of(value.replaceAll("DefaultValue\\(|\\)", ""));
-        }
-    }
-
-    private static class PropertyStateConverter extends StdConverter<String, GraphStore.PropertyState> {
-        @Override
-        public GraphStore.PropertyState convert(String value) {
-            return GraphStore.PropertyState.valueOf(value);
-        }
     }
 }
