@@ -19,10 +19,13 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.core.utils.export.file.HeaderProperty;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -107,6 +110,35 @@ class CsvImportUtilTest {
         );
         assertThat(relationshipHeaderToFileMapping).containsExactlyInAnyOrderEntriesOf(expectedMapping);
     }
+
+    @Test
+    void shouldParseNodeHeaderFile() throws IOException {
+        var headerPath = tempDir.resolve("nodes_Person_King_header.csv");
+        FileUtils.writeLines(headerPath.toFile(), List.of(":ID,foo:LONG,bar:DOUBLE"));
+
+        var parsedHeader = CsvImportUtil.parseNodeHeader(headerPath);
+
+        assertThat(parsedHeader.nodeLabels()).containsExactlyInAnyOrder("Person", "King");
+        assertThat(parsedHeader.propertyMappings()).containsExactlyInAnyOrder(
+            HeaderProperty.parse(1, "foo:LONG"),
+            HeaderProperty.parse(2, "bar:DOUBLE")
+        );
+    }
+
+    @Test
+    void shouldParseRelationshipHeaderFile() throws IOException {
+        var headerPath = tempDir.resolve("relationships_R_header.csv");
+        FileUtils.writeLines(headerPath.toFile(), List.of(":START_ID,:END_ID,foo:LONG,bar:DOUBLE"));
+
+        var parsedHeader = CsvImportUtil.parseRelationshipHeader(headerPath);
+
+        assertThat(parsedHeader.relationshipType()).isEqualTo("R");
+        assertThat(parsedHeader.propertyMappings()).containsExactlyInAnyOrder(
+            HeaderProperty.parse(2, "foo:LONG"),
+            HeaderProperty.parse(3, "bar:DOUBLE")
+        );
+    }
+
 
     static Stream<Arguments> nodeFileNames() {
         return Stream.of(
