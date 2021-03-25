@@ -22,6 +22,7 @@ package org.neo4j.gds.scaling;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
@@ -49,17 +50,17 @@ class ScalePropertiesTest {
 
     @GdlGraph
     static String GDL =
-        "(a:A {a: 1.1D, b: 20, c: 50, bAndC: [20.0, 50.0], mixedSizeArray: [1.0, 1.0], missingArray: [1.0,2.0]}), " +
-        "(b:A {a: 2.8D, b: 21, c: 51, bAndC: [21.0, 51.0], mixedSizeArray: [1.0]}), " +
-        "(c:A {a: 3, b: 22, c: 52, bAndC: [22.0, 52.0], mixedSizeArray: [1.0]}), " +
-        "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], mixedSizeArray: [1.0]}), " +
-        "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], mixedSizeArray: [1.0, 2.0, 3.0]})";
+        "(a:A {a: 1.1D, b: 20, c: 50, bAndC: [20.0, 50.0], lB: [20L], dB: [20.0d], mixedSizeArray: [1.0, 1.0], missingArray: [1.0,2.0]}), " +
+        "(b:A {a: 2.8D, b: 21, c: 51, bAndC: [21.0, 51.0], lB: [21L], dB: [21.0d], mixedSizeArray: [1.0]}), " +
+        "(c:A {a: 3, b: 22, c: 52, bAndC: [22.0, 52.0], lB: [22L], dB: [22.0d], mixedSizeArray: [1.0]}), " +
+        "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], lB: [23L], dB: [23.0d], mixedSizeArray: [1.0]}), " +
+        "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], lB: [24L], dB: [24.0d], mixedSizeArray: [1.0, 2.0, 3.0]})";
 
     @Inject
     TestGraph graph;
 
     @Test
-    void minmaxScaling() {
+    void scaleSingleProperty() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a"))
             .scalers(List.of(Scaler.Variant.MINMAX))
@@ -86,7 +87,7 @@ class ScalePropertiesTest {
 
     @ParameterizedTest
     @MethodSource("scalers")
-    void minmaxScalingOverMultipleProperties(List<Scaler.Variant> scalers) {
+    void scaleMultipleProperties(List<Scaler.Variant> scalers) {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "b", "c"))
             .scalers(scalers)
@@ -105,7 +106,7 @@ class ScalePropertiesTest {
     }
 
     @Test
-    void differentScalers() {
+    void scaleWithDifferentScalers() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "b", "c"))
             .scalers(List.of(Scaler.Variant.MINMAX, Scaler.Variant.MEAN, Scaler.Variant.LOG))
@@ -123,7 +124,7 @@ class ScalePropertiesTest {
     }
 
     @Test
-    void parallelScaler() {
+    void parallelScale() {
         int nodeCount = 50_000;
         var bigGraph = RandomGraphGenerator
             .builder()
@@ -176,6 +177,23 @@ class ScalePropertiesTest {
             .scaledProperties();
 
         LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actual.get(id)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scaler.Variant.class)
+    void supportLongAndDoubleArrays(Scaler.Variant scaler) {
+        var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder()
+            .scalers(List.of(scaler));
+        var bConfig = baseConfigBuilder.nodeProperties(List.of("b")).build();
+        var lBConfig = baseConfigBuilder.nodeProperties(List.of("lB")).build();
+        var dBConfig = baseConfigBuilder.nodeProperties(List.of("dB")).build();
+
+        var expected = new ScaleProperties(graph, bConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+        var actualLong = new ScaleProperties(graph, lBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+        var actualDouble = new ScaleProperties(graph, dBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+
+        LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualLong.get(id)));
+        LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualDouble.get(id)));
     }
 
     @Test

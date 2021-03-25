@@ -139,6 +139,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
             ));
         }
 
+        int arrayLength;
+
         switch (nodeProperties.valueType()) {
             case LONG:
             case DOUBLE:
@@ -148,19 +150,29 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
                     config.concurrency(),
                     executor
                 ));
-            case FLOAT_ARRAY:
-                int arrayLength = nodeProperties.doubleArrayValue(0).length;
+            case LONG_ARRAY:
+                arrayLength = nodeProperties.longArrayValue(0).length;
                 return IntStream.range(0, arrayLength)
                     .mapToObj(idx -> (Supplier<Scaler>)
                         () -> scalerVariant.create(
-                            transformToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
+                            transformLongArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
                             graph.nodeCount(),
                             config.concurrency(),
                             executor
                         )
                     ).collect(Collectors.toList());
-            case LONG_ARRAY:
+            case FLOAT_ARRAY:
             case DOUBLE_ARRAY:
+                arrayLength = nodeProperties.doubleArrayValue(0).length;
+                return IntStream.range(0, arrayLength)
+                    .mapToObj(idx -> (Supplier<Scaler>)
+                        () -> scalerVariant.create(
+                            transformFloatArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
+                            graph.nodeCount(),
+                            config.concurrency(),
+                            executor
+                        )
+                    ).collect(Collectors.toList());
             case UNKNOWN:
         }
 
@@ -171,18 +183,23 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         ));
     }
 
-    private DoubleNodeProperties transformToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
+    private DoubleNodeProperties transformFloatArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
         return (nodeId) -> {
             var propertyValue = property.floatArrayValue(nodeId);
 
             if (propertyValue == null || propertyValue.length != expectedArrayLength) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "For scaling property `%s` expected array of length %d but got length %d for node %d",
-                    propertyName,
-                    expectedArrayLength,
-                    Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0),
-                    nodeId
-                ));
+                throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+            }
+            return propertyValue[idx];
+        };
+    }
+
+    private DoubleNodeProperties transformLongArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
+        return (nodeId) -> {
+            var propertyValue = property.longArrayValue(nodeId);
+
+            if (propertyValue == null || propertyValue.length != expectedArrayLength) {
+                throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
             }
             return propertyValue[idx];
         };
@@ -195,5 +212,20 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         } else {
             return scalerVariants.get(i);
         }
+    }
+
+    private IllegalArgumentException createInvalidArrayException(
+        String propertyName,
+        int expectedArrayLength,
+        long nodeId,
+        int actualLength
+    ) {
+        return new IllegalArgumentException(formatWithLocale(
+            "For scaling property `%s` expected array of length %d but got length %d for node %d",
+            propertyName,
+            expectedArrayLength,
+            actualLength,
+            nodeId
+        ));
     }
 }

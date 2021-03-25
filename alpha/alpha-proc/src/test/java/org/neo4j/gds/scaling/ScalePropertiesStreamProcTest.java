@@ -34,12 +34,12 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
-        " (n0:A {id: 0})" +
-        ",(n1:A {id: 1})" +
-        ",(n2:A {id: 2})" +
-        ",(n3:A {id: 3})" +
-        ",(n4:A {id: 4})" +
-        ",(n5:A {id: 5})";
+        " (n0:A {id: [0, 2]})" +
+        ",(n1:A {id: [1, 2]})" +
+        ",(n2:A {id: [2, 2]})" +
+        ",(n3:A {id: [3, 2]})" +
+        ",(n4:A {id: [4, 2]})" +
+        ",(n5:A {id: [5, 2]})";
     private static final String GRAPH_NAME = "graph";
 
     @BeforeEach
@@ -69,12 +69,12 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "scaledProperty", List.of(-1 / 2D)),
-            Map.of("nodeId", 1L, "scaledProperty", List.of(-3 / 10D)),
-            Map.of("nodeId", 2L, "scaledProperty", List.of(-1 / 10D)),
-            Map.of("nodeId", 3L, "scaledProperty", List.of(1 / 10D)),
-            Map.of("nodeId", 4L, "scaledProperty", List.of(3 / 10D)),
-            Map.of("nodeId", 5L, "scaledProperty", List.of(1 / 2D))
+            Map.of("nodeId", 0L, "scaledProperty", List.of(-1 / 2D, 0D)),
+            Map.of("nodeId", 1L, "scaledProperty", List.of(-3 / 10D, 0D)),
+            Map.of("nodeId", 2L, "scaledProperty", List.of(-1 / 10D, 0D)),
+            Map.of("nodeId", 3L, "scaledProperty", List.of(1 / 10D, 0D)),
+            Map.of("nodeId", 4L, "scaledProperty", List.of(3 / 10D, 0D)),
+            Map.of("nodeId", 5L, "scaledProperty", List.of(1 / 2D, 0D))
         ));
     }
 
@@ -90,12 +90,12 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
             "})";
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "scaledProperty", List.of(-1 / 2D)),
-            Map.of("nodeId", 1L, "scaledProperty", List.of(-3 / 10D)),
-            Map.of("nodeId", 2L, "scaledProperty", List.of(-1 / 10D)),
-            Map.of("nodeId", 3L, "scaledProperty", List.of(1 / 10D)),
-            Map.of("nodeId", 4L, "scaledProperty", List.of(3 / 10D)),
-            Map.of("nodeId", 5L, "scaledProperty", List.of(1 / 2D))
+            Map.of("nodeId", 0L, "scaledProperty", List.of(-1 / 2D, 0D)),
+            Map.of("nodeId", 1L, "scaledProperty", List.of(-3 / 10D, 0D)),
+            Map.of("nodeId", 2L, "scaledProperty", List.of(-1 / 10D, 0D)),
+            Map.of("nodeId", 3L, "scaledProperty", List.of(1 / 10D, 0D)),
+            Map.of("nodeId", 4L, "scaledProperty", List.of(3 / 10D, 0D)),
+            Map.of("nodeId", 5L, "scaledProperty", List.of(1 / 2D, 0D))
         ));
     }
 
