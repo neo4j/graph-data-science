@@ -45,6 +45,10 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         this(Optional.of(seed));
     }
 
+    public UndirectedEdgeSplitter(Optional<Long> maybeSeed, int negativeRatio) {
+        super(maybeSeed, negativeRatio);
+    }
+
     @Override
     public SplitResult split(
         Graph graph,
@@ -72,7 +76,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         RelationshipsBuilder remainingRelsBuilder = newRelationshipsBuilder(graph, Orientation.UNDIRECTED);
 
         var positiveSamplesRemaining = new AtomicLong((long) (graph.relationshipCount() * holdoutFraction) / 2);
-        var negativeSamplesRemaining = new AtomicLong((long) (graph.relationshipCount() * holdoutFraction) / 2);
+        var negativeSamplesRemaining = new AtomicLong((long) (negativeRatio * graph.relationshipCount() * holdoutFraction) / 2);
         var edgesRemaining = new AtomicLong(graph.relationshipCount());
 
         graph.forEachNode(nodeId -> {

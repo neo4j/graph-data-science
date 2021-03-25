@@ -92,6 +92,45 @@ class UndirectedEdgeSplitterTest {
     }
 
     @Test
+    void splitWithNegativeRatio2() {
+        var splitter = new UndirectedEdgeSplitter(Optional.of(2021L), 2);
+
+        // select 20%, which is 1 (undirected) rels in this graph
+        var result = splitter.split(graph, .2);
+
+        var remainingRels = result.remainingRels();
+        // 1 positive selected reduces remaining
+        assertEquals(8L, remainingRels.topology().elementCount());
+        assertEquals(Orientation.UNDIRECTED, remainingRels.topology().orientation());
+        assertFalse(remainingRels.topology().isMultiGraph());
+        assertThat(remainingRels.properties()).isEmpty();
+
+        var selectedRels = result.selectedRels();
+        assertThat(selectedRels.topology()).satisfies(topology -> {
+            // it selected 2,5 and 4,1 (neg) and 2,1 (pos) relationships
+            assertEquals(3L, topology.elementCount());
+            var cursor = topology.list().decompressingCursor(topology.offsets().get(2L), topology.degrees().degree(2L));
+            assertEquals(1L, cursor.nextVLong());
+            assertEquals(5L, cursor.nextVLong());
+            var cursor2 = topology.list().decompressingCursor(topology.offsets().get(4L), topology.degrees().degree(4L));
+            assertEquals(1L, cursor2.nextVLong());
+            assertEquals(Orientation.NATURAL, topology.orientation());
+            assertFalse(topology.isMultiGraph());
+        });
+        assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
+            assertEquals(3L, p.elementCount());
+            var cursor = p.list().cursor(p.offsets().get(2L), p.degrees().degree(2L));
+            // 2,1 is positive
+            assertEquals(POSITIVE, Double.longBitsToDouble(cursor.nextLong()));
+            // 2,5 is negative
+            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
+            var cursor2 = p.list().cursor(p.offsets().get(4L), p.degrees().degree(4L));
+            // 4,1 is negative
+            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor2.nextLong()));
+        });
+    }
+
+    @Test
     void negativeEdgesShouldNotOverlapMasterGraph() {
         var huuuuugeDenseGraph = RandomGraphGenerator.builder()
             .nodeCount(100)

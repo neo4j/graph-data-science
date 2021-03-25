@@ -43,9 +43,15 @@ public abstract class EdgeSplitter {
     public static final String RELATIONSHIP_PROPERTY = "label";
 
     protected final ThreadLocal<Random> rng;
+    protected final int negativeRatio;
 
     public EdgeSplitter(Optional<Long> maybeSeed) {
+        this(maybeSeed, 1);
+    }
+
+    public EdgeSplitter(Optional<Long> maybeSeed, int negativeRatio) {
         this.rng = ThreadLocal.withInitial(() -> maybeSeed.map(Random::new).orElseGet(Random::new));
+        this.negativeRatio = negativeRatio;
     }
 
     public abstract SplitResult split(

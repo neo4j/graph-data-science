@@ -36,6 +36,10 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         this(Optional.of(seed));
     }
 
+    public DirectedEdgeSplitter(Optional<Long> maybeSeed, int negativeRatio) {
+        super(maybeSeed, negativeRatio);
+    }
+
     @Override
     public SplitResult split(
         Graph graph,
@@ -56,7 +60,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         RelationshipsBuilder remainingRelsBuilder = newRelationshipsBuilder(graph, Orientation.NATURAL);
 
         int totalPositiveSamples = (int) (graph.relationshipCount() * holdoutFraction);
-        var negativeSamplesRemaining = new AtomicLong((long) (graph.relationshipCount() * holdoutFraction));
+        var negativeSamplesRemaining = new AtomicLong((long) (negativeRatio * graph.relationshipCount() * holdoutFraction));
 
         var selectedPositiveCount = new AtomicLong(0L);
         graph.forEachNode(nodeId -> {
