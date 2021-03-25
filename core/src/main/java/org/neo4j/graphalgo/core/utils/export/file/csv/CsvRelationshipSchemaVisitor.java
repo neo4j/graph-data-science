@@ -37,7 +37,7 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
     static final String RELATIONSHIP_TYPE_COLUMN_NAME = "relationshipType";
     static final String AGGREGATION_COLUMN_NAME = "aggregation";
 
-    static final String RELATIONSHIP_SCHEMA_FILE_NAME = "relationship-schema.csv";
+    public static final String RELATIONSHIP_SCHEMA_FILE_NAME = "relationship-schema.csv";
 
     private final CsvAppender csvAppender;
     private final boolean hasProperties;

@@ -36,7 +36,7 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSche
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_TYPE_COLUMN_NAME;
 
-class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
+public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
 
     public static final List<String> RELATIONSHIP_SCHEMA_COLUMNS = List.of(
         RELATIONSHIP_TYPE_COLUMN_NAME,
