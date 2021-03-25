@@ -41,7 +41,7 @@ class CsvImportUtilTest {
     Path tempDir;
 
     @ParameterizedTest
-    @MethodSource("fileNames")
+    @MethodSource("nodeFileNames")
     void shouldFindNodeFiles(List<String> fileNames) throws IOException {
         for (String fileName : fileNames) {
             Files.createFile(tempDir.resolve(fileName));
@@ -52,12 +52,12 @@ class CsvImportUtilTest {
             .map(Path::toString)
             .collect(Collectors.toList());
 
-        assertThat(nodeHeaderFiles).hasSize(3);
-        assertThat(nodeHeaderFiles).containsExactlyInAnyOrder("nodes_A_B_header.csv", "nodes_A_C_header.csv", "nodes_B_header.csv");
+        assertThat(nodeHeaderFiles).hasSize(5);
+        assertThat(nodeHeaderFiles).containsExactlyInAnyOrder("nodes_A_B_header.csv", "nodes_A_C_header.csv", "nodes_B_header.csv", "nodes_Person_header.csv", "nodes_House_Property_header.csv");
     }
 
     @ParameterizedTest
-    @MethodSource("fileNames")
+    @MethodSource("nodeFileNames")
     void shouldConstructHeaderToDataFileMapping(List<String> fileNames) throws IOException {
         for (String fileName : fileNames) {
             Files.createFile(tempDir.resolve(fileName));
@@ -65,16 +65,18 @@ class CsvImportUtilTest {
         Map<Path, List<Path>> headerToFileMapping = CsvImportUtil.headerToFileMapping(tempDir);
         headerToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
 
-        assertThat(headerToFileMapping).hasSize(3);
+        assertThat(headerToFileMapping).hasSize(5);
         Map<Path, List<Path>> expectedMapping = Map.of(
             tempDir.resolve("nodes_A_B_header.csv"), List.of(tempDir.resolve("nodes_A_B_0.csv"), tempDir.resolve("nodes_A_B_1.csv")),
             tempDir.resolve("nodes_A_C_header.csv"), List.of(tempDir.resolve("nodes_A_C_0.csv"), tempDir.resolve("nodes_A_C_1.csv")),
-            tempDir.resolve("nodes_B_header.csv"), List.of(tempDir.resolve("nodes_B_0.csv"), tempDir.resolve("nodes_B_1.csv"), tempDir.resolve("nodes_B_2.csv"))
+            tempDir.resolve("nodes_B_header.csv"), List.of(tempDir.resolve("nodes_B_0.csv"), tempDir.resolve("nodes_B_1.csv"), tempDir.resolve("nodes_B_2.csv")),
+            tempDir.resolve("nodes_Person_header.csv"), List.of(),
+            tempDir.resolve("nodes_House_Property_header.csv"), List.of()
         );
         assertThat(headerToFileMapping).containsExactlyInAnyOrderEntriesOf(expectedMapping);
     }
 
-    static Stream<Arguments> fileNames() {
+    static Stream<Arguments> nodeFileNames() {
         return Stream.of(
             Arguments.of(
                 List.of(
@@ -87,6 +89,8 @@ class CsvImportUtilTest {
                     "nodes_B_2.csv",
                     "nodes_A_B_header.csv",
                     "nodes_A_C_header.csv",
+                    "nodes_Person_header.csv",
+                    "nodes_House_Property_header.csv",
                     "nodes_B_header.csv"
                 )
             )

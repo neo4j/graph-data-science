@@ -60,7 +60,7 @@ public final class CsvImportUtil {
     }
 
     static List<Path> getNodeHeaderFiles(Path csvDirectory) {
-        String nodeFilesPattern = "^nodes(_\\w)+_header.csv";
+        String nodeFilesPattern = "^nodes(_\\w+)+_header.csv";
         return getFilesByRegex(csvDirectory, nodeFilesPattern);
     }
 
