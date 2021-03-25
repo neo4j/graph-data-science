@@ -64,6 +64,11 @@ public final class CsvImportUtil {
         return getFilesByRegex(csvDirectory, nodeFilesPattern);
     }
 
+    static List<Path> getRelationshipHeaderFiles(Path csvDirectory) {
+        String nodeFilesPattern = "^relationships(_\\w+)+_header.csv";
+        return getFilesByRegex(csvDirectory, nodeFilesPattern);
+    }
+
     private static List<Path> getFilesByRegex(Path csvDirectory, String pattern) {
         var matcher = csvDirectory.getFileSystem().getPathMatcher("regex:" + pattern);
         try (var fileStream = Files.newDirectoryStream(csvDirectory, entry -> matcher.matches(entry.getFileName()))) {

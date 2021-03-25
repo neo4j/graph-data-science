@@ -57,6 +57,22 @@ class CsvImportUtilTest {
     }
 
     @ParameterizedTest
+    @MethodSource("relationshipsFileNames")
+    void shouldFindRelationshipHeaderFiles(List<String> fileNames) throws IOException {
+        for (String fileName : fileNames) {
+            Files.createFile(tempDir.resolve(fileName));
+        }
+        var relationshipHeaderFiles = CsvImportUtil.getRelationshipHeaderFiles(tempDir)
+            .stream()
+            .map(Path::getFileName)
+            .map(Path::toString)
+            .collect(Collectors.toList());
+
+        assertThat(relationshipHeaderFiles).hasSize(3);
+        assertThat(relationshipHeaderFiles).containsExactlyInAnyOrder("relationships_REL_header.csv", "relationships_REL1_header.csv", "relationships_REL2_header.csv");
+    }
+
+    @ParameterizedTest
     @MethodSource("nodeFileNames")
     void shouldConstructHeaderToDataFileMapping(List<String> fileNames) throws IOException {
         for (String fileName : fileNames) {
@@ -92,6 +108,25 @@ class CsvImportUtilTest {
                     "nodes_Person_header.csv",
                     "nodes_House_Property_header.csv",
                     "nodes_B_header.csv"
+                )
+            )
+        );
+    }
+
+    static Stream<Arguments> relationshipsFileNames() {
+        return Stream.of(
+            Arguments.of(
+                List.of(
+                    "relationships_REL_0.csv",
+                    "relationships_REL_1.csv",
+                    "relationships_REL1_0.csv",
+                    "relationships_REL1_1.csv",
+                    "relationships_REL2_0.csv",
+                    "relationships_REL2_1.csv",
+                    "relationships_REL2_2.csv",
+                    "relationships_REL_header.csv",
+                    "relationships_REL1_header.csv",
+                    "relationships_REL2_header.csv"
                 )
             )
         );
