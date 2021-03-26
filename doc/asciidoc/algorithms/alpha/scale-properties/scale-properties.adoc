@@ -16,12 +16,17 @@ The Scale Properties algorithm is a utility algorithm that is used to pre-proces
 It scales the node properties based on the specified scalers.
 Multiple properties can be scaled at once and are returned in a list property.
 
-The input properties must be numbers.
-The output property will always be a list of the same size as the number of input properties.
+The input properties must be numbers or lists of numbers.
+The lists must all have the same size.
+The output property will always be a list.
+The size of the output list is equal to the sum of length of the input properties.
+That is, if the input properties are two scalar numeric properties and one list property of length three, the output list will have a total length of five.
 
 There are a number of supported scalers for the Scale Properties algorithm.
 These can be configured using the `scalers` configuration parameter.
 
+List properties are scaled index-by-index.
+See <<algorithms-scale-properties-examples-list, the list example>> for more details.
 
 In the following equations, `p` denotes the vector containing all property values for a single property across all nodes in the graph.
 
@@ -144,18 +149,18 @@ include::../../shared/examples-intro.adoc[]
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
-  (:Hotel {avgReview: 4.2, buildYear: 1978, name: 'East'}),
-  (:Hotel {avgReview: 8.1, buildYear: 1958, name: 'Plaza'}),
-  (:Hotel {avgReview: 19.0, buildYear: 1999, name: 'Central'}),
-  (:Hotel {avgReview: -4.12, buildYear: 2005, name: 'West'}),
-  (:Hotel {avgReview: 0.01, buildYear: 2020, name: 'Polar'}),
-  (:Hotel {avgReview: 3.3, buildYear: 1981, name: 'Beach'}),
-  (:Hotel {avgReview: 6.7, buildYear: 1984, name: 'Mountain'}),
-  (:Hotel {avgReview: -1.2, buildYear: 2010, name: 'Forest'})
+  (:Hotel {avgReview: 4.2, buildYear: 1978, storyCapacity: [32, 32, 0], name: 'East'}),
+  (:Hotel {avgReview: 8.1, buildYear: 1958, storyCapacity: [18, 20, 0], name: 'Plaza'}),
+  (:Hotel {avgReview: 19.0, buildYear: 1999, storyCapacity: [100, 100, 70], name: 'Central'}),
+  (:Hotel {avgReview: -4.12, buildYear: 2005, storyCapacity: [250, 250, 250], name: 'West'}),
+  (:Hotel {avgReview: 0.01, buildYear: 2020, storyCapacity: [1250, 1250, 900], name: 'Polar'}),
+  (:Hotel {avgReview: 3.3, buildYear: 1981, storyCapacity: [240, 240, 0], name: 'Beach'}),
+  (:Hotel {avgReview: 6.7, buildYear: 1984, storyCapacity: [80, 0, 0], name: 'Mountain'}),
+  (:Hotel {avgReview: -1.2, buildYear: 2010, storyCapacity: [55, 20, 0], name: 'Forest'})
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
-We do this using a native projection targeting the `Hotel` nodes, including their numeric properties.
+We do this using a native projection targeting the `Hotel` nodes, including their properties.
 Note that no relationships are necessary to scale the node properties.
 Thus we use a star projection ('*') for relationships.
 
@@ -168,7 +173,7 @@ CALL gds.graph.create(
   'myGraph',
   'Hotel',
   '*',
-  { nodeProperties: ['avgReview', 'buildYear'] }
+  { nodeProperties: ['avgReview', 'buildYear', 'storyCapacity'] }
 )
 ----
 
@@ -249,6 +254,54 @@ CALL gds.alpha.scaleProperties.mutate('myGraph', {
 |===
 --
 
-The result shows that there are now six new node properties in the in-memory graph.
+The result shows that there are now eight new node properties in the in-memory graph.
 These contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
 To find out how to inspect the new schema of the in-memory graph, see <<catalog-graph-list, Listing graphs in the catalog>>.
+
+
+[[algorithms-scale-properties-examples-list]]
+=== List properties
+
+The `storyCapacity` property models the amount of rooms on each story of the hotel.
+The property is normalized so that hotels with fewer stories have a zero value.
+This is because the Scale Properties algorithm requires that all values for the same property have the same length.
+In this example we will show how to scale the values in these lists using the Scale Properties algorithm.
+We imagine using the output as feature vector to input in a machine learning algorithm.
+Additionally, we will include the `avgReview` property in our feature vector.
+
+Note we can only specify the one scaler per array property.
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scaleProperties.stream('myGraph', {
+  nodeProperties: ['avgReview', 'storyCapacity'],
+  scalers: ['StdScore', 'L2Norm']
+}) YIELD nodeId, scaledProperty
+RETURN gds.util.asNode(nodeId).name AS name, scaledProperty AS features
+  ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name       | features
+| "Beach"    | [-0.17956547594003253, 0.18388925876213183, 0.18437421939709808, 0.0]
+| "Central"  | [2.172199255871029, 0.0766205244842216, 0.07682259141545754, 0.07473073005828626]
+| "East"     | [-0.0447509371737933, 0.024518567834950912, 0.024583229252946412, 0.0]
+| "Forest"   | [-0.8536381697712284, 0.04214128846632188, 0.015364518283091507, 0.0]
+| "Mountain" | [0.32973389273242665, 0.061296419587377284, 0.0, 0.0]
+| "Plaza"    | [0.5394453974799097, 0.013791694407159888, 0.015364518283091507, 0.0]
+| "Polar"    | [-0.672387512096618, 0.95775655605277, 0.9602823926932192, 0.9608236721779662]
+| "West"     | [-1.2910364511016934, 0.191551311210554, 0.19205647853864385, 0.2668954644938795]
+|===
+--
+
+The resulting feature vector contains the standard-score scaled value for the `avgReview` property in the first list position.
+We can see that some values are negative and that the maximum value sticks out for the `Central` hotel.
+
+The other three list positions are the L2-norm scaled values for the `storyCapacity` list property.
+Note that each list item is scaled only with respect to the corresponding item in the other lists.
+Thus, the `Polar` hotel has the greatest scaled value in all list positions.
