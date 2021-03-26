@@ -84,7 +84,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema, boolean isQueueBased, boolean isAsync) {
         var estimationBuilder = MemoryEstimations.builder(Pregel.class)
             .perNode("vote bits", MemoryUsage::sizeOfHugeAtomicBitset)
-            .perThread("compute steps", MemoryEstimations.builder(ComputeStep.class).build())
+            .perThread("compute steps", MemoryEstimations.builder(ComputeStepTask.class).build())
             .add("node value", NodeValue.memoryEstimation(pregelSchema));
 
         if (isQueueBased) {
@@ -149,7 +149,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
             var lastIterationSendMessages = computeSteps
                 .stream()
-                .anyMatch(ComputeStep::hasSendMessage);
+                .anyMatch(ComputeStepTask::hasSendMessage);
 
             // No messages have been sent and all nodes voted to halt
             if (!lastIterationSendMessages && voteBits.allSet()) {
@@ -170,8 +170,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     @NotNull
-    private List<ComputeStep<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
-        Function<Partition, ComputeStep<CONFIG, ?>> partitionFunction = partition -> new ComputeStep<>(
+    private List<ComputeStepTask<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
+        Function<Partition, ComputeStepTask<CONFIG, ?>> partitionFunction = partition -> new ComputeStepTask<>(
             graph,
             computation,
             config,
@@ -200,7 +200,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         }
     }
 
-    private void runComputeSteps(Collection<ComputeStep<CONFIG, ?>> computeSteps) {
+    private void runComputeSteps(Collection<ComputeStepTask<CONFIG, ?>> computeSteps) {
         ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
     }
 

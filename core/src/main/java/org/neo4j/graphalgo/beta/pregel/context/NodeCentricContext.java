@@ -26,11 +26,11 @@ import java.util.function.LongConsumer;
 
 public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
 
-    protected final ComputeStep<CONFIG, ?> computeStep;
+    protected final ComputeStep computeStep;
 
     long nodeId;
 
-    NodeCentricContext(ComputeStep<CONFIG, ?> computeStep, CONFIG config) {
+    NodeCentricContext(ComputeStep computeStep, CONFIG config) {
         super(config);
         this.computeStep = computeStep;
     }

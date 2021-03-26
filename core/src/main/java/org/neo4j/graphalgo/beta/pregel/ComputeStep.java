@@ -19,187 +19,47 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.graphalgo.api.Degrees;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
-import org.neo4j.graphalgo.beta.pregel.context.InitContext;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.graphalgo.core.utils.partition.Partition;
-
 import java.util.function.LongConsumer;
 
-public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator> implements Runnable {
+public interface ComputeStep {
 
-    private final long nodeCount;
-    private final long relationshipCount;
-    private final boolean isMultiGraph;
-    private final InitContext<CONFIG> initContext;
-    private final ComputeContext<CONFIG> computeContext;
-    private final Partition nodeBatch;
-    private final Degrees degrees;
-    private final NodeValue nodeValue;
-    private final HugeAtomicBitSet voteBits;
-    private final Messenger<ITERATOR> messenger;
-    private final PregelComputation<CONFIG> computation;
-    private final RelationshipIterator relationshipIterator;
+    int iteration();
 
-    private int iteration;
-    private boolean hasSendMessage;
+    boolean isMultiGraph();
 
-    ComputeStep(
-        Graph graph,
-        PregelComputation<CONFIG> computation,
-        CONFIG config,
-        int iteration,
-        Partition nodeBatch,
-        NodeValue nodeValue,
-        Messenger<ITERATOR> messenger,
-        HugeAtomicBitSet voteBits,
-        RelationshipIterator relationshipIterator
-    ) {
-        this.iteration = iteration;
-        this.nodeCount = graph.nodeCount();
-        this.relationshipCount = graph.relationshipCount();
-        this.computation = computation;
-        this.voteBits = voteBits;
-        this.nodeBatch = nodeBatch;
-        this.degrees = graph;
-        this.isMultiGraph = graph.isMultiGraph();
-        this.nodeValue = nodeValue;
-        this.relationshipIterator = relationshipIterator.concurrentCopy();
-        this.messenger = messenger;
-        this.computeContext = new ComputeContext<>(this, config);
-        this.initContext = new InitContext<>(this, config, graph);
-    }
+    long nodeCount();
 
-    @Override
-    public void run() {
-        var messageIterator = messenger.messageIterator();
-        var messages = new Messages(messageIterator);
+    long relationshipCount();
 
-        long batchStart = nodeBatch.startNode();
-        long batchEnd = batchStart + nodeBatch.nodeCount();
+    int degree(long nodeId);
 
-        for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
+    void voteToHalt(long nodeId);
 
-            if (computeContext.isInitialSuperstep()) {
-                initContext.setNodeId(nodeId);
-                computation.init(initContext);
-            }
+    void sendTo(long targetNodeId, double message);
 
-            messenger.initMessageIterator(messageIterator, nodeId, computeContext.isInitialSuperstep());
-            
-            if (!messages.isEmpty() || !voteBits.get(nodeId)) {
-                voteBits.clear(nodeId);
-                computeContext.setNodeId(nodeId);
-                computation.compute(computeContext, messages);
-            }
-        }
-    }
+    void sendToNeighbors(long sourceNodeId, double message);
 
-    void init(
-        int iteration
-    ) {
-        this.iteration = iteration;
-        this.hasSendMessage = false;
-    }
+    void sendToNeighborsWeighted(long sourceNodeId, double message);
 
-    public int iteration() {
-        return iteration;
-    }
+    void forEachNeighbor(long sourceNodeId, LongConsumer targetConsumer);
 
-    public boolean isMultiGraph() {
-        return isMultiGraph;
-    }
+    void forEachDistinctNeighbor(long sourceNodeId, LongConsumer targetConsumer);
 
-    public long nodeCount() {
-        return nodeCount;
-    }
+    double doubleNodeValue(String key, long nodeId);
 
-    public long relationshipCount() {
-        return relationshipCount;
-    }
+    long longNodeValue(String key, long nodeId);
 
-    public int degree(long nodeId) {
-        return degrees.degree(nodeId);
-    }
+    long[] longArrayNodeValue(String key, long nodeId);
 
-    public void voteToHalt(long nodeId) {
-        voteBits.set(nodeId);
-    }
+    double[] doubleArrayNodeValue(String key, long nodeId);
 
-    public void sendTo(long targetNodeId, double message) {
-        messenger.sendTo(targetNodeId, message);
-        hasSendMessage = true;
-    }
+    void setNodeValue(String key, long nodeId, double value);
 
-    public void sendToNeighbors(long sourceNodeId, double message) {
-        relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
-            sendTo(targetNodeId, message);
-            return true;
-        });
-    }
+    void setNodeValue(String key, long nodeId, long value);
 
-    public void sendToNeighborsWeighted(long sourceNodeId, double message) {
-        relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
-            sendTo(targetNodeId, computation.applyRelationshipWeight(message, weight));
-            return true;
-        });
-    }
+    void setNodeValue(String key, long nodeId, long[] value);
 
-    public void forEachNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
-        relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
-            targetConsumer.accept(targetNodeId);
-            return true;
-        });
-    }
+    void setNodeValue(String key, long nodeId, double[] value);
 
-    public void forEachDistinctNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
-        var prevTarget = new MutableLong(-1);
-        relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
-            if (prevTarget.longValue() != targetNodeId) {
-                targetConsumer.accept(targetNodeId);
-                prevTarget.setValue(targetNodeId);
-            }
-            return true;
-        });
-    }
-
-    public double doubleNodeValue(String key, long nodeId) {
-        return nodeValue.doubleValue(key, nodeId);
-    }
-
-    public long longNodeValue(String key, long nodeId) {
-        return nodeValue.longValue(key, nodeId);
-    }
-
-    public long[] longArrayNodeValue(String key, long nodeId) {
-        return nodeValue.longArrayValue(key, nodeId);
-    }
-
-    public double[] doubleArrayNodeValue(String key, long nodeId) {
-        return nodeValue.doubleArrayValue(key, nodeId);
-    }
-
-    public void setNodeValue(String key, long nodeId, double value) {
-        nodeValue.set(key, nodeId, value);
-    }
-
-    public void setNodeValue(String key, long nodeId, long value) {
-        nodeValue.set(key, nodeId, value);
-    }
-
-    public void setNodeValue(String key, long nodeId, long[] value) {
-        nodeValue.set(key, nodeId, value);
-    }
-
-    public void setNodeValue(String key, long nodeId, double[] value) {
-        nodeValue.set(key, nodeId, value);
-    }
-
-    boolean hasSendMessage() {
-        return hasSendMessage;
-    }
+    boolean hasSendMessage();
 }

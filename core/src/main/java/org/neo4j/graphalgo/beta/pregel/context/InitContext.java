@@ -36,7 +36,7 @@ public final class InitContext<CONFIG extends PregelConfig> extends NodeCentricC
     private final NodePropertyContainer nodePropertyContainer;
 
     public InitContext(
-        ComputeStep<CONFIG, ?> computeStep,
+        ComputeStep computeStep,
         CONFIG config,
         NodePropertyContainer nodePropertyContainer
     ) {
