@@ -59,21 +59,22 @@ final class GraphInfoTest {
         // do one warmup create
         millisToCreate(emptyProducer, GraphInfo::withoutMemoryUsage);
         var baseline = millisToCreate(emptyProducer, GraphInfo::withoutMemoryUsage);
+        var allowedVarianceInMilliseconds = 10L;
 
         {
             var singleValue = millisToCreate(singleValueProducer, GraphInfo::withoutMemoryUsage);
             var lotsOfSmallValues = millisToCreate(lotsOfSmallValuesProducer, GraphInfo::withoutMemoryUsage);
 
-            assertThat(singleValue).isCloseTo(baseline, within(10L));
-            assertThat(lotsOfSmallValues).isCloseTo(baseline, within(10L));
+            assertThat(singleValue).isCloseTo(baseline, within(allowedVarianceInMilliseconds));
+            assertThat(lotsOfSmallValues).isCloseTo(baseline, within(allowedVarianceInMilliseconds));
         }
 
         {
             var singleValue = millisToCreate(singleValueProducer, GraphInfo::withMemoryUsage);
             var lotsOfSmallValues = millisToCreate(lotsOfSmallValuesProducer, GraphInfo::withMemoryUsage);
 
-            assertThat(singleValue).isGreaterThan(baseline * 10);
-            assertThat(lotsOfSmallValues).isGreaterThan(baseline * 10);
+            assertThat(singleValue).isNotCloseTo(baseline, within(allowedVarianceInMilliseconds));
+            assertThat(lotsOfSmallValues).isNotCloseTo(baseline, within(allowedVarianceInMilliseconds));
         }
     }
 
