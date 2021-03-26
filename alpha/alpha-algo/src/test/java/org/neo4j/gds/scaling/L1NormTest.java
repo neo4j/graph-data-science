@@ -40,13 +40,13 @@ class L1NormTest {
                 5L,
                 (DoubleNodeProperties) nodeId -> nodeId,
                 10D,
-                new double[]{0, 1 / 10D, 2 / 10D, 3 / 10D, 4 / 10D}
+                new double[]{0, 0.1D, 0.2D, 0.3D, 0.4D}
             ),
             Arguments.of(
                 5L,
                 (DoubleNodeProperties) nodeId -> (nodeId % 2 == 0) ? -nodeId : nodeId,
-                -2D,
-                new double[]{-0.0D, -0.5d, 1D, -3 / 2D, 2D}
+                10D,
+                new double[]{0, 0.1D, - 0.2D, 0.3D, -0.40D}
             )
         );
     }

@@ -48,7 +48,7 @@ final class L1Norm implements Scaler {
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
-        var sum = tasks.stream().mapToDouble(ComputeAggregates::sum).max().orElse(Double.MIN_VALUE);
+        var sum = tasks.stream().mapToDouble(ComputeAggregates::sum).sum();
 
         if (Math.abs(sum) < CLOSE_TO_ZERO) {
             return ZERO_SCALER;
@@ -73,13 +73,13 @@ final class L1Norm implements Scaler {
             this.start = start;
             this.length = length;
             this.properties = property;
-            this.sum = Double.MIN_VALUE;
+            this.sum = 0;
         }
 
         @Override
         public void run() {
             for (long nodeId = start; nodeId < (start + length); nodeId++) {
-                sum += properties.doubleValue(nodeId);
+                sum += Math.abs(properties.doubleValue(nodeId));
             }
         }
 
