@@ -50,11 +50,11 @@ class ScalePropertiesTest {
 
     @GdlGraph
     static String GDL =
-        "(a:A {a: 1.1D, b: 20, c: 50, bAndC: [20.0, 50.0], lB: [20L], dB: [20.0d], mixedSizeArray: [1.0, 1.0], missingArray: [1.0,2.0]}), " +
-        "(b:A {a: 2.8D, b: 21, c: 51, bAndC: [21.0, 51.0], lB: [21L], dB: [21.0d], mixedSizeArray: [1.0]}), " +
-        "(c:A {a: 3, b: 22, c: 52, bAndC: [22.0, 52.0], lB: [22L], dB: [22.0d], mixedSizeArray: [1.0]}), " +
-        "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], lB: [23L], dB: [23.0d], mixedSizeArray: [1.0]}), " +
-        "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], lB: [24L], dB: [24.0d], mixedSizeArray: [1.0, 2.0, 3.0]})";
+        "(a:A {a: 1.1D, b: 20, c: 50, bAndC: [20.0, 50.0], longArrayB: [20L], doubleArrayB: [20.0d], mixedSizeArray: [1.0, 1.0], missingArray: [1.0,2.0]}), " +
+        "(b:A {a: 2.8D, b: 21, c: 51, bAndC: [21.0, 51.0], longArrayB: [21L], doubleArrayB: [21.0d], mixedSizeArray: [1.0]}), " +
+        "(c:A {a: 3, b: 22, c: 52, bAndC: [22.0, 52.0], longArrayB: [22L], doubleArrayB: [22.0d], mixedSizeArray: [1.0]}), " +
+        "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], longArrayB: [23L], doubleArrayB: [23.0d], mixedSizeArray: [1.0]}), " +
+        "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], longArrayB: [24L], doubleArrayB: [24.0d], mixedSizeArray: [1.0, 2.0, 3.0]})";
 
     @Inject
     TestGraph graph;
@@ -185,12 +185,12 @@ class ScalePropertiesTest {
         var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder()
             .scalers(List.of(scaler));
         var bConfig = baseConfigBuilder.nodeProperties(List.of("b")).build();
-        var lBConfig = baseConfigBuilder.nodeProperties(List.of("lB")).build();
-        var dBConfig = baseConfigBuilder.nodeProperties(List.of("dB")).build();
+        var longArrayBConfig = baseConfigBuilder.nodeProperties(List.of("longArrayB")).build();
+        var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("doubleArrayB")).build();
 
         var expected = new ScaleProperties(graph, bConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
-        var actualLong = new ScaleProperties(graph, lBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
-        var actualDouble = new ScaleProperties(graph, dBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+        var actualLong = new ScaleProperties(graph, longArrayBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+        var actualDouble = new ScaleProperties(graph, doubleArrayBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
 
         LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualLong.get(id)));
         LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualDouble.get(id)));
