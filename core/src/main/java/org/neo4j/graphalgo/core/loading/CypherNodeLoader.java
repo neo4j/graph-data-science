@@ -128,7 +128,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         return QueryType.NODE;
     }
 
-    private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> propertiesWithPropertyMappings(Map<NodeLabel, Map<String, NodeProperties>> properties) {
+    private static Map<NodeLabel, Map<PropertyMapping, NodeProperties>> propertiesWithPropertyMappings(Map<NodeLabel, Map<String, NodeProperties>> properties) {
         return properties
             .entrySet()
             .stream()

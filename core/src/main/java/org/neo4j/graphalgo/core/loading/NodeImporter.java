@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.values.storable.Value;
 
 import java.util.Collections;
 import java.util.List;
@@ -73,24 +72,6 @@ public class NodeImporter {
                     labelIds,
                     propertiesReference,
                     kernelTransaction
-                );
-            } else {
-                return 0;
-            }
-        });
-    }
-
-    public long importCypherNodes(
-        NodesBatchBuffer buffer,
-        List<Map<String, Value>> cypherNodeProperties,
-        CypherNodePropertyImporter propertyImporter
-    ) {
-        return importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
-            if (propertyImporter != null) {
-                return propertyImporter.importProperties(
-                    internalId,
-                    labelIds,
-                    cypherNodeProperties.get((int) propertiesReference)
                 );
             } else {
                 return 0;

@@ -26,11 +26,11 @@ import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.loading.CypherNodePropertyImporter;
 import org.neo4j.graphalgo.core.loading.IdMappingAllocator;
 import org.neo4j.graphalgo.core.loading.InternalIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.NodeImporter;
@@ -65,6 +65,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public final class NodesBuilder {
 
+    public static final DefaultValue NO_PROPERTY_VALUE = DefaultValue.DEFAULT;
     public static final long UNKNOWN_MAX_ID = -1L;
 
     private final long maxOriginalId;
@@ -217,7 +218,7 @@ public final class NodesBuilder {
         }
         var propertyBuildersByPropertyKey = buildersByLabelTokenAndPropertyToken.get(labelId);
         if (!propertyBuildersByPropertyKey.containsKey(propertyKey)) {
-            propertyBuildersByPropertyKey.put(propertyKey, NodePropertiesFromStoreBuilder.of(nodeCount, tracker, CypherNodePropertyImporter.NO_PROPERTY_VALUE));
+            propertyBuildersByPropertyKey.put(propertyKey, NodePropertiesFromStoreBuilder.of(nodeCount, tracker, NO_PROPERTY_VALUE));
         }
         return propertyBuildersByPropertyKey.get(propertyKey);
     }
