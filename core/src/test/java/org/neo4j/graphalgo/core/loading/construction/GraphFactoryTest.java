@@ -190,7 +190,7 @@ class GraphFactoryTest {
     ) {
         var nodeMappingAndProperties = nodesBuilder.build();
         var idMap = nodeMappingAndProperties.nodeMapping();
-        var nodeProperties = nodeMappingAndProperties.nodePropertiesOrThrow();
+        var nodeProperties = nodeMappingAndProperties.unionNodePropertiesOrThrow();
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)

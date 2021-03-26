@@ -61,6 +61,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
@@ -72,7 +73,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 public final class NodesBuilder {
 
     private final long maxOriginalId;
-    private long nodeCount;
+    private final long nodeCount;
     private final int concurrency;
     private final AllocationTracker tracker;
 
@@ -252,28 +253,24 @@ public final class NodesBuilder {
             tracker
         );
 
-        Optional<Map<String, NodeProperties>> nodeProperties = Optional.empty();
+        Optional<Map<NodeLabel, Map<String, NodeProperties>>> nodeProperties = Optional.empty();
         if (hasProperties) {
-            nodeProperties = Optional.of(buildProperties(nodeMapping));
+            nodeProperties = Optional.of(buildProperties());
         }
         return ImmutableNodeMappingAndProperties.of(nodeMapping, nodeProperties);
     }
 
-    private Map<String, NodeProperties> buildProperties(NodeMapping nodeMapping) {
-        Map<String, Map<NodeLabel, NodeProperties>> nodePropertiesByKeyAndLabel = new HashMap<>();
+    private Map<NodeLabel, Map<String, NodeProperties>> buildProperties() {
+        Map<NodeLabel, Map<String, NodeProperties>> nodePropertiesByLabel = new HashMap<>();
         for (IntObjectCursor<Map<String, NodePropertiesFromStoreBuilder>> propertyBuilderByLabelToken : this.buildersByLabelTokenAndPropertyToken) {
             var nodeLabels = labelTokenNodeLabelMapping.get(propertyBuilderByLabelToken.key);
             nodeLabels.forEach(nodeLabel ->
-                propertyBuilderByLabelToken.value.forEach((propertyKey, propertyBuilder) -> nodePropertiesByKeyAndLabel
-                    .computeIfAbsent(propertyKey, __ -> new HashMap<>()).put(nodeLabel, propertyBuilder.build())
+                propertyBuilderByLabelToken.value.forEach((propertyKey, propertyBuilder) -> nodePropertiesByLabel
+                    .computeIfAbsent(nodeLabel, __ -> new HashMap<>()).put(propertyKey, propertyBuilder.build())
                 )
             );
         }
-
-        return nodePropertiesByKeyAndLabel.entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            entry -> new UnionNodeProperties(nodeMapping, entry.getValue())
-        ));
+        return nodePropertiesByLabel;
     }
 
     private int getOrCreateLabelTokenId(NodeLabel nodeLabel) {
@@ -322,10 +319,35 @@ public final class NodesBuilder {
     @ValueClass
     public interface NodeMappingAndProperties {
         NodeMapping nodeMapping();
-        Optional<Map<String, NodeProperties>> nodeProperties();
 
-        default Map<String, NodeProperties> nodePropertiesOrThrow() {
-            return nodeProperties()
+        Optional<Map<NodeLabel, Map<String, NodeProperties>>> nodeProperties();
+
+        default Optional<Map<String, NodeProperties>> unionNodeProperties() {
+            if (nodeProperties().isEmpty()) {
+                return Optional.empty();
+            }
+
+            Map<String, Map<NodeLabel, NodeProperties>> nodePropertiesByKeyAndLabel = new HashMap<>();
+            nodeProperties().get().forEach((nodeLabel, propertiesByKey) -> {
+                propertiesByKey.forEach((propertyKey, propertyValues) -> {
+                    nodePropertiesByKeyAndLabel
+                        .computeIfAbsent(propertyKey, __ -> new HashMap<>())
+                        .put(nodeLabel, propertyValues);
+                });
+            });
+
+            Map<String, NodeProperties> unionNodeProperties = nodePropertiesByKeyAndLabel
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                    entry -> entry.getKey(),
+                    entry -> new UnionNodeProperties(nodeMapping(), entry.getValue())
+                ));
+            return Optional.of(unionNodeProperties);
+        }
+
+        default Map<String, NodeProperties> unionNodePropertiesOrThrow() {
+            return unionNodeProperties()
                 .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
         }
     }
