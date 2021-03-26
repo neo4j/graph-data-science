@@ -41,7 +41,7 @@ class AccuracyMetricTest {
     }
 
     @Test
-    void shouldComputeAccuracyAllCorrect() {
+    void shouldComputeAccuracyWhenAllPredictionsAreCorrect() {
         var predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
         var targets = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
         var classCounts = new Multiset<Long>();
@@ -54,7 +54,7 @@ class AccuracyMetricTest {
     }
 
     @Test
-    void shouldComputeAccuracyAllWrong() {
+    void shouldComputeAccuracyWhenAllPredictionsAreWrong() {
         var predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
         var targets = HugeLongArray.of(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         var classCounts = new Multiset<Long>();
