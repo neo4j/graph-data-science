@@ -70,7 +70,7 @@ class GraphFactoryTest {
         return Stream.of(Orientation.NATURAL, Orientation.REVERSE);
     }
 
-    static Stream<Arguments> projectionsAndIdMaps() {
+    static Stream<Arguments> orientationsAndIdMaps() {
         return crossArguments(
             () -> validProjections().map(Arguments::of),
             () -> TestMethodRunner.idMapImplementation().map(Arguments::of)
@@ -78,7 +78,7 @@ class GraphFactoryTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("projectionsAndIdMaps")
+    @MethodSource("orientationsAndIdMaps")
     void unweighted(Orientation orientation, TestMethodRunner runTest) {
         runTest.run(() -> {
             long nodeCount = 4;
@@ -118,7 +118,7 @@ class GraphFactoryTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("projectionsAndIdMaps")
+    @MethodSource("orientationsAndIdMaps")
     void withNodeProperties(Orientation orientation, TestMethodRunner runTest) {
         var expectedGraph = fromGdl("(a:A {p: 42L})-->(b:A:B {p: 1337L})-->(c:C {p: 13L})-->(d {p: 33L})-->(a)", orientation);
         runTest.run(() -> {
@@ -148,7 +148,7 @@ class GraphFactoryTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("projectionsAndIdMaps")
+    @MethodSource("orientationsAndIdMaps")
     void withNodePropertiesWithDefaultValue(Orientation orientation, TestMethodRunner runTest) {
         var expectedGraph = fromGdl("(a:A {p: 42L})-->(b:A {p: -1L})-->(c:B {p: -42L})-->(a)", orientation);
         var nodeSchema = NodeSchema.builder()
@@ -212,7 +212,7 @@ class GraphFactoryTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("projectionsAndIdMaps")
+    @MethodSource("orientationsAndIdMaps")
     void weightedWithAggregation(Orientation orientation, TestMethodRunner runTest) {
         runTest.run(() -> {
             var expected = expectedWithAggregation(orientation);
@@ -223,7 +223,7 @@ class GraphFactoryTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("projectionsAndIdMaps")
+    @MethodSource("orientationsAndIdMaps")
     void weightedWithoutAggregation(Orientation orientation, TestMethodRunner runTest) {
         runTest.run(() -> {
             Graph graph = generateGraph(orientation, Aggregation.NONE);
