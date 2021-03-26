@@ -19,19 +19,19 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphdb.Result;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
 import org.neo4j.values.storable.Values;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -44,28 +44,19 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     private long rows;
     private long maxNeoId = 0;
-    private final NodesBatchBuffer buffer;
-    private final List<Map<String, Value>> cypherNodeProperties;
-    private final NodeImporter importer;
-    private final boolean hasLabelInformation;
-    private final CypherNodePropertyImporter propertyImporter;
 
-    private final Map<ElementIdentifier, Integer> elementIdentifierLabelTokenMapping;
-    private int labelIdCounter = 0;
+    private final NodesBuilder nodesBuilder;
+    private final Collection<String> propertyColumns;
+    private final boolean hasLabelInformation;
 
     public NodeRowVisitor(
-        NodesBatchBuffer buffer,
-        NodeImporter importer,
-        boolean hasLabelInformation,
-        CypherNodePropertyImporter propertyImporter
+        NodesBuilder nodesBuilder,
+        Collection<String> propertyColumns,
+        boolean hasLabelInformation
     ) {
-        this.buffer = buffer;
-        this.importer = importer;
-        this.cypherNodeProperties = new ArrayList<>(buffer.capacity());
+        this.nodesBuilder = nodesBuilder;
+        this.propertyColumns = propertyColumns;
         this.hasLabelInformation = hasLabelInformation;
-        this.propertyImporter = propertyImporter;
-        this.elementIdentifierLabelTokenMapping = new HashMap<>();
-
     }
 
     @Override
@@ -76,27 +67,13 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         }
         rows++;
 
-        List<String> labels = getLabels(row, neoId);
-        long[] labelIds = computeLabelIds(labels);
-
-        int propRef = processProperties(row, labels);
-
-        buffer.add(neoId, propRef, labelIds);
-        if (buffer.isFull()) {
-            flush();
-            reset();
-        }
+        var labels = getLabels(row, neoId).toArray(NodeLabel[]::new);
+        var properties = getProperties(row);
+        nodesBuilder.addNode(neoId, properties, labels);
         return true;
     }
 
-    void flush() {
-        if (rows == 0) {
-            throw new IllegalArgumentException("Node-Query returned no nodes");
-        }
-        importer.importCypherNodes(buffer, cypherNodeProperties, propertyImporter);
-    }
-
-    private List<String> getLabels(Result.ResultRow row, long neoId) {
+    private List<NodeLabel> getLabels(Result.ResultRow row, long neoId) {
         if (hasLabelInformation) {
             Object labelsObject = row.get(LABELS_COLUMN);
             if (!(labelsObject instanceof List)) {
@@ -117,32 +94,15 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 ));
             }
 
-            return labels;
+            return labels.stream().map(NodeLabel::of).collect(Collectors.toList());
         } else {
-            return Collections.singletonList(ALL_NODES.name);
+            return List.of(ALL_NODES);
         }
     }
 
-    private long[] computeLabelIds(List<String> labels) {
-        long[] labelIds = new long[labels.size()];
-
-        for (int i = 0; i < labels.size(); i++) {
-            NodeLabel nodeLabel = NodeLabel.of(labels.get(i));
-            long labelId = elementIdentifierLabelTokenMapping.computeIfAbsent(nodeLabel, (l) -> {
-                importer.labelTokenNodeLabelMapping.put(labelIdCounter, Collections.singletonList(nodeLabel));
-                return labelIdCounter++;
-            });
-            labelIds[i] = labelId;
-        }
-
-        return labelIds;
-    }
-
-    private int processProperties(Result.ResultRow row, List<String> labels) {
-        propertyImporter.registerPropertiesForLabels(labels);
-
+    private Map<String, Value> getProperties(Result.ResultRow row) {
         Map<String, Value> propertyValues = new HashMap<>();
-        for (String propertyKey : propertyImporter.propertyColumns()) {
+        for (String propertyKey : propertyColumns) {
             Object valueObject = CypherLoadingUtils.getProperty(row, propertyKey);
             if (valueObject != null) {
                 var value = Values.of(valueObject);
@@ -158,15 +118,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
             }
         }
 
-        int propRef = cypherNodeProperties.size();
-        cypherNodeProperties.add(propertyValues);
-
-        return propRef;
-    }
-
-    private void reset() {
-        buffer.reset();
-        cypherNodeProperties.clear();
+        return propertyValues;
     }
 
     long rows() {

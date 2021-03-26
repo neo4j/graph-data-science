@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import com.carrotsearch.hppc.IntObjectHashMap;
-import com.carrotsearch.hppc.IntObjectMap;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -30,17 +28,14 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphdb.Result;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphdb.Transaction;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 @Value.Enclosing
@@ -48,12 +43,9 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     private final long nodeCount;
     private final GraphDimensions outerDimensions;
-    private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
-    private final InternalHugeIdMappingBuilder builder;
     private long highestNodeId;
-    private CypherNodePropertyImporter nodePropertyImporter;
-    private NodeImporter importer;
+    private NodesBuilder nodesBuilder;
 
     CypherNodeLoader(
         String nodeQuery,
@@ -66,48 +58,26 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         this.nodeCount = nodeCount;
         this.outerDimensions = outerDimensions;
         this.highestNodeId = 0L;
-        this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
-        this.builder = InternalHugeIdMappingBuilder.of(nodeCount, loadingContext.tracker());
     }
 
     @Override
     BatchLoadResult loadSingleBatch(Transaction tx, int bufferSize) {
-        Result queryResult = runLoadingQuery(tx);
+        var queryResult = runLoadingQuery(tx);
 
-        Collection<String> propertyColumns = getPropertyColumns(queryResult);
+        var propertyColumns = getPropertyColumns(queryResult);
 
-        importer = new NodeImporter(
-            builder,
-            new HashMap<>(),
-            labelTokenNodeLabelMapping,
-            !propertyColumns.isEmpty(),
-            loadingContext.tracker()
-        );
-
-        nodePropertyImporter = new CypherNodePropertyImporter(
-            propertyColumns,
-            labelTokenNodeLabelMapping,
-            nodeCount,
-            loadingContext.tracker()
-        );
-
-        boolean hasLabelInformation = queryResult.columns().contains(NodeRowVisitor.LABELS_COLUMN);
-
-        NodesBatchBuffer buffer = new NodesBatchBufferBuilder()
-            .capacity(bufferSize)
+        var hasLabelInformation = queryResult.columns().contains(NodeRowVisitor.LABELS_COLUMN);
+        nodesBuilder = GraphFactory.initNodesBuilder()
+            .nodeCount(nodeCount)
+            .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
             .hasLabelInformation(hasLabelInformation)
-            .readProperty(!propertyColumns.isEmpty())
+            .hasProperties(!propertyColumns.isEmpty())
+            .tracker(loadingContext.tracker())
             .build();
 
-        NodeRowVisitor visitor = new NodeRowVisitor(
-            buffer,
-            importer,
-            hasLabelInformation,
-            nodePropertyImporter
-        );
+        NodeRowVisitor visitor = new NodeRowVisitor(nodesBuilder, propertyColumns, hasLabelInformation);
 
         queryResult.accept(visitor);
-        visitor.flush();
         return new BatchLoadResult(visitor.rows(), visitor.maxId());
     }
 
@@ -120,24 +90,12 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     @Override
     LoadResult result() {
-        final IdMap idMap;
-        try {
-            idMap = IdMapBuilder.buildChecked(
-                builder,
-                importer.nodeLabelBitSetMapping,
-                highestNodeId,
-                cypherConfig.readConcurrency(),
-                loadingContext.tracker()
-            );
-        } catch (DuplicateNodeIdException e) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Node(%d) was added multiple times. Please make sure that the nodeQuery returns distinct ids.",
-                e.nodeId
-            ));
-        }
-        Map<NodeLabel, Map<PropertyMapping, NodeProperties>> nodeProperties = nodePropertyImporter.result();
+        var nodeMappingAndProperties = nodesBuilder.build(highestNodeId);
+        var nodeMapping = nodeMappingAndProperties.nodeMapping();
+        var nodeProperties = nodeMappingAndProperties.nodeProperties().orElseGet(Map::of);
+        var nodePropertiesWithPropertyMappings = propertiesWithPropertyMappings(nodeProperties);
 
-        Map<String, Integer> propertyIds = nodeProperties
+        Map<String, Integer> propertyIds = nodePropertiesWithPropertyMappings
             .values()
             .stream()
             .flatMap(properties -> properties.keySet().stream())
@@ -151,7 +109,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
         return ImmutableCypherNodeLoader.LoadResult.builder()
             .dimensions(resultDimensions)
-            .idsAndProperties(IdsAndProperties.of(idMap, nodeProperties))
+            .idsAndProperties(IdsAndProperties.of(nodeMapping, nodePropertiesWithPropertyMappings))
             .build();
     }
 
@@ -168,6 +126,19 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     @Override
     QueryType queryType() {
         return QueryType.NODE;
+    }
+
+    private Map<NodeLabel, Map<PropertyMapping, NodeProperties>> propertiesWithPropertyMappings(Map<NodeLabel, Map<String, NodeProperties>> properties) {
+        return properties
+            .entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().entrySet().stream().collect(Collectors.toMap(
+                    propertiesByKey -> PropertyMapping.of(propertiesByKey.getKey(), propertiesByKey.getValue().valueType().fallbackValue()),
+                    Map.Entry::getValue
+                ))
+            ));
     }
 
     @ValueClass
