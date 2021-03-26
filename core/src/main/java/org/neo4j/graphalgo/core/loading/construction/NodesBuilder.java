@@ -54,6 +54,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
@@ -63,6 +64,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public final class NodesBuilder {
+
+    public static final long UNKNOWN_MAX_ID = -1L;
 
     private final long maxOriginalId;
     private final long nodeCount;
@@ -128,10 +131,13 @@ public final class NodesBuilder {
         BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn = buildersByLabelTokenAndPropertyKey.isEmpty()
             ? this::getOrCreatePropertyBuilder
             : this::getPropertyBuilder;
+        LongPredicate seenNodeIdPredicate = maxOriginalId == UNKNOWN_MAX_ID
+            ? nodeId -> false
+            : seenIds::getAndSet;
         this.threadLocalBuilder = AutoCloseableThreadLocal.withInitial(
             () -> new NodesBuilder.ThreadLocalBuilder(
                 nodeImporter,
-                seenIds,
+                seenNodeIdPredicate,
                 hasLabelInformation,
                 hasProperties,
                 labelTokenIdFn,
@@ -150,11 +156,15 @@ public final class NodesBuilder {
     }
 
     public NodeMappingAndProperties build() {
+        return build(maxOriginalId);
+    }
+
+    public NodeMappingAndProperties build(long highestNeoId) {
         this.threadLocalBuilder.close();
 
         var nodeMapping = this.nodeMappingBuilder.build(
             nodeLabelBitSetMap,
-            maxOriginalId,
+            highestNeoId,
             concurrency,
             tracker
         );
@@ -262,7 +272,7 @@ public final class NodesBuilder {
 
         private static final long[] ANY_LABEL_ARRAY = { ANY_LABEL };
 
-        private final HugeAtomicBitSet seenIds;
+        private final LongPredicate seenNodeIdPredicate;
         private final NodesBatchBuffer buffer;
         private final Function<NodeLabel, Integer> labelTokenIdFn;
         private final BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn;
@@ -272,14 +282,14 @@ public final class NodesBuilder {
 
         ThreadLocalBuilder(
             NodeImporter nodeImporter,
-            HugeAtomicBitSet seenIds,
+            LongPredicate seenNodeIdPredicate,
             boolean hasLabelInformation,
             boolean hasProperties,
             Function<NodeLabel, Integer> labelTokenIdFn,
             BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn,
             IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey
         ) {
-            this.seenIds = seenIds;
+            this.seenNodeIdPredicate = seenNodeIdPredicate;
             this.labelTokenIdFn = labelTokenIdFn;
             this.propertyBuilderFn = propertyBuilderFn;
 
@@ -294,7 +304,7 @@ public final class NodesBuilder {
         }
 
         public void addNode(long originalId, NodeLabel... nodeLabels) {
-            if (!seenIds.getAndSet(originalId)) {
+            if (!seenNodeIdPredicate.test(originalId)) {
                 long[] labels = labelTokens(nodeLabels);
 
                 buffer.add(originalId, NO_SUCH_PROPERTY_KEY, labels);
@@ -306,7 +316,7 @@ public final class NodesBuilder {
         }
 
         public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {
-            if (!seenIds.getAndSet(originalId)) {
+            if (!seenNodeIdPredicate.test(originalId)) {
                 long[] labels = labelTokens(nodeLabels);
 
                 int propertyReference = batchNodeProperties.size();
