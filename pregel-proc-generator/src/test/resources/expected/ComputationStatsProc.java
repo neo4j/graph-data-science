@@ -68,7 +68,7 @@ public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgor
 
     @Override
     protected AbstractResultBuilder<PregelStatsResult> resultBuilder(
-            AlgoBaseProc.ComputationResult<ComputationAlgorithm, Pregel.PregelResult, PregelConfig> computeResult) {
+            AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelConfig> computeResult) {
         var ranIterations = computeResult.result().ranIterations();
         var didConverge = computeResult.result().didConverge();
         return new PregelStatsResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);

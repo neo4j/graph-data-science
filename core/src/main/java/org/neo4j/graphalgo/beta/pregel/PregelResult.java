@@ -19,12 +19,14 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
-import org.neo4j.graphalgo.Algorithm;
-import org.neo4j.graphalgo.StatsProc;
+import org.neo4j.graphalgo.annotation.ValueClass;
 
-public abstract class PregelStatsProc<
-    ALGO extends Algorithm<ALGO, PregelResult>,
-    CONFIG extends PregelConfig>
-    extends StatsProc<ALGO, PregelResult, PregelStatsResult, CONFIG> {
+@ValueClass
+public interface PregelResult {
 
+    NodeValue nodeValues();
+
+    int ranIterations();
+
+    boolean didConverge();
 }

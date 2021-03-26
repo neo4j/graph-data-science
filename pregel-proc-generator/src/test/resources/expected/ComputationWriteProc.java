@@ -68,7 +68,7 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
 
     @Override
     protected AbstractResultBuilder<PregelWriteResult> resultBuilder(
-            AlgoBaseProc.ComputationResult<ComputationAlgorithm, Pregel.PregelResult, PregelConfig> computeResult) {
+            AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelConfig> computeResult) {
         var ranIterations = computeResult.result().ranIterations();
         var didConverge = computeResult.result().didConverge();
         return new PregelWriteResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);

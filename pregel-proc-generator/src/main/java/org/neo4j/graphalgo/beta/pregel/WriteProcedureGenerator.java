@@ -73,7 +73,7 @@ class WriteProcedureGenerator extends ProcedureGenerator {
             .addParameter(ParameterizedTypeName.get(
                 ClassName.get(AlgoBaseProc.ComputationResult.class),
                 computationClassName(pregelSpec, ALGORITHM_SUFFIX),
-                ClassName.get(Pregel.PregelResult.class),
+                ClassName.get(PregelResult.class),
                 pregelSpec.configTypeName()
             ), "computeResult")
             .addStatement("var ranIterations = computeResult.result().ranIterations()")

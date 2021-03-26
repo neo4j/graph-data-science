@@ -26,12 +26,12 @@ import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import java.util.List;
 
 public abstract class PregelMutateProc<
-    ALGO extends Algorithm<ALGO, Pregel.PregelResult>,
+    ALGO extends Algorithm<ALGO, PregelResult>,
     CONFIG extends PregelConfig>
-    extends MutatePropertyProc<ALGO, Pregel.PregelResult, PregelMutateResult, CONFIG> {
+    extends MutatePropertyProc<ALGO, PregelResult, PregelMutateResult, CONFIG> {
 
     @Override
-    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult) {
+    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, PregelResult, CONFIG> computationResult) {
         return PregelBaseProc.nodeProperties(computationResult, computationResult.config().mutateProperty());
     }
 }

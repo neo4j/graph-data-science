@@ -53,7 +53,7 @@ class AlgorithmGenerator extends PregelGenerator {
             .superclass(ParameterizedTypeName.get(
                 ClassName.get(Algorithm.class),
                 algorithmClassName,
-                ClassName.get(Pregel.PregelResult.class)
+                ClassName.get(PregelResult.class)
             ))
             .addOriginatingElement(pregelSpec.element());
 
@@ -112,7 +112,7 @@ class AlgorithmGenerator extends PregelGenerator {
         return MethodSpec.methodBuilder("compute")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
-            .returns(Pregel.PregelResult.class)
+            .returns(PregelResult.class)
             .addStatement("return pregelJob.run()")
             .build();
     }

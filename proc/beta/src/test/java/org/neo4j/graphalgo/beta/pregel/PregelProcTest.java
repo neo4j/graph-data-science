@@ -211,7 +211,7 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AbstractResultBuilder<PregelMutateResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, Pregel.PregelResult, PregelConfig> computeResult) {
+        protected AbstractResultBuilder<PregelMutateResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, PregelResult, PregelConfig> computeResult) {
             var ranIterations = computeResult.result().ranIterations();
             var didConverge = computeResult.result().didConverge();
             return new PregelMutateResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
@@ -262,7 +262,7 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AbstractResultBuilder<PregelWriteResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, Pregel.PregelResult, PregelConfig> computeResult) {
+        protected AbstractResultBuilder<PregelWriteResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, PregelResult, PregelConfig> computeResult) {
             var ranIterations = computeResult.result().ranIterations();
             var didConverge = computeResult.result().didConverge();
             return new PregelWriteResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
@@ -348,7 +348,7 @@ public class PregelProcTest extends BaseProcTest {
         }
     }
 
-    public static class CompositeTestAlgorithm extends Algorithm<CompositeTestAlgorithm, Pregel.PregelResult> {
+    public static class CompositeTestAlgorithm extends Algorithm<CompositeTestAlgorithm, PregelResult> {
 
         static final String LONG_KEY = "long";
         static final String DOUBLE_KEY = "double";
@@ -383,7 +383,7 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        public Pregel.PregelResult compute() {
+        public PregelResult compute() {
             return pregelJob.run();
         }
 

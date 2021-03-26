@@ -208,14 +208,4 @@ public final class Pregel<CONFIG extends PregelConfig> {
         var context = new MasterComputeContext<>(config, graph, iteration, nodeValues);
         computation.masterCompute(context);
     }
-
-    @ValueClass
-    public interface PregelResult {
-
-        NodeValue nodeValues();
-
-        int ranIterations();
-
-        boolean didConverge();
-    }
 }

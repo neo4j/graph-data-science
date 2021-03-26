@@ -68,7 +68,7 @@ public final class ComputationMutateProc extends PregelMutateProc<ComputationAlg
 
     @Override
     protected AbstractResultBuilder<PregelMutateResult> resultBuilder(
-            AlgoBaseProc.ComputationResult<ComputationAlgorithm, Pregel.PregelResult, PregelConfig> computeResult) {
+            AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelConfig> computeResult) {
         var ranIterations = computeResult.result().ranIterations();
         var didConverge = computeResult.result().didConverge();
         return new PregelMutateResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
