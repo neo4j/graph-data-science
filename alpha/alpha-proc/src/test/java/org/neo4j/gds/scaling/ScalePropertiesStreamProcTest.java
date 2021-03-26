@@ -58,6 +58,16 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
     }
 
     @Test
+    void worksOnEmptyGraph() {
+        runQuery("CALL gds.beta.graph.create.subgraph('empty', 'graph', 'false', 'false')");
+
+        assertCypherResult(
+            "CALL gds.alpha.scaleProperties.stream('empty', {nodeProperties: 'a', scalers: 'mean'})",
+            List.of()
+        );
+    }
+
+    @Test
     void stream() {
         var query = GdsCypher
             .call()
