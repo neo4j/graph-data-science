@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.CSRGraphStoreUtil;
+import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.database.DatabaseIdFactory;
@@ -98,7 +98,7 @@ final class GraphInfoTest {
             .nodeProjections(NodeProjections.ALL)
             .relationshipProjections(RelationshipProjections.ALL)
             .build();
-        var graphStore = CSRGraphStoreUtil.createFromGraph(
+        var graphStore = CSRGraphStore.of(
             DatabaseIdFactory.from("test", UUID.randomUUID()),
             graph,
             "TY",
