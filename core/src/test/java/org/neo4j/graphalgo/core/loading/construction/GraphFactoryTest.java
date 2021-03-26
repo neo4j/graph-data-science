@@ -81,7 +81,7 @@ class GraphFactoryTest {
     @MethodSource("projectionsAndIdMaps")
     void unweighted(Orientation orientation, TestMethodRunner runTest) {
         runTest.run(() -> {
-            int nodeCount = 4;
+            long nodeCount = 4;
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(nodeCount)
                 .hasLabelInformation(true)
@@ -122,7 +122,7 @@ class GraphFactoryTest {
     void withNodeProperties(Orientation orientation, TestMethodRunner runTest) {
         var expectedGraph = fromGdl("(a:A {p: 42L})-->(b:A:B {p: 1337L})-->(c:C {p: 13L})-->(d {p: 33L})-->(a)", orientation);
         runTest.run(() -> {
-            int nodeCount = (int) expectedGraph.nodeCount();
+            long nodeCount = expectedGraph.nodeCount();
             var nodesBuilder = GraphFactory.initNodesBuilder()
                 .maxOriginalId(nodeCount)
                 .nodeCount(nodeCount)
@@ -186,7 +186,7 @@ class GraphFactoryTest {
     private static Graph buildGraphFromNodesBuilder(
         Orientation orientation,
         NodeSchema nodeSchema,
-        int nodeCount,
+        long nodeCount,
         NodesBuilder nodesBuilder
     ) {
         var nodeMappingAndProperties = nodesBuilder.build();
@@ -250,7 +250,7 @@ class GraphFactoryTest {
     }
 
     private Graph generateGraph(Orientation orientation, Aggregation aggregation) {
-        int nodeCount = 4;
+        long nodeCount = 4;
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(nodeCount)
             .tracker(AllocationTracker.empty())
