@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.loading.CypherNodePropertyImporter;
 import org.neo4j.graphalgo.core.loading.IdMapImplementations;
 import org.neo4j.graphalgo.core.loading.IdMappingAllocator;
 import org.neo4j.graphalgo.core.loading.InternalHugeIdMappingBuilder;
@@ -58,6 +59,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -70,6 +72,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 public final class NodesBuilder {
 
     private final long maxOriginalId;
+    private long nodeCount;
     private final int concurrency;
     private final AllocationTracker tracker;
 
@@ -90,18 +93,23 @@ public final class NodesBuilder {
 
     static NodesBuilder withoutSchema(
         long maxOriginalId,
+        long nodeCount,
         boolean hasLabelInformation,
         boolean hasProperties,
         int concurrency,
         AllocationTracker tracker
     ) {
+        if (hasProperties && nodeCount <= 0) {
+            throw new IllegalArgumentException("NodesBuilder with properties requires a node count greater than 0, got " + nodeCount);
+        }
         return new NodesBuilder(
             maxOriginalId,
+            nodeCount,
             concurrency,
             new ObjectIntScatterMap<>(),
             new ConcurrentHashMap<>(),
             new IntObjectHashMap<>(),
-            null,
+            new IntObjectHashMap<>(),
             hasLabelInformation,
             hasProperties,
             tracker
@@ -141,6 +149,7 @@ public final class NodesBuilder {
         boolean hasLabelInformation = !(nodeLabels.isEmpty() || (nodeLabels.size() == 1 && nodeLabels.contains(NodeLabel.ALL_NODES)));
         return new NodesBuilder(
             maxOriginalId,
+            nodeCount,
             concurrency,
             elementIdentifierLabelTokenMapping,
             new ConcurrentHashMap<>(nodeLabels.size()),
@@ -154,6 +163,7 @@ public final class NodesBuilder {
 
     private NodesBuilder(
         long maxOriginalId,
+        long nodeCount,
         int concurrency,
         ObjectIntMap<NodeLabel> elementIdentifierLabelTokenMapping,
         Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMap,
@@ -164,6 +174,7 @@ public final class NodesBuilder {
         AllocationTracker tracker
     ) {
         this.maxOriginalId = maxOriginalId;
+        this.nodeCount = nodeCount;
         this.concurrency = concurrency;
         this.elementIdentifierLabelTokenMapping = elementIdentifierLabelTokenMapping;
         this.nodeLabelBitSetMap = nodeLabelBitSetMap;
@@ -202,6 +213,9 @@ public final class NodesBuilder {
         Function<NodeLabel, Integer> labelTokenIdFn = elementIdentifierLabelTokenMapping.isEmpty()
             ? this::getOrCreateLabelTokenId
             : this::getLabelTokenId;
+        BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn = buildersByLabelTokenAndPropertyKey.isEmpty()
+            ? this::getOrCreatePropertyBuilder
+            : this::getPropertyBuilder;
         this.threadLocalBuilder = AutoCloseableThreadLocal.withInitial(
             () -> new NodesBuilder.ThreadLocalBuilder(
                 nodeImporter,
@@ -209,6 +223,7 @@ public final class NodesBuilder {
                 hasLabelInformation,
                 hasProperties,
                 labelTokenIdFn,
+                propertyBuilderFn,
                 buildersByLabelTokenAndPropertyKey
             )
         );
@@ -283,6 +298,27 @@ public final class NodesBuilder {
         return elementIdentifierLabelTokenMapping.get(nodeLabel);
     }
 
+    private NodePropertiesFromStoreBuilder getOrCreatePropertyBuilder(int labelId, String propertyKey) {
+        if (!buildersByLabelTokenAndPropertyToken.containsKey(labelId)) {
+            buildersByLabelTokenAndPropertyToken.put(labelId, new HashMap<>());
+        }
+        var propertyBuildersByPropertyKey = buildersByLabelTokenAndPropertyToken.get(labelId);
+        if (!propertyBuildersByPropertyKey.containsKey(propertyKey)) {
+            propertyBuildersByPropertyKey.put(propertyKey, NodePropertiesFromStoreBuilder.of(nodeCount, tracker, CypherNodePropertyImporter.NO_PROPERTY_VALUE));
+        }
+        return propertyBuildersByPropertyKey.get(propertyKey);
+    }
+
+    private NodePropertiesFromStoreBuilder getPropertyBuilder(int labelId, String propertyKey) {
+        if (buildersByLabelTokenAndPropertyToken.containsKey(labelId)) {
+            Map<String, NodePropertiesFromStoreBuilder> propertyBuildersByPropertyKey = buildersByLabelTokenAndPropertyToken.get(labelId);
+            if (propertyBuildersByPropertyKey.containsKey(propertyKey)) {
+                return propertyBuildersByPropertyKey.get(propertyKey);
+            }
+        }
+        return null;
+    }
+
     @ValueClass
     public interface NodeMappingAndProperties {
         NodeMapping nodeMapping();
@@ -299,6 +335,7 @@ public final class NodesBuilder {
         private final HugeAtomicBitSet seenIds;
         private final NodesBatchBuffer buffer;
         private final Function<NodeLabel, Integer> labelTokenIdFn;
+        private final BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn;
         private final NodeImporter nodeImporter;
         private final IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey;
         private final List<Map<String, Value>> batchNodeProperties;
@@ -309,10 +346,12 @@ public final class NodesBuilder {
             boolean hasLabelInformation,
             boolean hasProperties,
             Function<NodeLabel, Integer> labelTokenIdFn,
+            BiFunction<Integer, String, NodePropertiesFromStoreBuilder> propertyBuilderFn,
             IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey
         ) {
             this.seenIds = seenIds;
             this.labelTokenIdFn = labelTokenIdFn;
+            this.propertyBuilderFn = propertyBuilderFn;
 
             this.buffer = new NodesBatchBufferBuilder()
                 .capacity(SparseLongArray.toValidBatchSize(ParallelUtil.DEFAULT_BATCH_SIZE))
@@ -399,13 +438,10 @@ public final class NodesBuilder {
                     continue;
                 }
 
-                Map<String, NodePropertiesFromStoreBuilder> buildersByPropertyId = buildersByLabelTokenAndPropertyKey.get((int) label);
-                if (buildersByPropertyId != null) {
-                    NodePropertiesFromStoreBuilder nodePropertiesBuilder = buildersByPropertyId.get(propertyKey);
-                    if (nodePropertiesBuilder != null) {
-                        nodePropertiesBuilder.set(nodeId, value);
-                        propertiesImported++;
-                    }
+                var nodePropertyBuilder = propertyBuilderFn.apply((int) label, propertyKey);
+                if (nodePropertyBuilder != null) {
+                    nodePropertyBuilder.set(nodeId, value);
+                    propertiesImported++;
                 }
             }
 

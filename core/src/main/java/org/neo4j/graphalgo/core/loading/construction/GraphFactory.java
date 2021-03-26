@@ -81,6 +81,7 @@ public final class GraphFactory {
     @Builder.Factory
     static NodesBuilder nodesBuilder(
         long maxOriginalId,
+        Optional<Long> nodeCount,
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Integer> concurrency,
@@ -88,6 +89,7 @@ public final class GraphFactory {
     ) {
         return NodesBuilder.withoutSchema(
             maxOriginalId,
+            nodeCount.orElse(-1L),
             hasLabelInformation.orElse(false),
             hasProperties.orElse(false),
             concurrency.orElse(1),

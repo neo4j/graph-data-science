@@ -246,4 +246,49 @@ class NodesBuilderTest {
             });
         });
     }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    void shouldBuildNodesWithPropertiesWithoutNodeSchema(TestMethodRunner runTest) {
+        runTest.run(() -> {
+            NodesBuilder nodesBuilder = NodesBuilder.withoutSchema(
+                2,
+                graph.nodeCount(),
+                true,
+                true,
+                1,
+                AllocationTracker.empty()
+            );
+
+            nodesBuilder.addNode(
+                idFunction.of("a"),
+                Map.of("prop1", Values.longValue(42), "prop2", Values.longValue(1337)),
+                NodeLabel.of("A")
+            );
+            nodesBuilder.addNode(
+                idFunction.of("b"),
+                Map.of("prop1", Values.longValue(43), "prop2", Values.longValue(1338)),
+                NodeLabel.of("A")
+            );
+
+            var nodeMappingAndProperties = nodesBuilder.build();
+            var nodeMapping = nodeMappingAndProperties.nodeMapping();
+            var nodeProperties = nodeMappingAndProperties
+                .nodeProperties()
+                .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
+
+            assertThat(graph.nodeCount()).isEqualTo(nodeMapping.nodeCount());
+            assertThat(graph.availableNodeLabels()).isEqualTo(nodeMapping.availableNodeLabels());
+            graph.forEachNode(nodeId -> {
+                assertThat(nodeMapping.toOriginalNodeId(nodeId)).isEqualTo(graph.toOriginalNodeId(nodeId));
+                assertThat(nodeProperties.get("prop1").longValue(nodeId)).isEqualTo(graph
+                    .nodeProperties("prop1")
+                    .longValue(nodeId));
+                assertThat(nodeProperties.get("prop2").longValue(nodeId)).isEqualTo(graph
+                    .nodeProperties("prop2")
+                    .longValue(nodeId));
+                return true;
+            });
+        });
+    }
 }
