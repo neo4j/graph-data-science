@@ -26,15 +26,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
-import org.neo4j.graphalgo.beta.pregel.context.InitContext;
-import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -45,11 +40,8 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
-import java.util.Optional;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -62,7 +54,7 @@ import static org.neo4j.graphalgo.beta.pregel.PregelTest.TestPregelComputation.K
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
-class PregelTest {
+class PregelFJTest {
 
     @GdlGraph
     private static final String TEST_GRAPH =
@@ -79,7 +71,7 @@ class PregelTest {
     @ParameterizedTest
     @MethodSource("configAndResult")
     <C extends PregelConfig> void sendsMessages(C config, PregelComputation<C> computation, double[] expected) {
-        Pregel<C> pregelJob = Pregel.create(
+        PregelFJ<C> pregelJob = PregelFJ.create(
             graph,
             config,
             computation,
@@ -112,11 +104,11 @@ class PregelTest {
         var singleThreadedConfig = configBuilder.concurrency(1).build();
         var multiThreadedConfig = configBuilder.concurrency(4).build();
 
-        var singleThreaded = run(graph, singleThreadedConfig, new TestPregelComputation());
-        var singleThreadedReduce = run(graph, singleThreadedConfig, new TestReduciblePregelComputation());
+        var singleThreaded = run(graph, singleThreadedConfig, new PregelTest.TestPregelComputation());
+        var singleThreadedReduce = run(graph, singleThreadedConfig, new PregelTest.TestReduciblePregelComputation());
 
-        var multiThreaded = run(graph, multiThreadedConfig, new TestPregelComputation());
-        var multiThreadedReduce = run(graph, multiThreadedConfig, new TestReduciblePregelComputation());
+        var multiThreaded = run(graph, multiThreadedConfig, new PregelTest.TestPregelComputation());
+        var multiThreadedReduce = run(graph, multiThreadedConfig, new PregelTest.TestReduciblePregelComputation());
 
         for (int nodeId = 0; nodeId < singleThreaded.size(); nodeId++) {
             var v1 = singleThreaded.get(nodeId);
@@ -132,7 +124,7 @@ class PregelTest {
 
     @NotNull
     private HugeDoubleArray run(Graph graph, PregelConfig config, PregelComputation<PregelConfig> computation) {
-        var pregelJob = Pregel.create(
+        var pregelJob = PregelFJ.create(
             graph,
             config,
             computation,
@@ -150,10 +142,10 @@ class PregelTest {
             .concurrency(1)
             .build();
 
-        var pregelJob = Pregel.create(
+        var pregelJob = PregelFJ.create(
             graph,
             config,
-            new TestSendTo(),
+            new PregelTest.TestSendTo(),
             Pools.DEFAULT,
             AllocationTracker.empty()
         );
@@ -173,10 +165,10 @@ class PregelTest {
             .doubleProperty("doubleSeed")
             .build();
 
-        var pregelJob = Pregel.create(
+        var pregelJob = PregelFJ.create(
             graph,
             config,
-            new CompositeTestComputation(),
+            new PregelTest.CompositeTestComputation(),
             Pools.DEFAULT,
             AllocationTracker.empty()
         );
@@ -210,10 +202,10 @@ class PregelTest {
 
     @Test
     void testMasterComputeStep() {
-        var pregelJob = Pregel.create(
+        var pregelJob = PregelFJ.create(
             graph,
             ImmutablePregelConfig.builder().maxIterations(4).build(),
-            new TestMasterCompute(),
+            new PregelTest.TestMasterCompute(),
             Pools.DEFAULT,
             AllocationTracker.empty()
         );
@@ -316,39 +308,25 @@ class PregelTest {
         return Stream.of(
             Arguments.of(
                 ImmutablePregelConfig.builder().maxIterations(2).build(),
-                new TestPregelComputation(),
+                new PregelTest.TestPregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
                 ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop").build(),
-                new TestPregelComputation(),
+                new PregelTest.TestPregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
                 ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop").build(),
-                new TestWeightComputation(),
+                new PregelTest.TestWeightComputation(),
                 new double[]{0.0, 2.0, 1.0}
             ),
             Arguments.of(
                 ImmutablePregelConfig.builder().maxIterations(2).build(),
-                new TestReduciblePregelComputation(),
+                new PregelTest.TestReduciblePregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             )
         );
-    }
-
-    @ValueClass
-    @SuppressWarnings("immutables:subtype")
-    interface HackerManConfig extends PregelConfig {
-        @Override
-        default void validateConcurrency() {
-            // haha, h4ck3rm4n, so smart, much wow
-        }
-
-        @Override
-        default void validateWriteConcurrency() {
-            // and he strikes again, HAHA
-        }
     }
 
     @Test
@@ -358,10 +336,10 @@ class PregelTest {
             .concurrency(42)
             .build();
 
-        assertThrows(IllegalArgumentException.class, () -> Pregel.create(
+        assertThrows(IllegalArgumentException.class, () -> PregelFJ.create(
             graph,
             config,
-            new TestSendTo(),
+            new PregelTest.TestSendTo(),
             Pools.DEFAULT,
             AllocationTracker.empty()
         ));
@@ -370,184 +348,15 @@ class PregelTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void messagesInInitialSuperStepShouldBeEmpty(boolean isAsynchronous) {
-        var pregelJob = Pregel.create(
+        var pregelJob = PregelFJ.create(
             graph,
             ImmutablePregelConfig.builder().maxIterations(2).isAsynchronous(isAsynchronous).build(),
-            new TestEmptyMessageInInitialSuperstep(),
+            new PregelTest.TestEmptyMessageInInitialSuperstep(),
             Pools.DEFAULT,
             AllocationTracker.empty()
         );
 
         // assertion is happening in the computation
         pregelJob.run();
-    }
-
-    public static class TestPregelComputation implements PregelComputation<PregelConfig> {
-
-        static final String KEY = "value";
-
-        @Override
-        public PregelSchema schema(PregelConfig config) {
-            return new PregelSchema.Builder()
-                .add(KEY, ValueType.DOUBLE)
-                .build();
-        }
-
-        @Override
-        public void compute(ComputeContext<PregelConfig> context, Messages messages) {
-            if (context.isInitialSuperstep()) {
-                context.setNodeValue(KEY, 0.0);
-                context.sendToNeighbors(1.0);
-            } else {
-                double messageSum = 0.0;
-                for (Double message : messages) {
-                    messageSum += message.longValue();
-                }
-                context.setNodeValue(KEY, messageSum);
-            }
-            context.voteToHalt();
-        }
-    }
-
-    public static class TestReduciblePregelComputation extends TestPregelComputation {
-
-        @Override
-        public Optional<Reducer> reducer() {
-            return Optional.of(new Reducer.Sum());
-        }
-    }
-
-    public static class TestWeightComputation extends TestPregelComputation {
-
-        @Override
-        public double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
-            return nodeValue * relationshipWeight;
-        }
-    }
-
-    public static class TestSendTo implements PregelComputation<PregelConfig> {
-
-        static final String KEY = "value";
-
-        @Override
-        public PregelSchema schema(PregelConfig config) {
-            return new PregelSchema.Builder().add(KEY, ValueType.DOUBLE).build();
-        }
-
-        @Override
-        public void compute(ComputeContext<PregelConfig> context, Messages messages) {
-            if (context.nodeId() == 0) {
-                var sum = StreamSupport.stream(messages.spliterator(), false).mapToDouble(d -> d).sum();
-                context.setNodeValue(KEY, sum);
-            } else {
-                context.sendTo(0L, 1);
-            }
-        }
-    }
-
-    @ValueClass
-    @Configuration
-    @SuppressWarnings("immutables:subtype")
-    public interface CompositeTestComputationConfig extends PregelConfig {
-        String doubleProperty();
-
-        String longProperty();
-    }
-
-    static class CompositeTestComputation implements PregelComputation<CompositeTestComputationConfig> {
-        static final String LONG_KEY = "long";
-        static final String DOUBLE_KEY = "double";
-        static final String LONG_ARRAY_KEY = "long_array";
-        static final String DOUBLE_ARRAY_KEY = "double_array";
-
-        @Override
-        public PregelSchema schema(CompositeTestComputationConfig config) {
-            return new PregelSchema.Builder()
-                .add(LONG_KEY, ValueType.LONG)
-                .add(DOUBLE_KEY, ValueType.DOUBLE)
-                .add(LONG_ARRAY_KEY, ValueType.LONG_ARRAY)
-                .add(DOUBLE_ARRAY_KEY, ValueType.DOUBLE_ARRAY)
-                .build();
-        }
-
-        @Override
-        public void init(InitContext<CompositeTestComputationConfig> context) {
-            long nodeId = context.nodeId();
-            long longValue = context.nodeProperties(context.config().longProperty()).longValue(nodeId);
-            double doubleValue = context.nodeProperties(context.config().doubleProperty()).doubleValue(nodeId);
-
-            context.setNodeValue(LONG_KEY, longValue);
-            context.setNodeValue(DOUBLE_KEY, doubleValue);
-            context.setNodeValue(LONG_ARRAY_KEY, new long[]{longValue});
-            context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{doubleValue});
-        }
-
-        @Override
-        public void compute(
-            ComputeContext<CompositeTestComputationConfig> context,
-            Messages messages
-        ) {
-            if (!context.isInitialSuperstep()) {
-                context.setNodeValue(LONG_KEY, context.longNodeValue(LONG_KEY) * 2);
-                context.setNodeValue(DOUBLE_KEY, context.doubleNodeValue(DOUBLE_KEY) * 2);
-
-                var longArray = context.longArrayNodeValue(LONG_ARRAY_KEY);
-                context.setNodeValue(LONG_ARRAY_KEY, new long[]{longArray[0] * 2L});
-
-                var doubleArray = context.doubleArrayNodeValue(DOUBLE_ARRAY_KEY);
-                context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{doubleArray[0] * 2L});
-            }
-            context.sendToNeighbors(42.0);
-        }
-    }
-
-    static class TestMasterCompute implements PregelComputation<PregelConfig> {
-        @Override
-        public PregelSchema schema(PregelConfig config) {
-            return new PregelSchema.Builder().add(KEY, ValueType.LONG).build();
-        }
-
-        @Override
-        public void init(InitContext<PregelConfig> context) {
-            context.setNodeValue(KEY, 0);
-        }
-
-        @Override
-        public void compute(ComputeContext<PregelConfig> context, Messages messages) {
-
-        }
-
-        @Override
-        public void masterCompute(MasterComputeContext<PregelConfig> context) {
-            context.forEachNode(nodeId -> {
-                context.setNodeValue(nodeId, KEY, context.longNodeValue(nodeId, KEY) + 1);
-                return true;
-            });
-        }
-    }
-
-    static class TestEmptyMessageInInitialSuperstep implements PregelComputation<PregelConfig> {
-        @Override
-        public PregelSchema schema(PregelConfig config) {
-            return new PregelSchema.Builder().build();
-        }
-
-        @Override
-        public void compute(ComputeContext<PregelConfig> context, Messages messages) {
-            if (context.isInitialSuperstep()) {
-                context.sendToNeighbors(context.nodeId());
-                // Nodes are processed sequentially per thread.
-                // 0 is connected to 1 and 2; for asynchronous
-                // computation, 1 and 2 will receive a message
-                // from 0 in the first superstep.
-                if (context.config().isAsynchronous() && context.nodeId() > 0) {
-                    assertThat(messages).isNotEmpty();
-                } else {
-                    // In synchronous mode, no messages must be
-                    // received in the same superstep.
-                    assertThat(messages).isEmpty();
-                }
-            }
-        }
     }
 }
