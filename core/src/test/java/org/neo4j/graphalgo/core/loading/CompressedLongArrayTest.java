@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.internal.unsafe.UnsafeUtil;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -182,21 +181,33 @@ class CompressedLongArrayTest {
         Instance size: 32 bytes
         Space losses: 0 bytes internal + 2 bytes external = 2 bytes total
          */
+        var unsafe = findTheUnsafe();
         // Offset 16 where the array elements start
-        int arrayBaseOffset = UnsafeUtil.arrayBaseOffset(byte[].class);
+        int arrayBaseOffset = unsafe.arrayBaseOffset(byte[].class);
         // Offset 12 which is the `length` field in the array object header
         int arrayLengthOffset = arrayBaseOffset - Integer.BYTES;
 
         byte[] bytes = {};
         // Override the internal `length` field to be the requested `length`
-        UnsafeUtil.putIntVolatile(bytes, arrayLengthOffset, length);
+        unsafe.putIntVolatile(bytes, arrayLengthOffset, length);
         assertEquals(length, bytes.length);
 
         try {
             code.accept(bytes);
         } finally {
             // Set it back to 0 to avoid shenanigans when it is cleaned up
-            UnsafeUtil.putIntVolatile(bytes, arrayLengthOffset, 0);
+            unsafe.putIntVolatile(bytes, arrayLengthOffset, 0);
+        }
+    }
+
+    private static sun.misc.Unsafe findTheUnsafe() {
+        org.neo4j.internal.unsafe.UnsafeUtil.assertHasUnsafe();
+        try {
+            var unsafeField = org.neo4j.internal.unsafe.UnsafeUtil.class.getDeclaredField("unsafe");
+            unsafeField.setAccessible(true);
+            return (sun.misc.Unsafe) unsafeField.get(null);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new LinkageError("Could not find the unsafe", e);
         }
     }
 }
