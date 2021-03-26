@@ -19,7 +19,10 @@
  */
 package org.neo4j.graphalgo.catalog;
 
-import org.junit.jupiter.api.Test;
+import org.assertj.core.api.InstanceOfAssertFactories;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -29,60 +32,55 @@ import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 final class GraphInfoTest {
 
-    @Test
-    void shouldNotTakeLongToInstantiate() {
-        // it's not super straight-forward to test this as we
-        // don't want to measure against a fixed time.
-        // We measure first how long it takes to create the info for a graph without properties
-        // Then with single value and array value properties.
-        // Those times should be close to each other.
-        // To verify, we also measure how long it takes to create an instance with memory usage
-        // and verify that those times are longer.
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("producers")
+    void shouldIncludeMemoryUsageUnlessRequested(PropertyProducer<?> producer, String displayName) {
+        assertThat(create(producer, GraphInfo::withoutMemoryUsage))
+            .returns(-1L, gi -> gi.sizeInBytes)
+            .returns("", gi -> gi.memoryUsage)
+            .returns(Map.of(), gi -> gi.detailSizeInBytes);
 
-        var emptyProducer = new PropertyProducer.EmptyPropertyProducer();
-        var singleValueProducer = PropertyProducer.fixed("singleValue", 42);
-        var lotsOfSmallValuesProducer = PropertyProducer.randomEmbeddings("lotsOfSmallValues", 42, 0.0F, 1.0F);
+        var graphInfo = create(producer, GraphInfo::withMemoryUsage);
+        assertThat(graphInfo)
+            .extracting(gi -> gi.sizeInBytes, as(InstanceOfAssertFactories.LONG))
+            .isPositive();
 
-        // do one warmup create
-        millisToCreate(emptyProducer, GraphInfo::withoutMemoryUsage);
-        var baseline = millisToCreate(emptyProducer, GraphInfo::withoutMemoryUsage);
-        var allowedVarianceInMilliseconds = 10L;
+        assertThat(graphInfo)
+            .extracting(gi -> gi.memoryUsage, as(InstanceOfAssertFactories.STRING))
+            .isNotBlank();
 
-        {
-            var singleValue = millisToCreate(singleValueProducer, GraphInfo::withoutMemoryUsage);
-            var lotsOfSmallValues = millisToCreate(lotsOfSmallValuesProducer, GraphInfo::withoutMemoryUsage);
-
-            assertThat(singleValue).isCloseTo(baseline, within(allowedVarianceInMilliseconds));
-            assertThat(lotsOfSmallValues).isCloseTo(baseline, within(allowedVarianceInMilliseconds));
-        }
-
-        {
-            var singleValue = millisToCreate(singleValueProducer, GraphInfo::withMemoryUsage);
-            var lotsOfSmallValues = millisToCreate(lotsOfSmallValuesProducer, GraphInfo::withMemoryUsage);
-
-            assertThat(singleValue).isNotCloseTo(baseline, within(allowedVarianceInMilliseconds));
-            assertThat(lotsOfSmallValues).isNotCloseTo(baseline, within(allowedVarianceInMilliseconds));
-        }
+        assertThat(graphInfo)
+            .extracting(gi -> gi.detailSizeInBytes, as(InstanceOfAssertFactories.MAP))
+            .isNotEmpty();
     }
 
+    static Stream<Arguments> producers() {
+        return Stream.of(
+            arguments(new PropertyProducer.EmptyPropertyProducer(), "emptyProducer"),
+            arguments(PropertyProducer.fixed("singleValue", 42), "singleValueProducer"),
+            arguments(
+                PropertyProducer.randomEmbeddings("lotsOfSmallValues", 42, 0.0F, 1.0F),
+                "lotsOfSmallValuesProducer"
+            )
+        );
+    }
 
-    @SuppressWarnings({"FieldCanBeLocal", "unused"})
-    private volatile GraphInfo blackhole;
-
-    private long millisToCreate(
+    private GraphInfo create(
         PropertyProducer<?> nodePropertyProducer,
         BiFunction<GraphCreateConfig, GraphStore, GraphInfo> constructor
     ) {
@@ -107,10 +105,6 @@ final class GraphInfoTest {
             AllocationTracker.empty()
         );
 
-        var timer = ProgressTimer.start();
-        try (timer) {
-            blackhole = constructor.apply(storeConfig, graphStore);
-        }
-        return timer.getDuration();
+        return constructor.apply(storeConfig, graphStore);
     }
 }
