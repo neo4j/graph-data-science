@@ -23,17 +23,19 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -66,12 +68,19 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     public Result compute() {
         var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
 
-        var propertyCount = config.nodeProperties().size();
-        initializeArrays(scaledProperties, propertyCount);
+        // Create a Scaler supplier for each input property
+        // Array properties are unrolled into multiple scalers
+        var scalerSuppliers = IntStream.range(0, config.nodeProperties().size())
+            .mapToObj(inputPos -> prepareScalers(config.nodeProperties().get(inputPos), pickScaler(config.scalers(), inputPos)))
+            .flatMap(Collection::stream)
+            .collect(Collectors.toList());
 
-        List<Scaler> scalers = resolveScalers();
-        for (int i = 0; i < propertyCount; i++) {
-            scaleProperty(scaledProperties, scalers.get(i), i);
+        initializeArrays(scaledProperties, scalerSuppliers.size());
+
+        // Materialize each scaler and apply it to all properties
+        for (int outputPos = 0; outputPos < scalerSuppliers.size(); outputPos++) {
+            var scaler = scalerSuppliers.get(outputPos).get();
+            scaleProperty(scaledProperties, scaler, outputPos);
         }
 
         return Result.of(scaledProperties);
@@ -119,16 +128,81 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         }
     }
 
-    private List<Scaler> resolveScalers() {
-        List<Scaler> scalers = new ArrayList<>();
+    private List<Supplier<Scaler>> prepareScalers(String propertyName, Scaler.Variant scalerVariant) {
+        var nodeProperties = graph.nodeProperties(propertyName);
 
-        for (int i = 0; i < config.nodeProperties().size(); i++) {
-            var scalerVariant = pickScaler(config.scalers(), i);
-            var property = config.nodeProperties().get(i);
-            var nodeProperties = resolveNodeProperty(property);
-            scalers.add(scalerVariant.create(nodeProperties, graph.nodeCount(), config.concurrency(), executor));
+        if (nodeProperties == null) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Node property `%s` not found in graph with node properties: %s",
+                propertyName,
+                graph.availableNodeProperties()
+            ));
         }
-        return scalers;
+
+        int arrayLength;
+
+        switch (nodeProperties.valueType()) {
+            case LONG:
+            case DOUBLE:
+                return List.of(() -> scalerVariant.create(
+                    nodeProperties,
+                    graph.nodeCount(),
+                    config.concurrency(),
+                    executor
+                ));
+            case LONG_ARRAY:
+                arrayLength = nodeProperties.longArrayValue(0).length;
+                return IntStream.range(0, arrayLength)
+                    .mapToObj(idx -> (Supplier<Scaler>)
+                        () -> scalerVariant.create(
+                            transformLongArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
+                            graph.nodeCount(),
+                            config.concurrency(),
+                            executor
+                        )
+                    ).collect(Collectors.toList());
+            case FLOAT_ARRAY:
+            case DOUBLE_ARRAY:
+                arrayLength = nodeProperties.doubleArrayValue(0).length;
+                return IntStream.range(0, arrayLength)
+                    .mapToObj(idx -> (Supplier<Scaler>)
+                        () -> scalerVariant.create(
+                            transformFloatArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
+                            graph.nodeCount(),
+                            config.concurrency(),
+                            executor
+                        )
+                    ).collect(Collectors.toList());
+            case UNKNOWN:
+        }
+
+        throw new UnsupportedOperationException(formatWithLocale(
+            "Scaling node property `%s` of type `%s` is not supported",
+            propertyName,
+            nodeProperties.valueType().cypherName()
+        ));
+    }
+
+    private DoubleNodeProperties transformFloatArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
+        return (nodeId) -> {
+            var propertyValue = property.floatArrayValue(nodeId);
+
+            if (propertyValue == null || propertyValue.length != expectedArrayLength) {
+                throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+            }
+            return propertyValue[idx];
+        };
+    }
+
+    private DoubleNodeProperties transformLongArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
+        return (nodeId) -> {
+            var propertyValue = property.longArrayValue(nodeId);
+
+            if (propertyValue == null || propertyValue.length != expectedArrayLength) {
+                throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+            }
+            return propertyValue[idx];
+        };
     }
 
     private Scaler.Variant pickScaler(List<Scaler.Variant> scalerVariants, int i) {
@@ -140,27 +214,18 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         }
     }
 
-    // TODO move nodeProperty check to org.neo4j.graphalgo.api.GraphStoreValidation when moving to beta
-    private NodeProperties resolveNodeProperty(String property) {
-        NodeProperties result = graph.nodeProperties(property);
-        var supportedTypes = Set.of(ValueType.DOUBLE, ValueType.LONG);
-
-        if (result == null) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Node property `%s` not found in graph with node properties: %s",
-                property,
-                graph.availableNodeProperties()
-            ));
-        } else if (!supportedTypes.contains(result.valueType())) {
-            throw new UnsupportedOperationException(formatWithLocale(
-                "Scaling node property `%s` of type `%s` is not supported. Supported types are %s",
-                property,
-                result.valueType().cypherName(),
-                supportedTypes.stream().map(ValueType::cypherName).collect(Collectors.joining(", "))
-            ));
-        }
-
-        return result;
+    private IllegalArgumentException createInvalidArrayException(
+        String propertyName,
+        int expectedArrayLength,
+        long nodeId,
+        int actualLength
+    ) {
+        return new IllegalArgumentException(formatWithLocale(
+            "For scaling property `%s` expected array of length %d but got length %d for node %d",
+            propertyName,
+            expectedArrayLength,
+            actualLength,
+            nodeId
+        ));
     }
-
 }

@@ -22,6 +22,7 @@ package org.neo4j.gds.scaling;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
@@ -35,6 +36,7 @@ import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.List;
 import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -48,17 +50,17 @@ class ScalePropertiesTest {
 
     @GdlGraph
     static String GDL =
-        "(a:A {a: 1.1D, b: 20, c: 50, array:[1.0,2.0]}), " +
-        "(b:A {a: 2.8D, b: 21, c: 51}), " +
-        "(c:A {a: 3, b: 22, c: 52}), " +
-        "(d:A {a: -1, b: 23, c: 60}), " +
-        "(e:A {a: -10, b: 24, c: 100})";
+        "(a:A {a: 1.1D, b: 20, c: 50, bAndC: [20.0, 50.0], longArrayB: [20L], doubleArrayB: [20.0d], mixedSizeArray: [1.0, 1.0], missingArray: [1.0,2.0]}), " +
+        "(b:A {a: 2.8D, b: 21, c: 51, bAndC: [21.0, 51.0], longArrayB: [21L], doubleArrayB: [21.0d], mixedSizeArray: [1.0]}), " +
+        "(c:A {a: 3, b: 22, c: 52, bAndC: [22.0, 52.0], longArrayB: [22L], doubleArrayB: [22.0d], mixedSizeArray: [1.0]}), " +
+        "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], longArrayB: [23L], doubleArrayB: [23.0d], mixedSizeArray: [1.0]}), " +
+        "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], longArrayB: [24L], doubleArrayB: [24.0d], mixedSizeArray: [1.0, 2.0, 3.0]})";
 
     @Inject
     TestGraph graph;
 
     @Test
-    void minmaxScaling() {
+    void scaleSingleProperty() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a"))
             .scalers(List.of(Scaler.Variant.MINMAX))
@@ -85,7 +87,7 @@ class ScalePropertiesTest {
 
     @ParameterizedTest
     @MethodSource("scalers")
-    void minmaxScalingOverMultipleProperties(List<Scaler.Variant> scalers) {
+    void scaleMultipleProperties(List<Scaler.Variant> scalers) {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "b", "c"))
             .scalers(scalers)
@@ -104,7 +106,7 @@ class ScalePropertiesTest {
     }
 
     @Test
-    void differentScalers() {
+    void scaleWithDifferentScalers() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "b", "c"))
             .scalers(List.of(Scaler.Variant.MINMAX, Scaler.Variant.MEAN, Scaler.Variant.LOG))
@@ -122,7 +124,7 @@ class ScalePropertiesTest {
     }
 
     @Test
-    void parallelScaler() {
+    void parallelScale() {
         int nodeCount = 50_000;
         var bigGraph = RandomGraphGenerator
             .builder()
@@ -155,16 +157,73 @@ class ScalePropertiesTest {
     }
 
     @Test
-    void failOnArrayProperty() {
+    void scaleArrayProperty() {
+        var arrayConfig = ImmutableScalePropertiesBaseConfig.builder()
+            .nodeProperties(List.of("a", "bAndC", "a"))
+            .scalers(List.of(Scaler.Variant.MINMAX))
+            .build();
+
+        var actual = new ScaleProperties(graph, arrayConfig, AllocationTracker.empty(), Pools.DEFAULT)
+            .compute()
+            .scaledProperties();
+
+        var singlePropConfig = ImmutableScalePropertiesBaseConfig.builder()
+            .nodeProperties(List.of("a", "b", "c", "a"))
+            .scalers(List.of(Scaler.Variant.MINMAX))
+            .build();
+
+        var expected = new ScaleProperties(graph, singlePropConfig, AllocationTracker.empty(), Pools.DEFAULT)
+            .compute()
+            .scaledProperties();
+
+        LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actual.get(id)));
+    }
+
+    @ParameterizedTest
+    @EnumSource(Scaler.Variant.class)
+    void supportLongAndDoubleArrays(Scaler.Variant scaler) {
+        var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder()
+            .scalers(List.of(scaler));
+        var bConfig = baseConfigBuilder.nodeProperties(List.of("b")).build();
+        var longArrayBConfig = baseConfigBuilder.nodeProperties(List.of("longArrayB")).build();
+        var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("doubleArrayB")).build();
+
+        var expected = new ScaleProperties(graph, bConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+        var actualLong = new ScaleProperties(graph, longArrayBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+        var actualDouble = new ScaleProperties(graph, doubleArrayBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+
+        LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualLong.get(id)));
+        LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualDouble.get(id)));
+    }
+
+    @Test
+    void failOnArrayPropertyWithUnequalLength() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
-            .nodeProperties(List.of("array"))
+            .nodeProperties(List.of("mixedSizeArray"))
             .scalers(List.of(Scaler.Variant.MINMAX))
             .build();
 
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
-        var error = assertThrows(UnsupportedOperationException.class, algo::compute);
+        var error = assertThrows(IllegalArgumentException.class, algo::compute);
 
-        assertThat(error.getMessage(), containsString("Scaling node property `array` of type `List of Float` is not supported"));
+        assertThat(error.getMessage(), containsString(
+            "For scaling property `mixedSizeArray` expected array of length 2 but got length 1 for node 1"
+        ));
+    }
+
+    @Test
+    void failOnMissingValuesForArrayProperty() {
+        var config = ImmutableScalePropertiesBaseConfig.builder()
+            .nodeProperties(List.of("missingArray"))
+            .scalers(List.of(Scaler.Variant.MINMAX))
+            .build();
+
+        var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
+        var error = assertThrows(IllegalArgumentException.class, algo::compute);
+
+        assertThat(error.getMessage(), containsString(
+            "For scaling property `missingArray` expected array of length 2 but got length 0 for node 1"
+        ));
     }
 
     @Test
