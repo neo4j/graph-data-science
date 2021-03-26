@@ -74,31 +74,40 @@ public final class GraphFactory {
         return new NodesBuilderBuilder();
     }
 
+    public static NodesBuilderFromSchemaBuilder initNodesBuilder(NodeSchema nodeSchema) {
+        return new NodesBuilderFromSchemaBuilder(nodeSchema);
+    }
+
     @Builder.Factory
     static NodesBuilder nodesBuilder(
         long maxOriginalId,
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Integer> concurrency,
-        Optional<Long> nodeCount,
-        Optional<NodeSchema> nodeSchema,
         AllocationTracker tracker
     ) {
-        if (nodeCount.isPresent() && nodeSchema.isPresent()) {
-            return NodesBuilder.fromSchema(
-                maxOriginalId,
-                nodeCount.get(),
-                concurrency.orElse(1),
-                nodeSchema.get(),
-                tracker
-            );
-        }
-
         return NodesBuilder.withoutSchema(
             maxOriginalId,
             hasLabelInformation.orElse(false),
             hasProperties.orElse(false),
             concurrency.orElse(1),
+            tracker
+        );
+    }
+
+    @Builder.Factory
+    static NodesBuilder nodesBuilderFromSchema(
+        long maxOriginalId,
+        long nodeCount,
+        Optional<Integer> concurrency,
+        @Builder.Parameter NodeSchema nodeSchema,
+        AllocationTracker tracker
+    ) {
+        return NodesBuilder.fromSchema(
+            maxOriginalId,
+            nodeCount,
+            concurrency.orElse(1),
+            nodeSchema,
             tracker
         );
     }

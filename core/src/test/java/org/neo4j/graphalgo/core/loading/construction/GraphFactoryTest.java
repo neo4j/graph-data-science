@@ -123,10 +123,9 @@ class GraphFactoryTest {
         var expectedGraph = fromGdl("(a:A {p: 42L})-->(b:A:B {p: 1337L})-->(c:C {p: 13L})-->(d {p: 33L})-->(a)", orientation);
         runTest.run(() -> {
             long nodeCount = expectedGraph.nodeCount();
-            var nodesBuilder = GraphFactory.initNodesBuilder()
+            var nodesBuilder = GraphFactory.initNodesBuilder(expectedGraph.schema().nodeSchema())
                 .maxOriginalId(nodeCount)
                 .nodeCount(nodeCount)
-                .nodeSchema(expectedGraph.schema().nodeSchema())
                 .tracker(AllocationTracker.empty())
                 .build();
 
@@ -165,10 +164,9 @@ class GraphFactoryTest {
             .build();
         runTest.run(() -> {
             int nodeCount = (int) expectedGraph.nodeCount();
-            var nodesBuilder = GraphFactory.initNodesBuilder()
+            var nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
                 .maxOriginalId(nodeCount)
                 .nodeCount(nodeCount)
-                .nodeSchema(nodeSchema)
                 .tracker(AllocationTracker.empty())
                 .build();
 
