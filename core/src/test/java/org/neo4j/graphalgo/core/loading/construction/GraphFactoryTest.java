@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -204,6 +205,7 @@ class GraphFactoryTest {
             idMap,
             nodeSchema,
             nodeProperties,
+            RelationshipType.ALL_RELATIONSHIPS,
             relationshipsBuilder.build(),
             AllocationTracker.empty()
         );

@@ -321,7 +321,7 @@ public final class NodesBuilder {
                 .build();
             this.nodeImporter = nodeImporter;
             this.buildersByLabelTokenAndPropertyKey = buildersByLabelTokenAndPropertyKey;
-            this.batchNodeProperties = new ArrayList<>();
+            this.batchNodeProperties = new ArrayList<>(buffer.capacity());
         }
 
         public void addNode(long originalId, NodeLabel... nodeLabels) {
@@ -368,11 +368,14 @@ public final class NodesBuilder {
             this.nodeImporter.importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
                 if (propertiesReference != NO_SUCH_PROPERTY_KEY) {
                     Map<String, Value> properties = batchNodeProperties.get((int) propertiesReference);
-                    return properties
-                        .entrySet()
-                        .stream()
-                        .mapToInt(entry -> importProperty(internalId, labelIds, entry.getKey(), entry.getValue()))
-                        .sum();
+                    MutableInt importedProperties = new MutableInt(0);
+                    properties.forEach((propertyKey, propertyValue) -> importedProperties.add(importProperty(
+                        internalId,
+                        labelIds,
+                        propertyKey,
+                        propertyValue
+                    )));
+                    return importedProperties.intValue();
                 }
                 return 0;
             });
