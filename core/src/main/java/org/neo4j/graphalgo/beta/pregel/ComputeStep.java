@@ -60,6 +60,4 @@ public interface ComputeStep {
     void setNodeValue(String key, long nodeId, long[] value);
 
     void setNodeValue(String key, long nodeId, double[] value);
-
-    boolean hasSendMessage();
 }

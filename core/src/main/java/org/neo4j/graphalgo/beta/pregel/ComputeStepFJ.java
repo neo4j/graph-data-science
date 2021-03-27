@@ -29,14 +29,15 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.RecursiveAction;
+import java.util.concurrent.CountedCompleter;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.LongConsumer;
 
-public final class ComputeStepFJ<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator> extends RecursiveAction implements ComputeStep {
+public final class ComputeStepFJ<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator>
+    extends CountedCompleter<Void>
+    implements ComputeStep {
 
-    private static final int SEQUENTIAL_THRESHOLD = 1000;
+    private static final int SEQUENTIAL_THRESHOLD = 10000;
 
     private final Graph graph;
     private final CONFIG config;
@@ -46,7 +47,6 @@ public final class ComputeStepFJ<CONFIG extends PregelConfig, ITERATOR extends M
     private final boolean isMultiGraph;
     private final InitContext<CONFIG> initContext;
     private final ComputeContext<CONFIG> computeContext;
-    private Partition nodeBatch;
     private final Degrees degrees;
     private final NodeValue nodeValue;
     private final HugeAtomicBitSet voteBits;
@@ -54,10 +54,10 @@ public final class ComputeStepFJ<CONFIG extends PregelConfig, ITERATOR extends M
     private final PregelComputation<CONFIG> computation;
     private final RelationshipIterator relationshipIterator;
 
-    private final List<ComputeStepFJ<CONFIG, ITERATOR>> subTasks;
-
-    private int iteration;
+    private Partition nodeBatch;
+    private final int iteration;
     private boolean hasSendMessage;
+    private final AtomicBoolean sentMessage;
 
     ComputeStepFJ(
         Graph graph,
@@ -68,8 +68,11 @@ public final class ComputeStepFJ<CONFIG extends PregelConfig, ITERATOR extends M
         NodeValue nodeValue,
         Messenger<ITERATOR> messenger,
         HugeAtomicBitSet voteBits,
-        RelationshipIterator relationshipIterator
+        RelationshipIterator relationshipIterator,
+        CountedCompleter<Void> parent,
+        AtomicBoolean sentMessage
     ) {
+        super(parent);
         this.graph = graph;
         this.config = config;
         this.iteration = iteration;
@@ -84,45 +87,48 @@ public final class ComputeStepFJ<CONFIG extends PregelConfig, ITERATOR extends M
         this.relationshipIterator = relationshipIterator.concurrentCopy();
         this.messenger = messenger;
         this.computeContext = new ComputeContext<>(this, config);
+        this.sentMessage = sentMessage;
         this.initContext = new InitContext<>(this, config, graph);
-
-        this.subTasks = new ArrayList<>();
     }
 
     @Override
     public void compute() {
-        if (nodeBatch.nodeCount() < SEQUENTIAL_THRESHOLD) {
-            computeSequentially();
-        } else {
+        if (nodeBatch.nodeCount() >= SEQUENTIAL_THRESHOLD) {
             long startNode = nodeBatch.startNode();
             long batchSize = nodeBatch.nodeCount();
             boolean isEven = batchSize % 2 == 0;
 
             long pivot = BitUtil.ceilDiv(batchSize, 2);
 
-            this.nodeBatch = isEven
+            var rightBatch = isEven
                 ? Partition.of(startNode + pivot, pivot)
                 : Partition.of(startNode + pivot, pivot - 1);
 
-            var subBatch = Partition.of(startNode, pivot);
+            var leftBatch = Partition.of(startNode, pivot);
 
-            var subTask = new ComputeStepFJ<>(
+            var leftTask = new ComputeStepFJ<>(
                 graph,
                 computation,
                 config,
                 iteration,
-                subBatch,
+                leftBatch,
                 nodeValue,
                 messenger,
                 voteBits,
-                relationshipIterator
+                relationshipIterator,
+                this,
+                sentMessage
             );
 
-            subTasks.add(subTask);
+            this.nodeBatch = rightBatch;
 
-            subTask.fork();
+            addToPendingCount(1);
+            leftTask.fork();
+
             this.compute();
-            subTask.join();
+        } else {
+            computeSequentially();
+            tryComplete();
         }
     }
 
@@ -148,6 +154,8 @@ public final class ComputeStepFJ<CONFIG extends PregelConfig, ITERATOR extends M
                 computation.compute(computeContext, messages);
             }
         }
+
+        this.sentMessage.set(hasSendMessage);
     }
 
     @Override
@@ -260,10 +268,5 @@ public final class ComputeStepFJ<CONFIG extends PregelConfig, ITERATOR extends M
     @Override
     public void setNodeValue(String key, long nodeId, double[] value) {
         nodeValue.set(key, nodeId, value);
-    }
-
-    @Override
-    public boolean hasSendMessage() {
-        return hasSendMessage || subTasks.stream().anyMatch(ComputeStepFJ::hasSendMessage);
     }
 }

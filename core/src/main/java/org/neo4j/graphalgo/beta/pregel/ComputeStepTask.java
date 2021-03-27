@@ -218,8 +218,7 @@ public final class ComputeStepTask<CONFIG extends PregelConfig, ITERATOR extends
         nodeValue.set(key, nodeId, value);
     }
 
-    @Override
-    public boolean hasSendMessage() {
+    boolean hasSendMessage() {
         return hasSendMessage;
     }
 }

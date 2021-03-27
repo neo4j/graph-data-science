@@ -20,25 +20,18 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
-import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
-import java.util.function.Function;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class PregelFJ<CONFIG extends PregelConfig> {
@@ -134,6 +127,8 @@ public final class PregelFJ<CONFIG extends PregelConfig> {
         int iterations;
         for (iterations = 0; iterations < config.maxIterations(); iterations++) {
             // Init root compute step
+            var sentMessage = new AtomicBoolean(false);
+
             var task = new ComputeStepFJ<>(
                 graph,
                 computation,
@@ -143,7 +138,9 @@ public final class PregelFJ<CONFIG extends PregelConfig> {
                 nodeValues,
                 messenger,
                 voteBits,
-                graph
+                graph,
+                null,
+                sentMessage
             );
 
             // Init messenger with the updated state
@@ -154,10 +151,8 @@ public final class PregelFJ<CONFIG extends PregelConfig> {
 
             runMasterComputeStep(iterations);
 
-            var lastIterationSendMessages = task.hasSendMessage();
-
             // No messages have been sent and all nodes voted to halt
-            if (!lastIterationSendMessages && voteBits.allSet()) {
+            if (!sentMessage.get() && voteBits.allSet()) {
                 didConverge = true;
                 break;
             }
