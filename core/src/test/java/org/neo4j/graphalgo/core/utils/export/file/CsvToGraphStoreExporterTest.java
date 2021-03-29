@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
@@ -34,6 +35,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class CsvToGraphStoreExporterTest {
 
@@ -59,6 +61,20 @@ class CsvToGraphStoreExporterTest {
             .addProperty(NodeLabel.of("A"), "neoId", ValueType.LONG)
             .addProperty(NodeLabel.of("B"), "neoId", ValueType.LONG)
             .build();
+
+        var testGraph = TestSupport.fromGdl(
+                                            "  (:A {neoId: 1329, prop1: 21})" +
+                                            ", (:A {neoId: 1330, prop1: 22})" +
+                                            ", (:A {neoId: 1331, prop1: 23})" +
+                                            ", (:A {neoId: 1332, prop1: 24})" +
+                                            ", (:A {neoId: 1333, prop1: 25})" +
+                                            ", (:B {neoId: 1328})" +
+                                            ", (:B {neoId: 1334})" +
+                                            ", (:B {neoId: 1335})" +
+                                            ", (:B {neoId: 1336})" +
+                                            ", (:B {neoId: 1337})"
+        );
+        assertGraphEquals(testGraph, graph);
 
         assertThat(loadedNodeSchema).isEqualTo(expectedNodeSchema);
     }

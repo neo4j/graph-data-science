@@ -132,7 +132,7 @@ public final class CsvToGraphStoreExporter {
             false,
             TransientAdjacencyDegrees.Factory.INSTANCE.newDegrees(HugeIntArray.newArray(0, tracker)),
             new TransientAdjacencyList(new byte[][]{}),
-            new TransientAdjacencyOffsets(HugeLongArray.newArray(0, tracker))
+            new TransientAdjacencyOffsets(HugeLongArray.newArray(fileInput.graphInfo().nodeCount(), tracker))
         );
         graphBuilder.relationshipType(RelationshipType.of("DUMMY_RELATIONSHIP"));
         graphBuilder.relationships(dummyRelationships);
