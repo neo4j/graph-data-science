@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.beta.generator;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
@@ -33,8 +35,10 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -325,7 +329,65 @@ class RandomGraphGeneratorTest {
             .build()
             .generate())
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Duplicate node properties with name [name] of types [DOUBLE] and [DOUBLE].");
+        .hasMessage("Duplicate node properties with name [name]. " +
+                    "The first property producer is [Fixed{propertyName='name', value=1337.0}], " +
+                    "the second one is [Fixed{propertyName='name', value=42.0}].");
+    }
+
+    @Test
+    void shouldFailForMultiplePropertyNamesForLabeledProducers() {
+        var aLabel = NodeLabel.of("A");
+        var bLabel = NodeLabel.of("B");
+        assertThatThrownBy(() -> RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(2)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .addNodePropertyProducer(aLabel, PropertyProducer.fixed("name", 1337.0))
+            .addNodePropertyProducer(bLabel, PropertyProducer.fixed("name", 42.0))
+            .build()
+            .generate())
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Duplicate node properties with name [name]. " +
+                    "The first property producer is [Fixed{propertyName='name', value=1337.0}], " +
+                    "the second one is [Fixed{propertyName='name', value=42.0}].");
+    }
+
+    @ParameterizedTest
+    @MethodSource("producers")
+    void shouldNotFailForMultiplePropertyNamesIfTheProducerIsTheSame(PropertyProducer<?> producer) {
+        assertThatCode(() -> RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(2)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .nodePropertyProducer(producer)
+            .nodePropertyProducer(producer)
+            .build()
+            .generate())
+        .doesNotThrowAnyException();
+    }
+
+    @ParameterizedTest
+    @MethodSource("producers")
+    void shouldNotFailForMultiplePropertyNamesIfTheProducerIsTheSameForLabeledProducers(PropertyProducer<?> producer) {
+        var aLabel = NodeLabel.of("A");
+        var bLabel = NodeLabel.of("B");
+        assertThatCode(() -> RandomGraphGenerator.builder()
+            .nodeCount(10)
+            .averageDegree(2)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .addNodePropertyProducer(aLabel, producer)
+            .addNodePropertyProducer(bLabel, producer)
+            .build()
+            .generate())
+        .doesNotThrowAnyException();
+    }
+
+    static Stream<PropertyProducer<?>> producers() {
+        return Stream.of(
+            PropertyProducer.fixed("name", 42.0),
+            PropertyProducer.random("name", 42.0, 1337.0),
+            PropertyProducer.randomEmbeddings("name", 21, 42.0f, 1337.0f)
+        );
     }
 
     @Test
