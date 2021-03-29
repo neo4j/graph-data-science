@@ -61,10 +61,12 @@ public class NodeSchemaLoader {
             while(linesIterator.hasNext()) {
                 var schemaLine = linesIterator.next();
                 schemaBuilder.nodeLabel(schemaLine.label);
-                schemaBuilder.key(schemaLine.propertyKey);
-                schemaBuilder.valueType(schemaLine.valueType);
-                schemaBuilder.defaultValue(schemaLine.defaultValue);
-                schemaBuilder.state(schemaLine.state);
+                if (schemaLine.propertyKey != null) {
+                    schemaBuilder.key(schemaLine.propertyKey);
+                    schemaBuilder.valueType(schemaLine.valueType);
+                    schemaBuilder.defaultValue(DefaultValue.of(schemaLine.defaultValue, schemaLine.valueType, true));
+                    schemaBuilder.state(schemaLine.state);
+                }
                 schemaBuilder.endOfEntity();
             }
         } catch (IOException e) {
@@ -90,7 +92,7 @@ public class NodeSchemaLoader {
 
         @JsonProperty
         @JsonDeserialize(converter = JacksonConverters.DefaultValueConverter.class)
-        DefaultValue defaultValue;
+        String defaultValue;
 
         @JsonProperty
         GraphStore.PropertyState state;

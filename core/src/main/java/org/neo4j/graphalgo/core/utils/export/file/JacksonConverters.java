@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.utils.export.file;
 import com.fasterxml.jackson.databind.util.StdConverter;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Locale;
@@ -50,10 +49,10 @@ public class JacksonConverters {
         }
     }
 
-    static class DefaultValueConverter extends StdConverter<String, DefaultValue> {
+    static class DefaultValueConverter extends StdConverter<String, String> {
         @Override
-        public DefaultValue convert(String value) {
-            return DefaultValue.of(value.replaceAll("DefaultValue\\(|\\)", ""));
+        public String convert(String value) {
+            return value.replaceAll("DefaultValue\\(|\\)", "");
         }
     }
 }

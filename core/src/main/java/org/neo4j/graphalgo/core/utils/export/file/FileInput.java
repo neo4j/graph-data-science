@@ -155,6 +155,11 @@ public final class FileInput implements CompatInput {
 
         @Override
         void visitLine(String line, NodeFileHeader header, InputEntityVisitor visitor) throws IOException {
+            // Ignore empty lines
+            if (line.isBlank()) {
+                return;
+            }
+
             var lineValues = line.split(",");
 
             visitor.labels(header.nodeLabels());

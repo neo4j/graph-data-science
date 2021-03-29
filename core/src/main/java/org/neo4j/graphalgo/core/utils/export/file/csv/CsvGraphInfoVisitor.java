@@ -34,6 +34,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
     static final String DATABASE_ID_COLUMN_NAME = "databaseId";
     static final String DATABASE_NAME_COLUMN_NAME = "databaseName";
     static final String NODE_COUNT_COLUMN_NAME = "nodeCount";
+    static final String MAX_ORIGINAL_ID_COLUMN_NAME = "maxOriginalId";
 
     private final CsvAppender csvAppender;
 
@@ -52,6 +53,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
             this.csvAppender.appendField(graphInfo.namedDatabaseId().databaseId().uuid().toString());
             this.csvAppender.appendField(graphInfo.namedDatabaseId().name());
             this.csvAppender.appendField(Long.toString(graphInfo.nodeCount()));
+            this.csvAppender.appendField(Long.toString(graphInfo.maxOriginalId()));
             this.csvAppender.endLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -72,6 +74,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
         this.csvAppender.appendField(DATABASE_ID_COLUMN_NAME);
         this.csvAppender.appendField(DATABASE_NAME_COLUMN_NAME);
         this.csvAppender.appendField(NODE_COUNT_COLUMN_NAME);
+        this.csvAppender.appendField(MAX_ORIGINAL_ID_COLUMN_NAME);
         this.csvAppender.endLine();
     }
 }

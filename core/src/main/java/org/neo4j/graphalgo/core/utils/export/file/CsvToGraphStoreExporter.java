@@ -19,24 +19,40 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
+import org.immutables.builder.Builder;
+import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyDegrees;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
+import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.ImmutableImportedProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 
 public final class CsvToGraphStoreExporter {
 
     private final GraphStoreNodeVisitor.Builder nodeVisitorBuilder;
     private final Path importPath;
     private final GraphStoreToFileExporterConfig config;
+
+    private final GraphBuilder graphBuilder;
 
     public static CsvToGraphStoreExporter create(
         GraphStoreToFileExporterConfig config,
@@ -57,26 +73,39 @@ public final class CsvToGraphStoreExporter {
         this.config = config;
         this.nodeVisitorBuilder = nodeVisitorBuilder.withReverseIdMapping(config.includeMetaData());
         this.importPath = importPath;
+        this.graphBuilder = new GraphBuilder();
+    }
+
+    public Graph graph() {
+        return graphBuilder.build();
     }
 
     public GraphStoreExporter.ImportedProperties run(AllocationTracker tracker) {
         var fileInput = new FileInput(importPath);
-        export(fileInput);
-        return ImmutableImportedProperties.of(0, 0);
+        graphBuilder.tracker(tracker);
+        return export(fileInput, tracker);
     }
 
-    private void export(FileInput fileInput) {
-        exportNodes(fileInput);
-        exportRelationships(fileInput);
+    private GraphStoreExporter.ImportedProperties export(FileInput fileInput, AllocationTracker tracker) {
+        var exportedNodes = exportNodes(fileInput, tracker);
+        var exportedRelationships = exportRelationships(fileInput, tracker);
+        return ImmutableImportedProperties.of(exportedNodes, exportedRelationships);
     }
 
-    private void exportNodes(FileInput fileInput) {
+    private long exportNodes(
+        FileInput fileInput,
+        AllocationTracker tracker
+    ) {
         NodeSchema nodeSchema = fileInput.nodeSchema();
+        graphBuilder.nodeSchema(nodeSchema);
+
+        GraphInfo graphInfo = fileInput.graphInfo();
         int concurrency = config.writeConcurrency();
-        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
-            .hasLabelInformation(!nodeSchema.availableLabels().isEmpty())
-            .maxOriginalId(1337L) // TODO
+        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
+            .maxOriginalId(graphInfo.maxOriginalId())
             .concurrency(concurrency)
+            .nodeCount(graphInfo.nodeCount())
+            .tracker(tracker)
             .build();
         nodeVisitorBuilder.withNodeSchema(nodeSchema);
         nodeVisitorBuilder.withNodesBuilder(nodesBuilder);
@@ -88,8 +117,46 @@ public final class CsvToGraphStoreExporter {
         );
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
+
+        var nodeMappingAndProperties = nodesBuilder.build();
+        graphBuilder.idMap(nodeMappingAndProperties.nodeMapping())
+            .nodeProperties(nodeMappingAndProperties.nodeProperties());
+
+        return nodeMappingAndProperties.nodeMapping().nodeCount();
     }
 
-    private void exportRelationships(FileInput fileInput) {}
+    private long exportRelationships(FileInput fileInput, AllocationTracker tracker) {
+        var dummyRelationships = Relationships.of(
+            0L,
+            Orientation.NATURAL,
+            false,
+            TransientAdjacencyDegrees.Factory.INSTANCE.newDegrees(HugeIntArray.newArray(0, tracker)),
+            new TransientAdjacencyList(new byte[][]{}),
+            new TransientAdjacencyOffsets(HugeLongArray.newArray(fileInput.graphInfo().nodeCount(), tracker))
+        );
+        graphBuilder.relationshipType(RelationshipType.of("DUMMY_RELATIONSHIP"));
+        graphBuilder.relationships(dummyRelationships);
+        return 0L;
+    }
 
+    @Builder.Factory
+    static Graph graph(
+        NodeMapping idMap,
+        NodeSchema nodeSchema,
+        Optional<Map<String, NodeProperties>> nodeProperties,
+        RelationshipType relationshipType,
+        Relationships relationships,
+        AllocationTracker tracker
+    ) {
+        return nodeProperties
+            .map(properties -> GraphFactory.create(
+                idMap,
+                nodeSchema,
+                properties,
+                relationshipType,
+                relationships,
+                tracker
+            ))
+            .orElseGet(() -> GraphFactory.create(idMap, relationships, tracker));
+    }
 }

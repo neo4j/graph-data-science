@@ -33,7 +33,11 @@ public interface MetaDataStore {
     RelationshipSchema relationshipSchema();
 
     static MetaDataStore of(GraphStore graphStore) {
-        GraphInfo graphInfo = ImmutableGraphInfo.of(graphStore.databaseId(), graphStore.nodeCount());
+        GraphInfo graphInfo = ImmutableGraphInfo.of(
+            graphStore.databaseId(),
+            graphStore.nodeCount(),
+            graphStore.nodes().highestNeoId()
+        );
         NodeSchema nodeSchema = graphStore.schema().nodeSchema();
         RelationshipSchema relationshipSchema = graphStore.schema().relationshipSchema();
         return ImmutableMetaDataStore.of(graphInfo, nodeSchema, relationshipSchema);

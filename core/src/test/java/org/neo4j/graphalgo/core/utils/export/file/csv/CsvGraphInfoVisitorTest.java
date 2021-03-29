@@ -34,7 +34,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
     void shouldExportDatabaseId() {
         NamedDatabaseId namedDatabaseId = TestDatabaseIdRepository.randomNamedDatabaseId();
         CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
-        graphInfoVisitor.export(ImmutableGraphInfo.of(namedDatabaseId, 1337L));
+        graphInfoVisitor.export(ImmutableGraphInfo.of(namedDatabaseId, 1337L, 19L));
         graphInfoVisitor.close();
 
         assertCsvFiles(List.of(GRAPH_INFO_FILE_NAME));
@@ -42,13 +42,23 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
             GRAPH_INFO_FILE_NAME,
             List.of(
                 defaultHeaderColumns(),
-                List.of(namedDatabaseId.databaseId().uuid().toString(), namedDatabaseId.name(), Long.toString(1337L))
+                List.of(
+                    namedDatabaseId.databaseId().uuid().toString(),
+                    namedDatabaseId.name(),
+                    Long.toString(1337L),
+                    Long.toString(19L)
+                )
             )
         );
     }
 
     @Override
     protected List<String> defaultHeaderColumns() {
-        return List.of(CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME, CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME, CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME);
+        return List.of(
+            CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME,
+            CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
+            CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
+            CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME
+        );
     }
 }

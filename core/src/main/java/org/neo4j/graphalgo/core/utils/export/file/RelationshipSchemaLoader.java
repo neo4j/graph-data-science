@@ -62,11 +62,13 @@ public class RelationshipSchemaLoader {
             while(linesIterator.hasNext()) {
                 var schemaLine = linesIterator.next();
                 schemaBuilder.relationshipType(schemaLine.relationshipType);
-                schemaBuilder.key(schemaLine.propertyKey);
-                schemaBuilder.valueType(schemaLine.valueType);
-                schemaBuilder.defaultValue(schemaLine.defaultValue);
-                schemaBuilder.state(schemaLine.state);
-                schemaBuilder.aggregation(schemaLine.aggregation);
+                if (schemaLine.propertyKey != null) {
+                    schemaBuilder.key(schemaLine.propertyKey);
+                    schemaBuilder.valueType(schemaLine.valueType);
+                    schemaBuilder.defaultValue(DefaultValue.of(schemaLine.defaultValue, schemaLine.valueType, true));
+                    schemaBuilder.state(schemaLine.state);
+                    schemaBuilder.aggregation(schemaLine.aggregation);
+                }
                 schemaBuilder.endOfEntity();
             }
         } catch (IOException e) {
@@ -92,7 +94,7 @@ public class RelationshipSchemaLoader {
 
         @JsonProperty
         @JsonDeserialize(converter = JacksonConverters.DefaultValueConverter.class)
-        DefaultValue defaultValue;
+        String defaultValue;
 
         @JsonProperty
         Aggregation aggregation;

@@ -19,11 +19,15 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
+import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -31,6 +35,11 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_ARRAY_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.api.DefaultValue.FLOAT_ARRAY_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.api.DefaultValue.LONG_ARRAY_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class DefaultValueTest {
@@ -45,10 +54,10 @@ class DefaultValueTest {
             arguments(42, 42L),
             arguments(42L, 42L),
             arguments(42.0F, 42L),
-            arguments(DefaultValue.FLOAT_DEFAULT_FALLBACK, DefaultValue.LONG_DEFAULT_FALLBACK),
+            arguments(DefaultValue.FLOAT_DEFAULT_FALLBACK, LONG_DEFAULT_FALLBACK),
             arguments(42.0D, 42L),
-            arguments(DefaultValue.DOUBLE_DEFAULT_FALLBACK, DefaultValue.LONG_DEFAULT_FALLBACK),
-            arguments(null, DefaultValue.LONG_DEFAULT_FALLBACK)
+            arguments(DefaultValue.DOUBLE_DEFAULT_FALLBACK, LONG_DEFAULT_FALLBACK),
+            arguments(null, LONG_DEFAULT_FALLBACK)
         );
     }
 
@@ -91,7 +100,7 @@ class DefaultValueTest {
         return Stream.of(
             arguments(42, 42.0D),
             arguments(42L, 42.0D),
-            arguments(DefaultValue.LONG_DEFAULT_FALLBACK, DefaultValue.DOUBLE_DEFAULT_FALLBACK),
+            arguments(LONG_DEFAULT_FALLBACK, DefaultValue.DOUBLE_DEFAULT_FALLBACK),
             arguments(42.123F, 42.123D),
             arguments(Float.MAX_VALUE, ((Float) Float.MAX_VALUE).doubleValue()),
             arguments(DefaultValue.FLOAT_DEFAULT_FALLBACK, DefaultValue.DOUBLE_DEFAULT_FALLBACK),
@@ -125,5 +134,36 @@ class DefaultValueTest {
         var e = assertThrows(UnsupportedOperationException.class, defaultValue::doubleValue);
 
         assertThat(e.getMessage(), containsString("Cannot safely convert"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("valuesWithValueType")
+    void shouldCreateDefaultValueUsingValueType(Object valueToSet, ValueType type, Function<DefaultValue, ?> fn, Object expectedValue) {
+        var defaultValue = DefaultValue.of(valueToSet, type, true);
+        Assertions.assertThat(fn.apply(defaultValue)).isEqualTo(expectedValue);
+    }
+
+    private static Stream<Arguments> valuesWithValueType() {
+        return Stream.of(
+            Arguments.of("42", ValueType.LONG, (Function<DefaultValue, ?>) DefaultValue::longValue, 42L),
+            Arguments.of("42", ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 42D),
+            Arguments.of("13.37", ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 13.37D),
+            Arguments.of(List.of("13.37", "42"), ValueType.DOUBLE_ARRAY, (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue, new double[] {13.37D, 42D}),
+            Arguments.of(new String[]{"13.37", "42"}, ValueType.DOUBLE_ARRAY, (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue, new double[] {13.37D, 42D}),
+            Arguments.of(List.of("1337", "42"), ValueType.LONG_ARRAY, (Function<DefaultValue, ?>) DefaultValue::longArrayValue, new long[] {1337L, 42L}),
+            Arguments.of(new String[]{"1337", "42"}, ValueType.LONG_ARRAY, (Function<DefaultValue, ?>) DefaultValue::longArrayValue, new long[] {1337L, 42L}),
+            Arguments.of(List.of("13.37", "42"), ValueType.FLOAT_ARRAY, (Function<DefaultValue, ?>) DefaultValue::floatArrayValue, new float[] {13.37F, 42F}),
+            Arguments.of(new String[]{"13.37", "42"}, ValueType.FLOAT_ARRAY, (Function<DefaultValue, ?>) DefaultValue::floatArrayValue, new float[] {13.37F, 42F}),
+            Arguments.of("", ValueType.LONG, (Function<DefaultValue, ?>) DefaultValue::longValue, LONG_DEFAULT_FALLBACK),
+            Arguments.of(null, ValueType.LONG, (Function<DefaultValue, ?>) DefaultValue::longValue, LONG_DEFAULT_FALLBACK),
+            Arguments.of("", ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, DOUBLE_DEFAULT_FALLBACK),
+            Arguments.of(null, ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, DOUBLE_DEFAULT_FALLBACK),
+            Arguments.of("", ValueType.DOUBLE_ARRAY, (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue, DOUBLE_ARRAY_DEFAULT_FALLBACK),
+            Arguments.of(null, ValueType.DOUBLE_ARRAY, (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue, DOUBLE_ARRAY_DEFAULT_FALLBACK),
+            Arguments.of("", ValueType.LONG_ARRAY, (Function<DefaultValue, ?>) DefaultValue::longArrayValue, LONG_ARRAY_DEFAULT_FALLBACK),
+            Arguments.of(null, ValueType.LONG_ARRAY, (Function<DefaultValue, ?>) DefaultValue::longArrayValue, LONG_ARRAY_DEFAULT_FALLBACK),
+            Arguments.of("", ValueType.FLOAT_ARRAY, (Function<DefaultValue, ?>) DefaultValue::floatArrayValue, FLOAT_ARRAY_DEFAULT_FALLBACK),
+            Arguments.of(null, ValueType.FLOAT_ARRAY, (Function<DefaultValue, ?>) DefaultValue::floatArrayValue, FLOAT_ARRAY_DEFAULT_FALLBACK)
+        );
     }
 }
