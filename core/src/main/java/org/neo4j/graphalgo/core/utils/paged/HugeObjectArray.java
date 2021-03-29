@@ -253,12 +253,25 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
         return SingleHugeObjectArray.of(componentClass, size, tracker);
     }
 
-    public static MemoryEstimation memoryEstimation(long objectEstimation) {
-        return memoryEstimation(
-            MemoryEstimations.of("instance", (dimensions, concurrency) -> MemoryRange.of(objectEstimation))
-        );
+    public static long memoryEstimation(long arraySize, long objectSize) {
+        var sizeOfInstance = arraySize <= ArrayUtil.MAX_ARRAY_LENGTH
+            ? sizeOfInstance(SingleHugeObjectArray.class)
+            : sizeOfInstance(PagedHugeObjectArray.class);
+
+        int numPages = numberOfPages(arraySize);
+
+        long outArrayMemoryUsage = sizeOfObjectArray(numPages);
+
+        long memoryUsagePerPage = sizeOfObjectArray(PAGE_SIZE) + (PAGE_SIZE * objectSize);
+        long pageMemoryUsage = (numPages - 1) * memoryUsagePerPage;
+
+        int lastPageSize = exclusiveIndexOfPage(arraySize);
+        var lastPageMemoryUsage = sizeOfObjectArray(lastPageSize) + (lastPageSize * objectSize);
+
+        return sizeOfInstance + outArrayMemoryUsage + pageMemoryUsage + lastPageMemoryUsage;
     }
 
+    // TODO: let's remove this method
     public static MemoryEstimation memoryEstimation(MemoryEstimation objectEstimation) {
         var builder = MemoryEstimations.builder();
 
@@ -281,6 +294,13 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
             }
         });
         return builder.build();
+    }
+
+    // TODO: lets remove this method
+    public static MemoryEstimation memoryEstimation(long objectEstimation) {
+        return memoryEstimation(
+            MemoryEstimations.of("instance", (dimensions, concurrency) -> MemoryRange.of(objectEstimation))
+        );
     }
 
     private static final class SingleHugeObjectArray<T> extends HugeObjectArray<T> {
