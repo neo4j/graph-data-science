@@ -221,36 +221,45 @@ public final class RandomGraphGenerator {
     }
 
     private NodePropertiesAndSchema generateNodeProperties(NodeMapping idMap) {
-        var propertyToLabels = new HashMap<String, List<NodeLabel>>();
-        var propertyToArray = new HashMap<String, NodeProperties>();
+        var propertyNameToLabels = new HashMap<String, List<NodeLabel>>();
+        var propertyNameToProducers = new HashMap<String, PropertyProducer<?>>();
 
         nodePropertyProducers.forEach((nodeLabel, propertyProducers) ->
             propertyProducers.forEach(propertyProducer -> {
                 // map property names to all labels for that property
-                propertyToLabels
+                propertyNameToLabels
                     .computeIfAbsent(propertyProducer.getPropertyName(), ignore -> new ArrayList<>())
                     .add(nodeLabel);
-                // generate properties and store them
-                var properties = generateProperties(propertyProducer);
-                var previous = propertyToArray.put(propertyProducer.getPropertyName(), properties);
-                if (previous != null) {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "Duplicate node properties with name [%s] of types [%s] and [%s].",
-                        propertyProducer.getPropertyName(),
-                        previous.valueType(),
-                        properties.valueType()
-                    ));
-                }
+                // group producers by property name
+                propertyNameToProducers.merge(
+                    propertyProducer.getPropertyName(),
+                    propertyProducer,
+                    (first, second) -> {
+                        if (!first.equals(second)) {
+                            throw new IllegalArgumentException(formatWithLocale(
+                                "Duplicate node properties with name [%s]. The first property producer is [%s], the second one is [%s].",
+                                first.getPropertyName(),
+                                first,
+                                second
+                            ));
+                        }
+                        return first;
+                    }
+                );
             })
         );
 
         // Construct union node properties
-        Map<String, NodeProperties> unionProperties = propertyToLabels.entrySet().stream().collect(Collectors.toMap(
+        Map<String, NodeProperties> unionProperties = propertyNameToLabels.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
             entry -> {
-                var propertyKey = entry.getKey();
+                var propertyName = entry.getKey();
                 var nodeLabels = entry.getValue();
-                var nodeProperties = propertyToArray.get(propertyKey);
+
+                // generate properties
+                var propertyProducer = propertyNameToProducers.get(propertyName);
+                var nodeProperties = generateProperties(propertyProducer);
+
                 var nodeLabelToProperties = nodeLabels
                     .stream()
                     .collect(Collectors.toMap(nodeLabel -> nodeLabel, nodeLabel -> nodeProperties));
@@ -262,7 +271,7 @@ public final class RandomGraphGenerator {
         // Create a corresponding node schema
         var nodeSchemaBuilder = NodeSchema.builder();
         unionProperties.forEach((propertyKey, property) -> {
-            propertyToLabels.get(propertyKey).forEach(nodeLabel ->
+            propertyNameToLabels.get(propertyKey).forEach(nodeLabel ->
                 nodeSchemaBuilder.addProperty(
                     nodeLabel,
                     propertyKey,
