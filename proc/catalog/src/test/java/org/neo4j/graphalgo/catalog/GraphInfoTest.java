@@ -35,7 +35,6 @@ import org.neo4j.graphalgo.core.loading.CSRGraphStoreUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -49,11 +48,10 @@ final class GraphInfoTest {
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("producers")
-    void shouldIncludeMemoryUsageUnlessRequested(PropertyProducer<?> producer, String displayName) {
+    void shouldIncludeMemoryUsageUnlessRequested(PropertyProducer<?> producer, @SuppressWarnings("unused") String displayName) {
         assertThat(create(producer, GraphInfo::withoutMemoryUsage))
             .returns(-1L, gi -> gi.sizeInBytes)
-            .returns("", gi -> gi.memoryUsage)
-            .returns(Map.of(), gi -> gi.detailSizeInBytes);
+            .returns("", gi -> gi.memoryUsage);
 
         var graphInfo = create(producer, GraphInfo::withMemoryUsage);
         assertThat(graphInfo)
@@ -63,10 +61,6 @@ final class GraphInfoTest {
         assertThat(graphInfo)
             .extracting(gi -> gi.memoryUsage, as(InstanceOfAssertFactories.STRING))
             .isNotBlank();
-
-        assertThat(graphInfo)
-            .extracting(gi -> gi.detailSizeInBytes, as(InstanceOfAssertFactories.MAP))
-            .isNotEmpty();
     }
 
     static Stream<Arguments> producers() {
