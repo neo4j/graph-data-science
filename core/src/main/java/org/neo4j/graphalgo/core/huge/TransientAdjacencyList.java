@@ -113,9 +113,8 @@ public final class TransientAdjacencyList implements AdjacencyList {
     static long computeAdjacencyByteSize(long avgDegree, long nodeCount, long delta) {
         long firstAdjacencyIdAvgByteSize = (avgDegree > 0) ? ceilDiv(encodedVLongSize(nodeCount), 2) : 0L;
         int relationshipByteSize = encodedVLongSize(delta);
-        int degreeByteSize = Integer.BYTES;
         long compressedAdjacencyByteSize = relationshipByteSize * Math.max(0, (avgDegree - 1));
-        return (degreeByteSize + firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
+        return (firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
     }
 
     public TransientAdjacencyList(byte[][] pages) {

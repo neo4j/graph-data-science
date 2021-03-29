@@ -170,8 +170,8 @@ class TransientAdjacencyListTest {
         MemoryTree memRec = TransientAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 16;
-        long bestCaseAdjacencySize = 100_500_000_000L;
-        long worstCaseAdjacencySize = 300_300_000_000L;
+        long bestCaseAdjacencySize = 100_100_000_000L;
+        long worstCaseAdjacencySize = 299_900_000_000L;
 
         int minPages = PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
         int maxPages = PageUtil.numPagesFor(worstCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
@@ -214,10 +214,8 @@ class TransientAdjacencyListTest {
         long firstAdjacencyIdAvgByteSize = ceilDiv(ceilDiv(64 - Long.numberOfLeadingZeros(nodeCount - 1), 7), 2);
         // int relationshipByteSize = encodedVLongSize(delta);
         long relationshipByteSize = ceilDiv(64 - Long.numberOfLeadingZeros(delta - 1), 7);
-        // int degreeByteSize = Integer.BYTES;
-        int degreeByteSize = 4;
         long compressedAdjacencyByteSize = relationshipByteSize * (avgDegree - 1);
-        long expected = (degreeByteSize + firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
+        long expected = (firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
 
         assertEquals(expected, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
     }
@@ -235,7 +233,7 @@ class TransientAdjacencyListTest {
         long avgDegree = 0;
         long nodeCount = 100;
         long delta = 0;
-        assertEquals(400, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
+        assertEquals(0, computeAdjacencyByteSize(avgDegree, nodeCount, delta));
     }
 
     private TransientAdjacencyList.DecompressingCursor adjacencyCursorFromTargets(long[] targets) {
