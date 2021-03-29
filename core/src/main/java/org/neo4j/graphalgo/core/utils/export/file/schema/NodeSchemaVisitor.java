@@ -34,4 +34,12 @@ public abstract class NodeSchemaVisitor extends InputNodeSchemaVisitor.Adapter {
         this.nodeLabel = nodeLabel;
         return true;
     }
+
+    protected void reset() {
+        nodeLabel(null);
+        key(null);
+        valueType(null);
+        defaultValue(null);
+        state(null);
+    }
 }
