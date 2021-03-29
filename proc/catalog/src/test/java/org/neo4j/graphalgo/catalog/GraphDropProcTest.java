@@ -99,9 +99,8 @@ class GraphDropProcTest extends BaseProcTest {
                     "relationshipCount", 1L,
                     "creationTime", isA(ZonedDateTime.class),
                     "modificationTime", isA(ZonedDateTime.class),
-                    "memoryUsage", isA(String.class),
-                    "sizeInBytes", isA(Long.class),
-                    "detailSizeInBytes", isA(Map.class),
+                    "memoryUsage", "",
+                    "sizeInBytes", -1L,
                     "schema", map(
                         "nodes", map("A", emptyMap()),
                         "relationships", map("REL", emptyMap())
