@@ -1,13 +1,13 @@
 [[algorithms-celf]]
 [.alpha]
 = CELF
-:entity: influenceMaximazation
-:result: spreadGain
+:entity: influenceMaximization
+:result: spread
 :algorithm: CELF
 
 [abstract]
 --
-This section describes the CELF Influence Maximization algorithm in the Neo4j Graph Data Science library.
+This section describes the Cost Effective Lazy Forward (CELF) Algorithm Influence Maximization algorithm in the Neo4j Graph Data Science library.
 --
 
 include::../alpha-note.adoc[]
@@ -24,7 +24,9 @@ This topic includes:
 The CELF algorithm for Influence Maximization aims to find `k` nodes that maximize the expected spread of influence in the network.
 It simulates the influence spread using the Independent Cascade model, which calculates the expected spread by taking the average spread over the `mc` Monte-Carlo simulations. In the propagation process, a node is influenced in case that a uniform random draw is less than the probability `p`.
 
-Leskovec et al. 2007 introduced CELF algorithm in their study "https://www.cs.cmu.edu/~jure/pubs/detect-kdd07.pdf[Cost-effective Outbreak Detection in Networks]" to deal with the NP-hard problem of Influence Maximization on the basis of the "lazy-forward" optimization.
+Leskovec et al. 2007 introduced the CELF algorithm in their study "https://www.cs.cmu.edu/~jure/pubs/detect-kdd07.pdf[Cost-effective Outbreak Detection in Networks]" to deal with the NP-hard problem of Influence Maximization.
+The CELF algorithm is based on a "lazy-forward" optimization. Τhe CELF algorithm dramatically improves the efficiency of the <<algorithms-greedy, Greedy>> algorithm and should be preffered for large networks.
+
 [[alpha-algorithms-celf-syntax]]
 == Syntax
 
@@ -40,13 +42,13 @@ include::../alpha-note.adoc[]
 .Run CELF in stream mode on a named graph.
 [source, cypher]
 ----
-CALL gds.alpha.celf.stream(
+CALL gds.alpha.influenceMaximization.celf.stream(
   graphName: String,
   configuration: Map
 )
 YIELD
   nodeId: Integer,
-  spreadGain: Float
+  spread: Float
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
@@ -60,7 +62,7 @@ include::specific-configuration.adoc[]
 |===
 | Name         | Type       | Description
 | nodeId       | Integer    | Node ID.
-| spreadGain   | Float      | The spread gain score of the node.
+| spread       | Float      | The spread gained by selecting the node.
 |===
 ======
 [.include-with-stats]
@@ -69,7 +71,7 @@ include::specific-configuration.adoc[]
 .Run CELF in stats mode on a named graph.
 [source, cypher]
 ----
-CALL gds.alpha.celf.stats(
+CALL gds.alpha.influenceMaximization.celf.stats(
   graphName: String,
   configuration: Map
 )
@@ -160,16 +162,16 @@ For more details on the `stream` mode in general, see <<running-algos-stream>>.
 .The following will run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.greedy.stream('myGraph', {k: 3, concurrency: 4})
-YIELD nodeId, spreadGain
-RETURN gds.util.asNode(nodeId).name AS Name, spreadGain
-ORDER BY spreadGain ASC
+CALL gds.alpha.influenceMaximization.greedy.stream('myGraph', {k: 3, concurrency: 4})
+YIELD nodeId, spread
+RETURN gds.util.asNode(nodeId).name AS Name, spread
+ORDER BY spread ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| Name  | spreadGain
+| Name      | spread
 | "Alice"   | 1.519
 | "Ethan"   | 2.701
 | "Michael" | 3.8

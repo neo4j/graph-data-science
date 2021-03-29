@@ -1,146 +1,147 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.neo4j.graphalgo.impl.influenceMaximization;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
-import org.apache.commons.lang3.tuple.Pair;
-
-import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
-
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.graphalgo.results.InfluenceMaximizationResult;
 
-public class CELF extends Algorithm<CELF,CELF>
-{
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
+
+public class CELF extends Algorithm<CELF, CELF> {
     private final Graph graph;
-    private final long k;
-    private final double p;
-    private final int mc;
+    private final long seedSetCount;
+    private final double propagationProbability;
+    private final int monteCarloSimulations;
 
     private final ExecutorService executorService;
     private final int concurrency;
     private final AllocationTracker tracker;
     private final ArrayList<Runnable> tasks;
 
-    private final LongDoubleScatterMap kNodes;
-    private final PriorityBlockingQueue<Pair<Long,Double>> spreads;
+    private final LongDoubleScatterMap seedSetNodes;
+    private final HugeLongPriorityQueue spreads;
 
-    private Pair<Long,Double> highest;
     private double gain;
 
     /*
-     * graph:   Graph
-     * k:       Number of nodes
-     * mc:      Number of Monte-Carlo simulations
-     * p:       Propagation Probability
+     * seedSetCount:            Number of seed set nodes
+     * monteCarloSimulations:   Number of Monte-Carlo simulations
+     * propagationProbability:  Propagation Probability
      */
-    public CELF( Graph graph, int k, double p, int mc, ExecutorService executorService, int concurrency, AllocationTracker tracker )
-    {
+    public CELF(Graph graph, int seedSetCount, double propagationProbability, int monteCarloSimulations, ExecutorService executorService, int concurrency, AllocationTracker tracker) {
         this.graph = graph;
         long nodeCount = graph.nodeCount();
 
-        this.k = (k >= nodeCount) ? k : 3; // k >= nodeCount
-        this.p = (p > 0 && p <= 1) ? p : 0.1; // 0 < p <= 1
-        this.mc = (mc >= 1) ? mc : 1000; // mc >= 1
+        this.seedSetCount = (seedSetCount <= nodeCount) ? seedSetCount : nodeCount; // k <= nodeCount
+        this.propagationProbability = propagationProbability;
+        this.monteCarloSimulations = monteCarloSimulations;
 
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.tracker = tracker;
         this.tasks = new ArrayList<>();
 
-        kNodes = new LongDoubleScatterMap( k );
-        spreads = new PriorityBlockingQueue<>( (int) nodeCount, ( o1, o2 ) ->
-        {
-            int r = o2.getRight().compareTo( o1.getRight() );
-            if ( r != 0 )
-            {
-                return r;
+        seedSetNodes = new LongDoubleScatterMap(seedSetCount);
+        spreads = new HugeLongPriorityQueue(nodeCount) {
+            @Override
+            protected boolean lessThan(long a, long b) {
+                return (costValues.get(a) != costValues.get(b)) ? costValues.get(a) > costValues.get(b) : a < b;
             }
-            else
-            {
-                return o1.getLeft().compareTo( o2.getLeft() );
-            }
-        } );
+        };
     }
 
     @Override
-    public CELF compute()
-    {
+    public CELF compute() {
         //Find the first node with greedy algorithm
-        GreedyPart();
+        greedyPart();
         //Find the next k-1 nodes using the list-sorting procedure
-        LazyForwardPart();
+        lazyForwardPart();
         return this;
     }
 
-    private void GreedyPart()
-    {
+    private void greedyPart() {
+        double highestScore;
+        long highestNode;
+
+        tasks.clear();
         //Calculate the first iteration sorted list
         graph.forEachNode(
                 node ->
                 {
-                    if ( !kNodes.containsKey( node ) )
-                    {
-                        tasks.add( new independentCascadeTask( graph, p, mc, node, kNodes.keys().toArray(), spreads, tracker ) );
-                    }
-                    if ( tasks.size() == concurrency )
-                    {
-                        ParallelUtil.run( tasks, executorService );
-                        tasks.clear();
+                    if (!seedSetNodes.containsKey(node)) {
+                        tasks.add(new IndependentCascadeTask(graph, propagationProbability, monteCarloSimulations, node, seedSetNodes.keys().toArray(), spreads, tracker));
                     }
                     return true;
-                } );
-        ParallelUtil.run( tasks, executorService );
-        tasks.clear();
-        //Remove the first node from candidate list
-        highest = spreads.poll();
+                });
+        ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
         //Add the node with the highest spread to the seed set
-        kNodes.put( highest.getLeft(), highest.getRight() );
-        gain = highest.getRight();
+        highestScore = spreads.cost(spreads.top());
+        highestNode = spreads.pop();
+        seedSetNodes.put(highestNode, highestScore);
+        gain = highestScore;
     }
 
-    private void LazyForwardPart()
-    {
-        for ( long i = 0; i < k - 1; i++ )
-        {
-            do
-            {
-                highest = spreads.poll();
-                //Recalculate the spread of the top node
-                ParallelUtil.run( new independentCascadeTask( graph, p, mc, highest.getLeft(), kNodes.keys().toArray(), spreads, tracker ), executorService );
-            }//Check if previous top node stayed on top after the sort
-            while ( (double) highest.getLeft() != spreads.peek().getLeft() );
+    private void lazyForwardPart() {
+        double highestScore;
+        long highestNode;
 
-            highest = spreads.poll();
-            kNodes.put( highest.getLeft(), highest.getRight() );
-            gain += highest.getRight();
+        for (long i = 0; i < seedSetCount - 1; i++) {
+            do {
+                highestNode = spreads.pop();
+                //Recalculate the spread of the top node
+                ParallelUtil.run(new IndependentCascadeTask(graph, propagationProbability, monteCarloSimulations, highestNode, seedSetNodes.keys().toArray(), spreads, tracker), executorService);
+                spreads.set(highestNode, spreads.cost(highestNode) - gain);
+            }//Check if previous top node stayed on top after the sort
+            while (highestNode != spreads.top());
+
+            //Add the node with the highest spread to the seed set
+            highestScore = spreads.cost(spreads.top());
+            highestNode = spreads.pop();
+            seedSetNodes.put(highestNode, highestScore + gain);
+            gain += highestScore;
         }
     }
 
     @Override
-    public CELF me()
-    {
+    public CELF me() {
         return this;
     }
 
     @Override
-    public void release()
-    {
+    public void release() {
     }
 
-    public double getNodeSpread( long node )
-    {
-        return kNodes.getOrDefault( node, 0 );
+    public double getNodeSpread(long node) {
+        return seedSetNodes.getOrDefault(node, 0);
     }
 
-    public Stream<InfluenceMaximizationResult> resultStream()
-    {
-        return LongStream.of( kNodes.keys().toArray() )
-                .mapToObj( node -> new InfluenceMaximizationResult( graph.toOriginalNodeId( node ), getNodeSpread( node ) ) );
+    public Stream<InfluenceMaximizationResult> resultStream() {
+        return LongStream.of(seedSetNodes.keys().toArray())
+                .mapToObj(node -> new InfluenceMaximizationResult(graph.toOriginalNodeId(node), getNodeSpread(node)));
     }
 }
