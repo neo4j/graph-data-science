@@ -26,14 +26,8 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ForkJoinComputer<CONFIG extends PregelConfig> implements PregelComputer {
+public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelComputer<CONFIG> {
 
-    private final Graph graph;
-    private final PregelComputation<CONFIG> computation;
-    private final CONFIG config;
-    private final NodeValue nodeValues;
-    private final Messenger<?> messenger;
-    private final HugeAtomicBitSet voteBits;
     private final ForkJoinPool forkJoinPool;
 
     private AtomicBoolean sentMessage;
@@ -48,12 +42,7 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> implements PregelComp
         HugeAtomicBitSet voteBits,
         ForkJoinPool forkJoinPool
     ) {
-        this.graph = graph;
-        this.computation = computation;
-        this.config = config;
-        this.nodeValues = nodeValues;
-        this.messenger = messenger;
-        this.voteBits = voteBits;
+        super(graph, computation, config, nodeValues, messenger, voteBits);
         this.forkJoinPool = forkJoinPool;
     }
 

@@ -44,7 +44,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final Messenger<?> messenger;
 
-    private final PregelComputer pregelComputer;
+    private final PregelComputer<CONFIG> computer;
 
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
         Graph graph,
@@ -113,7 +113,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         var voteBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
         if (config.useForkJoin()) {
             var forkJoinPool = ParallelUtil.getFJPoolWithConcurrency(config.concurrency());
-            this.pregelComputer = new ForkJoinComputer<>(
+            this.computer = new ForkJoinComputer<>(
                 graph,
                 computation,
                 config,
@@ -123,7 +123,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 forkJoinPool
             );
         } else {
-            this.pregelComputer = new PartitionedComputer<>(
+            this.computer = new PartitionedComputer<>(
                 graph,
                 computation,
                 config,
@@ -139,22 +139,22 @@ public final class Pregel<CONFIG extends PregelConfig> {
     public PregelResult run() {
         boolean didConverge = false;
 
-        pregelComputer.initComputation();
+        computer.initComputation();
 
         int iterations;
         for (iterations = 0; iterations < config.maxIterations(); iterations++) {
             // Init compute steps with the updated state
-            pregelComputer.initIteration(iterations);
+            computer.initIteration(iterations);
             // Init messenger with the updated state
             messenger.initIteration(iterations);
 
             // Run the computation
-            pregelComputer.runIteration();
+            computer.runIteration();
             // Run master compute
             runMasterComputeStep(iterations);
 
             // Check if computation has converged
-            if (pregelComputer.hasConverged()) {
+            if (computer.hasConverged()) {
                 didConverge = true;
                 break;
             }

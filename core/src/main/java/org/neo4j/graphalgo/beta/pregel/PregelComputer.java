@@ -19,15 +19,38 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 
-public interface PregelComputer {
+abstract class PregelComputer<CONFIG extends PregelConfig> {
+    final Graph graph;
+    final PregelComputation<CONFIG> computation;
+    final CONFIG config;
+    final NodeValue nodeValues;
+    final Messenger<?> messenger;
+    final HugeAtomicBitSet voteBits;
 
-    void initComputation();
+    PregelComputer(
+        Graph graph,
+        PregelComputation<CONFIG> computation,
+        CONFIG config,
+        NodeValue nodeValues,
+        Messenger<?> messenger,
+        HugeAtomicBitSet voteBits
+    ) {
+        this.graph = graph;
+        this.computation = computation;
+        this.config = config;
+        this.nodeValues = nodeValues;
+        this.messenger = messenger;
+        this.voteBits = voteBits;
+    }
 
-    void initIteration(int iteration);
+    abstract void initComputation();
 
-    void runIteration();
+    abstract void initIteration(int iteration);
 
-    boolean hasConverged();
+    abstract void runIteration();
+
+    abstract boolean hasConverged();
 }

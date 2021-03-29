@@ -33,14 +33,7 @@ import java.util.function.Function;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class PartitionedComputer<CONFIG extends PregelConfig> implements PregelComputer {
-
-    private final Graph graph;
-    private final PregelComputation<CONFIG> computation;
-    private final CONFIG config;
-    private final NodeValue nodeValues;
-    private final Messenger<?> messenger;
-    private final HugeAtomicBitSet voteBits;
+public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComputer<CONFIG> {
     private final ExecutorService executorService;
     private final int concurrency;
 
@@ -56,12 +49,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> implements PregelC
         int concurrency,
         ExecutorService executorService
     ) {
-        this.graph = graph;
-        this.computation = computation;
-        this.config = config;
-        this.nodeValues = nodeValues;
-        this.messenger = messenger;
-        this.voteBits = voteBits;
+        super(graph, computation, config, nodeValues, messenger, voteBits);
         this.executorService = executorService;
         this.concurrency = concurrency;
     }

@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.beta.pregel;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.TestSupport.*;
+import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_ARRAY_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.LONG_ARRAY_KEY;
@@ -78,14 +78,14 @@ class PregelTest {
     private TestGraph graph;
 
     @ParameterizedTest
-    @MethodSource("forkJoinConfigAndResult")
+    @MethodSource("partitioningConfigAndResult")
     void sendsMessages(
-        boolean useForkJoin,
+        Partitioning partitioning,
         ImmutablePregelConfig.Builder configBuilder,
         PregelComputation<PregelConfig> computation,
         double[] expected
     ) {
-        var config = configBuilder.useForkJoin(useForkJoin).build();
+        var config = configBuilder.partitioning(partitioning).build();
 
         Pregel<PregelConfig> pregelJob = Pregel.create(
             graph,
@@ -107,8 +107,8 @@ class PregelTest {
     }
 
     @ParameterizedTest
-    @MethodSource("forkJoinAndPartitioning")
-    void testCorrectnessForLargeGraph(boolean useForkJoin, Partitioning partitioningScheme) {
+    @EnumSource(Partitioning.class)
+    void testCorrectnessForLargeGraph(Partitioning partitioning) {
         var graph = RandomGraphGenerator.builder()
             .nodeCount(10_000)
             .averageDegree(10)
@@ -121,8 +121,7 @@ class PregelTest {
         var configBuilder = ImmutablePregelConfig.builder()
             .username("")
             .maxIterations(10)
-            .useForkJoin(useForkJoin)
-            .partitioning(partitioningScheme)
+            .partitioning(partitioning)
             .isAsynchronous(false);
 
         var singleThreadedConfig = configBuilder.concurrency(1).build();
@@ -160,12 +159,12 @@ class PregelTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void sendMessageToSpecificTarget(boolean useForkJoin) {
+    @EnumSource(Partitioning.class)
+    void sendMessageToSpecificTarget(Partitioning partitioning) {
         var config = ImmutablePregelConfig.builder()
             .maxIterations(2)
             .concurrency(1)
-            .useForkJoin(useForkJoin)
+            .partitioning(partitioning)
             .build();
 
         var pregelJob = Pregel.create(
@@ -183,12 +182,12 @@ class PregelTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void compositeNodeValueTest(boolean useForkJoin) {
+    @EnumSource(Partitioning.class)
+    void compositeNodeValueTest(Partitioning partitioning) {
         var config = ImmutableCompositeTestComputationConfig.builder()
             .maxIterations(2)
             .concurrency(1)
-            .useForkJoin(useForkJoin)
+            .partitioning(partitioning)
             .longProperty("longSeed")
             .doubleProperty("doubleSeed")
             .build();
@@ -229,11 +228,11 @@ class PregelTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testMasterComputeStep(boolean useForkJoin) {
+    @EnumSource(Partitioning.class)
+    void testMasterComputeStep(Partitioning partitioning) {
         var pregelJob = Pregel.create(
             graph,
-            ImmutablePregelConfig.builder().maxIterations(4).useForkJoin(useForkJoin).build(),
+            ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(),
             Pools.DEFAULT,
             AllocationTracker.empty()
@@ -246,8 +245,8 @@ class PregelTest {
     static Stream<Arguments> estimations() {
         return Stream.of(
             // queue based sync
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7441696L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7442344L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7_441_688L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7_442_336L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -256,7 +255,7 @@ class PregelTest {
                     .build(),
                 true,
                 false,
-                9441768L
+                9_441_760L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -266,12 +265,12 @@ class PregelTest {
                     .build(),
                 true,
                 false,
-                9442416L
+                9_442_408L
             ),
 
             // queue based async
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3841656L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3842304L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3_841_648L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3_842_296L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -280,7 +279,7 @@ class PregelTest {
                     .build(),
                 true,
                 true,
-                5841728L
+                5_841_720L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -290,12 +289,12 @@ class PregelTest {
                     .build(),
                 true,
                 true,
-                5842376L
+                5_842_368L
             ),
 
             // array based
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 241_576L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 242_224L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 241568L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 242216L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -304,7 +303,7 @@ class PregelTest {
                     .build(),
                 false,
                 false,
-                2_241_648L
+                2_241_640L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -314,7 +313,7 @@ class PregelTest {
                     .build(),
                 false,
                 false,
-                2_242_296L
+                2_242_288L
             )
         );
     }
@@ -342,8 +341,8 @@ class PregelTest {
         );
     }
 
-    static Stream<Arguments> forkJoinConfigAndResult() {
-        return crossArguments(TestSupport::trueFalseArguments, PregelTest::configAndResult);
+    static Stream<Arguments> partitioningConfigAndResult() {
+        return crossArguments(PregelTest::partitionings, PregelTest::configAndResult);
     }
 
     static Stream<Arguments> configAndResult() {
@@ -386,11 +385,11 @@ class PregelTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void preventIllegalConcurrencyConfiguration(boolean useForkJoin) {
+    @EnumSource(Partitioning.class)
+    void preventIllegalConcurrencyConfiguration(Partitioning partitioning) {
         var config = ImmutableHackerManConfig.builder()
             .maxIterations(1337)
-            .useForkJoin(useForkJoin)
+            .partitioning(partitioning)
             .concurrency(42)
             .build();
 
@@ -403,17 +402,17 @@ class PregelTest {
         ));
     }
 
-    static Stream<Arguments> forkJoinAndAsynchronous() {
-        return crossArguments(TestSupport::trueFalseArguments, TestSupport::trueFalseArguments);
+    static Stream<Arguments> partitioningAndAsynchronous() {
+        return crossArguments(PregelTest::partitionings, TestSupport::trueFalseArguments);
     }
 
     @ParameterizedTest
-    @MethodSource("forkJoinAndAsynchronous")
-    void messagesInInitialSuperStepShouldBeEmpty(boolean useForkJoin, boolean isAsynchronous) {
+    @MethodSource("partitioningAndAsynchronous")
+    void messagesInInitialSuperStepShouldBeEmpty(Partitioning partitioning, boolean isAsynchronous) {
         var config = ImmutablePregelConfig
             .builder()
             .maxIterations(2)
-            .useForkJoin(useForkJoin)
+            .partitioning(partitioning)
             .isAsynchronous(isAsynchronous)
             .build();
 
@@ -427,6 +426,10 @@ class PregelTest {
 
         // assertion is happening in the computation
         pregelJob.run();
+    }
+
+    static Stream<Arguments> partitionings() {
+        return Arrays.stream(Partitioning.values()).map(Arguments::of);
     }
 
     public static class TestPregelComputation implements PregelComputation<PregelConfig> {
