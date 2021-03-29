@@ -245,8 +245,8 @@ class PregelTest {
     static Stream<Arguments> estimations() {
         return Stream.of(
             // queue based sync
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7_441_688L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7_442_336L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7441672L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7442176L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -255,7 +255,7 @@ class PregelTest {
                     .build(),
                 true,
                 false,
-                9_441_760L
+                9441744L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -265,12 +265,12 @@ class PregelTest {
                     .build(),
                 true,
                 false,
-                9_442_408L
+                9442248L
             ),
 
             // queue based async
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3_841_648L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3_842_296L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3841632L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3842136L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -279,7 +279,7 @@ class PregelTest {
                     .build(),
                 true,
                 true,
-                5_841_720L
+                5841704L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -289,12 +289,12 @@ class PregelTest {
                     .build(),
                 true,
                 true,
-                5_842_368L
+                5842208L
             ),
 
             // array based
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 241568L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 242216L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 241552L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 242056L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -303,7 +303,7 @@ class PregelTest {
                     .build(),
                 false,
                 false,
-                2_241_640L
+                2241624L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -313,7 +313,7 @@ class PregelTest {
                     .build(),
                 false,
                 false,
-                2_242_288L
+                2242128L
             )
         );
     }

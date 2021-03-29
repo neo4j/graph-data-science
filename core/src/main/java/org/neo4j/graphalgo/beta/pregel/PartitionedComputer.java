@@ -37,7 +37,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
     private final ExecutorService executorService;
     private final int concurrency;
 
-    private List<ComputeStepTask<CONFIG, ?>> computeSteps;
+    private List<PartitionedComputeStep<CONFIG, ?>> computeSteps;
 
     PartitionedComputer(
         Graph graph,
@@ -76,23 +76,22 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
         // No messages have been sent and all nodes voted to halt
         var lastIterationSendMessages = computeSteps
             .stream()
-            .anyMatch(ComputeStepTask::hasSendMessage);
+            .anyMatch(PartitionedComputeStep::hasSentMessage);
         return !lastIterationSendMessages && voteBits.allSet();
 
     }
 
     @NotNull
-    private List<ComputeStepTask<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
-        Function<Partition, ComputeStepTask<CONFIG, ?>> partitionFunction = partition -> new ComputeStepTask<>(
-            graph,
+    private List<PartitionedComputeStep<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
+        Function<Partition, PartitionedComputeStep<CONFIG, ?>> partitionFunction = partition -> new PartitionedComputeStep<>(
+            graph.concurrentCopy(),
             computation,
             config,
             0,
             partition,
             nodeValues,
             messenger,
-            voteBits,
-            graph
+            voteBits
         );
 
         switch (config.partitioning()) {

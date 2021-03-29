@@ -72,7 +72,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema, boolean isQueueBased, boolean isAsync) {
         var estimationBuilder = MemoryEstimations.builder(Pregel.class)
             .perNode("vote bits", MemoryUsage::sizeOfHugeAtomicBitset)
-            .perThread("compute steps", MemoryEstimations.builder(ComputeStepTask.class).build())
+            .perThread("compute steps", MemoryEstimations.builder(PartitionedComputeStep.class).build())
             .add("node value", NodeValue.memoryEstimation(pregelSchema));
 
         if (isQueueBased) {

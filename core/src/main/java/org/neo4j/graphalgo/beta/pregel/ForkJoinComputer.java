@@ -31,7 +31,7 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
     private final ForkJoinPool forkJoinPool;
 
     private AtomicBoolean sentMessage;
-    private ComputeStepFJ<CONFIG, ?> rootTask;
+    private ForkJoinComputeStep<CONFIG, ?> rootTask;
 
     ForkJoinComputer(
         Graph graph,
@@ -54,7 +54,7 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
     @Override
     public void initIteration(int iteration) {
         this.sentMessage = new AtomicBoolean(false);
-        this.rootTask = new ComputeStepFJ<>(
+        this.rootTask = new ForkJoinComputeStep<>(
             graph,
             computation,
             config,
@@ -63,7 +63,6 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
             nodeValues,
             messenger,
             voteBits,
-            graph,
             null,
             sentMessage
         );

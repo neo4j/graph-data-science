@@ -19,45 +19,107 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
+
 import java.util.function.LongConsumer;
 
-public interface ComputeStep {
+public interface ComputeStep<CONFIG extends PregelConfig> {
+
+    Graph graph();
+
+    HugeAtomicBitSet voteBits();
+
+    PregelComputation<CONFIG> computation();
+
+    NodeValue nodeValue();
 
     int iteration();
 
-    boolean isMultiGraph();
+    default boolean isMultiGraph() {
+        return graph().isMultiGraph();
+    }
 
-    long nodeCount();
+    default long nodeCount() {
+        return graph().nodeCount();
+    }
 
-    long relationshipCount();
+    default long relationshipCount() {
+        return graph().relationshipCount();
+    }
 
-    int degree(long nodeId);
+    default int degree(long nodeId) {
+        return graph().degree(nodeId);
+    }
 
-    void voteToHalt(long nodeId);
+    default void voteToHalt(long nodeId) {
+        voteBits().set(nodeId);
+    }
 
     void sendTo(long targetNodeId, double message);
 
-    void sendToNeighbors(long sourceNodeId, double message);
+    default void sendToNeighbors(long sourceNodeId, double message) {
+        graph().forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+            sendTo(targetNodeId, message);
+            return true;
+        });
+    }
 
-    void sendToNeighborsWeighted(long sourceNodeId, double message);
+    default void sendToNeighborsWeighted(long sourceNodeId, double message) {
+        graph().forEachRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
+            sendTo(targetNodeId, computation().applyRelationshipWeight(message, weight));
+            return true;
+        });
+    }
 
-    void forEachNeighbor(long sourceNodeId, LongConsumer targetConsumer);
+    default void forEachNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
+        graph().forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+            targetConsumer.accept(targetNodeId);
+            return true;
+        });
+    }
 
-    void forEachDistinctNeighbor(long sourceNodeId, LongConsumer targetConsumer);
+    default void forEachDistinctNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
+        var prevTarget = new MutableLong(-1);
+        graph().forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+            if (prevTarget.longValue() != targetNodeId) {
+                targetConsumer.accept(targetNodeId);
+                prevTarget.setValue(targetNodeId);
+            }
+            return true;
+        });
+    }
 
-    double doubleNodeValue(String key, long nodeId);
+    default double doubleNodeValue(String key, long nodeId) {
+        return nodeValue().doubleValue(key, nodeId);
+    }
 
-    long longNodeValue(String key, long nodeId);
+    default long longNodeValue(String key, long nodeId) {
+        return nodeValue().longValue(key, nodeId);
+    }
 
-    long[] longArrayNodeValue(String key, long nodeId);
+    default long[] longArrayNodeValue(String key, long nodeId) {
+        return nodeValue().longArrayValue(key, nodeId);
+    }
 
-    double[] doubleArrayNodeValue(String key, long nodeId);
+    default double[] doubleArrayNodeValue(String key, long nodeId) {
+        return nodeValue().doubleArrayValue(key, nodeId);
+    }
 
-    void setNodeValue(String key, long nodeId, double value);
+    default void setNodeValue(String key, long nodeId, double value) {
+        nodeValue().set(key, nodeId, value);
+    }
 
-    void setNodeValue(String key, long nodeId, long value);
+    default void setNodeValue(String key, long nodeId, long value) {
+        nodeValue().set(key, nodeId, value);
+    }
 
-    void setNodeValue(String key, long nodeId, long[] value);
+    default void setNodeValue(String key, long nodeId, long[] value) {
+        nodeValue().set(key, nodeId, value);
+    }
 
-    void setNodeValue(String key, long nodeId, double[] value);
+    default void setNodeValue(String key, long nodeId, double[] value) {
+        nodeValue().set(key, nodeId, value);
+    }
 }
