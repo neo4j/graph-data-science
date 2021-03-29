@@ -1,8 +1,8 @@
 [[algorithms-greedy]]
 [.alpha]
 = Greedy
-:entity: influenceMaximazation
-:result: spreadGain
+:entity: influenceMaximization
+:result: spread
 :algorithm: Greedy
 
 [abstract]
@@ -23,9 +23,9 @@ This topic includes:
 == Introduction
 The Greedy algorithm for Influence Maximization aims to find `k` nodes that maximize the expected spread of influence in the network.
 It simulates the influence spread using the Independent Cascade model, which calculates the expected spread by taking the average spread over the `mc` Monte-Carlo simulations. In the propagation process, a node is influenced in case that a uniform random draw is less than the probability `p`.
-It is worth mentioning that the Greedy algorithm ensures the best possible approximation factor in PTIME. For large networks <<algorithms-celf, CELF>> algorithm should be used.
 
-Kempe et al. 2003 introduced a greedy algorithm in their study "https://www.cs.cornell.edu/home/kleinber/kdd03-inf.pdf[Maximizing the Spread of Influence through a Social Network]" to deal with the *NP*-hard problem of Influence Maximization.
+Kempe et al. 2003 introduced the Greedy algorithm in their study "https://www.cs.cornell.edu/home/kleinber/kdd03-inf.pdf[Maximizing the Spread of Influence through a Social Network]" to deal with the *NP*-hard problem of Influence Maximization.
+The Greedy algorithm successively selecting the node within the maximum marginal gain approximation in PTIME. For large networks <<algorithms-celf, CELF>> algorithm should be used.
 
 [[alpha-algorithms-greedy-syntax]]
 == Syntax
@@ -42,13 +42,13 @@ include::../alpha-note.adoc[]
 .Run Greedy in stream mode on a named graph.
 [source, cypher]
 ----
-CALL gds.alpha.greedy.stream(
+CALL gds.alpha.influenceMaximization.greedy.stream(
   graphName: String,
   configuration: Map
 )
 YIELD
   nodeId: Integer,
-  spreadGain: Float
+  spread : Float
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
@@ -62,7 +62,7 @@ include::specific-configuration.adoc[]
 |===
 | Name         | Type       | Description
 | nodeId       | Integer    | Node ID.
-| spreadGain   | Float      | The spread gain of the node.
+| spread       | Float      | The spread gained by selecting the node.
 |===
 ======
 [.include-with-stats]
@@ -70,7 +70,7 @@ include::specific-configuration.adoc[]
 .Run CELF in stats mode on a named graph.
 [source, cypher]
 ----
-CALL gds.alpha.celf.stats(
+CALL gds.alpha.influenceMaximization.celf.stats(
   graphName: String,
   configuration: Map
 )
@@ -163,16 +163,16 @@ For more details on the `stream` mode in general, see <<running-algos-stream>>.
 .The following will run the algorithm, and stream results:
 [source, cypher]
 ----
-CALL gds.alpha.greedy.stream('myGraph', {k: 3, concurrency: 4})
-YIELD nodeId, spreadGain
-RETURN gds.util.asNode(nodeId).name AS Name, spreadGain
-ORDER BY spreadGain ASC
+CALL gds.alpha.influenceMaximization.greedy.stream('myGraph', {k: 3, concurrency: 4})
+YIELD nodeId,
+RETURN gds.util.asNode(nodeId).name AS Name,
+ORDER BY spread ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| Name  | spreadGain
+| Name      | spread
 | "Alice"   | 1.519
 | "Ethan"   | 2.701
 | "Michael" | 3.8

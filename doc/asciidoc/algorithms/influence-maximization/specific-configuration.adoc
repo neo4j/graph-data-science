@@ -1,8 +1,0 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name                      | Type    | Default | Optional | Description
-| k                         | Integer | n/a     | no       | The number of node that maximize the expected spread in the network.
-| mc                        | Integer | 1000    | yes      | The number of Monte-Carlo simulations.
-| p                         | Float   | 0.1     | yes      | The propagation probability that are compared with a uniform random draw.
-|===

@@ -1,7 +1,25 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.neo4j.graphalgo.impl.influenceMaximization;
 
 import org.junit.jupiter.api.Test;
-
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -73,20 +91,19 @@ final class GreedyTest
     private IdFunction idFunction;
 
     @Test
-    void testSpread()
-    {
-        Greedy greedy = new Greedy( graph, 10, 0.2, 10, Pools.DEFAULT, 2, AllocationTracker.empty() );
+    void testSpread() {
+        Greedy greedy = new Greedy(graph, 10, 0.2, 10, Pools.DEFAULT, 2, AllocationTracker.empty());
         greedy.compute();
 
-        assertThat( greedy.getNodeSpread( idFunction.of( "a" ) ) ).isEqualTo( 2.2 );
-        assertThat( greedy.getNodeSpread( idFunction.of( "b" ) ) ).isEqualTo( 4.4 );
-        assertThat( greedy.getNodeSpread( idFunction.of( "c" ) ) ).isEqualTo( 5.4 );
-        assertThat( greedy.getNodeSpread( idFunction.of( "d" ) ) ).isEqualTo( 6.4 );
-        assertThat( greedy.getNodeSpread( idFunction.of( "e" ) ) ).isEqualTo( 7.4 );
-        assertThat( greedy.getNodeSpread( idFunction.of( "f" ) ) ).isEqualTo( 8.4 );
-        assertThat( greedy.getNodeSpread( idFunction.of( "g" ) ) ).isEqualTo( 9.4 );
-        assertThat( greedy.getNodeSpread( idFunction.of( "h" ) ) ).isEqualTo( 10.4 );
-        assertThat( greedy.getNodeSpread( idFunction.of( "i" ) ) ).isEqualTo( 11.4 );
-        assertThat( greedy.getNodeSpread( idFunction.of( "j" ) ) ).isEqualTo( 12.4 );
+        assertThat(greedy.getNodeSpread(idFunction.of("a"))).isEqualTo(2.2);
+        assertThat(greedy.getNodeSpread(idFunction.of("b"))).isEqualTo(4.4);
+        assertThat(greedy.getNodeSpread(idFunction.of("c"))).isEqualTo(5.4);
+        assertThat(greedy.getNodeSpread(idFunction.of("d"))).isEqualTo(6.4);
+        assertThat(greedy.getNodeSpread(idFunction.of("e"))).isEqualTo(7.4);
+        assertThat(greedy.getNodeSpread(idFunction.of("f"))).isEqualTo(8.4);
+        assertThat(greedy.getNodeSpread(idFunction.of("g"))).isEqualTo(9.4);
+        assertThat(greedy.getNodeSpread(idFunction.of("h"))).isEqualTo(10.4);
+        assertThat(greedy.getNodeSpread(idFunction.of("i"))).isEqualTo(11.4);
+        assertThat(greedy.getNodeSpread(idFunction.of("j"))).isEqualTo(12.4);
     }
 }

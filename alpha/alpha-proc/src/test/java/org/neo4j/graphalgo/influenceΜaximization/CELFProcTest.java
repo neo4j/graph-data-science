@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.neo4j.graphalgo.influenceΜaximization;
 
 import org.junit.jupiter.api.AfterEach;
@@ -92,7 +111,7 @@ public class CELFProcTest extends BaseProcTest {
     void testResultStream() {
         final Consumer consumer = mock(Consumer.class);
 
-        final String cypher = "CALL gds.alpha.celf.stream" +
+        final String cypher = "CALL gds.alpha.influenceMaximization.celf.stream" +
                 "('celfGraph'," +
                 "{" +
                 "   k:  2," +
@@ -100,11 +119,11 @@ public class CELFProcTest extends BaseProcTest {
                 "   mc: 10," +
                 "   concurrency: 2" +
                 "})" +
-                "YIELD nodeId, spreadGain RETURN nodeId, spreadGain";
+                "YIELD nodeId, spread RETURN nodeId, spread";
 
         runQueryWithRowConsumer(cypher, (tx, row) -> {
             long nodeId = row.getNumber("nodeId").longValue();
-            double spread = row.getNumber("spreadGain").doubleValue();
+            double spread = row.getNumber("spread").doubleValue();
             consumer.accept(nodeId, spread);
         });
 
