@@ -25,6 +25,9 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Objects;
 
+import static org.neo4j.graphalgo.api.DefaultValueUtil.parseDoubleArrayValue;
+import static org.neo4j.graphalgo.api.DefaultValueUtil.parseFloatArrayValue;
+import static org.neo4j.graphalgo.api.DefaultValueUtil.parseLongArrayValue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.ValueConversion.exactDoubleToLong;
 import static org.neo4j.graphalgo.utils.ValueConversion.exactLongToDouble;
@@ -35,6 +38,9 @@ public final class DefaultValue {
     public static final long LONG_DEFAULT_FALLBACK = Long.MIN_VALUE;
     public static final float FLOAT_DEFAULT_FALLBACK = Float.NaN;
     public static final double DOUBLE_DEFAULT_FALLBACK = Double.NaN;
+    static final double[] DOUBLE_ARRAY_DEFAULT_FALLBACK = DEFAULT.doubleArrayValue();
+    static final long[] LONG_ARRAY_DEFAULT_FALLBACK = DEFAULT.longArrayValue();
+    static final float[] FLOAT_ARRAY_DEFAULT_FALLBACK = DEFAULT.floatArrayValue();
 
     @Nullable
     private final Object defaultValue;
@@ -62,6 +68,12 @@ public final class DefaultValue {
                 return DefaultValue.of(Long.parseLong(defaultValue.toString()), isUserDefined);
             case DOUBLE:
                 return DefaultValue.of(Double.parseDouble(defaultValue.toString()), isUserDefined);
+            case DOUBLE_ARRAY:
+                return DefaultValue.of(parseDoubleArrayValue(defaultValue, type), isUserDefined);
+            case LONG_ARRAY:
+                return DefaultValue.of(parseLongArrayValue(defaultValue, type), isUserDefined);
+            case FLOAT_ARRAY:
+                return DefaultValue.of(parseFloatArrayValue(defaultValue, type), isUserDefined);
             default:
                 return DefaultValue.of(defaultValue, isUserDefined);
         }
@@ -88,15 +100,15 @@ public final class DefaultValue {
     }
 
     public static DefaultValue forLongArray() {
-        return DefaultValue.DEFAULT;
+        return DefaultValue.ofFallBackValue(LONG_ARRAY_DEFAULT_FALLBACK);
     }
 
     public static DefaultValue forFloatArray() {
-        return DefaultValue.DEFAULT;
+        return DefaultValue.ofFallBackValue(FLOAT_ARRAY_DEFAULT_FALLBACK);
     }
 
     public static DefaultValue forDoubleArray() {
-        return DefaultValue.DEFAULT;
+        return DefaultValue.ofFallBackValue(DOUBLE_ARRAY_DEFAULT_FALLBACK);
     }
 
     private DefaultValue(@Nullable Object defaultValue, boolean isUserDefined) {
