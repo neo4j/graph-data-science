@@ -47,4 +47,11 @@ public abstract class RelationshipSchemaVisitor extends InputRelationshipSchemaV
         this.aggregation = aggregation;
         return true;
     }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        relationshipType(null);
+        aggregation(null);
+    }
 }

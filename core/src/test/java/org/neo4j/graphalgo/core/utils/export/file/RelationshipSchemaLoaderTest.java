@@ -106,4 +106,41 @@ class RelationshipSchemaLoaderTest {
         assertThat(relationshipSchema.availableTypes()).containsExactlyInAnyOrder(RelationshipType.of("A"), RelationshipType.of("B"));
     }
 
+    @Test
+    void shouldLoadMixedRelationshipSchema() throws IOException {
+        var lines = List.of(
+            String.join(", ", RELATIONSHIP_SCHEMA_COLUMNS),
+            "REL1, prop1, long, DefaultValue(42), SUM, PERSISTENT",
+            "REL3"
+        );
+        FileUtils.writeLines(exportDir.resolve(RELATIONSHIP_SCHEMA_FILE_NAME).toFile(), lines);
+
+        var schemaLoader = new RelationshipSchemaLoader(exportDir);
+        var loadedRelationshipSchema = schemaLoader.load();
+
+        assertThat(loadedRelationshipSchema.availableTypes()).containsExactlyInAnyOrder(RelationshipType.of("REL1"), RelationshipType.of("REL3"));
+
+        var rel1Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL1")));
+        assertThat(rel1Properties)
+            .containsExactlyInAnyOrderEntriesOf(Map.of(
+                RelationshipType.of("REL1"),
+                Map.of(
+                    "prop1",
+                    RelationshipPropertySchema.of(
+                        "prop1",
+                        ValueType.LONG,
+                        DefaultValue.of(42L),
+                        GraphStore.PropertyState.PERSISTENT,
+                        Aggregation.SUM
+                    )
+                )
+            ));
+
+        var rel3Properties = loadedRelationshipSchema.filterProperties(Set.of(RelationshipType.of("REL3")));
+        assertThat(rel3Properties)
+            .containsExactlyInAnyOrderEntriesOf(Map.of(
+                RelationshipType.of("REL3"),
+                Map.of()
+            ));
+    }
 }

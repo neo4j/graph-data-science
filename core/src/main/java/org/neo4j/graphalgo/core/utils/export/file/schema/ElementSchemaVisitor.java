@@ -80,5 +80,13 @@ public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter im
     @Override
     public void endOfEntity() {
         export();
+        reset();
+    }
+
+    protected void reset() {
+        key(null);
+        valueType(null);
+        defaultValue(null);
+        state(null);
     }
 }
