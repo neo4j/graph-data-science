@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelMutateProc;
 import org.neo4j.graphalgo.beta.pregel.PregelMutateResult;
+import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.beta.pregel.PregelStatsProc;
 import org.neo4j.graphalgo.beta.pregel.PregelStatsResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;

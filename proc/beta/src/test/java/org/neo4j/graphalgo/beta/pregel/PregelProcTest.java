@@ -126,7 +126,7 @@ public class PregelProcTest extends BaseProcTest {
             runQuery(query);
         })
             .getRootCause()
-            .hasMessageContaining("Partitioning with name `PERFECT` does not exist. Available options are ['DEGREE', 'RANGE'].");
+            .hasMessageContaining("Partitioning with name `PERFECT` does not exist. Available options are ['AUTO', 'DEGREE', 'RANGE'].");
     }
 
     @Test
