@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,6 +30,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -113,6 +116,22 @@ class Node2VecTest extends AlgoTestBase {
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
+    }
+
+    @Test
+    void shouldEstimateMemory() {
+        var nodeCount = 1000;
+        var config = ImmutableNode2VecStreamConfig.builder().build();
+        var memoryEstimation = Node2Vec.memoryEstimation(config);
+
+        var numberOfRandomWalks = nodeCount * config.walksPerNode() * config.walkLength();
+        var randomWalkMemoryUsageLowerBound = numberOfRandomWalks * Long.BYTES;
+
+        var estimate = memoryEstimation.estimate(GraphDimensions.of(nodeCount), 1);
+        assertThat(estimate.memoryUsage().max).isCloseTo(randomWalkMemoryUsageLowerBound, Percentage.withPercentage(25));
+
+        var estimateTimesHundred = memoryEstimation.estimate(GraphDimensions.of(nodeCount * 100), 1);
+        assertThat(estimateTimesHundred.memoryUsage().max).isCloseTo(randomWalkMemoryUsageLowerBound * 100L, Percentage.withPercentage(25));
     }
 
     static Stream<Arguments> graphs() {

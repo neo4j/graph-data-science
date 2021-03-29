@@ -24,6 +24,9 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
@@ -31,6 +34,18 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
     private final Graph graph;
     private final Node2VecBaseConfig config;
     private final AllocationTracker tracker;
+
+    public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
+        return MemoryEstimations.builder(Node2Vec.class)
+            .perNode("random walks", (nodeCount) -> {
+                var numberOfRandomWalks = nodeCount * config.walksPerNode();
+                var randomWalkMemoryUsage = MemoryUsage.sizeOfLongArray(config.walkLength());
+                return HugeObjectArray.memoryEstimation(numberOfRandomWalks, randomWalkMemoryUsage);
+            })
+            .add("probability cache", ProbabilityComputer.memoryEstimation())
+            .add("model", Node2VecModel.memoryEstimation(config))
+            .build();
+    }
 
     public Node2Vec(Graph graph, Node2VecBaseConfig config, ProgressLogger progressLogger, AllocationTracker tracker) {
         this.graph = graph;

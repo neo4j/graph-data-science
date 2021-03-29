@@ -23,6 +23,9 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
@@ -42,6 +45,15 @@ public class Node2VecModel {
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
     private final long batchSize;
+
+    public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
+        var vectorMemoryEstimation =MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
+
+        return MemoryEstimations.builder(Node2Vec.class)
+            .perNode("center embeddings", (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, vectorMemoryEstimation))
+            .perNode("context embeddings", (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, vectorMemoryEstimation))
+            .build();
+    }
 
     Node2VecModel(
         long nodeCount,
