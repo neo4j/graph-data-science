@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
@@ -59,7 +60,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
         NodeValue nodeValue,
         Messenger<ITERATOR> messenger,
         HugeAtomicBitSet voteBits,
-        CountedCompleter<Void> parent,
+        @Nullable CountedCompleter<Void> parent,
         AtomicBoolean sentMessage
     ) {
         super(parent);

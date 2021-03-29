@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.beta.pregel.PregelConfig;
  */
 public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
 
-    public ComputeContext(ComputeStep computeStep, CONFIG config) {
+    public ComputeContext(ComputeStep<CONFIG> computeStep, CONFIG config) {
         super(computeStep, config);
         this.sendMessagesFunction = config.relationshipWeightProperty() == null
             ? computeStep::sendToNeighbors
