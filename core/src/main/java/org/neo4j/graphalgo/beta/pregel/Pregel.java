@@ -20,26 +20,16 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.graphalgo.core.utils.partition.Partition;
-import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Function;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class Pregel<CONFIG extends PregelConfig> {
@@ -54,9 +44,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final Messenger<?> messenger;
 
-    private final int concurrency;
-    private final ExecutorService executor;
-    private final AllocationTracker tracker;
+    private final PregelComputer pregelComputer;
 
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
         Graph graph,
@@ -112,9 +100,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.config = config;
         this.computation = computation;
         this.nodeValues = initialNodeValue;
-        this.concurrency = config.concurrency();
-        this.executor = executor;
-        this.tracker = tracker;
 
         var reducer = computation.reducer();
 
@@ -123,36 +108,53 @@ public final class Pregel<CONFIG extends PregelConfig> {
             : config.isAsynchronous()
                 ? new AsyncQueueMessenger(graph.nodeCount(), tracker)
                 : new SyncQueueMessenger(graph.nodeCount(), tracker);
+
+        // Tracks if a node voted to halt in the previous iteration
+        var voteBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
+        if (config.useForkJoin()) {
+            var forkJoinPool = ParallelUtil.getFJPoolWithConcurrency(config.concurrency());
+            this.pregelComputer = new ForkJoinComputer<>(
+                graph,
+                computation,
+                config,
+                nodeValues,
+                messenger,
+                voteBits,
+                forkJoinPool
+            );
+        } else {
+            this.pregelComputer = new PartitionedComputer<>(
+                graph,
+                computation,
+                config,
+                nodeValues,
+                messenger,
+                voteBits,
+                config.concurrency(),
+                executor
+            );
+        }
     }
 
     public PregelResult run() {
         boolean didConverge = false;
-        // Tracks if a node voted to halt in the previous iteration
-        HugeAtomicBitSet voteBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
 
-        var computeSteps = createComputeSteps(voteBits);
+        pregelComputer.initComputation();
 
         int iterations;
         for (iterations = 0; iterations < config.maxIterations(); iterations++) {
             // Init compute steps with the updated state
-            for (var computeStep : computeSteps) {
-                computeStep.init(iterations);
-            }
-
+            pregelComputer.initIteration(iterations);
             // Init messenger with the updated state
             messenger.initIteration(iterations);
 
             // Run the computation
-            runComputeSteps(computeSteps);
+            pregelComputer.runIteration();
+            // Run master compute
             runMasterComputeStep(iterations);
 
-
-            var lastIterationSendMessages = computeSteps
-                .stream()
-                .anyMatch(ComputeStepTask::hasSendMessage);
-
-            // No messages have been sent and all nodes voted to halt
-            if (!lastIterationSendMessages && voteBits.allSet()) {
+            // Check if computation has converged
+            if (pregelComputer.hasConverged()) {
                 didConverge = true;
                 break;
             }
@@ -167,41 +169,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     public void release() {
         messenger.release();
-    }
-
-    @NotNull
-    private List<ComputeStepTask<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
-        Function<Partition, ComputeStepTask<CONFIG, ?>> partitionFunction = partition -> new ComputeStepTask<>(
-            graph,
-            computation,
-            config,
-            0,
-            partition,
-            nodeValues,
-            messenger,
-            voteBits,
-            graph
-        );
-
-        switch (config.partitioning()) {
-            case RANGE:
-                return PartitionUtils.rangePartition(concurrency, graph.nodeCount(), partitionFunction);
-            case DEGREE:
-                var batchSize = Math.max(
-                    ParallelUtil.DEFAULT_BATCH_SIZE,
-                    BitUtil.ceilDiv(graph.relationshipCount(), concurrency)
-                );
-                return PartitionUtils.degreePartition(graph, batchSize, partitionFunction);
-            default:
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Unsupported partitioning `%s`",
-                    config.partitioning()
-                ));
-        }
-    }
-
-    private void runComputeSteps(Collection<ComputeStepTask<CONFIG, ?>> computeSteps) {
-        ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
     }
 
     private void runMasterComputeStep(int iteration) {

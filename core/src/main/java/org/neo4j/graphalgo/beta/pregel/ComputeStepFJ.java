@@ -37,7 +37,7 @@ public final class ComputeStepFJ<CONFIG extends PregelConfig, ITERATOR extends M
     extends CountedCompleter<Void>
     implements ComputeStep {
 
-    private static final int SEQUENTIAL_THRESHOLD = 10000;
+    private static final int SEQUENTIAL_THRESHOLD = 1000;
 
     private final Graph graph;
     private final CONFIG config;

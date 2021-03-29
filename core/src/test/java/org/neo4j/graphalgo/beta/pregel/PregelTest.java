@@ -20,12 +20,11 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
@@ -45,6 +44,7 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -54,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.*;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_ARRAY_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.LONG_ARRAY_KEY;
@@ -77,9 +78,16 @@ class PregelTest {
     private TestGraph graph;
 
     @ParameterizedTest
-    @MethodSource("configAndResult")
-    <C extends PregelConfig> void sendsMessages(C config, PregelComputation<C> computation, double[] expected) {
-        Pregel<C> pregelJob = Pregel.create(
+    @MethodSource("forkJoinConfigAndResult")
+    void sendsMessages(
+        boolean useForkJoin,
+        ImmutablePregelConfig.Builder configBuilder,
+        PregelComputation<PregelConfig> computation,
+        double[] expected
+    ) {
+        var config = configBuilder.useForkJoin(useForkJoin).build();
+
+        Pregel<PregelConfig> pregelJob = Pregel.create(
             graph,
             config,
             computation,
@@ -91,9 +99,16 @@ class PregelTest {
         assertArrayEquals(expected, nodeValues.doubleProperties(KEY).toArray());
     }
 
+    static Stream<Arguments> forkJoinAndPartitioning() {
+        return crossArguments(
+            TestSupport::trueFalseArguments,
+            () -> Arrays.stream(Partitioning.values()).map(Arguments::of)
+        );
+    }
+
     @ParameterizedTest
-    @EnumSource(Partitioning.class)
-    void testCorrectnessForLargeGraph(Partitioning partitioningScheme) {
+    @MethodSource("forkJoinAndPartitioning")
+    void testCorrectnessForLargeGraph(boolean useForkJoin, Partitioning partitioningScheme) {
         var graph = RandomGraphGenerator.builder()
             .nodeCount(10_000)
             .averageDegree(10)
@@ -106,6 +121,7 @@ class PregelTest {
         var configBuilder = ImmutablePregelConfig.builder()
             .username("")
             .maxIterations(10)
+            .useForkJoin(useForkJoin)
             .partitioning(partitioningScheme)
             .isAsynchronous(false);
 
@@ -143,11 +159,13 @@ class PregelTest {
         return pregelJob.run().nodeValues().doubleProperties(KEY);
     }
 
-    @Test
-    void sendMessageToSpecificTarget() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void sendMessageToSpecificTarget(boolean useForkJoin) {
         var config = ImmutablePregelConfig.builder()
             .maxIterations(2)
             .concurrency(1)
+            .useForkJoin(useForkJoin)
             .build();
 
         var pregelJob = Pregel.create(
@@ -164,11 +182,13 @@ class PregelTest {
         assertEquals(Double.NaN, nodeValues.doubleProperties(KEY).get(2L));
     }
 
-    @Test
-    void compositeNodeValueTest() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void compositeNodeValueTest(boolean useForkJoin) {
         var config = ImmutableCompositeTestComputationConfig.builder()
             .maxIterations(2)
             .concurrency(1)
+            .useForkJoin(useForkJoin)
             .longProperty("longSeed")
             .doubleProperty("doubleSeed")
             .build();
@@ -208,11 +228,12 @@ class PregelTest {
         );
     }
 
-    @Test
-    void testMasterComputeStep() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testMasterComputeStep(boolean useForkJoin) {
         var pregelJob = Pregel.create(
             graph,
-            ImmutablePregelConfig.builder().maxIterations(4).build(),
+            ImmutablePregelConfig.builder().maxIterations(4).useForkJoin(useForkJoin).build(),
             new TestMasterCompute(),
             Pools.DEFAULT,
             AllocationTracker.empty()
@@ -300,7 +321,13 @@ class PregelTest {
 
     @ParameterizedTest
     @MethodSource("estimations")
-    void memoryEstimation(int concurrency, PregelSchema pregelSchema, boolean isQueueBased, boolean isAsync, long expectedBytes) {
+    void memoryEstimation(
+        int concurrency,
+        PregelSchema pregelSchema,
+        boolean isQueueBased,
+        boolean isAsync,
+        long expectedBytes
+    ) {
         var dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(10_000)
             .maxRelCount(100_000)
@@ -308,29 +335,36 @@ class PregelTest {
 
         assertEquals(
             MemoryRange.of(expectedBytes).max,
-            Pregel.memoryEstimation(pregelSchema, isQueueBased, isAsync).estimate(dimensions, concurrency).memoryUsage().max
+            Pregel
+                .memoryEstimation(pregelSchema, isQueueBased, isAsync)
+                .estimate(dimensions, concurrency)
+                .memoryUsage().max
         );
+    }
+
+    static Stream<Arguments> forkJoinConfigAndResult() {
+        return crossArguments(TestSupport::trueFalseArguments, PregelTest::configAndResult);
     }
 
     static Stream<Arguments> configAndResult() {
         return Stream.of(
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2).build(),
+                ImmutablePregelConfig.builder().maxIterations(2),
                 new TestPregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop").build(),
+                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop"),
                 new TestPregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop").build(),
+                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop"),
                 new TestWeightComputation(),
                 new double[]{0.0, 2.0, 1.0}
             ),
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2).build(),
+                ImmutablePregelConfig.builder().maxIterations(2),
                 new TestReduciblePregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             )
@@ -351,10 +385,12 @@ class PregelTest {
         }
     }
 
-    @Test
-    void preventIllegalConcurrencyConfiguration() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void preventIllegalConcurrencyConfiguration(boolean useForkJoin) {
         var config = ImmutableHackerManConfig.builder()
             .maxIterations(1337)
+            .useForkJoin(useForkJoin)
             .concurrency(42)
             .build();
 
@@ -367,12 +403,23 @@ class PregelTest {
         ));
     }
 
+    static Stream<Arguments> forkJoinAndAsynchronous() {
+        return crossArguments(TestSupport::trueFalseArguments, TestSupport::trueFalseArguments);
+    }
+
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void messagesInInitialSuperStepShouldBeEmpty(boolean isAsynchronous) {
+    @MethodSource("forkJoinAndAsynchronous")
+    void messagesInInitialSuperStepShouldBeEmpty(boolean useForkJoin, boolean isAsynchronous) {
+        var config = ImmutablePregelConfig
+            .builder()
+            .maxIterations(2)
+            .useForkJoin(useForkJoin)
+            .isAsynchronous(isAsynchronous)
+            .build();
+
         var pregelJob = Pregel.create(
             graph,
-            ImmutablePregelConfig.builder().maxIterations(2).isAsynchronous(isAsynchronous).build(),
+            config,
             new TestEmptyMessageInInitialSuperstep(),
             Pools.DEFAULT,
             AllocationTracker.empty()

@@ -120,6 +120,10 @@ public final class TestSupport {
                 }));
     }
 
+    public static Stream<Arguments> trueFalseArguments() {
+        return Stream.of(true, false).map(Arguments::of);
+    }
+
     public static TestGraph fromGdl(String gdl) {
         return fromGdl(gdl, NATURAL, "graph");
     }
