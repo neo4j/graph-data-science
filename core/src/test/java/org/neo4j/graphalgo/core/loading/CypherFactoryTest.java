@@ -298,6 +298,26 @@ class CypherFactoryTest extends BaseTest {
     }
 
     @Test
+    void canLoadArrayNodeProperties() {
+        clearDb();
+        String query = "Create (:A {longArray: [42], doubleArray: [42.0]})";
+        runQuery(query);
+
+        String nodes = "MATCH (n) RETURN id(n) AS id, n.longArray as longArray, n.doubleArray as doubleArray";
+        String rels = "MATCH (n)" +
+                      "RETURN id(n) AS source, id(n) AS target";
+
+        Graph graph = applyInTransaction(db, tx -> new CypherLoaderBuilder().api(db)
+            .nodeQuery(nodes)
+            .relationshipQuery(rels)
+            .build()
+            .graph()
+        );
+
+        assertGraphEquals(fromGdl("(a {longArray: [42L], doubleArray: [42.0D]}), (a)-->(a)"), graph);
+    }
+
+    @Test
     @Disabled("Why did we need this? https://github.com/neo-technology/graph-analytics/pull/1079")
     void failOnDuplicateNodeIds() {
         GraphLoader loader = new CypherLoaderBuilder()

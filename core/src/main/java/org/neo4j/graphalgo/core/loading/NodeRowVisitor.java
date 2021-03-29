@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphdb.Result;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.ValueGroup;
 import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
@@ -142,15 +143,18 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
         Map<String, Value> propertyValues = new HashMap<>();
         for (String propertyKey : propertyImporter.propertyColumns()) {
-            Object value = CypherLoadingUtils.getProperty(row, propertyKey);
-            if (value instanceof Number) {
-                propertyValues.put(propertyKey, Values.of(value));
-            } else if (value != null) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Unsupported type [%s] of value %s. Please use a numeric property.",
-                    Values.of(value).valueGroup(),
-                    value
-                ));
+            Object valueObject = CypherLoadingUtils.getProperty(row, propertyKey);
+            if (valueObject != null) {
+                var value = Values.of(valueObject);
+                if (value.valueGroup() == ValueGroup.NUMBER || value.valueGroup() == ValueGroup.NUMBER_ARRAY) {
+                    propertyValues.put(propertyKey, value);
+                } else {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Unsupported type [%s] of value %s. Please use a numeric property.",
+                        value.valueGroup(),
+                        value
+                    ));
+                }
             }
         }
 
