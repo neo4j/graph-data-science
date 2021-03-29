@@ -41,7 +41,6 @@ public class GraphInfoWithHistogram extends GraphInfo {
             graphInfo.database,
             graphInfo.memoryUsage,
             graphInfo.sizeInBytes,
-            graphInfo.detailSizeInBytes,
             graphInfo.nodeProjection,
             graphInfo.relationshipProjection,
             graphInfo.nodeQuery,

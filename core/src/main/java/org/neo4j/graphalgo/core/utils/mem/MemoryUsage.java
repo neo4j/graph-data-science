@@ -24,9 +24,7 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.ObjectLongIdentityHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.SuppressForbidden;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.io.NullOutputStream;
@@ -40,9 +38,6 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 import static com.carrotsearch.hppc.Containers.DEFAULT_EXPECTED_ELEMENTS;
 import static com.carrotsearch.hppc.HashContainers.DEFAULT_LOAD_FACTOR;
@@ -315,99 +310,6 @@ public final class MemoryUsage {
         return totalSize.longValue();
     }
 
-    private static final Pattern ADJ_LIST = Pattern.compile("^.relationships.table\\[\\d+].value.list.*$");
-    private static final Pattern ADJ_OFFSETS = Pattern.compile("^.relationships.table\\[\\d+].value.offsets.*$");
-    private static final Pattern DOT = Pattern.compile("\\.");
-
-    @ValueClass
-    public interface IdMapMem {
-        long sparseLongArray();
-        long forwardMapping();
-        long backwardMapping();
-        @Value.Derived
-        default long total() {
-            return forwardMapping() + backwardMapping() + sparseLongArray();
-        }
-    }
-
-    @ValueClass
-    public interface AdjacencyMem {
-        long offsets();
-        long list();
-        @Value.Derived
-        default long total() {
-            return offsets() + list();
-        }
-    }
-
-    @ValueClass
-    public interface DetailMem {
-        long total();
-        IdMapMem idMap();
-        AdjacencyMem adjacencies();
-        Map<String, Long> fields();
-    }
-
-    public static DetailMem sizeOf2(Object thing) {
-        if (!VM_INFO_AVAILABLE) {
-            return null;
-        }
-        var totalSize = new MutableLong();
-        var graphWalker = new GraphWalker(thing);
-
-        var sparseLongArray = new MutableLong();
-        var forwardMapping = new MutableLong();
-        var backwardMapping = new MutableLong();
-        var adjOffsets = new MutableLong();
-        var adjLists = new MutableLong();
-
-        var byField = new HashMap<String, MutableLong>();
-
-        graphWalker.addVisitor(gpr -> {
-            var size = gpr.size();
-            var path = gpr.path();
-
-            DOT.splitAsStream(path)
-                .skip(1)
-                .findFirst()
-                .ifPresent(field -> byField.computeIfAbsent(field, __ -> new MutableLong()).add(size));
-
-            if (path.startsWith(".nodes.sparseLongArray")) {
-                sparseLongArray.add(size);
-            }
-            if (path.startsWith(".nodes.graphIds")) {
-                forwardMapping.add(size);
-            }
-            if (path.startsWith(".nodes.nodeToGraphIds")) {
-                backwardMapping.add(size);
-            }
-            if (ADJ_LIST.matcher(path).matches()) {
-                adjLists.add(size);
-            }
-            if (ADJ_OFFSETS.matcher(path).matches()) {
-                adjOffsets.add(size);
-            }
-            totalSize.add(size);
-        });
-        graphWalker.walk();
-
-        var builder = ImmutableDetailMem.builder()
-            .total(totalSize.longValue())
-            .idMap(ImmutableIdMapMem.builder()
-                .sparseLongArray(sparseLongArray.longValue())
-                .forwardMapping(forwardMapping.longValue())
-                .backwardMapping(backwardMapping.longValue())
-                .build()
-            )
-            .adjacencies(ImmutableAdjacencyMem.builder()
-                .offsets(adjOffsets.longValue())
-                .list(adjLists.longValue())
-                .build()
-            );
-        byField.forEach((field, size) -> builder.putField(field, size.longValue()));
-        return builder.build();
-    }
-
     /**
      * Aligns an object size to be the next multiple of object alignment bytes.
      */
@@ -427,7 +329,7 @@ public final class MemoryUsage {
         if (type.isPrimitive()) {
             return primitiveSizes.get(type);
         }
-        return 1 << SHIFT_OBJECT_REF;
+        return 1L << SHIFT_OBJECT_REF;
     }
 
     private static final String[] UNITS = new String[]{" Bytes", " KiB", " MiB", " GiB", " TiB", " PiB", " EiB", " ZiB", " YiB"};
