@@ -83,13 +83,13 @@ public final class CsvToGraphStoreExporter {
     }
 
     private GraphStoreExporter.ImportedProperties export(FileInput fileInput, AllocationTracker tracker) {
-        var exportedNodes = exportNodes(fileInput, tracker);
+        var nodes = exportNodes(fileInput, tracker);
         // FIXME: get the `nodes` parameter from the previous step
-        var exportedRelationships = exportRelationships(fileInput, null, AllocationTracker.empty());
-        return ImmutableImportedProperties.of(exportedNodes, exportedRelationships);
+        var exportedRelationships = exportRelationships(fileInput, nodes, AllocationTracker.empty());
+        return ImmutableImportedProperties.of(nodes.nodeCount(), exportedRelationships);
     }
 
-    private long exportNodes(
+    private NodeMapping exportNodes(
         FileInput fileInput,
         AllocationTracker tracker
     ) {
@@ -119,10 +119,10 @@ public final class CsvToGraphStoreExporter {
         graphBuilder.idMap(nodeMappingAndProperties.nodeMapping())
             .nodeProperties(nodeMappingAndProperties.nodeProperties());
 
-        return nodeMappingAndProperties.nodeMapping().nodeCount();
+        return nodeMappingAndProperties.nodeMapping();
     }
 
-    private void exportRelationships(FileInput fileInput, IdMapping nodes, AllocationTracker tracker) {
+    private long exportRelationships(FileInput fileInput, IdMapping nodes, AllocationTracker tracker) {
         var relationshipSchema = fileInput.relationshipSchema();
         int concurrency = config.writeConcurrency();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
@@ -139,6 +139,13 @@ public final class CsvToGraphStoreExporter {
         );
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
+
+        // FIXME: need to get the relationship type dynamically!!!
+        graphBuilder.relationshipType(RelationshipType.ALL_RELATIONSHIPS);
+
+        var relationships = relationshipsBuilder.build();
+        graphBuilder.relationships(relationships);
+        return relationships.topology().elementCount();
     }
 
     @Builder.Factory

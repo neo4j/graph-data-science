@@ -62,16 +62,17 @@ class CsvToGraphStoreExporterTest {
             .build();
 
         var testGraph = TestSupport.fromGdl(
-                                            "  (:A {prop1: 21})" +
-                                            ", (:A {prop1: 22})" +
-                                            ", (:A {prop1: 23})" +
-                                            ", (:A {prop1: 24})" +
+                                            "  (n0:A {prop1: 21})" +
+                                            ", (n1:A {prop1: 22})" +
+                                            ", (n2:A {prop1: 23})" +
+                                            ", (n3:A {prop1: 24})" +
                                             ", (:A { prop1: 25})" +
                                             ", (:B)" +
                                             ", (:B)" +
                                             ", (:B)" +
                                             ", (:B)" +
-                                            ", (:B)"
+                                            ", (:B)" +
+                                            ", (n0)-[:REL]->(n1)-[:REL]->(n2)-[:REL]->(n3)"
         );
         assertGraphEquals(testGraph, graph);
 
