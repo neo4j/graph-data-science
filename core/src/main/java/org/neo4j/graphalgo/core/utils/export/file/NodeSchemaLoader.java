@@ -92,7 +92,7 @@ public class NodeSchemaLoader {
 
         @JsonProperty
         @JsonDeserialize(converter = JacksonConverters.DefaultValueConverter.class)
-        DefaultValue defaultValue;
+        String defaultValue;
 
         @JsonProperty
         GraphStore.PropertyState state;

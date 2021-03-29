@@ -66,7 +66,7 @@ class RelationshipSchemaLoaderTest {
                     RelationshipPropertySchema.of(
                         "prop1",
                         ValueType.LONG,
-                        DefaultValue.of("42"),
+                        DefaultValue.of(42L),
                         GraphStore.PropertyState.PERSISTENT,
                         Aggregation.SUM
                     )
@@ -82,7 +82,7 @@ class RelationshipSchemaLoaderTest {
                     RelationshipPropertySchema.of(
                         "prop2",
                         ValueType.DOUBLE,
-                        DefaultValue.of("13.37"),
+                        DefaultValue.of(13.37D),
                         GraphStore.PropertyState.TRANSIENT,
                         Aggregation.COUNT
                     )
