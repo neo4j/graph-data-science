@@ -19,8 +19,14 @@
  */
 package org.neo4j.graphalgo.beta.pregel;
 
+import org.immutables.builder.Builder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 abstract class PregelComputer<CONFIG extends PregelConfig> {
     final Graph graph;
@@ -53,4 +59,49 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
     abstract void runIteration();
 
     abstract boolean hasConverged();
+
+    static <CONFIG extends PregelConfig> ComputerBuilder<CONFIG> builder() {
+        return new ComputerBuilder<>();
+    }
+
+    @Builder.Factory
+    static <CONFIG extends PregelConfig> PregelComputer<CONFIG> computer(
+        Graph graph,
+        PregelComputation<CONFIG> computation,
+        CONFIG config,
+        NodeValue nodeValues,
+        Messenger<?> messenger,
+        HugeAtomicBitSet voteBits,
+        ExecutorService executorService
+    ) {
+        if (config.useForkJoin()) {
+            if (!(executorService instanceof ForkJoinPool)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Required ForkJoinPool, got %s",
+                    executorService.getClass()
+                ));
+            }
+
+            return new ForkJoinComputer<>(
+                graph,
+                computation,
+                config,
+                nodeValues,
+                messenger,
+                voteBits,
+                (ForkJoinPool) executorService
+            );
+        }
+
+        return new PartitionedComputer<>(
+            graph,
+            computation,
+            config,
+            nodeValues,
+            messenger,
+            voteBits,
+            config.concurrency(),
+            executorService
+        );
+    }
 }

@@ -109,31 +109,17 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 ? new AsyncQueueMessenger(graph.nodeCount(), tracker)
                 : new SyncQueueMessenger(graph.nodeCount(), tracker);
 
-        // Tracks if a node voted to halt in the previous iteration
-        var voteBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
-        if (config.useForkJoin()) {
-            var forkJoinPool = ParallelUtil.getFJPoolWithConcurrency(config.concurrency());
-            this.computer = new ForkJoinComputer<>(
-                graph,
-                computation,
-                config,
-                nodeValues,
-                messenger,
-                voteBits,
-                forkJoinPool
-            );
-        } else {
-            this.computer = new PartitionedComputer<>(
-                graph,
-                computation,
-                config,
-                nodeValues,
-                messenger,
-                voteBits,
-                config.concurrency(),
-                executor
-            );
-        }
+        this.computer = PregelComputer.<CONFIG>builder()
+            .graph(graph)
+            .computation(computation)
+            .config(config)
+            .nodeValues(nodeValues)
+            .messenger(messenger)
+            .voteBits(HugeAtomicBitSet.create(graph.nodeCount(), tracker))
+            .executorService(config.useForkJoin()
+                ? ParallelUtil.getFJPoolWithConcurrency(config.concurrency())
+                : executor)
+            .build();
     }
 
     public PregelResult run() {
@@ -141,19 +127,14 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         computer.initComputation();
 
-        int iterations;
-        for (iterations = 0; iterations < config.maxIterations(); iterations++) {
-            // Init compute steps with the updated state
-            computer.initIteration(iterations);
-            // Init messenger with the updated state
-            messenger.initIteration(iterations);
+        int iteration = 0;
+        for (; iteration < config.maxIterations(); iteration++) {
+            computer.initIteration(iteration);
+            messenger.initIteration(iteration);
 
-            // Run the computation
             computer.runIteration();
-            // Run master compute
-            runMasterComputeStep(iterations);
+            runMasterComputeStep(iteration);
 
-            // Check if computation has converged
             if (computer.hasConverged()) {
                 didConverge = true;
                 break;
@@ -163,7 +144,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         return ImmutablePregelResult.builder()
             .nodeValues(nodeValues)
             .didConverge(didConverge)
-            .ranIterations(iterations)
+            .ranIterations(iteration)
             .build();
     }
 
