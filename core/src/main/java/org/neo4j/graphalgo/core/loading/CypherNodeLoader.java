@@ -78,7 +78,11 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         NodeRowVisitor visitor = new NodeRowVisitor(nodesBuilder, propertyColumns, hasLabelInformation);
 
         queryResult.accept(visitor);
-        return new BatchLoadResult(visitor.rows(), visitor.maxId());
+        long rows = visitor.rows();
+        if (rows == 0) {
+            throw new IllegalArgumentException("Node-Query returned no nodes");
+        }
+        return new BatchLoadResult(rows, visitor.maxId());
     }
 
     @Override
