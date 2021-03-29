@@ -296,6 +296,8 @@ public final class NodesBuilder {
 
     private static class ThreadLocalBuilder implements AutoCloseable {
 
+        private static final long[] ANY_LABEL_ARRAY = { ANY_LABEL };
+
         private final HugeAtomicBitSet seenIds;
         private final NodesBatchBuffer buffer;
         private final Function<NodeLabel, Integer> labelTokenIdFn;
@@ -353,7 +355,7 @@ public final class NodesBuilder {
 
         private long[] labelTokens(NodeLabel... nodeLabels) {
             if (nodeLabels == null || nodeLabels.length == 0) {
-                return new long[]{ ANY_LABEL };
+                return ANY_LABEL_ARRAY;
             }
             long[] labelIds = new long[nodeLabels.length];
 
