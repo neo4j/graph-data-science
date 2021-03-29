@@ -128,8 +128,7 @@ class GraphListProcTest extends BaseProcTest {
                 "creationTime", isA(ZonedDateTime.class),
                 "modificationTime", isA(ZonedDateTime.class),
                 "memoryUsage", instanceOf(String.class),
-                "sizeInBytes", instanceOf(Long.class),
-                "detailSizeInBytes", instanceOf(Map.class)
+                "sizeInBytes", instanceOf(Long.class)
             )
         ));
     }
@@ -212,7 +211,6 @@ class GraphListProcTest extends BaseProcTest {
                 "modificationTime", isA(ZonedDateTime.class),
                 "memoryUsage", instanceOf(String.class),
                 "sizeInBytes", instanceOf(Long.class),
-                "detailSizeInBytes", instanceOf(Map.class),
                 "density", new Condition<>(Double::isFinite, "a finite double")
             )
         ));
@@ -275,7 +273,6 @@ class GraphListProcTest extends BaseProcTest {
                 "modificationTime", isA(ZonedDateTime.class),
                 "memoryUsage", instanceOf(String.class),
                 "sizeInBytes", instanceOf(Long.class),
-                "detailSizeInBytes", instanceOf(Map.class),
                 "density", new Condition<>(Double::isFinite, "a finite double")
             )
         ));
