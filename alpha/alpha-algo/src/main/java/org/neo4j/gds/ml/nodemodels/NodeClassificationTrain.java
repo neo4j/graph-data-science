@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
@@ -27,7 +28,6 @@ import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPre
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrain;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
-import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.neo4j.graphalgo.Algorithm;
@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationTrain
     extends Algorithm<NodeClassificationTrain, Model<MultiClassNLRData, NodeClassificationTrainConfig>> {
@@ -77,90 +78,100 @@ public class NodeClassificationTrain
         var metrics = createMetrics(globalClassCounts);
 
         // 1. Init and shuffle node ids
-        progressLogger.logStart(":: ShuffleNodes");
+        progressLogger.logStart(":: Shuffle and Split");
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
         nodeIds.setAll(i -> i);
         ShuffleUtil.shuffleHugeLongArray(nodeIds, getRandomDataGenerator());
-        progressLogger.logFinish(":: ShuffleNodes");
 
         // 2a. Outer split nodes into holdout + remaining
-        progressLogger.logStart(":: OuterSplit");
         var outerSplitter = new FractionSplitter();
         var outerSplit = outerSplitter.split(nodeIds, 1 - config.holdoutFraction());
-        progressLogger.logFinish(":: OuterSplit");
 
         // 2b. Inner split: enumerate a number of train/validation splits of remaining
-        progressLogger.logStart(":: InnerSplit");
         var splitter = new StratifiedKFoldSplitter(config.validationFolds(), outerSplit.trainSet(), globalTargets, config.randomSeed());
         var splits = splitter.splits();
-        progressLogger.logFinish(":: InnerSplit");
+        progressLogger.logFinish(":: Shuffle and Split");
 
         var trainStats = initStatsMap(metrics);
         var validationStats = initStatsMap(metrics);
 
-        config.params().forEach(modelParams -> {
-            progressLogger.logMessage(modelParams.toString());
+        for (int i = 0; i < config.params().size(); i++) {
+            var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", i + 1, config.params().size());
+            var modelParams = config.params().get(i);
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
-            for (NodeSplit split : splits) {
-                // 3. train each model candidate on the train sets
-                progressLogger.logStart(":: TrainParams");
+            for (int j = 0; j < splits.size(); j++) {
+                var split = splits.get(j);
+                var candidateAndSplitMessage = formatWithLocale(candidateMessage + " :: Split %s of %s", j + 1, splits.size());
+
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
+
+                // 3. train each model candidate on the train sets
+                progressLogger.logStart(candidateAndSplitMessage + " :: Train");
+                // The best upper bound we have for bounding progress is maxIterations, so tell the user what that value is
+                // TODO: we are circumventing type checking built into config creation
+                //       could we trigger this type checking earlier? there is a lot of distance between this interaction and the
+                //       actual trainin code, can we close the gap? could we create the TrainConfig here?
+                //       it's nice to have all the progress logging configuration here, but if we can't close the gap it may be
+                //       better to push it (back) down into the train logic
+                int maxIterations = ((Number) modelParams.getOrDefault("maxIterations", TrainingConfig.MAX_ITERATIONS)).intValue();
+                progressLogger.logMessage(formatWithLocale(
+                    candidateAndSplitMessage + " :: Train :: Max iterations: %s",
+                    maxIterations
+                ));
+                progressLogger.reset(maxIterations);
                 var modelData = trainModel(trainSet, modelParams);
-                progressLogger.logFinish(":: TrainParams");
+                progressLogger.logFinish(candidateAndSplitMessage + " :: Train");
 
                 // 4. evaluate each model candidate on the train and validation sets
-                progressLogger.logStart(":: EvaluateParamsValidation");
-                progressLogger.reset(validationSet.size());
+                progressLogger.logStart(candidateAndSplitMessage + " :: Evaluate");
+                progressLogger.reset(validationSet.size() + trainSet.size());
                 computeMetrics(globalClassCounts, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
-                progressLogger.logFinish(":: EvaluateParamsValidation");
-                progressLogger.logStart(":: EvaluateParamsTrain");
-                progressLogger.reset(trainSet.size());
                 computeMetrics(globalClassCounts, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
-                progressLogger.logFinish(":: EvaluateParamsTrain");
+                progressLogger.logFinish(candidateAndSplitMessage + " :: Evaluate");
             }
             // insert the candidates metrics into trainStats and validationStats
             metrics.forEach(metric -> {
                 validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
                 trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
             });
-        });
+        }
 
-        progressLogger.logStart(":: PickWinner");
+        progressLogger.logStart(":: Select Model");
         // 5. pick the best-scoring model candidate, according to the main metric
         var mainMetric = metrics.get(0);
         var modelStats = validationStats.get(mainMetric);
         var winner = Collections.max(modelStats, COMPARE_AVERAGE);
-        progressLogger.logFinish(":: PickWinner");
+        progressLogger.logFinish(":: Select Model");
 
         var bestConfig = winner.params();
+        int maxIterations = ((Number) bestConfig.getOrDefault("maxIterations", TrainingConfig.MAX_ITERATIONS)).intValue();
         var modelSelectResult = ModelSelectResult.of(bestConfig, trainStats, validationStats);
 
         var bestParameters = modelSelectResult.bestParameters();
 
         // 6. train best model on remaining
-        progressLogger.logStart(":: Train");
+        progressLogger.logStart(":: Train Selected on Remainder");
+        progressLogger.reset(maxIterations);
         MultiClassNLRData winnerModelData = trainModel(outerSplit.trainSet(), bestParameters);
-        progressLogger.logFinish(":: Train");
+        progressLogger.logFinish(":: Train Selected on Remainder");
 
         // 7. evaluate it on the holdout set and outer training set
-        progressLogger.logStart(":: EvaluateOnTest");
-        progressLogger.reset(outerSplit.testSet().size());
+        progressLogger.logStart(":: Evaluate Selected Model");
+        progressLogger.reset(outerSplit.testSet().size() + outerSplit.trainSet().size());
         var testMetrics = computeMetrics(globalClassCounts, outerSplit.testSet(), winnerModelData, metrics);
-        progressLogger.logFinish(":: EvaluateOnTest");
-        progressLogger.logStart(":: EvaluateOnTrain");
-        progressLogger.reset(outerSplit.trainSet().size());
         var outerTrainMetrics = computeMetrics(globalClassCounts, outerSplit.trainSet(), winnerModelData, metrics);
-        progressLogger.logFinish(":: EvaluateOnTrain");
+        progressLogger.logFinish(":: Evaluate Selected Model");
 
         // we are done with all metrics!
         var metricResults = mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
 
         // 8. retrain that model on the full graph
-        progressLogger.logStart(":: Retrain");
+        progressLogger.logStart(":: Retrain Selected Model");
+        progressLogger.reset(maxIterations);
         MultiClassNLRData retrainedModelData = trainModel(nodeIds, bestParameters);
-        progressLogger.logFinish(":: Retrain");
+        progressLogger.logFinish(":: Retrain Selected Model");
 
         var modelInfo = NodeClassificationModelInfo.of(
             retrainedModelData.classIdMap().originalIdsList(),

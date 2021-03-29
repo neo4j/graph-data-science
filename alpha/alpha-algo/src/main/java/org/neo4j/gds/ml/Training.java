@@ -42,7 +42,6 @@ public class Training {
     }
 
     public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
-        progressLogger.reset(config.maxIterations());
         Updater[] updaters = new Updater[concurrency];
         updaters[0] = Updater.defaultUpdater(objective.weights());
         for (int i = 1; i < concurrency; i++) {

@@ -55,6 +55,7 @@ class NodeClassificationTrainTest {
 
     @GdlGraph
     private static final String DB_QUERY =
+        "CREATE " +
         "  (:N {bananas: 100.0, arrayProperty: [1.2, 1.2], a: 1.2, b: 1.2, t: 0})" +
         ", (:N {bananas: 100.0, arrayProperty: [2.8, 2.5], a: 2.8, b: 2.5, t: 0})" +
         ", (:N {bananas: 100.0, arrayProperty: [3.3, 0.5], a: 3.3, b: 0.5, t: 0})" +
