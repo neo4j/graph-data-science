@@ -184,9 +184,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "relationships_REL1_0.csv",
             List.of(
-                List.of("0", "0", "0.0", "42.0"),
-                List.of("0", "1", "1.0", "43.0"),
-                List.of("1", "0", "2.0", "44.0")
+                List.of(Long.toString(idFunction.of("a")), Long.toString(idFunction.of("a")), "0.0", "42.0"),
+                List.of(Long.toString(idFunction.of("a")), Long.toString(idFunction.of("b")), "1.0", "43.0"),
+                List.of(Long.toString(idFunction.of("b")), Long.toString(idFunction.of("a")), "2.0", "44.0")
             )
         );
 
@@ -194,9 +194,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "relationships_REL2_0.csv",
             List.of(
-                List.of("1", "2", "3.0", "45.0"),
-                List.of("2", "3", "4.0", "46.0"),
-                List.of("3", "0", "5.0", "47.0")
+                List.of(Long.toString(idFunction.of("b")), Long.toString(idFunction.of("c")), "3.0", "45.0"),
+                List.of(Long.toString(idFunction.of("c")), Long.toString(idFunction.of("d")), "4.0", "46.0"),
+                List.of(Long.toString(idFunction.of("d")), Long.toString(idFunction.of("a")), "5.0", "47.0")
             )
         );
 
@@ -251,12 +251,12 @@ class GraphStoreToFileExporterTest extends CsvTest {
                 }
             }).collect(Collectors.toList());
         assertThat(relationshipContents).containsExactlyInAnyOrder(
-            "0,0",
-            "0,1",
-            "1,0",
-            "1,2",
-            "2,3",
-            "3,0"
+            stringPair("a", "a"),
+            stringPair("a", "b"),
+            stringPair("b", "a"),
+            stringPair("b", "c"),
+            stringPair("c", "d"),
+            stringPair("d", "a")
         );
     }
 
@@ -348,5 +348,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
 
     private String stringPair(long id, String variable) {
         return formatWithLocale("%s,%s", id, idFunction.of(variable));
+    }
+
+    private String stringPair(String sourceNode, String endNode) {
+        return stringPair(idFunction.of(sourceNode), endNode);
     }
 }

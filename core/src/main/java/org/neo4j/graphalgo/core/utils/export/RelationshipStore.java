@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.NodeMapping;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,14 +37,16 @@ public final class RelationshipStore {
     private final long propertyCount;
 
     final Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators;
+    private final NodeMapping nodeMapping;
 
     private RelationshipStore(
-        long nodeCount,
+        NodeMapping nodeMapping,
         long relationshipCount,
         long propertyCount,
         Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators
     ) {
-        this.nodeCount = nodeCount;
+        this.nodeMapping = nodeMapping;
+        this.nodeCount = nodeMapping.nodeCount();
         this.relationshipCount = relationshipCount;
         this.propertyCount = propertyCount;
         this.relationshipIterators = relationshipIterators;
@@ -53,6 +56,10 @@ public final class RelationshipStore {
         return propertyCount;
     }
 
+    public NodeMapping nodeMapping() {
+        return nodeMapping;
+    }
+
     RelationshipStore concurrentCopy() {
         var copyIterators = relationshipIterators.entrySet().stream().collect(Collectors.toMap(
             Map.Entry::getKey,
@@ -60,7 +67,7 @@ public final class RelationshipStore {
         ));
 
         return new RelationshipStore(
-            nodeCount,
+            nodeMapping,
             relationshipCount,
             propertyCount,
             copyIterators
@@ -90,7 +97,7 @@ public final class RelationshipStore {
         });
 
         return new RelationshipStore(
-            graphStore.nodeCount(),
+            graphStore.nodes(),
             graphStore.relationshipCount(),
             propertyCount.getValue(),
             relationshipIterators

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export;
 
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
@@ -242,6 +243,7 @@ public final class GraphStoreInput implements CompatInput {
                 .collect(Collectors.toMap(
                     Map.Entry::getKey,
                     e -> new RelationshipConsumer(
+                        relationshipStore.nodeMapping(),
                         e.getKey().name,
                         e.getValue().propertyKeys()
                     )
@@ -266,14 +268,17 @@ public final class GraphStoreInput implements CompatInput {
         }
 
         private static final class RelationshipConsumer implements CompositeRelationshipIterator.RelationshipConsumer {
+            private final NodeMapping nodeMapping;
             private final String relationshipType;
             private final String[] propertyKeys;
             private InputEntityVisitor visitor;
 
             private RelationshipConsumer(
+                NodeMapping nodeMapping,
                 String relationshipType,
                 String[] propertyKeys
             ) {
+                this.nodeMapping = nodeMapping;
                 this.relationshipType = relationshipType;
                 this.propertyKeys = propertyKeys;
             }
@@ -284,8 +289,8 @@ public final class GraphStoreInput implements CompatInput {
 
             @Override
             public boolean consume(long source, long target, double[] properties) {
-                visitor.startId(source);
-                visitor.endId(target);
+                visitor.startId(nodeMapping.toOriginalNodeId(source));
+                visitor.endId(nodeMapping.toOriginalNodeId(target));
                 visitor.type(relationshipType);
 
                 for (int propertyIdx = 0; propertyIdx < propertyKeys.length; propertyIdx++) {
