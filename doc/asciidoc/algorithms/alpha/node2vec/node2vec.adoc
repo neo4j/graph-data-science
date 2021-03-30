@@ -1,6 +1,8 @@
 [[alpha-algorithms-embeddings-node2vec]]
 [.alpha]
 = Node2Vec
+:entity: node
+:result: embedding
 
 [abstract]
 --
