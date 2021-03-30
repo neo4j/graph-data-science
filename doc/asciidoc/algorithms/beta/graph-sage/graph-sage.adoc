@@ -1,6 +1,8 @@
 [[algorithms-embeddings-graph-sage]]
 [.beta]
 = GraphSAGE
+:entity: node
+:result: embedding
 
 [abstract]
 --
