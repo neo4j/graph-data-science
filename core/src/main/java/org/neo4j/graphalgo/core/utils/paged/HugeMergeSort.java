@@ -20,10 +20,10 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.concurrent.CountedCompleter;
-import java.util.concurrent.ForkJoinPool;
 
 public final class HugeMergeSort {
 
@@ -31,12 +31,8 @@ public final class HugeMergeSort {
 
     public static void sort(HugeLongArray array, int concurrency, AllocationTracker tracker) {
         var temp = HugeLongArray.newArray(array.size(), tracker);
-
-        var forkJoinPool = new ForkJoinPool(concurrency);
-
-        var rootTask = new MergeSortTask(null, array, temp, 0, array.size() - 1);
-
-        forkJoinPool.invoke(rootTask);
+        var forkJoinPool = ParallelUtil.getFJPoolWithConcurrency(concurrency);
+        forkJoinPool.invoke(new MergeSortTask(null, array, temp, 0, array.size() - 1));
     }
 
 
@@ -67,6 +63,8 @@ public final class HugeMergeSort {
         @Override
         public void compute() {
             if (endIndex - startIndex >= SEQUENTIAL_THRESHOLD) {
+                // We split the range in half and spawn two
+                // new sub task for left and right range.
                 this.midIndex = startIndex + endIndex >>> 1;
 
                 var leftTask = new MergeSortTask(this, array, temp, startIndex, midIndex);
@@ -77,12 +75,70 @@ public final class HugeMergeSort {
                 leftTask.fork();
                 rightTask.fork();
             } else {
-                superFastSequentialSort();
+                // We sort the range sequentially before
+                // propagating "done" to the "completer".
+                insertionSort();
+                // This calls into "onCompletion" which
+                // performs the merge of the two sub-ranges
+                // and decrements the pending count.
                 tryComplete();
             }
         }
 
-        private void superFastSequentialSort() {
+        @Override
+        public void onCompletion(CountedCompleter<?> caller) {
+            if (midIndex == 0) {
+                // No merging for leaf tasks.
+                return;
+            }
+
+            // Localize fields
+            var array = this.array;
+            var temp = this.temp;
+            long startIndex = this.startIndex;
+            long endIndex = this.endIndex;
+            long midIndex = this.midIndex;
+
+            // Copy only left range into temp
+            for (long i = startIndex; i <= midIndex; i++) {
+                temp.set(i, array.get(i));
+            }
+
+            // Left points to the next element in the left range.
+            long left = startIndex;
+            // Right points to the next element in the right range.
+            long right = midIndex + 1;
+
+            // i points to the next element in the full range.
+            long i = startIndex;
+            while (left <= midIndex && right <= endIndex) {
+                // Each iteration inserts an element into array
+                // at position i. We take the smaller element from
+                // either left or right range and increment the
+                // corresponding range index.
+                if (temp.get(left) < array.get(right)) {
+                    array.set(i++, temp.get(left++));
+                } else {
+                    array.set(i++, array.get(right++));
+                }
+            }
+
+            // If we still have elements in the temp range, we need
+            // to move them at the end of the range since we know
+            // that all values in the right range are smaller.
+            if (left <= midIndex) {
+                for (long k = i; k <= endIndex; k++) {
+                    array.set(k, temp.get(left++));
+                }
+            }
+        }
+
+        private void insertionSort() {
+            // Localize fields
+            var array = this.array;
+            long startIndex = this.startIndex;
+            long endIndex = this.endIndex;
+
             for (long i = startIndex, j = i; i < endIndex; j = ++i) {
                 // Try to find a spot for current
                 long current = array.get(i + 1);
@@ -95,42 +151,9 @@ public final class HugeMergeSort {
                         break;
                     }
                 }
-                // j points to correct index, insert
+
+                // We found the right position for "current".
                 array.set(j + 1, current);
-            }
-        }
-
-        @Override
-        public void onCompletion(CountedCompleter<?> caller) {
-            if (midIndex == 0) {
-                // No merging for leaf tasks
-                return;
-            }
-
-            // Copy range into temp
-            for (long i = startIndex; i <= midIndex; i++) {
-                temp.set(i, array.get(i));
-            }
-
-            long left = startIndex;
-            long right = midIndex + 1;
-
-            long i = startIndex;
-            while (left <= midIndex && right <= endIndex) {
-                if (temp.get(left) < array.get(right)) {
-                    // if left is smaller, pick from left
-                    array.set(i++, temp.get(left++));
-                } else {
-                    // if right is smaller, pick from right
-                    array.set(i++, array.get(right++));
-                }
-            }
-
-            if (left <= midIndex) {
-                // Move remaining from temp into array
-                for (long k = i; k <= endIndex; k++) {
-                    array.set(k, temp.get(left++));
-                }
             }
         }
     }
