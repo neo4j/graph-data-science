@@ -25,12 +25,15 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.gds.ml.features.FeatureExtractor;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -44,6 +47,7 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -323,7 +327,7 @@ class FastRPTest extends AlgoTestBase {
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(159_816, estimate.min);
+        assertEquals(159_832, estimate.min);
     }
 
     @Test
@@ -338,7 +342,7 @@ class FastRPTest extends AlgoTestBase {
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
         assertEquals(estimate.min, estimate.max);
-        assertEquals(159_816, estimate.min);
+        assertEquals(159_832, estimate.min);
     }
 
     @Test
@@ -390,18 +394,23 @@ class FastRPTest extends AlgoTestBase {
 
         @GdlGraph
         private static final String DB_CYPHER = "CREATE" +
-                                                "  (a { prop: 1 })" +
-                                                ", (b)" +
-                                                ", (a)-[:REL]->(b)";
+                                                "  (a:N { prop: 1 })" +
+                                                ", (b:N)" +
+                                                ", (c:NaNRelWeight)" +
+                                                ", (d:NaNRelWeight)" +
+                                                ", (a)-[:REL]->(b)" +
+                                                ", (c)-[:REL]->(d)" +
+                                                ", (d)-[:REL {weight: 1.0}]->(d)";
 
         @Inject
-        Graph graph;
+        GraphStore graphStore;
 
         @Inject
         IdFunction idFunction;
 
         @Test
         void shouldFailWhenNodePropertiesAreMissing() {
+            Graph graph = graphStore.getGraph(NodeLabel.of("N"), RelationshipType.of("REL"), Optional.empty());
             FastRP fastRP = new FastRP(
                 graph,
                 FastRPBaseConfig.builder()
@@ -417,6 +426,35 @@ class FastRPTest extends AlgoTestBase {
             assertThatThrownBy(fastRP::initRandomVectors)
                 .hasMessageContaining(
                     formatWithLocale("Missing node property for property key `prop` on node with id `%s`.", idFunction.of("b"))
+                );
+        }
+
+        @Test
+        void shouldFailWhenRelationshipWeightIsMissing() {
+            Graph graph = graphStore.getGraph(NodeLabel.of("NaNRelWeight"), RelationshipType.of("REL"), Optional.of("weight"));
+
+            var weightedConfig = FastRPBaseConfig.builder()
+                .relationshipWeightProperty("weight")
+                .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+                .addIterationWeight(1.0D)
+                .randomSeed(42L)
+                .build();
+
+            FastRP fastRP = new FastRP(
+                graph,
+                weightedConfig,
+                List.of(),
+                progressLogger,
+                AllocationTracker.empty()
+            );
+
+            assertThatThrownBy(fastRP::compute)
+                .hasMessageContaining(
+                    formatWithLocale(
+                        "Missing relationship property `weight` on relationship between nodes with ids `%d` and `%d`.",
+                        idFunction.of("c"),
+                        idFunction.of("d")
+                    )
                 );
         }
     }

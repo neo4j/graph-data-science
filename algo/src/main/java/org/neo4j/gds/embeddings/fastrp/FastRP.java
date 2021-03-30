@@ -53,6 +53,8 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     private final int concurrency;
     private final float normalizationStrength;
     private final List<FeatureExtractor> featureExtractors;
+    private final String relationshipWeightProperty;
+    private final double relationshipWeightFallback;
     private final int inputDimension;
     private final float[][] propertyVectors;
     private final HugeObjectArray<float[]> embeddings;
@@ -98,6 +100,8 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     ) {
         this.graph = graph;
         this.featureExtractors = featureExtractors;
+        this.relationshipWeightProperty = config.relationshipWeightProperty();
+        this.relationshipWeightFallback = this.relationshipWeightProperty == null ? 1.0 : Double.NaN;
         this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
         this.randomSeed = improveSeed(randomSeed.orElseGet(System::nanoTime));
         this.progressLogger = progressLogger;
@@ -181,6 +185,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
             var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
             double iterationWeight = iterationWeights.get(i).doubleValue();
+            final boolean firstIteration = i == 0;
 
             List<Runnable> tasks = PartitionUtils.rangePartition(
                 concurrency,
@@ -190,7 +195,8 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                     partition,
                     localCurrent,
                     localPrevious,
-                    iterationWeight
+                    iterationWeight,
+                    firstIteration
                 )
             );
             ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
@@ -385,18 +391,21 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         private final HugeObjectArray<float[]> localPrevious;
         private final double iterationWeight;
         private final Graph concurrentGraph;
+        private final boolean firstIteration;
 
         private PropagateEmbeddingsTask(
             Partition partition,
             HugeObjectArray<float[]> localCurrent,
             HugeObjectArray<float[]> localPrevious,
-            double iterationWeight
+            double iterationWeight,
+            boolean firstIteration
         ) {
             this.partition = partition;
             this.localCurrent = localCurrent;
             this.localPrevious = localPrevious;
             this.iterationWeight = iterationWeight;
             this.concurrentGraph = graph.concurrentCopy();
+            this.firstIteration = firstIteration;
         }
 
         @Override
@@ -408,7 +417,14 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                 Arrays.fill(currentEmbedding, 0.0f);
 
                 // Collect and combine the neighbour embeddings
-                concurrentGraph.forEachRelationship(nodeId, 1.0, (source, target, weight) -> {
+                concurrentGraph.forEachRelationship(nodeId, relationshipWeightFallback, (source, target, weight) -> {
+                    if (firstIteration && Double.isNaN(weight)) {
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Missing relationship property `%s` on relationship between nodes with ids `%d` and `%d`.",
+                            relationshipWeightProperty,
+                            graph.toOriginalNodeId(source), graph.toOriginalNodeId(target)
+                        ));
+                    }
                     embeddingCombiner.combine(currentEmbedding, localPrevious.get(target), weight);
                     return true;
                 });
