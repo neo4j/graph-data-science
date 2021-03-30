@@ -100,7 +100,7 @@ public final class NodesBuilder {
         AllocationTracker tracker
     ) {
         if (hasProperties && nodeCount <= 0) {
-            throw new IllegalArgumentException("NodesBuilder with properties requires a node count greater than 0, got " + nodeCount);
+            throw new IllegalArgumentException("NodesBuilder with properties requires a node count greater than 0");
         }
         return new NodesBuilder(
             maxOriginalId,

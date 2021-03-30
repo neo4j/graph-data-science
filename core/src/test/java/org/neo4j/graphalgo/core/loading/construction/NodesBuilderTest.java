@@ -149,18 +149,16 @@ class NodesBuilderTest {
         });
     }
 
-
     @ParameterizedTest
     @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
     void shouldBuildNodesWithProperties(TestMethodRunner runTest) {
         runTest.run(() -> {
-            NodesBuilder nodesBuilder = NodesBuilder.fromSchema(
-                2,
-                graph.nodeCount(),
-                1,
-                graph.schema().nodeSchema(),
-                AllocationTracker.empty()
-            );
+            NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(graph.schema().nodeSchema())
+                .maxOriginalId(2)
+                .nodeCount(graph.nodeCount())
+                .concurrency(1)
+                .tracker(AllocationTracker.empty())
+                .build();
 
             nodesBuilder.addNode(
                 idFunction.of("a"),
