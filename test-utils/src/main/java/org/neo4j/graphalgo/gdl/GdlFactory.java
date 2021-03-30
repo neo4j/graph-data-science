@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.gdl;
 
+import org.immutables.builder.Builder;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -62,6 +63,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -74,25 +76,52 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     private final NamedDatabaseId databaseId;
 
     public static GdlFactory of(String gdlGraph) {
-        return of(gdlGraph, GdlSupportExtension.DATABASE_ID);
+        return builder().gdlGraph(gdlGraph).build();
     }
 
     public static GdlFactory of(String gdlGraph, NamedDatabaseId namedDatabaseId) {
-        return of(AuthSubject.ANONYMOUS.username(), namedDatabaseId, "graph", gdlGraph);
+        return builder().gdlGraph(gdlGraph).namedDatabaseId(namedDatabaseId).build();
     }
 
     public static GdlFactory of(String username, NamedDatabaseId namedDatabaseId, String graphName, String gdlGraph) {
-        return of(
-            ImmutableGraphCreateFromGdlConfig.builder()
-                .username(username)
-                .graphName(graphName)
-                .gdlGraph(gdlGraph)
-                .build(),
-            namedDatabaseId
-        );
+        return builder()
+            .gdlGraph(gdlGraph)
+            .userName(username)
+            .graphName(graphName)
+            .namedDatabaseId(namedDatabaseId)
+            .build();
     }
 
     public static GdlFactory of(GraphCreateFromGdlConfig config, NamedDatabaseId databaseId) {
+        return builder()
+            .createConfig(config)
+            .namedDatabaseId(databaseId)
+            .build();
+    }
+
+    public static GdlFactoryBuilder builder() {
+        return new GdlFactoryBuilder();
+    }
+
+    @Builder.Factory
+    public static GdlFactory gdlFactory(
+        Optional<String> gdlGraph,
+        Optional<NamedDatabaseId> namedDatabaseId,
+        Optional<String> userName,
+        Optional<String> graphName,
+        Optional<GraphCreateFromGdlConfig> createConfig
+    ) {
+        var config = createConfig.isEmpty()
+            ? ImmutableGraphCreateFromGdlConfig.builder()
+            .username(userName.orElse(AuthSubject.ANONYMOUS.username()))
+            .graphName(graphName.orElse("graph"))
+            .gdlGraph(gdlGraph.orElseThrow(() -> new IllegalArgumentException(
+                "Gdl graph is required if no config is given")))
+            .build()
+            : createConfig.get();
+
+        var databaseId = namedDatabaseId.orElse(GdlSupportExtension.DATABASE_ID);
+
         var gdlHandler = new GDLHandler.Builder()
             .setDefaultVertexLabel(NodeLabel.ALL_NODES.name)
             .setDefaultEdgeLabel(RelationshipType.ALL_RELATIONSHIPS.name)
