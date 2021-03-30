@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.gdl;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
@@ -212,6 +213,19 @@ class GdlFactoryTest {
             .build();
 
         assertThat(relationshipSchema).isEqualTo(expectedRelationshipSchema);
+    }
+
+    @Test
+    void testCustomNodeIdFunction() {
+        var nextId = new MutableLong(42);
+        var factory = GdlFactory.builder()
+            .gdlGraph("(a),(b),(c)")
+            .nodeIdFunction(nextId::getAndIncrement)
+            .build();
+
+        assertThat(factory.nodeId("a")).isEqualTo(42L);
+        assertThat(factory.nodeId("b")).isEqualTo(43L);
+        assertThat(factory.nodeId("c")).isEqualTo(44L);
     }
 
     private void assertRelationshipProperty(

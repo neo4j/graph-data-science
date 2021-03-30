@@ -56,6 +56,7 @@ import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
+import org.s1ck.gdl.utils.ContinuousId;
 
 import java.lang.reflect.Array;
 import java.util.HashMap;
@@ -65,6 +66,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.LongSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -109,7 +112,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         Optional<NamedDatabaseId> namedDatabaseId,
         Optional<String> userName,
         Optional<String> graphName,
-        Optional<GraphCreateFromGdlConfig> createConfig
+        Optional<GraphCreateFromGdlConfig> createConfig,
+        Optional<LongSupplier> nodeIdFunction
     ) {
         var config = createConfig.isEmpty()
             ? ImmutableGraphCreateFromGdlConfig.builder()
@@ -122,7 +126,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
 
         var databaseId = namedDatabaseId.orElse(GdlSupportExtension.DATABASE_ID);
 
+        var nextVertexId = nodeIdFunction
+            .map(supplier -> (Function<Optional<String>, Long>) (ignored) -> supplier.getAsLong())
+            .orElseGet(ContinuousId::new);
+
         var gdlHandler = new GDLHandler.Builder()
+            .setNextVertexId(nextVertexId)
             .setDefaultVertexLabel(NodeLabel.ALL_NODES.name)
             .setDefaultEdgeLabel(RelationshipType.ALL_RELATIONSHIPS.name)
             .buildFromString(config.gdlGraph());
