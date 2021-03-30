@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipConsumer;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.queue.QueueBasedSpliterator;
@@ -128,7 +128,6 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         private final double returnParam;
         private final double inOutParam;
 
-
         public NextNodeStrategy(Graph graph, double returnParam, double inOutParam) {
             this.graph = graph;
             this.returnParam = returnParam;
@@ -172,7 +171,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                 returnParam,
                 inOutParam
             );
-            threadLocalGraph.forEachRelationship(currentNodeId, consumer);
+            threadLocalGraph.forEachRelationship(currentNodeId, 1.0, consumer);
             return consumer.probabilities();
         }
 
@@ -194,7 +193,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             return normalizedDistribution.length - 1;
         }
 
-        private class ProbabilityDistributionComputer implements RelationshipConsumer {
+        private class ProbabilityDistributionComputer implements RelationshipWithPropertyConsumer {
             private final Graph threadLocalGraph;
             final double[] probabilities;
             private final long currentNodeId;
@@ -223,7 +222,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             }
 
             @Override
-            public boolean accept(long start, long end) {
+            public boolean accept(long start, long end, double weight) {
                 long neighbourId = start == currentNodeId ? end : start;
 
                 double probability;
@@ -238,6 +237,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                     // node is not adjacent to previous node --> distance to previous node is 2
                     probability = 1D / inOutParam;
                 }
+
+                probability *= weight;
                 probabilities[index] = probability;
                 probSum += probability;
                 index++;

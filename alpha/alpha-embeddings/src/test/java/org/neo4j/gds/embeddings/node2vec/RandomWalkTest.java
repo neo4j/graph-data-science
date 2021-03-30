@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestGraphLoader;
@@ -29,9 +30,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
+import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class RandomWalkTest extends AlgoTestBase {
@@ -201,5 +204,39 @@ class RandomWalkTest extends AlgoTestBase {
 
         assertTrue(nodeCounter.get(3L) > nodeCounter.get(4L) * 10, formatWithLocale("occurrences: %s", nodeCounter));
         assertTrue(nodeCounter.get(3L) > nodeCounter.get(5L) * 10, formatWithLocale("occurrences: %s", nodeCounter));
+    }
+
+    @Test
+    void shouldRespectRelationshipWeights() {
+        var graph = fromGdl(
+            "  (a:Node)" +
+            ", (b:Node)" +
+            ", (c:Node)" +
+            ", (a)-[:REL {weight: 100.0}]->(b)" +
+            ", (a)-[:REL {weight: 1.0}]->(c)" +
+            ", (b)-[:REL {weight: 1.0}]->(a)" +
+            ", (c)-[:REL {weight: 1.0}]->(a)"
+        );
+
+        RandomWalk randomWalk = new RandomWalk(
+            graph,
+            10,
+            new RandomWalk.NextNodeStrategy(graph, 1, 1),
+            4,
+            1000,
+            1000
+        );
+
+        var nodeCounter = new HashMap<Long, Long>();
+        randomWalk
+            .compute()
+            .filter(arr -> graph.toOriginalNodeId(arr[0]) == 0)
+            .forEach(arr -> Arrays.stream(arr).forEach(n -> {
+                    long neo4jId = graph.toOriginalNodeId(n);
+                    nodeCounter.merge(neo4jId, 1L, Long::sum);
+                })
+            );
+
+        assertThat(nodeCounter.get(2L) * 100).isCloseTo(nodeCounter.get(1L), Percentage.withPercentage(20.0));
     }
 }
