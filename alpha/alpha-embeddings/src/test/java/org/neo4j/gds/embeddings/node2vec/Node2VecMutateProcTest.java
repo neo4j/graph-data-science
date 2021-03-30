@@ -45,7 +45,7 @@ class Node2VecMutateProcTest
     implements MutateNodePropertyTest<Node2Vec, Node2VecMutateConfig, HugeObjectArray<Vector>> {
 
     @BeforeEach
-    void setup() throws Exception {
+    void loadProcedures() throws Exception {
         registerProcedures(
             GraphWriteNodePropertiesProc.class
         );
