@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.filter;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
@@ -34,6 +35,7 @@ import org.neo4j.graphalgo.config.ImmutableGraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CSRGraphStoreUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 import org.neo4j.logging.NullLog;
 import org.neo4j.values.storable.NumberType;
@@ -242,6 +244,23 @@ class GraphStoreFilterTest {
         var filteredGraphStore = filter(graphStore, "*", "*");
 
         assertGraphEquals(graphStore.getUnion(), filteredGraphStore.getUnion());
+    }
+
+    @Test
+    void supportSeparateIdSpaces() throws ParseException, SemanticErrors {
+        var nextId = new MutableLong(42_1337L);
+        var graphStore = GdlFactory.builder()
+            .gdlGraph("(a:A)-[:REL1 {aProp: 42L}]->(b:B), (a)-[:REL2 {bProp: 43L}]->(b)")
+            .nodeIdFunction(nextId::getAndIncrement)
+            .build()
+            .build()
+            .graphStore();
+
+        assertThat(graphStore.nodeCount()).isEqualTo(2L);
+        assertThat(graphStore.nodes().highestNeoId()).isEqualTo(42_1338L);
+
+        var filteredGraphStore = filter(graphStore, "n:A OR n:B", "r.aProp = 42");
+        assertGraphEquals(fromGdl("(a:A)-[:REL1 {aProp: 42L}]->(b:B)"), filteredGraphStore.getUnion());
     }
 
     @Test
