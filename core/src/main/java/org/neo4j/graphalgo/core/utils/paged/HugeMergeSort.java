@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.concurrent.CountedCompleter;
@@ -50,7 +51,7 @@ public final class HugeMergeSort {
         private long midIndex;
 
         MergeSortTask(
-            CountedCompleter<?> completer,
+            @Nullable CountedCompleter<?> completer,
             HugeLongArray array,
             HugeLongArray temp,
             long startIndex,
