@@ -164,8 +164,8 @@ For more details on the `stream` mode in general, see <<running-algos-stream>>.
 [source, cypher]
 ----
 CALL gds.alpha.influenceMaximization.greedy.stream('myGraph', {k: 3, concurrency: 4})
-YIELD nodeId,
-RETURN gds.util.asNode(nodeId).name AS Name,
+YIELD nodeId, spread
+RETURN gds.util.asNode(nodeId).name AS Name, spread
 ORDER BY spread ASC
 ----
 
