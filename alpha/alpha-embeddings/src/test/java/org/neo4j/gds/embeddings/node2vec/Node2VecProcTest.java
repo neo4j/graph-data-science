@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
+import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
@@ -34,7 +35,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extends
     BaseProcTest implements AlgoBaseProcTest<Node2Vec, CONFIG, HugeObjectArray<Vector>>,
     MemoryEstimateTest<Node2Vec, CONFIG, HugeObjectArray<Vector>>,
-    HeapControlTest<Node2Vec, CONFIG, HugeObjectArray<Vector>> {
+    HeapControlTest<Node2Vec, CONFIG, HugeObjectArray<Vector>>,
+    RelationshipWeightConfigTest<Node2Vec, CONFIG, HugeObjectArray<Vector>>{
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
