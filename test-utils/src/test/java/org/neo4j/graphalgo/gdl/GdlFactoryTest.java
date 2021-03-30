@@ -226,6 +226,11 @@ class GdlFactoryTest {
         assertThat(factory.nodeId("a")).isEqualTo(42L);
         assertThat(factory.nodeId("b")).isEqualTo(43L);
         assertThat(factory.nodeId("c")).isEqualTo(44L);
+
+        var importResult = factory.build();
+
+        assertThat(importResult.dimensions().highestNeoId()).isEqualTo(44L);
+        assertThat(importResult.graphStore().nodes().highestNeoId()).isEqualTo(44L);
     }
 
     private void assertRelationshipProperty(

@@ -283,7 +283,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             IllegalArgumentException.class,
             () -> proc.validateConfigsAndGraphStore(
                 GraphStoreWithConfig.of(
-                    GdlFactory.builder().gdlGraph("").namedDatabaseId(db.databaseId()).build().build().graphStore(),
+                    GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
                     GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName)
                 ),
                 config
@@ -309,7 +309,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             IllegalArgumentException.class,
             () -> proc.validateConfigsAndGraphStore(
                 ImmutableGraphStoreWithConfig.of(
-                    GdlFactory.builder().gdlGraph("").namedDatabaseId(db.databaseId()).build().build().graphStore(),
+                    GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
                     GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName)
                 ),
                 config

@@ -56,6 +56,7 @@ import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
+import org.s1ck.gdl.model.Vertex;
 import org.s1ck.gdl.utils.ContinuousId;
 
 import java.lang.reflect.Array;
@@ -87,7 +88,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
     }
 
     @Builder.Factory
-    public static GdlFactory gdlFactory(
+    static GdlFactory gdlFactory(
         Optional<String> gdlGraph,
         Optional<NamedDatabaseId> namedDatabaseId,
         Optional<String> userName,
@@ -99,8 +100,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
             ? ImmutableGraphCreateFromGdlConfig.builder()
             .username(userName.orElse(AuthSubject.ANONYMOUS.username()))
             .graphName(graphName.orElse("graph"))
-            .gdlGraph(gdlGraph.orElseThrow(() -> new IllegalArgumentException(
-                "Gdl graph is required if no config is given")))
+            .gdlGraph(gdlGraph.orElse(""))
             .build()
             : createConfig.get();
 
@@ -433,10 +433,17 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
 
         static GraphDimensions of(GDLHandler gdlHandler) {
             var nodeCount = gdlHandler.getVertices().size();
+            var highestId = gdlHandler
+                .getVertices()
+                .stream()
+                .map(Vertex::getId)
+                .max(Long::compareTo)
+                .orElse((long) nodeCount);
             var relCount = gdlHandler.getEdges().size();
 
             return ImmutableGraphDimensions.builder()
                 .nodeCount(nodeCount)
+                .highestNeoId(highestId)
                 .maxRelCount(relCount)
                 .build();
         }
