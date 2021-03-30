@@ -53,7 +53,7 @@ class HugeMergeSortTest {
         HugeMergeSort.sort(array, concurrency, tracker);
 
         for (int i = 1; i < array.size(); i++) {
-            assertThat(array.get(i)).isGreaterThan(array.get(i - 1));
+            assertThat(array.get(i)).isGreaterThanOrEqualTo(array.get(i - 1));
         }
     }
 

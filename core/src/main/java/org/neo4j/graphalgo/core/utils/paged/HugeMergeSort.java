@@ -26,7 +26,7 @@ import java.util.concurrent.ForkJoinPool;
 
 public final class HugeMergeSort {
 
-    private static final int SEQUENTIAL_THRESHOLD = 4096;
+    private static final int SEQUENTIAL_THRESHOLD = 100;
 
     public static void sort(HugeLongArray array, int concurrency, AllocationTracker tracker) {
         var temp = HugeLongArray.newArray(array.size(), tracker);
@@ -107,27 +107,28 @@ public final class HugeMergeSort {
             }
 
             // Copy range into temp
-            // TODO: it should be enough to only copy the left part
-            for (long i = startIndex; i <= endIndex; i++) {
+            for (long i = startIndex; i <= midIndex; i++) {
                 temp.set(i, array.get(i));
             }
 
             long left = startIndex;
             long right = midIndex + 1;
 
-            for (long i = startIndex; i <= endIndex; i++) {
-                if (left > midIndex) {
-                    // left empty, just fill up from right
-                    array.set(i, temp.get(right++));
-                } else if (right > endIndex) {
-                    // right empty, just fill up from left
-                    array.set(i, temp.get(left++));
-                } else if (temp.get(left) < temp.get(right)) {
+            long i = startIndex;
+            while (left <= midIndex && right <= endIndex) {
+                if (temp.get(left) < array.get(right)) {
                     // if left is smaller, pick from left
-                    array.set(i, temp.get(left++));
+                    array.set(i++, temp.get(left++));
                 } else {
                     // if right is smaller, pick from right
-                    array.set(i, temp.get(right++));
+                    array.set(i++, array.get(right++));
+                }
+            }
+
+            if (left <= midIndex) {
+                // Move remaining from temp into array
+                for (long k = i; k <= endIndex; k++) {
+                    array.set(k, temp.get(left++));
                 }
             }
         }
