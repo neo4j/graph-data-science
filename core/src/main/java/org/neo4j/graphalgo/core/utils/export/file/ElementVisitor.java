@@ -37,10 +37,10 @@ abstract class ElementVisitor<
     I extends ElementIdentifier,
     PROPERTY_SCHEMA extends PropertySchema> extends InputEntityVisitor.Adapter {
 
-    final ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema;
+    protected final ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema;
+    protected final ObjectObjectMap<String, List<PROPERTY_SCHEMA>> propertySchemas;
 
     private final Object[] currentProperties;
-    private final ObjectObjectMap<String, List<PROPERTY_SCHEMA>> propertySchemas;
     private final ObjectIntMap<String> propertyKeyPositions;
 
     ElementVisitor(ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema) {

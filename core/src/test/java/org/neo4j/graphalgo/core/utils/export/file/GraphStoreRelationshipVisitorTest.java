@@ -24,21 +24,25 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.kernel.database.TestDatabaseIdRepository;
 
+import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 @GdlExtension
 class GraphStoreRelationshipVisitorTest {
 
     @GdlGraph
-    static String DB_CYPHER = "CREATE (a:A)-[:R]->(b:A)-[:R1]->(c:B)-[:R1]->(a)";
+    static String DB_CYPHER = "CREATE (a:A)-[:R {p: 1.23}]->(b:A)-[:R1 {r: 1337}]->(c:B)-[:R1 {r: 42}]->(a)";
 
     @Inject
     GraphStore graphStore;
@@ -59,8 +63,8 @@ class GraphStoreRelationshipVisitorTest {
         var relationshipTypeR = RelationshipType.of("R");
         var relationshipTypeR1 = RelationshipType.of("R1");
         graph.forEachNode(nodeId -> {
-            visitRelationshipType(relationshipVisitor, nodeId, relationshipTypeR);
-            visitRelationshipType(relationshipVisitor, nodeId, relationshipTypeR1);
+            visitRelationshipType(relationshipVisitor, nodeId, relationshipTypeR, "p");
+            visitRelationshipType(relationshipVisitor, nodeId, relationshipTypeR1, "r");
             return true;
         });
 
@@ -69,14 +73,28 @@ class GraphStoreRelationshipVisitorTest {
 
         assertThat(actualRelationships.relationshipTypesWithTopology().get(relationshipTypeR).elementCount()).isEqualTo(1L);
         assertThat(actualRelationships.relationshipTypesWithTopology().get(relationshipTypeR1).elementCount()).isEqualTo(2L);
+
+        Map<? extends RelationshipType, ? extends RelationshipPropertyStore> propertyStores = actualRelationships.propertyStores();
+        var actualGraph = new GraphStoreBuilder()
+            .relationshipPropertyStores(propertyStores)
+            .relationships(actualRelationships.relationshipTypesWithTopology())
+            .nodes(graph)
+            .databaseId(TestDatabaseIdRepository.randomNamedDatabaseId())
+            .concurrency(1)
+            .tracker(AllocationTracker.empty())
+            .build()
+            .getUnion();
+
+        assertGraphEquals(graph, actualGraph);
     }
 
-    private void visitRelationshipType(GraphStoreRelationshipVisitor relationshipVisitor, long nodeId, RelationshipType relationshipType) {
+    private void visitRelationshipType(GraphStoreRelationshipVisitor relationshipVisitor, long nodeId, RelationshipType relationshipType, String relationshipPropertyKey) {
         graph
             .relationshipTypeFilteredGraph(Set.of(relationshipType))
-            .forEachRelationship(nodeId, (source, target) -> {
+            .forEachRelationship(nodeId, 0.0, (source, target, propertyValue) -> {
                 relationshipVisitor.startId(source);
                 relationshipVisitor.endId(target);
+                relationshipVisitor.property(relationshipPropertyKey, propertyValue);
                 relationshipVisitor.type(relationshipType.name());
                 relationshipVisitor.endOfEntity();
                 return true;

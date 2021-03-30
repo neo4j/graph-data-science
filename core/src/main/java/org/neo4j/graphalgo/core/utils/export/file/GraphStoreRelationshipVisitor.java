@@ -19,12 +19,17 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.RelationshipProperty;
+import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
+import org.neo4j.graphalgo.core.loading.construction.ImmutablePropertyConfig;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilderBuilder;
+import org.neo4j.values.storable.NumberType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,30 +41,86 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
     private final Map<String, RelationshipsBuilder> relationshipBuilders;
     private final RelationshipsBuilderBuilder relationshipsBuilderBuilder;
 
+    private final Map<?, ?> relationshipStoreBuilders = new HashMap<>();
+
     protected GraphStoreRelationshipVisitor(RelationshipSchema relationshipSchema, RelationshipsBuilderBuilder relationshipsBuilderBuilder) {
         super(relationshipSchema);
         this.relationshipsBuilderBuilder = relationshipsBuilderBuilder;
         this.relationshipBuilders = new HashMap<>();
-
     }
 
     @Override
     protected void exportElement() {
-        var relationshipsBuilder = relationshipBuilders.computeIfAbsent(
-            relationshipType(),
-            (key) -> relationshipsBuilderBuilder.build()
-        );
 
-        relationshipsBuilder.add(startNode(), endNode());
+        if (elementSchema.hasProperties()) {
+            var relationshipsBuilder = relationshipBuilders.computeIfAbsent(
+                relationshipType(),
+                (key) -> relationshipsBuilderBuilder
+                    .propertyConfigs(
+                        getPropertySchema().stream().map(schema ->
+                            ImmutablePropertyConfig.of(schema.aggregation(), schema.defaultValue())
+                        ).collect(Collectors.toList())
+                    )
+                    .build()
+            );
+
+            var numberOfProperties = getPropertySchema().size();
+            if(numberOfProperties > 1) {
+                double[] propertyValues = new double[numberOfProperties];
+                MutableInt index = new MutableInt();
+                forEachProperty((propertyKey, propertyValue, valueType) -> {
+                    if (propertyValue == null) {
+                        System.out.println(relationshipType() + " property key : " + propertyKey);
+                    }
+                    propertyValues[index.getAndIncrement()] = Double.parseDouble(propertyValue.toString());
+                });
+                relationshipsBuilder.add(startNode(), endNode(), propertyValues);
+            } else {
+                forEachProperty((propertyKey, propertyValue, valueType) -> {
+                    relationshipsBuilder.add(startNode(), endNode(), Double.parseDouble(propertyValue.toString()));
+                });
+            }
+        } else {
+            var relationshipsBuilder = relationshipBuilders.computeIfAbsent(
+                relationshipType(),
+                (key) -> relationshipsBuilderBuilder
+                    .build()
+            );
+            relationshipsBuilder.add(startNode(), endNode());
+        }
     }
 
     protected RelationshipVisitorResult result() {
         var resultBuilder = ImmutableRelationshipVisitorResult.builder();
         var relationshipCountTracker = new LongAdder();
+        var propertyStores = new HashMap<RelationshipType, RelationshipPropertyStore>();
         var relationshipTypeTopologyMap = relationshipBuilders.entrySet().stream().map(entry -> {
             var type = entry.getKey();
             var builder = entry.getValue();
-            var topology = builder.build().topology();
+            var relationships = builder.buildAll();
+
+            var relationshipPropertySchemas = propertySchemas.get(type);
+            for (int i = 0; i < relationshipPropertySchemas.size(); i++) {
+                var relationship = relationships.get(i);
+                var relationshipPropertySchema = relationshipPropertySchemas.get(i);
+                relationship.properties().ifPresent(properties -> {
+                    var propertyStoreBuilder = RelationshipPropertyStore.builder();
+
+                    propertyStoreBuilder.putIfAbsent(relationshipPropertySchema.key(), RelationshipProperty.of(
+                        relationshipPropertySchema.key(),
+                        NumberType.FLOATING_POINT,
+                        relationshipPropertySchema.state(),
+                        properties,
+                        relationshipPropertySchema.defaultValue(),
+                        relationshipPropertySchema.aggregation()
+                        )
+                    );
+
+                    propertyStores.put(RelationshipType.of(type), propertyStoreBuilder.build());
+                });
+            }
+
+            var topology = relationships.get(0).topology();
             relationshipCountTracker.add(topology.elementCount());
             return Map.entry(RelationshipType.of(type), topology);
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -67,12 +128,14 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         return resultBuilder
             .putAllRelationshipTypesWithTopology(relationshipTypeTopologyMap)
             .relationshipCount(relationshipCountTracker.longValue())
+            .propertyStores(propertyStores)
             .build();
     }
 
     @ValueClass
     interface RelationshipVisitorResult {
         Map<RelationshipType, Relationships.Topology> relationshipTypesWithTopology();
+        Map<? extends RelationshipType,? extends RelationshipPropertyStore> propertyStores();
         long relationshipCount();
     }
 }
