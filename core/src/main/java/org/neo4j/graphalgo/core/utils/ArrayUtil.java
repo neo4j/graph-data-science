@@ -160,14 +160,6 @@ public final class ArrayUtil {
         return low - 1;
     }
 
-    public static double[] floatToDoubleArray(float[] floats) {
-        double[] doubles = new double[floats.length];
-        for (int i = 0; i < floats.length; i++) {
-            doubles[i] = floats[i];
-        }
-        return doubles;
-    }
-
     public static double[] fill(double value, int length) {
         double[] data = new double[length];
         Arrays.fill(data, value);

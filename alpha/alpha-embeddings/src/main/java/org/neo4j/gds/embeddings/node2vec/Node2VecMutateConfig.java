@@ -19,20 +19,30 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.MutatePropertyConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-final class Node2VecCompanion {
+import java.util.Optional;
 
-    static final String DESCRIPTION = "The Node2Vec algorithm computes embeddings for nodes based on random walks.";
+@ValueClass
+@Configuration
+@SuppressWarnings("immutables:subtype")
+public interface Node2VecMutateConfig extends Node2VecBaseConfig, MutatePropertyConfig {
 
-    static <CONFIG extends Node2VecBaseConfig> NodeProperties nodeProperties(
-        AlgoBaseProc.ComputationResult<Node2Vec, HugeObjectArray<Vector>, CONFIG> computationResult
+    static Node2VecMutateConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper userInput
     ) {
-        return (FloatArrayNodeProperties) (nodeId) -> computationResult.result().get(nodeId).data();
+        return new Node2VecMutateConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            userInput
+        );
     }
-
-    private Node2VecCompanion() {}
 }

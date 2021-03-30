@@ -75,7 +75,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
 
     @Override
     protected AlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory() {
-        return Node2VecCompanion.algorithmFactory();
+        return new Node2VecAlgorithmFactory<>();
     }
 
     @Override
