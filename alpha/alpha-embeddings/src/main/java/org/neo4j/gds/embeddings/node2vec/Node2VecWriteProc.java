@@ -21,20 +21,12 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.ArrayUtil;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -43,15 +35,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.lang.Math.multiplyExact;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteProc.WriteResult, Node2VecWriteConfig> {
 
     @Procedure(value = "gds.alpha.node2vec.write", mode = WRITE)
-    @Description(Node2VecStreamProc.NODE2VEC_DESCRIPTION)
+    @Description(Node2VecCompanion.DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -65,7 +55,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
 
     @Procedure(value = "gds.alpha.node2vec.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateStats(
+    public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -84,49 +74,12 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
 
     @Override
     protected AlgorithmFactory<Node2Vec, Node2VecWriteConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
-            @Override
-            public Node2Vec build(
-                Graph graph, Node2VecWriteConfig configuration, AllocationTracker tracker, Log log,
-                ProgressEventTracker eventTracker
-            ) {
-                var progressLogger = new BatchingProgressLogger(
-                    log,
-                    0, //dummy value, gets overridden
-                    "Node2Vec",
-                    configuration.concurrency(),
-                    eventTracker
-                );
-                validateConfig(configuration, graph);
-                return new Node2Vec(graph, configuration, progressLogger, tracker);
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(Node2VecWriteConfig configuration) {
-                return Node2Vec.memoryEstimation(configuration);
-            }
-
-            private void validateConfig(Node2VecWriteConfig config, Graph graph) {
-                try {
-                    var ignored = multiplyExact(multiplyExact(graph.nodeCount(), config.walksPerNode()), config.walkLength());
-                } catch (ArithmeticException ex) {
-                    throw new IllegalArgumentException(
-                        formatWithLocale(
-                            "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, walkLength: %d." +
-                            " Try reducing these parameters or run on a smaller graph.",
-                            graph.nodeCount(),
-                            config.walksPerNode(),
-                            config.walkLength()
-                        ));
-                }
-            }
-
-        };
+      return Node2VecCompanion.algorithmFactory();
     }
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computationResult) {
-        return (DoubleArrayNodeProperties) (nodeId) -> ArrayUtil.floatToDoubleArray(computationResult.result().get(nodeId).data());
+        return Node2VecCompanion.nodeProperties(computationResult);
     }
 
     @Override

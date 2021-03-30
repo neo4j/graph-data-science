@@ -21,17 +21,11 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -40,19 +34,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static java.lang.Math.multiplyExact;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vector>, Node2VecStreamProc.StreamResult, Node2VecStreamConfig> {
 
-    static final String NODE2VEC_DESCRIPTION = "The Node2Vec algorithm computes embeddings for nodes based on random walks.";
-
     @Procedure(value = "gds.alpha.node2vec.stream", mode = READ)
-    @Description(NODE2VEC_DESCRIPTION)
+    @Description(Node2VecCompanion.DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -61,20 +50,13 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
             graphNameOrConfig,
             configuration
         );
-        if (computationResult.isGraphEmpty()) {
-            return Stream.empty();
-        }
-        Graph graph = computationResult.graph();
-        var result = computationResult.result();
 
-        return LongStream
-            .range(0, graph.nodeCount())
-            .mapToObj(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), result.get(nodeId).data()));
+       return stream(computationResult);
     }
 
     @Procedure(value = "gds.alpha.node2vec.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimateStats(
+    public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -93,52 +75,19 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
 
     @Override
     protected AlgorithmFactory<Node2Vec, Node2VecStreamConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
-            @Override
-            public Node2Vec build(
-                Graph graph, Node2VecStreamConfig configuration, AllocationTracker tracker, Log log,
-                ProgressEventTracker eventTracker
-            ) {
-                var progressLogger = new BatchingProgressLogger(
-                    log,
-                    0, //dummy value, gets overridden
-                    "Node2Vec",
-                    configuration.concurrency(),
-                    eventTracker
-                );
-                validateConfig(configuration, graph);
-                return new Node2Vec(graph, configuration, progressLogger, tracker);
-            }
+        return Node2VecCompanion.algorithmFactory();
+    }
 
-            @Override
-            public MemoryEstimation memoryEstimation(Node2VecStreamConfig configuration) {
-                return Node2Vec.memoryEstimation(configuration);
-            }
-
-            private void validateConfig(Node2VecStreamConfig config, Graph graph) {
-                try {
-                    var ignored = multiplyExact(multiplyExact(graph.nodeCount(), config.walksPerNode()), config.walkLength());
-                } catch (ArithmeticException ex) {
-                    throw new IllegalArgumentException(
-                        formatWithLocale(
-                            "Aborting execution, running with the configured parameters is likely to overflow: node count: %d, walks per node: %d, walkLength: %d." +
-                            " Try reducing these parameters or run on a smaller graph.",
-                            graph.nodeCount(),
-                            config.walksPerNode(),
-                            config.walkLength()
-                        ));
-                }
-            }
-
-        };
+    @Override
+    protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecStreamConfig> computationResult) {
+        return Node2VecCompanion.nodeProperties(computationResult);
     }
 
     @Override
     protected StreamResult streamResult(
         long originalNodeId, long internalNodeId, NodeProperties nodeProperties
     ) {
-        throw new UnsupportedOperationException(
-            "Node2VecStreamProc doesn't want to build results this way. He won't be just another brick in the wall, man.");
+        return new StreamResult(originalNodeId, nodeProperties.floatArrayValue(internalNodeId));
     }
 
     @SuppressWarnings("unused")
