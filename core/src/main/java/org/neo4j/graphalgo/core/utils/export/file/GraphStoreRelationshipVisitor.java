@@ -19,20 +19,60 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilderBuilder;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.LongAdder;
+import java.util.stream.Collectors;
 
 public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
 
-    private final RelationshipsBuilder relationshipsBuilder;
+    private final Map<String, RelationshipsBuilder> relationshipBuilders;
+    private final RelationshipsBuilderBuilder relationshipsBuilderBuilder;
 
-    protected GraphStoreRelationshipVisitor(RelationshipSchema relationshipSchema, RelationshipsBuilder relationshipsBuilder) {
+    protected GraphStoreRelationshipVisitor(RelationshipSchema relationshipSchema, RelationshipsBuilderBuilder relationshipsBuilderBuilder) {
         super(relationshipSchema);
-        this.relationshipsBuilder = relationshipsBuilder;
+        this.relationshipsBuilderBuilder = relationshipsBuilderBuilder;
+        this.relationshipBuilders = new HashMap<>();
+
     }
 
     @Override
     protected void exportElement() {
+        var relationshipsBuilder = relationshipBuilders.computeIfAbsent(
+            relationshipType(),
+            (key) -> relationshipsBuilderBuilder.build()
+        );
+
         relationshipsBuilder.add(startNode(), endNode());
+    }
+
+    protected RelationshipVisitorResult result() {
+        var resultBuilder = ImmutableRelationshipVisitorResult.builder();
+        var relationshipCountTracker = new LongAdder();
+        var relationshipTypeTopologyMap = relationshipBuilders.entrySet().stream().map(entry -> {
+            var type = entry.getKey();
+            var builder = entry.getValue();
+            var topology = builder.build().topology();
+            relationshipCountTracker.add(topology.elementCount());
+            return Map.entry(RelationshipType.of(type), topology);
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return resultBuilder
+            .putAllRelationshipTypesWithTopology(relationshipTypeTopologyMap)
+            .relationshipCount(relationshipCountTracker.longValue())
+            .build();
+    }
+
+    @ValueClass
+    interface RelationshipVisitorResult {
+        Map<RelationshipType, Relationships.Topology> relationshipTypesWithTopology();
+        long relationshipCount();
     }
 }
