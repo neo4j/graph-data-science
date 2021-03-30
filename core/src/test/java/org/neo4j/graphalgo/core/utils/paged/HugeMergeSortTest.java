@@ -20,34 +20,41 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HugeMergeSortTest {
 
+    static Stream<Arguments> sizeAndConcurrency() {
+        return TestSupport.crossArguments(
+            () -> List.of(10, 100, 1000, 10_000, 100_000, 1_000_000, 10_000_000).stream().map(Arguments::of),
+            () -> List.of(1, 2, 4, 8).stream().map(Arguments::of)
+        );
+    }
+
     @ParameterizedTest
-    @ValueSource(longs = {10, 100, 1000, 10_000, 100_000, 1_000_000, 10_000_000})
-    void sortArray(long size) {
+    @MethodSource("sizeAndConcurrency")
+    void sortArray(int size, int concurrency) {
         var tracker = AllocationTracker.empty();
-
         var array = HugeLongArray.newArray(size, tracker);
-
-        var random = new Random();
-
-        for (long i = 0; i < size; i++) {
-            array.set(i, random.nextLong());
+        var longs = new Random().longs(size).toArray();
+        for (int i = 0; i < size; i++) {
+            array.set(i, longs[i]);
         }
 
-        HugeMergeSort.sort(array, 16, tracker);
+        HugeMergeSort.sort(array, concurrency, tracker);
 
         for (int i = 1; i < array.size(); i++) {
             assertThat(array.get(i)).isGreaterThan(array.get(i - 1));
         }
-
     }
 
 }
