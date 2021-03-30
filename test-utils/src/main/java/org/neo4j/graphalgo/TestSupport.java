@@ -141,7 +141,11 @@ public final class TestSupport {
             .orientation(orientation)
             .build();
 
-        var gdlFactory = GdlFactory.of(config, GdlSupportExtension.DATABASE_ID);
+        var gdlFactory = GdlFactory
+            .builder()
+            .createConfig(config)
+            .namedDatabaseId(GdlSupportExtension.DATABASE_ID)
+            .build();
 
         return new TestGraph(gdlFactory.build().graphStore().getUnion(), gdlFactory::nodeId, name);
     }

@@ -45,7 +45,11 @@ public interface GraphCreateFromGdlConfig extends GraphCreateConfig {
 
     @Override
     default GraphStoreFactory.Supplier graphStoreFactory() {
-        return loaderContext -> GdlFactory.of(this, loaderContext.api().databaseId());
+        return loaderContext -> GdlFactory
+            .builder()
+            .createConfig(this)
+            .namedDatabaseId(loaderContext.api().databaseId())
+            .build();
     }
 
     @Override

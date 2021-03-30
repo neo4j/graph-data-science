@@ -127,7 +127,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             .aggregation(gdlGraphSetup.aggregation())
             .build();
 
-        GdlFactory gdlFactory = GdlFactory.of(createConfig, DATABASE_ID);
+        GdlFactory gdlFactory = GdlFactory.builder().createConfig(createConfig).namedDatabaseId(DATABASE_ID).build();
         CSRGraphStore graphStore = gdlFactory.build().graphStore();
         CSRGraph graph = graphStore.getUnion();
         IdFunction idFunction = gdlFactory::nodeId;

@@ -82,26 +82,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         return builder().gdlGraph(gdlGraph).build();
     }
 
-    public static GdlFactory of(String gdlGraph, NamedDatabaseId namedDatabaseId) {
-        return builder().gdlGraph(gdlGraph).namedDatabaseId(namedDatabaseId).build();
-    }
-
-    public static GdlFactory of(String username, NamedDatabaseId namedDatabaseId, String graphName, String gdlGraph) {
-        return builder()
-            .gdlGraph(gdlGraph)
-            .userName(username)
-            .graphName(graphName)
-            .namedDatabaseId(namedDatabaseId)
-            .build();
-    }
-
-    public static GdlFactory of(GraphCreateFromGdlConfig config, NamedDatabaseId databaseId) {
-        return builder()
-            .createConfig(config)
-            .namedDatabaseId(databaseId)
-            .build();
-    }
-
     public static GdlFactoryBuilder builder() {
         return new GdlFactoryBuilder();
     }

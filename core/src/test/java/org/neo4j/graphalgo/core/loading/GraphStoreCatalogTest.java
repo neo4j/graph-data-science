@@ -117,8 +117,20 @@ class GraphStoreCatalogTest {
         NamedDatabaseId namedDatabaseId0 = DatabaseIdFactory.from("DB_0", UUID.fromString("0-0-0-0-0"));
         NamedDatabaseId namedDatabaseId1 = DatabaseIdFactory.from("DB_1", UUID.fromString("0-0-0-0-1"));
 
-        GraphStore graphStore0 = GdlFactory.of("()-->()", namedDatabaseId0).build().graphStore();
-        GraphStore graphStore1 = GdlFactory.of("()-->()-->()", namedDatabaseId1).build().graphStore();
+        GraphStore graphStore0 = GdlFactory
+            .builder()
+            .gdlGraph("()-->()")
+            .namedDatabaseId(namedDatabaseId0)
+            .build()
+            .build()
+            .graphStore();
+        GraphStore graphStore1 = GdlFactory
+            .builder()
+            .gdlGraph("()-->()-->()")
+            .namedDatabaseId(namedDatabaseId1)
+            .build()
+            .build()
+            .graphStore();
 
         GraphStoreCatalog.set(config0, graphStore0);
         GraphStoreCatalog.set(config1, graphStore1);
