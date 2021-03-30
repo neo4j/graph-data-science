@@ -20,27 +20,31 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.immutables.builder.Builder;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.IdMapping;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.ImmutableNodePropertyStore;
 import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.NodeProperty;
+import org.neo4j.graphalgo.api.NodePropertyStore;
+import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
-import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.ImmutableImportedProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class CsvToGraphStoreExporter {
 
@@ -48,7 +52,7 @@ public final class CsvToGraphStoreExporter {
     private final Path importPath;
     private final GraphStoreToFileExporterConfig config;
 
-    private final GraphBuilder graphBuilder;
+    private final GraphStoreBuilder graphStoreBuilder;
 
     public static CsvToGraphStoreExporter create(
         GraphStoreToFileExporterConfig config,
@@ -69,22 +73,21 @@ public final class CsvToGraphStoreExporter {
         this.config = config;
         this.nodeVisitorBuilder = nodeVisitorBuilder.withReverseIdMapping(config.includeMetaData());
         this.importPath = importPath;
-        this.graphBuilder = new GraphBuilder();
+        this.graphStoreBuilder = new GraphStoreBuilder().concurrency(config.writeConcurrency());
     }
 
-    public Graph graph() {
-        return graphBuilder.build();
+    public GraphStore graphStore() {
+        return graphStoreBuilder.build();
     }
 
     public GraphStoreExporter.ImportedProperties run(AllocationTracker tracker) {
         var fileInput = new FileInput(importPath);
-        graphBuilder.tracker(tracker);
+        graphStoreBuilder.tracker(tracker);
         return export(fileInput, tracker);
     }
 
     private GraphStoreExporter.ImportedProperties export(FileInput fileInput, AllocationTracker tracker) {
         var nodes = exportNodes(fileInput, tracker);
-        // FIXME: get the `nodes` parameter from the previous step
         var exportedRelationships = exportRelationships(fileInput, nodes, AllocationTracker.empty());
         return ImmutableImportedProperties.of(nodes.nodeCount(), exportedRelationships);
     }
@@ -94,9 +97,10 @@ public final class CsvToGraphStoreExporter {
         AllocationTracker tracker
     ) {
         NodeSchema nodeSchema = fileInput.nodeSchema();
-        graphBuilder.nodeSchema(nodeSchema);
 
         GraphInfo graphInfo = fileInput.graphInfo();
+        graphStoreBuilder.databaseId(graphInfo.namedDatabaseId());
+
         int concurrency = config.writeConcurrency();
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
             .maxOriginalId(graphInfo.maxOriginalId())
@@ -116,22 +120,38 @@ public final class CsvToGraphStoreExporter {
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
         var nodeMappingAndProperties = nodesBuilder.build();
-        graphBuilder.idMap(nodeMappingAndProperties.nodeMapping())
-            .nodeProperties(nodeMappingAndProperties.nodeProperties());
+        graphStoreBuilder.nodes(nodeMappingAndProperties.nodeMapping());
+        nodeMappingAndProperties.nodeProperties().orElse(Map.of())
+            .forEach((label, propertyMap) -> {
+                var nodeStoreProperties = propertyMap.entrySet().stream().map(entry -> {
+                    var propertyKey = entry.getKey();
+                    var nodeProperties = entry.getValue();
+                    var propertySchema = nodeSchema.properties().get(label).get(propertyKey);
+                    var nodeProperty = NodeProperty.of(
+                        propertySchema.key(),
+                        propertySchema.state(),
+                        nodeProperties,
+                        propertySchema.defaultValue()
+                    );
+
+                    return Map.entry(propertyKey, nodeProperty);
+                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+                graphStoreBuilder.putNodePropertyStores(label, ImmutableNodePropertyStore.of(nodeStoreProperties));
+            });
 
         return nodeMappingAndProperties.nodeMapping();
     }
 
-    private long exportRelationships(FileInput fileInput, IdMapping nodes, AllocationTracker tracker) {
+    private long exportRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker tracker) {
         var relationshipSchema = fileInput.relationshipSchema();
         int concurrency = config.writeConcurrency();
-        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+        var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
             .concurrency(concurrency)
             .nodes(nodes)
-            .tracker(tracker)
-            .build();
+            .tracker(tracker);
 
-        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipsBuilder);
+        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipsBuilderBuilder);
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
             concurrency,
@@ -140,32 +160,30 @@ public final class CsvToGraphStoreExporter {
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        // FIXME: need to get the relationship type dynamically!!!
-        graphBuilder.relationshipType(RelationshipType.ALL_RELATIONSHIPS);
+        var relationshipVisitorResult = relationshipVisitor.result();
+        graphStoreBuilder.relationships(relationshipVisitorResult.relationshipTypesWithTopology());
 
-        var relationships = relationshipsBuilder.build();
-        graphBuilder.relationships(relationships);
-        return relationships.topology().elementCount();
+        return relationshipVisitorResult.relationshipCount();
     }
 
     @Builder.Factory
-    static Graph graph(
-        NodeMapping idMap,
-        NodeSchema nodeSchema,
-        Optional<Map<String, NodeProperties>> nodeProperties,
-        RelationshipType relationshipType,
-        Relationships relationships,
+    static GraphStore graphStore(
+        NamedDatabaseId databaseId,
+        NodeMapping nodes,
+        Map<NodeLabel, NodePropertyStore> nodePropertyStores,
+        Map<RelationshipType, Relationships.Topology> relationships,
+        Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
+        int concurrency,
         AllocationTracker tracker
     ) {
-        return nodeProperties
-            .map(properties -> GraphFactory.create(
-                idMap,
-                nodeSchema,
-                properties,
-                relationshipType,
-                relationships,
-                tracker
-            ))
-            .orElseGet(() -> GraphFactory.create(idMap, relationships, tracker));
+        return CSRGraphStore.of(
+            databaseId,
+            nodes,
+            nodePropertyStores,
+            relationships,
+            relationshipPropertyStores,
+            concurrency,
+            tracker
+        );
     }
 }

@@ -48,10 +48,10 @@ class CsvToGraphStoreExporterTest {
         assertThat(importedProperties).isNotNull();
         assertThat(importedProperties.nodePropertyCount()).isEqualTo(10);
 
-        var graph = exporter.graph();
-        assertThat(graph).isNotNull();
-        assertThat(graph.nodeCount()).isEqualTo(10L);
-        var loadedNodeSchema = graph.schema().nodeSchema();
+        var graphStore = exporter.graphStore();
+        assertThat(graphStore).isNotNull();
+        assertThat(graphStore.nodeCount()).isEqualTo(10L);
+        var loadedNodeSchema = graphStore.schema().nodeSchema();
         var expectedNodeSchema = NodeSchema.builder()
             .addProperty(
                 NodeLabel.of("A"),
@@ -72,9 +72,10 @@ class CsvToGraphStoreExporterTest {
                                             ", (:B)" +
                                             ", (:B)" +
                                             ", (:B)" +
-                                            ", (n0)-[:REL]->(n1)-[:REL]->(n2)-[:REL]->(n3)"
+                                            ", (n0)-[:REL]->(n1)-[:REL]->(n2)-[:REL]->(n3)" +
+                                            ", (n1)-[:REL1]->(n2)-[:REL1]->(n3)"
         );
-        assertGraphEquals(testGraph, graph);
+        assertGraphEquals(testGraph, graphStore.getUnion());
 
         assertThat(loadedNodeSchema).isEqualTo(expectedNodeSchema);
     }
