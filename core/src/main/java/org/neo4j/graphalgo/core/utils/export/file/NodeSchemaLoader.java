@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
+import static org.neo4j.graphalgo.core.utils.export.file.NodeVisitor.NEO_ID_KEY;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
 
 public class NodeSchemaLoader {
@@ -61,7 +62,7 @@ public class NodeSchemaLoader {
             while(linesIterator.hasNext()) {
                 var schemaLine = linesIterator.next();
                 schemaBuilder.nodeLabel(schemaLine.label);
-                if (schemaLine.propertyKey != null) {
+                if (schemaLine.propertyKey != null && !NEO_ID_KEY.equals(schemaLine.propertyKey)) {
                     schemaBuilder.key(schemaLine.propertyKey);
                     schemaBuilder.valueType(schemaLine.valueType);
                     schemaBuilder.defaultValue(DefaultValue.of(schemaLine.defaultValue, schemaLine.valueType, true));

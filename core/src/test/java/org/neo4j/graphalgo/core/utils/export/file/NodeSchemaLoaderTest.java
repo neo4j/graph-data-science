@@ -107,4 +107,79 @@ class NodeSchemaLoaderTest {
         assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
     }
 
+    @Test
+    void shouldExcludeNeoId() throws IOException {
+        var nodeSchemaFile = exportDir.resolve(NODE_SCHEMA_FILE_NAME).toFile();
+        var lines = List.of(
+            String.join(", ", NODE_SCHEMA_COLUMNS),
+            "A, prop1, long, DefaultValue(42), PERSISTENT",
+            "A, neoId, long, , PERSISTENT",
+            "B, neoId, double,, PERSISTENT"
+        );
+        FileUtils.writeLines(nodeSchemaFile, lines);
+
+        var schemaLoader = new NodeSchemaLoader(exportDir);
+        var nodeSchema = schemaLoader.load();
+
+        assertThat(nodeSchema).isNotNull();
+
+        assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
+
+        var labelAProperties = nodeSchema.filterProperties(Set.of(NodeLabel.of("A")));
+        assertThat(labelAProperties)
+            .containsExactlyInAnyOrderEntriesOf(Map.of(
+                NodeLabel.of("A"),
+                Map.of(
+                    "prop1",
+                    PropertySchema.of(
+                        "prop1",
+                        ValueType.LONG,
+                        DefaultValue.of(42L),
+                        GraphStore.PropertyState.PERSISTENT
+                    )
+                )
+            ));
+
+        var labelBProperties = nodeSchema.filterProperties(Set.of(NodeLabel.of("B")));
+        assertThat(labelBProperties)
+            .containsExactlyInAnyOrderEntriesOf(Map.of(NodeLabel.of("B"), Map.of()));
+    }
+
+    @Test
+    void shouldLoadMixedLabels() throws IOException {
+        var nodeSchemaFile = exportDir.resolve(NODE_SCHEMA_FILE_NAME).toFile();
+        var lines = List.of(
+            String.join(", ", NODE_SCHEMA_COLUMNS),
+            "A, prop1, long, DefaultValue(42), PERSISTENT",
+            "B"
+        );
+        FileUtils.writeLines(nodeSchemaFile, lines);
+
+        var schemaLoader = new NodeSchemaLoader(exportDir);
+        var nodeSchema = schemaLoader.load();
+
+        assertThat(nodeSchema).isNotNull();
+
+        assertThat(nodeSchema.availableLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
+
+        var labelAProperties = nodeSchema.filterProperties(Set.of(NodeLabel.of("A")));
+        assertThat(labelAProperties)
+            .containsExactlyInAnyOrderEntriesOf(Map.of(
+                NodeLabel.of("A"),
+                Map.of(
+                    "prop1",
+                    PropertySchema.of(
+                        "prop1",
+                        ValueType.LONG,
+                        DefaultValue.of(42L),
+                        GraphStore.PropertyState.PERSISTENT
+                    )
+                )
+            ));
+
+        var labelBProperties = nodeSchema.filterProperties(Set.of(NodeLabel.of("B")));
+        assertThat(labelBProperties)
+            .containsExactlyInAnyOrderEntriesOf(Map.of(NodeLabel.of("B"), Map.of()));
+    }
+
 }

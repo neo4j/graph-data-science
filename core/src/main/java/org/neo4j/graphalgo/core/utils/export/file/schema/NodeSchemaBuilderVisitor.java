@@ -43,6 +43,8 @@ public class NodeSchemaBuilderVisitor extends NodeSchemaVisitor {
                 PropertySchema.of(key(), valueType(), defaultValue(), state())
             );
         }
+
+        reset();
     }
 
     public NodeSchema schema() {

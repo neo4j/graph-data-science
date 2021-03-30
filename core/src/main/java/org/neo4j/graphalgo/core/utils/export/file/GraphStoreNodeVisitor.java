@@ -44,6 +44,9 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
         NodeLabel[] nodeLabels = labels().stream().map(NodeLabel::of).toArray(NodeLabel[]::new);
         Map<String, Value> props = new HashMap<>();
         forEachProperty((key, value, type) -> {
+            if(NEO_ID_KEY.equals(key)) {
+                return;
+            }
             Value val;
             switch (type) {
                 case LONG:

@@ -41,6 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.core.utils.export.file.NodeVisitor.NEO_ID_KEY;
+
 public final class FileInput implements CompatInput {
 
     private final Path importPath;
@@ -163,11 +165,16 @@ public final class FileInput implements CompatInput {
             var lineValues = line.split(",");
 
             visitor.labels(header.nodeLabels());
-            visitor.id(Long.parseLong(lineValues[0]));
 
             header
                 .propertyMappings()
-                .forEach(property -> visitor.property(property.propertyKey(), lineValues[property.position()]));
+                .forEach(property -> {
+                    if (NEO_ID_KEY.equals(property.propertyKey())) {
+                        visitor.id(Long.parseLong(lineValues[property.position()]));
+                    } else {
+                        visitor.property(property.propertyKey(), lineValues[property.position()]);
+                    }
+                });
 
             visitor.endOfEntity();
         }

@@ -58,21 +58,20 @@ class CsvToGraphStoreExporterTest {
                 "prop1",
                 PropertySchema.of("prop1", ValueType.LONG, DefaultValue.of(42L), GraphStore.PropertyState.PERSISTENT)
             )
-            .addProperty(NodeLabel.of("A"), "neoId", ValueType.LONG)
-            .addProperty(NodeLabel.of("B"), "neoId", ValueType.LONG)
+            .addLabel(NodeLabel.of("B"))
             .build();
 
         var testGraph = TestSupport.fromGdl(
-                                            "  (:A {neoId: 1329, prop1: 21})" +
-                                            ", (:A {neoId: 1330, prop1: 22})" +
-                                            ", (:A {neoId: 1331, prop1: 23})" +
-                                            ", (:A {neoId: 1332, prop1: 24})" +
-                                            ", (:A {neoId: 1333, prop1: 25})" +
-                                            ", (:B {neoId: 1328})" +
-                                            ", (:B {neoId: 1334})" +
-                                            ", (:B {neoId: 1335})" +
-                                            ", (:B {neoId: 1336})" +
-                                            ", (:B {neoId: 1337})"
+                                            "  (:A {prop1: 21})" +
+                                            ", (:A {prop1: 22})" +
+                                            ", (:A {prop1: 23})" +
+                                            ", (:A {prop1: 24})" +
+                                            ", (:A { prop1: 25})" +
+                                            ", (:B)" +
+                                            ", (:B)" +
+                                            ", (:B)" +
+                                            ", (:B)" +
+                                            ", (:B)"
         );
         assertGraphEquals(testGraph, graph);
 
