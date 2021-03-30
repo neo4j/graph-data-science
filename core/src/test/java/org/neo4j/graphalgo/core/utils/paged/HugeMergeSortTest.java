@@ -34,15 +34,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HugeMergeSortTest {
 
     static Stream<Arguments> sizeAndConcurrency() {
+        var random = new Random();
         return TestSupport.crossArguments(
-            () -> List.of(10, 100, 1000, 10_000, 100_000, 1_000_000, 10_000_000).stream().map(Arguments::of),
+            // array sizes
+            () -> Stream.concat(
+                Stream.concat(
+                    random.longs(5, 1, 100).boxed(),
+                    random.longs(5, 100, 1_000).boxed()
+                ),
+                Stream.concat(
+                    random.longs(5, 1_000, 10_000).boxed(),
+                    random.longs(5, 10_000, 1_000_000).boxed()
+                )
+            ).map(Arguments::of),
+            // concurrencies
             () -> List.of(1, 2, 4, 8).stream().map(Arguments::of)
         );
     }
 
     @ParameterizedTest
     @MethodSource("sizeAndConcurrency")
-    void sortArray(int size, int concurrency) {
+    void sortArray(long size, int concurrency) {
         var tracker = AllocationTracker.empty();
         var array = HugeLongArray.newArray(size, tracker);
         var longs = new Random().longs(size).toArray();
