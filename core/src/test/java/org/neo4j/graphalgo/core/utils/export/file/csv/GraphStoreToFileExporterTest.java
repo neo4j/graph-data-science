@@ -157,8 +157,8 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "nodes_A_B_0.csv",
             List.of(
-                List.of("0", Long.toString(idFunction.of("a")), "0", "42", "1;3;3;7"),
-                List.of("1", Long.toString(idFunction.of("b")), "1", "43", "")
+                List.of("0", stringIdOf("a"), "0", "42", "1;3;3;7"),
+                List.of("1", stringIdOf("b"), "1", "43", "")
             )
         );
 
@@ -166,7 +166,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "nodes_A_C_0.csv",
             List.of(
-                List.of("2", Long.toString(idFunction.of("c")), "2", "44", "1;9;8;4")
+                List.of("2", stringIdOf("c"), "2", "44", "1;9;8;4")
             )
         );
 
@@ -174,7 +174,7 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "nodes_B_0.csv",
             List.of(
-                List.of("3", Long.toString(idFunction.of("d")), "3", "", "")
+                List.of("3", stringIdOf("d"), "3", "", "")
             )
         );
 
@@ -184,9 +184,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "relationships_REL1_0.csv",
             List.of(
-                List.of(Long.toString(idFunction.of("a")), Long.toString(idFunction.of("a")), "0.0", "42.0"),
-                List.of(Long.toString(idFunction.of("a")), Long.toString(idFunction.of("b")), "1.0", "43.0"),
-                List.of(Long.toString(idFunction.of("b")), Long.toString(idFunction.of("a")), "2.0", "44.0")
+                List.of(stringIdOf("a"), stringIdOf("a"), "0.0", "42.0"),
+                List.of(stringIdOf("a"), stringIdOf("b"), "1.0", "43.0"),
+                List.of(stringIdOf("b"), stringIdOf("a"), "2.0", "44.0")
             )
         );
 
@@ -194,9 +194,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             "relationships_REL2_0.csv",
             List.of(
-                List.of(Long.toString(idFunction.of("b")), Long.toString(idFunction.of("c")), "3.0", "45.0"),
-                List.of(Long.toString(idFunction.of("c")), Long.toString(idFunction.of("d")), "4.0", "46.0"),
-                List.of(Long.toString(idFunction.of("d")), Long.toString(idFunction.of("a")), "5.0", "47.0")
+                List.of(stringIdOf("b"), stringIdOf("c"), "3.0", "45.0"),
+                List.of(stringIdOf("c"), stringIdOf("d"), "4.0", "46.0"),
+                List.of(stringIdOf("d"), stringIdOf("a"), "5.0", "47.0")
             )
         );
 
@@ -344,6 +344,10 @@ class GraphStoreToFileExporterTest extends CsvTest {
                 List.of("REL4")
             )
         );
+    }
+
+    private String stringIdOf(String variable) {
+        return Long.toString(idFunction.of(variable));
     }
 
     private String stringPair(long id, String variable) {
