@@ -35,7 +35,6 @@ public final class HugeMergeSort {
         forkJoinPool.invoke(new MergeSortTask(null, array, temp, 0, array.size() - 1));
     }
 
-
     static class MergeSortTask extends CountedCompleter<Void> {
 
         private final HugeLongArray array;
@@ -77,7 +76,7 @@ public final class HugeMergeSort {
             } else {
                 // We sort the range sequentially before
                 // propagating "done" to the "completer".
-                insertionSort();
+                insertionSort(array, startIndex, endIndex);
                 // This calls into "onCompletion" which
                 // performs the merge of the two sub-ranges
                 // and decrements the pending count.
@@ -91,70 +90,61 @@ public final class HugeMergeSort {
                 // No merging for leaf tasks.
                 return;
             }
+            merge(array, temp, startIndex, endIndex, midIndex);
+        }
+    }
 
-            // Localize fields
-            var array = this.array;
-            var temp = this.temp;
-            long startIndex = this.startIndex;
-            long endIndex = this.endIndex;
-            long midIndex = this.midIndex;
+    private static void merge(HugeLongArray array, HugeLongArray temp, long startIndex, long endIndex, long midIndex) {
+        // Copy only left range into temp
+        for (long i = startIndex; i <= midIndex; i++) {
+            temp.set(i, array.get(i));
+        }
 
-            // Copy only left range into temp
-            for (long i = startIndex; i <= midIndex; i++) {
-                temp.set(i, array.get(i));
-            }
+        // Left points to the next element in the left range.
+        long left = startIndex;
+        // Right points to the next element in the right range.
+        long right = midIndex + 1;
 
-            // Left points to the next element in the left range.
-            long left = startIndex;
-            // Right points to the next element in the right range.
-            long right = midIndex + 1;
-
-            // i points to the next element in the full range.
-            long i = startIndex;
-            while (left <= midIndex && right <= endIndex) {
-                // Each iteration inserts an element into array
-                // at position i. We take the smaller element from
-                // either left or right range and increment the
-                // corresponding range index.
-                if (temp.get(left) < array.get(right)) {
-                    array.set(i++, temp.get(left++));
-                } else {
-                    array.set(i++, array.get(right++));
-                }
-            }
-
-            // If we still have elements in the temp range, we need
-            // to move them at the end of the range since we know
-            // that all values in the right range are smaller.
-            if (left <= midIndex) {
-                for (long k = i; k <= endIndex; k++) {
-                    array.set(k, temp.get(left++));
-                }
+        // i points to the next element in the full range.
+        long i = startIndex;
+        while (left <= midIndex && right <= endIndex) {
+            // Each iteration inserts an element into array
+            // at position i. We take the smaller element from
+            // either left or right range and increment the
+            // corresponding range index.
+            if (temp.get(left) < array.get(right)) {
+                array.set(i++, temp.get(left++));
+            } else {
+                array.set(i++, array.get(right++));
             }
         }
 
-        private void insertionSort() {
-            // Localize fields
-            var array = this.array;
-            long startIndex = this.startIndex;
-            long endIndex = this.endIndex;
-
-            for (long i = startIndex, j = i; i < endIndex; j = ++i) {
-                // Try to find a spot for current
-                long current = array.get(i + 1);
-
-                // Copy values greater than `current` to the right
-                while (current < array.get(j)) {
-                    array.set(j + 1, array.get(j));
-
-                    if (j-- == startIndex) {
-                        break;
-                    }
-                }
-
-                // We found the right position for "current".
-                array.set(j + 1, current);
+        // If we still have elements in the temp range, we need
+        // to move them at the end of the range since we know
+        // that all values in the right range are smaller.
+        if (left <= midIndex) {
+            for (long k = i; k <= endIndex; k++) {
+                array.set(k, temp.get(left++));
             }
+        }
+    }
+
+    private static void insertionSort(HugeLongArray array, long startIndex, long endIndex) {
+        for (long i = startIndex, j = i; i < endIndex; j = ++i) {
+            // Try to find a spot for current
+            long current = array.get(i + 1);
+
+            // Copy values greater than `current` to the right
+            while (current < array.get(j)) {
+                array.set(j + 1, array.get(j));
+
+                if (j-- == startIndex) {
+                    break;
+                }
+            }
+
+            // We found the right position for "current".
+            array.set(j + 1, current);
         }
     }
 
