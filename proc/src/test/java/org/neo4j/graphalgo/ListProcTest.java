@@ -29,6 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageWriteProc;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMutateProc;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamProc;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedMutateProc;
@@ -115,6 +116,8 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.model.load",
         "gds.alpha.model.store",
 
+        "gds.alpha.node2vec.mutate",
+        "gds.alpha.node2vec.mutate.estimate",
         "gds.alpha.node2vec.stream",
         "gds.alpha.node2vec.stream.estimate",
         "gds.alpha.node2vec.write",
@@ -361,6 +364,7 @@ class ListProcTest extends BaseProcTest {
             NodeSimilarityStreamProc.class,
             NodeSimilarityMutateProc.class,
             NodeSimilarityStatsProc.class,
+            Node2VecMutateProc.class,
             Node2VecStreamProc.class,
             Node2VecWriteProc.class,
             PageRankWriteProc.class,
