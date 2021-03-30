@@ -302,8 +302,11 @@ public final class SparseLongArray {
                 idCount += Long.bitCount(array[page]);
             }
 
+            // Capacity is set to include the highest node id.
+            // The highest node id is therefore capacity - 1.
+            var highestNeoId = capacity - 1;
             var layouts = ArrayLayout.constructEytzinger(sortedBlockOffsets, blockMapping);
-            return new SparseLongArray(idCount, capacity, array, blockOffsets, layouts.layout(), layouts.secondary());
+            return new SparseLongArray(idCount, highestNeoId, array, blockOffsets, layouts.layout(), layouts.secondary());
         }
     }
 
@@ -364,7 +367,10 @@ public final class SparseLongArray {
             Arrays.setAll(blockMapping, i -> i);
             var layouts = ArrayLayout.constructEytzinger(blockOffsets, blockMapping);
 
-            return new SparseLongArray(count, capacity, array, blockOffsets, layouts.layout(), layouts.secondary());
+            // Capacity is set to include the highest node id.
+            // The highest node id is therefore capacity - 1.
+            var highestNeoId = capacity - 1;
+            return new SparseLongArray(count, highestNeoId, array, blockOffsets, layouts.layout(), layouts.secondary());
         }
 
         private static class ThreadLocalBuilder implements AutoCloseable {

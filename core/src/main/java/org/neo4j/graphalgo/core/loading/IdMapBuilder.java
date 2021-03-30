@@ -99,7 +99,9 @@ public final class IdMapBuilder {
             nodeToGraphIds,
             convertedLabelInformation,
             idMapBuilder.size(),
-            idMapBuilder.capacity(),
+            // Capacity is set to include the highest node id.
+            // The highest node id is therefore capacity - 1.
+            idMapBuilder.capacity() - 1,
             tracker
         );
     }

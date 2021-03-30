@@ -80,6 +80,7 @@ class IdMapTest {
     @Test
     void shouldStoreCorrectHighestNeoId() {
         int length = 1337;
+        int highestNeoId = length - 1;
         var hugeIdMappingBuilder = InternalHugeIdMappingBuilder.of(length, AllocationTracker.empty());
         var hugeIdMap = IdMapBuilder.build(hugeIdMappingBuilder, Map.of(), length, 1, AllocationTracker.empty());
 
@@ -89,8 +90,8 @@ class IdMapTest {
         var sequentialBitIdMappingBuilder = InternalSequentialBitIdMappingBuilder.of(length, AllocationTracker.empty());
         var sequentialBitIdMap = IdMapBuilder.build(sequentialBitIdMappingBuilder, Map.of(), AllocationTracker.empty());
 
-        assertThat(hugeIdMap.highestNeoId()).isEqualTo(length);
-        assertThat(bitIdMap.highestNeoId()).isEqualTo(length);
-        assertThat(sequentialBitIdMap.highestNeoId()).isEqualTo(length);
+        assertThat(hugeIdMap.highestNeoId()).isEqualTo(highestNeoId);
+        assertThat(bitIdMap.highestNeoId()).isEqualTo(highestNeoId);
+        assertThat(sequentialBitIdMap.highestNeoId()).isEqualTo(highestNeoId);
     }
 }
