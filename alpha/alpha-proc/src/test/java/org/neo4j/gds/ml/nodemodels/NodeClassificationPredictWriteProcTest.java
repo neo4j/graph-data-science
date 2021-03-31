@@ -97,8 +97,6 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Wri
 
     @Test
     void shouldHaveTheRightOutputs() {
-        addModelWithFeatures(getUsername(), MODEL_NAME, List.of("a", "b"));
-
         var query = GdsCypher
             .call()
             .explicitCreation("g")
