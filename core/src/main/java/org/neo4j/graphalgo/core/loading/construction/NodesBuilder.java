@@ -61,7 +61,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
