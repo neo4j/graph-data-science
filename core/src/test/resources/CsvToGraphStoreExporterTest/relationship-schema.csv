@@ -1,2 +1,3 @@
 relationshipType,propertyKey,valueType,defaultValue,aggregation,state
-REL
+REL,weight,double,DefaultValue(1.9),SINGLE,PERSISTENT
+REL1

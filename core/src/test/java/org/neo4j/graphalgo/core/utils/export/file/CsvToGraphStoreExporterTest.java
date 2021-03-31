@@ -61,7 +61,7 @@ class CsvToGraphStoreExporterTest {
             .addLabel(NodeLabel.of("B"))
             .build();
 
-        var testGraph = TestSupport.fromGdl(
+        var expectedGraph = TestSupport.fromGdl(
                                             "  (n0:A {prop1: 21})" +
                                             ", (n1:A {prop1: 22})" +
                                             ", (n2:A {prop1: 23})" +
@@ -72,10 +72,11 @@ class CsvToGraphStoreExporterTest {
                                             ", (:B)" +
                                             ", (:B)" +
                                             ", (:B)" +
-                                            ", (n0)-[:REL]->(n1)-[:REL]->(n2)-[:REL]->(n3)" +
+                                            ", (n0)-[:REL {weight: 1.5}]->(n1)-[:REL {weight: 4.0}]->(n2)-[:REL {weight: 4.2}]->(n3)" +
                                             ", (n1)-[:REL1]->(n2)-[:REL1]->(n3)"
         );
-        assertGraphEquals(testGraph, graphStore.getUnion());
+        var actualGraph = graphStore.getUnion();
+        assertGraphEquals(expectedGraph, actualGraph);
 
         assertThat(loadedNodeSchema).isEqualTo(expectedNodeSchema);
     }

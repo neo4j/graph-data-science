@@ -162,7 +162,7 @@ public final class CsvToGraphStoreExporter {
 
         var relationshipVisitorResult = relationshipVisitor.result();
         graphStoreBuilder.relationships(relationshipVisitorResult.relationshipTypesWithTopology());
-
+        graphStoreBuilder.relationshipPropertyStores(relationshipVisitorResult.propertyStores());
         return relationshipVisitorResult.relationshipCount();
     }
 
