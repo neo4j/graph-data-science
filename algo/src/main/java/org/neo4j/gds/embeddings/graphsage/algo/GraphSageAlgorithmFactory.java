@@ -105,7 +105,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             .field("this.instance", GraphSage.class)
             .add(
                 "initialFeatures",
-                HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.featuresSize()))
+                HugeObjectArray.memoryEstimation(sizeOfDoubleArray(config.estimationFeatureDimension()))
             )
             .perThread(
                 "concurrentBatches",

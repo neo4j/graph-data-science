@@ -27,6 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -45,6 +46,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.DoubleAdder;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -65,7 +67,7 @@ public class GraphSageModelTrainer {
     private final int epochs;
     private final int maxIterations;
     private final int maxSearchDepth;
-    private final List<LayerConfig> layerConfigs;
+    private final Function<Graph, List<LayerConfig>> layerConfigsFunction;
     private final FeatureFunction featureFunction;
     private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
     private final ProgressLogger progressLogger;
@@ -81,7 +83,7 @@ public class GraphSageModelTrainer {
         FeatureFunction featureFunction,
         Collection<Weights<? extends Tensor<?>>> labelProjectionWeights
     ) {
-        this.layerConfigs = config.layerConfigs();
+        this.layerConfigsFunction = graph -> config.layerConfigs(featureDimension(config, graph));
         this.batchProvider = new BatchProvider(config.batchSize());
         this.learningRate = config.learningRate();
         this.tolerance = config.tolerance();
@@ -101,7 +103,7 @@ public class GraphSageModelTrainer {
         progressLogger.logStart();
         Map<String, Double> epochLosses = new TreeMap<>();
 
-        this.layers = layerConfigs.stream()
+        this.layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
 
@@ -291,6 +293,13 @@ public class GraphSageModelTrainer {
             .flatMap(layer -> layer.weights().stream())
             .collect(Collectors.toList()));
         return weights;
+    }
+
+    private int featureDimension(GraphSageTrainConfig config, Graph graph) {
+        return config.projectedFeatureDimension().orElseGet(() -> {
+            var featureExtractors = GraphSageHelper.featureExtractors(graph, config);
+            return FeatureExtraction.featureCount(featureExtractors);
+        });
     }
 
     @ValueClass

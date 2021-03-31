@@ -60,7 +60,12 @@ class GraphSageHelperTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource({"parameters"})
     void shouldInitializeFeaturesCorrectly(String name, GraphSageTrainConfig config, HugeObjectArray<double[]> expected) {
-        var actual = GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty());
+
+        var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(graph, config);
+        var actual = config.isMultiLabel() ? GraphSageHelper.initializeMultiLabelFeatures(
+            graph,
+            multiLabelFeatureExtractors, AllocationTracker.empty()
+        ) : GraphSageHelper.initializeSingleLabelFeatures(graph, config, AllocationTracker.empty());
 
         assertEquals(expected.size(), actual.size());
         for(int i = 0; i < actual.size(); i++) {
@@ -77,7 +82,10 @@ class GraphSageHelperTest {
             .projectedFeatureDimension(42)
             .build();
         var exception = assertThrows(IllegalArgumentException.class, () ->
-            GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty())
+            GraphSageHelper.initializeMultiLabelFeatures(graph,
+                GraphSageHelper.multiLabelFeatureExtractors(graph, config),
+                AllocationTracker.empty()
+            )
         );
         assertThat(exception).hasMessage(
             "Each node must have exactly one label: nodeId=0, labels=[NodeLabel{name='Bar'}, NodeLabel{name='Foo'}]"
@@ -145,7 +153,7 @@ class GraphSageHelperTest {
                 .featureProperties(List.of("a", "b"))
                 .build();
 
-            GraphSageHelper.initializeFeatures(graph, graphSageTrainConfig, AllocationTracker.empty());
+            GraphSageHelper.initializeSingleLabelFeatures(graph, graphSageTrainConfig, AllocationTracker.empty());
         }
     }
 
@@ -170,7 +178,7 @@ class GraphSageHelperTest {
                 .featureProperties(List.of("prop", "arrayProp"))
                 .build();
 
-            var features = GraphSageHelper.initializeFeatures(
+            var features = GraphSageHelper.initializeSingleLabelFeatures(
                 validGraph,
                 graphSageTrainConfig,
                 AllocationTracker.empty()
@@ -204,7 +212,7 @@ class GraphSageHelperTest {
                 .build();
 
             assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> GraphSageHelper.initializeFeatures(
+                .isThrownBy(() -> GraphSageHelper.initializeSingleLabelFeatures(
                     graph,
                     graphSageTrainConfig,
                     AllocationTracker.empty()))
@@ -231,7 +239,7 @@ class GraphSageHelperTest {
                 .featureProperties(Set.of("dummyProp", "numEmployees", "rating"))
                 .build();
 
-            var actual = GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty());
+            var actual = GraphSageHelper.initializeSingleLabelFeatures(graph, config, AllocationTracker.empty());
 
             var expected = HugeObjectArray.newArray(double[].class, 3, AllocationTracker.empty());
             expected.setAll(i -> new double[] {5.0, 2.0, 7.0});

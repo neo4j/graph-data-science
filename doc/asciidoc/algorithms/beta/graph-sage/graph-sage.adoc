@@ -198,13 +198,13 @@ Consider the graph created by the following Cypher statement:
 ----
 CREATE
   // Persons
-  (dan:Person {name: 'Dan', age: 20, height: 185, weight: 75}),
-  (annie:Person {name: 'Annie', age: 12, height: 124, weight: 42}),
-  (matt:Person {name: 'Matt', age: 67, height: 170, weight: 80}),
-  (jeff:Person {name: 'Jeff', age: 45, height: 192, weight: 85}),
-  (brie:Person {name: 'Brie', age: 27, height: 176, weight: 57}),
-  (elsa:Person {name: 'Elsa', age: 32, height: 158, weight: 55}),
-  (john:Person {name: 'John', age: 35, height: 172, weight: 76}),
+  (  dan:Person {name: 'Dan',   age: 20, heightAndWeight: [185, 75]}),
+  (annie:Person {name: 'Annie', age: 12, heightAndWeight: [124, 42]}),
+  ( matt:Person {name: 'Matt',  age: 67, heightAndWeight: [170, 80]}),
+  ( jeff:Person {name: 'Jeff',  age: 45, heightAndWeight: [192, 85]}),
+  ( brie:Person {name: 'Brie',  age: 27, heightAndWeight: [176, 57]}),
+  ( elsa:Person {name: 'Elsa',  age: 32, heightAndWeight: [158, 55]}),
+  ( john:Person {name: 'John',  age: 35, heightAndWeight: [172, 76]}),
 
   (dan)-[:KNOWS {relWeight: 1.0}]->(annie),
   (dan)-[:KNOWS {relWeight: 1.6}]->(matt),
@@ -224,7 +224,7 @@ CALL gds.graph.create(
   {
     Person: {
       label: 'Person',
-      properties: ['age', 'height', 'weight']
+      properties: ['age', 'heightAndWeight']
     }
   }, {
     KNOWS: {
@@ -251,7 +251,7 @@ CALL gds.beta.graphSage.train(
   'persons',
   {
     modelName: 'exampleTrainModel',
-    featureProperties: ['age', 'height', 'weight'],
+    featureProperties: ['age', 'heightAndWeight'],
     aggregator: 'mean',
     activationFunction: 'sigmoid',
     sampleSizes: [25, 10],
@@ -321,7 +321,7 @@ CALL gds.graph.create(
   {
     Person: {
       label: 'Person',
-      properties: ['age', 'height', 'weight']
+      properties: ['age', 'heightAndWeight']
     },
     Instrument: {
       label: 'Instrument',
@@ -347,7 +347,7 @@ CALL gds.beta.graphSage.train(
   'persons_with_instruments',
   {
     modelName: 'multiLabelModel',
-    featureProperties: ['age', 'height', 'weight', 'cost'],
+    featureProperties: ['age', 'heightAndWeight', 'cost'],
     projectedFeatureDimension: 4
   }
 )
@@ -365,7 +365,7 @@ CALL gds.beta.graphSage.train(
   'persons',
   {
     modelName: 'weightedTrainedModel',
-    featureProperties: ['age', 'height', 'weight'],
+    featureProperties: ['age', 'heightAndWeight'],
     aggregator: 'mean',
     activationFunction: 'sigmoid',
     sampleSizes: [25, 10],
@@ -392,7 +392,7 @@ CALL gds.beta.graphSage.train(
   'persons',
   {
     modelName: 'graphSage',
-    featureProperties: ['age', 'height', 'weight'],
+    featureProperties: ['age', 'heightAndWeight'],
     embeddingDimension: 3,
     degreeAsProperty: true
   }

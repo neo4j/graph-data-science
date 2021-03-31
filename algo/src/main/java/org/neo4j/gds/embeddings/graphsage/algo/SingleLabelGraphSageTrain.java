@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingleLabelFeatures;
 
 public class SingleLabelGraphSageTrain extends GraphSageTrain {
 
@@ -53,7 +53,7 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(
             graph,
-            initializeFeatures(graph, config, tracker)
+            initializeSingleLabelFeatures(graph, config, tracker)
         );
 
         return Model.of(

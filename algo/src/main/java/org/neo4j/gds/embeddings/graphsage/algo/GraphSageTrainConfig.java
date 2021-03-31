@@ -136,14 +136,14 @@ public interface GraphSageTrainConfig extends
     }
 
     @Configuration.Ignore
-    default List<LayerConfig> layerConfigs() {
+    default List<LayerConfig> layerConfigs(int featureDimension) {
         List<LayerConfig> result = new ArrayList<>(sampleSizes().size());
         for (int i = 0; i < sampleSizes().size(); i++) {
             LayerConfig layerConfig = LayerConfig.builder()
                 .aggregatorType(aggregator())
                 .activationFunction(activationFunction())
                 .rows(embeddingDimension())
-                .cols(i == 0 ? featuresSize() : embeddingDimension())
+                .cols(i == 0 ? featureDimension : embeddingDimension())
                 .sampleSize(sampleSizes().get(i))
                 .build();
 
@@ -159,7 +159,7 @@ public interface GraphSageTrainConfig extends
     }
 
     @Configuration.Ignore
-    default int featuresSize() {
+    default int estimationFeatureDimension() {
         return projectedFeatureDimension().orElse(featureProperties().size() + (degreeAsProperty() ? 1 : 0));
     }
 

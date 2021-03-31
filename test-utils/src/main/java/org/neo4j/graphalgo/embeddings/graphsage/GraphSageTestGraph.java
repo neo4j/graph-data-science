@@ -23,10 +23,10 @@ public final class GraphSageTestGraph {
 
     public static final String GDL =
         " CREATE" +
-        "  (n0:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0})" +
-        ", (n1:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0})" +
-        ", (n2:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0})" +
-        ", (n3:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0})" +
+        "  (n0:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0, embedding: [1.0, 42.42] })" +
+        ", (n1:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0, embedding: [1.0, 42.42] })" +
+        ", (n2:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0, embedding: [1.0, 42.42] })" +
+        ", (n3:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0, embedding: [1.0, 42.42] })" +
         ", (n4:Dish       {dummyProp: 5.0, numIngredients: 5.0, rating: 5.0})" +
         ", (n5:Dish       {dummyProp: 5.0, numIngredients: 5.0, rating: 5.0})" +
         ", (n6:Dish       {dummyProp: 5.0, numIngredients: 5.0, rating: 5.0})" +

@@ -62,7 +62,8 @@ class GraphSageEmbeddingsGeneratorTest {
             .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .modelName(MODEL_NAME)
             .build();
-        var features = GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty());
+
+        var features = GraphSageHelper.initializeSingleLabelFeatures(graph, config, AllocationTracker.empty());
 
         var trainModel = new GraphSageModelTrainer(config, ProgressLogger.NULL_LOGGER);
 
@@ -112,7 +113,10 @@ class GraphSageEmbeddingsGeneratorTest {
 
         var embeddings = embeddingsGenerator.makeEmbeddings(
             graph,
-            GraphSageHelper.initializeFeatures(graph, config, AllocationTracker.empty())
+            GraphSageHelper.initializeMultiLabelFeatures(graph,
+                GraphSageHelper.multiLabelFeatureExtractors(graph, config),
+                AllocationTracker.empty()
+            )
         );
 
         assertNotNull(embeddings);

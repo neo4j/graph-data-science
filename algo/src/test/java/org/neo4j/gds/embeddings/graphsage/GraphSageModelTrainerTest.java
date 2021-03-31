@@ -25,9 +25,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -61,12 +63,22 @@ class GraphSageModelTrainerTest {
     @GdlGraph
     private static final String GDL = GraphSageTestGraph.GDL;
 
+    @SuppressFBWarnings
+    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "array")
+    private static final String ARRAY_GRAPH = "CREATE" +
+                                              "  (a { features: [-1.0, 2.1] })" +
+                                              ", (b { features: [4.2, -1.6] })" +
+                                              ", (a)-[:REL]->(b)";
+
     private final String MODEL_NAME = "graphSageModel";
 
     @Inject
     private Graph graph;
+    @Inject
+    private Graph arrayGraph;
     private HugeObjectArray<double[]> features;
     private ImmutableGraphSageTrainConfig.Builder configBuilder;
+
 
     @BeforeEach
     void setUp() {
@@ -76,7 +88,7 @@ class GraphSageModelTrainerTest {
         Random random = new Random();
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
         configBuilder = ImmutableGraphSageTrainConfig.builder()
-            .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyNodeProperty"))
+            .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .embeddingDimension(EMBEDDING_DIMENSION);
     }
 
@@ -189,4 +201,22 @@ class GraphSageModelTrainerTest {
             );
     }
 
+    @Test
+    void shouldTrainModelWithArrayProperties() {
+        var arrayFeatures = HugeObjectArray.newArray(double[].class, arrayGraph.nodeCount(), AllocationTracker.empty());
+        LongStream
+            .range(0, arrayGraph.nodeCount())
+            .forEach(n -> arrayFeatures.set(n, arrayGraph.nodeProperties("features").doubleArrayValue(n)));
+        var config = GraphSageTrainConfig.builder()
+            .embeddingDimension(12)
+            .aggregator(Aggregator.AggregatorType.MEAN)
+            .activationFunction(ActivationFunction.SIGMOID)
+            .addFeatureProperty("features")
+            .modelName("model")
+            .build();
+
+        var trainer = new GraphSageModelTrainer(config, ProgressLogger.NULL_LOGGER);
+
+        trainer.train(arrayGraph, arrayFeatures);
+    }
 }
