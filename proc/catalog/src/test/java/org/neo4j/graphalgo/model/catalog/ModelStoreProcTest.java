@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
+import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -43,6 +44,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 @GdsEditionTest(Edition.EE)
@@ -128,6 +130,27 @@ class ModelStoreProcTest extends ModelProcBaseTest {
             .hasFieldOrPropertyWithValue("name", modelName)
             .hasFieldOrPropertyWithValue("stored", true)
             .hasFieldOrPropertyWithValue("loaded", true);
+    }
+
+    @Test
+    void shouldFailOnUnsupportedModel() {
+        var modelName = "testModel1";
+        var model1 = Model.of(
+            getUsername(),
+            modelName,
+            "unsupportedModel",
+            GRAPH_SCHEMA,
+            "bogusModel",
+            TestTrainConfig.of()
+        );
+
+        ModelCatalog.set(model1);
+
+        var query = "CALL gds.alpha.model.store('testModel1')";
+        assertThatThrownBy(() -> runQuery(query))
+            .getRootCause()
+            .hasMessageContaining("Unknown model type 'unsupportedModel'")
+            .hasMessageContaining("supported model types are: " + StringJoining.join(SUPPORTED_TYPES));
     }
 
     @Test
