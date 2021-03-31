@@ -40,6 +40,11 @@ YIELD
 * `storeMillis`: The number of milliseconds it took to store the model.
 
 
+*Trained models that can be stored*
+
+* <<algorithms-embeddings-graph-sage,GraphSAGE model>>
+* <<algorithms-ml-nodeclassification,Node Classification model>>
+
 [.alpha]
 [[catalog-model-load]]
 == Loading models from disk
