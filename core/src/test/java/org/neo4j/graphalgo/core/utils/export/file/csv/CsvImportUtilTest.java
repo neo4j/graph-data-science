@@ -55,7 +55,6 @@ class CsvImportUtilTest {
             .map(Path::toString)
             .collect(Collectors.toList());
 
-        assertThat(nodeHeaderFiles).hasSize(5);
         assertThat(nodeHeaderFiles).containsExactlyInAnyOrder("nodes_A_B_header.csv", "nodes_A_C_header.csv", "nodes_B_header.csv", "nodes_Person_header.csv", "nodes_House_Property_header.csv");
     }
 
@@ -68,11 +67,12 @@ class CsvImportUtilTest {
         Map<Path, List<Path>> headerToFileMapping = CsvImportUtil.nodeHeaderToFileMapping(tempDir);
         headerToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
 
-        assertThat(headerToFileMapping).hasSize(3);
         Map<Path, List<Path>> expectedMapping = Map.of(
             tempDir.resolve("nodes_A_B_header.csv"), List.of(tempDir.resolve("nodes_A_B_0.csv"), tempDir.resolve("nodes_A_B_1.csv")),
             tempDir.resolve("nodes_A_C_header.csv"), List.of(tempDir.resolve("nodes_A_C_0.csv"), tempDir.resolve("nodes_A_C_1.csv")),
-            tempDir.resolve("nodes_B_header.csv"), List.of(tempDir.resolve("nodes_B_0.csv"), tempDir.resolve("nodes_B_1.csv"), tempDir.resolve("nodes_B_2.csv"))
+            tempDir.resolve("nodes_B_header.csv"), List.of(tempDir.resolve("nodes_B_0.csv"), tempDir.resolve("nodes_B_1.csv"), tempDir.resolve("nodes_B_2.csv")),
+            tempDir.resolve("nodes_Person_header.csv"), List.of(),
+            tempDir.resolve("nodes_House_Property_header.csv"), List.of()
         );
         assertThat(headerToFileMapping).containsExactlyInAnyOrderEntriesOf(expectedMapping);
     }
@@ -89,7 +89,6 @@ class CsvImportUtilTest {
             .map(Path::toString)
             .collect(Collectors.toList());
 
-        assertThat(relationshipHeaderFiles).hasSize(3);
         assertThat(relationshipHeaderFiles).containsExactlyInAnyOrder("relationships_REL_header.csv", "relationships_REL1_header.csv", "relationships_REL2_header.csv");
     }
 
@@ -102,7 +101,6 @@ class CsvImportUtilTest {
         Map<Path, List<Path>> relationshipHeaderToFileMapping = CsvImportUtil.relationshipHeaderToFileMapping(tempDir);
         relationshipHeaderToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
 
-        assertThat(relationshipHeaderToFileMapping).hasSize(3);
         Map<Path, List<Path>> expectedMapping = Map.of(
             tempDir.resolve("relationships_REL_header.csv"), List.of(tempDir.resolve("relationships_REL_0.csv"), tempDir.resolve("relationships_REL_1.csv")),
             tempDir.resolve("relationships_REL1_header.csv"), List.of(tempDir.resolve("relationships_REL1_0.csv"), tempDir.resolve("relationships_REL1_1.csv")),

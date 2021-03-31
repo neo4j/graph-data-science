@@ -22,18 +22,14 @@ package org.neo4j.graphalgo.core.utils.export.file;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.RelationshipProperty;
 import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.loading.construction.ImmutablePropertyConfig;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilderBuilder;
-import org.neo4j.values.storable.NumberType;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.Collectors;
 
 public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
