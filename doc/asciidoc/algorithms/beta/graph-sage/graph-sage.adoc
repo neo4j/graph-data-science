@@ -487,3 +487,5 @@ If you are embedding a graph that has an isolated node, the aggregation step in 
 When all the properties of that node are `0.0`, and the activation function is relu, this leads to an all-zero vector for that node.
 However, since GraphSAGE normalizes node embeddings using the L2-norm, and a zero vector cannot be normalized, we assign all-zero embeddings to such nodes under these special circumstances.
 In scenarios where you generate all-zero embeddings for orphan nodes, that may have impacts on downstream tasks such as nearest neighbor or other similarity algorithms. It may be more appropriate to filter out these disconnected nodes prior to running GraphSAGE.
+
+When running `gds.beta.graphSage.train.estimate`, the feature dimension is computed as if each feature property is scalar.
