@@ -49,9 +49,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
 
     @Override
     protected void exportElement() {
-
-        // VN: Check the property schema for the current relationship type;
-        // elementSchema.hasProperties() may return `true` even if the current relationship type has none.
+        // TODO: this logic should move to the RelationshipsBuilder
         if (elementSchema.hasProperties(RelationshipType.of(relationshipType()))) {
             var relationshipsBuilder = relationshipBuilders.computeIfAbsent(
                 relationshipType(),

@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.export.file.csv.CsvImportUtil;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.batchimport.input.Groups;
 import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.InputChunk;
@@ -80,12 +81,12 @@ public final class FileInput implements CompatInput {
 
     @Override
     public IdType idType() {
-        return null;
+        return IdType.ACTUAL;
     }
 
     @Override
     public ReadableGroups groups() {
-        return null;
+        return Groups.EMPTY;
     }
 
     @Override
@@ -124,6 +125,10 @@ public final class FileInput implements CompatInput {
             }
             return false;
         }
+
+        @Override
+        public void close() {
+        }
     }
 
     static class NodeImporter extends FileImporter<NodeFileHeader> {
@@ -136,11 +141,6 @@ public final class FileInput implements CompatInput {
         public InputChunk newChunk() {
             return new NodeLineChunk();
         }
-
-        @Override
-        public void close() throws IOException {
-
-        }
     }
 
     static class RelationshipImporter extends FileImporter<RelationshipFileHeader> {
@@ -152,11 +152,6 @@ public final class FileInput implements CompatInput {
         @Override
         public InputChunk newChunk() {
             return new RelationshipLineChunk();
-        }
-
-        @Override
-        public void close() throws IOException {
-
         }
     }
 
@@ -229,6 +224,12 @@ public final class FileInput implements CompatInput {
 
             header
                 .propertyMappings()
+                // the property values are strings currently which is not the best practice
+                // when it comes to the visitor pattern. Now the visitor that reads this property
+                // has to know that we pass a string.
+                // However the "clean" solution would be to parse the string to the actual value
+                // here and pass it in the property function.
+                // The same applies to node properties. We will cover this in a follow up pr
                 .forEach(property -> visitor.property(property.propertyKey(), lineValues[property.position()]));
 
             visitor.endOfEntity();
