@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -64,8 +65,9 @@ class HugeMergeSortTest {
 
         HugeMergeSort.sort(array, concurrency, tracker);
 
-        for (int i = 1; i < array.size(); i++) {
-            assertThat(array.get(i)).isGreaterThanOrEqualTo(array.get(i - 1));
+        Arrays.sort(longs);
+        for (int i = 0; i < array.size(); i++) {
+            assertThat(longs[i]).isEqualTo(array.get(i));
         }
     }
 
