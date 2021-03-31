@@ -109,7 +109,7 @@ class GraphSageMultiLabelSerializationTest {
 
     private Model<ModelData, GraphSageTrainConfig> train() {
         var trainConfig = ImmutableGraphSageTrainConfig.builder()
-            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
+            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
             .embeddingDimension(64)
             .modelName(MODEL_NAME)
             .degreeAsProperty(true)

@@ -88,7 +88,7 @@ class GraphSageAlgorithmFactoryTest {
         LongUnaryOperator hugeObjectArraySize
     ) {
         // features: HugeOA[nodeCount * double[featureSize]]
-        var initialFeaturesArray = sizeOfDoubleArray(trainConfig.featuresSize());
+        var initialFeaturesArray = sizeOfDoubleArray(trainConfig.estimationFeatureDimension());
         var initialFeaturesMemory = hugeObjectArraySize.applyAsLong(initialFeaturesArray);
 
         // result: HugeOA[nodeCount * double[embeddingDimension]]
@@ -105,7 +105,7 @@ class GraphSageAlgorithmFactoryTest {
         // additional final layer size
         batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
         var subGraphMemories = new ArrayList<MemoryRange>();
-        var layerConfigs = trainConfig.layerConfigs();
+        var layerConfigs = trainConfig.layerConfigs(trainConfig.estimationFeatureDimension());
         for (LayerConfig layerConfig : layerConfigs) {
             var sampleSize = layerConfig.sampleSize();
 
@@ -240,8 +240,8 @@ class GraphSageAlgorithmFactoryTest {
 
         // previous layer representation = parent = local features: double[(bs..3bs) * featureSize]
         var firstLayerBatchNodeCount = batchSizes.get(0);
-        var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne() * trainConfig.featuresSize());
-        var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo() * trainConfig.featuresSize());
+        var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne() * trainConfig.estimationFeatureDimension());
+        var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo() * trainConfig.estimationFeatureDimension());
         aggregatorMemories.add(0, MemoryRange.of(minFirstLayerMemory, maxFirstLayerMemory));
 
         var lossFunctionMemory = Stream.concat(

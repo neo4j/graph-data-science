@@ -81,7 +81,7 @@ class GraphSageTrainAlgorithmFactoryTest {
     ) {
         var nodeCount = graphDimensions.nodeCount();
         var concurrency = config.concurrency();
-        var layerConfigs = config.layerConfigs();
+        var layerConfigs = config.layerConfigs(config.estimationFeatureDimension());
 
         var weightsPerLabel = MemoryRange.empty();
 
@@ -89,8 +89,8 @@ class GraphSageTrainAlgorithmFactoryTest {
             var minNumProperties = config.degreeAsProperty() ? 2 : 1;
             var maxNumProperties = config.featureProperties().size() + (config.degreeAsProperty() ? 1 : 0);
             maxNumProperties += 1; // Add one for the label
-            var minWeightsMemory = sizeOfDoubleArray(config.featuresSize() * minNumProperties);
-            var maxWeightsMemory = sizeOfDoubleArray(config.featuresSize() * maxNumProperties);
+            var minWeightsMemory = sizeOfDoubleArray(config.estimationFeatureDimension() * minNumProperties);
+            var maxWeightsMemory = sizeOfDoubleArray(config.estimationFeatureDimension() * maxNumProperties);
 
             weightsPerLabel = weightsPerLabel
                 .add(MemoryRange.of(minWeightsMemory, maxWeightsMemory))
@@ -119,8 +119,8 @@ class GraphSageTrainAlgorithmFactoryTest {
         // features: HugeOA[nodeCount * double[featureSize]]
         long minInitialFeaturesArray = config.isMultiLabel()
             ? sizeOfDoubleArray(config.degreeAsProperty() ? 2 : 1)
-            : sizeOfDoubleArray(config.featuresSize());
-        long maxInitialFeaturesArray = sizeOfDoubleArray(config.featuresSize());
+            : sizeOfDoubleArray(config.estimationFeatureDimension());
+        long maxInitialFeaturesArray = sizeOfDoubleArray(config.estimationFeatureDimension());
         var minInitialFeaturesMemory = hugeObjectArraySize.applyAsLong(minInitialFeaturesArray);
         var maxInitialFeaturesMemory = hugeObjectArraySize.applyAsLong(maxInitialFeaturesArray);
         var initialFeaturesMemory = MemoryRange.of(minInitialFeaturesMemory, maxInitialFeaturesMemory);
@@ -272,7 +272,7 @@ class GraphSageTrainAlgorithmFactoryTest {
 
         // previous layer representation = parent = local features: double[(bs..3bs) * featureSize]
         var firstLayerBatchNodeCount = batchSizes.get(0);
-        var featureSize = config.featuresSize();
+        var featureSize = config.estimationFeatureDimension();
         var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne() * featureSize);
         var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo() * featureSize);
         if (config.isMultiLabel()) {

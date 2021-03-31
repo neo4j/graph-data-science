@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelFeatureExtractors;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
@@ -102,7 +103,7 @@ public final class GraphSageHelper {
     ) {
         var isMultiLabel = config.isMultiLabel();
 
-        var layerConfigs = config.layerConfigs();
+        var layerConfigs = config.layerConfigs(config.estimationFeatureDimension());
         var numberOfLayers = layerConfigs.size();
 
         var computationGraphBuilder = MemoryEstimations.builder("computationGraph").startField("subgraphs");
@@ -146,7 +147,7 @@ public final class GraphSageHelper {
             var maxNodeCount = maxBatchNodeCounts.get(i + 1);
 
             if (i == 0) {
-                var featureSize = config.featuresSize();
+                var featureSize = config.estimationFeatureDimension();
                 MemoryRange firstLayerMemory = MemoryRange.of(
                     sizeOfDoubleArray(minPreviousNodeCount * featureSize),
                     sizeOfDoubleArray(maxPreviousNodeCount * featureSize)
@@ -211,56 +212,41 @@ public final class GraphSageHelper {
         return computationGraphBuilder.endField().build();
     }
 
-    public static HugeObjectArray<double[]> initializeFeatures(
+    public static HugeObjectArray<double[]> initializeSingleLabelFeatures(
         Graph graph,
         GraphSageTrainConfig config,
         AllocationTracker tracker
     ) {
-        HugeObjectArray<double[]> features = HugeObjectArray.newArray(
-            double[].class,
-            graph.nodeCount(),
-            tracker
-        );
+        var features = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
+        var extractors = featureExtractors(graph, config);
 
-        if (config.isMultiLabel()) {
-            return initializeMultiLabelFeatures(graph, config, features);
-        } else {
-            return initializeSingleLabelFeatures(graph, config, features);
-        }
+        return FeatureExtraction.extract(graph, extractors, features);
     }
 
-    private static HugeObjectArray<double[]> initializeSingleLabelFeatures(
-        Graph graph,
-        GraphSageTrainConfig config,
-        HugeObjectArray<double[]> features
-    ) {
+    public static List<FeatureExtractor> featureExtractors(Graph graph, GraphSageTrainConfig config) {
         var propertyFeatureExtractors = FeatureExtraction.propertyExtractors(
             graph,
             config.featureProperties()
         );
 
-        List<FeatureExtractor> extractors = config.degreeAsProperty() ?
+        return config.degreeAsProperty() ?
             Stream.concat(
                 propertyFeatureExtractors.stream(),
                 Stream.of(new DegreeFeatureExtractor(graph))
             ).collect(toList())
             : propertyFeatureExtractors;
-
-        return FeatureExtraction.extract(graph, extractors, features);
     }
 
-    private static HugeObjectArray<double[]> initializeMultiLabelFeatures(
+    public static MultiLabelFeatureExtractors multiLabelFeatureExtractors(
         Graph graph,
-        GraphSageTrainConfig config,
-        HugeObjectArray<double[]> features
+        GraphSageTrainConfig config
     ) {
-        var featureConsumer = new HugeObjectArrayFeatureConsumer(features);
-        var featureCountCache = new HashMap<NodeLabel, Integer>();
-        var filteredKeysPerLabel = filteredPropertyKeysPerNodeLabel(graph, config);
+        Map<NodeLabel, Set<String>> filteredKeysPerLabel = filteredPropertyKeysPerNodeLabel(graph, config);
+        var featureCountPerLabel = new HashMap<NodeLabel, Integer>();
         var extractorsPerLabel = new HashMap<NodeLabel, List<FeatureExtractor>>();
         graph.forEachNode(nodeId -> {
             var nodeLabel = labelOf(graph, nodeId);
-            var extractors = extractorsPerLabel.computeIfAbsent(nodeLabel, label -> {
+            extractorsPerLabel.computeIfAbsent(nodeLabel, label -> {
                 var propertyKeys = filteredKeysPerLabel.get(label);
                 var featureExtractors = new ArrayList<>(FeatureExtraction.propertyExtractors(graph, propertyKeys, nodeId));
                 if (config.degreeAsProperty()) {
@@ -269,10 +255,26 @@ public final class GraphSageHelper {
                 featureExtractors.add(new BiasFeature());
                 return featureExtractors;
             });
-            var featureCount = featureCountCache.computeIfAbsent(
+            featureCountPerLabel.computeIfAbsent(
                 nodeLabel,
                 label -> featureCount(extractorsPerLabel.get(label))
             );
+            return true;
+        });
+        return new MultiLabelFeatureExtractors(featureCountPerLabel, extractorsPerLabel);
+    }
+
+    public static HugeObjectArray<double[]> initializeMultiLabelFeatures(
+        Graph graph,
+        MultiLabelFeatureExtractors multiLabelFeatureExtractors,
+        AllocationTracker tracker
+    ) {
+        var features = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
+        var featureConsumer = new HugeObjectArrayFeatureConsumer(features);
+        graph.forEachNode(nodeId -> {
+            var nodeLabel = labelOf(graph, nodeId);
+            var extractors = multiLabelFeatureExtractors.extractorsPerLabel().get(nodeLabel);
+            var featureCount = multiLabelFeatureExtractors.featureCountPerLabel().get(nodeLabel);
             features.set(nodeId, new double[featureCount]);
             FeatureExtraction.extract(nodeId, nodeId, extractors, featureConsumer);
             return true;

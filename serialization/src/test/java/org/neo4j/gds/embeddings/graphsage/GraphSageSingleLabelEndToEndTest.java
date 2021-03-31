@@ -48,21 +48,21 @@ class GraphSageSingleLabelEndToEndTest {
     @GdlGraph
     private static final String GRAPH =
         "CREATE" +
-        "  (a:King{ age: 20, birth_year: 200, death_year: 300 })" +
-        ", (b:King{ age: 12, birth_year: 232, death_year: 300 })" +
-        ", (c:King{ age: 67, birth_year: 212, death_year: 300 })" +
-        ", (d:King{ age: 78, birth_year: 245, death_year: 300 })" +
-        ", (e:King{ age: 32, birth_year: 256, death_year: 300 })" +
-        ", (f:King{ age: 32, birth_year: 214, death_year: 300 })" +
-        ", (g:King{ age: 35, birth_year: 214, death_year: 300 })" +
-        ", (h:King{ age: 56, birth_year: 253, death_year: 300 })" +
-        ", (i:King{ age: 62, birth_year: 267, death_year: 300 })" +
-        ", (j:King{ age: 44, birth_year: 289, death_year: 300 })" +
-        ", (k:King{ age: 89, birth_year: 211, death_year: 300 })" +
-        ", (l:King{ age: 99, birth_year: 201, death_year: 300 })" +
-        ", (m:King{ age: 99, birth_year: 201, death_year: 300 })" +
-        ", (n:King{ age: 99, birth_year: 201, death_year: 300 })" +
-        ", (o:King{ age: 99, birth_year: 201, death_year: 300 })" +
+        "  (a:King{ age: 20, birth_year: 200, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (b:King{ age: 12, birth_year: 232, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (c:King{ age: 67, birth_year: 212, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (d:King{ age: 78, birth_year: 245, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (e:King{ age: 32, birth_year: 256, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (f:King{ age: 32, birth_year: 214, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (g:King{ age: 35, birth_year: 214, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (h:King{ age: 56, birth_year: 253, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (i:King{ age: 62, birth_year: 267, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (j:King{ age: 44, birth_year: 289, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (k:King{ age: 89, birth_year: 211, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (l:King{ age: 99, birth_year: 201, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (m:King{ age: 99, birth_year: 201, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (n:King{ age: 99, birth_year: 201, death_year: 300, embedding: [1.0, 42.42] })" +
+        ", (o:King{ age: 99, birth_year: 201, death_year: 300, embedding: [1.0, 42.42] })" +
         ", (a)-[:REL]->(b)" +
         ", (a)-[:REL]->(c)" +
         ", (b)-[:REL]->(c)" +
@@ -123,7 +123,7 @@ class GraphSageSingleLabelEndToEndTest {
     private Model<ModelData, GraphSageTrainConfig> train() {
         var trainConfig = ImmutableGraphSageTrainConfig.builder()
             .modelName(MODEL_NAME)
-            .featureProperties(List.of("age", "birth_year", "death_year"))
+            .featureProperties(List.of("age", "birth_year", "death_year", "embedding"))
             .build();
 
         SingleLabelGraphSageTrain trainAlgo = new SingleLabelGraphSageTrain(
