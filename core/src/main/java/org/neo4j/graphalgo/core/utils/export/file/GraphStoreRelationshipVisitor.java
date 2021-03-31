@@ -41,12 +41,14 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
     private final Map<String, RelationshipsBuilder> relationshipBuilders;
     private final RelationshipsBuilderBuilder relationshipsBuilderBuilder;
 
-    private final Map<?, ?> relationshipStoreBuilders = new HashMap<>();
-
-    protected GraphStoreRelationshipVisitor(RelationshipSchema relationshipSchema, RelationshipsBuilderBuilder relationshipsBuilderBuilder) {
+    protected GraphStoreRelationshipVisitor(
+        RelationshipSchema relationshipSchema,
+        RelationshipsBuilderBuilder relationshipsBuilderBuilder,
+        Map<String, RelationshipsBuilder> relationshipBuilders
+    ) {
         super(relationshipSchema);
         this.relationshipsBuilderBuilder = relationshipsBuilderBuilder;
-        this.relationshipBuilders = new HashMap<>();
+        this.relationshipBuilders = relationshipBuilders;
     }
 
     @Override
@@ -89,45 +91,34 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         }
     }
 
-    protected RelationshipVisitorResult result() {
-        var resultBuilder = ImmutableRelationshipVisitorResult.builder();
-        var relationshipCountTracker = new LongAdder();
-        var propertyStores = new HashMap<RelationshipType, RelationshipPropertyStore>();
-        var relationshipTypeTopologyMap = relationshipBuilders.entrySet().stream().map(entry -> {
-            var type = entry.getKey();
-            var builder = entry.getValue();
-            var relationships = builder.buildAll();
-            var propertyStoreBuilder = RelationshipPropertyStore.builder();
+    static final class Builder extends RelationshipVisitor.Builder<Builder, GraphStoreRelationshipVisitor> {
 
-            var relationshipPropertySchemas = propertySchemas.get(type);
-            for (int i = 0; i < relationshipPropertySchemas.size(); i++) {
-                var relationship = relationships.get(i);
-                var relationshipPropertySchema = relationshipPropertySchemas.get(i);
-                relationship.properties().ifPresent(properties -> {
+        RelationshipsBuilderBuilder relationshipsBuilderBuilder;
+        Map<String, RelationshipsBuilder> relationshipBuildersByType;
 
-                    propertyStoreBuilder.putIfAbsent(relationshipPropertySchema.key(), RelationshipProperty.of(
-                        relationshipPropertySchema.key(),
-                        NumberType.FLOATING_POINT,
-                        relationshipPropertySchema.state(),
-                        properties,
-                        relationshipPropertySchema.defaultValue(),
-                        relationshipPropertySchema.aggregation()
-                        )
-                    );
-                });
-            }
+        Builder withRelationshipBuilderBuilder(RelationshipsBuilderBuilder relationshipBuilderBuilder) {
+            this.relationshipsBuilderBuilder = relationshipBuilderBuilder;
+            return this;
+        }
 
-            propertyStores.put(RelationshipType.of(type), propertyStoreBuilder.build());
-            var topology = relationships.get(0).topology();
-            relationshipCountTracker.add(topology.elementCount());
-            return Map.entry(RelationshipType.of(type), topology);
-        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Builder withRelationshipBuildersToTypeResultMap(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
+            this.relationshipBuildersByType = relationshipBuildersByType;
+            return this;
+        }
 
-        return resultBuilder
-            .putAllRelationshipTypesWithTopology(relationshipTypeTopologyMap)
-            .relationshipCount(relationshipCountTracker.longValue())
-            .propertyStores(propertyStores)
-            .build();
+        @Override
+        Builder me() {
+            return this;
+        }
+
+        @Override
+        GraphStoreRelationshipVisitor build() {
+            return new GraphStoreRelationshipVisitor(
+                relationshipSchema,
+                relationshipsBuilderBuilder,
+                relationshipBuildersByType
+            );
+        }
     }
 
     @ValueClass

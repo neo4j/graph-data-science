@@ -26,12 +26,14 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -59,7 +61,8 @@ class GraphStoreRelationshipVisitorTest {
             .nodes(graph)
             .tracker(AllocationTracker.empty());
 
-        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipsBuilderBuilder);
+        Map<String, RelationshipsBuilder> relationshipBuildersByType = new HashMap<>();
+        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipsBuilderBuilder, relationshipBuildersByType);
 
         var relationshipTypeR = RelationshipType.of("R");
         var relationshipTypeR1 = RelationshipType.of("R1");
@@ -71,16 +74,19 @@ class GraphStoreRelationshipVisitorTest {
             return true;
         });
 
-        var actualRelationships = relationshipVisitor.result();
-        assertThat(actualRelationships.relationshipCount()).isEqualTo(4L);
+        var actualRelationships = CsvToGraphStoreExporter.relationshipTopologyAndProperties(
+            relationshipBuildersByType,
+            relationshipSchema
+        );
+        assertThat(actualRelationships.importedRelationships()).isEqualTo(4L);
 
-        assertThat(actualRelationships.relationshipTypesWithTopology().get(relationshipTypeR).elementCount()).isEqualTo(1L);
-        assertThat(actualRelationships.relationshipTypesWithTopology().get(relationshipTypeR1).elementCount()).isEqualTo(2L);
+        assertThat(actualRelationships.topologies().get(relationshipTypeR).elementCount()).isEqualTo(1L);
+        assertThat(actualRelationships.topologies().get(relationshipTypeR1).elementCount()).isEqualTo(2L);
 
-        Map<? extends RelationshipType, ? extends RelationshipPropertyStore> propertyStores = actualRelationships.propertyStores();
+        Map<? extends RelationshipType, ? extends RelationshipPropertyStore> propertyStores = actualRelationships.properties();
         var actualGraph = new GraphStoreBuilder()
             .relationshipPropertyStores(propertyStores)
-            .relationships(actualRelationships.relationshipTypesWithTopology())
+            .relationships(actualRelationships.topologies())
             .nodes(graph)
             .databaseId(TestDatabaseIdRepository.randomNamedDatabaseId())
             .concurrency(1)

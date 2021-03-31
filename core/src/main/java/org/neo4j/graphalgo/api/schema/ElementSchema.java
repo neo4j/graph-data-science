@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.api.schema;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.ElementIdentifier;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,6 +56,12 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFI
     @Value.Default
     default boolean hasProperties(ELEMENT_IDENTIFIER elementIdentifier) {
         return !properties().get(elementIdentifier).isEmpty();
+    }
+
+    @Value.Default
+    default List<PROPERTY_SCHEMA> propertySchemasFor(ELEMENT_IDENTIFIER elementIdentifier) {
+        var propertySchemaForTypes = filter(Set.of(elementIdentifier));
+        return new ArrayList<>(propertySchemaForTypes.unionProperties().values());
     }
 
     @Value.Derived

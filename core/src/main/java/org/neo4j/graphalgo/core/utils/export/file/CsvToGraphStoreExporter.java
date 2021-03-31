@@ -19,37 +19,46 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.immutables.builder.Builder;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.ImmutableNodePropertyStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperty;
 import org.neo4j.graphalgo.api.NodePropertyStore;
+import org.neo4j.graphalgo.api.RelationshipProperty;
 import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
+import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.ImmutableImportedProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.values.storable.NumberType;
 
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public final class CsvToGraphStoreExporter {
 
     private final GraphStoreNodeVisitor.Builder nodeVisitorBuilder;
     private final Path importPath;
+    private final GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder;
     private final GraphStoreToFileExporterConfig config;
 
     private final GraphStoreBuilder graphStoreBuilder;
@@ -60,6 +69,7 @@ public final class CsvToGraphStoreExporter {
     ) {
         return new CsvToGraphStoreExporter(
             new GraphStoreNodeVisitor.Builder(),
+            new GraphStoreRelationshipVisitor.Builder(),
             config,
             importPath
         );
@@ -67,11 +77,13 @@ public final class CsvToGraphStoreExporter {
 
     private CsvToGraphStoreExporter(
         GraphStoreNodeVisitor.Builder nodeVisitorBuilder,
+        GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder,
         GraphStoreToFileExporterConfig config,
         Path importPath
     ) {
-        this.config = config;
         this.nodeVisitorBuilder = nodeVisitorBuilder.withReverseIdMapping(config.includeMetaData());
+        this.relationshipVisitorBuilder = relationshipVisitorBuilder;
+        this.config = config;
         this.importPath = importPath;
         this.graphStoreBuilder = new GraphStoreBuilder().concurrency(config.writeConcurrency());
     }
@@ -144,26 +156,78 @@ public final class CsvToGraphStoreExporter {
     }
 
     private long exportRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker tracker) {
-        var relationshipSchema = fileInput.relationshipSchema();
         int concurrency = config.writeConcurrency();
         var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
             .concurrency(concurrency)
             .nodes(nodes)
             .tracker(tracker);
 
-        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipsBuilderBuilder);
+        Map<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
+        var relationshipSchema = fileInput.relationshipSchema();
+        this.relationshipVisitorBuilder
+            .withRelationshipSchema(relationshipSchema)
+            .withRelationshipBuilderBuilder(relationshipsBuilderBuilder)
+            .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType);
+
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            (index) -> new ElementImportRunner(relationshipVisitor, relationshipsIterator)
+            (index) -> new ElementImportRunner(relationshipVisitorBuilder.build(), relationshipsIterator)
         );
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        var relationshipVisitorResult = relationshipVisitor.result();
-        graphStoreBuilder.relationships(relationshipVisitorResult.relationshipTypesWithTopology());
-        graphStoreBuilder.relationshipPropertyStores(relationshipVisitorResult.propertyStores());
-        return relationshipVisitorResult.relationshipCount();
+        var relationships = relationshipTopologyAndProperties(relationshipBuildersByType, relationshipSchema);
+
+        graphStoreBuilder.relationships(relationships.topologies());
+        graphStoreBuilder.relationshipPropertyStores(relationships.properties());
+        return relationships.importedRelationships();
+    }
+
+    static RelationshipTopologyAndProperties relationshipTopologyAndProperties(
+        Map<String, RelationshipsBuilder> relationshipBuildersByType,
+        RelationshipSchema relationshipSchema
+    ) {
+        var propertyStores = new HashMap<RelationshipType, RelationshipPropertyStore>();
+        var importedRelationships = new MutableLong(0);
+        var relationshipTypeTopologyMap = relationshipBuildersByType.entrySet().stream().map(entry -> {
+            var relationshipType = RelationshipType.of(entry.getKey());
+            var builder = entry.getValue();
+            var relationships = builder.buildAll();
+            var propertyStoreBuilder = RelationshipPropertyStore.builder();
+
+            var relationshipPropertySchemas = relationshipSchema.propertySchemasFor(relationshipType);
+            for (int i = 0; i < relationshipPropertySchemas.size(); i++) {
+                var relationship = relationships.get(i);
+                var relationshipPropertySchema = relationshipPropertySchemas.get(i);
+                relationship.properties().ifPresent(properties -> {
+
+                    propertyStoreBuilder.putIfAbsent(relationshipPropertySchema.key(), RelationshipProperty.of(
+                        relationshipPropertySchema.key(),
+                        NumberType.FLOATING_POINT,
+                        relationshipPropertySchema.state(),
+                        properties,
+                        relationshipPropertySchema.defaultValue(),
+                        relationshipPropertySchema.aggregation()
+                        )
+                    );
+                });
+            }
+
+            propertyStores.put(relationshipType, propertyStoreBuilder.build());
+            var topology = relationships.get(0).topology();
+            importedRelationships.getAndAdd(topology.elementCount());
+            return Map.entry(relationshipType, topology);
+        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        return ImmutableRelationshipTopologyAndProperties.of(relationshipTypeTopologyMap, propertyStores, importedRelationships.longValue());
+    }
+
+    @ValueClass
+    interface RelationshipTopologyAndProperties {
+        Map<RelationshipType, Relationships.Topology> topologies();
+        Map<RelationshipType, RelationshipPropertyStore> properties();
+        long importedRelationships();
     }
 
     @Builder.Factory
