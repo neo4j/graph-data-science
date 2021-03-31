@@ -21,10 +21,11 @@ package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -32,16 +33,18 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import java.util.Set;
+
+import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 @GdlExtension
 class GraphStoreNodeVisitorTest {
 
     @GdlGraph
     static String DB_CYPHER = "CREATE" +
-                              "  (a:A)" +
-                              ", (b:A)" +
-                              ", (c:B)";
+                              "  (a:A {prop1: 42L, prop2: [1.0, 2.0]})" +
+                              ", (b:A {prop1: 43L, prop2: [3.0, 4.0]})" +
+                              ", (c:B {prop3: 13.37D})";
 
     @Inject
     GraphStore graphStore;
@@ -52,27 +55,36 @@ class GraphStoreNodeVisitorTest {
     @Test
     void shouldAddNodesToNodesBuilder() {
         NodeSchema nodeSchema = graphStore.schema().nodeSchema();
-        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
-            .hasLabelInformation(true)
+        NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
             .concurrency(1)
             .maxOriginalId(graphStore.nodeCount())
+            .nodeCount(graph.nodeCount())
             .tracker(AllocationTracker.empty())
             .build();
         GraphStoreNodeVisitor nodeVisitor = new GraphStoreNodeVisitor(nodeSchema, nodesBuilder, false);
         graph.forEachNode(nodeId -> {
             nodeVisitor.id(nodeId);
-            nodeVisitor.labels(graph.nodeLabels(nodeId).stream().map(NodeLabel::name).toArray(String[]::new));
+            Set<NodeLabel> nodeLabels = graph.nodeLabels(nodeId);
+            nodeVisitor.labels(nodeLabels.stream().map(NodeLabel::name).toArray(String[]::new));
+            var propertyKeys = graphStore.nodePropertyKeys(nodeLabels);
+            for (String propertyKey : propertyKeys) {
+                nodeVisitor.property(propertyKey, graph.nodeProperties(propertyKey).value(nodeId).asObject());
+            }
             nodeVisitor.endOfEntity();
             return true;
         });
 
-        var actualNodeMapping = nodesBuilder.build().nodeMapping();
-        var expectedNodeMapping = graph;
-        assertNodeMapping(actualNodeMapping, expectedNodeMapping);
-    }
-
-    static void assertNodeMapping(NodeMapping actual, NodeMapping expected) {
-        assertThat(actual.nodeCount()).isEqualTo(expected.nodeCount());
-        assertThat(actual.availableNodeLabels()).isEqualTo(expected.availableNodeLabels());
+        var nodeMappingAndProperties = nodesBuilder.build();
+        var nodeMapping = nodeMappingAndProperties.nodeMapping();
+        var nodeProperties = nodeMappingAndProperties.unionNodePropertiesOrThrow();
+        var relationships = GraphFactory.emptyRelationships(nodeMapping, AllocationTracker.empty());
+        HugeGraph actualGraph = GraphFactory.create(
+            nodeMapping,
+            nodeSchema,
+            nodeProperties,
+            RelationshipType.ALL_RELATIONSHIPS,
+            relationships,
+            AllocationTracker.empty());
+        assertGraphEquals(graph, actualGraph);
     }
 }

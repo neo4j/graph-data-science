@@ -195,7 +195,10 @@ public final class FileInput implements CompatInput {
                     if (NEO_ID_KEY.equals(property.propertyKey())) {
                         visitor.id(Long.parseLong(lineValues[property.position()]));
                     } else {
-                        visitor.property(property.propertyKey(), lineValues[property.position()]);
+                        visitor.property(
+                            property.propertyKey(),
+                            property.valueType().fromCsvValue(lineValues[property.position()])
+                        );
                     }
                 });
 
@@ -223,13 +226,10 @@ public final class FileInput implements CompatInput {
 
             header
                 .propertyMappings()
-                // the property values are strings currently which is not the best practice
-                // when it comes to the visitor pattern. Now the visitor that reads this property
-                // has to know that we pass a string.
-                // However the "clean" solution would be to parse the string to the actual value
-                // here and pass it in the property function.
-                // The same applies to node properties. We will cover this in a follow up pr
-                .forEach(property -> visitor.property(property.propertyKey(), lineValues[property.position()]));
+                .forEach(property -> visitor.property(
+                    property.propertyKey(),
+                    property.valueType().fromCsvValue(lineValues[property.position()])
+                ));
 
             visitor.endOfEntity();
         }

@@ -32,8 +32,8 @@ class RelationshipLineChunkTest {
 
     @Test
     void shouldVisitLine() throws IOException {
-        var line = "0,1,19.19,42";
-        var header = RelationshipFileHeader.of(":START_ID,:END_ID,foo:double,bar:long", "REL");
+        var line = "0,1,19.19,42,1;9,1.3;3.7";
+        var header = RelationshipFileHeader.of(":START_ID,:END_ID,foo:double,bar:long,baz:long[],meh:double[]", "REL");
 
         var lineChunk = new FileInput.RelationshipLineChunk();
         var visitor = new TestRelationshipVisitor();
@@ -43,8 +43,10 @@ class RelationshipLineChunkTest {
         assertThat(visitor.endId).isEqualTo(1);
         assertThat(visitor.properties).containsExactlyInAnyOrderEntriesOf(
             Map.of(
-                "foo", "19.19",
-                "bar", "42"
+                "foo", 19.19D,
+                "bar", 42L,
+                "baz", new long[] {1L, 9L},
+                "meh", new double[] {1.3D, 3.7D}
             )
         );
     }
