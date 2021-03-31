@@ -36,11 +36,9 @@ class ValueTypeTest {
         return Stream.of(
             arguments(ValueType.LONG, 42L, "42"),
             arguments(ValueType.LONG, LONG_DEFAULT_FALLBACK, ""),
-            arguments(ValueType.LONG, null, ""),
 
             arguments(ValueType.DOUBLE, 42.1337D, "42.1337"),
             arguments(ValueType.DOUBLE, DOUBLE_DEFAULT_FALLBACK,  ""),
-            arguments(ValueType.DOUBLE, null,  ""),
 
             arguments(ValueType.LONG_ARRAY, new long[]{1L, 3L, 3L, 7L}, "1;3;3;7"),
             arguments(ValueType.LONG_ARRAY, null, ""),
@@ -53,9 +51,25 @@ class ValueTypeTest {
         );
     }
 
+    private static Stream<Arguments> formatValuesWithNulls() {
+        return Stream.concat(
+            formatValues(),
+            Stream.of(
+                arguments(ValueType.LONG, null, ""),
+                arguments(ValueType.DOUBLE, null, "")
+            )
+        );
+    }
+
     @ParameterizedTest
-    @MethodSource("formatValues")
+    @MethodSource("formatValuesWithNulls")
     void testFormatting(ValueType valueType, Object value, String expected) {
         assertThat(valueType.csvValue(value)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @MethodSource("formatValues")
+    void testParsingFromCsv(ValueType valueType, Object expected, String value) {
+        assertThat(valueType.fromCsvValue(value)).isEqualTo(expected);
     }
 }
