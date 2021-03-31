@@ -49,15 +49,19 @@ class HugeMergeSortTest {
                 )
             ).map(Arguments::of),
             // concurrencies
-            () -> List.of(1, 2, 4, 8).stream().map(Arguments::of)
+            () -> List.of(1, 4).stream().map(Arguments::of),
+            // single vs paged array
+            () -> List.of(true, false).stream().map(Arguments::of)
         );
     }
 
     @ParameterizedTest
     @MethodSource("sizeAndConcurrency")
-    void sortArray(long size, int concurrency) {
+    void sortArray(long size, int concurrency, boolean useSingleArray) {
         var tracker = AllocationTracker.empty();
-        var array = HugeLongArray.newArray(size, tracker);
+        var array = useSingleArray
+            ? HugeLongArray.newSingleArray((int) size, tracker)
+            : HugeLongArray.newPagedArray(size, tracker);
         var longs = new Random().longs(size).toArray();
         for (int i = 0; i < size; i++) {
             array.set(i, longs[i]);
