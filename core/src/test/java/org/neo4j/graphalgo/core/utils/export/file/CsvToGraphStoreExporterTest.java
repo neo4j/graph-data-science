@@ -72,7 +72,7 @@ class CsvToGraphStoreExporterTest {
                                             ", (:B)" +
                                             ", (:B)" +
                                             ", (:B)" +
-                                            ", (n0)-[:REL {weight: 1.5}]->(n1)-[:REL {weight: 4.0}]->(n2)-[:REL {weight: 4.2}]->(n3)" +
+                                            ", (n0)-[:REL {weight: 1.5, height: 2.2}]->(n1)-[:REL {weight: 4.0, height: 2.3}]->(n2)-[:REL {weight: 4.2, height: 2.4}]->(n3)" +
                                             ", (n1)-[:REL1]->(n2)-[:REL1]->(n3)"
         );
         var actualGraph = graphStore.getUnion();

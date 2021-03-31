@@ -97,13 +97,13 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
             var type = entry.getKey();
             var builder = entry.getValue();
             var relationships = builder.buildAll();
+            var propertyStoreBuilder = RelationshipPropertyStore.builder();
 
             var relationshipPropertySchemas = propertySchemas.get(type);
             for (int i = 0; i < relationshipPropertySchemas.size(); i++) {
                 var relationship = relationships.get(i);
                 var relationshipPropertySchema = relationshipPropertySchemas.get(i);
                 relationship.properties().ifPresent(properties -> {
-                    var propertyStoreBuilder = RelationshipPropertyStore.builder();
 
                     propertyStoreBuilder.putIfAbsent(relationshipPropertySchema.key(), RelationshipProperty.of(
                         relationshipPropertySchema.key(),
@@ -114,11 +114,10 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
                         relationshipPropertySchema.aggregation()
                         )
                     );
-
-                    propertyStores.put(RelationshipType.of(type), propertyStoreBuilder.build());
                 });
             }
 
+            propertyStores.put(RelationshipType.of(type), propertyStoreBuilder.build());
             var topology = relationships.get(0).topology();
             relationshipCountTracker.add(topology.elementCount());
             return Map.entry(RelationshipType.of(type), topology);

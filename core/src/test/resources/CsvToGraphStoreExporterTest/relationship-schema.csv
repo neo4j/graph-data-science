@@ -1,3 +1,4 @@
 relationshipType,propertyKey,valueType,defaultValue,aggregation,state
 REL,weight,double,DefaultValue(1.9),SINGLE,PERSISTENT
+REL,height,double,DefaultValue(2.9),SINGLE,PERSISTENT
 REL1
