@@ -38,7 +38,7 @@ public interface HeaderProperty {
         } else if (propertyArgs[0].isEmpty() || propertyArgs[1].isEmpty()) {
             throw wrongHeaderFormatException(propertyString);
         }
-        return ImmutableHeaderProperty.of(position, propertyArgs[0], ValueType.valueOf(propertyArgs[1]));
+        return ImmutableHeaderProperty.of(position, propertyArgs[0], ValueType.fromCsvName(propertyArgs[1]));
     }
 
     @NotNull

@@ -34,7 +34,7 @@ class RelationshipFileHeaderTest {
 
     @Test
     void shouldBuildRelationshipFileHeader() {
-        var headerLine = ":START_ID,:END_ID,foo:LONG,bar:DOUBLE,baz:LONG";
+        var headerLine = ":START_ID,:END_ID,foo:long,bar:double,baz:long";
 
         var fileHeader = RelationshipFileHeader.of(headerLine, "REL");
 
@@ -50,7 +50,7 @@ class RelationshipFileHeaderTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        ":END_ID,foo:LONG,bar:DOUBLE",
+        ":END_ID,foo:long,bar:double",
         "",
         ":END_ID,:START_ID"
     })    void shouldFailIfStartIdColumnIsMissing(String headerLine) {
@@ -62,8 +62,8 @@ class RelationshipFileHeaderTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        ":START_ID,foo:LONG,bar:DOUBLE",
-        ":START_ID,foo:LONG,:END_ID,bar:DOUBLE",
+        ":START_ID,foo:long,bar:double",
+        ":START_ID,foo:long,:END_ID,bar:double",
         ":START_ID"
     })
     void shouldFailIfEndIdColumnIsMissing(String headerLine) {

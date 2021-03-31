@@ -45,7 +45,7 @@ public class JacksonConverters {
     static class ValueTypeConverter extends StdConverter<String, ValueType> {
         @Override
         public ValueType convert(String value) {
-            return ValueType.valueOf(value.toUpperCase(Locale.ENGLISH));
+            return ValueType.fromCsvName(value);
         }
     }
 

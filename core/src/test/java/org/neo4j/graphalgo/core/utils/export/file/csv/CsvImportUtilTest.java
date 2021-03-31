@@ -112,28 +112,28 @@ class CsvImportUtilTest {
     @Test
     void shouldParseNodeHeaderFile() throws IOException {
         var headerPath = tempDir.resolve("nodes_Person_King_header.csv");
-        FileUtils.writeLines(headerPath.toFile(), List.of(":ID,foo:LONG,bar:DOUBLE"));
+        FileUtils.writeLines(headerPath.toFile(), List.of(":ID,foo:long,bar:double"));
 
         var parsedHeader = CsvImportUtil.parseNodeHeader(headerPath);
 
         assertThat(parsedHeader.nodeLabels()).containsExactlyInAnyOrder("Person", "King");
         assertThat(parsedHeader.propertyMappings()).containsExactlyInAnyOrder(
-            HeaderProperty.parse(1, "foo:LONG"),
-            HeaderProperty.parse(2, "bar:DOUBLE")
+            HeaderProperty.parse(1, "foo:long"),
+            HeaderProperty.parse(2, "bar:double")
         );
     }
 
     @Test
     void shouldParseRelationshipHeaderFile() throws IOException {
         var headerPath = tempDir.resolve("relationships_R_header.csv");
-        FileUtils.writeLines(headerPath.toFile(), List.of(":START_ID,:END_ID,foo:LONG,bar:DOUBLE"));
+        FileUtils.writeLines(headerPath.toFile(), List.of(":START_ID,:END_ID,foo:long,bar:double"));
 
         var parsedHeader = CsvImportUtil.parseRelationshipHeader(headerPath);
 
         assertThat(parsedHeader.relationshipType()).isEqualTo("R");
         assertThat(parsedHeader.propertyMappings()).containsExactlyInAnyOrder(
-            HeaderProperty.parse(2, "foo:LONG"),
-            HeaderProperty.parse(3, "bar:DOUBLE")
+            HeaderProperty.parse(2, "foo:long"),
+            HeaderProperty.parse(3, "bar:double")
         );
     }
 

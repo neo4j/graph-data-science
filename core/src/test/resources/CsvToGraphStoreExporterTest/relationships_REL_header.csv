@@ -1,1 +1,1 @@
-:START_ID,:END_ID,weight:DOUBLE,height:DOUBLE
+:START_ID,:END_ID,weight:double,height:double

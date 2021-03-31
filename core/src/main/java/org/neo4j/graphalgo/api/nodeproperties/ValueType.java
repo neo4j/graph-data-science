@@ -202,4 +202,16 @@ public enum ValueType {
                 throw new IllegalArgumentException("Unexpected value: " + nt + " (sad java 😞)");
         }
     }
+
+    public static ValueType fromCsvName(String csvName) {
+        for (ValueType value : values()) {
+            if (value == UNKNOWN) {
+                continue;
+            }
+            if (value.csvName().equals(csvName)) {
+                return value;
+            }
+        }
+        throw new IllegalArgumentException("Unexpected value: " + csvName);
+    }
 }
