@@ -51,7 +51,7 @@ public final class TransientAdjacencyDegrees implements AdjacencyDegrees {
     public void close() {
     }
 
-    static MemoryEstimation memoryEstimation() {
+    public static MemoryEstimation memoryEstimation() {
         return MemoryEstimations
             .builder(TransientAdjacencyDegrees.class)
             .perNode("degrees", HugeIntArray::memoryEstimation)

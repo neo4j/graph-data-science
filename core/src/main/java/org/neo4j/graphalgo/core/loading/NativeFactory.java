@@ -102,6 +102,10 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
 
             // adjacency list
             builder.add(
+                formatWithLocale("adjacency degrees for '%s'", relationshipType),
+                TransientAdjacencyDegrees.memoryEstimation()
+            );
+            builder.add(
                 formatWithLocale("adjacency list for '%s'", relationshipType),
                 TransientAdjacencyList.compressedMemoryEstimation(relationshipType, undirected)
             );
