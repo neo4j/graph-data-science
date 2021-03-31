@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 
@@ -53,6 +54,15 @@ class GraphStoreRelationshipVisitorTest {
     @Inject
     Graph graph;
 
+    @GdlGraph(graphNamePrefix = "multipleProps")
+    static String MULTI_PROPS_CYPHER = "(a)-[:R {p: 42.0D, r: 13.37D}]->(b)";
+
+    @Inject
+    Graph multiplePropsGraph;
+
+    @Inject
+    IdFunction multiplePropsIdFunction;
+
     @Test
     void shouldAddRelationshipsToRelationshipBuilder() {
         var relationshipSchema = graphStore.schema().relationshipSchema();
@@ -74,14 +84,47 @@ class GraphStoreRelationshipVisitorTest {
             return true;
         });
 
+        var actualGraph = createGraph(graph, relationshipBuildersByType);
+        assertGraphEquals(graph, actualGraph);
+    }
+
+    @Test
+    void shouldBuildRelationshipsWithMultipleProperties() {
+        GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder = new GraphStoreRelationshipVisitor.Builder();
+        var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
+            .concurrency(1)
+            .nodes(multiplePropsGraph)
+            .tracker(AllocationTracker.empty());
+        Map<String, RelationshipsBuilder> relationshipBuildersByType = new HashMap<>();
+        var relationshipVisitor = relationshipVisitorBuilder
+            .withRelationshipBuilderBuilder(relationshipsBuilderBuilder)
+            .withRelationshipSchema(multiplePropsGraph.schema().relationshipSchema())
+            .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType)
+            .build();
+
+        relationshipVisitor.type("R");
+        relationshipVisitor.startId(multiplePropsIdFunction.of("a"));
+        relationshipVisitor.endId(multiplePropsIdFunction.of("b"));
+        relationshipVisitor.property("p", 42.0D);
+        relationshipVisitor.property("r", 13.37D);
+        relationshipVisitor.endOfEntity();
+
+        var actualGraph = createGraph(multiplePropsGraph, relationshipBuildersByType);
+        assertGraphEquals(multiplePropsGraph, actualGraph);
+    }
+
+    private Graph createGraph(
+        Graph graph,
+        Map<String, RelationshipsBuilder> relationshipBuildersByType
+    ) {
         var actualRelationships = CsvToGraphStoreExporter.relationshipTopologyAndProperties(
             relationshipBuildersByType,
-            relationshipSchema
+            graph.schema().relationshipSchema()
         );
         assertThat(actualRelationships.importedRelationships()).isEqualTo(4L);
 
         Map<? extends RelationshipType, ? extends RelationshipPropertyStore> propertyStores = actualRelationships.properties();
-        var actualGraph = new GraphStoreBuilder()
+        return new GraphStoreBuilder()
             .relationshipPropertyStores(propertyStores)
             .relationships(actualRelationships.topologies())
             .nodes(graph)
@@ -90,8 +133,6 @@ class GraphStoreRelationshipVisitorTest {
             .tracker(AllocationTracker.empty())
             .build()
             .getUnion();
-
-        assertGraphEquals(graph, actualGraph);
     }
 
     private void visitRelationshipType(GraphStoreRelationshipVisitor relationshipVisitor, long nodeId, RelationshipType relationshipType, Optional<String> relationshipPropertyKey) {
