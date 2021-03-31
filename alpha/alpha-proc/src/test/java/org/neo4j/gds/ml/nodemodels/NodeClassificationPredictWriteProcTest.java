@@ -66,7 +66,8 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Wri
         ", (n2:N {a: -1.45431768, b: -1.67820474})" +
         ", (n3:N {a: -0.34216825, b: -1.31498086})" +
         ", (n4:N {a: -0.60765016, b:  1.0186564})" +
-        ", (n5:N {a: -0.48403364, b: -0.49152604})";
+        ", (n5:N {a: -0.48403364, b: -0.49152604})" +
+        ", (n1)-[:R]->(n2)";
     public static final String GRAPH_NAME = "g";
     public static final String MODEL_NAME = "model";
 
