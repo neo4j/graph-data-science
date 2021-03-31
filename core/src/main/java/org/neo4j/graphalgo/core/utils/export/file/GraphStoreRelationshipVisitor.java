@@ -52,7 +52,9 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
     @Override
     protected void exportElement() {
 
-        if (elementSchema.hasProperties()) {
+        // VN: Check the property schema for the current relationship type;
+        // elementSchema.hasProperties() may return `true` even if the current relationship type has none.
+        if (elementSchema.hasProperties(RelationshipType.of(relationshipType()))) {
             var relationshipsBuilder = relationshipBuilders.computeIfAbsent(
                 relationshipType(),
                 (key) -> relationshipsBuilderBuilder
@@ -69,9 +71,6 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
                 double[] propertyValues = new double[numberOfProperties];
                 MutableInt index = new MutableInt();
                 forEachProperty((propertyKey, propertyValue, valueType) -> {
-                    if (propertyValue == null) {
-                        System.out.println(relationshipType() + " property key : " + propertyKey);
-                    }
                     propertyValues[index.getAndIncrement()] = Double.parseDouble(propertyValue.toString());
                 });
                 relationshipsBuilder.add(startNode(), endNode(), propertyValues);
