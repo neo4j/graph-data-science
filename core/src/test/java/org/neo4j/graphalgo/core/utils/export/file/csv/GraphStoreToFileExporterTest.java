@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
@@ -33,6 +34,7 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -342,6 +344,48 @@ class GraphStoreToFileExporterTest extends CsvTest {
                 List.of("REL2"),
                 List.of("REL3"),
                 List.of("REL4")
+            )
+        );
+    }
+
+    @Test
+    void shouldExportWithOffsetIds() {
+        var counter = new MutableLong(42L);
+        var graphStore = GdlFactory.builder()
+            .gdlGraph("CREATE (a)-[:REL]->(b)")
+            .nodeIdFunction(counter::getAndIncrement)
+            .build()
+            .build()
+            .graphStore();
+
+        var config = ImmutableGraphStoreToFileExporterConfig
+            .builder()
+            .exportName(tempDir.toString())
+            .writeConcurrency(1)
+            .includeMetaData(false)
+            .build();
+
+        // export db
+        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        exporter.run(AllocationTracker.empty());
+
+        assertCsvFiles(List.of(
+            "nodes_0.csv", "nodes_header.csv",
+            "relationships_REL_0.csv", "relationships_REL_header.csv"
+        ));
+
+        assertDataContent(
+            "nodes_0.csv",
+            List.of(
+                List.of("42"),
+                List.of("43")
+            )
+        );
+
+        assertDataContent(
+            "relationships_REL_0.csv",
+            List.of(
+                List.of("42", "43")
             )
         );
     }

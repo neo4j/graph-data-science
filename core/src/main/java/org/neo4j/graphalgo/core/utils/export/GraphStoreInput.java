@@ -192,7 +192,7 @@ public final class GraphStoreInput implements CompatInput {
         @Override
         public boolean next(InputEntityVisitor visitor) throws IOException {
             if (id < endId) {
-                visitor.id(id);
+                visitor.id(nodeStore.nodeMapping.toOriginalNodeId(id));
 
                 if (hasLabels) {
                     String[] labels = nodeStore.labels(id);
