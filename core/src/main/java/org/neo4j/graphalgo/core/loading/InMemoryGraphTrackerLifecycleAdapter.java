@@ -55,10 +55,7 @@ public class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter imple
     private void databaseIsShuttingDown(String databaseName) {
         var api = (GraphDatabaseAPI) dbms.database(databaseName);
         var namedDatabaseId = api.databaseId();
-
-        if (GraphStoreCatalog.graphStoresCount(namedDatabaseId) > 0) {
-            GraphStoreCatalog.removeAllLoadedGraphs(namedDatabaseId);
-        }
+        GraphStoreCatalog.removeAllLoadedGraphs(namedDatabaseId);
     }
 
     @Override
