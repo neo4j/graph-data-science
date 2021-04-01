@@ -83,7 +83,7 @@ public class GraphSageModelTrainer {
         FeatureFunction featureFunction,
         Collection<Weights<? extends Tensor<?>>> labelProjectionWeights
     ) {
-        this.layerConfigsFunction = graph -> config.layerConfigs(featureDimension(config, graph));
+        this.layerConfigsFunction = graph -> config.layerConfigs(firstLayerColumns(config, graph));
         this.batchProvider = new BatchProvider(config.batchSize());
         this.learningRate = config.learningRate();
         this.tolerance = config.tolerance();
@@ -295,7 +295,7 @@ public class GraphSageModelTrainer {
         return weights;
     }
 
-    private int featureDimension(GraphSageTrainConfig config, Graph graph) {
+    private int firstLayerColumns(GraphSageTrainConfig config, Graph graph) {
         return config.projectedFeatureDimension().orElseGet(() -> {
             var featureExtractors = GraphSageHelper.featureExtractors(graph, config);
             return FeatureExtraction.featureCount(featureExtractors);
