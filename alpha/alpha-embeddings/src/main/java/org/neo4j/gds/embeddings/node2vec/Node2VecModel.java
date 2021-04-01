@@ -47,7 +47,7 @@ public class Node2VecModel {
     private final long batchSize;
 
     public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
-        var vectorMemoryEstimation =MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
+        var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
 
         return MemoryEstimations.builder(Node2Vec.class)
             .perNode("center embeddings", (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, vectorMemoryEstimation))
