@@ -49,7 +49,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
 
     @Test
     void writesVisitedNodeSchema() {
-        var relationshipSchemaVisitor = new CsvRelationshipSchemaVisitor(tempDir, true);
+        var relationshipSchemaVisitor = new CsvRelationshipSchemaVisitor(tempDir);
         var relType1 = RelationshipType.of("REL1");
         relationshipSchemaVisitor.relationshipType(relType1);
         relationshipSchemaVisitor.key("prop1");
@@ -82,7 +82,7 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
 
     @Test
     void writesSchemaWithoutProperties() {
-        var relationshipSchemaVisitor = new CsvRelationshipSchemaVisitor(tempDir, false);
+        var relationshipSchemaVisitor = new CsvRelationshipSchemaVisitor(tempDir);
         RelationshipType rel1 = RelationshipType.of("REL1");
         relationshipSchemaVisitor.relationshipType(rel1);
         relationshipSchemaVisitor.endOfEntity();
@@ -98,6 +98,34 @@ public class CsvRelationshipSchemaVisitorTest extends CsvVisitorTest {
             List.of(
                 defaultHeaderColumns(),
                 List.of("REL1"),
+                List.of("REL2")
+            )
+        );
+    }
+
+    @Test
+    void writesSchemaWithMixedProperties() {
+        var relationshipSchemaVisitor = new CsvRelationshipSchemaVisitor(tempDir);
+        RelationshipType rel1 = RelationshipType.of("REL1");
+        relationshipSchemaVisitor.relationshipType(rel1);
+        relationshipSchemaVisitor.key("prop1");
+        relationshipSchemaVisitor.valueType(ValueType.LONG);
+        relationshipSchemaVisitor.defaultValue(DefaultValue.of(42L));
+        relationshipSchemaVisitor.state(GraphStore.PropertyState.PERSISTENT);
+        relationshipSchemaVisitor.aggregation(Aggregation.COUNT);
+        relationshipSchemaVisitor.endOfEntity();
+
+        RelationshipType rel2 = RelationshipType.of("REL2");
+        relationshipSchemaVisitor.relationshipType(rel2);
+        relationshipSchemaVisitor.endOfEntity();
+
+        relationshipSchemaVisitor.close();
+        assertCsvFiles(List.of(RELATIONSHIP_SCHEMA_FILE_NAME));
+        assertDataContent(
+            RELATIONSHIP_SCHEMA_FILE_NAME,
+            List.of(
+                defaultHeaderColumns(),
+                List.of("REL1", "prop1", "long", "DefaultValue(42)", "COUNT", "PERSISTENT"),
                 List.of("REL2")
             )
         );

@@ -40,23 +40,21 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
     public static final String RELATIONSHIP_SCHEMA_FILE_NAME = "relationship-schema.csv";
 
     private final CsvAppender csvAppender;
-    private final boolean hasProperties;
 
-    public CsvRelationshipSchemaVisitor(Path fileLocation, boolean hasProperties) {
+    public CsvRelationshipSchemaVisitor(Path fileLocation) {
         try {
             this.csvAppender = new CsvWriter().append(fileLocation.resolve(RELATIONSHIP_SCHEMA_FILE_NAME), StandardCharsets.UTF_8);
             writeHeader();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        this.hasProperties = hasProperties;
     }
 
     @Override
     protected void export() {
         try {
             csvAppender.appendField(relationshipType().name());
-            if (hasProperties) {
+            if (key() != null) {
                 csvAppender.appendField(key());
                 csvAppender.appendField(valueType().csvName());
                 csvAppender.appendField(defaultValue().toString());
