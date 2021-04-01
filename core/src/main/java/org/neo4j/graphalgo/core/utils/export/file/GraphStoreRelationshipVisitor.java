@@ -22,29 +22,32 @@ package org.neo4j.graphalgo.core.utils.export.file;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.ImmutablePropertyConfig;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilderBuilder;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
 
-    private final ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuilders;
-    private final RelationshipsBuilderBuilder relationshipsBuilderBuilder;
+    private final Supplier<RelationshipsBuilderBuilder> relationshipBuilderSupplier;
+    private final Map<String, RelationshipsBuilder> relationshipBuilders;
 
     protected GraphStoreRelationshipVisitor(
         RelationshipSchema relationshipSchema,
-        RelationshipsBuilderBuilder relationshipsBuilderBuilder,
-        ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuilders
+        Supplier<RelationshipsBuilderBuilder> relationshipBuilderSupplier,
+        Map<String, RelationshipsBuilder> relationshipBuilders
     ) {
         super(relationshipSchema);
-        this.relationshipsBuilderBuilder = relationshipsBuilderBuilder;
+        this.relationshipBuilderSupplier = relationshipBuilderSupplier;
         this.relationshipBuilders = relationshipBuilders;
     }
 
@@ -54,7 +57,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         if (elementSchema.hasProperties(RelationshipType.of(relationshipType()))) {
             var relationshipsBuilder = relationshipBuilders.computeIfAbsent(
                 relationshipType(),
-                (key) -> relationshipsBuilderBuilder
+                (key) -> relationshipBuilderSupplier.get()
                     .propertyConfigs(
                         getPropertySchema().stream().map(schema ->
                             ImmutablePropertyConfig.of(schema.aggregation(), schema.defaultValue())
@@ -79,8 +82,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         } else {
             var relationshipsBuilder = relationshipBuilders.computeIfAbsent(
                 relationshipType(),
-                (key) -> relationshipsBuilderBuilder
-                    .build()
+                (key) -> relationshipBuilderSupplier.get().build()
             );
             relationshipsBuilder.add(startNode(), endNode());
         }
@@ -88,16 +90,28 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
 
     static final class Builder extends RelationshipVisitor.Builder<Builder, GraphStoreRelationshipVisitor> {
 
-        RelationshipsBuilderBuilder relationshipsBuilderBuilder;
-        ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType;
+        Map<String, RelationshipsBuilder> relationshipBuildersByType;
+        int concurrency;
+        IdMapping nodes;
+        AllocationTracker tracker;
 
-        Builder withRelationshipBuilderBuilder(RelationshipsBuilderBuilder relationshipBuilderBuilder) {
-            this.relationshipsBuilderBuilder = relationshipBuilderBuilder;
+        Builder withRelationshipBuildersToTypeResultMap(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
+            this.relationshipBuildersByType = relationshipBuildersByType;
             return this;
         }
 
-        Builder withRelationshipBuildersToTypeResultMap(ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType) {
-            this.relationshipBuildersByType = relationshipBuildersByType;
+        Builder withConcurrency(int concurrency) {
+            this.concurrency = concurrency;
+            return this;
+        }
+
+        Builder withNodes(IdMapping nodes) {
+            this.nodes = nodes;
+            return this;
+        }
+
+        Builder withAllocationTracker(AllocationTracker allocationTracker) {
+            this.tracker = allocationTracker;
             return this;
         }
 
@@ -108,9 +122,14 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
 
         @Override
         GraphStoreRelationshipVisitor build() {
+            Supplier<RelationshipsBuilderBuilder> relationshipBuilderSupplier = () -> GraphFactory
+                .initRelationshipsBuilder()
+                .concurrency(concurrency)
+                .nodes(nodes)
+                .tracker(tracker);
             return new GraphStoreRelationshipVisitor(
                 relationshipSchema,
-                relationshipsBuilderBuilder,
+                relationshipBuilderSupplier,
                 relationshipBuildersByType
             );
         }
