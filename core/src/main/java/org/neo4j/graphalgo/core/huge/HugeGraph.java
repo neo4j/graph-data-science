@@ -391,9 +391,8 @@ public class HugeGraph implements CSRGraph {
      */
     @Override
     public boolean exists(long sourceNodeId, long targetNodeId) {
-        ExistsConsumer consumer = new ExistsConsumer(targetNodeId);
-        runForEach(sourceNodeId, consumer);
-        return consumer.found;
+        var cursor = adjacencyCursorForIteration(sourceNodeId);
+        return cursor.advance(targetNodeId) == targetNodeId;
     }
 
     /*

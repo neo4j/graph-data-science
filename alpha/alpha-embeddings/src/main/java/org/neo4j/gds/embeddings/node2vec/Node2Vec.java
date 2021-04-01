@@ -59,10 +59,11 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
         RandomWalk randomWalk = new RandomWalk(
             graph,
             config.walkLength(),
-            new RandomWalk.NextNodeStrategy(graph, config.returnFactor(), config.inOutFactor()),
             config.concurrency(),
             config.walksPerNode(),
-            config.walkBufferSize()
+            config.walkBufferSize(),
+            config.returnFactor(),
+            config.inOutFactor()
         );
 
         HugeObjectArray<long[]> walks = HugeObjectArray.newArray(

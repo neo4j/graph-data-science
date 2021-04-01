@@ -60,13 +60,14 @@ class RandomWalkTest extends AlgoTestBase {
         RandomWalk randomWalk = new RandomWalk(
             graph,
             config.walkLength(),
-            new RandomWalk.NextNodeStrategy(graph, config.returnFactor(), config.inOutFactor()),
             config.concurrency(),
             config.walksPerNode(),
-            config.walkBufferSize()
+            config.walkBufferSize(),
+            config.returnFactor(),
+            config.inOutFactor()
         );
 
-        int expectedNumberOfWalks = config.walksPerNode() * NODE_COUNT;
+        int expectedNumberOfWalks = config.walksPerNode() * 3;
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
         long[] walkForNodeZero = result
@@ -86,15 +87,18 @@ class RandomWalkTest extends AlgoTestBase {
         RandomWalk randomWalk = new RandomWalk(
             graph,
             config.walkLength(),
-            new RandomWalk.NextNodeStrategy(graph, config.returnFactor(), config.inOutFactor()),
             config.concurrency(),
             config.walksPerNode(),
-            config.walkBufferSize()
+            config.walkBufferSize(),
+            config.returnFactor(),
+            config.inOutFactor()
         );
 
-        int expectedNumberOfWalks = config.walksPerNode() * 5;
+        int expectedNumberOfWalks = config.walksPerNode() * 3;
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
+        long[] walkForNodeZero = result.stream().filter(arr -> graph.toOriginalNodeId(arr[0]) == 0).findFirst().orElse(new long[0]);
+        int expectedStepsInWalkForNode0 = config.walkLength();
         long[] walkForNodeZero = result
             .stream()
             .filter(arr -> graph.toOriginalNodeId(arr[0]) == 0)
@@ -119,10 +123,11 @@ class RandomWalkTest extends AlgoTestBase {
         RandomWalk randomWalk = new RandomWalk(
             graph,
             10,
-            new RandomWalk.NextNodeStrategy(graph, 0.01, 1),
             4,
             100,
-            1000
+            1000,
+            0.01,
+            1
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -189,10 +194,11 @@ class RandomWalkTest extends AlgoTestBase {
         RandomWalk randomWalk = new RandomWalk(
             graph,
             10,
-            new RandomWalk.NextNodeStrategy(graph, 0.01, 100000),
             4,
             1000,
-            1000
+            1000,
+            0.1,
+            10
         );
 
         var nodeCounter = new HashMap<Long, Long>();
