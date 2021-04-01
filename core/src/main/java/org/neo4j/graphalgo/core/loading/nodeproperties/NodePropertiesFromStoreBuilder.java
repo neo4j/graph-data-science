@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.values.storable.Values.NO_VALUE;
 
 public final class NodePropertiesFromStoreBuilder {
 
@@ -74,7 +75,7 @@ public final class NodePropertiesFromStoreBuilder {
     }
 
     public void set(long nodeId, Value value) {
-        if (value != null) {
+        if (value != null && value != NO_VALUE) {
             if (innerBuilder.get() == null) {
                 initializeWithType(value);
             }

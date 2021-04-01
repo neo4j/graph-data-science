@@ -236,6 +236,9 @@ public final class FileInput implements CompatInput {
                     if (NEO_ID_KEY.equals(property.propertyKey())) {
                         visitor.id(Long.parseLong(lineValues[property.position()]));
                     } else {
+                        var propertyValue =  property.position() < lineValues.length
+                            ? lineValues[property.position()]
+                            : "";
                         visitor.property(
                             property.propertyKey(),
                             property.valueType().fromCsvValue(lineValues[property.position()], propertySchemas.get(property.propertyKey()).defaultValue())
@@ -260,7 +263,7 @@ public final class FileInput implements CompatInput {
 
         @Override
         void visitLine(String line, RelationshipFileHeader header, InputEntityVisitor visitor) throws IOException {
-            var lineValues = line.split(",");
+            var lineValues = line.split(",", -1);
 
             visitor.type(header.relationshipType());
             visitor.startId(Long.parseLong(lineValues[0]));
