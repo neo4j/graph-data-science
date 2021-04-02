@@ -264,6 +264,17 @@ class GraphStoreFilterTest {
     }
 
     @Test
+    void supportNonOverlappingNodeIdSpace() throws ParseException, SemanticErrors {
+        // nodes will end up having ids 0, 1, 2, 3 ..
+        var graphStore = graphStoreFromGDL("(:A),(:A),(a:B),(a)-->(:B)");
+        // .. but only nodes 2 and 3 remain ..
+        var filteredGraphStore = filter(graphStore, "n:B", "*");
+        // .. and become 0 and 1 in output graph.
+        // Assert that the relationship is correctly attached.
+        assertGraphEquals(fromGdl("(:B)-->(:B)"), filteredGraphStore.getUnion());
+    }
+
+    @Test
     void logProgress() throws ParseException, SemanticErrors {
         var relType = RelationshipType.of("REL1");
 
