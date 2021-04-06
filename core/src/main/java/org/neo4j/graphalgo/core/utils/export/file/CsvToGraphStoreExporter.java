@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.immutables.builder.Builder;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
@@ -27,12 +26,15 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.ImmutableNodePropertyStore;
 import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.NodeProperty;
 import org.neo4j.graphalgo.api.NodePropertyStore;
 import org.neo4j.graphalgo.api.RelationshipProperty;
 import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
+import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -50,6 +52,7 @@ import org.neo4j.values.storable.NumberType;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -135,24 +138,34 @@ public final class CsvToGraphStoreExporter {
         graphStoreBuilder.nodes(nodeMappingAndProperties.nodeMapping());
         nodeMappingAndProperties.nodeProperties().orElse(Map.of())
             .forEach((label, propertyMap) -> {
-                var nodeStoreProperties = propertyMap.entrySet().stream().map(entry -> {
-                    var propertyKey = entry.getKey();
-                    var nodeProperties = entry.getValue();
-                    var propertySchema = nodeSchema.properties().get(label).get(propertyKey);
-                    var nodeProperty = NodeProperty.of(
-                        propertySchema.key(),
-                        propertySchema.state(),
-                        nodeProperties,
-                        propertySchema.defaultValue()
-                    );
-
-                    return Map.entry(propertyKey, nodeProperty);
-                }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
+                var nodeStoreProperties = propertyKeyToNodePropertyMapping(nodeSchema, label, propertyMap);
                 graphStoreBuilder.putNodePropertyStores(label, ImmutableNodePropertyStore.of(nodeStoreProperties));
             });
 
         return nodeMappingAndProperties.nodeMapping();
+    }
+
+    private Map<String, NodeProperty> propertyKeyToNodePropertyMapping(
+        NodeSchema nodeSchema,
+        NodeLabel label,
+        Map<String, NodeProperties> propertyMap
+    ) {
+        Map<String, PropertySchema> propertySchemaForLabel = nodeSchema.properties().get(label);
+        return propertyMap.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> nodePropertiesFrom(entry.getKey(), entry.getValue(), propertySchemaForLabel)
+            ));
+    }
+
+    private NodeProperty nodePropertiesFrom(String propertyKey, NodeProperties nodeProperties, Map<String, PropertySchema> propertySchema) {
+        var propertySchemaForKey = propertySchema.get(propertyKey);
+        return NodeProperty.of(
+            propertySchemaForKey.key(),
+            propertySchemaForKey.state(),
+            nodeProperties,
+            propertySchemaForKey.defaultValue()
+        );
     }
 
     private long exportRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker tracker) {
@@ -189,26 +202,51 @@ public final class CsvToGraphStoreExporter {
         RelationshipSchema relationshipSchema
     ) {
         var propertyStores = new HashMap<RelationshipType, RelationshipPropertyStore>();
-        var importedRelationships = new MutableLong(0);
-        var relationshipTypeTopologyMap = relationshipBuildersByType.entrySet().stream().map(entry -> {
+        var relationshipTypeTopologyMap = relationshipTypeToTopologyMapping(
+            relationshipBuildersByType,
+            propertyStores,
+            relationshipSchema
+        );
+
+        var importedRelationships = relationshipTypeTopologyMap.values().stream().mapToLong(Relationships.Topology::elementCount).sum();
+        return ImmutableRelationshipTopologyAndProperties.of(relationshipTypeTopologyMap, propertyStores, importedRelationships);
+    }
+
+    private static Map<RelationshipType, Relationships.Topology> relationshipTypeToTopologyMapping(
+        Map<String, RelationshipsBuilder> relationshipBuildersByType,
+        Map<RelationshipType, RelationshipPropertyStore> propertyStores,
+        RelationshipSchema relationshipSchema
+    ) {
+        return relationshipBuildersByType.entrySet().stream().map(entry -> {
             var relationshipType = RelationshipType.of(entry.getKey());
-            var builder = entry.getValue();
-            var relationships = builder.buildAll();
-            var propertyStoreBuilder = RelationshipPropertyStore.builder();
-
-            buildPropertyStores(
-                relationships,
-                propertyStoreBuilder,
-                relationshipSchema.propertySchemasFor(relationshipType)
+            return Map.entry(
+                relationshipType,
+                relationshipTopologyFrom(
+                    relationshipType,
+                    entry.getValue().buildAll(),
+                    relationshipSchema.propertySchemasFor(relationshipType),
+                    propertyStores
+                )
             );
-
-            propertyStores.put(relationshipType, propertyStoreBuilder.build());
-            var topology = relationships.get(0).topology();
-            importedRelationships.getAndAdd(topology.elementCount());
-            return Map.entry(relationshipType, topology);
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
 
-        return ImmutableRelationshipTopologyAndProperties.of(relationshipTypeTopologyMap, propertyStores, importedRelationships.longValue());
+    private static Relationships.Topology relationshipTopologyFrom(
+        RelationshipType relationshipType,
+        List<Relationships> relationships,
+        List<RelationshipPropertySchema> propertySchemas,
+        Map<RelationshipType, RelationshipPropertyStore> propertyStores
+    ) {
+        var propertyStoreBuilder = RelationshipPropertyStore.builder();
+
+        buildPropertyStores(
+            relationships,
+            propertyStoreBuilder,
+            propertySchemas
+        );
+
+        propertyStores.put(relationshipType, propertyStoreBuilder.build());
+        return relationships.get(0).topology();
     }
 
     private static void buildPropertyStores(
