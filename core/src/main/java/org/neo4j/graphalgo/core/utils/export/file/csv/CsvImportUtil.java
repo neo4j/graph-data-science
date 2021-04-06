@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 import org.neo4j.graphalgo.core.utils.export.file.NodeFileHeader;
 import org.neo4j.graphalgo.core.utils.export.file.RelationshipFileHeader;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +41,7 @@ public final class CsvImportUtil {
 
     public static NodeFileHeader parseNodeHeader(Path headerFile) {
         try (var headerReader = Files.newBufferedReader(headerFile, StandardCharsets.UTF_8)) {
-            return NodeFileHeader.of(headerReader.readLine(), inferNodeLabels(headerFile));
+            return NodeFileHeader.of(checkedReadLine(headerReader), inferNodeLabels(headerFile));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -48,7 +49,7 @@ public final class CsvImportUtil {
 
     public static RelationshipFileHeader parseRelationshipHeader(Path headerFile) {
         try (var headerReader = Files.newBufferedReader(headerFile, StandardCharsets.UTF_8)) {
-            return RelationshipFileHeader.of(headerReader.readLine(), inferRelationshipType(headerFile));
+            return RelationshipFileHeader.of(checkedReadLine(headerReader), inferRelationshipType(headerFile));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -104,5 +105,13 @@ public final class CsvImportUtil {
     private static String inferRelationshipType(Path headerFile) {
         var headerFileName = headerFile.getFileName().toString();
         return headerFileName.replaceAll("relationships_|_header.csv", "");
+    }
+
+    private static String checkedReadLine(BufferedReader reader) throws IOException {
+        String line = reader.readLine();
+        if (line == null) {
+            throw new IOException("Line was null");
+        }
+        return line;
     }
 }
