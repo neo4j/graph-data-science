@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -87,29 +88,22 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
         return new MutateResult.Builder();
     }
 
-    public static final class MutateResult {
+    public static final class MutateResult extends StandardMutateResult {
 
         public final long nodeCount;
         public final long nodePropertiesWritten;
-        public final long createMillis;
-        public final long computeMillis;
-        public final long mutateMillis;
-        public final Map<String, Object> configuration;
 
         MutateResult(
             long nodeCount,
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
-            long writeMillis,
+            long mutateMillis,
             Map<String, Object> configuration
         ) {
+            super(createMillis, computeMillis, 0, mutateMillis, configuration);
             this.nodeCount = nodeCount;
             this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.mutateMillis = writeMillis;
-            this.configuration = configuration;
         }
 
         static class Builder extends AbstractResultBuilder<MutateResult> {
