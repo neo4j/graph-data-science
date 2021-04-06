@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.Algorithm;
@@ -26,6 +27,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphalgo.core.utils.queue.QueueBasedSpliterator;
 
@@ -75,12 +78,18 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(queueSize);
         long[] TOMB = new long[0];
 
+
+        CumulativeWeightSupplier cumulativeWeightSupplier = graph.hasRelationshipProperty()
+            ? cumulativeWeights()::get
+            : graph::degree;
+
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             graph.nodeCount(),
             BitUtil.ceilDiv(graph.nodeCount(), concurrency),
             (partition) -> RandomWalkTask.of(
                 nodeIndex::getAndIncrement,
+                cumulativeWeightSupplier,
                 graph.concurrentCopy(),
                 walksPerNode,
                 steps,
@@ -97,8 +106,22 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             } catch (InterruptedException e) {
             }
         }).start();
-        QueueBasedSpliterator<long[]> spliterator = new QueueBasedSpliterator<>(walks, TOMB, terminationFlag, timeout);
-        return StreamSupport.stream(spliterator, false);
+
+        return StreamSupport.stream(new QueueBasedSpliterator<>(walks, TOMB, terminationFlag, timeout), false);
+    }
+
+    private HugeAtomicDoubleArray cumulativeWeights() {
+        var weights = HugeAtomicDoubleArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        ParallelUtil.parallelForEachNode(
+            graph,
+            concurrency,
+            nodeId -> graph.forEachRelationship(nodeId, 1.0, (s, t, weight) -> {
+                weights.update(nodeId, oldWeight -> oldWeight + weight);
+                return true;
+            })
+        );
+
+        return weights;
     }
 
     @Override
@@ -116,16 +139,18 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         private final Random random;
         private final BlockingQueue<long[]> walks;
         private final NextNodeSupplier nextNodeSupplier;
-        private final MutableInt index;
+        private final MutableDouble currentWeight;
         private final MutableLong randomNeighbour;
         private final long[][] buffer;
         private final MutableInt bufferPosition;
         private final double normalizedReturnProbability;
         private final double normalizedSameDistanceProbability;
         private final double normalizedInOutProbability;
+        private final CumulativeWeightSupplier cumulativeWeightSupplier;
 
         static RandomWalkTask of(
             NextNodeSupplier nextNodeSupplier,
+            CumulativeWeightSupplier cumulativeWeightSupplier,
             Graph graph,
             int numWalks,
             int walkLength,
@@ -140,27 +165,30 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
             return new RandomWalkTask(
                 nextNodeSupplier,
-                graph,
+                cumulativeWeightSupplier,
                 numWalks,
                 walkLength,
                 walks,
                 normalizedReturnProbability,
                 normalizedSameDistanceProbability,
-                normalizedInOutProbability
+                normalizedInOutProbability,
+                graph
             );
         }
 
         private RandomWalkTask(
             NextNodeSupplier nextNodeSupplier,
-            Graph graph,
+            CumulativeWeightSupplier cumulativeWeightSupplier,
             int numWalks,
             int walkLength,
             BlockingQueue<long[]> walks,
             double normalizedReturnProbability,
             double normalizedSameDistanceProbability,
-            double normalizedInOutProbability
+            double normalizedInOutProbability,
+            Graph graph
         ) {
             this.nextNodeSupplier = nextNodeSupplier;
+            this.cumulativeWeightSupplier = cumulativeWeightSupplier;
             this.graph = graph;
             this.numWalks = numWalks;
             this.walkLength = walkLength;
@@ -170,7 +198,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             this.normalizedInOutProbability = normalizedInOutProbability;
 
             this.random = new Random();
-            this.index = new MutableInt(0);
+            this.currentWeight = new MutableDouble(0);
             this.randomNeighbour = new MutableLong(-1);
             this.buffer = new long[1000][];
             this.bufferPosition = new MutableInt(0);
@@ -180,7 +208,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         public void run() {
             long nodeId;
 
-            while(true) {
+            while (true) {
                 nodeId = nextNodeSupplier.nextNode();
 
                 if (nodeId >= graph.nodeCount()) break;
@@ -200,7 +228,6 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             }
 
             flushBuffer();
-            System.out.println("Thread finished at = " + System.currentTimeMillis());
         }
 
         private long[] walk(long startNode) {
@@ -255,19 +282,17 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         }
 
         private long randomNeighbour(long node) {
-            var degree= graph.degree(node);
+            var cumulativeWeight = cumulativeWeightSupplier.forNode(node);
+            var randomWeight = cumulativeWeight * random.nextDouble();
 
-            var randomNeighbourIndex = random.nextInt(degree);
-
-            index.setValue(0);
+            currentWeight.setValue(0.0);
             randomNeighbour.setValue(-1);
 
-            graph.forEachRelationship(node, (source, target) -> {
-                if (randomNeighbourIndex == index.getValue()) {
+            graph.forEachRelationship(node, 1.0D, (source, target, weight) -> {
+                if (randomWeight <= currentWeight.addAndGet(weight)) {
                     randomNeighbour.setValue(target);
                     return false;
                 }
-                index.increment();
                 return true;
             });
 
@@ -293,5 +318,10 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     @FunctionalInterface
     interface NextNodeSupplier {
         long nextNode();
+    }
+
+    @FunctionalInterface
+    interface CumulativeWeightSupplier {
+        double forNode(long nodeId);
     }
 }

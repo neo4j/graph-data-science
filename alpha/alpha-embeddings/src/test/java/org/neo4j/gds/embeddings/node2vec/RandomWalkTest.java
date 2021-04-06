@@ -216,10 +216,10 @@ class RandomWalkTest extends AlgoTestBase {
 
         RandomWalk randomWalk = new RandomWalk(
             graph,
-            10,
-            4,
             1000,
-            1000,
+            1,
+            1,
+            100,
             1,
             1
         );
@@ -227,13 +227,14 @@ class RandomWalkTest extends AlgoTestBase {
         var nodeCounter = new HashMap<Long, Long>();
         randomWalk
             .compute()
-            .filter(arr -> graph.toOriginalNodeId(arr[0]) == 0)
             .forEach(arr -> Arrays.stream(arr).forEach(n -> {
                     long neo4jId = graph.toOriginalNodeId(n);
                     nodeCounter.merge(neo4jId, 1L, Long::sum);
                 })
             );
 
-        assertThat(nodeCounter.get(2L) * 100).isCloseTo(nodeCounter.get(1L), Percentage.withPercentage(25.0));
+        assertThat(nodeCounter.get(0L)).isCloseTo(1500, Percentage.withPercentage(10));
+        assertThat(nodeCounter.get(1L)).isCloseTo(1500, Percentage.withPercentage(10));
+        assertThat(nodeCounter.get(2L)).isCloseTo(1L, Offset.offset(50L));
     }
 }
