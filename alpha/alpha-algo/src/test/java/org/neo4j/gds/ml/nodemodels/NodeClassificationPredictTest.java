@@ -92,10 +92,11 @@ class NodeClassificationPredictTest {
                 -0.63303538, 0.08735695, -3.39978931
             }, 4, 3)))
             .classIdMap(classIdMap)
+            .featureProperties(List.of("a", "b"))
             .build();
 
         var result = new NodeClassificationPredict(
-            new MultiClassNLRPredictor(modelData, List.of("a", "b")),
+            new MultiClassNLRPredictor(modelData),
             graph,
             1,
             1,
@@ -146,10 +147,11 @@ class NodeClassificationPredictTest {
                 1.12730619, -0.84532386, 0.93216654
             }, 1, 3)))
             .classIdMap(classIdMap)
+            .featureProperties(List.of("a", "b"))
             .build();
 
         var result = new NodeClassificationPredict(
-            new MultiClassNLRPredictor(modelData, List.of("a", "b")),
+            new MultiClassNLRPredictor(modelData),
             graph,
             1,
             1,
@@ -195,6 +197,7 @@ class NodeClassificationPredictTest {
     void shouldLogProgress() {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(0);
+        var featureProperties = List.of("a", "b");
         var model = Model.of(
             "",
             "model",
@@ -205,12 +208,13 @@ class NodeClassificationPredictTest {
                     1.12730619, -0.84532386, 0.93216654
                 }, 1, 3)))
                 .classIdMap(classIdMap)
+                .featureProperties(featureProperties)
                 .build(),
             ImmutableNodeClassificationTrainConfig
                 .builder()
                 .modelName("model")
                 .targetProperty("foo")
-                .featureProperties(List.of("a", "b"))
+                .featureProperties(featureProperties)
                 .holdoutFraction(0.2)
                 .validationFolds(4)
                 .build()

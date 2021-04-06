@@ -60,7 +60,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
             NodeClassificationTrainConfig.class
         );
         return new NodeClassificationPredict(
-            new MultiClassNLRPredictor(model.data(), model.trainConfig().featureProperties()),
+            new MultiClassNLRPredictor(model.data()),
             graph,
             configuration.batchSize(),
             configuration.concurrency(),

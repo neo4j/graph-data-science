@@ -40,11 +40,9 @@ import static org.neo4j.gds.ml.features.FeatureExtraction.extract;
 public class MultiClassNLRPredictor implements Predictor<Matrix, MultiClassNLRData> {
 
     private final MultiClassNLRData modelData;
-    private final List<String> featureProperties;
 
-    public MultiClassNLRPredictor(MultiClassNLRData modelData, List<String> featureProperties) {
+    public MultiClassNLRPredictor(MultiClassNLRData modelData) {
         this.modelData = modelData;
-        this.featureProperties = featureProperties;
     }
 
     @Override
@@ -71,7 +69,7 @@ public class MultiClassNLRPredictor implements Predictor<Matrix, MultiClassNLRDa
 
     private List<FeatureExtractor> featureExtractors(Graph graph) {
         var featureExtractors = new ArrayList<FeatureExtractor>();
-        featureExtractors.addAll(FeatureExtraction.propertyExtractors(graph, featureProperties));
+        featureExtractors.addAll(FeatureExtraction.propertyExtractors(graph, modelData().featureProperties()));
         featureExtractors.add(new BiasFeature());
         return featureExtractors;
     }

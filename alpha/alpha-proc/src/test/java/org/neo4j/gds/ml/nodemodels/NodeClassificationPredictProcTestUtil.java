@@ -47,6 +47,7 @@ public class NodeClassificationPredictProcTestUtil {
                     1.12730619, -0.84532386, 0.93216654,
                     -1.12730619, 0.84532386, 0.0
                 }, 2, 3)))
+                .featureProperties(properties)
                 .classIdMap(classIdMap)
                 .build(),
             ImmutableNodeClassificationTrainConfig

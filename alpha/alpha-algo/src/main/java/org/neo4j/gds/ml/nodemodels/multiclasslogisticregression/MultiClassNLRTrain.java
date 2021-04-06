@@ -53,7 +53,7 @@ public class MultiClassNLRTrain {
             config.featureProperties(),
             config.targetProperty()
         );
-        var predictor = new MultiClassNLRPredictor(modelData, config.featureProperties());
+        var predictor = new MultiClassNLRPredictor(modelData);
         var objective = new MultiClassNLRObjective(
             graph,
             predictor,

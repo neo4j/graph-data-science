@@ -260,7 +260,7 @@ public class NodeClassificationTrain
     }
 
     private MultiClassNLRPredictor predictor(MultiClassNLRData modelData) {
-        return new MultiClassNLRPredictor(modelData, config.featureProperties());
+        return new MultiClassNLRPredictor(modelData);
     }
 
     private MultiClassNLRData trainModel(

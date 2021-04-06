@@ -21,17 +21,21 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.ml.batch.Batch;
-import org.neo4j.gds.ml.batch.MappedBatch;
 import org.neo4j.gds.ml.Predictor;
+import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.batch.BatchTransformer;
+import org.neo4j.gds.ml.batch.MappedBatch;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
  * Consumes a BatchQueue containing long indices into a <code>nodeIds</code> LongArrayAccessor.
@@ -87,10 +91,41 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
                     bestClassId = classId;
                 }
             }
+            if (bestClassId == -1) {
+                // TODO: Fail training if weights are NaN
+                fail(nodeIds.apply(nodeIndex));
+            }
             var bestClass = predictor.modelData().classIdMap().toOriginal(bestClassId);
             predictedClasses.set(nodeIndex, bestClass);
             currentRow++;
         }
         progressLogger.logProgress(batch.size());
+    }
+
+    private void fail(long nodeId) {
+        var badProperties = new ArrayList<String>();
+        for (var prop : predictor.modelData().featureProperties()) {
+            var theProp = graph.nodeProperties(prop);
+            var valueType = theProp.valueType();
+            if (valueType == ValueType.DOUBLE) {
+                if (Double.isNaN(theProp.doubleValue(nodeId))) {
+                    badProperties.add(prop);
+                }
+            } else if (valueType == ValueType.DOUBLE_ARRAY || valueType == ValueType.FLOAT_ARRAY) {
+                for (double val : theProp.doubleArrayValue(nodeId)) {
+                    if (Double.isNaN(val)) {
+                        badProperties.add(prop);
+                        break;
+                    }
+                }
+            }
+
+        }
+        throw new IllegalArgumentException(
+            formatWithLocale("Node with ID %d has invalid feature property value NaN. Properties with NaN values: %s",
+                graph.toOriginalNodeId(nodeId),
+                badProperties
+            )
+        );
     }
 }
