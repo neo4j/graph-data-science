@@ -122,6 +122,10 @@ public final class GraphStoreCatalog {
         userCatalogs.clear();
     }
 
+    public static void removeAllLoadedGraphs(NamedDatabaseId databaseId) {
+        userCatalogs.forEach((user, userCatalog) -> userCatalog.remove(databaseId));
+    }
+
     public static Map<GraphCreateConfig, GraphStore> getGraphStores(String username) {
         return getUserCatalog(username).getGraphStores();
     }
@@ -245,6 +249,10 @@ public final class GraphStoreCatalog {
                 removeDegreeDistribution(userCatalogKey);
                 graphsByName.remove(userCatalogKey);
             });
+        }
+
+        private void remove(NamedDatabaseId databaseId) {
+            graphsByName.keySet().removeIf(userCatalogKey -> userCatalogKey.namedDatabaseId() == databaseId);
         }
 
         private Map<GraphCreateConfig, GraphStore> getGraphStores() {
