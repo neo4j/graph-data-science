@@ -32,10 +32,8 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class RandomWalkTest extends AlgoTestBase {
 
@@ -71,7 +69,11 @@ class RandomWalkTest extends AlgoTestBase {
         int expectedNumberOfWalks = config.walksPerNode() * NODE_COUNT;
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
-        long[] walkForNodeZero = result.stream().filter(arr -> graph.toOriginalNodeId(arr[0]) == 0).findFirst().orElse(new long[0]);
+        long[] walkForNodeZero = result
+            .stream()
+            .filter(arr -> graph.toOriginalNodeId(arr[0]) == 0)
+            .findFirst()
+            .orElse(new long[0]);
         int expectedStepsInWalkForNode0 = config.walkLength() + 1;
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
@@ -93,7 +95,11 @@ class RandomWalkTest extends AlgoTestBase {
         int expectedNumberOfWalks = config.walksPerNode() * 5;
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
-        long[] walkForNodeZero = result.stream().filter(arr -> graph.toOriginalNodeId(arr[0]) == 0).findFirst().orElse(new long[0]);
+        long[] walkForNodeZero = result
+            .stream()
+            .filter(arr -> graph.toOriginalNodeId(arr[0]) == 0)
+            .findFirst()
+            .orElse(new long[0]);
         int expectedStepsInWalkForNode0 = config.walkLength() + 1;
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
@@ -130,10 +136,14 @@ class RandomWalkTest extends AlgoTestBase {
             );
 
         // (a) and (b) have similar occurrences, since from (a) the only reachable node is (b)
-        assertTrue(Math.abs(nodeCounter.get(0L) - nodeCounter.get(1L)) <= 100, formatWithLocale("occurrences: %s", nodeCounter));
+        assertThat(Math.abs(nodeCounter.get(0L) - nodeCounter.get(1L)) <= 100)
+            .withFailMessage("occurrences: %s", nodeCounter)
+            .isTrue();
 
         // all other nodes should occur far less often because of the high return probability
-        assertTrue(nodeCounter.get(0L) > nodeCounter.getOrDefault(2L, 0L) * 40, formatWithLocale("occurrences: %s", nodeCounter));
+        assertThat(nodeCounter.get(0L) > nodeCounter.getOrDefault(2L, 0L) * 40)
+            .withFailMessage("occurrences: %s", nodeCounter)
+            .isTrue();
     }
 
 
@@ -196,14 +206,26 @@ class RandomWalkTest extends AlgoTestBase {
             );
 
         // (b), (c), (d) should be much more common than (e) and (f)
-        assertTrue(nodeCounter.get(1L) > nodeCounter.get(4L) * 10, formatWithLocale("occurrences: %s", nodeCounter));
-        assertTrue(nodeCounter.get(1L) > nodeCounter.get(5L) * 10, formatWithLocale("occurrences: %s", nodeCounter));
+        assertThat(nodeCounter.get(1L) > nodeCounter.get(4L) * 10)
+            .withFailMessage("occurrences: %s", nodeCounter)
+            .isTrue();
+        assertThat(nodeCounter.get(1L) > nodeCounter.get(5L) * 10)
+            .withFailMessage("occurrences: %s", nodeCounter)
+            .isTrue();
 
-        assertTrue(nodeCounter.get(2L) > nodeCounter.get(4L) * 10, formatWithLocale("occurrences: %s", nodeCounter));
-        assertTrue(nodeCounter.get(2L) > nodeCounter.get(5L) * 10, formatWithLocale("occurrences: %s", nodeCounter));
+        assertThat(nodeCounter.get(2L) > nodeCounter.get(4L) * 10)
+            .withFailMessage("occurrences: %s", nodeCounter)
+            .isTrue();
+        assertThat(nodeCounter.get(2L) > nodeCounter.get(5L) * 10)
+            .withFailMessage("occurrences: %s", nodeCounter)
+            .isTrue();
 
-        assertTrue(nodeCounter.get(3L) > nodeCounter.get(4L) * 10, formatWithLocale("occurrences: %s", nodeCounter));
-        assertTrue(nodeCounter.get(3L) > nodeCounter.get(5L) * 10, formatWithLocale("occurrences: %s", nodeCounter));
+        assertThat(nodeCounter.get(3L) > nodeCounter.get(4L) * 10)
+            .withFailMessage("occurrences: %s", nodeCounter)
+            .isTrue();
+        assertThat(nodeCounter.get(3L) > nodeCounter.get(5L) * 10)
+            .withFailMessage("occurrences: %s", nodeCounter)
+            .isTrue();
     }
 
     @Test
@@ -237,6 +259,6 @@ class RandomWalkTest extends AlgoTestBase {
                 })
             );
 
-        assertThat(nodeCounter.get(2L) * 100).isCloseTo(nodeCounter.get(1L), Percentage.withPercentage(20.0));
+        assertThat(nodeCounter.get(2L) * 100).isCloseTo(nodeCounter.get(1L), Percentage.withPercentage(25.0));
     }
 }
