@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
-import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -72,6 +72,15 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
             .mapToObj(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), result.get(nodeId).data()));
     }
 
+    @Procedure(value = "gds.alpha.node2vec.stream.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimateStats(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
+    }
+
     @Override
     protected Node2VecStreamConfig newConfig(
         String username,
@@ -103,7 +112,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
 
             @Override
             public MemoryEstimation memoryEstimation(Node2VecStreamConfig configuration) {
-                throw new MemoryEstimationNotImplementedException();
+                return Node2Vec.memoryEstimation(configuration);
             }
 
             private void validateConfig(Node2VecStreamConfig config, Graph graph) {

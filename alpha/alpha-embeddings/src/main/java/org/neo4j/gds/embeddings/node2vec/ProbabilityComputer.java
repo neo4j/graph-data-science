@@ -21,6 +21,8 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -42,6 +44,14 @@ public class ProbabilityComputer {
     private HugeAtomicLongArray nodeFrequencies;
     private HugeDoubleArray centerProbabilities;
     private HugeLongArray contextDistribution;
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(ProbabilityComputer.class)
+            .perNode("node frequencies", HugeAtomicLongArray::memoryEstimation)
+            .perNode("center probabilities", HugeDoubleArray::memoryEstimation)
+            .perNode("context distribution", HugeLongArray::memoryEstimation)
+            .build();
+    }
 
     public ProbabilityComputer(
         HugeObjectArray<long[]> walks,

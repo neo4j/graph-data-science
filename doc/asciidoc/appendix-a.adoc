@@ -350,9 +350,11 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.ml.splitRelationships.mutate`
 .1+<.^| Triangle Finding
 | `gds.alpha.triangles`
-.2+<.^|<<alpha-algorithms-embeddings-node2vec, Node2Vec>>
+.4+<.^|<<alpha-algorithms-embeddings-node2vec, Node2Vec>>
 | `gds.alpha.node2vec.stream`
+| `gds.alpha.node2vec.stream.estimate`
 | `gds.alpha.node2vec.write`
+| `gds.alpha.node2vec.write`.estimate
 |===
 
 The following table lists all functions in the GDS library:

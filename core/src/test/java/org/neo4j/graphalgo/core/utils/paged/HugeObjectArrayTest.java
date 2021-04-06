@@ -20,13 +20,13 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.jupiter.api.Test;
+import org.assertj.core.data.Percentage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
@@ -35,7 +35,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, HugeObjectArray<String>> {
@@ -169,14 +168,14 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
         return null;
     }
 
-    @Test
-    void shouldComputeMemoryEstimation() {
-        var estimation = HugeObjectArray.memoryEstimation(sizeOfLongArray(10));
+    @ParameterizedTest
+    // {42, ArrayUtil.MAX_ARRAY_LENGTH + 42}
+    @ValueSource(longs = {42, 268435498})
+    void shouldComputeMemoryEstimation(long elementCount) {
+        var elementEstimation = sizeOfLongArray(42);
+        var lowerBoundEstimate = elementCount * elementEstimation;
 
-        var dim0 = ImmutableGraphDimensions.builder().nodeCount(0).build();
-        assertEquals(40, estimation.estimate(dim0, 1).memoryUsage().min);
-
-        var dim10000 = ImmutableGraphDimensions.builder().nodeCount(10000).build();
-        assertEquals(1000040, estimation.estimate(dim10000, 1).memoryUsage().min);
+        var estimation = HugeObjectArray.memoryEstimation(elementCount, elementEstimation);
+        assertThat(estimation).isCloseTo(lowerBoundEstimate, Percentage.withPercentage(2));
     }
 }

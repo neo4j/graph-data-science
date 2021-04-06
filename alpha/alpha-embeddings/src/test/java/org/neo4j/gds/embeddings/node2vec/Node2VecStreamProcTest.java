@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -35,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> implements AlgoBaseProcTest<Node2Vec, Node2VecStreamConfig, HugeObjectArray<Vector>> {
+class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
 
     @Test
     void embeddingsShouldHaveTheConfiguredDimension() {
@@ -71,6 +70,7 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> impl
             .streamMode()
             .addParameter("walksPerNode", Integer.MAX_VALUE)
             .addParameter("walkLength", Integer.MAX_VALUE)
+            .addParameter("sudo", true)
             .yields();
 
         Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));

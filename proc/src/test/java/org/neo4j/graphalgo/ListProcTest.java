@@ -29,6 +29,8 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageWriteProc;
+import org.neo4j.gds.embeddings.node2vec.Node2VecStreamProc;
+import org.neo4j.gds.embeddings.node2vec.Node2VecWriteProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedMutateProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedStatsProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedStreamProc;
@@ -112,6 +114,11 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.model.delete",
         "gds.alpha.model.load",
         "gds.alpha.model.store",
+
+        "gds.alpha.node2vec.stream",
+        "gds.alpha.node2vec.stream.estimate",
+        "gds.alpha.node2vec.write",
+        "gds.alpha.node2vec.write.estimate",
 
         "gds.beta.allShortestPaths.dijkstra.stream",
         "gds.beta.allShortestPaths.dijkstra.stream.estimate",
@@ -354,6 +361,8 @@ class ListProcTest extends BaseProcTest {
             NodeSimilarityStreamProc.class,
             NodeSimilarityMutateProc.class,
             NodeSimilarityStatsProc.class,
+            Node2VecStreamProc.class,
+            Node2VecWriteProc.class,
             PageRankWriteProc.class,
             PageRankStreamProc.class,
             PageRankMutateProc.class,
