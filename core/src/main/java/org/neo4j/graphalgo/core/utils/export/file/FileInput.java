@@ -168,7 +168,10 @@ public final class FileInput implements CompatInput {
         public boolean next(InputEntityVisitor visitor) throws IOException {
             if (lineIterator.hasNext()) {
                 String line = lineIterator.next();
-                visitLine(line, header, visitor);
+                // Ignore empty lines
+                if (!line.isBlank()) {
+                    visitLine(line, header, visitor);
+                }
                 return true;
             }
             return false;
@@ -181,10 +184,6 @@ public final class FileInput implements CompatInput {
 
         @Override
         void visitLine(String line, NodeFileHeader header, InputEntityVisitor visitor) throws IOException {
-            // Ignore empty lines
-            if (line.isBlank()) {
-                return;
-            }
 
             var lineValues = line.split(",");
 
