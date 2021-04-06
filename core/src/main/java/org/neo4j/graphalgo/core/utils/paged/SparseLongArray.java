@@ -99,7 +99,7 @@ public final class SparseLongArray {
         });
     }
 
-    private SparseLongArray(
+    SparseLongArray(
         long idCount,
         long highestNeoId,
         long[] array,
@@ -201,6 +201,23 @@ public final class SparseLongArray {
         return 0;
     }
 
+    long[] array() {
+        return array;
+    }
+
+    long[] blockOffsets() {
+        return blockOffsets;
+    }
+
+    long[] sortedBlockOffsets() {
+        return sortedBlockOffsets;
+    }
+
+    int[] blockMapping() {
+        return blockMapping;
+    }
+
+
     private static int pageId(long originalId) {
         return (int) (originalId >>> BLOCK_SHIFT);
     }
@@ -232,7 +249,7 @@ public final class SparseLongArray {
         }
 
         @TestOnly
-        void set(long allocationIndex, long... originalIds) {
+        public void set(long allocationIndex, long... originalIds) {
             set(allocationIndex, originalIds, 0, originalIds.length);
         }
 

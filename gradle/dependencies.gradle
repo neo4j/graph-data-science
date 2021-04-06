@@ -58,6 +58,7 @@ ext {
             'scala':                        scalas[properties.getOrDefault('neo4jVersion', neos.'4.2').toString().split('\\.')[0..1].join('.')],
             'spotbugsToolVersion':          '4.0.6',
             'protobuf':                     '3.11.0',
+            'kryo':                         '5.0.4',
     ]
     dep = [
         junit5bom:          "org.junit:junit-bom:${ver.junit5}",

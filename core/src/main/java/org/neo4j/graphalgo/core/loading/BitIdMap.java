@@ -216,6 +216,14 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
         );
     }
 
+    public Map<NodeLabel, BitSet> labelInformation() {
+        return labelInformation;
+    }
+
+    public SparseLongArray sparseLongArray() {
+        return sparseLongArray;
+    }
+
     private void validateNodeLabelFilter(Collection<NodeLabel> nodeLabels, Map<NodeLabel, BitSet> labelInformation) {
         List<ElementIdentifier> invalidLabels = nodeLabels
             .stream()
