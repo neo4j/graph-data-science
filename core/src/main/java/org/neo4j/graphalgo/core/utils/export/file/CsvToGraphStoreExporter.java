@@ -162,7 +162,7 @@ public final class CsvToGraphStoreExporter {
             .nodes(nodes)
             .tracker(tracker);
 
-        Map<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();
         this.relationshipVisitorBuilder
             .withRelationshipSchema(relationshipSchema)

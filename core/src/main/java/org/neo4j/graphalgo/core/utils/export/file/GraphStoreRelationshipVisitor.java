@@ -30,17 +30,18 @@ import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilderBuilder;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
 
-    private final Map<String, RelationshipsBuilder> relationshipBuilders;
+    private final ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuilders;
     private final RelationshipsBuilderBuilder relationshipsBuilderBuilder;
 
     protected GraphStoreRelationshipVisitor(
         RelationshipSchema relationshipSchema,
         RelationshipsBuilderBuilder relationshipsBuilderBuilder,
-        Map<String, RelationshipsBuilder> relationshipBuilders
+        ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuilders
     ) {
         super(relationshipSchema);
         this.relationshipsBuilderBuilder = relationshipsBuilderBuilder;
@@ -88,14 +89,14 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
     static final class Builder extends RelationshipVisitor.Builder<Builder, GraphStoreRelationshipVisitor> {
 
         RelationshipsBuilderBuilder relationshipsBuilderBuilder;
-        Map<String, RelationshipsBuilder> relationshipBuildersByType;
+        ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType;
 
         Builder withRelationshipBuilderBuilder(RelationshipsBuilderBuilder relationshipBuilderBuilder) {
             this.relationshipsBuilderBuilder = relationshipBuilderBuilder;
             return this;
         }
 
-        Builder withRelationshipBuildersToTypeResultMap(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
+        Builder withRelationshipBuildersToTypeResultMap(ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType) {
             this.relationshipBuildersByType = relationshipBuildersByType;
             return this;
         }

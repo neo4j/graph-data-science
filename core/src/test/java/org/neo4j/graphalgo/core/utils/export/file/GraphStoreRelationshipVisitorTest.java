@@ -33,10 +33,10 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -61,7 +61,7 @@ class GraphStoreRelationshipVisitorTest {
             .nodes(graph)
             .tracker(AllocationTracker.empty());
 
-        Map<String, RelationshipsBuilder> relationshipBuildersByType = new HashMap<>();
+        ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipsBuilderBuilder, relationshipBuildersByType);
 
         var relationshipTypeR = RelationshipType.of("R");
