@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
@@ -37,7 +38,6 @@ import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
 class RandomWalkTest extends AlgoTestBase {
 
-    private static final int NODE_COUNT = 5;
     private static final String DEFAULT_DB_CYPHER =
         "CREATE" +
         "  (a:Node1)" +
@@ -75,7 +75,7 @@ class RandomWalkTest extends AlgoTestBase {
             .filter(arr -> graph.toOriginalNodeId(arr[0]) == 0)
             .findFirst()
             .orElse(new long[0]);
-        int expectedStepsInWalkForNode0 = config.walkLength() + 1;
+        int expectedStepsInWalkForNode0 = config.walkLength();
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
 
@@ -97,14 +97,12 @@ class RandomWalkTest extends AlgoTestBase {
         int expectedNumberOfWalks = config.walksPerNode() * 3;
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
-        long[] walkForNodeZero = result.stream().filter(arr -> graph.toOriginalNodeId(arr[0]) == 0).findFirst().orElse(new long[0]);
-        int expectedStepsInWalkForNode0 = config.walkLength();
         long[] walkForNodeZero = result
             .stream()
             .filter(arr -> graph.toOriginalNodeId(arr[0]) == 0)
             .findFirst()
             .orElse(new long[0]);
-        int expectedStepsInWalkForNode0 = config.walkLength() + 1;
+        int expectedStepsInWalkForNode0 = config.walkLength();
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
 
@@ -151,21 +149,6 @@ class RandomWalkTest extends AlgoTestBase {
             .isTrue();
     }
 
-
-    /*
-            +-->B+----+
-            |   +     |
-            |   |     |
-            +   |     +
-        +-->A+------->C+->E+->F
-        |   +   |     +       +
-        |   |   |     |       |
-        |   |   |     |       |
-        |   |   +     |       |
-        |   +-->D+----+       |
-        |                     |
-        +---------------------+
-     */
     @Test
     void largeInOutFactorShouldMakeTheWalkKeepTheSameDistance() {
         runQuery("CREATE " +
@@ -178,17 +161,15 @@ class RandomWalkTest extends AlgoTestBase {
                  ", (a)-[:REL]->(b)" +
                  ", (a)-[:REL]->(c)" +
                  ", (a)-[:REL]->(d)" +
-                 ", (b)-[:REL]->(c)" +
-                 ", (b)-[:REL]->(d)" +
+                 ", (b)-[:REL]->(a)" +
                  ", (b)-[:REL]->(e)" +
-                 ", (c)-[:REL]->(b)" +
+                 ", (c)-[:REL]->(a)" +
                  ", (c)-[:REL]->(d)" +
                  ", (c)-[:REL]->(e)" +
-                 ", (d)-[:REL]->(b)" +
+                 ", (d)-[:REL]->(a)" +
                  ", (d)-[:REL]->(c)" +
                  ", (d)-[:REL]->(e)" +
-                 ", (e)-[:REL]->(f)" +
-                 ", (f)-[:REL]->(a)");
+                 ", (e)-[:REL]->(a)");
 
         Graph graph = TestGraphLoader.from(db).graph(NATIVE);
         RandomWalk randomWalk = new RandomWalk(
@@ -198,7 +179,7 @@ class RandomWalkTest extends AlgoTestBase {
             1000,
             1000,
             0.1,
-            10
+            100000
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -211,28 +192,15 @@ class RandomWalkTest extends AlgoTestBase {
                 })
             );
 
-        // (b), (c), (d) should be much more common than (e) and (f)
-        assertThat(nodeCounter.get(1L) > nodeCounter.get(4L) * 10)
-            .withFailMessage("occurrences: %s", nodeCounter)
-            .isTrue();
-        assertThat(nodeCounter.get(1L) > nodeCounter.get(5L) * 10)
-            .withFailMessage("occurrences: %s", nodeCounter)
-            .isTrue();
+        // (a), (b), (c), (d) should be much more common than (e)
+        assertThat(nodeCounter.get(0L)).isNotCloseTo(nodeCounter.get(4L), Offset.offset(4000L));
+        assertThat(nodeCounter.get(1L)).isNotCloseTo(nodeCounter.get(4L), Offset.offset(1200L));
+        assertThat(nodeCounter.get(2L)).isNotCloseTo(nodeCounter.get(4L), Offset.offset(1200L));
+        assertThat(nodeCounter.get(3L)).isNotCloseTo(nodeCounter.get(4L), Offset.offset(1200L));
 
-        assertThat(nodeCounter.get(2L) > nodeCounter.get(4L) * 10)
-            .withFailMessage("occurrences: %s", nodeCounter)
-            .isTrue();
-        assertThat(nodeCounter.get(2L) > nodeCounter.get(5L) * 10)
-            .withFailMessage("occurrences: %s", nodeCounter)
-            .isTrue();
-
-        assertThat(nodeCounter.get(3L) > nodeCounter.get(4L) * 10)
-            .withFailMessage("occurrences: %s", nodeCounter)
-            .isTrue();
-        assertThat(nodeCounter.get(3L) > nodeCounter.get(5L) * 10)
-            .withFailMessage("occurrences: %s", nodeCounter)
-            .isTrue();
+        assertThat(nodeCounter.get(4L)).isLessThan(100);
     }
+
 
     @Test
     void shouldRespectRelationshipWeights() {
@@ -249,10 +217,11 @@ class RandomWalkTest extends AlgoTestBase {
         RandomWalk randomWalk = new RandomWalk(
             graph,
             10,
-            new RandomWalk.NextNodeStrategy(graph, 1, 1),
             4,
             1000,
-            1000
+            1000,
+            1,
+            1
         );
 
         var nodeCounter = new HashMap<Long, Long>();
