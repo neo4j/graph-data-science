@@ -49,8 +49,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.utils.export.file.NodeVisitor.NEO_ID_KEY;
-
 public final class FileInput implements CompatInput {
 
     private final Path importPath;
@@ -230,20 +228,23 @@ public final class FileInput implements CompatInput {
 
             visitor.labels(header.nodeLabels());
 
+            visitor.id(Long.parseLong(lineValues[0]));
+
             header
                 .propertyMappings()
                 .forEach(property -> {
-                    if (NEO_ID_KEY.equals(property.propertyKey())) {
-                        visitor.id(Long.parseLong(lineValues[property.position()]));
-                    } else {
-                        var propertyValue =  property.position() < lineValues.length
-                            ? lineValues[property.position()]
-                            : "";
-                        visitor.property(
-                            property.propertyKey(),
-                            property.valueType().fromCsvValue(lineValues[property.position()], propertySchemas.get(property.propertyKey()).defaultValue())
-                        );
-                    }
+                    var propertyValue = property.position() < lineValues.length
+                        ? lineValues[property.position()]
+                        : "";
+                    visitor.property(
+                        property.propertyKey(),
+                        property
+                            .valueType()
+                            .fromCsvValue(
+                                propertyValue,
+                                propertySchemas.get(property.propertyKey()).defaultValue()
+                            )
+                    );
                 });
 
             visitor.endOfEntity();

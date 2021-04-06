@@ -33,7 +33,7 @@ class NodeFileHeaderTest {
 
     @Test
     void shouldBuildNodeFileHeader() {
-        var headerLine = ":ID,foo:long,bar:double,baz:long,neoId:long";
+        var headerLine = ":ID,foo:long,bar:double,baz:long";
 
         var fileHeader = NodeFileHeader.of(headerLine, new String[]{"A", "B", "C"});
 
@@ -42,8 +42,7 @@ class NodeFileHeaderTest {
         assertThat(fileHeader.propertyMappings()).containsExactlyInAnyOrder(
             ImmutableHeaderProperty.of(1, "foo", ValueType.LONG),
             ImmutableHeaderProperty.of(2, "bar", ValueType.DOUBLE),
-            ImmutableHeaderProperty.of(3, "baz", ValueType.LONG),
-            ImmutableHeaderProperty.of(4, "neoId", ValueType.LONG)
+            ImmutableHeaderProperty.of(3, "baz", ValueType.LONG)
         );
     }
 
