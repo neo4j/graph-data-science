@@ -36,10 +36,7 @@ class RelationshipFileHeaderTest {
     void shouldBuildRelationshipFileHeader() {
         var headerLine = ":START_ID,:END_ID,foo:LONG,bar:DOUBLE,baz:LONG";
 
-        var fileHeader = RelationshipFileHeader.builder()
-            .withHeaderLine(headerLine)
-            .withRelationshipType("REL")
-            .build();
+        var fileHeader = RelationshipFileHeader.of(headerLine, "REL");
 
         assertThat(fileHeader).isNotNull();
         assertThat(fileHeader.relationshipType()).isEqualTo("REL");
@@ -57,11 +54,7 @@ class RelationshipFileHeaderTest {
         "",
         ":END_ID,:START_ID"
     })    void shouldFailIfStartIdColumnIsMissing(String headerLine) {
-        assertThatThrownBy(() -> RelationshipFileHeader.builder()
-            .withHeaderLine(headerLine)
-            .withRelationshipType("REL")
-            .build()
-        )
+        assertThatThrownBy(() -> RelationshipFileHeader.of(headerLine, "REL"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("First column")
             .hasMessageContaining("must be " + START_ID_COLUMN_NAME);
@@ -74,11 +67,7 @@ class RelationshipFileHeaderTest {
         ":START_ID"
     })
     void shouldFailIfEndIdColumnIsMissing(String headerLine) {
-        assertThatThrownBy(() -> RelationshipFileHeader.builder()
-            .withHeaderLine(headerLine)
-            .withRelationshipType("REL")
-            .build()
-        )
+        assertThatThrownBy(() -> RelationshipFileHeader.of(headerLine, "REL"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Second column")
             .hasMessageContaining("must be " + END_ID_COLUMN_NAME);
@@ -88,11 +77,7 @@ class RelationshipFileHeaderTest {
     @ValueSource(strings = {"foo::Bar", ":BAR", "foo:", ":foo:BAR", ":"})
     void shouldFailOnMalformedProperties(String propertyHeaderString) {
         var headerString = formatWithLocale("%s,%s,%s", START_ID_COLUMN_NAME, END_ID_COLUMN_NAME, propertyHeaderString);
-        assertThatThrownBy(() -> RelationshipFileHeader.builder()
-            .withHeaderLine(headerString)
-            .withRelationshipType("REL")
-            .build()
-        )
+        assertThatThrownBy(() -> RelationshipFileHeader.of(headerString, "REL"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("does not have expected format <string>:<string>");
     }

@@ -31,36 +31,16 @@ public interface NodeFileHeader {
     Set<HeaderProperty> propertyMappings();
     String[] nodeLabels();
 
-    static NodeFileHeaderBuilder builder() {
-        return new NodeFileHeaderBuilder();
-    }
-
-    final class NodeFileHeaderBuilder {
-        private String headerLine;
-        private String[] nodeLabels;
-        private NodeFileHeaderBuilder() {}
-
-        public NodeFileHeaderBuilder withHeaderLine(String headerLine) {
-            this.headerLine = headerLine;
-            return this;
+    static NodeFileHeader of(String headerLine, String[] nodeLabels) {
+        var builder = ImmutableNodeFileHeader.builder();
+        String[] csvColumns = headerLine.split(",");
+        if (csvColumns.length == 0 || !csvColumns[0].equals(ID_COLUMN_NAME)) {
+            throw new IllegalArgumentException(formatWithLocale("First column of header must be %s.", ID_COLUMN_NAME));
         }
-
-        public NodeFileHeaderBuilder withNodeLabels(String[] nodeLabels) {
-            this.nodeLabels = nodeLabels;
-            return this;
+        for (int i = 1; i < csvColumns.length; i++) {
+            builder.addPropertyMapping(HeaderProperty.parse(i, csvColumns[i]));
         }
-
-        public NodeFileHeader build() {
-            var builder = ImmutableNodeFileHeader.builder();
-            String[] csvColumns = headerLine.split(",");
-            if (csvColumns.length == 0 || !csvColumns[0].equals(ID_COLUMN_NAME)) {
-                throw new IllegalArgumentException(formatWithLocale("First column of header must be %s.", ID_COLUMN_NAME));
-            }
-            for (int i = 1; i < csvColumns.length; i++) {
-                builder.addPropertyMapping(HeaderProperty.parse(i, csvColumns[i]));
-            }
-            builder.nodeLabels(nodeLabels);
-            return builder.build();
-        }
+        builder.nodeLabels(nodeLabels);
+        return builder.build();
     }
 }

@@ -32,39 +32,19 @@ public interface RelationshipFileHeader {
     Set<HeaderProperty> propertyMappings();
     String relationshipType();
 
-    static RelationshipFileBuilder builder() {
-        return new RelationshipFileBuilder();
-    }
-
-    final class RelationshipFileBuilder {
-        private String headerLine;
-        private String relationshipType;
-        private RelationshipFileBuilder() {}
-
-        public RelationshipFileBuilder withHeaderLine(String headerLine) {
-            this.headerLine = headerLine;
-            return this;
+    static RelationshipFileHeader of(String headerLine, String relationshipType) {
+        var builder = ImmutableRelationshipFileHeader.builder();
+        String[] csvColumns = headerLine.split(",");
+        if (csvColumns.length == 0 || !csvColumns[0].equals(START_ID_COLUMN_NAME)) {
+            throw new IllegalArgumentException(formatWithLocale("First column of header must be %s.", START_ID_COLUMN_NAME));
         }
-
-        public RelationshipFileBuilder withRelationshipType(String relationshipType) {
-            this.relationshipType = relationshipType;
-            return this;
+        if (csvColumns.length == 1 || !csvColumns[1].equals(END_ID_COLUMN_NAME)) {
+            throw new IllegalArgumentException(formatWithLocale("Second column of header must be %s.", END_ID_COLUMN_NAME));
         }
-
-        public RelationshipFileHeader build() {
-            var builder = ImmutableRelationshipFileHeader.builder();
-            String[] csvColumns = headerLine.split(",");
-            if (csvColumns.length == 0 || !csvColumns[0].equals(START_ID_COLUMN_NAME)) {
-                throw new IllegalArgumentException(formatWithLocale("First column of header must be %s.", START_ID_COLUMN_NAME));
-            }
-            if (csvColumns.length == 1 || !csvColumns[1].equals(END_ID_COLUMN_NAME)) {
-                throw new IllegalArgumentException(formatWithLocale("Second column of header must be %s.", END_ID_COLUMN_NAME));
-            }
-            for (int i = 2; i < csvColumns.length; i++) {
-                builder.addPropertyMapping(HeaderProperty.parse(i, csvColumns[i]));
-            }
-            builder.relationshipType(relationshipType);
-            return builder.build();
+        for (int i = 2; i < csvColumns.length; i++) {
+            builder.addPropertyMapping(HeaderProperty.parse(i, csvColumns[i]));
         }
+        builder.relationshipType(relationshipType);
+        return builder.build();
     }
 }

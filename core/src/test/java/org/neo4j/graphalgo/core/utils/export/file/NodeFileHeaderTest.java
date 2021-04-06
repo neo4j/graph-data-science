@@ -35,10 +35,7 @@ class NodeFileHeaderTest {
     void shouldBuildNodeFileHeader() {
         var headerLine = ":ID,foo:LONG,bar:DOUBLE,baz:LONG,neoId:LONG";
 
-        var fileHeader = NodeFileHeader.builder()
-            .withHeaderLine(headerLine)
-            .withNodeLabels(new String[]{"A", "B", "C"})
-            .build();
+        var fileHeader = NodeFileHeader.of(headerLine, new String[]{"A", "B", "C"});
 
         assertThat(fileHeader).isNotNull();
         assertThat(fileHeader.nodeLabels()).containsExactlyInAnyOrder("A", "B", "C");
@@ -54,11 +51,7 @@ class NodeFileHeaderTest {
     void shouldFailIfIdColumnIsMissing() {
         var headerLine = "foo:LONG,bar:DOUBLE";
 
-        assertThatThrownBy(() -> NodeFileHeader.builder()
-            .withHeaderLine(headerLine)
-            .withNodeLabels(new String[]{"A"})
-            .build()
-        )
+        assertThatThrownBy(() -> NodeFileHeader.of(headerLine, new String[]{"A"}))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("First column")
             .hasMessageContaining("must be " + ID_COLUMN_NAME);
@@ -68,11 +61,7 @@ class NodeFileHeaderTest {
     @ValueSource(strings = {"foo::Bar", ":BAR", "foo:", ":foo:BAR", ":"})
     void shouldFailOnMalformedProperties(String propertyHeaderString) {
         var headerString = formatWithLocale("%s,%s", ID_COLUMN_NAME, propertyHeaderString);
-        assertThatThrownBy(() -> NodeFileHeader.builder()
-            .withHeaderLine(headerString)
-            .withNodeLabels(new String[]{"A"})
-            .build()
-        )
+        assertThatThrownBy(() -> NodeFileHeader.of(headerString, new String[]{"A"}))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("does not have expected format <string>:<string>");
     }

@@ -40,10 +40,7 @@ public final class CsvImportUtil {
 
     public static NodeFileHeader parseNodeHeader(Path headerFile) {
         try (var headerReader = Files.newBufferedReader(headerFile, StandardCharsets.UTF_8)) {
-            return NodeFileHeader.builder()
-                .withHeaderLine(headerReader.readLine())
-                .withNodeLabels(inferNodeLabels(headerFile))
-                .build();
+            return NodeFileHeader.of(headerReader.readLine(), inferNodeLabels(headerFile));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -51,10 +48,7 @@ public final class CsvImportUtil {
 
     public static RelationshipFileHeader parseRelationshipHeader(Path headerFile) {
         try (var headerReader = Files.newBufferedReader(headerFile, StandardCharsets.UTF_8)) {
-            return RelationshipFileHeader.builder()
-                .withHeaderLine(headerReader.readLine())
-                .withRelationshipType(inferRelationshipType(headerFile))
-                .build();
+            return RelationshipFileHeader.of(headerReader.readLine(), inferRelationshipType(headerFile));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
