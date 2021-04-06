@@ -74,13 +74,13 @@ public final class CsvImportUtil {
 
     private static Map<Path, List<Path>> headerToFileMapping(Path csvDirectory, Function<Path, Collection<Path>> headerPaths) {
         Map<Path, List<Path>> headerToDataFileMapping = new HashMap<>();
-        for (Path relationshipHeaderFile : headerPaths.apply(csvDirectory)) {
-            String relationshipDataFilePattern = relationshipHeaderFile.getFileName().toString().replace("_header", "(_\\d+)");
-            List<Path> relationshipDataPaths = headerToDataFileMapping.computeIfAbsent(
-                relationshipHeaderFile,
+        for (Path headerFile : headerPaths.apply(csvDirectory)) {
+            String dataFilePattern = headerFile.getFileName().toString().replace("_header", "(_\\d+)");
+            List<Path> dataPaths = headerToDataFileMapping.computeIfAbsent(
+                headerFile,
                 path -> new ArrayList<>()
             );
-            relationshipDataPaths.addAll(getFilesByRegex(csvDirectory, relationshipDataFilePattern));
+            dataPaths.addAll(getFilesByRegex(csvDirectory, dataFilePattern));
         }
         return headerToDataFileMapping;
     }

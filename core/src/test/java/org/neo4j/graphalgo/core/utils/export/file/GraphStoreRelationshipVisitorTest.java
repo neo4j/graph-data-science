@@ -80,9 +80,6 @@ class GraphStoreRelationshipVisitorTest {
         );
         assertThat(actualRelationships.importedRelationships()).isEqualTo(4L);
 
-        assertThat(actualRelationships.topologies().get(relationshipTypeR).elementCount()).isEqualTo(1L);
-        assertThat(actualRelationships.topologies().get(relationshipTypeR1).elementCount()).isEqualTo(2L);
-
         Map<? extends RelationshipType, ? extends RelationshipPropertyStore> propertyStores = actualRelationships.properties();
         var actualGraph = new GraphStoreBuilder()
             .relationshipPropertyStores(propertyStores)

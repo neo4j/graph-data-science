@@ -196,23 +196,11 @@ public final class CsvToGraphStoreExporter {
             var relationships = builder.buildAll();
             var propertyStoreBuilder = RelationshipPropertyStore.builder();
 
-            var relationshipPropertySchemas = relationshipSchema.propertySchemasFor(relationshipType);
-            for (int i = 0; i < relationshipPropertySchemas.size(); i++) {
-                var relationship = relationships.get(i);
-                var relationshipPropertySchema = relationshipPropertySchemas.get(i);
-                relationship.properties().ifPresent(properties -> {
-
-                    propertyStoreBuilder.putIfAbsent(relationshipPropertySchema.key(), RelationshipProperty.of(
-                        relationshipPropertySchema.key(),
-                        NumberType.FLOATING_POINT,
-                        relationshipPropertySchema.state(),
-                        properties,
-                        relationshipPropertySchema.defaultValue(),
-                        relationshipPropertySchema.aggregation()
-                        )
-                    );
-                });
-            }
+            buildPropertyStores(
+                relationships,
+                propertyStoreBuilder,
+                relationshipSchema.propertySchemasFor(relationshipType)
+            );
 
             propertyStores.put(relationshipType, propertyStoreBuilder.build());
             var topology = relationships.get(0).topology();
@@ -221,6 +209,29 @@ public final class CsvToGraphStoreExporter {
         }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return ImmutableRelationshipTopologyAndProperties.of(relationshipTypeTopologyMap, propertyStores, importedRelationships.longValue());
+    }
+
+    private static void buildPropertyStores(
+        java.util.List<Relationships> relationships,
+        RelationshipPropertyStore.Builder propertyStoreBuilder,
+        java.util.List<org.neo4j.graphalgo.api.schema.RelationshipPropertySchema> relationshipPropertySchemas
+    ) {
+        for (int i = 0; i < relationshipPropertySchemas.size(); i++) {
+            var relationship = relationships.get(i);
+            var relationshipPropertySchema = relationshipPropertySchemas.get(i);
+            relationship.properties().ifPresent(properties -> {
+
+                propertyStoreBuilder.putIfAbsent(relationshipPropertySchema.key(), RelationshipProperty.of(
+                    relationshipPropertySchema.key(),
+                    NumberType.FLOATING_POINT,
+                    relationshipPropertySchema.state(),
+                    properties,
+                    relationshipPropertySchema.defaultValue(),
+                    relationshipPropertySchema.aggregation()
+                    )
+                );
+            });
+        }
     }
 
     @ValueClass
