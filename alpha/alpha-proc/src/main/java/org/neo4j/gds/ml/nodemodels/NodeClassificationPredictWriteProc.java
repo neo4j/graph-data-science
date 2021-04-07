@@ -55,11 +55,11 @@ public class NodeClassificationPredictWriteProc
     @Override
     protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationPredictWriteConfig> computationResult) {
         var config = computationResult.config();
-        var mutateProperty = config.writeProperty();
+        var writeProperty = config.writeProperty();
         var result = computationResult.result();
         var classProperties = result.predictedClasses().asNodeProperties();
         var nodeProperties = new ArrayList<NodePropertyExporter.NodeProperty>();
-        nodeProperties.add(NodePropertyExporter.NodeProperty.of(mutateProperty, classProperties));
+        nodeProperties.add(NodePropertyExporter.NodeProperty.of(writeProperty, classProperties));
         if (result.predictedProbabilities().isPresent()) {
             var probabilityPropertyKey = config.predictedProbabilityProperty().orElseThrow();
             var probabilityProperties = result.predictedProbabilities().get();
