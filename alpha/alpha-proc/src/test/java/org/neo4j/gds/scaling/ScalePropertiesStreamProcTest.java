@@ -62,7 +62,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.graph.create.subgraph('empty', 'graph', 'false', 'false')");
 
         assertCypherResult(
-            "CALL gds.alpha.scaleProperties.stream('empty', {nodeProperties: 'a', scalers: 'mean'})",
+            "CALL gds.alpha.scaleProperties.stream('empty', {nodeProperties: 'a', scaler: 'mean'})",
             List.of()
         );
     }
@@ -75,7 +75,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
             .algo("gds.alpha.scaleProperties")
             .streamMode()
             .addParameter("nodeProperties", List.of("id"))
-            .addParameter("scalers", List.of("Mean"))
+            .addParameter("scaler", "Mean")
             .yields();
 
         assertCypherResult(query, List.of(
@@ -96,7 +96,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
             "  nodeProjection: 'A'," +
             "  relationshipProjection: '*'," +
             "  nodeProperties: " + nodePropertyProjection + "," +
-            "  scalers: 'mean'" +
+            "  scaler: 'mean'" +
             "})";
 
         assertCypherResult(query, List.of(

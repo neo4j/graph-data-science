@@ -40,10 +40,10 @@ import java.util.stream.IntStream;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
- * This algorithm takes as input a list of node property names and a same-sized list of scalers.
- * It applies the scalers to the node property values, respectively, and outputs a single node property.
+ * This algorithm takes as input a list of node property names and a scaler.
+ * It applies the scaler to the node property values, respectively, and outputs a single node property.
  * The output node property values are lists of the same size as the input lists, and contain the scaled values
- * of the input node properties scaled according to the specified scalers.
+ * of the input node properties.
  */
 public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.Result> {
 
@@ -70,8 +70,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
 
         // Create a Scaler supplier for each input property
         // Array properties are unrolled into multiple scalers
-        var scalerSuppliers = IntStream.range(0, config.nodeProperties().size())
-            .mapToObj(inputPos -> prepareScalers(config.nodeProperties().get(inputPos), pickScaler(config.scalers(), inputPos)))
+        var scalerSuppliers = config.nodeProperties().stream()
+            .map(this::prepareScalers)
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
@@ -128,7 +128,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         }
     }
 
-    private List<Supplier<Scaler>> prepareScalers(String propertyName, Scaler.Variant scalerVariant) {
+    private List<Supplier<Scaler>> prepareScalers(String propertyName) {
+        var scalerVariant = config.scaler();
         var nodeProperties = graph.nodeProperties(propertyName);
 
         if (nodeProperties == null) {
@@ -203,15 +204,6 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
             }
             return propertyValue[idx];
         };
-    }
-
-    private Scaler.Variant pickScaler(List<Scaler.Variant> scalerVariants, int i) {
-        if (scalerVariants.size() == 1) {
-            // this supports syntactic sugar variant
-            return scalerVariants.get(0);
-        } else {
-            return scalerVariants.get(i);
-        }
     }
 
     private IllegalArgumentException createInvalidArrayException(

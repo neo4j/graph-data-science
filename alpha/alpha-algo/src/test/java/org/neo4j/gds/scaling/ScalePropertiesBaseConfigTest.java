@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
@@ -36,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
-import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 class ScalePropertiesBaseConfigTest {
 
@@ -50,36 +48,13 @@ class ScalePropertiesBaseConfigTest {
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
-                    "scalers", List.of(toLowerCaseWithLocale(scaler.name()), toUpperCaseWithLocale(scaler.name())),
+                    "scaler", toLowerCaseWithLocale(scaler.name()),
                     "nodeProperties", List.of("a", "b")
                 )
             )
         );
 
-        assertThat(config.scalers().size()).isEqualTo(2);
-        assertThat(config.scalers().get(0)).isEqualTo(scaler);
-        assertThat(config.scalers().get(1)).isEqualTo(scaler);
-    }
-
-    @Test
-    void unequalNodePropertiesScalerSizes() {
-        IllegalArgumentException ex = assertThrows(
-            IllegalArgumentException.class,
-            () -> new ScalePropertiesMutateConfigImpl(
-                Optional.of("graph"),
-                Optional.empty(),
-                "",
-                CypherMapWrapper.create(
-                    Map.of(
-                        "mutateProperty", "test",
-                        "scalers", List.of("Mean", "Minmax"),
-                        "nodeProperties", List.of("a", "b", "c")
-                    )
-                )
-            )
-        );
-
-        assertThat(ex.getMessage()).contains("Specify a scaler for each node property. Found 2 scalers for 3 node properties");
+        assertThat(config.scaler()).isEqualTo(scaler);
     }
 
     @Test
@@ -91,7 +66,7 @@ class ScalePropertiesBaseConfigTest {
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
-                    "scalers", List.of("Mean"),
+                    "scaler", "Mean",
                     "nodeProperties", Map.of("a", Map.of("neoProperty", "noeA", "defaultValue", 0))
                 )
             )
@@ -111,7 +86,7 @@ class ScalePropertiesBaseConfigTest {
                 CypherMapWrapper.create(
                     Map.of(
                         "mutateProperty", "test",
-                        "scalers", List.of("nonExistent"),
+                        "scaler", "nonExistent",
                         "nodeProperties", "test"
                     )
                 )
@@ -125,25 +100,6 @@ class ScalePropertiesBaseConfigTest {
         return Stream.of(Arguments.of("mean"), Arguments.of(List.of("mean")));
     }
 
-    @ParameterizedTest
-    @MethodSource("scalers")
-    void syntacticSugarForScalers() {
-        var config = new ScalePropertiesMutateConfigImpl(
-            Optional.of("graph"),
-            Optional.empty(),
-            "",
-            CypherMapWrapper.create(
-                Map.of(
-                    "mutateProperty", "test",
-                    "scalers", "mean",
-                    "nodeProperties", List.of("a", "b")
-                )
-            )
-        );
-
-        assertThat(config.scalers()).isEqualTo(List.of(Scaler.Variant.MEAN));
-    }
-
     @Test
     void failOnSpecifyingSamePropertyMultipleTimes() {
         assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new ScalePropertiesMutateConfigImpl(
@@ -153,7 +109,7 @@ class ScalePropertiesBaseConfigTest {
             CypherMapWrapper.create(
                 Map.of(
                     "mutateProperty", "test",
-                    "scalers", "mean",
+                    "scaler", "mean",
                     "nodeProperties", List.of("a", "b", "b", "a", "a")
                 )
             )
@@ -171,7 +127,7 @@ class ScalePropertiesBaseConfigTest {
                 CypherMapWrapper.create(
                     Map.of(
                         "mutateProperty", "test",
-                        "scalers", "mean",
+                        "scaler", "mean",
                         "nodeProperties", List.of(1)
                     )
                 )

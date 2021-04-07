@@ -133,8 +133,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
 
     private CentralityResult normalize(String scalerName, CentralityResult stats, int concurrency) {
         var scaler = Scaler.Variant
-            .fromCypher(scalerName)
-            .get(0)
+            .lookup(scalerName)
             .create(stats.asNodeProperties(), stats.array().size(), concurrency, Pools.DEFAULT);
         return new NormalizedCentralityResult(stats, scaler);
     }

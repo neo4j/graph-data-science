@@ -22,7 +22,6 @@ package org.neo4j.gds.scaling;
 import org.neo4j.graphalgo.api.NodeProperties;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -119,33 +118,15 @@ public interface Scaler {
             }
         }
 
+        public static String toString(Variant variant) {
+            return variant.name();
+        }
+
         public abstract Scaler create(
             NodeProperties properties,
             long nodeCount,
             int concurrency,
             ExecutorService executor
         );
-
-        public static List<String> toCypher(List<Variant> variants) {
-            return variants.stream()
-                .map(Variant::name)
-                .collect(Collectors.toList());
-        }
-
-        public static List<Variant> fromCypher(Object scalers) {
-            List<String> scalerNames;
-            if (scalers instanceof String) {
-                var singleScalar = (String) scalers;
-                scalerNames = List.of(singleScalar);
-            } else if (scalers instanceof List) {
-                scalerNames = (List<String>) scalers;
-            } else {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Expected String or List for scalers. Got %s.",
-                    scalers.getClass().getSimpleName()
-                ));
-            }
-            return scalerNames.stream().map(Scaler.Variant::lookup).collect(Collectors.toList());
-        }
     }
 }

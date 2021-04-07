@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.AbstractPropertyMappings.fromObject;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
@@ -37,9 +35,9 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
     @Configuration.ConvertWith("parsePropertyNames")
     List<String> nodeProperties();
 
-    @Configuration.ConvertWith("org.neo4j.gds.scaling.Scaler.Variant#fromCypher")
-    @Configuration.ToMapValue("org.neo4j.gds.scaling.Scaler.Variant#toCypher")
-    List<Scaler.Variant> scalers();
+    @Configuration.ConvertWith("org.neo4j.gds.scaling.Scaler.Variant#lookup")
+    @Configuration.ToMapValue("org.neo4j.gds.scaling.Scaler.Variant#toString")
+    Scaler.Variant scaler();
 
     @SuppressWarnings("unused")
     static List<String> parsePropertyNames(Object nodePropertiesOrMappings) {
@@ -48,16 +46,5 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
             .stream()
             .map(PropertyMapping::propertyKey)
             .collect(Collectors.toList());
-    }
-
-    @Value.Check
-    default void propertiesSizeMustEqualScalersSize() {
-        if (scalers().size() != 1 && scalers().size() != nodeProperties().size()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Specify a scaler for each node property. Found %d scalers for %d node properties.",
-                scalers().size(),
-                nodeProperties().size()
-            ));
-        }
     }
 }

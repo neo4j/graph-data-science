@@ -70,7 +70,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
             .algo("gds.alpha.scaleProperties")
             .mutateMode()
             .addParameter("nodeProperties", List.of("id"))
-            .addParameter("scalers", List.of("Mean"))
+            .addParameter("scaler", "Mean")
             .addParameter("mutateProperty", "mean")
             .yields();
 
