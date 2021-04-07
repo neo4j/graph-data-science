@@ -55,3 +55,9 @@ After creating the graphs in the catalog, we can refer to them in algorithms by 
 ----
 CALL gds.pageRank.stream('my-native-graph') YIELD nodeId, score;
 ----
+
+The projected graphs will reside in the catalog until:
+
+- the graph is dropped using <<catalog-graph-drop, gds.graph.drop>>
+- the Neo4j database from which to graph was projected is stopped or dropped
+- the Neo4j database management system is stopped.
