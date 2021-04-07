@@ -51,6 +51,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     private final double returnParam;
     private final double inOutParam;
     private final AtomicLong nodeIndex;
+    private final long randomSeed;
 
     public RandomWalk(
         Graph graph,
@@ -59,7 +60,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         int walksPerNode,
         int queueSize,
         double returnParam,
-        double inOutParam
+        double inOutParam,
+        long randomSeed
     ) {
         this.graph = graph;
         this.steps = steps;
@@ -68,6 +70,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         this.queueSize = queueSize;
         this.returnParam = returnParam;
         this.inOutParam = inOutParam;
+        this.randomSeed = randomSeed;
         nodeIndex = new AtomicLong(0);
     }
 
@@ -93,7 +96,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                     steps,
                     returnParam,
                     inOutParam,
-                    walks
+                    walks,
+                    randomSeed
                 )).collect(Collectors.toList());
 
         new Thread(() -> {
@@ -133,7 +137,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         private final Graph graph;
         private final int numWalks;
         private final int walkLength;
-        private final Random random;
+        private final Random random = new Random();
         private final BlockingQueue<long[]> walks;
         private final NextNodeSupplier nextNodeSupplier;
         private final MutableDouble currentWeight;
@@ -143,6 +147,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         private final double normalizedReturnProbability;
         private final double normalizedSameDistanceProbability;
         private final double normalizedInOutProbability;
+        private final long randomSeed;
         private final CumulativeWeightSupplier cumulativeWeightSupplier;
 
         static RandomWalkTask of(
@@ -153,7 +158,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             int walkLength,
             double returnParam,
             double inOutParam,
-            BlockingQueue<long[]> walks
+            BlockingQueue<long[]> walks,
+            long randomSeed
         ) {
             var maxProbability = Math.max(Math.max(1 / returnParam, 1.0), 1 / inOutParam);
             var normalizedReturnProbability = (1 / returnParam) / maxProbability;
@@ -169,7 +175,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                 normalizedReturnProbability,
                 normalizedSameDistanceProbability,
                 normalizedInOutProbability,
-                graph
+                graph,
+                randomSeed
             );
         }
 
@@ -182,7 +189,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             double normalizedReturnProbability,
             double normalizedSameDistanceProbability,
             double normalizedInOutProbability,
-            Graph graph
+            Graph graph,
+            long randomSeed
         ) {
             this.nextNodeSupplier = nextNodeSupplier;
             this.cumulativeWeightSupplier = cumulativeWeightSupplier;
@@ -193,8 +201,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             this.normalizedReturnProbability = normalizedReturnProbability;
             this.normalizedSameDistanceProbability = normalizedSameDistanceProbability;
             this.normalizedInOutProbability = normalizedInOutProbability;
+            this.randomSeed = randomSeed;
 
-            this.random = new Random();
             this.currentWeight = new MutableDouble(0);
             this.randomNeighbour = new MutableLong(-1);
             this.buffer = new long[1000][];
@@ -213,6 +221,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                 if (graph.degree(nodeId) == 0) {
                     continue;
                 }
+
+                random.setSeed(randomSeed + nodeId);
 
                 for (int walkIndex = 0; walkIndex < numWalks; walkIndex++) {
                     buffer[bufferPosition.getAndIncrement()] = walk(nodeId);

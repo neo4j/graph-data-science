@@ -63,7 +63,8 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
             config.walksPerNode(),
             config.walkBufferSize(),
             config.returnFactor(),
-            config.inOutFactor()
+            config.inOutFactor(),
+            config.seed()
         );
 
         HugeObjectArray<long[]> tempWalks = HugeObjectArray.newArray(

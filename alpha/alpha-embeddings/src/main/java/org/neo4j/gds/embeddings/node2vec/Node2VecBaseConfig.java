@@ -105,4 +105,6 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
         return 1;
     }
 
+    @Value.Default
+    default long seed() { return 42; }
 }

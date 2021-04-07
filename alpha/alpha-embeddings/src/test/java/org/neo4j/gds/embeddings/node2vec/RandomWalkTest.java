@@ -21,14 +21,17 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,18 +60,10 @@ class RandomWalkTest extends AlgoTestBase {
         runQuery(DEFAULT_DB_CYPHER);
         Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().build();
         Graph graph = TestGraphLoader.from(db).graph(NATIVE);
-        RandomWalk randomWalk = new RandomWalk(
-            graph,
-            config.walkLength(),
-            config.concurrency(),
-            config.walksPerNode(),
-            config.walkBufferSize(),
-            config.returnFactor(),
-            config.inOutFactor()
-        );
+
+        List<long[]> result = runRandomWalk(config, graph);
 
         int expectedNumberOfWalks = config.walksPerNode() * 3;
-        List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
         long[] walkForNodeZero = result
             .stream()
@@ -77,6 +72,43 @@ class RandomWalkTest extends AlgoTestBase {
             .orElse(new long[0]);
         int expectedStepsInWalkForNode0 = config.walkLength();
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
+    }
+
+    @Test
+    void shouldBeDeterministic() {
+        runQuery(DEFAULT_DB_CYPHER);
+        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().concurrency(4).build();
+        Graph graph = TestGraphLoader.from(db).graph(NATIVE);
+
+        List<long[]> firstResult = runRandomWalk(config, graph);
+        List<long[]> secondResult = runRandomWalk(config, graph);
+
+        Collection<long[]> firstResultAsSet = new TreeSet<>(Arrays::compare);
+        firstResultAsSet.addAll(firstResult);
+        assertThat(firstResultAsSet).hasSize(firstResult.size());
+
+        Collection<long[]> secondResultAsSet = new TreeSet<>(Arrays::compare);
+        secondResultAsSet.addAll(secondResult);
+        assertThat(secondResultAsSet).hasSize(secondResult.size());
+
+        assertThat(firstResultAsSet).isEqualTo(secondResultAsSet);
+    }
+
+    @NotNull
+    private List<long[]> runRandomWalk(Node2VecStreamConfig config, Graph graph) {
+        RandomWalk randomWalk = new RandomWalk(
+            graph,
+            config.walkLength(),
+            config.concurrency(),
+            config.walksPerNode(),
+            config.walkBufferSize(),
+            config.returnFactor(),
+            config.inOutFactor(),
+            config.seed()
+        );
+
+        List<long[]> result = randomWalk.compute().collect(Collectors.toList());
+        return result;
     }
 
     @Test
@@ -91,7 +123,8 @@ class RandomWalkTest extends AlgoTestBase {
             config.walksPerNode(),
             config.walkBufferSize(),
             config.returnFactor(),
-            config.inOutFactor()
+            config.inOutFactor(),
+            config.seed()
         );
 
         int expectedNumberOfWalks = config.walksPerNode() * 3;
@@ -125,7 +158,8 @@ class RandomWalkTest extends AlgoTestBase {
             100,
             1000,
             0.01,
-            1
+            1,
+            42
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -179,7 +213,8 @@ class RandomWalkTest extends AlgoTestBase {
             1000,
             1000,
             0.1,
-            100000
+            100000,
+            87
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -221,7 +256,8 @@ class RandomWalkTest extends AlgoTestBase {
             1,
             100,
             1,
-            1
+            1,
+            23
         );
 
         var nodeCounter = new HashMap<Long, Long>();
