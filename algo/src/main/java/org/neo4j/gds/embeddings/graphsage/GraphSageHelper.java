@@ -244,7 +244,7 @@ public final class GraphSageHelper {
         Graph graph,
         GraphSageTrainConfig config
     ) {
-        Map<NodeLabel, Set<String>> filteredKeysPerLabel = filteredPropertyKeysPerNodeLabel(graph, config);
+        var filteredKeysPerLabel = filteredPropertyKeysPerNodeLabel(graph, config);
         var featureCountPerLabel = new HashMap<NodeLabel, Integer>();
         var extractorsPerLabel = new HashMap<NodeLabel, List<FeatureExtractor>>();
         graph.forEachNode(nodeId -> {
