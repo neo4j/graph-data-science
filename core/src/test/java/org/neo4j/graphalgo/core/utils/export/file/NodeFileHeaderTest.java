@@ -33,7 +33,7 @@ class NodeFileHeaderTest {
 
     @Test
     void shouldBuildNodeFileHeader() {
-        var headerLine = ":ID,foo:LONG,bar:DOUBLE,baz:LONG,neoId:LONG";
+        var headerLine = ":ID,foo:long,bar:double,baz:long,neoId:long";
 
         var fileHeader = NodeFileHeader.of(headerLine, new String[]{"A", "B", "C"});
 
@@ -49,7 +49,7 @@ class NodeFileHeaderTest {
 
     @Test
     void shouldFailIfIdColumnIsMissing() {
-        var headerLine = "foo:LONG,bar:DOUBLE";
+        var headerLine = "foo:long,bar:double";
 
         assertThatThrownBy(() -> NodeFileHeader.of(headerLine, new String[]{"A"}))
             .isInstanceOf(IllegalArgumentException.class)

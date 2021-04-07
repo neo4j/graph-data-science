@@ -33,7 +33,7 @@ class RelationshipLineChunkTest {
     @Test
     void shouldVisitLine() throws IOException {
         var line = "0,1,19.19,42";
-        var header = RelationshipFileHeader.of(":START_ID,:END_ID,foo:DOUBLE,bar:LONG", "REL");
+        var header = RelationshipFileHeader.of(":START_ID,:END_ID,foo:double,bar:long", "REL");
 
         var lineChunk = new FileInput.RelationshipLineChunk();
         var visitor = new TestRelationshipVisitor();

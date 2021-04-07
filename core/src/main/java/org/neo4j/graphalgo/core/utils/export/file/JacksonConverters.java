@@ -24,8 +24,6 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
-import java.util.Locale;
-
 public class JacksonConverters {
 
     static class NodeLabelConverter extends StdConverter<String, NodeLabel> {
@@ -45,14 +43,14 @@ public class JacksonConverters {
     static class ValueTypeConverter extends StdConverter<String, ValueType> {
         @Override
         public ValueType convert(String value) {
-            return ValueType.valueOf(value.toUpperCase(Locale.ENGLISH));
+            return ValueType.fromCsvName(value);
         }
     }
 
     static class DefaultValueConverter extends StdConverter<String, String> {
         @Override
         public String convert(String value) {
-            return value.replaceAll("DefaultValue\\(|\\)", "");
+            return value.replaceAll("DefaultValue\\(|null|NaN|\\)", "");
         }
     }
 }
