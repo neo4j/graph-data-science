@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.queue.QueueBasedSpliterator;
 
-import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -216,9 +215,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
                 }
 
                 for (int walkIndex = 0; walkIndex < numWalks; walkIndex++) {
-                    var nextWalk = walk(nodeId);
+                    buffer[bufferPosition.getAndIncrement()] = walk(nodeId);
 
-                    buffer[bufferPosition.getAndIncrement()] = nextWalk;
                     if (bufferPosition.getValue() == buffer.length) {
                         flushBuffer();
                     }
@@ -230,7 +228,6 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
         private long[] walk(long startNode) {
             var walk = new long[walkLength];
-            Arrays.fill(walk, -1L);
             walk[0] = startNode;
             walk[1] = randomNeighbour(startNode);
 
