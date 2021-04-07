@@ -46,5 +46,4 @@ class JacksonConvertersTest {
         var defaultValueConverter = new JacksonConverters.DefaultValueConverter();
         assertThat(defaultValueConverter.convert(defaultValue)).isEqualTo(expected);
     }
-
 }
