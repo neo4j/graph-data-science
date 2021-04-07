@@ -43,13 +43,6 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
 
     @SuppressWarnings("unused")
     static List<String> parsePropertyNames(Object nodePropertiesOrMappings) {
-        if (nodePropertiesOrMappings instanceof List) {
-            var nodeProperties = (List<?>) nodePropertiesOrMappings;
-            if (nodeProperties.stream().anyMatch(property -> !(property instanceof String))) {
-                throw new IllegalArgumentException("nodeProperties must be strings");
-            }
-            return (List<String>) nodeProperties;
-        }
         return fromObject(nodePropertiesOrMappings)
             .mappings()
             .stream()

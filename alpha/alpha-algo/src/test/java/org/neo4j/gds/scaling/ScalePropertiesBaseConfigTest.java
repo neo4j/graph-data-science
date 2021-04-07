@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
@@ -50,7 +51,7 @@ class ScalePropertiesBaseConfigTest {
                 Map.of(
                     "mutateProperty", "test",
                     "scalers", List.of(toLowerCaseWithLocale(scaler.name()), toUpperCaseWithLocale(scaler.name())),
-                    "nodeProperties", List.of("a", "a")
+                    "nodeProperties", List.of("a", "b")
                 )
             )
         );
@@ -144,8 +145,8 @@ class ScalePropertiesBaseConfigTest {
     }
 
     @Test
-    void canSpecifySamePropertyMultipleTimes() {
-        var config = new ScalePropertiesMutateConfigImpl(
+    void failOnSpecifyingSamePropertyMultipleTimes() {
+        assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> new ScalePropertiesMutateConfigImpl(
             Optional.of("graph"),
             Optional.empty(),
             "",
@@ -156,9 +157,7 @@ class ScalePropertiesBaseConfigTest {
                     "nodeProperties", List.of("a", "b", "b", "a", "a")
                 )
             )
-        );
-
-        assertThat(config.nodeProperties()).isEqualTo(List.of("a", "b", "b", "a", "a"));
+        )).withMessageContaining("Duplicate property key `b`");
     }
 
     @Test
@@ -179,6 +178,6 @@ class ScalePropertiesBaseConfigTest {
             )
         );
 
-        assertThat(ex.getMessage()).contains("nodeProperties must be strings");
+        assertThat(ex.getMessage()).contains("Expected String or Map for property mappings. Got Integer.");
     }
 }
