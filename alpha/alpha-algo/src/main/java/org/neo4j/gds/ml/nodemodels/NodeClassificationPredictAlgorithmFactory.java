@@ -30,17 +30,14 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 
-public class NodeClassificationPredictAlgorithmFactory
-    extends AbstractAlgorithmFactory<NodeClassificationPredict, NodeClassificationMutateConfig> {
+public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassificationPredictConfig> extends AbstractAlgorithmFactory<NodeClassificationPredict, CONFIG> {
 
     public NodeClassificationPredictAlgorithmFactory() {
         super();
     }
 
     @Override
-    protected long taskVolume(
-        Graph graph, NodeClassificationMutateConfig configuration
-    ) {
+    protected long taskVolume(Graph graph, NodeClassificationPredictConfig configuration) {
         return graph.nodeCount();
     }
 
@@ -52,7 +49,7 @@ public class NodeClassificationPredictAlgorithmFactory
     @Override
     protected NodeClassificationPredict build(
         Graph graph,
-        NodeClassificationMutateConfig configuration,
+        NodeClassificationPredictConfig configuration,
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
@@ -74,7 +71,7 @@ public class NodeClassificationPredictAlgorithmFactory
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(NodeClassificationMutateConfig configuration) {
+    public MemoryEstimation memoryEstimation(NodeClassificationPredictConfig configuration) {
         throw new MemoryEstimationNotImplementedException();
     }
 

@@ -343,8 +343,9 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^| Link Prediction
 | `gds.alpha.ml.linkPrediction.predict.mutate`
 | `gds.alpha.ml.linkPrediction.train`
-.2+<.^| Node Classification
+.3+<.^| Node Classification
 | `gds.alpha.ml.nodeClassification.predict.mutate`
+| `gds.alpha.ml.nodeClassification.predict.write`
 | `gds.alpha.ml.nodeClassification.train`
 .1+<.^| Split Relationships
 | `gds.alpha.ml.splitRelationships.mutate`
