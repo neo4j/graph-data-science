@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.immutables.builder.Builder;
+import org.neo4j.common.Validator;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -49,6 +50,7 @@ import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
@@ -297,4 +299,14 @@ public final class CsvToGraphStoreExporter {
             tracker
         );
     }
+
+    public static final Validator<Path> DIRECTORY_IS_READABLE = value -> {
+        Files.exists(value);
+        if (!Files.isDirectory(value)) {
+            throw new IllegalArgumentException("'" + value + "' is not a directory");
+        }
+        if (!Files.isReadable(value)) {
+            throw new IllegalArgumentException("Directory '" + value + "' not readable");
+        }
+    };
 }
