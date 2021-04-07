@@ -26,10 +26,8 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphalgo.core.utils.queue.QueueBasedSpliterator;
 
 import java.util.Arrays;
@@ -37,6 +35,8 @@ import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -83,21 +83,19 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             ? cumulativeWeights()::get
             : graph::degree;
 
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            graph.nodeCount(),
-            BitUtil.ceilDiv(graph.nodeCount(), concurrency),
-            (partition) -> RandomWalkTask.of(
-                nodeIndex::getAndIncrement,
-                cumulativeWeightSupplier,
-                graph.concurrentCopy(),
-                walksPerNode,
-                steps,
-                returnParam,
-                inOutParam,
-                walks
-            )
-        );
+        var tasks = IntStream
+            .range(0, concurrency)
+            .mapToObj(i ->
+                RandomWalkTask.of(
+                    nodeIndex::getAndIncrement,
+                    cumulativeWeightSupplier,
+                    graph.concurrentCopy(),
+                    walksPerNode,
+                    steps,
+                    returnParam,
+                    inOutParam,
+                    walks
+                )).collect(Collectors.toList());
 
         new Thread(() -> {
             ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
