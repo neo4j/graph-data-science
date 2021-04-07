@@ -59,24 +59,22 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
         RandomWalk randomWalk = new RandomWalk(
             graph,
             config.walkLength(),
-            new RandomWalk.NextNodeStrategy(graph, config.returnFactor(), config.inOutFactor()),
             config.concurrency(),
             config.walksPerNode(),
-            config.walkBufferSize()
+            config.walkBufferSize(),
+            config.returnFactor(),
+            config.inOutFactor()
         );
 
-        HugeObjectArray<long[]> walks = HugeObjectArray.newArray(
+        HugeObjectArray<long[]> tempWalks = HugeObjectArray.newArray(
             long[].class,
             graph.nodeCount() * config.walksPerNode(),
             tracker
         );
+
         MutableLong counter = new MutableLong(0);
-        randomWalk
-            .compute()
-            .forEach(walk -> {
-                walks.set(counter.longValue(), walk);
-                counter.increment();
-            });
+        randomWalk.compute().forEach(walk -> tempWalks.set(counter.getAndIncrement(), walk));
+        var walks = tempWalks.copyOf(counter.longValue(), tracker);
 
         var probabilityComputer = new ProbabilityComputer(
             walks,

@@ -19,73 +19,106 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.queue.QueueBasedSpliterator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
+    // The number of tries we will make to draw a random neighbour according to p and q
+    private static final int MAX_TRIES = 100;
 
     private final Graph graph;
     private final int steps;
-    private final NextNodeStrategy strategy;
     private final int concurrency;
     private final int walksPerNode;
     private final int queueSize;
+    private final double returnParam;
+    private final double inOutParam;
+    private final AtomicLong nodeIndex;
 
     public RandomWalk(
         Graph graph,
         int steps,
-        NextNodeStrategy strategy,
         int concurrency,
         int walksPerNode,
-        int queueSize
+        int queueSize,
+        double returnParam,
+        double inOutParam
     ) {
         this.graph = graph;
         this.steps = steps;
-        this.strategy = strategy;
         this.concurrency = concurrency;
         this.walksPerNode = walksPerNode;
         this.queueSize = queueSize;
+        this.returnParam = returnParam;
+        this.inOutParam = inOutParam;
+        nodeIndex = new AtomicLong(0);
     }
 
     @Override
     public Stream<long[]> compute() {
-        int minBatchSize = 100;
         int timeout = 100;
         BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(queueSize);
         long[] TOMB = new long[0];
 
-        long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, minBatchSize);
-        ArrayList<Runnable> tasks = new ArrayList<>();
-        for (var i = 0; i < graph.nodeCount(); i += batchSize) {
-            var start = i;
-            var stop = Math.min(start + batchSize, graph.nodeCount());
-            tasks.add(
-                () -> {
-                    for (var j = start; j < stop; j++) {
-                        doWalk(j).forEach(walk -> put(walks, walk));
-                    }
-                }
-            );
-        }
+
+        CumulativeWeightSupplier cumulativeWeightSupplier = graph.hasRelationshipProperty()
+            ? cumulativeWeights()::get
+            : graph::degree;
+
+        var tasks = IntStream
+            .range(0, concurrency)
+            .mapToObj(i ->
+                RandomWalkTask.of(
+                    nodeIndex::getAndIncrement,
+                    cumulativeWeightSupplier,
+                    graph.concurrentCopy(),
+                    walksPerNode,
+                    steps,
+                    returnParam,
+                    inOutParam,
+                    walks
+                )).collect(Collectors.toList());
+
         new Thread(() -> {
             ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
-            put(walks, TOMB);
+            try {
+                walks.put(TOMB);
+            } catch (InterruptedException e) {
+            }
         }).start();
-        QueueBasedSpliterator<long[]> spliterator = new QueueBasedSpliterator<>(walks, TOMB, terminationFlag, timeout);
-        return StreamSupport.stream(spliterator, false);
+
+        return StreamSupport.stream(new QueueBasedSpliterator<>(walks, TOMB, terminationFlag, timeout), false);
+    }
+
+    private HugeAtomicDoubleArray cumulativeWeights() {
+        var weights = HugeAtomicDoubleArray.newArray(graph.nodeCount(), AllocationTracker.empty());
+        ParallelUtil.parallelForEachNode(
+            graph,
+            concurrency,
+            nodeId -> graph.forEachRelationship(nodeId, 1.0, (s, t, weight) -> {
+                weights.update(nodeId, oldWeight -> oldWeight + weight);
+                return true;
+            })
+        );
+
+        return weights;
     }
 
     @Override
@@ -96,158 +129,197 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     @Override
     public void release() { }
 
-    private Stream<long[]> doWalk(long startNodeId) {
-        return IntStream.range(0, walksPerNode).mapToObj(ignored -> {
-            long[] nodeIds = new long[steps + 1];
-            long currentNodeId = startNodeId;
-            long previousNodeId = currentNodeId;
-            nodeIds[0] = currentNodeId;
-            for (int i = 1; i <= steps; i++) {
-                long nextNodeId = strategy.getNextNode(currentNodeId, previousNodeId);
-                previousNodeId = currentNodeId;
-                currentNodeId = nextNodeId;
-
-                if (currentNodeId == -1 || !terminationFlag.running()) {
-                    return Arrays.copyOf(nodeIds, i);
-                }
-                nodeIds[i] = currentNodeId;
-            }
-
-            return nodeIds;
-        });
-    }
-
-    private static <T> void put(BlockingQueue<T> queue, T items) {
-        try {
-            queue.put(items);
-        } catch (InterruptedException e) {}
-    }
-
-    public static class NextNodeStrategy {
+    private static final class RandomWalkTask implements Runnable {
         private final Graph graph;
-        private final double returnParam;
-        private final double inOutParam;
+        private final int numWalks;
+        private final int walkLength;
+        private final Random random;
+        private final BlockingQueue<long[]> walks;
+        private final NextNodeSupplier nextNodeSupplier;
+        private final MutableDouble currentWeight;
+        private final MutableLong randomNeighbour;
+        private final long[][] buffer;
+        private final MutableInt bufferPosition;
+        private final double normalizedReturnProbability;
+        private final double normalizedSameDistanceProbability;
+        private final double normalizedInOutProbability;
+        private final CumulativeWeightSupplier cumulativeWeightSupplier;
 
-        public NextNodeStrategy(Graph graph, double returnParam, double inOutParam) {
-            this.graph = graph;
-            this.returnParam = returnParam;
-            this.inOutParam = inOutParam;
-        }
-
-        public long getNextNode(long currentNode, long previousNode) {
-            Graph threadLocalGraph = graph.concurrentCopy();
-
-            int degree = threadLocalGraph.degree(currentNode);
-            if (degree == 0) {
-                return -1;
-            }
-
-            double[] distribution = buildProbabilityDistribution(
-                threadLocalGraph,
-                currentNode,
-                previousNode,
-                returnParam,
-                inOutParam,
-                degree
-            );
-            int neighbourIndex = pickIndexFromDistribution(distribution, ThreadLocalRandom.current().nextDouble());
-
-            return threadLocalGraph.getTarget(currentNode, neighbourIndex);
-        }
-
-        private double[] buildProbabilityDistribution(
-            Graph threadLocalGraph,
-            long currentNodeId,
-            long previousNodeId,
+        static RandomWalkTask of(
+            NextNodeSupplier nextNodeSupplier,
+            CumulativeWeightSupplier cumulativeWeightSupplier,
+            Graph graph,
+            int numWalks,
+            int walkLength,
             double returnParam,
             double inOutParam,
-            int degree
+            BlockingQueue<long[]> walks
         ) {
-            ProbabilityDistributionComputer consumer = new ProbabilityDistributionComputer(
-                threadLocalGraph.concurrentCopy(),
-                degree,
-                currentNodeId,
-                previousNodeId,
-                returnParam,
-                inOutParam
+            var maxProbability = Math.max(Math.max(1 / returnParam, 1.0), 1 / inOutParam);
+            var normalizedReturnProbability = (1 / returnParam) / maxProbability;
+            var normalizedSameDistanceProbability = 1 / maxProbability;
+            var normalizedInOutProbability = (1 / inOutParam) / maxProbability;
+
+            return new RandomWalkTask(
+                nextNodeSupplier,
+                cumulativeWeightSupplier,
+                numWalks,
+                walkLength,
+                walks,
+                normalizedReturnProbability,
+                normalizedSameDistanceProbability,
+                normalizedInOutProbability,
+                graph
             );
-            threadLocalGraph.forEachRelationship(currentNodeId, 1.0, consumer);
-            return consumer.probabilities();
         }
 
-        private static double[] normalizeDistribution(double[] array, double sum) {
-            for (int i = 0; i < array.length; i++) {
-                array[i] /= sum;
-            }
-            return array;
+        private RandomWalkTask(
+            NextNodeSupplier nextNodeSupplier,
+            CumulativeWeightSupplier cumulativeWeightSupplier,
+            int numWalks,
+            int walkLength,
+            BlockingQueue<long[]> walks,
+            double normalizedReturnProbability,
+            double normalizedSameDistanceProbability,
+            double normalizedInOutProbability,
+            Graph graph
+        ) {
+            this.nextNodeSupplier = nextNodeSupplier;
+            this.cumulativeWeightSupplier = cumulativeWeightSupplier;
+            this.graph = graph;
+            this.numWalks = numWalks;
+            this.walkLength = walkLength;
+            this.walks = walks;
+            this.normalizedReturnProbability = normalizedReturnProbability;
+            this.normalizedSameDistanceProbability = normalizedSameDistanceProbability;
+            this.normalizedInOutProbability = normalizedInOutProbability;
+
+            this.random = new Random();
+            this.currentWeight = new MutableDouble(0);
+            this.randomNeighbour = new MutableLong(-1);
+            this.buffer = new long[1000][];
+            this.bufferPosition = new MutableInt(0);
         }
 
-        private static int pickIndexFromDistribution(double[] normalizedDistribution, double randomThreshold) {
-            double cumulativeProbability = 0.0;
-            for (int i = 0; i < normalizedDistribution.length; i++) {
-                cumulativeProbability += normalizedDistribution[i];
-                if (randomThreshold <= cumulativeProbability) {
-                    return i;
+        @Override
+        public void run() {
+            long nodeId;
+
+            while (true) {
+                nodeId = nextNodeSupplier.nextNode();
+
+                if (nodeId >= graph.nodeCount()) break;
+
+                if (graph.degree(nodeId) == 0) {
+                    continue;
+                }
+
+                for (int walkIndex = 0; walkIndex < numWalks; walkIndex++) {
+                    buffer[bufferPosition.getAndIncrement()] = walk(nodeId);
+
+                    if (bufferPosition.getValue() == buffer.length) {
+                        flushBuffer();
+                    }
                 }
             }
-            return normalizedDistribution.length - 1;
+
+            flushBuffer();
         }
 
-        private class ProbabilityDistributionComputer implements RelationshipWithPropertyConsumer {
-            private final Graph threadLocalGraph;
-            final double[] probabilities;
-            private final long currentNodeId;
-            private final long previousNodeId;
-            private final double returnParam;
-            private final double inOutParam;
-            double probSum;
-            int index;
+        private long[] walk(long startNode) {
+            var walk = new long[walkLength];
+            walk[0] = startNode;
+            walk[1] = randomNeighbour(startNode);
 
-            public ProbabilityDistributionComputer(
-                Graph threadLocalGraph,
-                int degree,
-                long currentNodeId,
-                long previousNodeId,
-                double returnParam,
-                double inOutParam
-            ) {
-                this.threadLocalGraph = threadLocalGraph;
-                this.currentNodeId = currentNodeId;
-                this.previousNodeId = previousNodeId;
-                this.returnParam = returnParam;
-                this.inOutParam = inOutParam;
-                probabilities = new double[degree];
-                probSum = 0;
-                index = 0;
-            }
-
-            @Override
-            public boolean accept(long start, long end, double weight) {
-                long neighbourId = start == currentNodeId ? end : start;
-
-                double probability;
-
-                if (neighbourId == previousNodeId) {
-                    // node is previous node
-                    probability = 1D / returnParam;
-                } else if (threadLocalGraph.exists(previousNodeId, neighbourId)) {
-                    // node is also adjacent to previous node --> distance to previous node is 1
-                    probability = 1D;
+            for (int i = 2; i < walkLength; i++) {
+                var nextNode = walkOneStep(walk[i - 2], walk[i - 1]);
+                if (nextNode == -1) {
+                    var shortenedWalk = new long[i];
+                    System.arraycopy(walk, 0, shortenedWalk, 0, shortenedWalk.length);
+                    walk = shortenedWalk;
+                    break;
                 } else {
-                    // node is not adjacent to previous node --> distance to previous node is 2
-                    probability = 1D / inOutParam;
+                    walk[i] = nextNode;
+                }
+            }
+            return walk;
+        }
+
+        private long walkOneStep(long previousNode, long currentNode) {
+            var currentNodeDegree = graph.degree(currentNode);
+
+            if (currentNodeDegree == 0) {
+                // We have arrived at a node with no outgoing neighbors, we can stop walking
+                return -1;
+            } else if (currentNodeDegree == 1) {
+                // This node only has one neighbour, no need to test
+                return randomNeighbour(currentNode);
+            } else {
+                var tries = 0;
+                while (tries < MAX_TRIES) {
+                    var newNode = randomNeighbour(currentNode);
+                    var r = random.nextDouble();
+
+                    if (newNode == previousNode) {
+                        if (r < normalizedReturnProbability) {
+                            return newNode;
+                        }
+                    } else if (isNeighbour(previousNode, newNode)) {
+                        if (r < normalizedSameDistanceProbability) {
+                            return newNode;
+                        }
+                    } else if (r < normalizedInOutProbability) {
+                        return newNode;
+                    }
+                    tries++;
                 }
 
-                probability *= weight;
-                probabilities[index] = probability;
-                probSum += probability;
-                index++;
-                return true;
-            }
-
-            private double[] probabilities() {
-                return normalizeDistribution(probabilities, probSum);
+                // We did not find a valid neighbour in `MAX_TRIES` tries, so we just pick a random one.
+                return randomNeighbour(currentNode);
             }
         }
+
+        private long randomNeighbour(long node) {
+            var cumulativeWeight = cumulativeWeightSupplier.forNode(node);
+            var randomWeight = cumulativeWeight * random.nextDouble();
+
+            currentWeight.setValue(0.0);
+            randomNeighbour.setValue(-1);
+
+            graph.forEachRelationship(node, 1.0D, (source, target, weight) -> {
+                if (randomWeight <= currentWeight.addAndGet(weight)) {
+                    randomNeighbour.setValue(target);
+                    return false;
+                }
+                return true;
+            });
+
+            return randomNeighbour.getValue();
+        }
+
+        private boolean isNeighbour(long source, long target) {
+            return graph.exists(source, target);
+        }
+
+        private void flushBuffer() {
+            for (int i = 0; i < bufferPosition.getValue(); i++) {
+                try {
+                    walks.put(buffer[i]);
+                } catch (InterruptedException e) {
+
+                }
+            }
+            bufferPosition.setValue(0);
+        }
+    }
+
+    @FunctionalInterface
+    interface NextNodeSupplier {
+        long nextNode();
+    }
+
+    @FunctionalInterface
+    interface CumulativeWeightSupplier {
+        double forNode(long nodeId);
     }
 }
