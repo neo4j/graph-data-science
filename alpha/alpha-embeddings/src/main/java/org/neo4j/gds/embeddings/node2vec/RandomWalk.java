@@ -239,6 +239,9 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             for (int i = 2; i < walkLength; i++) {
                 var nextNode = walkOneStep(walk[i - 2], walk[i - 1]);
                 if (nextNode == -1) {
+                    var shortenedWalk = new long[i];
+                    System.arraycopy(walk, 0, shortenedWalk, 0, shortenedWalk.length);
+                    walk = shortenedWalk;
                     break;
                 } else {
                     walk[i] = nextNode;

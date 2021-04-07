@@ -75,7 +75,7 @@ public class PositiveSampleProducer {
         nextContextWord();
     }
 
-    public long currentWalkIndex() {
+    long currentWalkIndex() {
         return walkIndex;
     }
 
