@@ -69,7 +69,7 @@ class AppendixAProcedureListingTest extends BaseProcTest {
         registeredProcedures.add("gds.list");
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 261;
+        int expectedCount = 262;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),

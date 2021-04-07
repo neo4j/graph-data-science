@@ -32,11 +32,7 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-import static org.hamcrest.Matchers.isA;
-import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictProcTestUtil.addModelWithFeatures;
 
 class NodeClassificationPredictStreamProcTest extends BaseProcTest {
