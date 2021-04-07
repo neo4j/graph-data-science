@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
 import java.io.IOException;
@@ -35,7 +37,14 @@ class RelationshipLineChunkTest {
         var line = "0,1,19.19,42,1;9,1.3;3.7";
         var header = RelationshipFileHeader.of(":START_ID,:END_ID,foo:double,bar:long,baz:long[],meh:double[]", "REL");
 
-        var lineChunk = new FileInput.RelationshipLineChunk();
+        var lineChunk = new FileInput.RelationshipLineChunk(
+            Map.of(
+                "foo", RelationshipPropertySchema.of("foo", ValueType.DOUBLE),
+                "bar", RelationshipPropertySchema.of("bar", ValueType.DOUBLE),
+                "baz", RelationshipPropertySchema.of("baz", ValueType.LONG_ARRAY),
+                "meh", RelationshipPropertySchema.of("meh", ValueType.DOUBLE_ARRAY)
+            )
+        );
         var visitor = new TestRelationshipVisitor();
         lineChunk.visitLine(line, header, visitor);
 

@@ -50,9 +50,9 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue) {
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
             if (csvValue.isBlank()) {
-                return fallbackValue().longValue();
+                return fallbackValue.longValue();
             }
             return Long.parseLong(csvValue);
         }
@@ -82,9 +82,9 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue) {
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
             if (csvValue.isBlank()) {
-                return fallbackValue().doubleValue();
+                return fallbackValue.doubleValue();
             }
             return Double.parseDouble(csvValue);
         }
@@ -115,9 +115,9 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue) {
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
             if (csvValue.isBlank()) {
-                return fallbackValue().doubleArrayValue();
+                return fallbackValue.doubleArrayValue();
             }
             String[] arrayElements = csvValue.split(";");
             double[] doubleArray = new double[arrayElements.length];
@@ -157,9 +157,9 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue) {
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
             if (csvValue.isBlank()) {
-                return fallbackValue().floatArrayValue();
+                return fallbackValue.floatArrayValue();
             }
             String[] arrayElements = csvValue.split(";");
             float[] floatArray = new float[arrayElements.length];
@@ -195,9 +195,9 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue) {
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
             if (csvValue.isBlank()) {
-                return fallbackValue().longArrayValue();
+                return fallbackValue.longArrayValue();
             }
             String[] arrayElements = csvValue.split(";");
             long[] longArray = new long[arrayElements.length];
@@ -232,7 +232,7 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue) {
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
             throw new UnsupportedOperationException("Unsupported conversion from CSV value to UNKNOWN");
         }
 
@@ -248,9 +248,13 @@ public enum ValueType {
 
     public abstract String csvValue(Object value);
 
-    public abstract Object fromCsvValue(String csvValue);
+    public abstract Object fromCsvValue(String csvValue, DefaultValue fallbackValue);
 
     public abstract DefaultValue fallbackValue();
+
+    public Object fromCsvValue(String csvValue) {
+        return fromCsvValue(csvValue, fallbackValue());
+    }
 
     public static ValueType fromNumberType(NumberType nt) {
         switch (nt) {
