@@ -19,8 +19,12 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 
+import java.util.Map;
 import java.util.Set;
 
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
@@ -28,9 +32,14 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisi
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-public interface RelationshipFileHeader {
+public interface RelationshipFileHeader extends FileHeader<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
     Set<HeaderProperty> propertyMappings();
     String relationshipType();
+
+    @Override
+    default Map<String, RelationshipPropertySchema> schemaForIdentifier(RelationshipSchema schema) {
+        return schema.filter(Set.of(RelationshipType.of(relationshipType()))).unionProperties();
+    }
 
     static RelationshipFileHeader of(String headerLine, String relationshipType) {
         var builder = ImmutableRelationshipFileHeader.builder();

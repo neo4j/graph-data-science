@@ -28,8 +28,6 @@ import org.neo4j.values.storable.Values;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-
 public class GraphStoreNodeVisitor extends NodeVisitor {
 
     private final NodesBuilder nodesBuilder;
@@ -47,28 +45,7 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
             if(NEO_ID_KEY.equals(key)) {
                 return;
             }
-            Value val;
-            switch (type) {
-                case LONG:
-                    val = Values.longValue(Long.parseLong(value.toString()));
-                break;
-                case DOUBLE:
-                    val = Values.doubleValue(Double.parseDouble(value.toString()));
-                break;
-                case LONG_ARRAY:
-                    val = Values.longArray((long[]) value);
-                break;
-                case DOUBLE_ARRAY:
-                    val = Values.doubleArray((double[]) value);
-                break;
-                case FLOAT_ARRAY:
-                    val = Values.floatArray((float[]) value);
-                break;
-                default:
-                    throw new IllegalArgumentException(formatWithLocale("Value of type %s is not supported", type));
-            }
-
-            props.put(key, val);
+            props.put(key, Values.of(value));
         });
 
         nodesBuilder.addNode(id(), props, nodeLabels);

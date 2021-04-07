@@ -44,7 +44,7 @@ class CsvToGraphStoreExporterTest {
 
         var expectedGraph = TestSupport.fromGdl(
                                             "  (n0:A {prop1: 21})" +
-                                            ", (n1:A {prop1: 22})" +
+                                            ", (n1:A {prop1: 42})" +
                                             ", (n2:A {prop1: 23})" +
                                             ", (n3:A {prop1: 24})" +
                                             ", (:A { prop1: 25})" +

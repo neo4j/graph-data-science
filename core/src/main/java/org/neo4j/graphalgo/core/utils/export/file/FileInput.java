@@ -20,7 +20,13 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.graphalgo.ElementIdentifier;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.schema.ElementSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
+import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
@@ -66,7 +72,7 @@ public final class FileInput implements CompatInput {
             entry -> CsvImportUtil.parseNodeHeader(entry.getKey()),
             Map.Entry::getValue
         ));
-        return () -> new NodeImporter(headerToDataFilesMapping);
+        return () -> new NodeImporter(headerToDataFilesMapping, nodeSchema);
     }
 
     @Override
@@ -76,7 +82,7 @@ public final class FileInput implements CompatInput {
             entry -> CsvImportUtil.parseRelationshipHeader(entry.getKey()),
             Map.Entry::getValue
         ));
-        return () -> new RelationshipImporter(headerToDataFilesMapping);
+        return () -> new RelationshipImporter(headerToDataFilesMapping, relationshipSchema);
     }
 
     @Override
@@ -106,12 +112,21 @@ public final class FileInput implements CompatInput {
         return relationshipSchema;
     }
 
-    abstract static class FileImporter<HEADER> implements InputIterator {
+    abstract static class FileImporter<
+        HEADER extends FileHeader<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
+        SCHEMA extends ElementSchema<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
+        IDENTIFIER extends ElementIdentifier,
+        PROPERTY_SCHEMA extends PropertySchema> implements InputIterator {
 
         private final MappedListIterator<HEADER, Path> entryIterator;
+        final SCHEMA elementSchema;
 
-        FileImporter(Map<HEADER, List<Path>> headerToDataFilesMapping) {
+        FileImporter(
+            Map<HEADER, List<Path>> headerToDataFilesMapping,
+            SCHEMA elementSchema
+        ) {
             this.entryIterator = new MappedListIterator<>(headerToDataFilesMapping);
+            this.elementSchema = elementSchema;
         }
 
         @Override
@@ -120,7 +135,7 @@ public final class FileInput implements CompatInput {
                 Pair<HEADER, Path> entry = entryIterator.next();
 
                 assert chunk instanceof LineChunk;
-                ((LineChunk<HEADER>) chunk).initialize(entry.getKey(), entry.getValue());
+                ((LineChunk<HEADER, SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>) chunk).initialize(entry.getKey(), entry.getValue());
                 return true;
             }
             return false;
@@ -131,36 +146,58 @@ public final class FileInput implements CompatInput {
         }
     }
 
-    static class NodeImporter extends FileImporter<NodeFileHeader> {
+    static class NodeImporter extends FileImporter<NodeFileHeader, NodeSchema, NodeLabel, PropertySchema> {
 
-        NodeImporter(Map<NodeFileHeader, List<Path>> headerToDataFilesMapping) {
-            super(headerToDataFilesMapping);
+        NodeImporter(
+            Map<NodeFileHeader, List<Path>> headerToDataFilesMapping,
+            NodeSchema nodeSchema
+        ) {
+            super(headerToDataFilesMapping, nodeSchema);
         }
 
         @Override
         public InputChunk newChunk() {
-            return new NodeLineChunk();
+            return new NodeLineChunk(elementSchema);
         }
     }
 
-    static class RelationshipImporter extends FileImporter<RelationshipFileHeader> {
+    static class RelationshipImporter extends FileImporter<RelationshipFileHeader, RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
 
-        RelationshipImporter(Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping) {
-            super(headerToDataFilesMapping);
+        RelationshipImporter(
+            Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping,
+            RelationshipSchema relationshipSchema
+        ) {
+            super(headerToDataFilesMapping, relationshipSchema);
         }
 
         @Override
         public InputChunk newChunk() {
-            return new RelationshipLineChunk();
+            return new RelationshipLineChunk(elementSchema);
         }
     }
 
-    abstract static class LineChunk<HEADER> implements InputChunk {
+    abstract static class LineChunk<
+        HEADER extends FileHeader<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
+        SCHEMA extends ElementSchema<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
+        IDENTIFIER extends ElementIdentifier,
+        PROPERTY_SCHEMA extends PropertySchema> implements InputChunk {
+
+        private final SCHEMA schema;
+
         HEADER header;
         Iterator<String> lineIterator;
+        Map<String, PROPERTY_SCHEMA> propertySchemas;
 
-        void initialize(HEADER header, Path path) throws IOException {
+        LineChunk(SCHEMA schema) {
+            this.schema = schema;
+        }
+
+        void initialize(
+            HEADER header,
+            Path path
+        ) throws IOException {
             this.header = header;
+            this.propertySchemas = header.schemaForIdentifier(schema);
             this.lineIterator = Files.lines(path).iterator();
         }
 
@@ -180,12 +217,16 @@ public final class FileInput implements CompatInput {
         abstract void visitLine(String line, HEADER header, InputEntityVisitor visitor) throws IOException;
     }
 
-    static class NodeLineChunk extends LineChunk<NodeFileHeader> {
+    static class NodeLineChunk extends LineChunk<NodeFileHeader, NodeSchema, NodeLabel, PropertySchema> {
+
+        NodeLineChunk(NodeSchema nodeSchema) {
+            super(nodeSchema);
+        }
 
         @Override
         void visitLine(String line, NodeFileHeader header, InputEntityVisitor visitor) throws IOException {
 
-            var lineValues = line.split(",");
+            var lineValues = line.split(",", -1);
 
             visitor.labels(header.nodeLabels());
 
@@ -195,7 +236,10 @@ public final class FileInput implements CompatInput {
                     if (NEO_ID_KEY.equals(property.propertyKey())) {
                         visitor.id(Long.parseLong(lineValues[property.position()]));
                     } else {
-                        visitor.property(property.propertyKey(), lineValues[property.position()]);
+                        visitor.property(
+                            property.propertyKey(),
+                            property.valueType().fromCsvValue(lineValues[property.position()], propertySchemas.get(property.propertyKey()).defaultValue())
+                        );
                     }
                 });
 
@@ -208,9 +252,10 @@ public final class FileInput implements CompatInput {
         }
     }
 
-    static class RelationshipLineChunk extends LineChunk<RelationshipFileHeader> {
+    static class RelationshipLineChunk extends LineChunk<RelationshipFileHeader, RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
 
-        RelationshipLineChunk() {
+        public RelationshipLineChunk(RelationshipSchema relationshipSchema) {
+            super(relationshipSchema);
         }
 
         @Override
@@ -223,13 +268,10 @@ public final class FileInput implements CompatInput {
 
             header
                 .propertyMappings()
-                // the property values are strings currently which is not the best practice
-                // when it comes to the visitor pattern. Now the visitor that reads this property
-                // has to know that we pass a string.
-                // However the "clean" solution would be to parse the string to the actual value
-                // here and pass it in the property function.
-                // The same applies to node properties. We will cover this in a follow up pr
-                .forEach(property -> visitor.property(property.propertyKey(), lineValues[property.position()]));
+                .forEach(property -> visitor.property(
+                    property.propertyKey(),
+                    property.valueType().fromCsvValue(lineValues[property.position()], propertySchemas.get(property.propertyKey()).defaultValue())
+                ));
 
             visitor.endOfEntity();
         }

@@ -50,6 +50,14 @@ public enum ValueType {
         }
 
         @Override
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
+            if (csvValue.isBlank()) {
+                return fallbackValue.longValue();
+            }
+            return Long.parseLong(csvValue);
+        }
+
+        @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.forLong();
         }
@@ -71,6 +79,14 @@ public enum ValueType {
                 return "";
             }
             return value.toString();
+        }
+
+        @Override
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
+            if (csvValue.isBlank()) {
+                return fallbackValue.doubleValue();
+            }
+            return Double.parseDouble(csvValue);
         }
 
         @Override
@@ -96,6 +112,19 @@ public enum ValueType {
             }
             var doubleArray = (double[]) value;
             return Arrays.stream(doubleArray).mapToObj(Double::toString).collect(Collectors.joining(";"));
+        }
+
+        @Override
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
+            if (csvValue.isBlank()) {
+                return fallbackValue.doubleArrayValue();
+            }
+            String[] arrayElements = csvValue.split(";");
+            double[] doubleArray = new double[arrayElements.length];
+            for (int i = 0; i < arrayElements.length; i++) {
+                doubleArray[i] = Double.parseDouble(arrayElements[i]);
+            }
+            return doubleArray;
         }
 
         @Override
@@ -128,6 +157,19 @@ public enum ValueType {
         }
 
         @Override
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
+            if (csvValue.isBlank()) {
+                return fallbackValue.floatArrayValue();
+            }
+            String[] arrayElements = csvValue.split(";");
+            float[] floatArray = new float[arrayElements.length];
+            for (int i = 0; i < arrayElements.length; i++) {
+                floatArray[i] = Float.parseFloat(arrayElements[i]);
+            }
+            return floatArray;
+        }
+
+        @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.forFloatArray();
         }
@@ -150,6 +192,19 @@ public enum ValueType {
             }
             var longArray = (long[]) value;
             return Arrays.stream(longArray).mapToObj(Long::toString).collect(Collectors.joining(";"));
+        }
+
+        @Override
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
+            if (csvValue.isBlank()) {
+                return fallbackValue.longArrayValue();
+            }
+            String[] arrayElements = csvValue.split(";");
+            long[] longArray = new long[arrayElements.length];
+            for (int i = 0; i < arrayElements.length; i++) {
+                longArray[i] = Long.parseLong(arrayElements[i]);
+            }
+            return longArray;
         }
 
         @Override
@@ -177,6 +232,11 @@ public enum ValueType {
         }
 
         @Override
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
+            throw new UnsupportedOperationException("Unsupported conversion from CSV value to UNKNOWN");
+        }
+
+        @Override
         public DefaultValue fallbackValue() {
             return DefaultValue.DEFAULT;
         }
@@ -188,7 +248,13 @@ public enum ValueType {
 
     public abstract String csvValue(Object value);
 
+    public abstract Object fromCsvValue(String csvValue, DefaultValue fallbackValue);
+
     public abstract DefaultValue fallbackValue();
+
+    public Object fromCsvValue(String csvValue) {
+        return fromCsvValue(csvValue, fallbackValue());
+    }
 
     public static ValueType fromNumberType(NumberType nt) {
         switch (nt) {

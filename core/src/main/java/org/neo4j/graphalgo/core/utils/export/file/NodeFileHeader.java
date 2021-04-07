@@ -19,17 +19,29 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
-public interface NodeFileHeader {
+public interface NodeFileHeader extends FileHeader<NodeSchema, NodeLabel, PropertySchema> {
     Set<HeaderProperty> propertyMappings();
     String[] nodeLabels();
+
+    @Override
+    default Map<String, PropertySchema> schemaForIdentifier(NodeSchema schema) {
+        Set<NodeLabel> nodeLabels = Arrays.stream(nodeLabels()).map(NodeLabel::of).collect(Collectors.toSet());
+        return schema.filter(nodeLabels).unionProperties();
+    }
 
     static NodeFileHeader of(String headerLine, String[] nodeLabels) {
         var builder = ImmutableNodeFileHeader.builder();
