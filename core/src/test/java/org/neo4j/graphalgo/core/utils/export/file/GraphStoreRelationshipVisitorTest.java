@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
-
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
@@ -95,7 +94,7 @@ class GraphStoreRelationshipVisitorTest {
             .concurrency(1)
             .nodes(multiplePropsGraph)
             .tracker(AllocationTracker.empty());
-        Map<String, RelationshipsBuilder> relationshipBuildersByType = new HashMap<>();
+        ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipVisitor = relationshipVisitorBuilder
             .withRelationshipBuilderBuilder(relationshipsBuilderBuilder)
             .withRelationshipSchema(multiplePropsGraph.schema().relationshipSchema())
