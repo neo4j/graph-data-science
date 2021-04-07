@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.export.file.csv.estimation.GraphStoreToCsv
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -96,7 +97,33 @@ public class GraphStoreExportProc extends BaseProc {
         var exportConfig = GraphStoreToFileExporterConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
 
-        var result = runWithExceptionLogging(
+        return Stream.of(runGraphStoreExportToCsv(graphName, exportConfig));
+    }
+
+    @Internal
+    @Procedure(name = "gds.graphs.persist", mode = READ)
+    @Description("Persists a graph store to disk.")
+    public Stream<FileExportResult> persist(
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(configuration);
+
+        return runWithExceptionLogging(
+            "GraphStore persistance failed",
+            () -> GraphStoreCatalog.getGraphStores(username(), databaseId()).keySet().stream().map(createConfig -> {
+                var exportConfig = cypherConfig
+                    .withBoolean("includeMetaData", true)
+                    .withString("exportName", createConfig.graphName());
+
+                var config = GraphStoreToFileExporterConfig.of(username(), exportConfig);
+
+                return runGraphStoreExportToCsv(createConfig.graphName(), config);
+            })
+        );
+    }
+
+    private FileExportResult runGraphStoreExportToCsv(String graphName, GraphStoreToFileExporterConfig exportConfig) {
+        return runWithExceptionLogging(
             "CSV export failed", () -> {
                 var exportPath = getExportPath(exportConfig);
 
@@ -120,8 +147,6 @@ public class GraphStoreExportProc extends BaseProc {
                 );
             }
         );
-
-        return Stream.of(result);
     }
 
     @Procedure(name = "gds.beta.graph.export.csv.estimate", mode = READ)
