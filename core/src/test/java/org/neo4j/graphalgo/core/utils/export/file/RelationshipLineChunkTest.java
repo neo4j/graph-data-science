@@ -20,8 +20,10 @@
 package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
+import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
 import java.io.IOException;
@@ -37,15 +39,15 @@ class RelationshipLineChunkTest {
         var line = "0,1,19.19,42,1;9,1.3;3.7";
         var header = RelationshipFileHeader.of(":START_ID,:END_ID,foo:double,bar:long,baz:long[],meh:double[]", "REL");
 
-        var lineChunk = new FileInput.RelationshipLineChunk(
-            Map.of(
-                "foo", RelationshipPropertySchema.of("foo", ValueType.DOUBLE),
-                "bar", RelationshipPropertySchema.of("bar", ValueType.DOUBLE),
-                "baz", RelationshipPropertySchema.of("baz", ValueType.LONG_ARRAY),
-                "meh", RelationshipPropertySchema.of("meh", ValueType.DOUBLE_ARRAY)
-            )
-        );
+        var relationshipSchema = RelationshipSchema.builder()
+            .addProperty(RelationshipType.of("REL"), "foo", RelationshipPropertySchema.of("foo", ValueType.DOUBLE))
+            .addProperty(RelationshipType.of("REL"), "bar", RelationshipPropertySchema.of("bar", ValueType.DOUBLE))
+            .addProperty(RelationshipType.of("REL"), "baz", RelationshipPropertySchema.of("baz", ValueType.LONG_ARRAY))
+            .addProperty(RelationshipType.of("REL"), "meh", RelationshipPropertySchema.of("meh", ValueType.DOUBLE_ARRAY))
+            .build();
+        var lineChunk = new FileInput.RelationshipLineChunk(relationshipSchema);
         var visitor = new TestRelationshipVisitor();
+        lineChunk.propertySchemas = header.schemaForIdentifier(relationshipSchema);
         lineChunk.visitLine(line, header, visitor);
 
         assertThat(visitor.startId).isEqualTo(0);
