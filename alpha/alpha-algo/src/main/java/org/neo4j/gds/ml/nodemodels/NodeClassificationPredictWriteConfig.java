@@ -33,6 +33,15 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface NodeClassificationPredictWriteConfig extends NodeClassificationPredictConfig, WritePropertyConfig {
 
+    @Value.Derived
+    @Configuration.Ignore
+    @Override
+    default boolean includePredictedProbabilities() {
+        return predictedProbabilityProperty().isPresent();
+    }
+
+    Optional<String> predictedProbabilityProperty();
+
     @Value.Default
     default int batchSize() {
         return 100;

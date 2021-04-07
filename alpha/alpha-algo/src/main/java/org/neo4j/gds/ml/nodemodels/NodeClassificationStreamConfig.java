@@ -22,21 +22,33 @@ package org.neo4j.gds.ml.nodemodels;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPredictConfig extends AlgoBaseConfig, ModelConfig {
-
-    boolean includePredictedProbabilities();
+public interface NodeClassificationStreamConfig extends NodeClassificationPredictConfig {
 
     @Value.Default
-    default int batchSize() {
-        return 100;
+    default boolean includePredictedProbabilities() {
+        return false;
+    }
+
+    static NodeClassificationStreamConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper userInput
+    ) {
+        return new NodeClassificationStreamConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            userInput
+        );
     }
 
 }

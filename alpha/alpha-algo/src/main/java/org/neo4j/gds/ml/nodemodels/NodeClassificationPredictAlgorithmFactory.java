@@ -64,7 +64,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
             graph,
             configuration.batchSize(),
             configuration.concurrency(),
-            configuration.predictedProbabilityProperty().isPresent(),
+            configuration.includePredictedProbabilities(),
             tracker,
             progressLogger
         );
