@@ -51,7 +51,7 @@ final class Mean implements Scaler {
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
         var min = tasks.stream().mapToDouble(ComputeAggregates::min).min().orElse(Double.MAX_VALUE);
-        var max = tasks.stream().mapToDouble(ComputeAggregates::max).max().orElse(Double.MIN_VALUE);
+        var max = tasks.stream().mapToDouble(ComputeAggregates::max).max().orElse(-Double.MAX_VALUE);
         var sum = tasks.stream().mapToDouble(ComputeAggregates::sum).sum();
 
         var maxMinDiff = max - min;
@@ -82,7 +82,7 @@ final class Mean implements Scaler {
             this.length = length;
             this.properties = property;
             this.min = Double.MAX_VALUE;
-            this.max = Double.MIN_VALUE;
+            this.max = -Double.MAX_VALUE;
             this.sum = 0D;
         }
 
