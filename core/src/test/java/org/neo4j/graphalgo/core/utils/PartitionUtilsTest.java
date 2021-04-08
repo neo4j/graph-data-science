@@ -41,27 +41,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class PartitionUtilsTest {
 
-    public class TestTask implements Runnable {
-
-        public final long start;
-        public final long nodeCount;
-
-        TestTask(long start, long nodeCount) {
-            this.start = start;
-            this.nodeCount = nodeCount;
-        }
-
-        @Override
-        public void run() {
-
-        }
-
-        @Override
-        public String toString() {
-            return formatWithLocale("(%d, %d)", start, nodeCount);
-        }
-    }
-
     @Test
     void testAlignment() {
         long alignTo = 64;
@@ -79,6 +58,26 @@ class PartitionUtilsTest {
             .map(partition -> new TestTask(partition.startNode(), partition.nodeCount()))
             .collect(Collectors.toList());
 
+        assertTaskRanges(tasks);
+    }
+
+    @Test
+    void testAlignmentWithTaskSupplier() {
+        long alignTo = 64;
+        long nodeCount = 200;
+        int concurrency = 2;
+
+        var tasks = PartitionUtils.numberAlignedPartitioning(
+            concurrency,
+            nodeCount,
+            alignTo,
+            partition -> new TestTask(partition.startNode(), partition.nodeCount())
+        );
+
+        assertTaskRanges(tasks);
+    }
+
+    private void assertTaskRanges(List<TestTask> tasks) {
         assertEquals(2, tasks.size());
         assertTrue(
             tasks.stream().anyMatch((t) -> t.start == 0 && t.nodeCount == 128),
@@ -152,6 +151,27 @@ class PartitionUtilsTest {
         assertEquals(1, partitions.size());
         assertEquals(0, partitions.get(0).startNode());
         assertEquals(3, partitions.get(0).nodeCount());
+    }
+
+    static class TestTask implements Runnable {
+
+        public final long start;
+        public final long nodeCount;
+
+        TestTask(long start, long nodeCount) {
+            this.start = start;
+            this.nodeCount = nodeCount;
+        }
+
+        @Override
+        public void run() {
+
+        }
+
+        @Override
+        public String toString() {
+            return formatWithLocale("(%d, %d)", start, nodeCount);
+        }
     }
 
 }
