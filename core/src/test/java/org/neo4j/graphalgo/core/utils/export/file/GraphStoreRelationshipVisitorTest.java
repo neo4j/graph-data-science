@@ -83,7 +83,7 @@ class GraphStoreRelationshipVisitorTest {
             return true;
         });
 
-        var actualGraph = createGraph(graph, relationshipBuildersByType);
+        var actualGraph = createGraph(graph, relationshipBuildersByType, 4L);
         assertGraphEquals(graph, actualGraph);
     }
 
@@ -108,25 +108,26 @@ class GraphStoreRelationshipVisitorTest {
         relationshipVisitor.property("r", 13.37D);
         relationshipVisitor.endOfEntity();
 
-        var actualGraph = createGraph(multiplePropsGraph, relationshipBuildersByType);
+        var actualGraph = createGraph(multiplePropsGraph, relationshipBuildersByType, 1L);
         assertGraphEquals(multiplePropsGraph, actualGraph);
     }
 
     private Graph createGraph(
-        Graph graph,
-        Map<String, RelationshipsBuilder> relationshipBuildersByType
+        Graph expectedGraph,
+        Map<String, RelationshipsBuilder> relationshipBuildersByType,
+        long expectedImportedRelationshipsCount
     ) {
         var actualRelationships = CsvToGraphStoreExporter.relationshipTopologyAndProperties(
             relationshipBuildersByType,
-            graph.schema().relationshipSchema()
+            expectedGraph.schema().relationshipSchema()
         );
-        assertThat(actualRelationships.importedRelationships()).isEqualTo(4L);
+        assertThat(actualRelationships.importedRelationships()).isEqualTo(expectedImportedRelationshipsCount);
 
         Map<? extends RelationshipType, ? extends RelationshipPropertyStore> propertyStores = actualRelationships.properties();
         return new GraphStoreBuilder()
             .relationshipPropertyStores(propertyStores)
             .relationships(actualRelationships.topologies())
-            .nodes(graph)
+            .nodes(expectedGraph)
             .databaseId(TestDatabaseIdRepository.randomNamedDatabaseId())
             .concurrency(1)
             .tracker(AllocationTracker.empty())
