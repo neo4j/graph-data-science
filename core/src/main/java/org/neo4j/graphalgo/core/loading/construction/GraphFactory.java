@@ -19,8 +19,12 @@
  */
 package org.neo4j.graphalgo.core.loading.construction;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.ObjectIntScatterMap;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
@@ -42,22 +46,32 @@ import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.AdjacencyBuilder;
 import org.neo4j.graphalgo.core.loading.AdjacencyListWithPropertiesBuilder;
 import org.neo4j.graphalgo.core.loading.IdMapImplementations;
+import org.neo4j.graphalgo.core.loading.IdMappingAllocator;
 import org.neo4j.graphalgo.core.loading.ImportSizing;
+import org.neo4j.graphalgo.core.loading.InternalBitIdMappingBuilder;
+import org.neo4j.graphalgo.core.loading.InternalHugeIdMappingBuilder;
+import org.neo4j.graphalgo.core.loading.InternalIdMappingBuilder;
+import org.neo4j.graphalgo.core.loading.InternalSequentialBitIdMappingBuilder;
+import org.neo4j.graphalgo.core.loading.NodeMappingBuilder;
 import org.neo4j.graphalgo.core.loading.RecordsBatchBuffer;
 import org.neo4j.graphalgo.core.loading.RelationshipImporter;
 import org.neo4j.graphalgo.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.graphalgo.core.loading.TransientAdjacencyListBuilder;
+import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.IntStream;
 
+import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_RELATIONSHIP_TYPE;
 
 @Value.Style(
@@ -75,14 +89,15 @@ public final class GraphFactory {
         return new NodesBuilderBuilder();
     }
 
-    public static NodesBuilderFromSchemaBuilder initNodesBuilder(NodeSchema nodeSchema) {
-        return new NodesBuilderFromSchemaBuilder(nodeSchema);
+    public static NodesBuilderBuilder initNodesBuilder(NodeSchema nodeSchema) {
+        return new NodesBuilderBuilder().nodeSchema(nodeSchema);
     }
 
     @Builder.Factory
     static NodesBuilder nodesBuilder(
         long maxOriginalId,
         Optional<Long> nodeCount,
+        Optional<NodeSchema> nodeSchema,
         Optional<Boolean> useBitIdMap,
         Optional<Boolean> hasDisjointPartitions,
         Optional<Boolean> hasLabelInformation,
@@ -92,40 +107,107 @@ public final class GraphFactory {
     ) {
         boolean _useBitIdMap = useBitIdMap.orElse(IdMapImplementations.useBitIdMap());
         boolean _hasDisjointPartitions = hasDisjointPartitions.orElse(false);
-        boolean _hasLabelInformation = hasLabelInformation.orElse(false);
+        boolean _hasLabelInformation = nodeSchema
+            .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
+            .or(() -> hasLabelInformation).orElse(false);
+        int _concurrency = concurrency.orElse(1);
 
-        return NodesBuilder.withoutSchema(
+        NodeMappingBuilder.Capturing nodeMappingBuilder;
+        InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder;
+
+        if (_useBitIdMap && _hasDisjointPartitions) {
+            var idMappingBuilder = InternalBitIdMappingBuilder.of(maxOriginalId + 1, tracker);
+            nodeMappingBuilder = IdMapImplementations.bitIdMapBuilder(idMappingBuilder);
+            internalIdMappingBuilder = idMappingBuilder;
+        } else if (_useBitIdMap && !_hasLabelInformation) {
+            var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1, tracker);
+            nodeMappingBuilder = IdMapImplementations.sequentialBitIdMapBuilder(idMappingBuilder);
+            internalIdMappingBuilder = idMappingBuilder;
+        } else {
+            var idMappingBuilder = InternalHugeIdMappingBuilder.of(maxOriginalId + 1, tracker);
+            nodeMappingBuilder = IdMapImplementations.hugeIdMapBuilder(idMappingBuilder);
+            internalIdMappingBuilder = idMappingBuilder;
+        }
+
+        return nodeSchema.map(schema -> fromSchema(
             maxOriginalId,
-            nodeCount.orElse(-1L),
-            _useBitIdMap,
-            _hasDisjointPartitions,
+            nodeCount.orElseThrow(() -> new IllegalArgumentException("Required parameter [nodeCount] is missing")),
+            nodeMappingBuilder,
+            internalIdMappingBuilder,
+            _concurrency,
+            schema,
             _hasLabelInformation,
-            hasProperties.orElse(false),
-            concurrency.orElse(1),
             tracker
-        );
+        )).orElseGet(() -> {
+            boolean _hasProperties = hasProperties.orElse(false);
+            long _nodeCount = nodeCount.orElse(-1L);
+
+            if (_hasProperties && _nodeCount <= 0) {
+                throw new IllegalArgumentException("NodesBuilder with properties requires a node count greater than 0");
+            }
+
+            return new NodesBuilder(
+                maxOriginalId,
+                _nodeCount,
+                _concurrency,
+                new ObjectIntScatterMap<>(),
+                new ConcurrentHashMap<>(),
+                new IntObjectHashMap<>(),
+                new IntObjectHashMap<>(),
+                nodeMappingBuilder,
+                internalIdMappingBuilder,
+                _hasLabelInformation,
+                _hasProperties,
+                tracker
+            );
+        });
     }
 
-    @Builder.Factory
-    static NodesBuilder nodesBuilderFromSchema(
+    private static NodesBuilder fromSchema(
         long maxOriginalId,
         long nodeCount,
-        Optional<Boolean> useBitIdMap,
-        Optional<Boolean> hasDisjointPartitions,
-        Optional<Integer> concurrency,
-        @Builder.Parameter NodeSchema nodeSchema,
+        NodeMappingBuilder.Capturing nodeMappingBuilder,
+        InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder,
+        int concurrency,
+        NodeSchema nodeSchema,
+        boolean hasLabelInformation,
         AllocationTracker tracker
     ) {
-        boolean _useBitIdMap = useBitIdMap.orElse(IdMapImplementations.useBitIdMap());
-        boolean _hasDisjointPartitions = hasDisjointPartitions.orElse(false);
+        var nodeLabels = nodeSchema.availableLabels();
 
-        return NodesBuilder.fromSchema(
+        var elementIdentifierLabelTokenMapping = new ObjectIntScatterMap<NodeLabel>();
+        var labelTokenNodeLabelMapping = new IntObjectHashMap<List<NodeLabel>>();
+        var builderByLabelTokenAndPropertyToken = new IntObjectHashMap<Map<String, NodePropertiesFromStoreBuilder>>();
+
+        var labelTokenCounter = new MutableInt(0);
+        nodeLabels.forEach(nodeLabel -> {
+            int labelToken = nodeLabel == NodeLabel.ALL_NODES
+                ? ANY_LABEL
+                : labelTokenCounter.getAndIncrement();
+
+            elementIdentifierLabelTokenMapping.put(nodeLabel, labelToken);
+            labelTokenNodeLabelMapping.put(labelToken, List.of(nodeLabel));
+            builderByLabelTokenAndPropertyToken.put(labelToken, new HashMap<>());
+
+            nodeSchema.properties().get(nodeLabel).forEach((propertyKey, propertySchema) ->
+                builderByLabelTokenAndPropertyToken.get(labelToken).put(
+                    propertyKey,
+                    NodePropertiesFromStoreBuilder.of(nodeCount, tracker, propertySchema.defaultValue())
+                ));
+        });
+
+        return new NodesBuilder(
             maxOriginalId,
             nodeCount,
-            _useBitIdMap,
-            _hasDisjointPartitions,
-            concurrency.orElse(1),
-            nodeSchema,
+            concurrency,
+            elementIdentifierLabelTokenMapping,
+            new ConcurrentHashMap<>(nodeLabels.size()),
+            labelTokenNodeLabelMapping,
+            builderByLabelTokenAndPropertyToken,
+            nodeMappingBuilder,
+            internalIdMappingBuilder,
+            hasLabelInformation,
+            nodeSchema.hasProperties(),
             tracker
         );
     }
