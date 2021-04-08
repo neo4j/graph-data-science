@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.UnionNodeProperties;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.CypherNodePropertyImporter;
 import org.neo4j.graphalgo.core.loading.IdMappingAllocator;
@@ -153,14 +152,9 @@ public final class NodesBuilder {
     public NodeMappingAndProperties build() {
         this.threadLocalBuilder.close();
 
-        var graphDimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(maxOriginalId)
-            .highestNeoId(maxOriginalId)
-            .build();
-
         var nodeMapping = this.nodeMappingBuilder.build(
             nodeLabelBitSetMap,
-            graphDimensions,
+            maxOriginalId,
             concurrency,
             tracker
         );

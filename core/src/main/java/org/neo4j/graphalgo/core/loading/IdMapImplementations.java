@@ -53,13 +53,7 @@ public final class IdMapImplementations {
     }
 
     public static NodeMappingBuilder<InternalHugeIdMappingBuilder> hugeIdMapBuilder() {
-        return (idMapBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
-            idMapBuilder,
-            labelInformation,
-            graphDimensions.highestNeoId(),
-            concurrency,
-            tracker
-        );
+        return IdMapBuilder::build;
     }
 
     public static NodeMappingBuilder.Capturing hugeIdMapBuilder(InternalHugeIdMappingBuilder idMapBuilder) {

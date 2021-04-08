@@ -82,7 +82,7 @@ class IdMapTest {
         int length = 1337;
         int highestNeoId = length - 1;
         var hugeIdMappingBuilder = InternalHugeIdMappingBuilder.of(length, AllocationTracker.empty());
-        var hugeIdMap = IdMapBuilder.build(hugeIdMappingBuilder, Map.of(), length, 1, AllocationTracker.empty());
+        var hugeIdMap = IdMapBuilder.build(hugeIdMappingBuilder, Map.of(), highestNeoId, 1, AllocationTracker.empty());
 
         var bitIdMappingBuilder = InternalBitIdMappingBuilder.of(length, AllocationTracker.empty());
         var bitIdMap = IdMapBuilder.build(bitIdMappingBuilder, Map.of(), AllocationTracker.empty());
