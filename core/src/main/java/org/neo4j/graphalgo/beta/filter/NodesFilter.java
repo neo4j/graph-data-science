@@ -73,8 +73,6 @@ final class NodesFilter {
         ProgressLogger progressLogger,
         AllocationTracker allocationTracker
     ) {
-        progressLogger.startSubTask("Nodes").reset(graphStore.nodeCount());
-
         LongToLongFunction originalIdFunction;
         LongToLongFunction internalIdFunction;
 
@@ -87,10 +85,18 @@ final class NodesFilter {
             .tracker(allocationTracker);
 
         if (IdMapImplementations.useBitIdMap()) {
-            var sortedOriginalIds = sortedOriginalIds(graphStore, concurrency, executorService, allocationTracker);
+            progressLogger.startSubTask("Prepare node ids");
+            var sortedOriginalIds = sortOriginalIds(
+                graphStore,
+                concurrency,
+                executorService,
+                progressLogger,
+                allocationTracker
+            );
             originalIdFunction = sortedOriginalIds::get;
             internalIdFunction = (id) -> inputNodes.toMappedNodeId(originalIdFunction.applyAsLong(id));
             nodesBuilderBuilder.hasDisjointPartitions(true);
+            progressLogger.finishSubTask("Prepare node ids");
         } else {
             originalIdFunction = inputNodes::toOriginalNodeId;
             internalIdFunction = (id) -> id;
@@ -105,15 +111,14 @@ final class NodesFilter {
             partition -> new NodeFilterTask(partition, expression, graphStore, originalIdFunction, internalIdFunction, nodesBuilder, progressLogger)
         );
 
+        progressLogger.startSubTask("Nodes").reset(graphStore.nodeCount());
         ParallelUtil.runWithConcurrency(concurrency, nodeFilterTasks, executorService);
+        progressLogger.finishSubTask("Nodes");
 
         var nodeMappingAndProperties = nodesBuilder.build();
         var filteredNodeMapping = nodeMappingAndProperties.nodeMapping();
 
-        progressLogger
-            .finishSubTask("Nodes")
-            .startSubTask("Node properties");
-
+        progressLogger.startSubTask("Node properties");
         var filteredNodePropertyStores = filterNodeProperties(
             filteredNodeMapping,
             graphStore,
@@ -121,7 +126,6 @@ final class NodesFilter {
             concurrency,
             progressLogger
         );
-
         progressLogger.finishSubTask("Node properties");
 
         return ImmutableFilteredNodes.builder()
@@ -130,12 +134,14 @@ final class NodesFilter {
             .build();
     }
 
-    private static HugeLongArray sortedOriginalIds(
+    private static HugeLongArray sortOriginalIds(
         GraphStore graphStore,
         int concurrency,
         ExecutorService executorService,
+        ProgressLogger progressLogger,
         AllocationTracker allocationTracker
     ) {
+        progressLogger.startSubTask("Create id array");
         var originalIds = HugeLongArray.newArray(graphStore.nodeCount(), allocationTracker);
         var tasks = PartitionUtils.rangePartition(
             concurrency,
@@ -146,8 +152,11 @@ final class NodesFilter {
             ))
         );
         ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+        progressLogger.finishSubTask("Create id array");
 
+        progressLogger.startSubTask("Sort id array");
         HugeMergeSort.sort(originalIds, concurrency, allocationTracker);
+        progressLogger.finishSubTask("Sort id array");
 
         return originalIds;
     }

@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CSRGraphStoreUtil;
+import org.neo4j.graphalgo.core.loading.IdMapImplementations;
 import org.neo4j.graphalgo.core.loading.construction.TestMethodRunner;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.gdl.GdlFactory;
@@ -383,6 +384,20 @@ class GraphStoreFilterTest {
                 log,
                 AllocationTracker.empty()
             );
+
+            if (IdMapImplementations.useBitIdMap()) {
+                assertThat(log.getMessages(TestLog.INFO))
+                    // avoid asserting on the thread id
+                    .extracting(removingThreadId())
+                    .contains(
+                        "GraphStore Filter :: Prepare node ids :: Start",
+                        "GraphStore Filter :: Prepare node ids :: Create id array :: Start",
+                        "GraphStore Filter :: Prepare node ids :: Create id array :: Finished",
+                        "GraphStore Filter :: Prepare node ids :: Sort id array :: Start",
+                        "GraphStore Filter :: Prepare node ids :: Sort id array :: Finished",
+                        "GraphStore Filter :: Prepare node ids :: Finished"
+                    );
+            }
 
             assertThat(log.getMessages(TestLog.INFO))
                 // avoid asserting on the thread id
