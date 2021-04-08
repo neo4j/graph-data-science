@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.CypherNodePropertyImporter;
 import org.neo4j.graphalgo.core.loading.IdMapImplementations;
 import org.neo4j.graphalgo.core.loading.IdMappingAllocator;
+import org.neo4j.graphalgo.core.loading.InternalBitIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.InternalHugeIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.InternalIdMappingBuilder;
 import org.neo4j.graphalgo.core.loading.InternalSequentialBitIdMappingBuilder;
@@ -94,6 +95,8 @@ public final class NodesBuilder {
     static NodesBuilder withoutSchema(
         long maxOriginalId,
         long nodeCount,
+        boolean useBitIdMap,
+        boolean hasDisjointPartitions,
         boolean hasLabelInformation,
         boolean hasProperties,
         int concurrency,
@@ -110,6 +113,8 @@ public final class NodesBuilder {
             new ConcurrentHashMap<>(),
             new IntObjectHashMap<>(),
             new IntObjectHashMap<>(),
+            useBitIdMap,
+            hasDisjointPartitions,
             hasLabelInformation,
             hasProperties,
             tracker
@@ -119,6 +124,8 @@ public final class NodesBuilder {
     static NodesBuilder fromSchema(
         long maxOriginalId,
         long nodeCount,
+        boolean useBitIdMap,
+        boolean hasDisjointPartitions,
         int concurrency,
         NodeSchema nodeSchema,
         AllocationTracker tracker
@@ -147,6 +154,7 @@ public final class NodesBuilder {
         });
 
         boolean hasLabelInformation = !(nodeLabels.isEmpty() || (nodeLabels.size() == 1 && nodeLabels.contains(NodeLabel.ALL_NODES)));
+
         return new NodesBuilder(
             maxOriginalId,
             nodeCount,
@@ -155,6 +163,8 @@ public final class NodesBuilder {
             new ConcurrentHashMap<>(nodeLabels.size()),
             labelTokenNodeLabelMapping,
             builderByLabelTokenAndPropertyToken,
+            useBitIdMap,
+            hasDisjointPartitions,
             hasLabelInformation,
             nodeSchema.hasProperties(),
             tracker
@@ -169,6 +179,8 @@ public final class NodesBuilder {
         Map<NodeLabel, HugeAtomicBitSet> nodeLabelBitSetMap,
         IntObjectHashMap<List<NodeLabel>> labelTokenNodeLabelMapping,
         IntObjectMap<Map<String, NodePropertiesFromStoreBuilder>> buildersByLabelTokenAndPropertyKey,
+        boolean useBitIdMap,
+        boolean hasDisjointPartitions,
         boolean hasLabelInformation,
         boolean hasProperties,
         AllocationTracker tracker
@@ -188,9 +200,12 @@ public final class NodesBuilder {
         // this is maxOriginalId + 1, because it is the capacity for the neo -> gds mapping, where we need to
         // be able to include the highest possible id
         InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder;
-        // The sequential bitidmap builder does not support labels that are added *during* the import.
-        // The default bitidmap builder does requires nodes being added in specific batches (super blocks), so it cannot be used here.
-        if (IdMapImplementations.useBitIdMap() && !hasLabelInformation) {
+
+        if (useBitIdMap && hasDisjointPartitions) {
+            var idMappingBuilder = InternalBitIdMappingBuilder.of(maxOriginalId + 1, tracker);
+            this.nodeMappingBuilder = IdMapImplementations.bitIdMapBuilder(idMappingBuilder);
+            internalIdMappingBuilder = idMappingBuilder;
+        } else if (useBitIdMap && !hasLabelInformation) {
             var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1, tracker);
             this.nodeMappingBuilder = IdMapImplementations.sequentialBitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;

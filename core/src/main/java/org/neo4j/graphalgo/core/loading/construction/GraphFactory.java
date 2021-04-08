@@ -41,6 +41,7 @@ import org.neo4j.graphalgo.core.huge.TransientAdjacencyDegrees;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.AdjacencyBuilder;
 import org.neo4j.graphalgo.core.loading.AdjacencyListWithPropertiesBuilder;
+import org.neo4j.graphalgo.core.loading.IdMapImplementations;
 import org.neo4j.graphalgo.core.loading.ImportSizing;
 import org.neo4j.graphalgo.core.loading.RecordsBatchBuffer;
 import org.neo4j.graphalgo.core.loading.RelationshipImporter;
@@ -82,15 +83,23 @@ public final class GraphFactory {
     static NodesBuilder nodesBuilder(
         long maxOriginalId,
         Optional<Long> nodeCount,
+        Optional<Boolean> useBitIdMap,
+        Optional<Boolean> hasDisjointPartitions,
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Integer> concurrency,
         AllocationTracker tracker
     ) {
+        boolean _useBitIdMap = useBitIdMap.orElse(IdMapImplementations.useBitIdMap());
+        boolean _hasDisjointPartitions = hasDisjointPartitions.orElse(false);
+        boolean _hasLabelInformation = hasLabelInformation.orElse(false);
+
         return NodesBuilder.withoutSchema(
             maxOriginalId,
             nodeCount.orElse(-1L),
-            hasLabelInformation.orElse(false),
+            _useBitIdMap,
+            _hasDisjointPartitions,
+            _hasLabelInformation,
             hasProperties.orElse(false),
             concurrency.orElse(1),
             tracker
@@ -101,13 +110,20 @@ public final class GraphFactory {
     static NodesBuilder nodesBuilderFromSchema(
         long maxOriginalId,
         long nodeCount,
+        Optional<Boolean> useBitIdMap,
+        Optional<Boolean> hasDisjointPartitions,
         Optional<Integer> concurrency,
         @Builder.Parameter NodeSchema nodeSchema,
         AllocationTracker tracker
     ) {
+        boolean _useBitIdMap = useBitIdMap.orElse(IdMapImplementations.useBitIdMap());
+        boolean _hasDisjointPartitions = hasDisjointPartitions.orElse(false);
+
         return NodesBuilder.fromSchema(
             maxOriginalId,
             nodeCount,
+            _useBitIdMap,
+            _hasDisjointPartitions,
             concurrency.orElse(1),
             nodeSchema,
             tracker

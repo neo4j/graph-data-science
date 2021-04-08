@@ -203,13 +203,13 @@ class NodesBuilderTest {
                 .addProperty(nodeLabel, "prop2", ValueType.LONG)
                 .build();
             int concurrency = 4;
-            var nodesBuilder = NodesBuilder.fromSchema(
-                nodeCount,
-                nodeCount,
-                concurrency,
-                nodeSchema,
-                AllocationTracker.empty()
-            );
+
+            var nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
+                .nodeCount(nodeCount)
+                .maxOriginalId(nodeCount)
+                .concurrency(concurrency)
+                .tracker(AllocationTracker.empty())
+                .build();
 
             var tasks = ParallelUtil.tasks(
                 concurrency,
@@ -249,14 +249,14 @@ class NodesBuilderTest {
     @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
     void shouldBuildNodesWithPropertiesWithoutNodeSchema(TestMethodRunner runTest) {
         runTest.run(() -> {
-            NodesBuilder nodesBuilder = NodesBuilder.withoutSchema(
-                2,
-                graph.nodeCount(),
-                true,
-                true,
-                1,
-                AllocationTracker.empty()
-            );
+            var nodesBuilder = GraphFactory.initNodesBuilder()
+                .nodeCount(graph.nodeCount())
+                .maxOriginalId(2)
+                .concurrency(1)
+                .hasLabelInformation(true)
+                .hasProperties(true)
+                .tracker(AllocationTracker.empty())
+                .build();
 
             nodesBuilder.addNode(
                 idFunction.of("a"),
