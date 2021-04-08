@@ -84,6 +84,7 @@ class NodeClassificationPredictTest {
         classIdMap.toMapped(1);
         classIdMap.toMapped(100);
         classIdMap.toMapped(2);
+        List<String> featureProperties = List.of("a", "b");
         var modelData = MultiClassNLRData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 1.12730619, -0.84532386, 0.93216654,
@@ -92,15 +93,15 @@ class NodeClassificationPredictTest {
                 -0.63303538, 0.08735695, -3.39978931
             }, 4, 3)))
             .classIdMap(classIdMap)
-            .featureProperties(List.of("a", "b"))
             .build();
 
         var result = new NodeClassificationPredict(
-            new MultiClassNLRPredictor(modelData),
+            new MultiClassNLRPredictor(modelData, featureProperties),
             graph,
             1,
             1,
             true,
+            featureProperties,
             AllocationTracker.empty(),
             TestProgressLogger.NULL_LOGGER
         ).compute();
@@ -142,20 +143,21 @@ class NodeClassificationPredictTest {
     void singleClass() {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(1);
+        List<String> featureProperties = List.of("a", "b");
         var modelData = MultiClassNLRData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 1.12730619, -0.84532386, 0.93216654
             }, 1, 3)))
             .classIdMap(classIdMap)
-            .featureProperties(List.of("a", "b"))
             .build();
 
         var result = new NodeClassificationPredict(
-            new MultiClassNLRPredictor(modelData),
+            new MultiClassNLRPredictor(modelData, featureProperties),
             graph,
             1,
             1,
             true,
+            featureProperties,
             AllocationTracker.empty(),
             TestProgressLogger.NULL_LOGGER
         ).compute();
@@ -208,7 +210,6 @@ class NodeClassificationPredictTest {
                     1.12730619, -0.84532386, 0.93216654
                 }, 1, 3)))
                 .classIdMap(classIdMap)
-                .featureProperties(featureProperties)
                 .build(),
             ImmutableNodeClassificationTrainConfig
                 .builder()

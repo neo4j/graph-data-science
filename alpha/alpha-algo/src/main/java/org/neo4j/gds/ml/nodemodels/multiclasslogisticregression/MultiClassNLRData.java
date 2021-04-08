@@ -36,8 +36,6 @@ public interface MultiClassNLRData {
 
     LocalIdMap classIdMap();
 
-    List<String> featureProperties();
-
     static MultiClassNLRData from(
         Graph graph,
         List<String> featureProperties,
@@ -50,7 +48,6 @@ public interface MultiClassNLRData {
         return builder()
             .classIdMap(classIdMap)
             .weights(weights)
-            .featureProperties(featureProperties)
             .build();
     }
 

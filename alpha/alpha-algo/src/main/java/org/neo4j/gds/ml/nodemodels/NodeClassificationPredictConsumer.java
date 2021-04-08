@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -50,6 +51,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
     private final Predictor<Matrix, MultiClassNLRData> predictor;
     private final HugeObjectArray<double[]> predictedProbabilities;
     private final HugeLongArray predictedClasses;
+    private final List<String> featureProperties;
     private final ProgressLogger progressLogger;
 
     public NodeClassificationPredictConsumer(
@@ -58,6 +60,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
         Predictor<Matrix, MultiClassNLRData> predictor,
         @Nullable HugeObjectArray<double[]> predictedProbabilities,
         HugeLongArray predictedClasses,
+        List<String> featureProperties,
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
@@ -65,6 +68,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
         this.predictor = predictor;
         this.predictedProbabilities = predictedProbabilities;
         this.predictedClasses = predictedClasses;
+        this.featureProperties = featureProperties;
         this.progressLogger = progressLogger;
     }
 
@@ -104,7 +108,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
 
     private void fail(long nodeId) {
         var badProperties = new ArrayList<String>();
-        for (var prop : predictor.modelData().featureProperties()) {
+        for (var prop : featureProperties) {
             var theProp = graph.nodeProperties(prop);
             var valueType = theProp.valueType();
             if (valueType == ValueType.DOUBLE) {

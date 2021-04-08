@@ -43,7 +43,6 @@ public class NodeClassificationSerializer implements ModelSerializer<MultiClassN
             .setLocalIdMap(NodeClassificationProto.LocalIdMap
                 .newBuilder()
                 .addAllOriginalIds(modelData.classIdMap().originalIdsList()))
-            .addAllFeatureProperties(modelData.featureProperties())
             .build();
     }
 
@@ -60,7 +59,6 @@ public class NodeClassificationSerializer implements ModelSerializer<MultiClassN
         return MultiClassNLRData.builder()
             .weights(weights)
             .classIdMap(localIdMap)
-            .featureProperties(serializedData.getFeaturePropertiesList())
             .build();
     }
 
@@ -87,7 +85,6 @@ public class NodeClassificationSerializer implements ModelSerializer<MultiClassN
             .data(MultiClassNLRData.builder()
                 .weights(weights)
                 .classIdMap(localIdMap)
-                .addAllFeatureProperties(serializedData.getFeaturePropertiesList())
                 .build())
             .build();
     }

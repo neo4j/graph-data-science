@@ -8,7 +8,6 @@ option java_outer_classname = "NodeClassificationProto";
 message NodeClassificationModelData {
   Matrix weights = 1;
   LocalIdMap localIdMap = 2;
-  repeated string featureProperties = 3;
 }
 
 message LocalIdMap {

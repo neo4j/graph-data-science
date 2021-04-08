@@ -247,6 +247,7 @@ public class NodeClassificationTrain
             predictor(modelData),
             null,
             predictedClasses,
+            config.featureProperties(),
             progressLogger
         );
 
@@ -260,7 +261,7 @@ public class NodeClassificationTrain
     }
 
     private MultiClassNLRPredictor predictor(MultiClassNLRData modelData) {
-        return new MultiClassNLRPredictor(modelData);
+        return new MultiClassNLRPredictor(modelData, config.featureProperties());
     }
 
     private MultiClassNLRData trainModel(
