@@ -25,13 +25,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -54,28 +53,21 @@ class PositiveSampleProducerTest {
     void doesNotCauseStackOverflow() {
         // enough walks to potentially trigger StackOverflow
         int nbrOfWalks = 5000;
-        HugeObjectArray<long[]> walks = HugeObjectArray.of(LongStream
-            .range(0, nbrOfWalks)
-            .mapToObj((l1) -> new long[]{l1})
-            .collect(Collectors.toList())
-            .toArray(new long[][]{})
-        );
+
+        var walks = createCompressedRandomWalks(nbrOfWalks, (l1) -> new long[]{l1});
 
         // our sample producer is supposed to work within the first 3 walks
         // it prefetches in the constructor
         var sampleProducer = new PositiveSampleProducer(
-            walks,
+            walks.iterator(0, nbrOfWalks),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
-            0,
-            3,
             10,
             TestProgressLogger.NULL_LOGGER
         );
 
         var counter = 0L;
-        while (sampleProducer.hasNext()) {
+        while (sampleProducer.next(new long[2])) {
             counter++;
-            sampleProducer.next(new long[2]);
         }
 
         // does not overflow the stack = passes test
@@ -86,30 +78,22 @@ class PositiveSampleProducerTest {
     void doesNotCauseStackOverflowDueToBadLuck() {
         // enough walks to potentially trigger StackOverflow
         int nbrOfWalks = 5000;
-        HugeObjectArray<long[]> walks = HugeObjectArray.of(LongStream
-            .range(0, nbrOfWalks)
-            .mapToObj((l1) -> new long[]{l1, (l1 + 1) % nbrOfWalks})
-            .collect(Collectors.toList())
-            .toArray(new long[][]{})
-        );
+        var walks = createCompressedRandomWalks(nbrOfWalks, (l1) -> new long[]{l1, (l1 + 1) % nbrOfWalks});
 
         // our sample producer is supposed to work within the first nbrOfWalks - 1 walks
         // it prefetches in the constructor
         HugeDoubleArray probabilities = HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 0).toArray());
         var sampleProducer = new PositiveSampleProducer(
-            walks,
+            walks.iterator(0, nbrOfWalks),
             probabilities,
-            0,
-            nbrOfWalks - 1,
             10,
             TestProgressLogger.NULL_LOGGER
         );
         // does not overflow the stack = passes test
 
         var counter = 0L;
-        while (sampleProducer.hasNext()) {
+        while (sampleProducer.next(new long[2])) {
             counter++;
-            sampleProducer.next(new long[2]);
         }
 
         assertEquals(0, counter, "no samples possible here because walks are too short");
@@ -118,26 +102,18 @@ class PositiveSampleProducerTest {
     @Test
     void doesNotAttemptToFetchOutsideBatch() {
         int nbrOfWalks = 100;
-        HugeObjectArray<long[]> walks = HugeObjectArray.of(LongStream
-            .range(0, nbrOfWalks)
-            .mapToObj((l1) -> new long[]{l1, (l1 + 1) % nbrOfWalks, (l1 + 2) % nbrOfWalks})
-            .collect(Collectors.toList())
-            .toArray(new long[][]{})
-        );
+        var walks = createCompressedRandomWalks(nbrOfWalks, (l1) -> new long[]{l1, (l1 + 1) % nbrOfWalks, (l1 + 2) % nbrOfWalks});
 
         var sampleProducer = new PositiveSampleProducer(
-            walks,
+            walks.iterator(0, nbrOfWalks / 2),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
-            0,
-            nbrOfWalks / 2 - 1,
             10,
             TestProgressLogger.NULL_LOGGER
         );
 
         var counter = 0L;
-        while (sampleProducer.hasNext()) {
+        while (sampleProducer.next(new long[2])) {
             counter++;
-            sampleProducer.next(new long[2]);
         }
 
         assertEquals(300, counter, "50 walks in batch, 3 nodes each, 2 center word matches => 300 samples");
@@ -148,21 +124,18 @@ class PositiveSampleProducerTest {
     void shouldProducePairsWith(
         String name,
         int windowSize,
-        HugeObjectArray<long[]> walks,
+        CompressedRandomWalks walks,
         List<Pair<Long, Long>> expectedPairs
     ) {
         Collection<Pair<Long, Long>> actualPairs = new ArrayList<>();
 
         PositiveSampleProducer producer = new PositiveSampleProducer(
-            walks,
+            walks.iterator(0, walks.size()),
             centerNodeProbabilities,
-            0,
-            walks.size() - 1L,
             windowSize,
             TestProgressLogger.NULL_LOGGER
         );
-        while (producer.hasNext()) {
-            producer.next(buffer);
+        while (producer.next(buffer)) {
             actualPairs.add(Pair.of(buffer[0], buffer[1]));
         }
 
@@ -171,7 +144,7 @@ class PositiveSampleProducerTest {
 
     @Test
     void shouldProducePairsWithBounds() {
-        HugeObjectArray<long[]> walks = HugeObjectArray.of(
+        var walks = createCompressedRandomWalks(
             new long[]{0, 1, 2},
             new long[]{3, 4, 5},
             new long[]{3, 4, 5},
@@ -180,15 +153,12 @@ class PositiveSampleProducerTest {
 
         Collection<Pair<Long, Long>> actualPairs = new ArrayList<>();
         PositiveSampleProducer producer = new PositiveSampleProducer(
-            walks,
+            walks.iterator(0, 2),
             centerNodeProbabilities,
-            0,
-            1,
             3,
             TestProgressLogger.NULL_LOGGER
         );
-        while (producer.hasNext()) {
-            producer.next(buffer);
+        while (producer.next(buffer)) {
             actualPairs.add(Pair.of(buffer[0], buffer[1]));
         }
 
@@ -210,7 +180,7 @@ class PositiveSampleProducerTest {
 
     @Test
     void shouldRemoveDownsampledWordFromWalk() {
-        HugeObjectArray<long[]> walks = HugeObjectArray.of(
+        var walks = createCompressedRandomWalks(
             new long[]{0, 1},       // 1 is downsampled, and the walk is then too short and will be ignored
             new long[]{0, 1, 2},    // 1 is downsampled, the remaining walk is (0,2)
             new long[]{3, 4, 5, 6}, // 5 is downsampled, the remaining walk is (3,4,6)
@@ -229,16 +199,13 @@ class PositiveSampleProducerTest {
 
         Collection<Pair<Long, Long>> actualPairs = new ArrayList<>();
         PositiveSampleProducer producer = new PositiveSampleProducer(
-            walks,
+            walks.iterator(0, walks.size()),
             centerNodeProbabilities,
-            0,
-            3,
             3,
             TestProgressLogger.NULL_LOGGER
         );
 
-        while (producer.hasNext()) {
-            producer.next(buffer);
+        while (producer.next(buffer)) {
             actualPairs.add(Pair.of(buffer[0], buffer[1]));
         }
 
@@ -264,7 +231,7 @@ class PositiveSampleProducerTest {
             arguments(
                 "Uneven window size",
                 3,
-                HugeObjectArray.of(
+                createCompressedRandomWalks(
                     new long[]{0, 1, 2}
                 ),
                 List.of(
@@ -278,7 +245,7 @@ class PositiveSampleProducerTest {
             arguments(
                 "Even window size",
                 4,
-                HugeObjectArray.of(
+                createCompressedRandomWalks(
                     new long[]{0, 1, 2, 3}
                 ),
                 List.of(
@@ -296,7 +263,7 @@ class PositiveSampleProducerTest {
             arguments(
                 "Window size greater than walk length",
                 3,
-                HugeObjectArray.of(
+                createCompressedRandomWalks(
                     new long[]{0, 1}
                 ),
                 List.of(
@@ -308,7 +275,7 @@ class PositiveSampleProducerTest {
             arguments(
                 "Multiple walks",
                 3,
-                HugeObjectArray.of(
+                createCompressedRandomWalks(
                     new long[]{0, 1, 2},
                     new long[]{3, 4, 5}
                 ),
@@ -325,6 +292,26 @@ class PositiveSampleProducerTest {
                 )
             )
         );
+    }
+
+    private static CompressedRandomWalks createCompressedRandomWalks(long[]... walksInput) {
+        var walks = new CompressedRandomWalks(walksInput.length, AllocationTracker.empty());
+        for (long[] walk : walksInput) {
+            walks.add(walk);
+        }
+        return walks;
+    }
+
+    private static CompressedRandomWalks createCompressedRandomWalks(long count, WalkSupplier walkSupplier) {
+        var walks = new CompressedRandomWalks(count, AllocationTracker.empty());
+        for (long i = 0; i < count; i++) {
+            walks.add(walkSupplier.getWalk(i));
+        }
+        return walks;
+    }
+
+    interface WalkSupplier {
+        long[] getWalk(long index);
     }
 
 }

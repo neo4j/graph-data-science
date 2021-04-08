@@ -21,109 +21,97 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
 public class PositiveSampleProducer {
 
-    private final HugeObjectArray<long[]> walks;
+    private final Iterator<long[]> walks;
     private final HugeDoubleArray centerNodeProbabilities;
-    private final long batchEnd;
     private final int prefixWindowSize;
     private final int postfixWindowSize;
     private long[] currentWalk;
     private long currentCenterWord;
-    private long walkIndex;
     private final ProgressLogger progressLogger;
     private int centerWordIndex;
     private int contextWordIndex;
 
-    public PositiveSampleProducer(
-        HugeObjectArray<long[]> walks,
+    PositiveSampleProducer(
+        Iterator<long[]> walks,
         HugeDoubleArray centerNodeProbabilities,
-        long batchStart,
-        long batchEnd,
         int windowSize,
         ProgressLogger progressLogger
     ) {
         this.walks = walks;
-        this.batchEnd = batchEnd;
         this.progressLogger = progressLogger;
         this.centerNodeProbabilities = centerNodeProbabilities;
 
-        prefixWindowSize = (int) ceilDiv(windowSize - 1, 2);
+        prefixWindowSize = ceilDiv(windowSize - 1, 2);
         postfixWindowSize = (windowSize - 1) / 2;
 
-        this.walkIndex = batchStart - 1;
+        this.currentWalk = new long[0];
         this.centerWordIndex = -1;
         this.contextWordIndex = 1;
-        nextWalk();
     }
 
-    public boolean hasNext() {
-        return walkIndex <= batchEnd;
-    }
-
-    public void next(long[] buffer) {
-        buffer[0] = currentCenterWord;
-        buffer[1] = currentWalk[contextWordIndex];
-
-        nextContextWord();
-    }
-
-    long currentWalkIndex() {
-        return walkIndex;
-    }
-
-    private void nextWalk() {
-        walkIndex++;
-
-        if (walkIndex >= walks.size()) {
-            return;
+    public boolean next(long[] buffer) {
+        if (nextContextWord()) {
+            buffer[0] = currentCenterWord;
+            buffer[1] = currentWalk[contextWordIndex];
+            return true;
         }
-        long[] walk = filter(walks.get(walkIndex));
 
-        while (walkIndex <= batchEnd && walk.length < 2) {
-            walkIndex++;
-            if (walkIndex < walks.size()) {
-                walk = filter(walks.get(walkIndex));
-            }
+        return false;
+    }
+
+    private boolean nextWalk() {
+        if (!walks.hasNext()) {
+            return false;
+        }
+        long[] walk = filter(walks.next());
+
+        while (walks.hasNext() && walk.length < 2) {
+            walk = filter(walks.next());
             progressLogger.logProgress();
         }
 
-        if (hasNext()) {
+        if (walk.length >= 2) {
             progressLogger.logProgress();
             this.currentWalk = walk;
             centerWordIndex = -1;
-            nextCenterWord();
+            return nextCenterWord();
         }
+
+        return false;
     }
 
-    private void nextCenterWord() {
+    private boolean nextCenterWord() {
         centerWordIndex++;
 
         if (centerWordIndex < currentWalk.length) {
             currentCenterWord = currentWalk[centerWordIndex];
             contextWordIndex = Math.max(0, centerWordIndex - prefixWindowSize) - 1;
-            nextContextWord();
+            return nextContextWord();
         } else {
-            nextWalk();
+            return nextWalk();
         }
     }
 
-    private void nextContextWord() {
+    private boolean nextContextWord() {
         contextWordIndex++;
         if (centerWordIndex == contextWordIndex) {
             contextWordIndex++;
         }
 
         if (contextWordIndex >= Math.min(centerWordIndex + postfixWindowSize + 1, currentWalk.length)) {
-            nextCenterWord();
+            return nextCenterWord();
         }
+
+        return true;
     }
 
     private long[] filter(long[] walk) {
