@@ -35,6 +35,10 @@ public interface Scaler {
 
     void scaleProperty(long nodeId, double[] result, int offset);
 
+    default int dimension() {
+        return 1;
+    }
+
     Scaler ZERO_SCALER = (nodeId, result, offset) -> result[offset] = 0D;
 
     enum Variant {
@@ -123,11 +127,35 @@ public interface Scaler {
             return variant.name();
         }
 
+        /**
+         * Create a scaler. Some scalers rely on aggregate extreme values which are computed at construction time.
+         */
         public abstract Scaler create(
             NodeProperties properties,
             long nodeCount,
             int concurrency,
             ExecutorService executor
         );
+    }
+
+    class ArrayScaler implements Scaler {
+
+        private final List<Scaler> elementScalers;
+
+        ArrayScaler(List<Scaler> elementScalers) {
+            this.elementScalers = elementScalers;
+        }
+
+        @Override
+        public void scaleProperty(long nodeId, double[] result, int offset) {
+            for (int i = 0; i < dimension(); i++) {
+                elementScalers.get(i).scaleProperty(nodeId, result, offset + i);
+            }
+        }
+
+        @Override
+        public int dimension() {
+            return elementScalers.size();
+        }
     }
 }

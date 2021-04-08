@@ -29,11 +29,9 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -68,19 +66,20 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     public Result compute() {
         var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount(), tracker);
 
-        // Create a Scaler supplier for each input property
+        // Create a Scaler for each input property
         // Array properties are unrolled into multiple scalers
-        var scalerSuppliers = config.nodeProperties().stream()
+        var scalers = config.nodeProperties().stream()
             .map(this::prepareScalers)
-            .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-        initializeArrays(scaledProperties, scalerSuppliers.size());
+        var outputArrayLength = scalers.stream().mapToInt(Scaler::dimension).sum();
+        initializeArrays(scaledProperties, outputArrayLength);
 
         // Materialize each scaler and apply it to all properties
-        for (int outputPos = 0; outputPos < scalerSuppliers.size(); outputPos++) {
-            var scaler = scalerSuppliers.get(outputPos).get();
-            scaleProperty(scaledProperties, scaler, outputPos);
+        var resultIndex = 0;
+        for (var scaler : scalers) {
+            scaleProperty(scaledProperties, scaler, resultIndex);
+            resultIndex += scaler.dimension();
         }
 
         return Result.of(scaledProperties);
@@ -126,7 +125,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         }
     }
 
-    private List<Supplier<Scaler>> prepareScalers(String propertyName) {
+    private Scaler prepareScalers(String propertyName) {
         var scalerVariant = config.scaler();
         var nodeProperties = graph.nodeProperties(propertyName);
 
@@ -139,39 +138,38 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         }
 
         int arrayLength;
+        List<Scaler> elementScalers;
 
         switch (nodeProperties.valueType()) {
             case LONG:
             case DOUBLE:
-                return List.of(() -> scalerVariant.create(
+                return scalerVariant.create(
                     nodeProperties,
                     graph.nodeCount(),
                     config.concurrency(),
                     executor
-                ));
+                );
             case LONG_ARRAY:
                 arrayLength = nodeProperties.longArrayValue(0).length;
-                return IntStream.range(0, arrayLength)
-                    .mapToObj(idx -> (Supplier<Scaler>)
-                        () -> scalerVariant.create(
-                            transformLongArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
-                            graph.nodeCount(),
-                            config.concurrency(),
-                            executor
-                        )
-                    ).collect(Collectors.toList());
+                elementScalers = IntStream.range(0, arrayLength)
+                    .mapToObj(idx -> scalerVariant.create(
+                        transformLongArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
+                        graph.nodeCount(),
+                        config.concurrency(),
+                        executor
+                    )).collect(Collectors.toList());
+                return new Scaler.ArrayScaler(elementScalers);
             case FLOAT_ARRAY:
             case DOUBLE_ARRAY:
                 arrayLength = nodeProperties.doubleArrayValue(0).length;
-                return IntStream.range(0, arrayLength)
-                    .mapToObj(idx -> (Supplier<Scaler>)
-                        () -> scalerVariant.create(
-                            transformFloatArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
-                            graph.nodeCount(),
-                            config.concurrency(),
-                            executor
-                        )
-                    ).collect(Collectors.toList());
+                elementScalers = IntStream.range(0, arrayLength)
+                    .mapToObj(idx -> scalerVariant.create(
+                        transformFloatArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
+                        graph.nodeCount(),
+                        config.concurrency(),
+                        executor
+                    )).collect(Collectors.toList());
+                return new Scaler.ArrayScaler(elementScalers);
             case UNKNOWN:
         }
 
