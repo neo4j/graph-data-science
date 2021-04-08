@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.filter;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
@@ -31,6 +32,7 @@ import org.neo4j.graphalgo.api.NodePropertyStore;
 import org.neo4j.graphalgo.beta.filter.expression.EvaluationContext;
 import org.neo4j.graphalgo.beta.filter.expression.Expression;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.loading.IdMapImplementations;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.loading.nodeproperties.DoubleArrayNodePropertiesBuilder;
@@ -41,6 +43,9 @@ import org.neo4j.graphalgo.core.loading.nodeproperties.LongArrayNodePropertiesBu
 import org.neo4j.graphalgo.core.loading.nodeproperties.LongNodePropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeMergeSort;
+import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
@@ -70,17 +75,34 @@ final class NodesFilter {
     ) {
         progressLogger.startSubTask("Nodes").reset(graphStore.nodeCount());
 
-        var nodesBuilder = GraphFactory.initNodesBuilder()
-            .concurrency(concurrency)
-            .maxOriginalId(graphStore.nodes().highestNeoId())
-            .hasLabelInformation(!graphStore.nodeLabels().isEmpty())
-            .tracker(allocationTracker)
-            .build();
+        LongToLongFunction originalIdFunction;
+        LongToLongFunction internalIdFunction;
 
-        var nodeFilterTasks = PartitionUtils.rangePartition(
+        var inputNodes = graphStore.nodes();
+
+        var nodesBuilderBuilder = GraphFactory.initNodesBuilder()
+            .concurrency(concurrency)
+            .maxOriginalId(inputNodes.highestNeoId())
+            .hasLabelInformation(!graphStore.nodeLabels().isEmpty())
+            .tracker(allocationTracker);
+
+        if (IdMapImplementations.useBitIdMap()) {
+            var sortedOriginalIds = sortedOriginalIds(graphStore, concurrency, executorService, allocationTracker);
+            originalIdFunction = sortedOriginalIds::get;
+            internalIdFunction = (id) -> inputNodes.toMappedNodeId(originalIdFunction.applyAsLong(id));
+            nodesBuilderBuilder.hasDisjointPartitions(true);
+        } else {
+            originalIdFunction = inputNodes::toOriginalNodeId;
+            internalIdFunction = (id) -> id;
+        }
+
+        var nodesBuilder = nodesBuilderBuilder.build();
+
+        var nodeFilterTasks = PartitionUtils.numberAlignedPartitioning(
             concurrency,
             graphStore.nodeCount(),
-            partition -> new NodeFilterTask(partition, expression, graphStore, nodesBuilder, progressLogger)
+            SparseLongArray.SUPER_BLOCK_SIZE,
+            partition -> new NodeFilterTask(partition, expression, graphStore, originalIdFunction, internalIdFunction, nodesBuilder, progressLogger)
         );
 
         ParallelUtil.runWithConcurrency(concurrency, nodeFilterTasks, executorService);
@@ -106,6 +128,28 @@ final class NodesFilter {
             .nodeMapping(filteredNodeMapping)
             .propertyStores(filteredNodePropertyStores)
             .build();
+    }
+
+    private static HugeLongArray sortedOriginalIds(
+        GraphStore graphStore,
+        int concurrency,
+        ExecutorService executorService,
+        AllocationTracker allocationTracker
+    ) {
+        var originalIds = HugeLongArray.newArray(graphStore.nodeCount(), allocationTracker);
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            graphStore.nodeCount(),
+            partition -> (Runnable) () -> partition.consume(node -> originalIds.set(
+                node,
+                graphStore.nodes().toOriginalNodeId(node)
+            ))
+        );
+        ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+
+        HugeMergeSort.sort(originalIds, concurrency, allocationTracker);
+
+        return originalIds;
     }
 
     private static Map<NodeLabel, NodePropertyStore> filterNodeProperties(
@@ -293,20 +337,25 @@ final class NodesFilter {
         private final EvaluationContext.NodeEvaluationContext nodeContext;
         private final ProgressLogger progressLogger;
         private final GraphStore graphStore;
+        private final LongToLongFunction originalIdFunction;
+        private final LongToLongFunction internalIdFunction;
         private final NodesBuilder nodesBuilder;
 
         private NodeFilterTask(
             Partition partition,
             Expression expression,
             GraphStore graphStore,
+            LongToLongFunction originalIdFunction,
+            LongToLongFunction internalIdFunction,
             NodesBuilder nodesBuilder,
             ProgressLogger progressLogger
         ) {
             this.partition = partition;
             this.expression = expression;
             this.graphStore = graphStore;
+            this.originalIdFunction = originalIdFunction;
+            this.internalIdFunction = internalIdFunction;
             this.nodesBuilder = nodesBuilder;
-
             this.nodeContext = new EvaluationContext.NodeEvaluationContext(graphStore);
             this.progressLogger = progressLogger;
         }
@@ -314,13 +363,15 @@ final class NodesFilter {
         @Override
         public void run() {
             var nodeMapping = graphStore.nodes();
-
+            var originalIdFunction = this.originalIdFunction;
+            var internalIdFunction = this.internalIdFunction;
             partition.consume(node -> {
-                nodeContext.init(node);
+                var internalId = internalIdFunction.applyAsLong(node);
+                nodeContext.init(internalId);
                 if (expression.evaluate(nodeContext) == Expression.TRUE) {
-                    var neoId = nodeMapping.toOriginalNodeId(node);
-                    NodeLabel[] labels = nodeMapping.nodeLabels(node).toArray(NodeLabel[]::new);
-                    nodesBuilder.addNode(neoId, labels);
+                    var originalId = originalIdFunction.applyAsLong(node);
+                    NodeLabel[] labels = nodeMapping.nodeLabels(internalId).toArray(NodeLabel[]::new);
+                    nodesBuilder.addNode(originalId, labels);
                 }
                 progressLogger.logProgress();
             });
