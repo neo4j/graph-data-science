@@ -91,7 +91,7 @@ public interface Reducer {
 
         @Override
         public double identity() {
-            return Double.MIN_VALUE;
+            return -Double.MAX_VALUE;
         }
 
         @Override

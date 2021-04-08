@@ -51,7 +51,7 @@ final class BetweennessCentralityProc {
 
             if (procResultBuilder.computeDeprecatedStats) {
                 double min = Double.MAX_VALUE;
-                double max = Double.MIN_VALUE;
+                double max = -Double.MAX_VALUE;
                 double sum = 0.0;
                 for (long i = centrality.size() - 1; i >= 0; i--) {
                     double c = centrality.get(i);

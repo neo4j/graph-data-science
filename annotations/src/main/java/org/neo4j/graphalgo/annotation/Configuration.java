@@ -107,7 +107,7 @@ public @interface Configuration {
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
     @interface DoubleRange {
-        double min() default Double.MIN_VALUE;
+        double min() default -Double.MAX_VALUE;
         double max() default Double.MAX_VALUE;
         boolean minInclusive() default true;
         boolean maxInclusive() default true;
