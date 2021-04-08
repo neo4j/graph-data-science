@@ -72,11 +72,13 @@ interface RandomWalkProbabilities {
             this.sampleCount = new MutableLong(0);
         }
 
-        void registerWalk(long[] walk) {
+        RandomWalkProbabilities.Builder registerWalk(long[] walk) {
             for (long node : walk) {
                 nodeFrequencies.addTo(node, 1);
             }
             this.sampleCount.add(walk.length);
+
+            return this;
         }
 
         RandomWalkProbabilities build() {

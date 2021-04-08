@@ -74,8 +74,10 @@ class Node2VecModelTest {
         Node2VecModel word2Vec = new Node2VecModel(
             nodeCount,
             config,
-            walks,
-            new ProbabilityComputer(walks, nodeCount, 0.001, 0.75, 4, AllocationTracker.empty()),
+//            walks,
+//            new RandomWalkProbabilities(walks, nodeCount, 0.001, 0.75, 4, AllocationTracker.empty()),
+            null,
+            null,
             TestProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );

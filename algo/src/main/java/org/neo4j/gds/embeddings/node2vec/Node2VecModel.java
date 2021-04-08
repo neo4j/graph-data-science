@@ -27,8 +27,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -40,11 +40,10 @@ public class Node2VecModel {
     private final HugeObjectArray<Vector> centerEmbeddings;
     private final HugeObjectArray<Vector> contextEmbeddings;
     private final Node2VecBaseConfig config;
-    private final HugeObjectArray<long[]> walks;
-    private final ProbabilityComputer probabilityComputer;
+    private final CompressedRandomWalks walks;
+    private final RandomWalkProbabilities randomWalkProbabilities;
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
-    private final long batchSize;
 
     public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
         var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
@@ -58,27 +57,21 @@ public class Node2VecModel {
     Node2VecModel(
         long nodeCount,
         Node2VecBaseConfig config,
-        HugeObjectArray<long[]> walks,
-        ProbabilityComputer probabilityComputer,
+        CompressedRandomWalks walks,
+        RandomWalkProbabilities randomWalkProbabilities,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.config = config;
         this.walks = walks;
-        this.probabilityComputer = probabilityComputer;
+        this.randomWalkProbabilities = randomWalkProbabilities;
         this.progressLogger = progressLogger;
-        this.negativeSamples = new NegativeSampleProducer(probabilityComputer.getContextNodeDistribution());
+        this.negativeSamples = new NegativeSampleProducer(randomWalkProbabilities.contextDistribution());
         this.tracker = tracker;
 
         // TODO research how the weights are initialized
         centerEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension());
         contextEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension());
-
-        this.batchSize = ParallelUtil.adjustedBatchSize(
-            walks.size(),
-            config.concurrency(),
-            1000
-        );
     }
 
     void train() {
@@ -86,10 +79,11 @@ public class Node2VecModel {
         for (int iteration = 0; iteration < config.iterations(); iteration++) {
             progressLogger.reset(walks.size());
             progressLogger.logMessage(formatWithLocale(":: Iteration %d :: Start", iteration + 1));
-            var tasks = new ArrayList<TrainingTask>();
-            for (long sampleIndex = 0; sampleIndex < walks.size(); sampleIndex += batchSize) {
-                tasks.add(new TrainingTask(sampleIndex, Math.min(walks.size(), sampleIndex + batchSize) - 1));
-            }
+
+            var tasks = PartitionUtils.rangePartition(config.concurrency(), walks.size(), (partition ->
+                new TrainingTask(partition.startNode(), partition.nodeCount())
+            ));
+
             ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
             progressLogger.logMessage(formatWithLocale(":: Iteration %d :: Finished", iteration + 1));
         }
@@ -121,17 +115,13 @@ public class Node2VecModel {
         private final Vector contextGradientBuffer;
         private final float initialLearningRate;
         private final float learningRateModifier;
-        private final long startIndex;
 
         private float learningRate;
 
-        TrainingTask(long startIndex, long endIndex) {
-            this.startIndex = startIndex;
+        private TrainingTask(long startIndex, long length) {
             this.positiveSamples = new PositiveSampleProducer(
-                walks,
-                probabilityComputer.getCenterNodeProbabilities(),
-                startIndex,
-                endIndex,
+                walks.iterator(startIndex, length),
+                randomWalkProbabilities.centerProbabilities(),
                 config.windowSize(),
                 progressLogger
             );
@@ -139,22 +129,21 @@ public class Node2VecModel {
             this.contextGradientBuffer = new Vector(config.embeddingDimension());
 
             this.initialLearningRate = (float) config.initialLearningRate();
-            this.learningRateModifier = (float) ((initialLearningRate - config.minLearningRate()) / (endIndex - startIndex));
+            this.learningRateModifier = (float) ((initialLearningRate - config.minLearningRate()) / length);
             this.learningRate = initialLearningRate;
         }
 
         @Override
         public void run() {
             var buffer = new long[2];
-            while (positiveSamples.hasNext()) {
-                positiveSamples.next(buffer);
+            while (positiveSamples.next(buffer)) {
                 trainSample(buffer[0], buffer[1], true);
 
                 for (var i = 0; i < config.negativeSamplingRate(); i++) {
                     trainSample(buffer[0], negativeSamples.nextSample(), false);
                 }
 
-                learningRate = initialLearningRate - (learningRateModifier * (positiveSamples.currentWalkIndex() - startIndex));
+                learningRate = initialLearningRate; //- (learningRateModifier * (positiveSamples.currentWalkIndex() - startIndex));
             }
         }
 
@@ -165,7 +154,6 @@ public class Node2VecModel {
             float affinity = positive
                 ? centerEmbedding.innerProduct(contextEmbedding)
                 : -centerEmbedding.innerProduct(contextEmbedding);
-
 
             float scalar = (float) (positive
                             ? 1 / (Math.exp(affinity) + 1)
