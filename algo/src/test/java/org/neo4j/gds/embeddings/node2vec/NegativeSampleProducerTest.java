@@ -51,7 +51,7 @@ class NegativeSampleProducerTest {
 
         Map<Long, Integer> distribution = IntStream
             .range(0, 1300)
-            .mapToObj(ignore -> sampler.nextSample())
+            .mapToObj(ignore -> sampler.next())
             .collect(Collectors.toMap(
                 Function.identity(),
                 ignore -> 1,

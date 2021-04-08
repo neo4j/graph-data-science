@@ -49,8 +49,14 @@ public class Node2VecModel {
         var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
 
         return MemoryEstimations.builder(Node2Vec.class)
-            .perNode("center embeddings", (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, vectorMemoryEstimation))
-            .perNode("context embeddings", (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, vectorMemoryEstimation))
+            .perNode(
+                "center embeddings",
+                (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, vectorMemoryEstimation)
+            )
+            .perNode(
+                "context embeddings",
+                (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, vectorMemoryEstimation)
+            )
             .build();
     }
 
@@ -69,20 +75,41 @@ public class Node2VecModel {
         this.negativeSamples = new NegativeSampleProducer(randomWalkProbabilities.contextDistribution());
         this.tracker = tracker;
 
-        // TODO research how the weights are initialized
         centerEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension());
         contextEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension());
     }
 
     void train() {
         progressLogger.logMessage(":: Training :: Start");
+        var learningRateAlpha = (config.initialLearningRate() - config.minLearningRate()) / config.iterations();
+
         for (int iteration = 0; iteration < config.iterations(); iteration++) {
             progressLogger.reset(walks.size());
             progressLogger.logMessage(formatWithLocale(":: Iteration %d :: Start", iteration + 1));
 
-            var tasks = PartitionUtils.rangePartition(config.concurrency(), walks.size(), (partition ->
-                new TrainingTask(partition.startNode(), partition.nodeCount())
-            ));
+            var learningRate = (float) Math.max(
+                config.minLearningRate(),
+                config.initialLearningRate() - iteration * learningRateAlpha
+            );
+
+            var tasks = PartitionUtils.rangePartition(config.concurrency(), walks.size(), (partition -> {
+                var positiveSampleProducer = new PositiveSampleProducer(
+                    walks.iterator(partition.startNode(), partition.nodeCount()),
+                    randomWalkProbabilities.centerProbabilities(),
+                    config.windowSize(),
+                    progressLogger
+                );
+
+                return new TrainingTask(
+                    centerEmbeddings,
+                    contextEmbeddings,
+                    positiveSampleProducer,
+                    negativeSamples,
+                    learningRate,
+                    config.negativeSamplingRate(),
+                    config.embeddingDimension()
+                );
+            }));
 
             ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
             progressLogger.logMessage(formatWithLocale(":: Iteration %d :: Finished", iteration + 1));
@@ -103,47 +130,56 @@ public class Node2VecModel {
         for (var i = 0L; i < nodeCount; i++) {
             var data = new Random()
                 .doubles(embeddingDimensions, -1, 1)
-                .collect(() -> new FloatConsumer(embeddingDimensions), FloatConsumer::add, FloatConsumer::addAll).values;
+                .collect(
+                    () -> new FloatConsumer(embeddingDimensions),
+                    FloatConsumer::add,
+                    FloatConsumer::addAll
+                ).values;
             embeddings.set(i, new Vector(data));
         }
         return embeddings;
     }
 
-    private class TrainingTask implements Runnable {
-        private final PositiveSampleProducer positiveSamples;
+    private static final class TrainingTask implements Runnable {
+        private final HugeObjectArray<Vector> centerEmbeddings;
+        private final HugeObjectArray<Vector> contextEmbeddings;
+
+        private final PositiveSampleProducer positiveSampleProducer;
+        private final NegativeSampleProducer negativeSampleProducer;
         private final Vector centerGradientBuffer;
         private final Vector contextGradientBuffer;
-        private final float initialLearningRate;
-        private final float learningRateModifier;
+        private final int negativeSamplingRate;
+        private final float learningRate;
 
-        private float learningRate;
+        private TrainingTask(
+            HugeObjectArray<Vector> centerEmbeddings,
+            HugeObjectArray<Vector> contextEmbeddings,
+            PositiveSampleProducer positiveSampleProducer,
+            NegativeSampleProducer negativeSampleProducer,
+            float learningRate,
+            int negativeSamplingRate,
+            int embeddingDimensions
+        ) {
+            this.centerEmbeddings = centerEmbeddings;
+            this.contextEmbeddings = contextEmbeddings;
+            this.positiveSampleProducer = positiveSampleProducer;
+            this.negativeSampleProducer = negativeSampleProducer;
+            this.learningRate = learningRate;
+            this.negativeSamplingRate = negativeSamplingRate;
 
-        private TrainingTask(long startIndex, long length) {
-            this.positiveSamples = new PositiveSampleProducer(
-                walks.iterator(startIndex, length),
-                randomWalkProbabilities.centerProbabilities(),
-                config.windowSize(),
-                progressLogger
-            );
-            this.centerGradientBuffer = new Vector(config.embeddingDimension());
-            this.contextGradientBuffer = new Vector(config.embeddingDimension());
-
-            this.initialLearningRate = (float) config.initialLearningRate();
-            this.learningRateModifier = (float) ((initialLearningRate - config.minLearningRate()) / length);
-            this.learningRate = initialLearningRate;
+            this.centerGradientBuffer = new Vector(embeddingDimensions);
+            this.contextGradientBuffer = new Vector(embeddingDimensions);
         }
 
         @Override
         public void run() {
             var buffer = new long[2];
-            while (positiveSamples.next(buffer)) {
+            while (positiveSampleProducer.next(buffer)) {
                 trainSample(buffer[0], buffer[1], true);
 
-                for (var i = 0; i < config.negativeSamplingRate(); i++) {
-                    trainSample(buffer[0], negativeSamples.nextSample(), false);
+                for (var i = 0; i < negativeSamplingRate; i++) {
+                    trainSample(buffer[0], negativeSampleProducer.next(), false);
                 }
-
-                learningRate = initialLearningRate; //- (learningRateModifier * (positiveSamples.currentWalkIndex() - startIndex));
             }
         }
 
@@ -156,8 +192,8 @@ public class Node2VecModel {
                 : -centerEmbedding.innerProduct(contextEmbedding);
 
             float scalar = (float) (positive
-                            ? 1 / (Math.exp(affinity) + 1)
-                            : -1 / (Math.exp(affinity) + 1));
+                ? 1 / (Math.exp(affinity) + 1)
+                : -1 / (Math.exp(affinity) + 1));
 
             centerGradientBuffer.scalarMultiply(contextEmbedding, scalar * learningRate);
             contextGradientBuffer.scalarMultiply(centerEmbedding, scalar * learningRate);
