@@ -73,6 +73,8 @@ final class NodesFilter {
         ProgressLogger progressLogger,
         AllocationTracker allocationTracker
     ) {
+        // Depending on the type of the id map we need to construct
+        // resolving original and internal ids works different.
         LongToLongFunction originalIdFunction;
         LongToLongFunction internalIdFunction;
 
@@ -86,6 +88,10 @@ final class NodesFilter {
 
         if (IdMapImplementations.useBitIdMap()) {
             progressLogger.startSubTask("Prepare node ids");
+            // If we need to construct a BitIdMap, we need to make
+            // sure that each thread processes a disjoint, ordered
+            // subset of original node ids. We therefore produce a
+            // temporary array which contains sorted original ids.
             var sortedOriginalIds = sortOriginalIds(
                 graphStore,
                 concurrency,
@@ -93,11 +99,24 @@ final class NodesFilter {
                 progressLogger,
                 allocationTracker
             );
+            // Each thread processes a non-overlapping, consecutive
+            // range of node ids. The original id is therefore just
+            // a lookup in the sorted array.
             originalIdFunction = sortedOriginalIds::get;
+            // The actual internal id is used to lookup node labels
+            // and properties. We need to reverse the mapping by
+            // looking up the original id in the sorted array and
+            // use that original id to retrieve the internal id from
+            // the original node mapping.
             internalIdFunction = (id) -> inputNodes.toMappedNodeId(originalIdFunction.applyAsLong(id));
+            // We signal the nodes builder to use the block-based
+            // BitIdMap builder.
             nodesBuilderBuilder.hasDisjointPartitions(true);
             progressLogger.finishSubTask("Prepare node ids");
         } else {
+            // If we need to construct a regular IdMap, we can just
+            // delegate to the input node id mapping and use the
+            // internal id as given.
             originalIdFunction = inputNodes::toOriginalNodeId;
             internalIdFunction = (id) -> id;
         }
@@ -107,8 +126,21 @@ final class NodesFilter {
         var nodeFilterTasks = PartitionUtils.numberAlignedPartitioning(
             concurrency,
             graphStore.nodeCount(),
+            // We need to make sure to align the partition size
+            // with the block size in the SLA, which is the main
+            // data structure of the BitIdMap. If partition sizes
+            // are unaligned, wrong internal ids will be generated
+            // during import.
             SparseLongArray.SUPER_BLOCK_SIZE,
-            partition -> new NodeFilterTask(partition, expression, graphStore, originalIdFunction, internalIdFunction, nodesBuilder, progressLogger)
+            partition -> new NodeFilterTask(
+                partition,
+                expression,
+                graphStore,
+                originalIdFunction,
+                internalIdFunction,
+                nodesBuilder,
+                progressLogger
+            )
         );
 
         progressLogger.startSubTask("Nodes").reset(graphStore.nodeCount());
