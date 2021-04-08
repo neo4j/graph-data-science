@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,23 +46,27 @@ class MinMaxTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodeProperties properties, double min, double max) {
-        var minMaxNormalizer = (MinMax) MinMax.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = (MinMax) MinMax.create(properties, 10, 1, Pools.DEFAULT);
 
-        assertThat(minMaxNormalizer.min).isEqualTo(min);
-        assertThat(minMaxNormalizer.maxMinDiff).isEqualTo(max - min);
+        assertThat(scaler.min).isEqualTo(min);
+        assertThat(scaler.maxMinDiff).isEqualTo(max - min);
 
+        double[] actual = new double[10];
+        IntStream.range(0, 10).forEach(nodeId -> scaler.scaleProperty(nodeId, actual, nodeId));
         for (int i = 0; i < 10; i++) {
-            assertThat(minMaxNormalizer.scaleProperty(i)).isEqualTo(i / 9D);
+            assertThat(actual[i]).isEqualTo(i / 9D);
         }
     }
 
     @Test
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 4D;
-        var minMaxNormalizer = MinMax.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = MinMax.create(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
-            assertThat(minMaxNormalizer.scaleProperty(i)).isEqualTo(0D);
+            double[] result = new double[1];
+            scaler.scaleProperty(i, result, 0);
+            assertThat(result[0]).isEqualTo(0D);
         }
     }
 

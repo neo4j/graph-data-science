@@ -34,9 +34,9 @@ final class LogTransformer implements Scaler {
     }
 
     @Override
-    public double scaleProperty(long nodeId) {
+    public void scaleProperty(long nodeId, double[] result, int offset) {
         // TODO: check for 0 ? (as its -Infinity)
-        return Math.log(properties.doubleValue(nodeId));
+        result[offset] = Math.log(properties.doubleValue(nodeId));
     }
 
 }

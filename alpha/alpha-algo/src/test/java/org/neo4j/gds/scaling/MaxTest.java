@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 
-import java.util.stream.LongStream;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,19 +37,19 @@ class MaxTest {
     private static Stream<Arguments> properties() {
         return Stream.of(
             Arguments.of(
-                10L,
+                10,
                 (DoubleNodeProperties) nodeId -> nodeId,
                 9D,
                 new double[]{0, 1 / 9D, 2 / 9D, 3 / 9D, 4 / 9D, 5 / 9D, 6 / 9D, 7 / 9D, 8 / 9D, 9 / 9D}
             ),
             Arguments.of(
-                10L,
+                10,
                 (DoubleNodeProperties) nodeId -> -nodeId,
                 9D,
                 new double[]{0, -1 / 9D, -2 / 9D, -3 / 9D, -4 / 9D, -5 / 9D, -6 / 9D, -7 / 9D, -8 / 9D, -9 / 9D}
             ),
             Arguments.of(
-                5L,
+                5,
                 (DoubleNodeProperties) nodeId -> (nodeId % 2 == 0) ? -nodeId : nodeId,
                 4D,
                 new double[]{0, 1 / 4D, -0.5D, 3 / 4D, -1}
@@ -59,12 +59,13 @@ class MaxTest {
 
     @ParameterizedTest
     @MethodSource("properties")
-    void scale(long nodeCount, NodeProperties properties, double maxAbs, double[] expected) {
+    void scale(int nodeCount, NodeProperties properties, double maxAbs, double[] expected) {
         var scaler = (Max) Max.create(properties, nodeCount, 1, Pools.DEFAULT);
 
         assertThat(scaler.maxAbs).isEqualTo(maxAbs);
 
-        double[] actual = LongStream.range(0, nodeCount).mapToDouble(scaler::scaleProperty).toArray();
+        double[] actual = new double[nodeCount];
+        IntStream.range(0, nodeCount).forEach(nodeId -> scaler.scaleProperty(nodeId, actual, nodeId));
         assertThat(actual).containsSequence(expected);
     }
 
@@ -74,7 +75,9 @@ class MaxTest {
         var scaler = Max.create(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
-            assertThat(scaler.scaleProperty(i)).isEqualTo(0D);
+            double[] result = new double[1];
+            scaler.scaleProperty(i, result, 0);
+            assertThat(result[0]).isEqualTo(0D);
         }
     }
 }

@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 
-import java.util.stream.LongStream;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,13 +37,13 @@ class L1NormTest {
     private static Stream<Arguments> properties() {
         return Stream.of(
             Arguments.of(
-                5L,
+                5,
                 (DoubleNodeProperties) nodeId -> nodeId,
                 10D,
                 new double[]{0, 0.1D, 0.2D, 0.3D, 0.4D}
             ),
             Arguments.of(
-                5L,
+                5,
                 (DoubleNodeProperties) nodeId -> (nodeId % 2 == 0) ? -nodeId : nodeId,
                 10D,
                 new double[]{0, 0.1D, - 0.2D, 0.3D, -0.40D}
@@ -53,12 +53,13 @@ class L1NormTest {
 
     @ParameterizedTest
     @MethodSource("properties")
-    void scale(long nodeCount, NodeProperties properties, double l1norm, double[] expected) {
+    void scale(int nodeCount, NodeProperties properties, double l1norm, double[] expected) {
         var scaler = (L1Norm) L1Norm.create(properties, nodeCount, 1, Pools.DEFAULT);
 
         assertThat(scaler.l1Norm).isEqualTo(l1norm);
 
-        double[] actual = LongStream.range(0, nodeCount).mapToDouble(scaler::scaleProperty).toArray();
+        double[] actual = new double[nodeCount];
+        IntStream.range(0, nodeCount).forEach(nodeId -> scaler.scaleProperty(nodeId, actual, nodeId));
         assertThat(actual).containsSequence(expected);
     }
 
@@ -68,7 +69,9 @@ class L1NormTest {
         var scaler = L1Norm.create(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
-            assertThat(scaler.scaleProperty(i)).isEqualTo(0D);
+            double[] result = new double[1];
+            scaler.scaleProperty(i, result, 0);
+            assertThat(result[0]).isEqualTo(0D);
         }
     }
 }

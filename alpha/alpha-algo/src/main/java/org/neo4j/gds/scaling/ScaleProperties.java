@@ -103,9 +103,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
             config.concurrency(),
             graph.nodeCount(),
             (partition) -> (Runnable) () -> partition.consume((nodeId) -> {
-                var afterValue = scaler.scaleProperty(nodeId);
-                double[] existingResult = scaledProperties.get(nodeId);
-                existingResult[index] = afterValue;
+                scaler.scaleProperty(nodeId, scaledProperties.get(nodeId), index);
             })
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);

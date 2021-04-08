@@ -22,6 +22,7 @@ package org.neo4j.gds.scaling;
 import org.neo4j.graphalgo.api.NodeProperties;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -32,9 +33,9 @@ public interface Scaler {
 
     double CLOSE_TO_ZERO = 1e-15;
 
-    double scaleProperty(long nodeId);
+    void scaleProperty(long nodeId, double[] result, int offset);
 
-    Scaler ZERO_SCALER = nodeId -> 0;
+    Scaler ZERO_SCALER = (nodeId, result, offset) -> result[offset] = 0D;
 
     enum Variant {
         NONE {
@@ -42,7 +43,7 @@ public interface Scaler {
             public Scaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
-                return properties::doubleValue;
+                return (nodeId, result, offset) -> result[offset] = properties.doubleValue(nodeId);
             }
         },
         MAX {

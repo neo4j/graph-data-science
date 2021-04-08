@@ -59,8 +59,8 @@ final class MinMax implements Scaler {
     }
 
     @Override
-    public double scaleProperty(long nodeId) {
-        return (properties.doubleValue(nodeId) - min) / maxMinDiff;
+    public void scaleProperty(long nodeId, double[] result, int offset) {
+        result[offset] = (properties.doubleValue(nodeId) - min) / maxMinDiff;
     }
 
     static class ComputeAggregates implements Runnable {

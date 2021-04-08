@@ -58,8 +58,8 @@ final class Max implements Scaler {
     }
 
     @Override
-    public double scaleProperty(long nodeId) {
-        return properties.doubleValue(nodeId) / maxAbs;
+    public void scaleProperty(long nodeId, double[] result, int offset) {
+        result[offset] = properties.doubleValue(nodeId) / maxAbs;
     }
 
     static class ComputeAggregates implements Runnable {

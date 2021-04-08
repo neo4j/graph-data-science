@@ -45,7 +45,8 @@ class NoneScalerTest {
     void scale(NodeProperties properties, double[] expected) {
         var scaler = Scaler.Variant.NONE.create(properties, 4, 42, Pools.DEFAULT);
 
-        double[] actual = IntStream.range(1, 5).mapToDouble(scaler::scaleProperty).toArray();
+        double[] actual = new double[5];
+        IntStream.range(0, 5).forEach(nodeId -> scaler.scaleProperty(nodeId, actual, nodeId));
         assertThat(actual).containsSequence(expected);
     }
 

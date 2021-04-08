@@ -64,8 +64,8 @@ final class Mean implements Scaler {
     }
 
     @Override
-    public double scaleProperty(long nodeId) {
-        return (properties.doubleValue(nodeId) - avg) / maxMinDiff;
+    public void scaleProperty(long nodeId, double[] result, int offset) {
+        result[offset] = (properties.doubleValue(nodeId) - avg) / maxMinDiff;
     }
 
     static class ComputeAggregates implements Runnable {

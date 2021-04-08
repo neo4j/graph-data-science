@@ -59,8 +59,8 @@ final class L2Norm implements Scaler {
     }
 
     @Override
-    public double scaleProperty(long nodeId) {
-        return properties.doubleValue(nodeId) / euclideanLength;
+    public void scaleProperty(long nodeId, double[] result, int offset) {
+        result[offset] = properties.doubleValue(nodeId) / euclideanLength;
     }
 
     static class ComputeAggregate implements Runnable {

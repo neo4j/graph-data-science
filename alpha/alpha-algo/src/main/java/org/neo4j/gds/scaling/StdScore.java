@@ -69,8 +69,8 @@ final class StdScore implements Scaler {
     }
 
     @Override
-    public double scaleProperty(long nodeId) {
-        return (properties.doubleValue(nodeId) - avg) / std;
+    public void scaleProperty(long nodeId, double[] result, int offset) {
+        result[offset] = (properties.doubleValue(nodeId) - avg) / std;
     }
 
     static class ComputeSums implements Runnable {

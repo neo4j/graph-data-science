@@ -58,8 +58,8 @@ final class L1Norm implements Scaler {
     }
 
     @Override
-    public double scaleProperty(long nodeId) {
-        return properties.doubleValue(nodeId) / l1Norm;
+    public void scaleProperty(long nodeId, double[] result, int offset) {
+        result[offset] = properties.doubleValue(nodeId) / l1Norm;
     }
 
     static class ComputeAggregates implements Runnable {

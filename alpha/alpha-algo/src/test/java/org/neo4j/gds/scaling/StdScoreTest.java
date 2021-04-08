@@ -51,17 +51,20 @@ class StdScoreTest {
         assertThat(scaler.avg).isEqualTo(avg);
         assertThat(scaler.std).isEqualTo(std);
 
-        double[] actual = IntStream.range(0, 10).mapToDouble(scaler::scaleProperty).toArray();
+        double[] actual = new double[10];
+        IntStream.range(0, 10).forEach(nodeId -> scaler.scaleProperty(nodeId, actual, nodeId));
         assertThat(actual).containsSequence(expected);
     }
 
     @Test
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 4D;
-        var normalizer = Mean.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = Mean.create(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
-            assertThat(normalizer.scaleProperty(i)).isEqualTo(0D);
+            double[] result = new double[1];
+            scaler.scaleProperty(i, result, 0);
+            assertThat(result[0]).isEqualTo(0D);
         }
     }
 }
