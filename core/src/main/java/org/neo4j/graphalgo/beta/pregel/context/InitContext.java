@@ -35,7 +35,7 @@ import java.util.Set;
 public final class InitContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
     private final NodePropertyContainer nodePropertyContainer;
 
-    public InitContext(ComputeStep<CONFIG> computeStep, CONFIG config, NodePropertyContainer nodePropertyContainer) {
+    public InitContext(ComputeStep<CONFIG, ?> computeStep, CONFIG config, NodePropertyContainer nodePropertyContainer) {
         super(computeStep, config);
         this.nodePropertyContainer = nodePropertyContainer;
     }

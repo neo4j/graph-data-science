@@ -21,11 +21,14 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
+import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 
 import java.util.function.LongConsumer;
 
-public interface ComputeStep<CONFIG extends PregelConfig> {
+public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator> {
 
     Graph graph();
 
@@ -34,6 +37,14 @@ public interface ComputeStep<CONFIG extends PregelConfig> {
     PregelComputation<CONFIG> computation();
 
     NodeValue nodeValue();
+
+    Messenger<ITERATOR> messenger();
+
+    Partition nodeBatch();
+
+    InitContext<CONFIG> initContext();
+
+    ComputeContext<CONFIG> computeContext();
 
     int iteration();
 
@@ -58,6 +69,37 @@ public interface ComputeStep<CONFIG extends PregelConfig> {
     }
 
     void sendTo(long targetNodeId, double message);
+
+    default void computeBatch() {
+        var messenger = messenger();
+        var messageIterator = messenger.messageIterator();
+        var messages = new Messages(messageIterator);
+
+        var nodeBatch = nodeBatch();
+        long batchStart = nodeBatch.startNode();
+        long batchEnd = batchStart + nodeBatch.nodeCount();
+
+        var computation = computation();
+        var initContext = initContext();
+        var computeContext = computeContext();
+        var voteBits = voteBits();
+
+        for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
+
+            if (computeContext.isInitialSuperstep()) {
+                initContext.setNodeId(nodeId);
+                computation.init(initContext);
+            }
+
+            messenger.initMessageIterator(messageIterator, nodeId, computeContext.isInitialSuperstep());
+
+            if (!messages.isEmpty() || !voteBits.get(nodeId)) {
+                voteBits.clear(nodeId);
+                computeContext.setNodeId(nodeId);
+                computation.compute(computeContext, messages);
+            }
+        }
+    }
 
     default void sendToNeighbors(long sourceNodeId, double message) {
         graph().forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {

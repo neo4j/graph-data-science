@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator>
     extends CountedCompleter<Void>
-    implements ComputeStep<CONFIG> {
+    implements ComputeStep<CONFIG, ITERATOR> {
 
     private static final int SEQUENTIAL_THRESHOLD = 1000;
 
@@ -112,35 +112,10 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
 
             this.compute();
         } else {
-            computeSequentially();
+            computeBatch();
+            this.sentMessage.set(hasSendMessage);
             tryComplete();
         }
-    }
-
-    private void computeSequentially() {
-        var messageIterator = messenger.messageIterator();
-        var messages = new Messages(messageIterator);
-
-        long batchStart = nodeBatch.startNode();
-        long batchEnd = batchStart + nodeBatch.nodeCount();
-
-        for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
-
-            if (computeContext.isInitialSuperstep()) {
-                initContext.setNodeId(nodeId);
-                computation.init(initContext);
-            }
-
-            messenger.initMessageIterator(messageIterator, nodeId, computeContext.isInitialSuperstep());
-
-            if (!messages.isEmpty() || !voteBits.get(nodeId)) {
-                voteBits.clear(nodeId);
-                computeContext.setNodeId(nodeId);
-                computation.compute(computeContext, messages);
-            }
-        }
-
-        this.sentMessage.set(hasSendMessage);
     }
 
     @Override
@@ -161,6 +136,26 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     @Override
     public NodeValue nodeValue() {
         return nodeValue;
+    }
+
+    @Override
+    public Messenger<ITERATOR> messenger() {
+        return messenger;
+    }
+
+    @Override
+    public Partition nodeBatch() {
+        return nodeBatch;
+    }
+
+    @Override
+    public InitContext<CONFIG> initContext() {
+        return initContext;
+    }
+
+    @Override
+    public ComputeContext<CONFIG> computeContext() {
+        return computeContext;
     }
 
     @Override

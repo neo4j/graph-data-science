@@ -25,7 +25,8 @@ import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 
-public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator> implements Runnable, ComputeStep<CONFIG> {
+public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator>
+    implements Runnable, ComputeStep<CONFIG, ITERATOR> {
 
     private final InitContext<CONFIG> initContext;
     private final ComputeContext<CONFIG> computeContext;
@@ -62,27 +63,7 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
 
     @Override
     public void run() {
-        var messageIterator = messenger.messageIterator();
-        var messages = new Messages(messageIterator);
-
-        long batchStart = nodeBatch.startNode();
-        long batchEnd = batchStart + nodeBatch.nodeCount();
-
-        for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
-
-            if (computeContext.isInitialSuperstep()) {
-                initContext.setNodeId(nodeId);
-                computation.init(initContext);
-            }
-
-            messenger.initMessageIterator(messageIterator, nodeId, computeContext.isInitialSuperstep());
-            
-            if (!messages.isEmpty() || !voteBits.get(nodeId)) {
-                voteBits.clear(nodeId);
-                computeContext.setNodeId(nodeId);
-                computation.compute(computeContext, messages);
-            }
-        }
+        computeBatch();
     }
 
     @Override
@@ -103,6 +84,26 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
     @Override
     public NodeValue nodeValue() {
         return nodeValue;
+    }
+
+    @Override
+    public Messenger<ITERATOR> messenger() {
+        return messenger;
+    }
+
+    @Override
+    public Partition nodeBatch() {
+        return nodeBatch;
+    }
+
+    @Override
+    public InitContext<CONFIG> initContext() {
+        return initContext;
+    }
+
+    @Override
+    public ComputeContext<CONFIG> computeContext() {
+        return computeContext;
     }
 
     @Override
