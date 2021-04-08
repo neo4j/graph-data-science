@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -33,6 +34,15 @@ import java.util.Optional;
 public interface NodeClassificationMutateConfig extends NodeClassificationPredictConfig, MutatePropertyConfig {
 
     long serialVersionUID = 0x42L;
+
+    @Value.Derived
+    @Configuration.Ignore
+    @Override
+    default boolean includePredictedProbabilities() {
+        return predictedProbabilityProperty().isPresent();
+    }
+
+    Optional<String> predictedProbabilityProperty();
 
     static NodeClassificationMutateConfig of(
         String username,

@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
@@ -31,29 +30,20 @@ import java.util.Optional;
 @Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPredictWriteConfig extends NodeClassificationPredictConfig, WritePropertyConfig {
-
-    @Value.Derived
-    @Configuration.Ignore
-    @Override
-    default boolean includePredictedProbabilities() {
-        return predictedProbabilityProperty().isPresent();
-    }
-
-    Optional<String> predictedProbabilityProperty();
+public interface NodeClassificationStreamConfig extends NodeClassificationPredictConfig {
 
     @Value.Default
-    default int batchSize() {
-        return 100;
+    default boolean includePredictedProbabilities() {
+        return false;
     }
 
-    static NodeClassificationPredictWriteConfig of(
+    static NodeClassificationStreamConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new NodeClassificationPredictWriteConfigImpl(
+        return new NodeClassificationStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,
