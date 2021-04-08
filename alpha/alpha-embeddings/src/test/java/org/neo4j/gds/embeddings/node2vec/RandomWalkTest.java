@@ -28,12 +28,13 @@ import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
@@ -61,7 +62,18 @@ class RandomWalkTest extends AlgoTestBase {
         Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().build();
         Graph graph = TestGraphLoader.from(db).graph(NATIVE);
 
-        List<long[]> result = runRandomWalk(config, graph);
+        var randomWalk = RandomWalk.create(
+            graph,
+            config.walkLength(),
+            config.concurrency(),
+            config.walksPerNode(),
+            config.walkBufferSize(),
+            config.returnFactor(),
+            config.inOutFactor(),
+            config.randomSeed()
+        );
+
+        List<long[]> result = randomWalk.compute().collect(Collectors.toList());
 
         int expectedNumberOfWalks = config.walksPerNode() * 3;
         assertEquals(expectedNumberOfWalks, result.size());
@@ -77,17 +89,17 @@ class RandomWalkTest extends AlgoTestBase {
     @Test
     void shouldBeDeterministic() {
         runQuery(DEFAULT_DB_CYPHER);
-        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().concurrency(4).build();
-        Graph graph = TestGraphLoader.from(db).graph(NATIVE);
+        var config = ImmutableNode2VecStreamConfig.builder().concurrency(4).build();
+        var graph = TestGraphLoader.from(db).graph(NATIVE);
 
-        List<long[]> firstResult = runRandomWalk(config, graph);
-        List<long[]> secondResult = runRandomWalk(config, graph);
+        var firstResult = runRandomWalkSeeded(config, graph, of(42L));
+        var secondResult = runRandomWalkSeeded(config, graph, of(42L));
 
-        Collection<long[]> firstResultAsSet = new TreeSet<>(Arrays::compare);
+        var firstResultAsSet = new TreeSet<long[]>(Arrays::compare);
         firstResultAsSet.addAll(firstResult);
         assertThat(firstResultAsSet).hasSize(firstResult.size());
 
-        Collection<long[]> secondResultAsSet = new TreeSet<>(Arrays::compare);
+        var secondResultAsSet = new TreeSet<long[]>(Arrays::compare);
         secondResultAsSet.addAll(secondResult);
         assertThat(secondResultAsSet).hasSize(secondResult.size());
 
@@ -95,8 +107,8 @@ class RandomWalkTest extends AlgoTestBase {
     }
 
     @NotNull
-    private List<long[]> runRandomWalk(Node2VecStreamConfig config, Graph graph) {
-        RandomWalk randomWalk = new RandomWalk(
+    private List<long[]> runRandomWalkSeeded(Node2VecStreamConfig config, Graph graph, Optional<Long> randomSeed) {
+        var randomWalk = RandomWalk.create(
             graph,
             config.walkLength(),
             config.concurrency(),
@@ -104,11 +116,10 @@ class RandomWalkTest extends AlgoTestBase {
             config.walkBufferSize(),
             config.returnFactor(),
             config.inOutFactor(),
-            config.seed()
+            randomSeed
         );
 
-        List<long[]> result = randomWalk.compute().collect(Collectors.toList());
-        return result;
+        return randomWalk.compute().collect(Collectors.toList());
     }
 
     @Test
@@ -116,7 +127,7 @@ class RandomWalkTest extends AlgoTestBase {
         runQuery(DEFAULT_DB_CYPHER);
         Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().build();
         Graph graph = TestGraphLoader.from(db).withRelationshipTypes("REL1", "REL2").graph(NATIVE);
-        RandomWalk randomWalk = new RandomWalk(
+        RandomWalk randomWalk = RandomWalk.create(
             graph,
             config.walkLength(),
             config.concurrency(),
@@ -124,7 +135,7 @@ class RandomWalkTest extends AlgoTestBase {
             config.walkBufferSize(),
             config.returnFactor(),
             config.inOutFactor(),
-            config.seed()
+            config.randomSeed()
         );
 
         int expectedNumberOfWalks = config.walksPerNode() * 3;
@@ -151,7 +162,7 @@ class RandomWalkTest extends AlgoTestBase {
                  ", (g)-[:REL]->(h:Node)-[:REL]->(a)");
 
         Graph graph = TestGraphLoader.from(db).graph(NATIVE);
-        RandomWalk randomWalk = new RandomWalk(
+        RandomWalk randomWalk = RandomWalk.create(
             graph,
             10,
             4,
@@ -159,7 +170,7 @@ class RandomWalkTest extends AlgoTestBase {
             1000,
             0.01,
             1,
-            42
+            of(42L)
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -206,7 +217,7 @@ class RandomWalkTest extends AlgoTestBase {
                  ", (e)-[:REL]->(a)");
 
         Graph graph = TestGraphLoader.from(db).graph(NATIVE);
-        RandomWalk randomWalk = new RandomWalk(
+        RandomWalk randomWalk = RandomWalk.create(
             graph,
             10,
             4,
@@ -214,7 +225,7 @@ class RandomWalkTest extends AlgoTestBase {
             1000,
             0.1,
             100000,
-            87
+            of(87L)
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -249,7 +260,7 @@ class RandomWalkTest extends AlgoTestBase {
             ", (c)-[:REL {weight: 1.0}]->(a)"
         );
 
-        RandomWalk randomWalk = new RandomWalk(
+        RandomWalk randomWalk = RandomWalk.create(
             graph,
             1000,
             1,
@@ -257,7 +268,7 @@ class RandomWalkTest extends AlgoTestBase {
             100,
             1,
             1,
-            23
+            of(23L)
         );
 
         var nodeCounter = new HashMap<Long, Long>();

@@ -56,7 +56,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
 
     @Override
     public HugeObjectArray<Vector> compute() {
-        RandomWalk randomWalk = new RandomWalk(
+        RandomWalk randomWalk = RandomWalk.create(
             graph,
             config.walkLength(),
             config.concurrency(),
@@ -64,7 +64,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
             config.walkBufferSize(),
             config.returnFactor(),
             config.inOutFactor(),
-            config.seed()
+            config.randomSeed()
         );
 
         HugeObjectArray<long[]> tempWalks = HugeObjectArray.newArray(

@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.queue.QueueBasedSpliterator;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -53,7 +54,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     private final AtomicLong nodeIndex;
     private final long randomSeed;
 
-    public RandomWalk(
+    private RandomWalk(
         Graph graph,
         int steps,
         int concurrency,
@@ -72,6 +73,21 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         this.inOutParam = inOutParam;
         this.randomSeed = randomSeed;
         nodeIndex = new AtomicLong(0);
+    }
+
+    public static RandomWalk create(
+        Graph graph,
+        int steps,
+        int concurrency,
+        int walksPerNode,
+        int queueSize,
+        double returnParam,
+        double inOutParam,
+        Optional<Long> randomSeed
+    ) {
+        var seed = randomSeed.orElseGet(() -> new Random().nextLong());
+
+        return new RandomWalk(graph, steps, concurrency, walksPerNode, queueSize, returnParam, inOutParam, seed);
     }
 
     @Override

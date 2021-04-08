@@ -25,6 +25,8 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
+import java.util.Optional;
+
 public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig {
 
     @Value.Default
@@ -105,6 +107,5 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
         return 1;
     }
 
-    @Value.Default
-    default long seed() { return 42; }
+    Optional<Long> randomSeed();
 }
