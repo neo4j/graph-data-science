@@ -17,7 +17,7 @@
 | batchSize      | Integer | 100             | yes      | Number of nodes per batch.
 | minIterations  | Integer | 1               | yes      | Minimum number of training epochs.
 | maxIterations  | Integer | 100             | yes      | Maximum number of training epochs.
-| maxStreakCount | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
+| patience       | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
 | tolerance      | Float   | 0.001           | yes      | Epochs that do not improve the loss by a factor of 1 - `tolerance` are considered unproductive.
 | sharedUpdater  | Boolean | false           | yes      | Whether to use a shared ADAM optimizer across training threads.
 | concurrency    | Integer | see description | yes      | Concurrency for training the model candidate. By default the value of the top level `concurrency` parameter is used.

@@ -22,7 +22,7 @@ package org.neo4j.gds.ml;
 class StreakStopper implements TrainingStopper {
 
     private final int minIterations;
-    private final int maxStreakCount;
+    private final int patience;
     private final int maxIterations;
     private final int windowSize;
     private final double tolerance;
@@ -32,9 +32,9 @@ class StreakStopper implements TrainingStopper {
     private int unproductiveStreak;
     private final double[] lossHistory;
 
-    StreakStopper(int minIterations, int maxStreakCount, int maxIterations, int windowSize, double tolerance) {
+    StreakStopper(int minIterations, int patience, int maxIterations, int windowSize, double tolerance) {
         this.minIterations = minIterations;
-        this.maxStreakCount = maxStreakCount;
+        this.patience = patience;
         this.maxIterations = maxIterations;
         this.windowSize = windowSize;
         this.tolerance = tolerance;
@@ -71,11 +71,11 @@ class StreakStopper implements TrainingStopper {
     @Override
     public boolean terminated() {
         return count >= maxIterations ||
-               unproductiveStreak >= maxStreakCount;
+               unproductiveStreak >= patience;
     }
 
     @Override
     public boolean converged() {
-        return unproductiveStreak >= maxStreakCount;
+        return unproductiveStreak >= patience;
     }
 }
