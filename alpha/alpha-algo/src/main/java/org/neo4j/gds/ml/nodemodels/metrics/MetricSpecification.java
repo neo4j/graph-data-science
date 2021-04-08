@@ -26,6 +26,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -34,9 +36,12 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface MetricSpecification {
-    Map<String, Function<Long, Metric>> SINGLE_CLASS_METRIC_FACTORIES = Map.of(
-        F1Score.NAME, F1Score::new
-    );
+    SortedMap<String, Function<Long, Metric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(
+        F1Score.NAME, F1Score::new,
+        Precision.NAME, Precision::new,
+        Recall.NAME, Recall::new,
+        Accuracy.NAME, Accuracy::new
+    ));
     String NUMBER_OR_STAR = "((?:-?[\\d]+)|(?:\\*))";
     String VALID_SINGLE_CLASS_METRICS = String.join("|", SINGLE_CLASS_METRIC_FACTORIES.keySet());
     Pattern SINGLE_CLASS_METRIC_PATTERN = Pattern.compile(
