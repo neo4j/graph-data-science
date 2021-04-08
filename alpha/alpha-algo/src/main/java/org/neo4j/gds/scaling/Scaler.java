@@ -20,6 +20,7 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 
 import java.util.Arrays;
 import java.util.List;
@@ -157,5 +158,26 @@ public interface Scaler {
         public int dimension() {
             return elementScalers.size();
         }
+    }
+    
+    abstract class AggregatesComputer implements Runnable {
+        
+        private final Partition partition;
+        final NodeProperties properties;
+
+        AggregatesComputer(Partition partition, NodeProperties property) {
+            this.partition = partition;
+            this.properties = property;
+        }
+
+        @Override
+        public void run() {
+            long end = partition.startNode() + partition.nodeCount();
+            for (long nodeId = partition.startNode(); nodeId < end; nodeId++) {
+                compute(nodeId);
+            }
+        }
+
+        abstract void compute(long nodeId);
     }
 }

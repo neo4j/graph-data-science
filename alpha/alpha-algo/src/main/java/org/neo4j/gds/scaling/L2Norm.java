@@ -21,6 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
@@ -43,12 +44,12 @@ final class L2Norm implements Scaler {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new ComputeAggregate(partition.startNode(), partition.nodeCount(), properties)
+            partition -> new ComputeSquaredSum(partition, properties)
         );
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
-        var squaredSum = tasks.stream().mapToDouble(ComputeAggregate::squaredSum).sum();
+        var squaredSum = tasks.stream().mapToDouble(ComputeSquaredSum::squaredSum).sum();
         var euclideanLength = Math.sqrt(squaredSum);
 
         if (Math.abs(euclideanLength) < CLOSE_TO_ZERO) {
@@ -63,26 +64,19 @@ final class L2Norm implements Scaler {
         result[offset] = properties.doubleValue(nodeId) / euclideanLength;
     }
 
-    static class ComputeAggregate implements Runnable {
+    static class ComputeSquaredSum extends AggregatesComputer {
 
-        private final long start;
-        private final long length;
-        private final NodeProperties properties;
         private double squaredSum;
 
-        ComputeAggregate(long start, long length, NodeProperties property) {
-            this.start = start;
-            this.length = length;
-            this.properties = property;
+        ComputeSquaredSum(Partition partition, NodeProperties property) {
+            super(partition, property);
             this.squaredSum = 0D;
         }
 
         @Override
-        public void run() {
-            for (long nodeId = start; nodeId < (start + length); nodeId++) {
-                var propertyValue = properties.doubleValue(nodeId);
-                squaredSum += propertyValue * propertyValue;
-            }
+        void compute(long nodeId) {
+            var propertyValue = properties.doubleValue(nodeId);
+            squaredSum += propertyValue * propertyValue;
         }
 
         double squaredSum() {

@@ -21,6 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
@@ -41,13 +42,13 @@ final class MinMax implements Scaler {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new ComputeAggregates(partition.startNode(), partition.nodeCount(), properties)
+            partition -> new ComputeMaxMin(partition, properties)
         );
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
-        var min = tasks.stream().mapToDouble(ComputeAggregates::min).min().orElse(Double.MAX_VALUE);
-        var max = tasks.stream().mapToDouble(ComputeAggregates::max).max().orElse(-Double.MAX_VALUE);
+        var min = tasks.stream().mapToDouble(ComputeMaxMin::min).min().orElse(Double.MAX_VALUE);
+        var max = tasks.stream().mapToDouble(ComputeMaxMin::max).max().orElse(-Double.MAX_VALUE);
 
         var maxMinDiff = max - min;
 
@@ -63,32 +64,25 @@ final class MinMax implements Scaler {
         result[offset] = (properties.doubleValue(nodeId) - min) / maxMinDiff;
     }
 
-    static class ComputeAggregates implements Runnable {
+    static class ComputeMaxMin extends AggregatesComputer {
 
-        private final long start;
-        private final long length;
-        private final NodeProperties properties;
         private double min;
         private double max;
 
-        ComputeAggregates(long start, long length, NodeProperties property) {
-            this.start = start;
-            this.length = length;
-            this.properties = property;
+        ComputeMaxMin(Partition partition, NodeProperties property) {
+            super(partition, property);
             this.min = Double.MAX_VALUE;
             this.max = -Double.MAX_VALUE;
         }
 
         @Override
-        public void run() {
-            for (long nodeId = start; nodeId < (start + length); nodeId++) {
-                var propertyValue = properties.doubleValue(nodeId);
-                if (propertyValue < min) {
-                    min = propertyValue;
-                }
-                if (propertyValue > max) {
-                    max = propertyValue;
-                }
+        void compute(long nodeId) {
+            var propertyValue = properties.doubleValue(nodeId);
+            if (propertyValue < min) {
+                min = propertyValue;
+            }
+            if (propertyValue > max) {
+                max = propertyValue;
             }
         }
 
