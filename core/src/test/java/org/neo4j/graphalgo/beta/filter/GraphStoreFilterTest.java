@@ -45,6 +45,7 @@ import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -54,9 +55,9 @@ import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 class GraphStoreFilterTest {
 
-    private static GraphCreateFromGraphConfig config(String nodeFilter, String relationshipFilter) {
+    private static GraphCreateFromGraphConfig config(String nodeFilter, String relationshipFilter, int concurrency) {
         return ImmutableGraphCreateFromGraphConfig.builder()
-            .concurrency(1)
+            .concurrency(concurrency)
             .nodeFilter(nodeFilter)
             .relationshipFilter(relationshipFilter)
             .graphName("outputGraph")
@@ -377,7 +378,7 @@ class GraphStoreFilterTest {
 
             GraphStoreFilter.filter(
                 graphStore,
-                config("*", "*"),
+                config("*", "*", 1),
                 Pools.DEFAULT,
                 log,
                 AllocationTracker.empty()
@@ -420,12 +421,49 @@ class GraphStoreFilterTest {
         });
     }
 
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    void testMultiThreadedFiltering(TestMethodRunner runTest) throws Exception {
+        runTest.run(() -> {
+            var labelA = new NodeLabel[] {NodeLabel.of("A")};
+            var labelB = new NodeLabel[] {NodeLabel.of("B")};
+
+            var generatedGraph = RandomGraphGenerator
+                .builder()
+                .nodeCount(100_000)
+                .nodeLabelProducer((node) -> ThreadLocalRandom.current().nextDouble(0, 1) > 0.5 ? labelA : labelB)
+                .nodePropertyProducer(PropertyProducer.random("nodeProp", 0, 1))
+                .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+                .relationshipPropertyProducer(PropertyProducer.random("relProp", 0, 1))
+                .averageDegree(5)
+                .build()
+                .generate();
+
+            var graphStore = CSRGraphStoreUtil.createFromGraph(
+                TestDatabaseIdRepository.randomNamedDatabaseId(),
+                generatedGraph,
+                "REL",
+                Optional.empty(),
+                4,
+                AllocationTracker.empty()
+            );
+
+            assertGraphEquals(graphStore.getUnion(), filter(graphStore, "*", "*", 4).getUnion());
+        });
+    }
+
     private GraphStore filter(GraphStore graphStore, String nodeFilter, String relationshipFilter) throws
+        SemanticErrors,
+        ParseException {
+        return filter(graphStore, nodeFilter, relationshipFilter, 1);
+    }
+
+    private GraphStore filter(GraphStore graphStore, String nodeFilter, String relationshipFilter, int concurrency) throws
         ParseException,
         SemanticErrors {
         return GraphStoreFilter.filter(
             graphStore,
-            config(nodeFilter, relationshipFilter),
+            config(nodeFilter, relationshipFilter, concurrency),
             Pools.DEFAULT,
             NullLog.getInstance(),
             AllocationTracker.empty()
