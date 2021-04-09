@@ -17,3 +17,12 @@ This will yield an empty result for non-existing graphs.
 ----
 CALL gds.graph.drop('my-fictive-graph', false) YIELD graphName;
 ----
+
+If we want to drop a graph created on another database, we can set the database name as the third parameter.
+This will yield an empty result for non-existing graphs.
+
+.Try removing a graph from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.drop('my-fictive-graph', false, 'my-other-db') YIELD graphName;
+----
