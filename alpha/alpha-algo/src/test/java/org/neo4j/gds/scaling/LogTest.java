@@ -44,8 +44,7 @@ class LogTest {
     void normalizes(NodeProperties properties, double[] expected) {
         var scaler = LogTransformer.create(properties);
 
-        double[] actual = new double[5];
-        IntStream.range(1, 5).forEach(nodeId -> scaler.scaleProperty(nodeId, actual, nodeId - 1));
+        double[] actual = IntStream.range(1, 5).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);
     }
 

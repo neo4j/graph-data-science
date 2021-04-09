@@ -49,8 +49,7 @@ class L2NormTest {
 
         assertThat(scaler.euclideanLength).isEqualTo(euclideanLength);
 
-        double[] actual = new double[10];
-        IntStream.range(0, 10).forEach(nodeId -> scaler.scaleProperty(nodeId, actual, nodeId));
+        double[] actual = IntStream.range(0, 10).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);
     }
 
@@ -60,9 +59,7 @@ class L2NormTest {
         var scaler = L2Norm.create(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
-            double[] result = new double[1];
-            scaler.scaleProperty(i, result, 0);
-            assertThat(result[0]).isEqualTo(0D);
+            assertThat(scaler.scaleProperty(i)).isEqualTo(0D);
         }
     }
 }
