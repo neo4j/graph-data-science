@@ -48,7 +48,7 @@ final class Max implements Scaler {
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
-        var absMax = tasks.stream().mapToDouble(ComputeAggregates::absMax).max().orElse(-Double.MAX_VALUE);
+        var absMax = tasks.stream().mapToDouble(ComputeAggregates::absMax).max().orElse(0);
 
         if (Math.abs(absMax) < CLOSE_TO_ZERO) {
             return ZERO_SCALER;
@@ -73,7 +73,7 @@ final class Max implements Scaler {
             this.start = start;
             this.length = length;
             this.properties = property;
-            this.absMax = -Double.MAX_VALUE;
+            this.absMax = 0;
         }
 
         @Override
