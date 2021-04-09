@@ -25,7 +25,7 @@ public interface Scaler {
 
     double CLOSE_TO_ZERO = 1e-15;
 
-    void scaleProperty(long nodeId, double[] result, int offset);
+    double scaleProperty(long nodeId);
 
     int dimension();
 
@@ -37,11 +37,15 @@ public interface Scaler {
             this.elementScalers = elementScalers;
         }
 
-        @Override
         public void scaleProperty(long nodeId, double[] result, int offset) {
             for (int i = 0; i < dimension(); i++) {
                 result[offset + i] = elementScalers.get(i).scaleProperty(nodeId);
             }
+        }
+
+        @Override
+        public double scaleProperty(long nodeId) {
+            throw new UnsupportedOperationException("Use the other scaleProperty method");
         }
 
         @Override

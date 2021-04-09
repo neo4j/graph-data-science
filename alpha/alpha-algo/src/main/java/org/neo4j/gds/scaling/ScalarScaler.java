@@ -38,11 +38,6 @@ public abstract class ScalarScaler implements Scaler {
     public abstract double scaleProperty(long nodeId);
 
     @Override
-    public void scaleProperty(long nodeId, double[] result, int offset) {
-        result[offset] = scaleProperty(nodeId);
-    }
-
-    @Override
     public int dimension() {
         return 1;
     }

@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.LongConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -98,28 +99,31 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     }
 
     private void scaleProperty(HugeObjectArray<double[]> scaledProperties, Scaler scaler, int index) {
-        if (scaler instanceof ScalarScaler) {
-            var _scaler = (ScalarScaler) scaler;
-            var tasks = PartitionUtils.rangePartition(
-                config.concurrency(),
-                graph.nodeCount(),
-                (partition) -> (Runnable) () -> partition.consume((nodeId) -> {
-                    var afterValue = _scaler.scaleProperty(nodeId);
-                    double[] existingResult = scaledProperties.get(nodeId);
-                    existingResult[index] = afterValue;
-                })
-            );
-            ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+        var task = selectNodeIdConsumer(scaledProperties, scaler, index);
+        var tasks = PartitionUtils.rangePartition(
+            config.concurrency(),
+            graph.nodeCount(),
+            partition -> (Runnable) () -> partition.consume(task)
+        );
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+    }
+
+    private LongConsumer selectNodeIdConsumer(
+        HugeObjectArray<double[]> scaledProperties,
+        Scaler scaler,
+        int index
+    ) {
+        if (scaler instanceof Scaler.ArrayScaler) {
+            return (nodeId) ->
+                ((Scaler.ArrayScaler) scaler).scaleProperty(nodeId, scaledProperties.get(nodeId), index);
         } else {
-            var tasks = PartitionUtils.rangePartition(
-                config.concurrency(),
-                graph.nodeCount(),
-                (partition) -> (Runnable) () -> partition.consume((nodeId) -> {
-                    scaler.scaleProperty(nodeId, scaledProperties.get(nodeId), index);
-                })
-            );
-            ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
-        }    }
+            return (nodeId) -> {
+                var afterValue = scaler.scaleProperty(nodeId);
+                double[] existingResult = scaledProperties.get(nodeId);
+                existingResult[index] = afterValue;
+            };
+        }
+    }
 
     @Override
     public ScaleProperties me() {
