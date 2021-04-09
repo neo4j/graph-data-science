@@ -173,11 +173,20 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
                     )).collect(Collectors.toList());
                 return new Scaler.ArrayScaler(elementScalers);
             case FLOAT_ARRAY:
+                arrayLength = nodeProperties.floatArrayValue(0).length;
+                elementScalers = IntStream.range(0, arrayLength)
+                    .mapToObj(idx -> scalerVariant.create(
+                        transformFloatArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
+                        graph.nodeCount(),
+                        config.concurrency(),
+                        executor
+                    )).collect(Collectors.toList());
+                return new Scaler.ArrayScaler(elementScalers);
             case DOUBLE_ARRAY:
                 arrayLength = nodeProperties.doubleArrayValue(0).length;
                 elementScalers = IntStream.range(0, arrayLength)
                     .mapToObj(idx -> scalerVariant.create(
-                        transformFloatArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
+                        transformDoubleArrayEntryToDoubleProperty(propertyName, nodeProperties, arrayLength, idx),
                         graph.nodeCount(),
                         config.concurrency(),
                         executor
@@ -196,6 +205,17 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     private DoubleNodeProperties transformFloatArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
         return (nodeId) -> {
             var propertyValue = property.floatArrayValue(nodeId);
+
+            if (propertyValue == null || propertyValue.length != expectedArrayLength) {
+                throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+            }
+            return propertyValue[idx];
+        };
+    }
+
+    private DoubleNodeProperties transformDoubleArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
+        return (nodeId) -> {
+            var propertyValue = property.doubleArrayValue(nodeId);
 
             if (propertyValue == null || propertyValue.length != expectedArrayLength) {
                 throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));

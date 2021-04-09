@@ -47,11 +47,11 @@ class ScalePropertiesTest {
 
     @GdlGraph
     static String GDL =
-        "(a:A {a: 1.1D, b: 20, c: 50, bAndC: [20.0, 50.0], longArrayB: [20L], doubleArrayB: [20.0d], mixedSizeArray: [1.0, 1.0], missingArray: [1.0,2.0]}), " +
-        "(b:A {a: 2.8D, b: 21, c: 51, bAndC: [21.0, 51.0], longArrayB: [21L], doubleArrayB: [21.0d], mixedSizeArray: [1.0]}), " +
-        "(c:A {a: 3, b: 22, c: 52, bAndC: [22.0, 52.0], longArrayB: [22L], doubleArrayB: [22.0d], mixedSizeArray: [1.0]}), " +
-        "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], longArrayB: [23L], doubleArrayB: [23.0d], mixedSizeArray: [1.0]}), " +
-        "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], longArrayB: [24L], doubleArrayB: [24.0d], mixedSizeArray: [1.0, 2.0, 3.0]})";
+        "(a:A {a: 1.1D, b: 20, c: 50, bAndC: [20.0, 50.0], longArrayB: [20L], floatArrayB: [20.0], doubleArray: [1.000000001d],  mixedSizeArray: [1.0, 1.0], missingArray: [1.0,2.0]}), " +
+        "(b:A {a: 2.8D, b: 21, c: 51, bAndC: [21.0, 51.0], longArrayB: [21L], floatArrayB: [21.0], doubleArray: [1.000000002d], mixedSizeArray: [1.0]}), " +
+        "(c:A {a: 3, b: 22, c: 52, bAndC: [22.0, 52.0], longArrayB: [22L], floatArrayB: [22.0], doubleArray: [1.000000003d], mixedSizeArray: [1.0]}), " +
+        "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], longArrayB: [23L], floatArrayB: [23.0], doubleArray: [1.000000004d], mixedSizeArray: [1.0]}), " +
+        "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], longArrayB: [24L], floatArrayB: [24.0], doubleArray: [1.000000005d], mixedSizeArray: [1.0, 2.0, 3.0]})";
 
     @Inject
     TestGraph graph;
@@ -152,12 +152,12 @@ class ScalePropertiesTest {
 
     @ParameterizedTest
     @EnumSource(ScalarScaler.Variant.class)
-    void supportLongAndDoubleArrays(ScalarScaler.Variant scaler) {
+    void supportLongAndFloatArrays(ScalarScaler.Variant scaler) {
         var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder()
             .scaler(scaler);
         var bConfig = baseConfigBuilder.nodeProperties(List.of("b")).build();
         var longArrayBConfig = baseConfigBuilder.nodeProperties(List.of("longArrayB")).build();
-        var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("doubleArrayB")).build();
+        var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("floatArrayB")).build();
 
         var expected = new ScaleProperties(graph, bConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
         var actualLong = new ScaleProperties(graph, longArrayBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
@@ -165,6 +165,17 @@ class ScalePropertiesTest {
 
         LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualLong.get(id)));
         LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualDouble.get(id)));
+    }
+
+    @Test
+    void supportDoubleArrays() {
+        var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder().scaler(ScalarScaler.Variant.MINMAX);
+        var config = baseConfigBuilder.nodeProperties(List.of("doubleArray")).build();
+
+        var expected = new double[][]{new double[]{0.0}, new double[]{0.2499999722444236}, new double[]{.5}, new double[]{0.7500000277555764}, new double[]{1.0}};
+        var actual = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+
+        IntStream.range(0, (int) graph.nodeCount()).forEach(id -> assertArrayEquals(expected[id], actual.get(id)));
     }
 
     @Test
