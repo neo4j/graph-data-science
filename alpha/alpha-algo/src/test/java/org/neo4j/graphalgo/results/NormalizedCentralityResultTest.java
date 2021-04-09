@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.results;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.scaling.Scaler;
+import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.result.CentralityResult;
 
@@ -30,7 +30,7 @@ class NormalizedCentralityResultTest {
     @Test
     void mapsThroughScaler() {
         var unNormalizedResult = new CentralityResult(HugeDoubleArray.of(1, 2, 3, 4));
-        var normalizedResult = new NormalizedCentralityResult(unNormalizedResult, Scaler.ScalarScaler.ZERO);
+        var normalizedResult = new NormalizedCentralityResult(unNormalizedResult, ScalarScaler.ZERO);
 
         var normalizedProperties = normalizedResult.asNodeProperties();
         for (int i = 0; i < 4; i++) {

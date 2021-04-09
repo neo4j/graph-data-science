@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class L1Norm extends Scaler.ScalarScaler {
+final class L1Norm extends ScalarScaler {
 
     final double l1Norm;
 

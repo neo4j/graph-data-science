@@ -161,32 +161,6 @@ public interface Scaler {
         }
     }
 
-    abstract class ScalarScaler implements Scaler {
-
-        protected final NodeProperties properties;
-
-        public ScalarScaler(NodeProperties properties) {this.properties = properties;}
-
-        public abstract double scaleProperty(long nodeId);
-
-        @Override
-        public void scaleProperty(long nodeId, double[] result, int offset) {
-            result[offset] = scaleProperty(nodeId);
-        }
-
-        @Override
-        public int dimension() {
-            return 1;
-        }
-
-        public static final ScalarScaler ZERO = new ScalarScaler(null) {
-            @Override
-            public double scaleProperty(long nodeId) {
-                return 0;
-            }
-        };
-    }
-    
     abstract class AggregatesComputer implements Runnable {
         
         private final Partition partition;

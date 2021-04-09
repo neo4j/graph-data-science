@@ -17,27 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.results;
+package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.scaling.ScalarScaler;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.graphalgo.result.CentralityResult;
+import org.neo4j.graphalgo.api.NodeProperties;
 
-public class NormalizedCentralityResult extends CentralityResult {
-    private final ScalarScaler scaler;
+public abstract class ScalarScaler implements Scaler {
 
-    public NormalizedCentralityResult(CentralityResult result, ScalarScaler scaler) {
-        super(result.array());
-        this.scaler = scaler;
+    protected final NodeProperties properties;
+
+    public ScalarScaler(NodeProperties properties) {this.properties = properties;}
+
+    public abstract double scaleProperty(long nodeId);
+
+    @Override
+    public void scaleProperty(long nodeId, double[] result, int offset) {
+        result[offset] = scaleProperty(nodeId);
     }
 
     @Override
-    public double score(long nodeId) {
-        return scaler.scaleProperty(nodeId);
+    public int dimension() {
+        return 1;
     }
 
-    @Override
-    public DoubleNodeProperties asNodeProperties() {
-        return this::score;
-    }
+    public static final org.neo4j.gds.scaling.ScalarScaler ZERO = new org.neo4j.gds.scaling.ScalarScaler(null) {
+        @Override
+        public double scaleProperty(long nodeId) {
+            return 0;
+        }
+    };
 }

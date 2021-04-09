@@ -21,7 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 
-final class LogTransformer extends Scaler.ScalarScaler {
+final class LogTransformer extends ScalarScaler {
 
     private LogTransformer(NodeProperties properties) {
         super(properties);

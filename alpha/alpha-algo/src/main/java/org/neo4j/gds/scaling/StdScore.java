@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class StdScore extends Scaler.ScalarScaler {
+final class StdScore extends ScalarScaler {
 
     final double avg;
     final double std;

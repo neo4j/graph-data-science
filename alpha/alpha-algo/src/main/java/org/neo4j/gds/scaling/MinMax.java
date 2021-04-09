@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class MinMax extends Scaler.ScalarScaler {
+final class MinMax extends ScalarScaler {
 
     final double min;
     final double maxMinDiff;

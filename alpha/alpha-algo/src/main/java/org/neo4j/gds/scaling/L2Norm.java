@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class L2Norm extends Scaler.ScalarScaler {
+final class L2Norm extends ScalarScaler {
 
     final double euclideanLength;
 
