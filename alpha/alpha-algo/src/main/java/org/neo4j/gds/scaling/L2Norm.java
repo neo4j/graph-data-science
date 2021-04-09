@@ -35,7 +35,7 @@ final class L2Norm extends ScalarScaler {
         this.euclideanLength = euclideanLength;
     }
 
-    static ScalarScaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+    static ScalarScaler initialize(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,

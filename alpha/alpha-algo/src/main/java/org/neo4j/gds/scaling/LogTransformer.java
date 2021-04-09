@@ -23,12 +23,8 @@ import org.neo4j.graphalgo.api.NodeProperties;
 
 final class LogTransformer extends ScalarScaler {
 
-    private LogTransformer(NodeProperties properties) {
+    LogTransformer(NodeProperties properties) {
         super(properties);
-    }
-
-    static LogTransformer create(NodeProperties properties) {
-        return new LogTransformer(properties);
     }
 
     @Override

@@ -54,7 +54,7 @@ class L1NormTest {
     @ParameterizedTest
     @MethodSource("properties")
     void scale(int nodeCount, NodeProperties properties, double l1norm, double[] expected) {
-        var scaler = (L1Norm) L1Norm.create(properties, nodeCount, 1, Pools.DEFAULT);
+        var scaler = (L1Norm) L1Norm.initialize(properties, nodeCount, 1, Pools.DEFAULT);
 
         assertThat(scaler.l1Norm).isEqualTo(l1norm);
 
@@ -65,7 +65,7 @@ class L1NormTest {
     @Test
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 0D;
-        var scaler = L1Norm.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = L1Norm.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);

@@ -73,7 +73,7 @@ public abstract class ScalarScaler implements Scaler {
             public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
-                return Max.create(properties, nodeCount, concurrency, executor);
+                return Max.initialize(properties, nodeCount, concurrency, executor);
             }
         },
         MINMAX {
@@ -81,7 +81,7 @@ public abstract class ScalarScaler implements Scaler {
             public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
-                return MinMax.create(properties, nodeCount, concurrency, executor);
+                return MinMax.initialize(properties, nodeCount, concurrency, executor);
             }
         },
         MEAN {
@@ -89,7 +89,7 @@ public abstract class ScalarScaler implements Scaler {
             public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
-                return Mean.create(properties, nodeCount, concurrency, executor);
+                return Mean.initialize(properties, nodeCount, concurrency, executor);
             }
         },
         LOG {
@@ -97,7 +97,7 @@ public abstract class ScalarScaler implements Scaler {
             public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
-                return LogTransformer.create(properties);
+                return new LogTransformer(properties);
             }
         },
         STDSCORE {
@@ -105,7 +105,7 @@ public abstract class ScalarScaler implements Scaler {
             public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
-                return StdScore.create(properties, nodeCount, concurrency, executor);
+                return StdScore.initialize(properties, nodeCount, concurrency, executor);
             }
         },
         L1NORM {
@@ -113,7 +113,7 @@ public abstract class ScalarScaler implements Scaler {
             public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
-                return L1Norm.create(properties, nodeCount, concurrency, executor);
+                return L1Norm.initialize(properties, nodeCount, concurrency, executor);
             }
         },
         L2NORM {
@@ -121,7 +121,7 @@ public abstract class ScalarScaler implements Scaler {
             public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
-                return L2Norm.create(properties, nodeCount, concurrency, executor);
+                return L2Norm.initialize(properties, nodeCount, concurrency, executor);
             }
         };
 

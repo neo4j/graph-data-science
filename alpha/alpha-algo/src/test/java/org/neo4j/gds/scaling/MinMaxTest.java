@@ -45,7 +45,7 @@ class MinMaxTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodeProperties properties, double min, double max) {
-        var scaler = (MinMax) MinMax.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = (MinMax) MinMax.initialize(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(scaler.min).isEqualTo(min);
         assertThat(scaler.maxMinDiff).isEqualTo(max - min);
@@ -58,7 +58,7 @@ class MinMaxTest {
     @Test
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 4D;
-        var scaler = MinMax.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = MinMax.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);

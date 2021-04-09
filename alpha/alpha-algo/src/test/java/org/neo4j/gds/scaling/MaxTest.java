@@ -60,7 +60,7 @@ class MaxTest {
     @ParameterizedTest
     @MethodSource("properties")
     void scale(int nodeCount, NodeProperties properties, double maxAbs, double[] expected) {
-        var scaler = (Max) Max.create(properties, nodeCount, 1, Pools.DEFAULT);
+        var scaler = (Max) Max.initialize(properties, nodeCount, 1, Pools.DEFAULT);
 
         assertThat(scaler.maxAbs).isEqualTo(maxAbs);
 
@@ -71,7 +71,7 @@ class MaxTest {
     @Test
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 0D;
-        var scaler = Max.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = Max.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);

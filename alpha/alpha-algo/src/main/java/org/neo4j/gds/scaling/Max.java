@@ -35,7 +35,7 @@ final class Max extends ScalarScaler {
         this.maxAbs = maxAbs;
     }
 
-    static ScalarScaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+    static ScalarScaler initialize(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
