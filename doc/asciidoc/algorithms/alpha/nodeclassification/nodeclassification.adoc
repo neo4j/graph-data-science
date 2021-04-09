@@ -49,12 +49,22 @@ The order of the probabilities match the order of the classes registered in the 
 
 The Node Classification model in the Neo4j GDS library supports the following evaluation metrics:
 
-* `F1_WEIGHTED`
-* `F1_MACRO`
-* `ACCURACY`
+* Global metrics
+** `F1_WEIGHTED`
+** `F1_MACRO`
+** `ACCURACY`
 
-More than one metric can be specified during training but only the `primary` one is used for evaluation, the results of all are present in the train results.
+* Per-class metrics
+** `F1(class=<number>)` or `F1(class=*)`
+** `PRECISION(class=<number>)` or `PRECISION(class=*)`
+** `RECALL(class=<number>)` or `RECALL(class=*)`
+** `ACCURACY(class=<number>)` or `ACCURACY(class=*)`
 
+The `*` is syntactic sugar for reporting the metric for each class in the graph.
+When using a per-class metric, the reported metrics contain keys like for example `ACCURACY_class_1`.
+
+More than one metric can be specified during training but only the first specified -- the `primary` one -- is used for evaluation, the results of all are present in the train results.
+The primary metric may not be a `*` expansion due to the ambiguity of which of the expanded metrics should be the `primary` one.
 
 [[algorithms-ml-nodeclassification-syntax]]
 == Syntax
