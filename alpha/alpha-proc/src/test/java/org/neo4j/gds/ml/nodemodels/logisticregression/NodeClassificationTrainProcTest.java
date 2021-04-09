@@ -37,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 class NodeClassificationTrainProcTest extends BaseProcTest {
 
@@ -141,7 +140,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
         String resultAsString = runQuery(query, Result::resultAsString);
 
         assertThat(resultAsString).doesNotContain("f1_weighted", "aCcUrAcY", "f1(  ClAss = 0  )", "f1");
-        assertThat(resultAsString).contains("F1_WEIGHTED", "ACCURACY", "F1_class_0", "F1");
+        assertThat(resultAsString).contains("F1_WEIGHTED", "ACCURACY", "F1_class_0");
     }
 
     @Test
@@ -155,15 +154,18 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .addParameter("targetProperty", "t")
             .addParameter("holdoutFraction", 0.2)
             .addParameter("validationFolds", 4)
-            .addParameter("metrics", List.of("F1"))
+            .addParameter("metrics", List.of("F1(class=*)", "invalid"))
             .addParameter("params", List.of(Map.of("penalty", 1)))
             .yields();
 
-        assertError(query,"The primary (first) metric provided must be one of" );
+        assertError(query,
+            "The primary (first) metric provided must be one of " +
+            "F1_WEIGHTED, F1_MACRO, ACCURACY, F1(class=<class value>). " +
+            "Invalid metric expression `invalid`.");
     }
 
     @Test
-    void shouldFailWithInvalidMetric() {
+    void shouldFailWithInvalidMetrics() {
 
         String query = GdsCypher
             .call()
@@ -174,11 +176,11 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .addParameter("targetProperty", "t")
             .addParameter("holdoutFraction", 0.2)
             .addParameter("validationFolds", 4)
-            .addParameter("metrics", List.of("foo"))
+            .addParameter("metrics", List.of("foo", "F1(class=-42)", "F1(class=bar)"))
             .addParameter("params", List.of(Map.of("penalty", 1)))
             .yields();
 
-        assertError(query, "Invalid metric expression `foo`.");
+        assertError(query, "Invalid metric expressions `foo`, `F1(class=bar)`.");
     }
 
     @Test
