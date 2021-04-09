@@ -43,7 +43,6 @@ final class MinMax extends ScalarScaler {
             nodeCount,
             partition -> new ComputeMaxMin(partition, properties)
         );
-
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
         var min = tasks.stream().mapToDouble(ComputeMaxMin::min).min().orElse(Double.MAX_VALUE);

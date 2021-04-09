@@ -41,7 +41,6 @@ final class Max extends ScalarScaler {
             nodeCount,
             partition -> new ComputeAbsMax(partition, properties)
         );
-
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
         var absMax = tasks.stream().mapToDouble(ComputeAbsMax::absMax).max().orElse(0);

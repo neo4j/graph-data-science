@@ -41,7 +41,6 @@ final class L1Norm extends ScalarScaler {
             nodeCount,
             partition -> new ComputeSum(partition, properties)
         );
-
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
         var sum = tasks.stream().mapToDouble(ComputeSum::sum).sum();

@@ -43,7 +43,6 @@ final class Mean extends ScalarScaler {
             nodeCount,
             partition -> new ComputeMaxMinSum(partition, properties)
         );
-
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
         var min = tasks.stream().mapToDouble(ComputeMaxMinSum::min).min().orElse(Double.MAX_VALUE);

@@ -41,7 +41,6 @@ final class L2Norm extends ScalarScaler {
             nodeCount,
             partition -> new ComputeSquaredSum(partition, properties)
         );
-
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
         var squaredSum = tasks.stream().mapToDouble(ComputeSquaredSum::squaredSum).sum();
