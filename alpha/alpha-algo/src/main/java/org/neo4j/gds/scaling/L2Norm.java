@@ -37,10 +37,6 @@ final class L2Norm implements Scaler {
     }
 
     static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
-        if (nodeCount == 0) {
-            return new L2Norm(properties, 0);
-        }
-
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,

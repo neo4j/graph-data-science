@@ -39,10 +39,6 @@ final class Mean implements Scaler {
     }
 
     static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
-        if (nodeCount == 0) {
-            return new Mean(properties, 0, 0);
-        }
-
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,

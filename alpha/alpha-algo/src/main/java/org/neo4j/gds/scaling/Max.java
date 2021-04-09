@@ -37,10 +37,6 @@ final class Max implements Scaler {
     }
 
     static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
-        if (nodeCount == 0) {
-            return ZERO_SCALER;
-        }
-
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,

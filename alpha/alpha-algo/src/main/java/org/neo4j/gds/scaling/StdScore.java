@@ -39,11 +39,6 @@ final class StdScore implements Scaler {
     }
 
     static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
-        if (nodeCount == 0) {
-            return new StdScore(properties, 0, 0);
-        }
-
-        // calculate sum and squared sum
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
