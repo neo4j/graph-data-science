@@ -26,17 +26,16 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class L2Norm implements Scaler {
+final class L2Norm extends Scaler.ScalarScaler {
 
-    private final NodeProperties properties;
     final double euclideanLength;
 
     private L2Norm(NodeProperties properties, double euclideanLength) {
-        this.properties = properties;
+        super(properties);
         this.euclideanLength = euclideanLength;
     }
 
-    static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+    static ScalarScaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
@@ -49,15 +48,15 @@ final class L2Norm implements Scaler {
         var euclideanLength = Math.sqrt(squaredSum);
 
         if (Math.abs(euclideanLength) < CLOSE_TO_ZERO) {
-            return ZERO_SCALER;
+            return ZERO;
         } else {
             return new L2Norm(properties, euclideanLength);
         }
     }
 
     @Override
-    public void scaleProperty(long nodeId, double[] result, int offset) {
-        result[offset] = properties.doubleValue(nodeId) / euclideanLength;
+    public double scaleProperty(long nodeId) {
+        return properties.doubleValue(nodeId) / euclideanLength;
     }
 
     static class ComputeSquaredSum extends AggregatesComputer {

@@ -30,7 +30,7 @@ class NormalizedCentralityResultTest {
     @Test
     void mapsThroughScaler() {
         var unNormalizedResult = new CentralityResult(HugeDoubleArray.of(1, 2, 3, 4));
-        var normalizedResult = new NormalizedCentralityResult(unNormalizedResult, Scaler.ZERO_SCALER);
+        var normalizedResult = new NormalizedCentralityResult(unNormalizedResult, Scaler.ScalarScaler.ZERO);
 
         var normalizedProperties = normalizedResult.asNodeProperties();
         for (int i = 0; i < 4; i++) {

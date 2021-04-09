@@ -26,19 +26,18 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class MinMax implements Scaler {
+final class MinMax extends Scaler.ScalarScaler {
 
-    private final NodeProperties properties;
     final double min;
     final double maxMinDiff;
 
     private MinMax(NodeProperties properties, double min, double maxMinDiff) {
-        this.properties = properties;
+        super(properties);
         this.min = min;
         this.maxMinDiff = maxMinDiff;
     }
 
-    static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+    static ScalarScaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
@@ -53,15 +52,15 @@ final class MinMax implements Scaler {
         var maxMinDiff = max - min;
 
         if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
-            return ZERO_SCALER;
+            return ZERO;
         } else {
             return new MinMax(properties, min, maxMinDiff);
         }
     }
 
     @Override
-    public void scaleProperty(long nodeId, double[] result, int offset) {
-        result[offset] = (properties.doubleValue(nodeId) - min) / maxMinDiff;
+    public double scaleProperty(long nodeId) {
+        return (properties.doubleValue(nodeId) - min) / maxMinDiff;
     }
 
     static class ComputeMaxMin extends AggregatesComputer {

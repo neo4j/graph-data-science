@@ -26,17 +26,16 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class L1Norm implements Scaler {
+final class L1Norm extends Scaler.ScalarScaler {
 
-    private final NodeProperties properties;
     final double l1Norm;
 
     private L1Norm(NodeProperties properties, double l1Norm) {
-        this.properties = properties;
+        super(properties);
         this.l1Norm = l1Norm;
     }
 
-    static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+    static ScalarScaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
@@ -48,15 +47,15 @@ final class L1Norm implements Scaler {
         var sum = tasks.stream().mapToDouble(ComputeSum::sum).sum();
 
         if (Math.abs(sum) < CLOSE_TO_ZERO) {
-            return ZERO_SCALER;
+            return ZERO;
         } else {
             return new L1Norm(properties, sum);
         }
     }
 
     @Override
-    public void scaleProperty(long nodeId, double[] result, int offset) {
-        result[offset] = properties.doubleValue(nodeId) / l1Norm;
+    public double scaleProperty(long nodeId) {
+        return properties.doubleValue(nodeId) / l1Norm;
     }
 
     static class ComputeSum extends AggregatesComputer {

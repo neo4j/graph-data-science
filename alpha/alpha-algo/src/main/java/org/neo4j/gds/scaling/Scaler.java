@@ -36,24 +36,25 @@ public interface Scaler {
 
     void scaleProperty(long nodeId, double[] result, int offset);
 
-    default int dimension() {
-        return 1;
-    }
-
-    Scaler ZERO_SCALER = (nodeId, result, offset) -> result[offset] = 0D;
+    int dimension();
 
     enum Variant {
         NONE {
             @Override
-            public Scaler create(
+            public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
-                return (nodeId, result, offset) -> result[offset] = properties.doubleValue(nodeId);
+                return new ScalarScaler(properties) {
+                    @Override
+                    public double scaleProperty(long nodeId) {
+                        return properties.doubleValue(nodeId);
+                    }
+                };
             }
         },
         MAX {
             @Override
-            public Scaler create(
+            public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return Max.create(properties, nodeCount, concurrency, executor);
@@ -61,7 +62,7 @@ public interface Scaler {
         },
         MINMAX {
             @Override
-            public Scaler create(
+            public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return MinMax.create(properties, nodeCount, concurrency, executor);
@@ -69,7 +70,7 @@ public interface Scaler {
         },
         MEAN {
             @Override
-            public Scaler create(
+            public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return Mean.create(properties, nodeCount, concurrency, executor);
@@ -77,7 +78,7 @@ public interface Scaler {
         },
         LOG {
             @Override
-            public Scaler create(
+            public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return LogTransformer.create(properties);
@@ -85,7 +86,7 @@ public interface Scaler {
         },
         STDSCORE {
             @Override
-            public Scaler create(
+            public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return StdScore.create(properties, nodeCount, concurrency, executor);
@@ -93,7 +94,7 @@ public interface Scaler {
         },
         L1NORM {
             @Override
-            public Scaler create(
+            public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return L1Norm.create(properties, nodeCount, concurrency, executor);
@@ -101,7 +102,7 @@ public interface Scaler {
         },
         L2NORM {
             @Override
-            public Scaler create(
+            public ScalarScaler create(
                 NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return L2Norm.create(properties, nodeCount, concurrency, executor);
@@ -131,7 +132,7 @@ public interface Scaler {
         /**
          * Create a scaler. Some scalers rely on aggregate extreme values which are computed at construction time.
          */
-        public abstract Scaler create(
+        public abstract ScalarScaler create(
             NodeProperties properties,
             long nodeCount,
             int concurrency,
@@ -158,6 +159,32 @@ public interface Scaler {
         public int dimension() {
             return elementScalers.size();
         }
+    }
+
+    abstract class ScalarScaler implements Scaler {
+
+        protected final NodeProperties properties;
+
+        public ScalarScaler(NodeProperties properties) {this.properties = properties;}
+
+        public abstract double scaleProperty(long nodeId);
+
+        @Override
+        public void scaleProperty(long nodeId, double[] result, int offset) {
+            result[offset] = scaleProperty(nodeId);
+        }
+
+        @Override
+        public int dimension() {
+            return 1;
+        }
+
+        public static final ScalarScaler ZERO = new ScalarScaler(null) {
+            @Override
+            public double scaleProperty(long nodeId) {
+                return 0;
+            }
+        };
     }
     
     abstract class AggregatesComputer implements Runnable {

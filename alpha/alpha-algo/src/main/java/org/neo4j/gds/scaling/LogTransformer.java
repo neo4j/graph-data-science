@@ -21,12 +21,10 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 
-final class LogTransformer implements Scaler {
-
-    private final NodeProperties properties;
+final class LogTransformer extends Scaler.ScalarScaler {
 
     private LogTransformer(NodeProperties properties) {
-        this.properties = properties;
+        super(properties);
     }
 
     static LogTransformer create(NodeProperties properties) {
@@ -34,9 +32,9 @@ final class LogTransformer implements Scaler {
     }
 
     @Override
-    public void scaleProperty(long nodeId, double[] result, int offset) {
+    public double scaleProperty(long nodeId) {
         // TODO: check for 0 ? (as its -Infinity)
-        result[offset] = Math.log(properties.doubleValue(nodeId));
+        return Math.log(properties.doubleValue(nodeId));
     }
 
 }

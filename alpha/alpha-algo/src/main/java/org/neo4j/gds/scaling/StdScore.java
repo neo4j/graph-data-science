@@ -26,19 +26,18 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class StdScore implements Scaler {
+final class StdScore extends Scaler.ScalarScaler {
 
-    private final NodeProperties properties;
     final double avg;
     final double std;
 
     private StdScore(NodeProperties properties, double avg, double std) {
-        this.properties = properties;
+        super(properties);
         this.avg = avg;
         this.std = std;
     }
 
-    static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+    static ScalarScaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
@@ -58,15 +57,15 @@ final class StdScore implements Scaler {
         var std = Math.sqrt(variance);
 
         if (Math.abs(std) < CLOSE_TO_ZERO) {
-            return ZERO_SCALER;
+            return ZERO;
         } else {
             return new StdScore(properties, avg, std);
         }
     }
 
     @Override
-    public void scaleProperty(long nodeId, double[] result, int offset) {
-        result[offset] = (properties.doubleValue(nodeId) - avg) / std;
+    public double scaleProperty(long nodeId) {
+        return (properties.doubleValue(nodeId) - avg) / std;
     }
 
     static class ComputeSumAndSquaredSum extends AggregatesComputer {

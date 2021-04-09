@@ -26,19 +26,18 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class Mean implements Scaler {
+final class Mean extends Scaler.ScalarScaler {
 
-    private final NodeProperties properties;
     final double avg;
     final double maxMinDiff;
 
     private Mean(NodeProperties properties, double avg, double maxMinDiff) {
-        this.properties = properties;
+        super(properties);
         this.avg = avg;
         this.maxMinDiff = maxMinDiff;
     }
 
-    static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+    static ScalarScaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
@@ -54,15 +53,15 @@ final class Mean implements Scaler {
         var maxMinDiff = max - min;
 
         if (Math.abs(maxMinDiff) < CLOSE_TO_ZERO) {
-            return ZERO_SCALER;
+            return ZERO;
         } else {
             return new Mean(properties, sum / nodeCount, maxMinDiff);
         }
     }
 
     @Override
-    public void scaleProperty(long nodeId, double[] result, int offset) {
-        result[offset] = (properties.doubleValue(nodeId) - avg) / maxMinDiff;
+    public double scaleProperty(long nodeId) {
+        return (properties.doubleValue(nodeId) - avg) / maxMinDiff;
     }
 
     static class ComputeMaxMinSum extends AggregatesComputer {

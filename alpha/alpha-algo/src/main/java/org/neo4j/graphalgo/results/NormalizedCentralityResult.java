@@ -24,19 +24,16 @@ import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.result.CentralityResult;
 
 public class NormalizedCentralityResult extends CentralityResult {
-    private final Scaler scaler;
-    private final double[] result;
+    private final Scaler.ScalarScaler scaler;
 
-    public NormalizedCentralityResult(CentralityResult result, Scaler scaler) {
+    public NormalizedCentralityResult(CentralityResult result, Scaler.ScalarScaler scaler) {
         super(result.array());
         this.scaler = scaler;
-        this.result = new double[1];
     }
 
     @Override
     public double score(long nodeId) {
-        scaler.scaleProperty(nodeId, result, 0);
-        return result[0];
+        return scaler.scaleProperty(nodeId);
     }
 
     @Override
