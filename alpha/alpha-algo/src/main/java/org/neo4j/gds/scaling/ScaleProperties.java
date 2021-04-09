@@ -98,15 +98,28 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     }
 
     private void scaleProperty(HugeObjectArray<double[]> scaledProperties, Scaler scaler, int index) {
-        var tasks = PartitionUtils.rangePartition(
-            config.concurrency(),
-            graph.nodeCount(),
-            (partition) -> (Runnable) () -> partition.consume((nodeId) -> {
-                scaler.scaleProperty(nodeId, scaledProperties.get(nodeId), index);
-            })
-        );
-        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
-    }
+        if (scaler instanceof ScalarScaler) {
+            var _scaler = (ScalarScaler) scaler;
+            var tasks = PartitionUtils.rangePartition(
+                config.concurrency(),
+                graph.nodeCount(),
+                (partition) -> (Runnable) () -> partition.consume((nodeId) -> {
+                    var afterValue = _scaler.scaleProperty(nodeId);
+                    double[] existingResult = scaledProperties.get(nodeId);
+                    existingResult[index] = afterValue;
+                })
+            );
+            ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+        } else {
+            var tasks = PartitionUtils.rangePartition(
+                config.concurrency(),
+                graph.nodeCount(),
+                (partition) -> (Runnable) () -> partition.consume((nodeId) -> {
+                    scaler.scaleProperty(nodeId, scaledProperties.get(nodeId), index);
+                })
+            );
+            ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+        }    }
 
     @Override
     public ScaleProperties me() {
