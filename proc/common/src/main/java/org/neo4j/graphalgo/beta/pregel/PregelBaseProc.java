@@ -34,9 +34,9 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class PregelBaseProc {
 
-    static <ALGO extends Algorithm<ALGO, Pregel.PregelResult>, CONFIG extends PregelConfig>
+    static <ALGO extends Algorithm<ALGO, PregelResult>, CONFIG extends PregelConfig>
     List<NodePropertyExporter.NodeProperty> nodeProperties(
-        AlgoBaseProc.ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult,
+        AlgoBaseProc.ComputationResult<ALGO, PregelResult, CONFIG> computationResult,
         String propertyPrefix
     ) {
         var compositeNodeValue = computationResult.result().nodeValues();

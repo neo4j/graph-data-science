@@ -24,12 +24,13 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.logging.Log;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
-public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, Pregel.PregelResult> {
+public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, PregelResult> {
     private final Pregel<PregelConfig> pregelJob;
 
     ComputationAlgorithm(Graph graph, PregelConfig configuration, AllocationTracker tracker,
@@ -38,7 +39,7 @@ public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, 
     }
 
     @Override
-    public Pregel.PregelResult compute() {
+    public PregelResult compute() {
         return pregelJob.run();
     }
 

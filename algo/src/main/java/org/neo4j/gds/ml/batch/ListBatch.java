@@ -24,7 +24,7 @@ import java.util.List;
 public class ListBatch implements Batch {
     private final List<Long> ids;
 
-    ListBatch(List<Long> ids) {
+    public ListBatch(List<Long> ids) {
         this.ids = ids;
     }
 

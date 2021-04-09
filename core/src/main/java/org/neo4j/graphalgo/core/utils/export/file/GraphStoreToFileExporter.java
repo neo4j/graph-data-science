@@ -56,8 +56,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             graphStore,
             config,
             () -> new CsvGraphInfoVisitor(exportPath),
-            () -> new CsvNodeSchemaVisitor(exportPath, nodeSchema.hasProperties()),
-            () -> new CsvRelationshipSchemaVisitor(exportPath, relationshipSchema.hasProperties()),
+            () -> new CsvNodeSchemaVisitor(exportPath),
+            () -> new CsvRelationshipSchemaVisitor(exportPath),
             (index) -> new CsvNodeVisitor(exportPath, nodeSchema, headerFiles, index, config.includeMetaData()),
             (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index)
         );

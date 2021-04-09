@@ -30,13 +30,13 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public abstract class PregelStreamProc<
-    ALGO extends Algorithm<ALGO, Pregel.PregelResult>,
+    ALGO extends Algorithm<ALGO, PregelResult>,
     CONFIG extends PregelConfig>
-    extends StreamProc<ALGO, Pregel.PregelResult, PregelStreamResult, CONFIG> {
+    extends StreamProc<ALGO, PregelResult, PregelStreamResult, CONFIG> {
 
     @Override
     protected Stream<PregelStreamResult> stream(
-        AlgoBaseProc.ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult
+        AlgoBaseProc.ComputationResult<ALGO, PregelResult, CONFIG> computationResult
     ) {
         if (computationResult.isGraphEmpty()) {
             return Stream.empty();

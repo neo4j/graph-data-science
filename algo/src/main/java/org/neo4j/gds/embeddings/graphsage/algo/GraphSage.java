@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.embeddings.graphsage.GraphSageEmbeddingsGenerator;
+import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.graphalgo.Algorithm;
@@ -30,7 +31,8 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingleLabelFeatures;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeMultiLabelFeatures;
 
 public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
@@ -69,9 +71,17 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
         );
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
+
+        var features = trainConfig.isMultiLabel() ?
+            initializeMultiLabelFeatures(
+                graph,
+                GraphSageHelper.multiLabelFeatureExtractors(graph, trainConfig), tracker
+            )
+            : initializeSingleLabelFeatures(graph, trainConfig, tracker);
+
         HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(
             graph,
-            initializeFeatures(graph, trainConfig, tracker)
+            features
         );
         return GraphSageResult.of(embeddings);
     }

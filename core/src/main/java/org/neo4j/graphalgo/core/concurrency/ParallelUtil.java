@@ -1088,7 +1088,7 @@ public final class ParallelUtil {
         }
     }
 
-    private static ForkJoinPool getFJPoolWithConcurrency(int concurrency) {
+    public static ForkJoinPool getFJPoolWithConcurrency(int concurrency) {
         return new ForkJoinPool(concurrency, forkJoinPoolWorkerThreadFactory, null, false);
     }
 

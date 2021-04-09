@@ -25,14 +25,12 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
 
-import java.util.Optional;
-
 @Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
 public interface NodeClassificationPredictConfig extends AlgoBaseConfig, ModelConfig {
 
-    Optional<String> predictedProbabilityProperty();
+    boolean includePredictedProbabilities();
 
     @Value.Default
     default int batchSize() {

@@ -41,7 +41,7 @@ class LayerSerializationTest {
             .degreeAsProperty(true)
             .build();
 
-        var layer = config.layerConfigs().stream()
+        var layer = config.layerConfigs(42).stream()
             .map(LayerFactory::createLayer)
             .findFirst()
             .orElseThrow();

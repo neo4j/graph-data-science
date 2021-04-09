@@ -20,26 +20,16 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.graphalgo.core.utils.partition.Partition;
-import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Function;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class Pregel<CONFIG extends PregelConfig> {
@@ -54,9 +44,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final Messenger<?> messenger;
 
-    private final int concurrency;
-    private final ExecutorService executor;
-    private final AllocationTracker tracker;
+    private final PregelComputer<CONFIG> computer;
 
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
         Graph graph,
@@ -84,7 +72,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema, boolean isQueueBased, boolean isAsync) {
         var estimationBuilder = MemoryEstimations.builder(Pregel.class)
             .perNode("vote bits", MemoryUsage::sizeOfHugeAtomicBitset)
-            .perThread("compute steps", MemoryEstimations.builder(ComputeStep.class).build())
+            .perThread("compute steps", MemoryEstimations.builder(PartitionedComputeStep.class).build())
             .add("node value", NodeValue.memoryEstimation(pregelSchema));
 
         if (isQueueBased) {
@@ -112,9 +100,6 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.config = config;
         this.computation = computation;
         this.nodeValues = initialNodeValue;
-        this.concurrency = config.concurrency();
-        this.executor = executor;
-        this.tracker = tracker;
 
         var reducer = computation.reducer();
 
@@ -123,36 +108,34 @@ public final class Pregel<CONFIG extends PregelConfig> {
             : config.isAsynchronous()
                 ? new AsyncQueueMessenger(graph.nodeCount(), tracker)
                 : new SyncQueueMessenger(graph.nodeCount(), tracker);
+
+        this.computer = PregelComputer.<CONFIG>builder()
+            .graph(graph)
+            .computation(computation)
+            .config(config)
+            .nodeValues(nodeValues)
+            .messenger(messenger)
+            .voteBits(HugeAtomicBitSet.create(graph.nodeCount(), tracker))
+            .executorService(config.useForkJoin()
+                ? ParallelUtil.getFJPoolWithConcurrency(config.concurrency())
+                : executor)
+            .build();
     }
 
     public PregelResult run() {
         boolean didConverge = false;
-        // Tracks if a node voted to halt in the previous iteration
-        HugeAtomicBitSet voteBits = HugeAtomicBitSet.create(graph.nodeCount(), tracker);
 
-        var computeSteps = createComputeSteps(voteBits);
+        computer.initComputation();
 
-        int iterations;
-        for (iterations = 0; iterations < config.maxIterations(); iterations++) {
-            // Init compute steps with the updated state
-            for (var computeStep : computeSteps) {
-                computeStep.init(iterations);
-            }
+        int iteration = 0;
+        for (; iteration < config.maxIterations(); iteration++) {
+            computer.initIteration(iteration);
+            messenger.initIteration(iteration);
 
-            // Init messenger with the updated state
-            messenger.initIteration(iterations);
+            computer.runIteration();
+            runMasterComputeStep(iteration);
 
-            // Run the computation
-            runComputeSteps(computeSteps);
-            runMasterComputeStep(iterations);
-
-
-            var lastIterationSendMessages = computeSteps
-                .stream()
-                .anyMatch(ComputeStep::hasSendMessage);
-
-            // No messages have been sent and all nodes voted to halt
-            if (!lastIterationSendMessages && voteBits.allSet()) {
+            if (computer.hasConverged()) {
                 didConverge = true;
                 break;
             }
@@ -161,7 +144,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         return ImmutablePregelResult.builder()
             .nodeValues(nodeValues)
             .didConverge(didConverge)
-            .ranIterations(iterations)
+            .ranIterations(iteration)
             .build();
     }
 
@@ -169,53 +152,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
         messenger.release();
     }
 
-    @NotNull
-    private List<ComputeStep<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
-        Function<Partition, ComputeStep<CONFIG, ?>> partitionFunction = partition -> new ComputeStep<>(
-            graph,
-            computation,
-            config,
-            0,
-            partition,
-            nodeValues,
-            messenger,
-            voteBits,
-            graph
-        );
-
-        switch (config.partitioning()) {
-            case RANGE:
-                return PartitionUtils.rangePartition(concurrency, graph.nodeCount(), partitionFunction);
-            case DEGREE:
-                var batchSize = Math.max(
-                    ParallelUtil.DEFAULT_BATCH_SIZE,
-                    BitUtil.ceilDiv(graph.relationshipCount(), concurrency)
-                );
-                return PartitionUtils.degreePartition(graph, batchSize, partitionFunction);
-            default:
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Unsupported partitioning `%s`",
-                    config.partitioning()
-                ));
-        }
-    }
-
-    private void runComputeSteps(Collection<ComputeStep<CONFIG, ?>> computeSteps) {
-        ParallelUtil.runWithConcurrency(concurrency, computeSteps, executor);
-    }
-
     private void runMasterComputeStep(int iteration) {
         var context = new MasterComputeContext<>(config, graph, iteration, nodeValues);
         computation.masterCompute(context);
-    }
-
-    @ValueClass
-    public interface PregelResult {
-
-        NodeValue nodeValues();
-
-        int ranIterations();
-
-        boolean didConverge();
     }
 }

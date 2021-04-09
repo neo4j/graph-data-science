@@ -20,12 +20,11 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
@@ -45,6 +44,7 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -54,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_ARRAY_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.LONG_ARRAY_KEY;
@@ -77,9 +78,16 @@ class PregelTest {
     private TestGraph graph;
 
     @ParameterizedTest
-    @MethodSource("configAndResult")
-    <C extends PregelConfig> void sendsMessages(C config, PregelComputation<C> computation, double[] expected) {
-        Pregel<C> pregelJob = Pregel.create(
+    @MethodSource("partitioningConfigAndResult")
+    void sendsMessages(
+        Partitioning partitioning,
+        ImmutablePregelConfig.Builder configBuilder,
+        PregelComputation<PregelConfig> computation,
+        double[] expected
+    ) {
+        var config = configBuilder.partitioning(partitioning).build();
+
+        Pregel<PregelConfig> pregelJob = Pregel.create(
             graph,
             config,
             computation,
@@ -91,9 +99,16 @@ class PregelTest {
         assertArrayEquals(expected, nodeValues.doubleProperties(KEY).toArray());
     }
 
+    static Stream<Arguments> forkJoinAndPartitioning() {
+        return crossArguments(
+            TestSupport::trueFalseArguments,
+            () -> Arrays.stream(Partitioning.values()).map(Arguments::of)
+        );
+    }
+
     @ParameterizedTest
     @EnumSource(Partitioning.class)
-    void testCorrectnessForLargeGraph(Partitioning partitioningScheme) {
+    void testCorrectnessForLargeGraph(Partitioning partitioning) {
         var graph = RandomGraphGenerator.builder()
             .nodeCount(10_000)
             .averageDegree(10)
@@ -106,7 +121,7 @@ class PregelTest {
         var configBuilder = ImmutablePregelConfig.builder()
             .username("")
             .maxIterations(10)
-            .partitioning(partitioningScheme)
+            .partitioning(partitioning)
             .isAsynchronous(false);
 
         var singleThreadedConfig = configBuilder.concurrency(1).build();
@@ -143,11 +158,13 @@ class PregelTest {
         return pregelJob.run().nodeValues().doubleProperties(KEY);
     }
 
-    @Test
-    void sendMessageToSpecificTarget() {
+    @ParameterizedTest
+    @EnumSource(Partitioning.class)
+    void sendMessageToSpecificTarget(Partitioning partitioning) {
         var config = ImmutablePregelConfig.builder()
             .maxIterations(2)
             .concurrency(1)
+            .partitioning(partitioning)
             .build();
 
         var pregelJob = Pregel.create(
@@ -164,11 +181,13 @@ class PregelTest {
         assertEquals(Double.NaN, nodeValues.doubleProperties(KEY).get(2L));
     }
 
-    @Test
-    void compositeNodeValueTest() {
+    @ParameterizedTest
+    @EnumSource(Partitioning.class)
+    void compositeNodeValueTest(Partitioning partitioning) {
         var config = ImmutableCompositeTestComputationConfig.builder()
             .maxIterations(2)
             .concurrency(1)
+            .partitioning(partitioning)
             .longProperty("longSeed")
             .doubleProperty("doubleSeed")
             .build();
@@ -208,11 +227,12 @@ class PregelTest {
         );
     }
 
-    @Test
-    void testMasterComputeStep() {
+    @ParameterizedTest
+    @EnumSource(Partitioning.class)
+    void testMasterComputeStep(Partitioning partitioning) {
         var pregelJob = Pregel.create(
             graph,
-            ImmutablePregelConfig.builder().maxIterations(4).build(),
+            ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(),
             Pools.DEFAULT,
             AllocationTracker.empty()
@@ -225,8 +245,8 @@ class PregelTest {
     static Stream<Arguments> estimations() {
         return Stream.of(
             // queue based sync
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7441696L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7442344L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7441672L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7442176L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -235,7 +255,7 @@ class PregelTest {
                     .build(),
                 true,
                 false,
-                9441768L
+                9441744L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -245,12 +265,12 @@ class PregelTest {
                     .build(),
                 true,
                 false,
-                9442416L
+                9442248L
             ),
 
             // queue based async
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3841656L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3842304L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3841632L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3842136L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -259,7 +279,7 @@ class PregelTest {
                     .build(),
                 true,
                 true,
-                5841728L
+                5841704L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -269,12 +289,12 @@ class PregelTest {
                     .build(),
                 true,
                 true,
-                5842376L
+                5842208L
             ),
 
             // array based
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 241_576L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 242_224L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 241552L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 242056L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -283,7 +303,7 @@ class PregelTest {
                     .build(),
                 false,
                 false,
-                2_241_648L
+                2241624L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -293,14 +313,20 @@ class PregelTest {
                     .build(),
                 false,
                 false,
-                2_242_296L
+                2242128L
             )
         );
     }
 
     @ParameterizedTest
     @MethodSource("estimations")
-    void memoryEstimation(int concurrency, PregelSchema pregelSchema, boolean isQueueBased, boolean isAsync, long expectedBytes) {
+    void memoryEstimation(
+        int concurrency,
+        PregelSchema pregelSchema,
+        boolean isQueueBased,
+        boolean isAsync,
+        long expectedBytes
+    ) {
         var dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(10_000)
             .maxRelCount(100_000)
@@ -308,29 +334,36 @@ class PregelTest {
 
         assertEquals(
             MemoryRange.of(expectedBytes).max,
-            Pregel.memoryEstimation(pregelSchema, isQueueBased, isAsync).estimate(dimensions, concurrency).memoryUsage().max
+            Pregel
+                .memoryEstimation(pregelSchema, isQueueBased, isAsync)
+                .estimate(dimensions, concurrency)
+                .memoryUsage().max
         );
+    }
+
+    static Stream<Arguments> partitioningConfigAndResult() {
+        return crossArguments(PregelTest::partitionings, PregelTest::configAndResult);
     }
 
     static Stream<Arguments> configAndResult() {
         return Stream.of(
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2).build(),
+                ImmutablePregelConfig.builder().maxIterations(2),
                 new TestPregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop").build(),
+                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop"),
                 new TestPregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop").build(),
+                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop"),
                 new TestWeightComputation(),
                 new double[]{0.0, 2.0, 1.0}
             ),
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2).build(),
+                ImmutablePregelConfig.builder().maxIterations(2),
                 new TestReduciblePregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             )
@@ -351,10 +384,12 @@ class PregelTest {
         }
     }
 
-    @Test
-    void preventIllegalConcurrencyConfiguration() {
+    @ParameterizedTest
+    @EnumSource(Partitioning.class)
+    void preventIllegalConcurrencyConfiguration(Partitioning partitioning) {
         var config = ImmutableHackerManConfig.builder()
             .maxIterations(1337)
+            .partitioning(partitioning)
             .concurrency(42)
             .build();
 
@@ -367,12 +402,23 @@ class PregelTest {
         ));
     }
 
+    static Stream<Arguments> partitioningAndAsynchronous() {
+        return crossArguments(PregelTest::partitionings, TestSupport::trueFalseArguments);
+    }
+
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void messagesInInitialSuperStepShouldBeEmpty(boolean isAsynchronous) {
+    @MethodSource("partitioningAndAsynchronous")
+    void messagesInInitialSuperStepShouldBeEmpty(Partitioning partitioning, boolean isAsynchronous) {
+        var config = ImmutablePregelConfig
+            .builder()
+            .maxIterations(2)
+            .partitioning(partitioning)
+            .isAsynchronous(isAsynchronous)
+            .build();
+
         var pregelJob = Pregel.create(
             graph,
-            ImmutablePregelConfig.builder().maxIterations(2).isAsynchronous(isAsynchronous).build(),
+            config,
             new TestEmptyMessageInInitialSuperstep(),
             Pools.DEFAULT,
             AllocationTracker.empty()
@@ -380,6 +426,10 @@ class PregelTest {
 
         // assertion is happening in the computation
         pregelJob.run();
+    }
+
+    static Stream<Arguments> partitionings() {
+        return Arrays.stream(Partitioning.values()).map(Arguments::of);
     }
 
     public static class TestPregelComputation implements PregelComputation<PregelConfig> {
@@ -501,7 +551,7 @@ class PregelTest {
         }
     }
 
-    private static class TestMasterCompute implements PregelComputation<PregelConfig> {
+    static class TestMasterCompute implements PregelComputation<PregelConfig> {
         @Override
         public PregelSchema schema(PregelConfig config) {
             return new PregelSchema.Builder().add(KEY, ValueType.LONG).build();
@@ -526,7 +576,7 @@ class PregelTest {
         }
     }
 
-    private static class TestEmptyMessageInInitialSuperstep implements PregelComputation<PregelConfig> {
+    static class TestEmptyMessageInInitialSuperstep implements PregelComputation<PregelConfig> {
         @Override
         public PregelSchema schema(PregelConfig config) {
             return new PregelSchema.Builder().build();

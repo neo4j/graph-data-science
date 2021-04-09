@@ -76,7 +76,7 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
     }
 
     private MemoryEstimation estimate(GraphSageTrainConfig config, long nodeCount, int labelCount) {
-        var layerConfigs = config.layerConfigs();
+        var layerConfigs = config.layerConfigs(config.estimationFeatureDimension());
         var numberOfLayers = layerConfigs.size();
 
         var layerBuilder = MemoryEstimations.builder("GraphSageTrain")
@@ -106,8 +106,8 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
         var isMultiLabel = config.isMultiLabel();
 
         var perNodeFeaturesMemory = MemoryRange.of(
-            sizeOfDoubleArray(isMultiLabel ? config.degreeAsProperty() ? 2 : 1 : config.featuresSize()),
-            sizeOfDoubleArray(config.featuresSize())
+            sizeOfDoubleArray(isMultiLabel ? config.degreeAsProperty() ? 2 : 1 : config.estimationFeatureDimension()),
+            sizeOfDoubleArray(config.estimationFeatureDimension())
         );
         var initialFeaturesMemory = HugeObjectArray.memoryEstimation(MemoryEstimations.of("", perNodeFeaturesMemory));
 
@@ -121,8 +121,8 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
             var minNumProperties = config.degreeAsProperty() ? 2 : 1;
             var maxNumProperties = config.featureProperties().size() + (config.degreeAsProperty() ? 1 : 0);
             maxNumProperties++; // Add one for the label
-            var minWeightsMemory = sizeOfDoubleArray(config.featuresSize() * minNumProperties);
-            var maxWeightsMemory = sizeOfDoubleArray(config.featuresSize() * maxNumProperties);
+            var minWeightsMemory = sizeOfDoubleArray(config.estimationFeatureDimension() * minNumProperties);
+            var maxWeightsMemory = sizeOfDoubleArray(config.estimationFeatureDimension() * maxNumProperties);
             var weightByLabelMemory = MemoryRange.of(minWeightsMemory, maxWeightsMemory).times(labelCount);
 
             estimationsBuilder.fixed("weightsByLabel", weightByLabelMemory);

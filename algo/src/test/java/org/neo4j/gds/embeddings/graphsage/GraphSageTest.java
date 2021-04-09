@@ -55,7 +55,6 @@ import java.util.Random;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeFeatures;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
@@ -119,8 +118,6 @@ class GraphSageTest {
             .featureProperties(List.of("f1", "f2", "f3"))
             .concurrency(4)
             .build();
-
-        features = initializeFeatures(orphanGraph, trainConfig, AllocationTracker.empty());
 
         SingleLabelGraphSageTrain trainAlgo = new SingleLabelGraphSageTrain(
             orphanGraph,

@@ -20,9 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
@@ -30,57 +28,61 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 
 import java.util.function.LongConsumer;
 
-public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator> implements Runnable {
+public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messages.MessageIterator> {
 
-    private final long nodeCount;
-    private final long relationshipCount;
-    private final boolean isMultiGraph;
-    private final InitContext<CONFIG> initContext;
-    private final ComputeContext<CONFIG> computeContext;
-    private final Partition nodeBatch;
-    private final Degrees degrees;
-    private final NodeValue nodeValue;
-    private final HugeAtomicBitSet voteBits;
-    private final Messenger<ITERATOR> messenger;
-    private final PregelComputation<CONFIG> computation;
-    private final RelationshipIterator relationshipIterator;
+    Graph graph();
 
-    private int iteration;
-    private boolean hasSendMessage;
+    HugeAtomicBitSet voteBits();
 
-    ComputeStep(
-        Graph graph,
-        PregelComputation<CONFIG> computation,
-        CONFIG config,
-        int iteration,
-        Partition nodeBatch,
-        NodeValue nodeValue,
-        Messenger<ITERATOR> messenger,
-        HugeAtomicBitSet voteBits,
-        RelationshipIterator relationshipIterator
-    ) {
-        this.iteration = iteration;
-        this.nodeCount = graph.nodeCount();
-        this.relationshipCount = graph.relationshipCount();
-        this.computation = computation;
-        this.voteBits = voteBits;
-        this.nodeBatch = nodeBatch;
-        this.degrees = graph;
-        this.isMultiGraph = graph.isMultiGraph();
-        this.nodeValue = nodeValue;
-        this.relationshipIterator = relationshipIterator.concurrentCopy();
-        this.messenger = messenger;
-        this.computeContext = new ComputeContext<>(this, config);
-        this.initContext = new InitContext<>(this, config, graph);
+    PregelComputation<CONFIG> computation();
+
+    NodeValue nodeValue();
+
+    Messenger<ITERATOR> messenger();
+
+    Partition nodeBatch();
+
+    InitContext<CONFIG> initContext();
+
+    ComputeContext<CONFIG> computeContext();
+
+    int iteration();
+
+    default boolean isMultiGraph() {
+        return graph().isMultiGraph();
     }
 
-    @Override
-    public void run() {
+    default long nodeCount() {
+        return graph().nodeCount();
+    }
+
+    default long relationshipCount() {
+        return graph().relationshipCount();
+    }
+
+    default int degree(long nodeId) {
+        return graph().degree(nodeId);
+    }
+
+    default void voteToHalt(long nodeId) {
+        voteBits().set(nodeId);
+    }
+
+    void sendTo(long targetNodeId, double message);
+
+    default void computeBatch() {
+        var messenger = messenger();
         var messageIterator = messenger.messageIterator();
         var messages = new Messages(messageIterator);
 
+        var nodeBatch = nodeBatch();
         long batchStart = nodeBatch.startNode();
         long batchEnd = batchStart + nodeBatch.nodeCount();
+
+        var computation = computation();
+        var initContext = initContext();
+        var computeContext = computeContext();
+        var voteBits = voteBits();
 
         for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
 
@@ -90,7 +92,7 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
             }
 
             messenger.initMessageIterator(messageIterator, nodeId, computeContext.isInitialSuperstep());
-            
+
             if (!messages.isEmpty() || !voteBits.get(nodeId)) {
                 voteBits.clear(nodeId);
                 computeContext.setNodeId(nodeId);
@@ -99,66 +101,30 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
         }
     }
 
-    void init(
-        int iteration
-    ) {
-        this.iteration = iteration;
-        this.hasSendMessage = false;
-    }
-
-    public int iteration() {
-        return iteration;
-    }
-
-    public boolean isMultiGraph() {
-        return isMultiGraph;
-    }
-
-    public long nodeCount() {
-        return nodeCount;
-    }
-
-    public long relationshipCount() {
-        return relationshipCount;
-    }
-
-    public int degree(long nodeId) {
-        return degrees.degree(nodeId);
-    }
-
-    public void voteToHalt(long nodeId) {
-        voteBits.set(nodeId);
-    }
-
-    public void sendTo(long targetNodeId, double message) {
-        messenger.sendTo(targetNodeId, message);
-        hasSendMessage = true;
-    }
-
-    public void sendToNeighbors(long sourceNodeId, double message) {
-        relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+    default void sendToNeighbors(long sourceNodeId, double message) {
+        graph().forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
             sendTo(targetNodeId, message);
             return true;
         });
     }
 
-    public void sendToNeighborsWeighted(long sourceNodeId, double message) {
-        relationshipIterator.forEachRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
-            sendTo(targetNodeId, computation.applyRelationshipWeight(message, weight));
+    default void sendToNeighborsWeighted(long sourceNodeId, double message) {
+        graph().forEachRelationship(sourceNodeId, 1.0, (ignored, targetNodeId, weight) -> {
+            sendTo(targetNodeId, computation().applyRelationshipWeight(message, weight));
             return true;
         });
     }
 
-    public void forEachNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
-        relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+    default void forEachNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
+        graph().forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
             targetConsumer.accept(targetNodeId);
             return true;
         });
     }
 
-    public void forEachDistinctNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
+    default void forEachDistinctNeighbor(long sourceNodeId, LongConsumer targetConsumer) {
         var prevTarget = new MutableLong(-1);
-        relationshipIterator.forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
+        graph().forEachRelationship(sourceNodeId, (ignored, targetNodeId) -> {
             if (prevTarget.longValue() != targetNodeId) {
                 targetConsumer.accept(targetNodeId);
                 prevTarget.setValue(targetNodeId);
@@ -167,39 +133,35 @@ public final class ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Mes
         });
     }
 
-    public double doubleNodeValue(String key, long nodeId) {
-        return nodeValue.doubleValue(key, nodeId);
+    default double doubleNodeValue(String key, long nodeId) {
+        return nodeValue().doubleValue(key, nodeId);
     }
 
-    public long longNodeValue(String key, long nodeId) {
-        return nodeValue.longValue(key, nodeId);
+    default long longNodeValue(String key, long nodeId) {
+        return nodeValue().longValue(key, nodeId);
     }
 
-    public long[] longArrayNodeValue(String key, long nodeId) {
-        return nodeValue.longArrayValue(key, nodeId);
+    default long[] longArrayNodeValue(String key, long nodeId) {
+        return nodeValue().longArrayValue(key, nodeId);
     }
 
-    public double[] doubleArrayNodeValue(String key, long nodeId) {
-        return nodeValue.doubleArrayValue(key, nodeId);
+    default double[] doubleArrayNodeValue(String key, long nodeId) {
+        return nodeValue().doubleArrayValue(key, nodeId);
     }
 
-    public void setNodeValue(String key, long nodeId, double value) {
-        nodeValue.set(key, nodeId, value);
+    default void setNodeValue(String key, long nodeId, double value) {
+        nodeValue().set(key, nodeId, value);
     }
 
-    public void setNodeValue(String key, long nodeId, long value) {
-        nodeValue.set(key, nodeId, value);
+    default void setNodeValue(String key, long nodeId, long value) {
+        nodeValue().set(key, nodeId, value);
     }
 
-    public void setNodeValue(String key, long nodeId, long[] value) {
-        nodeValue.set(key, nodeId, value);
+    default void setNodeValue(String key, long nodeId, long[] value) {
+        nodeValue().set(key, nodeId, value);
     }
 
-    public void setNodeValue(String key, long nodeId, double[] value) {
-        nodeValue.set(key, nodeId, value);
-    }
-
-    boolean hasSendMessage() {
-        return hasSendMessage;
+    default void setNodeValue(String key, long nodeId, double[] value) {
+        nodeValue().set(key, nodeId, value);
     }
 }

@@ -59,12 +59,14 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
             MultiClassNLRData.class,
             NodeClassificationTrainConfig.class
         );
+        var featureProperties = model.trainConfig().featureProperties();
         return new NodeClassificationPredict(
-            new MultiClassNLRPredictor(model.data(), model.trainConfig().featureProperties()),
+            new MultiClassNLRPredictor(model.data(), featureProperties),
             graph,
             configuration.batchSize(),
             configuration.concurrency(),
-            configuration.predictedProbabilityProperty().isPresent(),
+            configuration.includePredictedProbabilities(),
+            featureProperties,
             tracker,
             progressLogger
         );

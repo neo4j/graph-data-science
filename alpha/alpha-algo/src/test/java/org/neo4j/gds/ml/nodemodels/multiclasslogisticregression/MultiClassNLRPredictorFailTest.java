@@ -34,8 +34,9 @@ public class MultiClassNLRPredictorFailTest extends FeatureExtractionBaseTest {
     public void makeExtractions(Graph graph) {
         var weights = new Weights<>(Matrix.fill(0.0, 5, 4));
         var classIdMap = new LocalIdMap();
+        var featureProperties = List.of("a", "b");
         var modelData = ImmutableMultiClassNLRData.of(weights, classIdMap);
-        var multiClassNLRPredictor = new MultiClassNLRPredictor(modelData, List.of("a", "b"));
+        var multiClassNLRPredictor = new MultiClassNLRPredictor(modelData, featureProperties);
         var batch = new LazyBatch(0, 4, 4);
         multiClassNLRPredictor.predict(graph, batch);
     }

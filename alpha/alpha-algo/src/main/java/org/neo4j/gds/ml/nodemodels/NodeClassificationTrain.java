@@ -247,6 +247,7 @@ public class NodeClassificationTrain
             predictor(modelData),
             null,
             predictedClasses,
+            config.featureProperties(),
             progressLogger
         );
 

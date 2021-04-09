@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelMutateProc;
 import org.neo4j.graphalgo.beta.pregel.PregelMutateResult;
+import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -68,7 +69,7 @@ public final class ComputationMutateProc extends PregelMutateProc<ComputationAlg
 
     @Override
     protected AbstractResultBuilder<PregelMutateResult> resultBuilder(
-            AlgoBaseProc.ComputationResult<ComputationAlgorithm, Pregel.PregelResult, PregelConfig> computeResult) {
+            AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelConfig> computeResult) {
         var ranIterations = computeResult.result().ranIterations();
         var didConverge = computeResult.result().didConverge();
         return new PregelMutateResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);

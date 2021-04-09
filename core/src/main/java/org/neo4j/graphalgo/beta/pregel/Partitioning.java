@@ -31,7 +31,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public enum Partitioning {
     RANGE,
-    DEGREE;
+    DEGREE,
+    AUTO;
 
     private static final List<String> VALUES = Arrays
         .stream(Partitioning.values())

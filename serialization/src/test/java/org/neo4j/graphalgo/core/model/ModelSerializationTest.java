@@ -76,7 +76,7 @@ class ModelSerializationTest {
                 .modelName("MODEL_NAME")
                 .aggregator(Aggregator.AggregatorType.MEAN)
                 .activationFunction(ActivationFunction.SIGMOID)
-                .featureProperties(List.of("age", "birth_year", "death_year"))
+                .featureProperties(List.of("age", "birth_year", "death_year", "embedding"))
                 .build()
         );
 

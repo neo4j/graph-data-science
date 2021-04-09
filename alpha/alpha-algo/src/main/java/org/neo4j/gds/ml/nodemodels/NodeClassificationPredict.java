@@ -31,6 +31,8 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import java.util.List;
+
 import static org.neo4j.gds.ml.batch.BatchTransformer.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, MultiClassNLRResult> {
@@ -40,6 +42,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     private final int batchSize;
     private final int concurrency;
     private final boolean produceProbabilities;
+    private final List<String> featureProperties;
     private final AllocationTracker tracker;
 
     NodeClassificationPredict(
@@ -48,6 +51,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         int batchSize,
         int concurrency,
         boolean produceProbabilities,
+        List<String> featureProperties,
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
@@ -56,6 +60,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.produceProbabilities = produceProbabilities;
+        this.featureProperties = featureProperties;
         this.tracker = tracker;
         this.progressLogger = progressLogger;
     }
@@ -66,8 +71,12 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         var predictedProbabilities = initProbabilities();
         var predictedClasses = HugeLongArray.newArray(graph.nodeCount(), tracker);
         var consumer = new NodeClassificationPredictConsumer(
-            graph, IDENTITY, predictor,
-            predictedProbabilities, predictedClasses,
+            graph,
+            IDENTITY,
+            predictor,
+            predictedProbabilities,
+            predictedClasses,
+            featureProperties,
             progressLogger
         );
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);

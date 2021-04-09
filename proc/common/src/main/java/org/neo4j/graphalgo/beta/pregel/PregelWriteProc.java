@@ -26,12 +26,12 @@ import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import java.util.List;
 
 public abstract class PregelWriteProc<
-    ALGO extends Algorithm<ALGO, Pregel.PregelResult>,
+    ALGO extends Algorithm<ALGO, PregelResult>,
     CONFIG extends PregelConfig>
-    extends WriteProc<ALGO, Pregel.PregelResult, PregelWriteResult, CONFIG> {
+    extends WriteProc<ALGO, PregelResult, PregelWriteResult, CONFIG> {
 
     @Override
-    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, Pregel.PregelResult, CONFIG> computationResult) {
+    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, PregelResult, CONFIG> computationResult) {
         return PregelBaseProc.nodeProperties(computationResult, computationResult.config().writeProperty());
     }
 }

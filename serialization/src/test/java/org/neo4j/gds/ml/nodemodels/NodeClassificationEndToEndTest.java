@@ -119,13 +119,15 @@ class NodeClassificationEndToEndTest {
     }
 
     private NodeClassificationPredict predictAlgorithm(Model<MultiClassNLRData, NodeClassificationTrainConfig> model) {
-        var predictor = new MultiClassNLRPredictor(model.data(), model.trainConfig().featureProperties());;
+        var featureProperties = model.trainConfig().featureProperties();
+        var predictor = new MultiClassNLRPredictor(model.data(), featureProperties);
         return new NodeClassificationPredict(
             predictor,
             predictGraph,
             100,
             4,
             false,
+            featureProperties,
             AllocationTracker.empty(),
             ProgressLogger.NULL_LOGGER
         );

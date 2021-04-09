@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.beta.pregel.PregelStatsProc;
 import org.neo4j.graphalgo.beta.pregel.PregelStatsResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -68,7 +69,7 @@ public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgor
 
     @Override
     protected AbstractResultBuilder<PregelStatsResult> resultBuilder(
-            AlgoBaseProc.ComputationResult<ComputationAlgorithm, Pregel.PregelResult, PregelConfig> computeResult) {
+            AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelConfig> computeResult) {
         var ranIterations = computeResult.result().ranIterations();
         var didConverge = computeResult.result().didConverge();
         return new PregelStatsResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);

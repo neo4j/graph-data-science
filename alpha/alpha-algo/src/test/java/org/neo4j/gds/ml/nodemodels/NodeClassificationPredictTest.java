@@ -84,6 +84,7 @@ class NodeClassificationPredictTest {
         classIdMap.toMapped(1);
         classIdMap.toMapped(100);
         classIdMap.toMapped(2);
+        List<String> featureProperties = List.of("a", "b");
         var modelData = MultiClassNLRData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 1.12730619, -0.84532386, 0.93216654,
@@ -95,11 +96,12 @@ class NodeClassificationPredictTest {
             .build();
 
         var result = new NodeClassificationPredict(
-            new MultiClassNLRPredictor(modelData, List.of("a", "b")),
+            new MultiClassNLRPredictor(modelData, featureProperties),
             graph,
             1,
             1,
             true,
+            featureProperties,
             AllocationTracker.empty(),
             TestProgressLogger.NULL_LOGGER
         ).compute();
@@ -141,6 +143,7 @@ class NodeClassificationPredictTest {
     void singleClass() {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(1);
+        List<String> featureProperties = List.of("a", "b");
         var modelData = MultiClassNLRData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 1.12730619, -0.84532386, 0.93216654
@@ -149,11 +152,12 @@ class NodeClassificationPredictTest {
             .build();
 
         var result = new NodeClassificationPredict(
-            new MultiClassNLRPredictor(modelData, List.of("a", "b")),
+            new MultiClassNLRPredictor(modelData, featureProperties),
             graph,
             1,
             1,
             true,
+            featureProperties,
             AllocationTracker.empty(),
             TestProgressLogger.NULL_LOGGER
         ).compute();
@@ -195,6 +199,7 @@ class NodeClassificationPredictTest {
     void shouldLogProgress() {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(0);
+        var featureProperties = List.of("a", "b");
         var model = Model.of(
             "",
             "model",
@@ -210,7 +215,7 @@ class NodeClassificationPredictTest {
                 .builder()
                 .modelName("model")
                 .targetProperty("foo")
-                .featureProperties(List.of("a", "b"))
+                .featureProperties(featureProperties)
                 .holdoutFraction(0.2)
                 .validationFolds(4)
                 .build()

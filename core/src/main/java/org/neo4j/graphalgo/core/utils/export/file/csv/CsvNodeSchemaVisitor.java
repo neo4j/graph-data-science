@@ -38,23 +38,21 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
     public static final String NODE_SCHEMA_FILE_NAME = "node-schema.csv";
 
     private final CsvAppender csvAppender;
-    private final boolean hasProperties;
 
-    public CsvNodeSchemaVisitor(Path fileLocation, boolean hasProperties) {
+    public CsvNodeSchemaVisitor(Path fileLocation) {
         try {
             this.csvAppender = new CsvWriter().append(fileLocation.resolve(NODE_SCHEMA_FILE_NAME), StandardCharsets.UTF_8);
             writeHeader();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        this.hasProperties = hasProperties;
     }
 
     @Override
     protected void export() {
         try {
             csvAppender.appendField(nodeLabel().name());
-            if (hasProperties) {
+            if (key() != null) {
                 csvAppender.appendField(key());
                 csvAppender.appendField(valueType().csvName());
                 csvAppender.appendField(defaultValue().toString());

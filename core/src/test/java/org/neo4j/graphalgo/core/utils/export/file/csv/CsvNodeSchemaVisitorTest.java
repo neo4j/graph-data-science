@@ -34,7 +34,7 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
 
     @Test
     void writesVisitedNodeSchema() {
-        var nodeSchemaVisitor = new CsvNodeSchemaVisitor(tempDir, true);
+        var nodeSchemaVisitor = new CsvNodeSchemaVisitor(tempDir);
         NodeLabel labelA = NodeLabel.of("A");
         nodeSchemaVisitor.nodeLabel(labelA);
         nodeSchemaVisitor.key("prop1");
@@ -65,7 +65,7 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
 
     @Test
     void writesSchemaWithoutProperties() {
-        var nodeSchemaVisitor = new CsvNodeSchemaVisitor(tempDir, false);
+        var nodeSchemaVisitor = new CsvNodeSchemaVisitor(tempDir);
         NodeLabel labelA = NodeLabel.of("A");
         nodeSchemaVisitor.nodeLabel(labelA);
         nodeSchemaVisitor.endOfEntity();
@@ -81,6 +81,33 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
             List.of(
                 defaultHeaderColumns(),
                 List.of("A"),
+                List.of("B")
+            )
+        );
+    }
+
+    @Test
+    void writesSchemaWithMixedProperties() {
+        var nodeSchemaVisitor = new CsvNodeSchemaVisitor(tempDir);
+        NodeLabel labelA = NodeLabel.of("A");
+        nodeSchemaVisitor.nodeLabel(labelA);
+        nodeSchemaVisitor.key("prop1");
+        nodeSchemaVisitor.valueType(ValueType.LONG);
+        nodeSchemaVisitor.defaultValue(DefaultValue.of(42L));
+        nodeSchemaVisitor.state(GraphStore.PropertyState.PERSISTENT);
+        nodeSchemaVisitor.endOfEntity();
+
+        NodeLabel labelB = NodeLabel.of("B");
+        nodeSchemaVisitor.nodeLabel(labelB);
+        nodeSchemaVisitor.endOfEntity();
+
+        nodeSchemaVisitor.close();
+        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME));
+        assertDataContent(
+            NODE_SCHEMA_FILE_NAME,
+            List.of(
+                defaultHeaderColumns(),
+                List.of("A", "prop1", "long", "DefaultValue(42)", "PERSISTENT"),
                 List.of("B")
             )
         );

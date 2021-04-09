@@ -73,6 +73,12 @@ public interface PregelConfig extends
         return Partitioning.RANGE;
     }
 
+    @Value.Derived
+    @Configuration.Ignore
+    default boolean useForkJoin() {
+        return partitioning() == Partitioning.AUTO;
+    }
+
     static PregelConfig of(
         String username,
         Optional<String> graphName,
