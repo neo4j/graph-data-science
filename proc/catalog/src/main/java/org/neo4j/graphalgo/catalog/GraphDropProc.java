@@ -42,7 +42,7 @@ public class GraphDropProc extends CatalogProc {
         validateGraphName(graphName);
 
         AtomicReference<GraphInfo> result = new AtomicReference<>();
-        GraphStoreCatalog.remove(username(), databaseId(), graphName, (graphStoreWithConfig) ->
+        GraphStoreCatalog.remove(username(), databaseId().name(), graphName, (graphStoreWithConfig) ->
             result.set(GraphInfo.withoutMemoryUsage(graphStoreWithConfig.config(), graphStoreWithConfig.graphStore())), failIfMissing
         );
 
