@@ -19,16 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.partition.Partition;
-
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface Scaler {
 
@@ -37,108 +28,6 @@ public interface Scaler {
     void scaleProperty(long nodeId, double[] result, int offset);
 
     int dimension();
-
-    enum Variant {
-        NONE {
-            @Override
-            public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return new ScalarScaler(properties) {
-                    @Override
-                    public double scaleProperty(long nodeId) {
-                        return properties.doubleValue(nodeId);
-                    }
-                };
-            }
-        },
-        MAX {
-            @Override
-            public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return Max.create(properties, nodeCount, concurrency, executor);
-            }
-        },
-        MINMAX {
-            @Override
-            public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return MinMax.create(properties, nodeCount, concurrency, executor);
-            }
-        },
-        MEAN {
-            @Override
-            public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return Mean.create(properties, nodeCount, concurrency, executor);
-            }
-        },
-        LOG {
-            @Override
-            public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return LogTransformer.create(properties);
-            }
-        },
-        STDSCORE {
-            @Override
-            public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return StdScore.create(properties, nodeCount, concurrency, executor);
-            }
-        },
-        L1NORM {
-            @Override
-            public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return L1Norm.create(properties, nodeCount, concurrency, executor);
-            }
-        },
-        L2NORM {
-            @Override
-            public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return L2Norm.create(properties, nodeCount, concurrency, executor);
-            }
-        };
-
-        public static Variant lookup(String name) {
-            try {
-                return valueOf(name.toUpperCase(Locale.ENGLISH));
-            } catch (IllegalArgumentException e) {
-                String availableStrategies = Arrays
-                    .stream(values())
-                    .map(Variant::name)
-                    .collect(Collectors.joining(", "));
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Scaler `%s` is not supported. Must be one of: %s.",
-                    name,
-                    availableStrategies
-                ));
-            }
-        }
-
-        public static String toString(Variant variant) {
-            return variant.name();
-        }
-
-        /**
-         * Create a scaler. Some scalers rely on aggregate extreme values which are computed at construction time.
-         */
-        public abstract ScalarScaler create(
-            NodeProperties properties,
-            long nodeCount,
-            int concurrency,
-            ExecutorService executor
-        );
-    }
 
     class ArrayScaler implements Scaler {
 
@@ -161,24 +50,4 @@ public interface Scaler {
         }
     }
 
-    abstract class AggregatesComputer implements Runnable {
-        
-        private final Partition partition;
-        final NodeProperties properties;
-
-        AggregatesComputer(Partition partition, NodeProperties property) {
-            this.partition = partition;
-            this.properties = property;
-        }
-
-        @Override
-        public void run() {
-            long end = partition.startNode() + partition.nodeCount();
-            for (long nodeId = partition.startNode(); nodeId < end; nodeId++) {
-                compute(nodeId);
-            }
-        }
-
-        abstract void compute(long nodeId);
-    }
 }

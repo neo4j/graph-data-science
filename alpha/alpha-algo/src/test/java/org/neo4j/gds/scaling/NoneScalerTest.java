@@ -30,6 +30,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.scaling.ScalarScaler.Variant.NONE;
 
 class NoneScalerTest {
 
@@ -43,7 +44,7 @@ class NoneScalerTest {
     @ParameterizedTest
     @MethodSource("properties")
     void scale(NodeProperties properties, double[] expected) {
-        var scaler = Scaler.Variant.NONE.create(properties, 4, 42, Pools.DEFAULT);
+        var scaler = NONE.create(properties, 4, 42, Pools.DEFAULT);
 
         double[] actual = new double[5];
         IntStream.range(0, 5).forEach(nodeId -> scaler.scaleProperty(nodeId, actual, nodeId));
