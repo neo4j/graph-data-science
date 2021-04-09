@@ -31,16 +31,16 @@ public interface Scaler {
 
     class ArrayScaler implements Scaler {
 
-        private final List<Scaler> elementScalers;
+        private final List<ScalarScaler> elementScalers;
 
-        ArrayScaler(List<Scaler> elementScalers) {
+        ArrayScaler(List<ScalarScaler> elementScalers) {
             this.elementScalers = elementScalers;
         }
 
         @Override
         public void scaleProperty(long nodeId, double[] result, int offset) {
             for (int i = 0; i < dimension(); i++) {
-                elementScalers.get(i).scaleProperty(nodeId, result, offset + i);
+                result[offset + i] = elementScalers.get(i).scaleProperty(nodeId);
             }
         }
 

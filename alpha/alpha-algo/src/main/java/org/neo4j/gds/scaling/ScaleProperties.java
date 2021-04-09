@@ -151,7 +151,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         }
 
         int arrayLength;
-        List<Scaler> elementScalers;
+        List<ScalarScaler> elementScalers;
 
         switch (nodeProperties.valueType()) {
             case LONG:
