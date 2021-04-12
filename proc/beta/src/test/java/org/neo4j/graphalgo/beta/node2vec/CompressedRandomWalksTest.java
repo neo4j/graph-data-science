@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -47,15 +48,8 @@ class CompressedRandomWalksTest {
 
         walks.forEach(walk -> compressedRandomWalks.add(Arrays.copyOf(walk, walk.length)));
 
-        Iterator<long[]> iterator = compressedRandomWalks.iterator(0, 3);
-        var decompressedWalks = new ArrayList<long[]>();
-        iterator.forEachRemaining(decompressedWalks::add);
-        assertThat(decompressedWalks).containsExactly(walks.get(0), walks.get(1), walks.get(2));
-
-        iterator = compressedRandomWalks.iterator(3, 4);
-        decompressedWalks.clear();
-        iterator.forEachRemaining(decompressedWalks::add);
-        assertThat(decompressedWalks).containsExactly(walks.get(3), walks.get(4), walks.get(5), walks.get(6));
+        assertIteratorContent(compressedRandomWalks.iterator(0, 3), List.of(walks.get(0), walks.get(1), walks.get(2)));
+        assertIteratorContent(compressedRandomWalks.iterator(3, 4), List.of(walks.get(3), walks.get(4), walks.get(5), walks.get(6)));
     }
 
     @Test
@@ -67,5 +61,15 @@ class CompressedRandomWalksTest {
         assertThatThrownBy(() -> compressedRandomWalks.iterator(0, 2))
             .hasMessageContaining("chunk exceeds the number of stored random walks")
             .hasMessageContaining("0-1");
+    }
+
+    private void assertIteratorContent(Iterator<long[]> iterator, Iterable<long[]> expected) {
+        var decompressedWalks = new ArrayList<long[]>();
+        iterator.forEachRemaining(decompressedWalk -> {
+            var filteredWalk = Arrays.stream(decompressedWalk).filter(v -> v != -1L).toArray();
+            decompressedWalks.add(filteredWalk);
+        });
+
+        assertThat(decompressedWalks).containsExactlyElementsOf(expected);
     }
 }

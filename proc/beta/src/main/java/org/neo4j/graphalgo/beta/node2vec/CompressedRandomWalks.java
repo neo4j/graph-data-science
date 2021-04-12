@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodeVLongs;
@@ -34,6 +35,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class CompressedRandomWalks {
     private final HugeObjectArray<byte[]> compressedWalks;
     private final HugeLongArray walkLengths;
+
+    private int maxWalkLength;
     private long size = 0L;
 
     public CompressedRandomWalks(long maxWalkCount, AllocationTracker tracker) {
@@ -59,6 +62,9 @@ public class CompressedRandomWalks {
         var currentIndex = size++;
         compressedWalks.set(currentIndex, compressedData);
         walkLengths.set(currentIndex, walk.length);
+        if (walk.length > maxWalkLength) {
+            maxWalkLength = walk.length;
+        }
     }
 
     public Iterator<long[]> iterator(long startIndex, long length) {
@@ -74,7 +80,7 @@ public class CompressedRandomWalks {
             );
         }
 
-        return new CompressedWalkIterator(startIndex, endIndex, compressedWalks, walkLengths);
+        return new CompressedWalkIterator(startIndex, endIndex, compressedWalks, walkLengths, maxWalkLength);
     }
 
     public long size() {
@@ -89,6 +95,7 @@ public class CompressedRandomWalks {
         private final HugeObjectArray<byte[]> compressedWalks;
         private final HugeLongArray walkLengths;
         private final long endIndex;
+        private final long[] outputBuffer;
 
         private long currentIndex;
 
@@ -96,12 +103,14 @@ public class CompressedRandomWalks {
             long startIndex,
             long endIndex,
             HugeObjectArray<byte[]> compressedWalks,
-            HugeLongArray walkLengths
+            HugeLongArray walkLengths,
+            int maxWalkLength
         ) {
             this.compressedWalks = compressedWalks;
             this.walkLengths = walkLengths;
             this.currentIndex = startIndex;
             this.endIndex = endIndex;
+            outputBuffer = new long[maxWalkLength];
         }
 
         @Override
@@ -109,16 +118,21 @@ public class CompressedRandomWalks {
             return currentIndex <= endIndex;
         }
 
+        /**
+         * Returns the next random walk in the specified range.
+         * The long array returned by this method will be reused in the following next call.
+         * If the current walk is shorter than the maximum walk length, the remaining elements will be filled with -1.
+         */
         @Override
         public long[] next() {
             var compressedWalk = compressedWalks.get(currentIndex);
             var walkLength = (int) walkLengths.get(currentIndex);
-            var uncompressedWalk = new long[walkLength];
-            ZigZagLongDecoding.zigZagUncompress(compressedWalk, walkLength, uncompressedWalk);
+            Arrays.fill(outputBuffer, -1L);
+            ZigZagLongDecoding.zigZagUncompress(compressedWalk, walkLength, outputBuffer);
 
             currentIndex++;
 
-            return uncompressedWalk;
+            return outputBuffer;
         }
     }
 }
