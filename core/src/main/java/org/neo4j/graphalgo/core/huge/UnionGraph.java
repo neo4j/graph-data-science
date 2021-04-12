@@ -23,12 +23,12 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.ImmutableTopology;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipCursor;
@@ -194,13 +194,13 @@ public final class UnionGraph implements CSRGraph {
 
     @Override
     public int degree(long nodeId) {
-        int degree = 0;
+        long degree = 0;
 
         for (CSRGraph graph : graphs) {
             degree += graph.degree(nodeId);
         }
 
-        return  degree;
+        return Math.toIntExact(degree);
     }
 
     @Override
@@ -282,7 +282,20 @@ public final class UnionGraph implements CSRGraph {
         return true;
     }
 
-    public Relationships.Topology relationshipTopology() {
+    @ValueClass
+    public interface UnionGraphTopology {
+        CompositeAdjacencyList list();
+
+        CompositeAdjacencyOffsets offsets();
+
+        long elementCount();
+
+        Orientation orientation();
+
+        boolean isMultiGraph();
+    }
+
+    public UnionGraphTopology relationshipTopology() {
         List<AdjacencyDegrees> adjacencyDegrees = new ArrayList<>(graphs.size());
         List<AdjacencyList> adjacencyLists = new ArrayList<>(graphs.size());
         List<AdjacencyOffsets> adjacencyOffsets  = new ArrayList<>(graphs.size());
@@ -295,8 +308,7 @@ public final class UnionGraph implements CSRGraph {
             }
         }
 
-        return ImmutableTopology.builder()
-            .degrees(new CompositeAdjacencyDegrees(adjacencyDegrees))
+        return ImmutableUnionGraphTopology.builder()
             .offsets(new CompositeAdjacencyOffsets(adjacencyOffsets))
             .list(new CompositeAdjacencyList(adjacencyDegrees, adjacencyLists, adjacencyOffsets))
             .orientation(Orientation.NATURAL)

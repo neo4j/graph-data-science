@@ -22,26 +22,25 @@ package org.neo4j.graphalgo.triangle.intersect;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.huge.CompositeAdjacencyCursor;
-import org.neo4j.graphalgo.core.huge.CompositeAdjacencyDegrees;
 import org.neo4j.graphalgo.core.huge.CompositeAdjacencyList;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 
 import java.util.ArrayList;
+import java.util.function.LongToIntFunction;
 
 public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
 
-    private final CompositeAdjacencyDegrees compositeAdjacencyDegrees;
+    private final LongToIntFunction degreeFunction;
     private final CompositeAdjacencyList compositeAdjacencyList;
 
     private UnionGraphIntersect(
-        CompositeAdjacencyDegrees compositeAdjacencyDegrees,
+        LongToIntFunction degreeFunction,
         CompositeAdjacencyList compositeAdjacencyList,
         long maxDegree
     ) {
         super(compositeAdjacencyList::rawDecompressingCursor, maxDegree);
-        this.compositeAdjacencyDegrees = compositeAdjacencyDegrees;
+        this.degreeFunction = degreeFunction;
         this.compositeAdjacencyList = compositeAdjacencyList;
     }
 
@@ -65,7 +64,7 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
 
     @Override
     protected int degree(long nodeId) {
-        return compositeAdjacencyDegrees.degree(nodeId);
+        return degreeFunction.applyAsInt(nodeId);
     }
 
     @ServiceProvider
@@ -77,12 +76,12 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         }
 
         @Override
-        public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
+        public UnionGraphIntersect load(Graph graph, RelationshipIntersectConfig config) {
             assert graph instanceof UnionGraph;
             var topology = ((UnionGraph) graph).relationshipTopology();
             return new UnionGraphIntersect(
-                (CompositeAdjacencyDegrees) topology.degrees(),
-                (CompositeAdjacencyList) topology.list(),
+                graph::degree,
+                topology.list(),
                 config.maxDegree()
             );
         }

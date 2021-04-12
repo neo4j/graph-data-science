@@ -24,8 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -34,14 +33,15 @@ import java.util.PrimitiveIterator;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
 
 final class CompositeIntersectionTest extends AlgoTestBase {
 
     private static final int DEGREE = 25;
-    public static final RelationshipType TYPE_1 = RelationshipType.withName("TYPE1");
-    public static final RelationshipType TYPE_2 = RelationshipType.withName("TYPE2");
-    private static RelationshipIntersect INTERSECT;
+    private static final RelationshipType TYPE_1 = RelationshipType.withName("TYPE1");
+    private static final RelationshipType TYPE_2 = RelationshipType.withName("TYPE2");
+    private static UnionGraph GRAPH;
     private static long START1;
     private static long START2;
     private static long[] TARGETS;
@@ -72,30 +72,45 @@ final class CompositeIntersectionTest extends AlgoTestBase {
             return Arrays.copyOf(targets, some);
         });
 
-        final Graph graph = new StoreLoaderBuilder()
+        GRAPH = ((UnionGraph) new StoreLoaderBuilder()
             .api(db)
             .addRelationshipType(TYPE_1.name())
             .addRelationshipType(TYPE_2.name())
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
-            .graph();
+            .graph());
 
-        INTERSECT = RelationshipIntersectFactoryLocator.lookup(graph)
-            .orElseThrow(IllegalArgumentException::new)
-            .load(graph, ImmutableRelationshipIntersectConfig.builder().build());
-        START1 = graph.toMappedNodeId(neoStarts[0]);
-        START2 = graph.toMappedNodeId(neoStarts[1]);
-        TARGETS = Arrays.stream(neoTargets).map(graph::toMappedNodeId).toArray();
+        START1 = GRAPH.toMappedNodeId(neoStarts[0]);
+        START2 = GRAPH.toMappedNodeId(neoStarts[1]);
+        TARGETS = Arrays.stream(neoTargets).map(GRAPH::toMappedNodeId).toArray();
         Arrays.sort(TARGETS);
     }
 
     @Test
     void intersectWithTargets() {
+        var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
+            GRAPH,
+            ImmutableRelationshipIntersectConfig.builder().build()
+        );
+
         PrimitiveIterator.OfLong targets = Arrays.stream(TARGETS).iterator();
-        INTERSECT.intersectAll(START1, (a, b, c) -> {
+        intersect.intersectAll(START1, (a, b, c) -> {
             assertEquals(START1, a);
             assertEquals(START2, b);
             assertEquals(targets.nextLong(), c);
         });
+    }
+
+    @Test
+    void intersectWithTargetsWithMaxDegree() {
+        var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
+            GRAPH,
+            ImmutableRelationshipIntersectConfig.builder().maxDegree(0).build()
+        );
+
+        intersect.intersectAll(
+            START1,
+            (a, b, c) -> fail("This code should have been protected by the max degree filter")
+        );
     }
 }

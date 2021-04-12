@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class CompositeAdjacencyListTest {
@@ -43,10 +42,9 @@ class CompositeAdjacencyListTest {
     Graph graph;
 
     @Test
-    void shouldComputeCorrectDegree() {
-        var adjacencyList = ((UnionGraph) graph).relationshipTopology().degrees();
-        assertTrue(adjacencyList instanceof CompositeAdjacencyDegrees);
-        assertEquals(2, adjacencyList.degree(0));
-        assertEquals(0, adjacencyList.degree(1));
+    void shouldIgnoreInputDegreeForCursor() {
+        var adjacencyList = ((UnionGraph) graph).relationshipTopology().list();
+        var cursor = adjacencyList.decompressingCursor(0, -1);
+        assertEquals(2, cursor.remaining());
     }
 }
