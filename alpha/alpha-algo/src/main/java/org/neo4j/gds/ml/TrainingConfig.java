@@ -37,7 +37,7 @@ public interface TrainingConfig extends ConcurrencyConfig {
     }
 
     @Value.Default
-    default int maxStreakCount() {
+    default int patience() {
         return 1;
     }
 
