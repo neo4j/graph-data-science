@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -30,15 +29,19 @@ import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
 public class PositiveSampleProducer {
 
+    private static final int FILTERED_NODE_MARKER = -2;
+
     private final Iterator<long[]> walks;
     private final HugeDoubleArray centerNodeProbabilities;
     private final int prefixWindowSize;
     private final int postfixWindowSize;
-    private long[] currentWalk;
-    private long currentCenterWord;
     private final ProgressLogger progressLogger;
+    private long[] currentWalk;
     private int centerWordIndex;
+    private long currentCenterWord;
     private int contextWordIndex;
+    private int currentWindowStart;
+    private int currentWindowEnd;
 
     PositiveSampleProducer(
         Iterator<long[]> walks,
@@ -72,14 +75,16 @@ public class PositiveSampleProducer {
         if (!walks.hasNext()) {
             return false;
         }
-        long[] walk = filter(walks.next());
+        long[] walk = walks.next();
+        int filteredWalkLength = filter(walk);
 
-        while (walks.hasNext() && walk.length < 2) {
-            walk = filter(walks.next());
+        while (walks.hasNext() && filteredWalkLength < 2) {
+            walk = walks.next();
+            filteredWalkLength = filter(walk);
             progressLogger.logProgress();
         }
 
-        if (walk.length >= 2) {
+        if (filteredWalkLength >= 2) {
             progressLogger.logProgress();
             this.currentWalk = walk;
             centerWordIndex = -1;
@@ -92,33 +97,70 @@ public class PositiveSampleProducer {
     private boolean nextCenterWord() {
         centerWordIndex++;
 
-        if (centerWordIndex < currentWalk.length) {
-            currentCenterWord = currentWalk[centerWordIndex];
-            contextWordIndex = Math.max(0, centerWordIndex - prefixWindowSize) - 1;
-            return nextContextWord();
-        } else {
+        if (centerWordIndex >= currentWalk.length || currentWalk[centerWordIndex] == -1) {
             return nextWalk();
+        } else if (currentWalk[centerWordIndex] == -2) {
+            return nextCenterWord();
+        } else {
+            currentCenterWord = currentWalk[centerWordIndex];
+
+            setContextBoundaries();
+            contextWordIndex = currentWindowStart - 1;
+            return nextContextWord();
         }
     }
 
     private boolean nextContextWord() {
-        contextWordIndex++;
-        if (centerWordIndex == contextWordIndex) {
-            contextWordIndex++;
-        }
-
-        if (contextWordIndex >= Math.min(centerWordIndex + postfixWindowSize + 1, currentWalk.length)) {
+        if (currentWalk.length == 0) {
             return nextCenterWord();
         }
 
-        return true;
+        contextWordIndex++;
+
+        if(contextWordIndex <= currentWindowEnd && contextWordIndex != centerWordIndex && currentWalk[contextWordIndex] >= 0) {
+            return true;
+        } else if (contextWordIndex > currentWindowEnd) {
+            return nextCenterWord();
+        }
+
+        return nextContextWord();
     }
 
-    private long[] filter(long[] walk) {
-        return Arrays.stream(walk).filter(this::shouldPickNode).toArray();
+    private int filter(long[] walk) {
+        int filteredWalkLength = 0;
+        for (int i = 0; i < walk.length; i++) {
+            if (walk[i] >= 0 && shouldPickNode(walk[i])) {
+                filteredWalkLength++;
+            } else if (walk[i] >= 0) {
+                walk[i] = FILTERED_NODE_MARKER;
+            }
+        }
+
+        return filteredWalkLength;
     }
 
     private boolean shouldPickNode(long nodeId) {
         return ThreadLocalRandom.current().nextDouble(0, 1) < centerNodeProbabilities.get(nodeId);
+    }
+
+    // We need to adjust the window size for a given center word to ignore filtered nodes that might occur in the window
+    private void setContextBoundaries() {
+        var currentPrefixSize = prefixWindowSize;
+        currentWindowStart = centerWordIndex;
+        while(currentPrefixSize > 0 && currentWindowStart > 0) {
+            currentWindowStart--;
+            if (currentWindowStart >= 0 && currentWalk[currentWindowStart] > 0) {
+                currentPrefixSize--;
+            }
+        };
+
+        var currentPostfixSize = postfixWindowSize;
+        currentWindowEnd = centerWordIndex ;
+        while (currentPostfixSize > 0 && currentWindowEnd < currentWalk.length - 1 && currentWalk[currentWindowEnd] != -1) {
+            currentWindowEnd++;
+            if (currentWalk[currentWindowEnd] > 0) {
+                currentPostfixSize--;
+            }
+        }
     }
 }

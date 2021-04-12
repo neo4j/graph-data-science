@@ -290,6 +290,24 @@ class PositiveSampleProducerTest {
                     Pair.of(4L, 5L),
                     Pair.of(5L, 4L)
                 )
+            ),
+
+            arguments(
+                "Walks with different lengths",
+                3,
+                createCompressedRandomWalks(
+                    new long[]{0, 1},
+                    new long[]{3, 4, 5}
+                ),
+                List.of(
+                    Pair.of(0L, 1L),
+                    Pair.of(1L, 0L),
+
+                    Pair.of(3L, 4L),
+                    Pair.of(4L, 3L),
+                    Pair.of(4L, 5L),
+                    Pair.of(5L, 4L)
+                )
             )
         );
     }
