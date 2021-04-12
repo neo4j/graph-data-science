@@ -36,5 +36,4 @@ public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeig
     default Orientation orientation() {
         return Orientation.NATURAL;
     }
-
 }

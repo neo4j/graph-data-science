@@ -57,3 +57,4 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> impl
         return builder.build();
     }
 }
+
