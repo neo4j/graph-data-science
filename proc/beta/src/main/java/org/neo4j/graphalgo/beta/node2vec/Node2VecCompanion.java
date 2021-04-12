@@ -17,8 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.node2vec;
+package org.neo4j.graphalgo.beta.node2vec;
 
+import org.neo4j.gds.embeddings.node2vec.Node2Vec;
+import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
+import org.neo4j.gds.embeddings.node2vec.Vector;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;

@@ -30,7 +30,7 @@ import org.neo4j.logging.Log;
 import static java.lang.Math.multiplyExact;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> implements AlgorithmFactory<Node2Vec, CONFIG> {
+public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> implements AlgorithmFactory<Node2Vec, CONFIG> {
     @Override
     public Node2Vec build(
         Graph graph,

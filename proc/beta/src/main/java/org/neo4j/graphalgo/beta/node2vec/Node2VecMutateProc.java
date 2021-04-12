@@ -17,16 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.node2vec;
+package org.neo4j.graphalgo.beta.node2vec;
 
+import org.neo4j.gds.embeddings.node2vec.Node2Vec;
+import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.embeddings.node2vec.Vector;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
+import org.neo4j.graphalgo.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -36,25 +42,25 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
-public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteProc.WriteResult, Node2VecWriteConfig> {
+public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectArray<Vector>, Node2VecMutateProc.MutateResult, Node2VecMutateConfig> {
 
-    @Procedure(value = "gds.alpha.node2vec.write", mode = WRITE)
+    @Procedure(value = "gds.alpha.node2vec.mutate", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computationResult = compute(
+        ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
-        return write(computationResult);
+
+        return mutate(computationResult);
     }
 
-    @Procedure(value = "gds.alpha.node2vec.write.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Procedure(value = "gds.alpha.node2vec.mutate.estimate", mode = READ)
+    @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -63,61 +69,53 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
     }
 
     @Override
-    protected Node2VecWriteConfig newConfig(
+    protected Node2VecMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return Node2VecWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return Node2VecMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<Node2Vec, Node2VecWriteConfig> algorithmFactory() {
+    protected AlgorithmFactory<Node2Vec, Node2VecMutateConfig> algorithmFactory() {
         return new Node2VecAlgorithmFactory<>();
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecMutateConfig> computationResult) {
         return Node2VecCompanion.nodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computeResult) {
-        return new WriteResult.Builder();
+    protected MutateResult.Builder resultBuilder(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecMutateConfig> computeResult) {
+        return new MutateResult.Builder();
     }
 
-    @SuppressWarnings("unused")
-    public static final class WriteResult {
+    public static final class MutateResult extends StandardMutateResult {
 
         public final long nodeCount;
         public final long nodePropertiesWritten;
-        public final long createMillis;
-        public final long computeMillis;
-        public final long writeMillis;
-        public final Map<String, Object> configuration;
 
-        WriteResult(
+        MutateResult(
             long nodeCount,
             long nodePropertiesWritten,
             long createMillis,
             long computeMillis,
-            long writeMillis,
+            long mutateMillis,
             Map<String, Object> configuration
         ) {
+            super(createMillis, computeMillis, 0, mutateMillis, configuration);
             this.nodeCount = nodeCount;
             this.nodePropertiesWritten = nodePropertiesWritten;
-            this.createMillis = createMillis;
-            this.computeMillis = computeMillis;
-            this.writeMillis = writeMillis;
-            this.configuration = configuration;
         }
 
-        static class Builder extends AbstractResultBuilder<WriteResult> {
+        static class Builder extends AbstractResultBuilder<MutateResult> {
 
             @Override
-            public WriteResult build() {
-                return new WriteResult(
+            public MutateResult build() {
+                return new MutateResult(
                     nodeCount,
                     nodePropertiesWritten,
                     createMillis,

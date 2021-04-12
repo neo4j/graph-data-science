@@ -17,11 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.node2vec;
+package org.neo4j.graphalgo.beta.node2vec;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.node2vec.Node2Vec;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.embeddings.node2vec.Vector;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
@@ -100,7 +104,7 @@ class Node2VecMutateProcTest
                 })
         );
 
-        GraphStore mutatedGraphStore = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
+        GraphStore mutatedGraphStore = GraphStoreCatalog.get(AlgoBaseProcTest.TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
         assertMutatedGraph(mutatedGraphStore);
     }
 
