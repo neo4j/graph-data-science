@@ -32,18 +32,17 @@ import static org.neo4j.procedure.Mode.READ;
 public class GraphDropProc extends CatalogProc {
 
     private static final String DESCRIPTION = "Drops a named graph from the catalog and frees up the resources it occupies.";
-    private static final String NO_VALUE = "__NO_VALUE";
 
     @Procedure(name = "gds.graph.drop", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphInfo> drop(
         @Name(value = "graphName") String graphName,
         @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing,
-        @Name(value = "dbName", defaultValue = NO_VALUE) String dbName
+        @Name(value = "dbName", defaultValue = "") String dbName
     ) {
         validateGraphName(graphName);
 
-        if (dbName.equals(NO_VALUE)) {
+        if (dbName.isEmpty()) {
             dbName = databaseId().name();
         }
 
