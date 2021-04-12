@@ -93,6 +93,68 @@ include::specific-train-configuration.adoc[]
 | modelInfo     | Map     | Information about the training and the winning model.
 | configuration | Map     | Configuration used for the train procedure.
 |===
+
+The `modelInfo` can also be retrieved at a later time by using the <<catalog-model-list, Model List Procedure>>.
+The `modelInfo` return field has the following algorithm-specific subfields:
+
+[opts="header",cols="1,1,6"]
+|===
+| Name           | Type          | Description
+| classes        | List<Integer> | Sorted list of class ids which are the distinct values of `targetProperty` over the entire graph.
+| bestParameters | Map           | The map in `params` which contains the model configuration which performed best on average on validation folds according to the primary metric.
+| metrics        | Map           | Map from metric description to evaluated metrics for various models and subsets of the data, see below.
+|===
+
+The `metrics` map contains for each metric description (such as `F1_MACRO` or `RECALL(class=4)`), the corresponding results for that metric.
+Each such result map contains the keys `train`, `validation`, `outerTrain` and `test`.
+The latter two correspond to numeric values for the evaluation of the best model on the test set and its complement -- the outer train set.
+The `train` and `validation` results contain lists of results for all candidate models (i.e. `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
+These correspond to the hyper-parameters of the model candidate, and statistics for the result of that model over cross-validation folds.
+The structure of `modelInfo` is:
+
+[source]
+----
+{
+    bestParameters: Map,     // one of the maps specified in `params`
+    classes: List of Integer,
+    metrics: {
+        String: {            // a metric description
+            "test": Float,
+            "outerTrain": Float,
+            "train": [{
+                "avg": Float,
+                "max": Float,
+                "min": Float,
+                "params": Map
+            },
+            {
+                "avg": Float,
+                "max": Float,
+                "min": Float,
+                "params": Map
+            },
+            ...              // more results per model candidate
+            ],
+            "validation": [{
+                "avg": Float,
+                "max": Float,
+                "min": Float,
+                "params": Map
+            },
+            {
+                "avg": Float,
+                "max": Float,
+                "min": Float,
+                "params": Map
+            },
+            ...              // more results per model candidate
+            ],
+        },
+        String: Map,         // another metric
+        ...                  // remaining metrics
+    }
+}
+----
 ======
 
 
