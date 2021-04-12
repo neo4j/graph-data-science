@@ -6,7 +6,6 @@ group = 'com.neo4j.gds'
 
 dependencies {
     implementation project(':proc')
-    implementation project(':alpha-embeddings')
 }
 
 task licenseFile {

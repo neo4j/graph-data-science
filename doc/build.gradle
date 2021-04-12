@@ -7,7 +7,6 @@ dependencies {
     implementation     group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.doc.'asciidoctorj'
 
     testImplementation project(':proc')
-    testImplementation project(':alpha-embeddings')
     testImplementation project(':pregel-example')
 
     testImplementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
