@@ -98,28 +98,27 @@ public final class GraphFactory {
         long maxOriginalId,
         Optional<Long> nodeCount,
         Optional<NodeSchema> nodeSchema,
-        Optional<Boolean> useBitIdMap,
         Optional<Boolean> hasDisjointPartitions,
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Integer> concurrency,
         AllocationTracker tracker
     ) {
-        boolean _useBitIdMap = useBitIdMap.orElse(IdMapImplementations.useBitIdMap());
-        boolean _hasDisjointPartitions = hasDisjointPartitions.orElse(false);
-        boolean _hasLabelInformation = nodeSchema
+        boolean useBitIdMap = IdMapImplementations.useBitIdMap();
+        boolean disjointPartitions = hasDisjointPartitions.orElse(false);
+        boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
             .or(() -> hasLabelInformation).orElse(false);
-        int _concurrency = concurrency.orElse(1);
+        int threadCount = concurrency.orElse(1);
 
         NodeMappingBuilder.Capturing nodeMappingBuilder;
         InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder;
 
-        if (_useBitIdMap && _hasDisjointPartitions) {
+        if (useBitIdMap && disjointPartitions) {
             var idMappingBuilder = InternalBitIdMappingBuilder.of(maxOriginalId + 1, tracker);
             nodeMappingBuilder = IdMapImplementations.bitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
-        } else if (_useBitIdMap && !_hasLabelInformation) {
+        } else if (useBitIdMap && !labelInformation) {
             var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1, tracker);
             nodeMappingBuilder = IdMapImplementations.sequentialBitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
@@ -134,30 +133,30 @@ public final class GraphFactory {
             nodeCount.orElseThrow(() -> new IllegalArgumentException("Required parameter [nodeCount] is missing")),
             nodeMappingBuilder,
             internalIdMappingBuilder,
-            _concurrency,
+            threadCount,
             schema,
-            _hasLabelInformation,
+            labelInformation,
             tracker
         )).orElseGet(() -> {
-            boolean _hasProperties = hasProperties.orElse(false);
-            long _nodeCount = nodeCount.orElse(-1L);
+            boolean nodeProperties = hasProperties.orElse(false);
+            long nodes = nodeCount.orElse(-1L);
 
-            if (_hasProperties && _nodeCount <= 0) {
+            if (nodeProperties && nodes <= 0) {
                 throw new IllegalArgumentException("NodesBuilder with properties requires a node count greater than 0");
             }
 
             return new NodesBuilder(
                 maxOriginalId,
-                _nodeCount,
-                _concurrency,
+                nodes,
+                threadCount,
                 new ObjectIntScatterMap<>(),
                 new ConcurrentHashMap<>(),
                 new IntObjectHashMap<>(),
                 new IntObjectHashMap<>(),
                 nodeMappingBuilder,
                 internalIdMappingBuilder,
-                _hasLabelInformation,
-                _hasProperties,
+                labelInformation,
+                nodeProperties,
                 tracker
             );
         });

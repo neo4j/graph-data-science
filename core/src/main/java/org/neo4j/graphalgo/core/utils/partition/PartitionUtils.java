@@ -100,7 +100,7 @@ public final class PartitionUtils {
         return result;
     }
 
-    private static <TASK> ArrayList<TASK> tasks(
+    private static <TASK> List<TASK> tasks(
         int concurrency,
         long nodeCount,
         long batchSize,
