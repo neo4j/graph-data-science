@@ -38,6 +38,7 @@ interface RandomWalkProbabilities {
     HugeLongArray nodeFrequencies();
     HugeDoubleArray centerProbabilities();
     HugeLongArray contextDistribution();
+    long sampleCount();
 
     static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(RandomWalkProbabilities.class)
@@ -90,6 +91,7 @@ interface RandomWalkProbabilities {
                 .nodeFrequencies(nodeFrequencies)
                 .centerProbabilities(centerProbabilities)
                 .contextDistribution(contextDistribution)
+                .sampleCount(sampleCount.getValue())
                 .build();
         }
 

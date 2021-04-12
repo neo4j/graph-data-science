@@ -146,7 +146,7 @@ class PartitionUtilsTest {
         nodeFilter.set(2);
 
         var partitions = PartitionUtils.degreePartition(
-            new SetBitsIterable(nodeFilter).primitiveLongIterator(), graph, 2, Function.identity()
+            new SetBitsIterable(nodeFilter).primitiveLongIterator(), graph::degree, 2, Function.identity()
         );
         assertEquals(1, partitions.size());
         assertEquals(0, partitions.get(0).startNode());

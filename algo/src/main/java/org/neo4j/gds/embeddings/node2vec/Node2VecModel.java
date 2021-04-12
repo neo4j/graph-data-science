@@ -21,7 +21,9 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -92,24 +94,29 @@ public class Node2VecModel {
                 config.initialLearningRate() - iteration * learningRateAlpha
             );
 
-            var tasks = PartitionUtils.rangePartition(config.concurrency(), walks.size(), (partition -> {
-                var positiveSampleProducer = new PositiveSampleProducer(
-                    walks.iterator(partition.startNode(), partition.nodeCount()),
-                    randomWalkProbabilities.centerProbabilities(),
-                    config.windowSize(),
-                    progressLogger
-                );
+            var tasks = PartitionUtils.degreePartition(
+                PrimitiveLongCollections.range(0, walks.size() - 1),
+                walks::walkLength,
+                BitUtil.ceilDiv(randomWalkProbabilities.sampleCount(), config.concurrency()),
+                (partition -> {
+                    var positiveSampleProducer = new PositiveSampleProducer(
+                        walks.iterator(partition.startNode(), partition.nodeCount()),
+                        randomWalkProbabilities.centerProbabilities(),
+                        config.windowSize(),
+                        progressLogger
+                    );
 
-                return new TrainingTask(
-                    centerEmbeddings,
-                    contextEmbeddings,
-                    positiveSampleProducer,
-                    negativeSamples,
-                    learningRate,
-                    config.negativeSamplingRate(),
-                    config.embeddingDimension()
-                );
-            }));
+                    return new TrainingTask(
+                        centerEmbeddings,
+                        contextEmbeddings,
+                        positiveSampleProducer,
+                        negativeSamples,
+                        learningRate,
+                        config.negativeSamplingRate(),
+                        config.embeddingDimension()
+                    );
+                })
+            );
 
             ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
             progressLogger.logMessage(formatWithLocale(":: Iteration %d :: Finished", iteration + 1));

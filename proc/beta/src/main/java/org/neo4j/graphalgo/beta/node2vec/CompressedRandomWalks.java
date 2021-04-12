@@ -81,6 +81,10 @@ public class CompressedRandomWalks {
         return size;
     }
 
+    public int walkLength(long index) {
+        return (int) walkLengths.get(index);
+    }
+
     public static class CompressedWalkIterator implements Iterator<long[]> {
         private final HugeObjectArray<byte[]> compressedWalks;
         private final HugeLongArray walkLengths;
