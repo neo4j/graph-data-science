@@ -41,7 +41,7 @@ If you are using Neo4j Desktop you can simply add the Graph Data Science library
 .3+<.^|GDS 1.5.x
 |Neo4j 4.0.0 - 4.0.11
 |Neo4j 4.1.0 - 4.1.8
-|Neo4j 4.2.0 - 4.2.4
+|Neo4j 4.2.0 - 4.2.5
 |===
 
 NOTE: Preview releases are not automatically made available in Neo4j Desktop. They need to be installed manually.
