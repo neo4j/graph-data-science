@@ -99,16 +99,19 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     }
 
     private void scaleProperty(HugeObjectArray<double[]> scaledProperties, Scaler scaler, int index) {
-        var task = selectNodeIdConsumer(scaledProperties, scaler, index);
+        var strategy = selectPropertyScalerStrategy(scaledProperties, scaler, index);
         var tasks = PartitionUtils.rangePartition(
             config.concurrency(),
             graph.nodeCount(),
-            partition -> (Runnable) () -> partition.consume(task)
+            partition -> (Runnable) () -> partition.consume(strategy)
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
     }
 
-    private LongConsumer selectNodeIdConsumer(
+    /**
+     * If the property is a list property, we will use an optimised code path here.
+     */
+    private LongConsumer selectPropertyScalerStrategy(
         HugeObjectArray<double[]> scaledProperties,
         Scaler scaler,
         int index
