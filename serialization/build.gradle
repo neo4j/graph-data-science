@@ -49,7 +49,7 @@ dependencies {
     implementation project(':ml-core')
     implementation project(':algo')
     implementation project(':alpha-algo')
-    testCompile project(':alpha-algo').sourceSets.test.output
+    testImplementation project(':alpha-algo').sourceSets.test.output
 
     testImplementation project(':test-utils')
     testCompileOnly group: 'org.immutables',      name: 'value-annotations',    version: ver.'immutables'

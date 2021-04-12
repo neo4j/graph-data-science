@@ -28,8 +28,8 @@ dependencies {
 
     testImplementation project(':test-utils')
     testImplementation project(':algo')
-    testCompile project(':algo').sourceSets.test.output
-    testCompile project(':ml-test-utils')
+    testImplementation project(':algo').sourceSets.test.output
+    testImplementation project(':ml-test-utils')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 }
