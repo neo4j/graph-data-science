@@ -38,6 +38,9 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationMutateProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationStreamProc;
 import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
+import org.neo4j.graphalgo.beta.node2vec.Node2VecMutateProc;
+import org.neo4j.graphalgo.beta.node2vec.Node2VecStreamProc;
+import org.neo4j.graphalgo.beta.node2vec.Node2VecWriteProc;
 import org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraMutateProc;
 import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraStreamProc;
@@ -163,6 +166,10 @@ final class EstimationCliTest {
         "gds.beta.modularityOptimization.mutate.estimate",
         "gds.beta.modularityOptimization.stream.estimate",
         "gds.beta.modularityOptimization.write.estimate",
+
+        "gds.beta.node2vec.mutate.estimate",
+        "gds.beta.node2vec.stream.estimate",
+        "gds.beta.node2vec.write.estimate",
 
         "gds.beta.shortestPath.astar.mutate.estimate",
         "gds.beta.shortestPath.astar.stream.estimate",
@@ -548,6 +555,10 @@ final class EstimationCliTest {
             runEstimation(new ModularityOptimizationMutateProc()::mutateEstimate, "mutateProperty", "foo"),
             runEstimation(new ModularityOptimizationStreamProc()::estimate),
             runEstimation(new ModularityOptimizationWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new Node2VecMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new Node2VecStreamProc()::estimate),
+            runEstimation(new Node2VecWriteProc()::estimate, "writeProperty", "foo"),
 
             runEstimation(new ShortestPathAStarStreamProc()::streamEstimate,
                 "sourceNode", 0L,
