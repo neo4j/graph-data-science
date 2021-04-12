@@ -227,6 +227,13 @@ The following table lists all beta procedures in the GDS library:
 | `gds.beta.modularityOptimization.stream.estimate`
 | `gds.beta.modularityOptimization.write`
 | `gds.beta.modularityOptimization.write.estimate`
+.6+<.^|<<beta-algorithms-embeddings-node2vec, Node2Vec>>
+| `gds.beta.node2vec.mutate`
+| `gds.beta.node2vec.mutate.estimate`
+| `gds.beta.node2vec.stream`
+| `gds.beta.node2vec.stream.estimate`
+| `gds.beta.node2vec.write`
+| `gds.beta.node2vec.write`.estimate
 .6+<.^| Shortest Path Dijkstra
 | `gds.beta.shortestPath.dijkstra.stream`
 | `gds.beta.shortestPath.dijkstra.stream.estimate`
@@ -352,13 +359,6 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.ml.splitRelationships.mutate`
 .1+<.^| Triangle Finding
 | `gds.alpha.triangles`
-.6+<.^|<<alpha-algorithms-embeddings-node2vec, Node2Vec>>
-| `gds.alpha.node2vec.mutate`
-| `gds.alpha.node2vec.mutate.estimate`
-| `gds.alpha.node2vec.stream`
-| `gds.alpha.node2vec.stream.estimate`
-| `gds.alpha.node2vec.write`
-| `gds.alpha.node2vec.write`.estimate
 |===
 
 The following table lists all functions in the GDS library:

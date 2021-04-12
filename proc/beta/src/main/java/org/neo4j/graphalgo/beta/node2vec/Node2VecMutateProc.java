@@ -45,7 +45,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectArray<Vector>, Node2VecMutateProc.MutateResult, Node2VecMutateConfig> {
 
-    @Procedure(value = "gds.alpha.node2vec.mutate", mode = READ)
+    @Procedure(value = "gds.beta.node2vec.mutate", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -59,7 +59,7 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
         return mutate(computationResult);
     }
 
-    @Procedure(value = "gds.alpha.node2vec.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.beta.node2vec.mutate.estimate", mode = READ)
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

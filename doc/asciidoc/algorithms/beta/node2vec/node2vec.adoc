@@ -1,5 +1,5 @@
-[[alpha-algorithms-embeddings-node2vec]]
-[.alpha]
+[[beta-algorithms-embeddings-node2vec]]
+[.beta]
 = Node2Vec
 :entity: node
 :result: embedding
@@ -33,7 +33,7 @@ For more information on this algorithm, see:
 .Run Node2Vec in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.node2vec.stream(
+CALL gds.beta.node2vec.stream(
   graphName: String,
   configuration: Map
 ) YIELD
@@ -62,7 +62,7 @@ include::specific-configuration.adoc[]
 .Run Node2Vec in write mode on a graph stored in the catalog.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.node2vec.write(
+CALL gds.beta.node2vec.write(
   graphName: String,
   configuration: Map
 )
@@ -105,7 +105,7 @@ include::../../shared/syntax-anonymous-graphs.adoc[]
 .Run Node2Vec in write mode on an anonymous graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.node2vec.write(
+CALL gds.beta.node2vec.write(
   configuration: Map
 )
 YIELD
@@ -159,7 +159,7 @@ CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 
 [source, cypher, role=noplay query-example, no-result, group=node2vec]
 ----
-CALL gds.alpha.node2vec.stream('myGraph', {embeddingDimension: 2})
+CALL gds.beta.node2vec.stream('myGraph', {embeddingDimension: 2})
 ----
 
 [opts=header]

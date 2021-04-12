@@ -44,7 +44,7 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
         int dimensions = 42;
         var query = GdsCypher.call()
             .loadEverything()
-            .algo("gds.alpha.node2vec")
+            .algo("gds.beta.node2vec")
             .streamMode()
             .addParameter("embeddingDimension", 42)
             .yields();
@@ -69,7 +69,7 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
         );
         var query = GdsCypher.call()
             .loadEverything()
-            .algo("gds.alpha.node2vec")
+            .algo("gds.beta.node2vec")
             .streamMode()
             .addParameter("walksPerNode", Integer.MAX_VALUE)
             .addParameter("walkLength", Integer.MAX_VALUE)

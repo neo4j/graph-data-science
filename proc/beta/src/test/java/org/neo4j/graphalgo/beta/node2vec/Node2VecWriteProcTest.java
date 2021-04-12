@@ -45,7 +45,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
         long dimensions = 42;
         var query = GdsCypher.call()
             .loadEverything()
-            .algo("gds.alpha.node2vec")
+            .algo("gds.beta.node2vec")
             .writeMode()
             .addParameter("writeProperty", "embedding")
             .addParameter("embeddingDimension", dimensions)
@@ -80,7 +80,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
         );
         var query = GdsCypher.call()
             .loadEverything()
-            .algo("gds.alpha.node2vec")
+            .algo("gds.beta.node2vec")
             .writeMode()
             .addParameter("writeProperty", "embedding")
             .addParameter("walksPerNode", Integer.MAX_VALUE)

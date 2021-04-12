@@ -45,7 +45,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteProc.WriteResult, Node2VecWriteConfig> {
 
-    @Procedure(value = "gds.alpha.node2vec.write", mode = WRITE)
+    @Procedure(value = "gds.beta.node2vec.write", mode = WRITE)
     @Description(Node2VecCompanion.DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -58,7 +58,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
         return write(computationResult);
     }
 
-    @Procedure(value = "gds.alpha.node2vec.write.estimate", mode = READ)
+    @Procedure(value = "gds.beta.node2vec.write.estimate", mode = READ)
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

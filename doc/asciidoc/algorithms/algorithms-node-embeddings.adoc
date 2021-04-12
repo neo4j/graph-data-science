@@ -15,13 +15,11 @@ The Neo4j Graph Data Science library contains the following node embedding algor
 
 * Beta
 ** <<algorithms-embeddings-graph-sage, GraphSAGE>>
-
-* Alpha
-** <<alpha-algorithms-embeddings-node2vec, Node2Vec>>
+** <<beta-algorithms-embeddings-node2vec, Node2Vec>>
 
 
 include::fastrp/fastrp.adoc[leveloffset=+1]
 
 include::beta/graph-sage/graph-sage.adoc[leveloffset=+1]
 
-include::alpha/node2vec/node2vec.adoc[leveloffset=+1]
+include::beta/node2vec/node2vec.adoc[leveloffset=+1]

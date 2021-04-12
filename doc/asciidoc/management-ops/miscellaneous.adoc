@@ -32,7 +32,7 @@ YIELD
 
 ==== Examples
 
-Assuming we just started `gds.alpha.node2vec.stream` procedure.
+Assuming we just started `gds.beta.node2vec.stream` procedure.
 
 [source, cypher, role=noplay]
 ----

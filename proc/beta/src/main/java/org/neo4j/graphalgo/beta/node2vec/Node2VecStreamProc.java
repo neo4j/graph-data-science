@@ -45,7 +45,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vector>, Node2VecStreamProc.StreamResult, Node2VecStreamConfig> {
 
-    @Procedure(value = "gds.alpha.node2vec.stream", mode = READ)
+    @Procedure(value = "gds.beta.node2vec.stream", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -59,7 +59,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
        return stream(computationResult);
     }
 
-    @Procedure(value = "gds.alpha.node2vec.stream.estimate", mode = READ)
+    @Procedure(value = "gds.beta.node2vec.stream.estimate", mode = READ)
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,

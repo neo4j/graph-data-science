@@ -116,12 +116,12 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.model.load",
         "gds.alpha.model.store",
 
-        "gds.alpha.node2vec.mutate",
-        "gds.alpha.node2vec.mutate.estimate",
-        "gds.alpha.node2vec.stream",
-        "gds.alpha.node2vec.stream.estimate",
-        "gds.alpha.node2vec.write",
-        "gds.alpha.node2vec.write.estimate",
+        "gds.beta.node2vec.mutate",
+        "gds.beta.node2vec.mutate.estimate",
+        "gds.beta.node2vec.stream",
+        "gds.beta.node2vec.stream.estimate",
+        "gds.beta.node2vec.write",
+        "gds.beta.node2vec.write.estimate",
 
         "gds.beta.allShortestPaths.dijkstra.stream",
         "gds.beta.allShortestPaths.dijkstra.stream.estimate",
