@@ -259,6 +259,8 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
     public final class ComputeSteps {
         private List<ComputeStep> steps;
         private final ExecutorService pool;
+        // collects scores that each partition updated in any other partition
+        // partition -> partition -> (next) score
         private float[][][] scores;
         private final int concurrency;
 
@@ -287,7 +289,9 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
 
         private void run(int iterations) {
             didConverge = false;
+            // initialize compute steps
             ParallelUtil.runWithConcurrency(concurrency, steps, terminationFlag, pool);
+
             for (ranIterations = 0; ranIterations < iterations && !didConverge; ranIterations++) {
                 getProgressLogger().logMessage(formatWithLocale(":: Iteration %d :: Start", ranIterations + 1));
                 // calculate scores
@@ -349,6 +353,7 @@ public class PageRank extends Algorithm<PageRank, PageRank> {
         private void synchronizeScores(ComputeStep step, int idx, float[][][] scores) {
             step.prepareNextIteration(scores[idx]);
             float[][] nextScores = step.nextScores();
+            // assigns scores for each partition that have been sent by the compute step identified by idx
             for (int j = 0, len = nextScores.length; j < len; j++) {
                 scores[j][idx] = nextScores[j];
             }

@@ -41,8 +41,11 @@ public abstract class BaseComputeStep implements ComputeStep {
 
     private int state;
 
+    // start node ids for all partitions
     long[] starts;
+    // size of all partitions
     private int[] lengths;
+
     protected double tolerance;
     private final long[] sourceNodeIds;
     final RelationshipIterator relationshipIterator;
@@ -52,9 +55,13 @@ public abstract class BaseComputeStep implements ComputeStep {
     private final double alpha;
     final double dampingFactor;
 
+    // stores rank for own partition = O(partition_size)
     double[] pageRank;
+    // stores delta for own partition = O(partition_size)
     double[] deltas;
+    // O(partition * partition_size) = O(node_count)
     float[][] nextScores;
+    // O(partition * partition_size) = O(node_count)
     float[][] prevScores;
 
     final long startNode;
@@ -98,6 +105,7 @@ public abstract class BaseComputeStep implements ComputeStep {
         ProgressLogger progressLogger
     ) {
         this.dampingFactor = dampingFactor;
+        // TODO why do we need this and not 1/n
         this.alpha = 1.0 - dampingFactor;
         this.tolerance = tolerance;
         this.sourceNodeIds = sourceNodeIds;
@@ -147,10 +155,12 @@ public abstract class BaseComputeStep implements ComputeStep {
         tracker.add(sizeOfDoubleArray(partitionSize) << 1);
 
         double[] partitionRank = new double[partitionSize];
+        // alpha
         double initialValue = initialValue();
         if (sourceNodeIds.length == 0) {
             Arrays.fill(partitionRank, initialValue);
         } else {
+            // personalized page rank initializes only source nodes with alpha
             Arrays.fill(partitionRank, 0.0);
 
             long[] partitionSourceNodeIds = LongStream.of(sourceNodeIds)
@@ -190,14 +200,20 @@ public abstract class BaseComputeStep implements ComputeStep {
 
         boolean shouldBreak = true;
 
+        // prev scores contains all partial scores sent by any other compute step
+        // therefore each array in prev scores has the same length
+        // Each column represents all scores for the node id
         int length = prevScores[0].length;
         for (int i = 0; i < length; i++) {
+            // sum of partial scores
             double sum = 0.0;
+            // sum up scores for each column
             for (int j = 0; j < scoreDim; j++) {
                 float[] scores = prevScores[j];
                 sum += scores[i];
                 scores[i] = 0F;
             }
+            // in Pregel we do delta = (jumpProbability / context.nodeCount()) + dampingFactor * sum;
             double delta = dampingFactor * degreeFactor() * sum;
             if (delta > tolerance) {
                 shouldBreak = false;
