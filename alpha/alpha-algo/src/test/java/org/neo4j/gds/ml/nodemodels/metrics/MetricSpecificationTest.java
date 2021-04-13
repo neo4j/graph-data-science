@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
-import org.jetbrains.annotations.TestOnly;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -100,7 +99,6 @@ public class MetricSpecificationTest {
         return List.of("F 1 ( class=2 3 4)", "F 1 ( class=3)", "f1(c las s = 01 0 30 2)", "JAMESBOND(class=0)", "F1(class=$)");
     }
 
-    @TestOnly
     public static List<String> allValidMetricSpecifications() {
         var validExpressions = new LinkedList<String>();
         var allClassExpressions = AllClassMetric.values();
