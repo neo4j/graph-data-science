@@ -42,6 +42,14 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
 
     private static boolean weighted;
 
+    private final double dampingFactor;
+    private final double alpha;
+
+    PageRankPregel(PageRankPregelConfig config) {
+        this.dampingFactor = config.dampingFactor();
+        this.alpha = 1 - this.dampingFactor;
+    }
+
     @Override
     public PregelSchema schema(PageRankPregelConfig config) {
         return new PregelSchema.Builder().add(PAGE_RANK, ValueType.DOUBLE).build();
@@ -51,7 +59,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     public void init(InitContext<PageRankPregelConfig> context) {
         var initialValue = context.config().seedProperty() != null
             ? context.nodeProperties(context.config().seedProperty()).doubleValue(context.nodeId())
-            : 1.0 / context.nodeCount();
+            : alpha;
         context.setNodeValue(PAGE_RANK, initialValue);
 
         weighted = context.config().relationshipWeightProperty() != null;
@@ -61,6 +69,8 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     public void compute(ComputeContext<PageRankPregelConfig> context, Messages messages) {
         double newRank = context.doubleNodeValue(PAGE_RANK);
 
+        double delta = newRank;
+
         // compute new rank based on neighbor ranks
         if (!context.isInitialSuperstep()) {
             double sum = 0;
@@ -68,12 +78,8 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
                 sum += message;
             }
 
-            var dampingFactor = context.config().dampingFactor();
-            var jumpProbability = 1 - dampingFactor;
-
-            newRank = (jumpProbability / context.nodeCount()) + dampingFactor * sum;
-
-            context.setNodeValue(PAGE_RANK, newRank);
+            delta = dampingFactor * sum;
+            context.setNodeValue(PAGE_RANK, newRank + delta);
         }
 
         // send new rank to neighbors
@@ -81,7 +87,8 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
             // normalized via `applyRelationshipWeight`
             context.sendToNeighbors(newRank);
         } else {
-            context.sendToNeighbors(newRank / context.degree());
+            int degree = context.degree();
+            context.sendToNeighbors(delta / degree);
         }
     }
 
