@@ -77,7 +77,27 @@ Note that, after the first invocation, we cannot use the 'remaining' graph as th
 === Metrics
 
 The Link Prediction model in the Neo4j GDS library supports only the Area Under the Precision-Recall Curve metric, abbreviated as AUCPR.
-However, most graphs have far more non-connected node pairs than connected ones.
+In order to compute precision and recall we require a set of examples, each of which has a positive or negative target.
+For each example we have also a predicted target.
+Given the true and predicted targets, we can compute precision and recall (for reference, see f.e. https://en.wikipedia.org/wiki/Precision_and_recall#Definition_(classification_context)[Wikipedia]).
+
+Then, to compute the AUCPR, we construct the precision-recall curve, as follows:
+
+- Each predicted target is associated with a prediction strength, for example the predicted probability of a positive target.
+  We sort the examples in descending order of prediction strength.
+- For all prediction strengths that occur, we use that strength as a threshold and for all examples of that strength or higher predict that these examples have positive targets.
+- We now compute precision `p` and recall `r` and consider the tuple `(r, p)` as a point on a curve, the precision-recall curve.
+- Finally, the curve is linearly interpolated and the area is computed as a union of trapezoids with corners on the points.
+
+The curve will have a shape that looks something like this:
+
+image::misc/precision-recall-trapezoid.png[precision-recall curve with trapezoid,align="center"]
+
+Note here the blue area which shows one trapezoid under the curve.
+
+==== Class imbalance
+
+Most graphs have far more non-connected node pairs than connected ones (e.g. sparse graphs).
 Thus, typically we have an issue with _class imbalance_.
 
 We will denote by `classRatio` the ratio of non-connected node pairs to connected node pairs.
