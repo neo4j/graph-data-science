@@ -32,16 +32,6 @@ public class FractionSplitter {
         this.allocationTracker = allocationTracker;
     }
 
-    // fraction is in [0,1]
-    public NodeSplit split(long nodeCount, double trainFraction) {
-        long trainSize = (long) (nodeCount * trainFraction);
-        long testSize = nodeCount - trainSize;
-        var train = initHLA(trainSize, i -> i);
-        var test = initHLA(testSize, i -> i + trainSize);
-
-        return NodeSplit.of(train, test);
-    }
-
     public NodeSplit split(HugeLongArray ids, double trainFraction) {
         long trainSize = (long) (ids.size() * trainFraction);
         long testSize = ids.size() - trainSize;

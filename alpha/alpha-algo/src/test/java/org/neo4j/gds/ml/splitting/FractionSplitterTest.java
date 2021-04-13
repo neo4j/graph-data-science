@@ -28,17 +28,16 @@ class FractionSplitterTest {
     @Test
     void shouldGiveEmptySets() {
         var fractionSplitter = new FractionSplitter(AllocationTracker.empty());
-        var split = fractionSplitter.split(0, 0.5);
+        var split = fractionSplitter.split(HugeLongArray.newArray(0, AllocationTracker.empty()), 0.5);
         Assertions.assertThat(split.trainSet().toArray()).isEmpty();
         Assertions.assertThat(split.testSet().toArray()).isEmpty();
     }
 
     @Test
     void shouldGiveCorrectFractionConsecutiveIds() {
-        long nodeCount = 10;
         double fraction = 0.65;
         var fractionSplitter = new FractionSplitter(AllocationTracker.empty());
-        var split = fractionSplitter.split(nodeCount, fraction);
+        var split = fractionSplitter.split(HugeLongArray.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), fraction);
         Assertions.assertThat(split.trainSet().toArray()).containsExactly(0, 1, 2, 3, 4, 5);
         Assertions.assertThat(split.testSet().toArray()).containsExactly(6, 7, 8, 9);
     }
