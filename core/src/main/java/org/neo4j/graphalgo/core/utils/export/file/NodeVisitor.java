@@ -36,6 +36,7 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
     private static final Set<NodeLabel> EMPTY_LABELS_LABEL = Set.of(NodeLabel.ALL_NODES);
     private long currentId;
     private List<String> currentLabels;
+    private String labelIdentifier;
 
     protected NodeVisitor(NodeSchema nodeSchema) {
         super(nodeSchema);
@@ -64,14 +65,15 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
     public boolean labels(String[] labels) {
         Arrays.sort(labels);
         currentLabels = Arrays.asList(labels);
+        labelIdentifier = String.join("_", labels);
         return true;
     }
 
     // Overrides from ElementVisitor
 
     @Override
-    String elementIdentifier() {
-        return String.join("_", labels());
+    protected String elementIdentifier() {
+        return labelIdentifier;
     }
 
     @Override
@@ -87,6 +89,7 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
     void reset() {
         currentId = -1;
         currentLabels = EMPTY_LABELS;
+        labelIdentifier = "";
     }
 
     abstract static class Builder<SELF extends Builder<SELF, VISITOR>, VISITOR extends NodeVisitor> {

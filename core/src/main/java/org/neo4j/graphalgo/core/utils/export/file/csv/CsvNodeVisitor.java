@@ -100,7 +100,7 @@ public class CsvNodeVisitor extends NodeVisitor {
     }
 
     private CsvAppender getAppender() {
-        var labelsString = String.join("_", labels());
+        var labelsString = elementIdentifier();
 
         return csvAppenders.computeIfAbsent(labelsString, (ignore) -> {
             var fileName = labelsString.isBlank() ? "nodes" : formatWithLocale("nodes_%s", labelsString);
