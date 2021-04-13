@@ -28,8 +28,8 @@ public class FractionSplitter {
 
     private final AllocationTracker allocationTracker;
 
-    public FractionSplitter() {
-        this.allocationTracker = AllocationTracker.empty();
+    public FractionSplitter(AllocationTracker allocationTracker) {
+        this.allocationTracker = allocationTracker;
     }
 
     // fraction is in [0,1]

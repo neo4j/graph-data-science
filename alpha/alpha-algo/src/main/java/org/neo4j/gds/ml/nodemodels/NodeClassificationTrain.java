@@ -83,7 +83,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         ShuffleUtil.shuffleHugeLongArray(nodeIds, getRandomDataGenerator());
 
         // 2a. Outer split nodes into holdout + remaining
-        var outerSplitter = new FractionSplitter();
+        var outerSplitter = new FractionSplitter(allocationTracker);
         var outerSplit = outerSplitter.split(nodeIds, 1 - config.holdoutFraction());
 
         // 2b. Inner split: enumerate a number of train/validation splits of remaining
