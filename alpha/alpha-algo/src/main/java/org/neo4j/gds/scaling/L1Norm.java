@@ -21,39 +21,34 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class L1Norm implements Scaler {
+final class L1Norm extends ScalarScaler {
 
-    private final NodeProperties properties;
     final double l1Norm;
 
     private L1Norm(NodeProperties properties, double l1Norm) {
-        this.properties = properties;
+        super(properties);
         this.l1Norm = l1Norm;
     }
 
-    static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
-        if (nodeCount == 0) {
-            return ZERO_SCALER;
-        }
-
+    static ScalarScaler initialize(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new ComputeAggregates(partition.startNode(), partition.nodeCount(), properties)
+            partition -> new ComputeAbsoluteSum(partition, properties)
         );
-
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
-        var sum = tasks.stream().mapToDouble(ComputeAggregates::sum).sum();
+        var absoluteSum = tasks.stream().mapToDouble(ComputeAbsoluteSum::sum).sum();
 
-        if (Math.abs(sum) < CLOSE_TO_ZERO) {
-            return ZERO_SCALER;
+        if (absoluteSum < CLOSE_TO_ZERO) {
+            return ZERO;
         } else {
-            return new L1Norm(properties, sum);
+            return new L1Norm(properties, absoluteSum);
         }
     }
 
@@ -62,25 +57,18 @@ final class L1Norm implements Scaler {
         return properties.doubleValue(nodeId) / l1Norm;
     }
 
-    static class ComputeAggregates implements Runnable {
-
-        private final long start;
-        private final long length;
-        private final NodeProperties properties;
+    static class ComputeAbsoluteSum extends AggregatesComputer {
+        
         private double sum;
 
-        ComputeAggregates(long start, long length, NodeProperties property) {
-            this.start = start;
-            this.length = length;
-            this.properties = property;
+        ComputeAbsoluteSum(Partition partition, NodeProperties property) {
+            super(partition, property);
             this.sum = 0;
         }
 
         @Override
-        public void run() {
-            for (long nodeId = start; nodeId < (start + length); nodeId++) {
-                sum += Math.abs(properties.doubleValue(nodeId));
-            }
+        void compute(long nodeId) {
+            sum += Math.abs(properties.doubleValue(nodeId));
         }
 
         double sum() {

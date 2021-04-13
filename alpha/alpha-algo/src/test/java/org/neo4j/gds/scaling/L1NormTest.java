@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 
-import java.util.stream.LongStream;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,13 +37,13 @@ class L1NormTest {
     private static Stream<Arguments> properties() {
         return Stream.of(
             Arguments.of(
-                5L,
+                5,
                 (DoubleNodeProperties) nodeId -> nodeId,
                 10D,
                 new double[]{0, 0.1D, 0.2D, 0.3D, 0.4D}
             ),
             Arguments.of(
-                5L,
+                5,
                 (DoubleNodeProperties) nodeId -> (nodeId % 2 == 0) ? -nodeId : nodeId,
                 10D,
                 new double[]{0, 0.1D, - 0.2D, 0.3D, -0.40D}
@@ -53,19 +53,19 @@ class L1NormTest {
 
     @ParameterizedTest
     @MethodSource("properties")
-    void scale(long nodeCount, NodeProperties properties, double l1norm, double[] expected) {
-        var scaler = (L1Norm) L1Norm.create(properties, nodeCount, 1, Pools.DEFAULT);
+    void scale(int nodeCount, NodeProperties properties, double l1norm, double[] expected) {
+        var scaler = (L1Norm) L1Norm.initialize(properties, nodeCount, 1, Pools.DEFAULT);
 
         assertThat(scaler.l1Norm).isEqualTo(l1norm);
 
-        double[] actual = LongStream.range(0, nodeCount).mapToDouble(scaler::scaleProperty).toArray();
+        double[] actual = IntStream.range(0, nodeCount).mapToDouble(scaler::scaleProperty).toArray();
         assertThat(actual).containsSequence(expected);
     }
 
     @Test
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 0D;
-        var scaler = L1Norm.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = L1Norm.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);

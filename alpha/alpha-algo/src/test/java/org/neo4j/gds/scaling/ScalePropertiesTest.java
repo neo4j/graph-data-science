@@ -47,11 +47,11 @@ class ScalePropertiesTest {
 
     @GdlGraph
     static String GDL =
-        "(a:A {a: 1.1D, b: 20, c: 50, bAndC: [20.0, 50.0], longArrayB: [20L], doubleArrayB: [20.0d], mixedSizeArray: [1.0, 1.0], missingArray: [1.0,2.0]}), " +
-        "(b:A {a: 2.8D, b: 21, c: 51, bAndC: [21.0, 51.0], longArrayB: [21L], doubleArrayB: [21.0d], mixedSizeArray: [1.0]}), " +
-        "(c:A {a: 3, b: 22, c: 52, bAndC: [22.0, 52.0], longArrayB: [22L], doubleArrayB: [22.0d], mixedSizeArray: [1.0]}), " +
-        "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], longArrayB: [23L], doubleArrayB: [23.0d], mixedSizeArray: [1.0]}), " +
-        "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], longArrayB: [24L], doubleArrayB: [24.0d], mixedSizeArray: [1.0, 2.0, 3.0]})";
+        "(a:A {a: 1.1D, b: 20, c: 50, bAndC: [20.0, 50.0], longArrayB: [20L], floatArrayB: [20.0], doubleArray: [1.000000001d],  mixedSizeArray: [1.0, 1.0], missingArray: [1.0,2.0]}), " +
+        "(b:A {a: 2.8D, b: 21, c: 51, bAndC: [21.0, 51.0], longArrayB: [21L], floatArrayB: [21.0], doubleArray: [1.000000002d], mixedSizeArray: [1.0]}), " +
+        "(c:A {a: 3, b: 22, c: 52, bAndC: [22.0, 52.0], longArrayB: [22L], floatArrayB: [22.0], doubleArray: [1.000000003d], mixedSizeArray: [1.0]}), " +
+        "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], longArrayB: [23L], floatArrayB: [23.0], doubleArray: [1.000000004d], mixedSizeArray: [1.0]}), " +
+        "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], longArrayB: [24L], floatArrayB: [24.0], doubleArray: [1.000000005d], mixedSizeArray: [1.0, 2.0, 3.0]})";
 
     @Inject
     TestGraph graph;
@@ -60,7 +60,7 @@ class ScalePropertiesTest {
     void scaleSingleProperty() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a"))
-            .scaler(Scaler.Variant.MINMAX)
+            .scaler(ScalarScaler.Variant.MINMAX)
             .concurrency(1)
             .build();
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
@@ -79,7 +79,7 @@ class ScalePropertiesTest {
     void scaleMultipleProperties() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "b", "c"))
-            .scaler(Scaler.Variant.MINMAX)
+            .scaler(ScalarScaler.Variant.MINMAX)
             .concurrency(1)
             .build();
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
@@ -108,7 +108,7 @@ class ScalePropertiesTest {
 
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a"))
-            .scaler(Scaler.Variant.MINMAX);
+            .scaler(ScalarScaler.Variant.MINMAX);
 
         var parallelResult = new ScaleProperties(
             bigGraph,
@@ -131,7 +131,7 @@ class ScalePropertiesTest {
     void scaleArrayProperty() {
         var arrayConfig = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "bAndC", "a"))
-            .scaler(Scaler.Variant.MINMAX)
+            .scaler(ScalarScaler.Variant.MINMAX)
             .build();
 
         var actual = new ScaleProperties(graph, arrayConfig, AllocationTracker.empty(), Pools.DEFAULT)
@@ -140,7 +140,7 @@ class ScalePropertiesTest {
 
         var singlePropConfig = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("a", "b", "c", "a"))
-            .scaler(Scaler.Variant.MINMAX)
+            .scaler(ScalarScaler.Variant.MINMAX)
             .build();
 
         var expected = new ScaleProperties(graph, singlePropConfig, AllocationTracker.empty(), Pools.DEFAULT)
@@ -151,13 +151,13 @@ class ScalePropertiesTest {
     }
 
     @ParameterizedTest
-    @EnumSource(Scaler.Variant.class)
-    void supportLongAndDoubleArrays(Scaler.Variant scaler) {
+    @EnumSource(ScalarScaler.Variant.class)
+    void supportLongAndFloatArrays(ScalarScaler.Variant scaler) {
         var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder()
             .scaler(scaler);
         var bConfig = baseConfigBuilder.nodeProperties(List.of("b")).build();
         var longArrayBConfig = baseConfigBuilder.nodeProperties(List.of("longArrayB")).build();
-        var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("doubleArrayB")).build();
+        var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("floatArrayB")).build();
 
         var expected = new ScaleProperties(graph, bConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
         var actualLong = new ScaleProperties(graph, longArrayBConfig, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
@@ -168,10 +168,21 @@ class ScalePropertiesTest {
     }
 
     @Test
+    void supportDoubleArrays() {
+        var baseConfigBuilder = ImmutableScalePropertiesBaseConfig.builder().scaler(ScalarScaler.Variant.MINMAX);
+        var config = baseConfigBuilder.nodeProperties(List.of("doubleArray")).build();
+
+        var expected = new double[][]{new double[]{0.0}, new double[]{0.2499999722444236}, new double[]{.5}, new double[]{0.7500000277555764}, new double[]{1.0}};
+        var actual = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT).compute().scaledProperties();
+
+        IntStream.range(0, (int) graph.nodeCount()).forEach(id -> assertArrayEquals(expected[id], actual.get(id)));
+    }
+
+    @Test
     void failOnArrayPropertyWithUnequalLength() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("mixedSizeArray"))
-            .scaler(Scaler.Variant.MINMAX)
+            .scaler(ScalarScaler.Variant.MINMAX)
             .build();
 
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
@@ -186,7 +197,7 @@ class ScalePropertiesTest {
     void failOnMissingValuesForArrayProperty() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("missingArray"))
-            .scaler(Scaler.Variant.MINMAX)
+            .scaler(ScalarScaler.Variant.MINMAX)
             .build();
 
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);
@@ -201,7 +212,7 @@ class ScalePropertiesTest {
     void failOnNonExistentProperty() {
         var config = ImmutableScalePropertiesBaseConfig.builder()
             .nodeProperties(List.of("IMAGINARY_PROP"))
-            .scaler(Scaler.Variant.MINMAX)
+            .scaler(ScalarScaler.Variant.MINMAX)
             .build();
 
         var algo = new ScaleProperties(graph, config, AllocationTracker.empty(), Pools.DEFAULT);

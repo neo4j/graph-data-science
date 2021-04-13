@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.gds.scaling.Scaler;
+import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.result.CentralityResult;
 
 public class NormalizedCentralityResult extends CentralityResult {
-    private final Scaler scaler;
+    private final ScalarScaler scaler;
 
-    public NormalizedCentralityResult(CentralityResult result, Scaler scaler) {
+    public NormalizedCentralityResult(CentralityResult result, ScalarScaler scaler) {
         super(result.array());
         this.scaler = scaler;
     }
@@ -38,6 +38,6 @@ public class NormalizedCentralityResult extends CentralityResult {
 
     @Override
     public DoubleNodeProperties asNodeProperties() {
-        return scaler::scaleProperty;
+        return this::score;
     }
 }

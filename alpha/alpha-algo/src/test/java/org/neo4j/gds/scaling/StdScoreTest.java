@@ -46,7 +46,7 @@ class StdScoreTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodeProperties properties, double avg, double std, double[] expected) {
-        var scaler = (StdScore) StdScore.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = (StdScore) StdScore.initialize(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(scaler.avg).isEqualTo(avg);
         assertThat(scaler.std).isEqualTo(std);
@@ -58,10 +58,10 @@ class StdScoreTest {
     @Test
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 4D;
-        var normalizer = Mean.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = Mean.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
-            assertThat(normalizer.scaleProperty(i)).isEqualTo(0D);
+            assertThat(scaler.scaleProperty(i)).isEqualTo(0D);
         }
     }
 }
