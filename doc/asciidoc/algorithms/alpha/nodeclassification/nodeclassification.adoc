@@ -101,7 +101,7 @@ The `modelInfo` return field has the following algorithm-specific subfields:
 |===
 | Name           | Type          | Description
 | classes        | List<Integer> | Sorted list of class ids which are the distinct values of `targetProperty` over the entire graph.
-| bestParameters | Map           | The map in `params` which contains the model configuration which performed best on average on validation folds according to the primary metric.
+| bestParameters | Map           | The model parameters which performed best on average on validation folds according to the primary metric.
 | metrics        | Map           | Map from metric description to evaluated metrics for various models and subsets of the data, see below.
 |===
 
