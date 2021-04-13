@@ -45,7 +45,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     private final double dampingFactor;
     private final double alpha;
 
-    PageRankPregel(PageRankPregelConfig config) {
+    public PageRankPregel(PageRankPregelConfig config) {
         this.dampingFactor = config.dampingFactor();
         this.alpha = 1 - this.dampingFactor;
     }
