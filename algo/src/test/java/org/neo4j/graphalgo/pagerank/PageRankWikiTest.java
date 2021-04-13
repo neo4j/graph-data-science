@@ -20,9 +20,11 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -35,7 +37,6 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.neo4j.graphalgo.pagerank.PageRankPregel.PAGE_RANK;
 
 @GdlExtension
 class PageRankWikiTest {
@@ -96,12 +97,8 @@ class PageRankWikiTest {
             .tolerance(0)
             .build();
 
-        var gdsResult = runOnGds(graph, config);
-        var pregelResult = runOnPregel(graph, config);
-
-        LongStream.range(0, graph.nodeCount())
-            .forEach(nodeId -> System.out.println("gds:" + gdsResult.doubleValue(nodeId) + " pregel:" + pregelResult.doubleValue(
-                nodeId)));
+        var gdsResult = runOnGds(graph, config).result().asNodeProperties();
+        var pregelResult = runOnPregel(graph, config).nodeValues().doubleProperties(PageRankPregel.PAGE_RANK).asNodeProperties();
 
         for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
             assertThat(gdsResult.doubleValue(nodeId)).isEqualTo(expected[nodeId], within(1e-2));
@@ -109,19 +106,33 @@ class PageRankWikiTest {
         }
     }
 
-    DoubleNodeProperties runOnGds(Graph graph, PageRankBaseConfig config) {
-        return PageRankAlgorithmType.NON_WEIGHTED
-            .create(graph, config, LongStream.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
-            .compute()
-            .result()
-            .asNodeProperties();
+    @ParameterizedTest
+    @CsvSource(value = {"0.5, 2", "0.1, 13"})
+    void tolerance(double tolerance, int expectedIterations) {
+        var config = ImmutablePageRankStreamConfig.builder()
+            .maxIterations(40)
+            .concurrency(1)
+            .tolerance(tolerance)
+            .build();
+
+        var pregelResult = runOnPregel(graph, config);
+
+        // initial iteration is counted extra in Pregel
+        assertThat(pregelResult.ranIterations()).isEqualTo(expectedIterations);
     }
 
-    DoubleNodeProperties runOnPregel(Graph graph, PageRankBaseConfig config) {
+    PageRank runOnGds(Graph graph, PageRankBaseConfig config) {
+        return PageRankAlgorithmType.NON_WEIGHTED
+            .create(graph, config, LongStream.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            .compute();
+    }
+
+    PregelResult runOnPregel(Graph graph, PageRankBaseConfig config) {
         var pregelConfig = ImmutablePageRankPregelConfig.builder()
             .maxIterations(config.maxIterations() + 1)
             .dampingFactor(config.dampingFactor())
             .concurrency(config.concurrency())
+            .tolerance(config.tolerance())
             .isAsynchronous(false)
             .build();
 
@@ -133,6 +144,6 @@ class PageRankWikiTest {
             AllocationTracker.empty()
         );
 
-        return pregelJob.run().nodeValues().doubleProperties(PAGE_RANK).asNodeProperties();
+        return pregelJob.run();
     }
 }

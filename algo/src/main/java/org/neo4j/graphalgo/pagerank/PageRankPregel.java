@@ -43,10 +43,12 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     private static boolean weighted;
 
     private final double dampingFactor;
+    private final double tolerance;
     private final double alpha;
 
     public PageRankPregel(PageRankPregelConfig config) {
         this.dampingFactor = config.dampingFactor();
+        this.tolerance = config.tolerance();
         this.alpha = 1 - this.dampingFactor;
     }
 
@@ -82,13 +84,17 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
             context.setNodeValue(PAGE_RANK, newRank + delta);
         }
 
-        // send new rank to neighbors
-        if (weighted) {
-            // normalized via `applyRelationshipWeight`
-            context.sendToNeighbors(newRank);
+        if (delta > tolerance || context.isInitialSuperstep()) {
+            // send new rank to neighbors
+            if (weighted) {
+                // normalized via `applyRelationshipWeight`
+                context.sendToNeighbors(newRank);
+            } else {
+                int degree = context.degree();
+                context.sendToNeighbors(delta / degree);
+            }
         } else {
-            int degree = context.degree();
-            context.sendToNeighbors(delta / degree);
+            context.voteToHalt();
         }
     }
 
@@ -110,6 +116,11 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
         @Value.Default
         default double dampingFactor() {
             return 0.85;
+        }
+
+        @Value.Default
+        default double tolerance() {
+            return 1e-7;
         }
 
         static PageRankPregelConfig of(
