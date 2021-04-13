@@ -39,16 +39,16 @@ final class L1Norm extends ScalarScaler {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new ComputeSum(partition, properties)
+            partition -> new ComputeAbsoluteSum(partition, properties)
         );
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
-        var sum = tasks.stream().mapToDouble(ComputeSum::sum).sum();
+        var absoluteSum = tasks.stream().mapToDouble(ComputeAbsoluteSum::sum).sum();
 
-        if (Math.abs(sum) < CLOSE_TO_ZERO) {
+        if (Math.abs(absoluteSum) < CLOSE_TO_ZERO) {
             return ZERO;
         } else {
-            return new L1Norm(properties, sum);
+            return new L1Norm(properties, absoluteSum);
         }
     }
 
@@ -57,11 +57,11 @@ final class L1Norm extends ScalarScaler {
         return properties.doubleValue(nodeId) / l1Norm;
     }
 
-    static class ComputeSum extends AggregatesComputer {
+    static class ComputeAbsoluteSum extends AggregatesComputer {
         
         private double sum;
 
-        ComputeSum(Partition partition, NodeProperties property) {
+        ComputeAbsoluteSum(Partition partition, NodeProperties property) {
             super(partition, property);
             this.sum = 0;
         }
