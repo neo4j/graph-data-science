@@ -29,7 +29,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class Precision implements Metric {
 
     public static final String NAME = "PRECISION";
-    private static final double EPSILON = 1e-8;
 
     private final long positiveTarget;
 
@@ -53,14 +52,14 @@ public class Precision implements Metric {
             long predictedClass = predictions.get(row);
 
             var predictedIsPositive = predictedClass == positiveTarget;
-            var targetIsPositive = targetClass == positiveTarget;
-            var targetIsNegative = !targetIsPositive;
+            if (!predictedIsPositive) continue;
 
-            if (predictedIsPositive && targetIsPositive) {
+            var targetIsPositive = targetClass == positiveTarget;
+
+            if (targetIsPositive) {
                 truePositives++;
             }
-
-            if (predictedIsPositive && targetIsNegative) {
+            else {
                 falsePositives++;
             }
         }

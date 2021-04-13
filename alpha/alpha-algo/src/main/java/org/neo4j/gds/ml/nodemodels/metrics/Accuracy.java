@@ -68,7 +68,6 @@ public class Accuracy implements Metric {
         }
 
         var result = ((double) accurates) / targets.size();
-        assert result <= 1.0;
         return result;
     }
 

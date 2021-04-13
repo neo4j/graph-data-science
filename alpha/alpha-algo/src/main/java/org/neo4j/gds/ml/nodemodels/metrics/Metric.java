@@ -23,5 +23,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
 public interface Metric {
+    double EPSILON = 1e-8;
     double compute(HugeLongArray targets, HugeLongArray predictions, Multiset<Long> globalClassCounts);
 }

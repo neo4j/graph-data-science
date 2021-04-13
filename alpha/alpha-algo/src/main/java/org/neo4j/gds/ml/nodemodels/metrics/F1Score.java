@@ -29,7 +29,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class F1Score implements Metric {
 
     public static final String NAME = "F1";
-    private static final double EPSILON = 1e-8;
 
     private final long positiveTarget;
 

@@ -29,7 +29,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class Recall implements Metric {
 
     public static final String NAME = "RECALL";
-    private static final double EPSILON = 1e-8;
 
     private final long positiveTarget;
 
@@ -65,9 +64,7 @@ public class Recall implements Metric {
             }
         }
 
-        var result = truePositives / (truePositives + falseNegatives + EPSILON);
-        assert result <= 1.0;
-        return result;
+        return truePositives / (truePositives + falseNegatives + EPSILON);
     }
 
     public double compute(HugeLongArray targets, HugeLongArray predictions) {
