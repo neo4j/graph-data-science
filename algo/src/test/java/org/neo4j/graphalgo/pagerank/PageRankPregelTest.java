@@ -125,7 +125,8 @@ class PageRankPregelTest {
             "k;b,expectedPersonalizedRank2"
         })
         void withSourceNodes(String sourceNodesString, String expectedPropertyKey) {
-            var sourceNodeIds = Arrays.stream(sourceNodesString.split(";")).mapToLong(graph::toMappedNodeId).toArray();
+            // ids are converted to mapped ids within the algorithms
+            var sourceNodeIds = Arrays.stream(sourceNodesString.split(";")).mapToLong(graph::toOriginalNodeId).toArray();
 
             var config = ImmutablePageRankStreamConfig.builder()
                 .maxIterations(40)
@@ -153,10 +154,8 @@ class PageRankPregelTest {
     }
 
     PageRank runOnGds(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds) {
-        // GDS PageRank maps to internal ids internally
-        long[] originalSourceIds = Arrays.stream(sourceNodeIds).map(graph::toOriginalNodeId).toArray();
         return PageRankAlgorithmType.NON_WEIGHTED
-            .create(graph, config, LongStream.of(originalSourceIds), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            .create(graph, config, LongStream.of(sourceNodeIds), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
             .compute();
     }
 
@@ -169,6 +168,7 @@ class PageRankPregelTest {
             .maxIterations(config.maxIterations() + 1)
             .dampingFactor(config.dampingFactor())
             .concurrency(config.concurrency())
+            .sourceNodeIds(LongStream.of(sourceNodeIds))
             .tolerance(config.tolerance())
             .isAsynchronous(false)
             .build();
@@ -176,7 +176,7 @@ class PageRankPregelTest {
         var pregelJob = Pregel.create(
             graph,
             pregelConfig,
-            new PageRankPregel(pregelConfig, sourceNodeIds),
+            new PageRankPregel(graph, pregelConfig),
             Pools.DEFAULT,
             AllocationTracker.empty()
         );
