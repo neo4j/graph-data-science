@@ -103,19 +103,19 @@ The area under the Precision-Recall curve can also be interpreted as an average 
 
 Most graphs have far more non-connected node pairs than connected ones (e.g. sparse graphs).
 Thus, typically we have an issue with _class imbalance_.
-
-The AUCPR metric can be adjusted to either evaluate in a _traditional_ way or to compensate for class imbalance for more interpretable average precision measurement.
-It is common for reasons of resource limitations to down sample the majority class of non-connected pairs and to perform training and evaluation on (nearly) balanced data.
-
-The configuration parameter `classRatio` determines the weighting of negative example (non-connected node pairs) to connected node pairs.
+There are multiple strategies to account for imbalanced data.
+In our procedure, the AUCPR metric is used which is considered more suitable than the commonly used AUROC metric for imbalanced data.
+One can also specify the configuration parameter `classRatio` which determines the weighting of negative example (non-connected node pairs) to connected node pairs.
 This means upweighting the false positives by this ratio when computing precision.
-Setting `classRatio` to `1.0` is consistent with the traditional evaluation method and is recommended for comparison with other models evaluated this way.
 
-The AUCPR, or average precision, is then however overly optimistic because in reality there are much more negative examples which have been sampled out.
-There are `n(n-1)/2` node pairs in the graph, which can be used to compute the _true_ class ratio as the ratio of `nodePairs - relationshipCount` to `relationshipCount`.
-By setting `classRatio` to a higher value than `1.0`, or even to the true class ratio, the average precision is more accurate.
-Since the evaluation is typically done on a graphs created by the `splitRelationships` procedure, this entails a set of equal number of positive and negative examples.
+Note that the `classRatio` can be set arbitrarily, and not necessarily as the _true_ class ratio it the graph.
+There are `n(n-1)/2` node pairs in the graph, which can be used to compute the true class ratio as the ratio of `nodePairs - relationshipCount` to `relationshipCount`.
+Since the evaluation is typically done on graphs created by the `splitRelationships` procedure, this entails a set of equal number of positive and negative examples.
+
+Setting `classRatio` to `1.0` is consistent with _traditional_ evaluation and is recommended for comparison with other models evaluated this way.
+To compensate for the under sampling of negative examples, a higher value than `1.0`, or even the _true_ class ratio, can be used.
 Using the true class ratio approximates an evaluation on a sample according to the true class distribution.
+The reported metric (AUCPR) then better reflects the expected precision on unseen highly imbalanced data.
 With this type of evaluation one has to adjust expectations as the metric value then becomes much smaller.
 
 [[algorithms-ml-linkprediction-syntax]]
