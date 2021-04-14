@@ -38,6 +38,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
 
     private final boolean weighted;
     private final String seedProperty;
+    private final boolean hasSourceNodes;
     private final LongSet sourceNodes;
 
     private final double dampingFactor;
@@ -52,6 +53,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
         this.alpha = 1 - this.dampingFactor;
         this.sourceNodes = new LongScatterSet();
         config.sourceNodeIds().map(nodeMapping::toMappedNodeId).forEach(sourceNodes::add);
+        this.hasSourceNodes = !sourceNodes.isEmpty();
     }
 
     @Override
@@ -61,11 +63,17 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
 
     @Override
     public void init(InitContext<PageRankPregelConfig> context) {
+        context.setNodeValue(PAGE_RANK, initialValue(context));
+    }
+
+    private double initialValue(InitContext<PageRankPregelConfig> context) {
         var nodeId = context.nodeId();
-        var initialValue = seedProperty != null
-            ? context.nodeProperties(seedProperty).doubleValue(nodeId)
-            : sourceNodes.contains(nodeId) ? alpha : 0;
-        context.setNodeValue(PAGE_RANK, initialValue);
+        if (seedProperty != null) {
+            return context.nodeProperties(seedProperty).doubleValue(nodeId);
+        } else if (!hasSourceNodes || sourceNodes.contains(nodeId)) {
+            return alpha;
+        }
+        return 0;
     }
 
     @Override
