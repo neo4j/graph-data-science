@@ -47,11 +47,6 @@ public interface TrainingConfig extends ConcurrencyConfig {
     }
 
     @Value.Default
-    default int windowSize() {
-        return 1;
-    }
-
-    @Value.Default
     default double tolerance() {
         return 1e-3;
     }

@@ -19,7 +19,6 @@
 | minEpochs     | Integer | 1               | yes      | Minimum number of training epochs.
 | maxEpochs     | Integer | 100             | yes      | Maximum number of training epochs.
 | patience      | Integer | 1               | yes      | Maximum number of iterations that do not improve the loss before stopping.
-| windowSize    | Integer | 1               | yes      | Number of the most recent iterations used for computing the loss.
 | tolerance     | Float   | 0.001           | yes      | Minimum acceptable loss before stopping.
 | sharedUpdater | Boolean | false           | yes      | Whether to use the same instance of weight updater for all batches.
 | concurrency   | Integer | see description | yes      | Concurrency for training the model candidate. By default the value of the top level `concurrency` parameter is used.

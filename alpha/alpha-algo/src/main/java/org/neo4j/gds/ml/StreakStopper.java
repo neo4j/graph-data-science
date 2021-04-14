@@ -24,30 +24,18 @@ class StreakStopper implements TrainingStopper {
     private final int minEpochs;
     private final int patience;
     private final int maxEpochs;
-    private final int windowSize;
     private final double tolerance;
 
     private int count;
-    private double bestMovingAverage;
+    private double bestLoss;
     private int unproductiveStreak;
-    private final double[] lossHistory;
 
-    StreakStopper(int minEpochs, int patience, int maxEpochs, int windowSize, double tolerance) {
+    StreakStopper(int minEpochs, int patience, int maxEpochs, double tolerance) {
         this.minEpochs = minEpochs;
         this.patience = patience;
         this.maxEpochs = maxEpochs;
-        this.windowSize = windowSize;
         this.tolerance = tolerance;
-        this.lossHistory = new double[windowSize];
-        this.bestMovingAverage = Double.MAX_VALUE;
-    }
-
-    private double movingAverage() {
-        double sum = 0;
-        for (double loss : lossHistory) {
-            sum += loss;
-        }
-        return sum / Math.min(count, windowSize);
+        this.bestLoss = Double.MAX_VALUE;
     }
 
     @Override
@@ -56,16 +44,15 @@ class StreakStopper implements TrainingStopper {
             return; // or throw???
         }
         if(count >= minEpochs) {
-            if (loss - bestMovingAverage >= - tolerance * Math.abs(bestMovingAverage)) {
+            if (loss - bestLoss >= - tolerance * Math.abs(bestLoss)) {
                 unproductiveStreak++;
             } else {
                 unproductiveStreak = 0;
             }
         }
 
-        lossHistory[count % windowSize] = loss;
         count++;
-        bestMovingAverage = Math.min(bestMovingAverage, movingAverage());
+        bestLoss = Math.min(bestLoss, loss);
     }
 
     @Override

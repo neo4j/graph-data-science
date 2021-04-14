@@ -29,7 +29,6 @@ public interface TrainingStopper {
             config.minEpochs(),
             config.patience(),
             config.maxEpochs(),
-            config.windowSize(),
             config.tolerance()
         );
     }

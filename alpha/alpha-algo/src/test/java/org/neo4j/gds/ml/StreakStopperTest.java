@@ -27,20 +27,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class StreakStopperTest {
 
     private StreakStopper stopper;
-    private final static int MIN_ITERATION = 10;
-    private final static int MAX_STREAK = 3;
-    private final static int MAX_REGISTRATIONS = 1000;
-    private final static int WINDOW_SIZE = 5;
+    private final static int MIN_EPOCHS = 10;
+    private final static int PATIENCE = 3;
+    private final static int MAX_EPOCHS = 1000;
     private final static double TOLERANCE = 1e-4;
 
     @BeforeEach
     void setup() {
-        stopper = new StreakStopper(MIN_ITERATION, MAX_STREAK, MAX_REGISTRATIONS, WINDOW_SIZE, TOLERANCE);
+        stopper = new StreakStopper(MIN_EPOCHS, PATIENCE, MAX_EPOCHS, TOLERANCE);
     }
 
     @Test
     void shouldMakeAtLeastTenIterations() {
-        for (int i = 0; i < MIN_ITERATION; i++) {
+        for (int i = 0; i < MIN_EPOCHS; i++) {
             stopper.registerLoss(0.11);
         }
 
@@ -49,13 +48,13 @@ class StreakStopperTest {
 
     @Test
     void shouldTerminateAfterMaxStreakUnproductiveHits() {
-        for (int i = 0; i < MIN_ITERATION; i++) {
+        for (int i = 0; i < MIN_EPOCHS; i++) {
             stopper.registerLoss(0.11);
         }
 
         assertThat(stopper.terminated()).isFalse();
 
-        for (int i = 0; i < MAX_STREAK; i++) {
+        for (int i = 0; i < PATIENCE; i++) {
             stopper.registerLoss(0.11);
         }
 
@@ -67,14 +66,14 @@ class StreakStopperTest {
         var startLoss = 0.13;
 
         int i = 0;
-        while (i < 2*MAX_REGISTRATIONS && !stopper.terminated()) {
+        while (i < 2 * MAX_EPOCHS && !stopper.terminated()) {
             stopper.registerLoss(startLoss);
             startLoss -= 0.1;
             i++;
         }
 
         assertThat(stopper.terminated()).isTrue();
-        assertThat(i).isEqualTo(MAX_REGISTRATIONS);
+        assertThat(i).isEqualTo(MAX_EPOCHS);
     }
 
     @Test
@@ -82,13 +81,13 @@ class StreakStopperTest {
         var startLoss = -0.13;
 
         int i = 0;
-        while (i < 2*MAX_REGISTRATIONS && !stopper.terminated()) {
+        while (i < 2 * MAX_EPOCHS && !stopper.terminated()) {
             stopper.registerLoss(startLoss);
             i++;
         }
 
         assertThat(stopper.terminated()).isTrue();
-        assertThat(i).isEqualTo(MIN_ITERATION + MAX_STREAK);
+        assertThat(i).isEqualTo(MIN_EPOCHS + PATIENCE);
     }
 
     @Test
@@ -96,7 +95,7 @@ class StreakStopperTest {
         var startLoss = 1.0;
 
         int i = 0;
-        while (i < MIN_ITERATION && !stopper.terminated()) {
+        while (i < MIN_EPOCHS && !stopper.terminated()) {
             stopper.registerLoss(startLoss);
             i++;
         }
