@@ -139,7 +139,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         var nodeMapping = nodeMappingBuilder.build(
             idMapBuilder,
             nodeLabelBitSetMapping,
-            dimensions,
+            dimensions.highestNeoId(),
             concurrency,
             tracker
         );

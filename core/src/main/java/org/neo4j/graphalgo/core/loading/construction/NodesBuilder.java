@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.loading.construction;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.IdMapImplementations;
 import org.neo4j.graphalgo.core.loading.IdMappingAllocator;
@@ -123,14 +122,9 @@ public class NodesBuilder {
     public NodeMapping build() {
         this.threadLocalBuilder.close();
 
-        var graphDimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(maxOriginalId)
-            .highestNeoId(maxOriginalId)
-            .build();
-
         return this.nodeMappingBuilder.build(
             nodeLabelBitSetMap,
-            graphDimensions,
+            maxOriginalId,
             concurrency,
             tracker
         );

@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 
@@ -32,16 +31,16 @@ public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? e
     NodeMapping build(
         BUILDER idMapBuilder,
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
-        GraphDimensions graphDimensions,
+        long highestNodeId,
         int concurrency,
         AllocationTracker tracker
     );
 
     default Capturing capture(BUILDER idMapBuilder) {
-        return ((labelInformation, graphDimensions, concurrency, tracker) -> this.build(
+        return ((labelInformation, highestNodeId, concurrency, tracker) -> this.build(
             idMapBuilder,
             labelInformation,
-            graphDimensions,
+            highestNodeId,
             concurrency,
             tracker
         ));
@@ -51,7 +50,7 @@ public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? e
 
         NodeMapping build(
             Map<NodeLabel, HugeAtomicBitSet> labelInformation,
-            GraphDimensions graphDimensions,
+            long highestNodeId,
             int concurrency,
             AllocationTracker tracker
         );
