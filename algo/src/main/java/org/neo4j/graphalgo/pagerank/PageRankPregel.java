@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import com.carrotsearch.hppc.LongScatterSet;
+import com.carrotsearch.hppc.LongSet;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
@@ -33,16 +35,22 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
 
     static final String PAGE_RANK = "pagerank";
 
-    private static boolean weighted;
+    private final boolean weighted;
+    private final String seedProperty;
+    private final LongSet sourceNodes;
 
     private final double dampingFactor;
     private final double tolerance;
     private final double alpha;
 
     public PageRankPregel(PageRankPregelConfig config) {
+        this.weighted = config.relationshipWeightProperty() != null;
+        this.seedProperty = config.seedProperty();
         this.dampingFactor = config.dampingFactor();
         this.tolerance = config.tolerance();
         this.alpha = 1 - this.dampingFactor;
+        this.sourceNodes = new LongScatterSet();
+        config.sourceNodeIds().forEach(sourceNodes::add);
     }
 
     @Override
@@ -52,12 +60,11 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
 
     @Override
     public void init(InitContext<PageRankPregelConfig> context) {
-        var initialValue = context.config().seedProperty() != null
-            ? context.nodeProperties(context.config().seedProperty()).doubleValue(context.nodeId())
-            : alpha;
+        var nodeId = context.nodeId();
+        var initialValue = seedProperty != null
+            ? context.nodeProperties(seedProperty).doubleValue(nodeId)
+            : sourceNodes.contains(nodeId) ? alpha : 0;
         context.setNodeValue(PAGE_RANK, initialValue);
-
-        weighted = context.config().relationshipWeightProperty() != null;
     }
 
     @Override
