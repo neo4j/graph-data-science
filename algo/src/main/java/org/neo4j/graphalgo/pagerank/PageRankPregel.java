@@ -19,24 +19,17 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.Reducer;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
-public class PageRankPregel implements PregelComputation<PageRankPregel.PageRankPregelConfig> {
+public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
 
     static final String PAGE_RANK = "pagerank";
 
@@ -109,27 +102,4 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
         return nodeValue * relationshipWeight;
     }
 
-    @ValueClass
-    @Configuration("PageRankPregelConfigImpl")
-    @SuppressWarnings("immutables:subtype")
-    public interface PageRankPregelConfig extends PregelConfig, SeedConfig {
-        @Value.Default
-        default double dampingFactor() {
-            return 0.85;
-        }
-
-        @Value.Default
-        default double tolerance() {
-            return 1e-7;
-        }
-
-        static PageRankPregelConfig of(
-            String username,
-            Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitCreate,
-            CypherMapWrapper userInput
-        ) {
-            return new PageRankPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
-        }
-    }
 }

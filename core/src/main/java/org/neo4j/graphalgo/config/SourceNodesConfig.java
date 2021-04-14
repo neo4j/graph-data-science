@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.config;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphdb.Node;
 
@@ -32,6 +33,7 @@ public interface SourceNodesConfig {
         return Collections.emptyList();
     }
 
+    @Value.Default
     @Configuration.Ignore
     default LongStream sourceNodeIds() {
         return sourceNodes().stream().mapToLong(Node::getId);

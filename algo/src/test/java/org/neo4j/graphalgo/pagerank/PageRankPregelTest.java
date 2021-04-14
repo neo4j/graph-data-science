@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,17 +49,17 @@ class PageRankPregelTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.3040965 })" +
-            ", (b:Node { expectedRank: 3.5658695 })" +
-            ", (c:Node { expectedRank: 3.180981 })" +
-            ", (d:Node { expectedRank: 0.3625935 })" +
-            ", (e:Node { expectedRank: 0.7503465 })" +
-            ", (f:Node { expectedRank: 0.3625935 })" +
-            ", (g:Node { expectedRank: 0.15 })" +
-            ", (h:Node { expectedRank: 0.15 })" +
-            ", (i:Node { expectedRank: 0.15 })" +
-            ", (j:Node { expectedRank: 0.15 })" +
-            ", (k:Node { expectedRank: 0.15 })" +
+            "  (a:Node { expectedRank: 0.3040965, expectedPersonalizedRank: 0.17053529152163158 })" +
+            ", (b:Node { expectedRank: 3.5658695, expectedPersonalizedRank: 0.3216114449911402 })" +
+            ", (c:Node { expectedRank: 3.180981,  expectedPersonalizedRank: 0.27329311398643763 })" +
+            ", (d:Node { expectedRank: 0.3625935, expectedPersonalizedRank: 0.048318333106500536 })" +
+            ", (e:Node { expectedRank: 0.7503465, expectedPersonalizedRank: 0.17053529152163158 })" +
+            ", (f:Node { expectedRank: 0.3625935, expectedPersonalizedRank: 0.048318333106500536 })" +
+            ", (g:Node { expectedRank: 0.15,      expectedPersonalizedRank: 0.0 })" +
+            ", (h:Node { expectedRank: 0.15,      expectedPersonalizedRank: 0.0 })" +
+            ", (i:Node { expectedRank: 0.15,      expectedPersonalizedRank: 0.0 })" +
+            ", (j:Node { expectedRank: 0.15,      expectedPersonalizedRank: 0.0 })" +
+            ", (k:Node { expectedRank: 0.15,      expectedPersonalizedRank: 0.0 })" +
             ", (b)-[:TYPE]->(c)" +
             ", (c)-[:TYPE]->(b)" +
             ", (d)-[:TYPE]->(a)" +
@@ -91,7 +90,10 @@ class PageRankPregelTest {
                 .build();
 
             var gdsResult = runOnGds(graph, config).result().asNodeProperties();
-            var pregelResult = runOnPregel(graph, config).nodeValues().doubleProperties(PageRankPregel.PAGE_RANK).asNodeProperties();
+            var pregelResult = runOnPregel(graph, config)
+                .nodeValues()
+                .doubleProperties(PageRankPregel.PAGE_RANK)
+                .asNodeProperties();
 
             var actual = graph.nodeProperties("expectedRank");
 
@@ -115,20 +117,53 @@ class PageRankPregelTest {
             // initial iteration is counted extra in Pregel
             assertThat(pregelResult.ranIterations()).isEqualTo(expectedIterations);
         }
+
+        @Test
+        void withSourceNodes() {
+            var sourceNodeIds = new long[]{graph.toMappedNodeId("a"), graph.toMappedNodeId("e")};
+
+            var config = ImmutablePageRankStreamConfig.builder()
+                .maxIterations(40)
+                .tolerance(0)
+                .concurrency(1)
+                .build();
+
+            var gdsResult = runOnGds(graph, config, sourceNodeIds).result().asNodeProperties();
+            var pregelResult = runOnPregel(graph, config, sourceNodeIds)
+                .nodeValues()
+                .doubleProperties(PageRankPregel.PAGE_RANK)
+                .asNodeProperties();
+
+            var actual = graph.nodeProperties("expectedPersonalizedRank");
+
+            for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+                assertThat(gdsResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
+                assertThat(pregelResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
+            }
+        }
     }
 
     PageRank runOnGds(Graph graph, PageRankBaseConfig config) {
+        return runOnGds(graph, config, new long[0]);
+    }
+
+    PageRank runOnGds(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds) {
         return PageRankAlgorithmType.NON_WEIGHTED
-            .create(graph, config, LongStream.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            .create(graph, config, LongStream.of(sourceNodeIds), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
             .compute();
     }
 
     PregelResult runOnPregel(Graph graph, PageRankBaseConfig config) {
+        return runOnPregel(graph, config, new long[0]);
+    }
+
+    PregelResult runOnPregel(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds) {
         var pregelConfig = ImmutablePageRankPregelConfig.builder()
             .maxIterations(config.maxIterations() + 1)
             .dampingFactor(config.dampingFactor())
             .concurrency(config.concurrency())
             .tolerance(config.tolerance())
+            .sourceNodeIds(LongStream.of(sourceNodeIds))
             .isAsynchronous(false)
             .build();
 
