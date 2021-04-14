@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.core.huge;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.AdjacencyDegrees;
@@ -287,12 +286,6 @@ public final class UnionGraph implements CSRGraph {
         CompositeAdjacencyList list();
 
         CompositeAdjacencyOffsets offsets();
-
-        long elementCount();
-
-        Orientation orientation();
-
-        boolean isMultiGraph();
     }
 
     public UnionGraphTopology relationshipTopology() {
@@ -311,9 +304,6 @@ public final class UnionGraph implements CSRGraph {
         return ImmutableUnionGraphTopology.builder()
             .offsets(new CompositeAdjacencyOffsets(adjacencyOffsets))
             .list(new CompositeAdjacencyList(adjacencyDegrees, adjacencyLists, adjacencyOffsets))
-            .orientation(Orientation.NATURAL)
-            .elementCount(relationshipCount())
-            .isMultiGraph(true)
             .build();
     }
 
