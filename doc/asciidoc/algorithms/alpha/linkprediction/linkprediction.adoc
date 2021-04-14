@@ -18,6 +18,8 @@ Link prediction is a common machine learning task applied to graphs: training a 
 You can think of this as building a model to predict missing relationships in your dataset or relationships that are likely to form in the future.
 Neo4j GDS trains supervised machine learning models based on the relationships and node properties in your graph to predict the existence - and probability - of relationships.
 
+Link Prediction can be used favorably together with <<algorithms-ml-models-preprocessing, pre-processing algorithms>>.
+
 The basic work flow of Link Prediction contains the following parts which are described below:
 
 * <<algorithms-ml-train-test-splitting, Creating training and test graphs>>

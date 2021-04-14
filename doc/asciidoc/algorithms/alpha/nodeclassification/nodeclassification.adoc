@@ -16,6 +16,7 @@ This section describes the Node Classification Model in the Neo4j Graph Data Sci
 
 Node Classification is a common machine learning task applied to graphs: training a model to learn in which class a node belongs.
 Neo4j GDS trains supervised machine learning models based on node properties (features) in your graph to predict what class an unseen or future node would belong to.
+Node Classification can be used favorably together with <<algorithms-ml-models-preprocessing, pre-processing algorithms>>.
 
 Concretely, Node Classification models are used to predict a non-existing node property based on other node properties.
 The non-existing node property represents the class, and is referred to as the target property.
