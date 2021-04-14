@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AuraShutdownProc extends BaseProc {
@@ -49,13 +50,10 @@ public class AuraShutdownProc extends BaseProc {
         var timer = ProgressTimer.start();
         try (timer) {
             var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-            var exceptions = GraphStoreCatalog
-                .getGraphStores(username(), databaseId())
-                .entrySet()
-                .stream()
-                .flatMap(entry -> {
-                    var createConfig = entry.getKey();
-                    var graphStore = entry.getValue();
+            var exceptions = GraphStoreCatalog.getAllGraphStores()
+                .flatMap(store -> {
+                    var createConfig = store.config();
+                    var graphStore = store.graphStore();
                     try {
                         var config = ImmutableGraphStoreToFileExporterConfig
                             .builder()
@@ -72,14 +70,21 @@ public class AuraShutdownProc extends BaseProc {
                         );
                         return Stream.empty();
                     } catch (Exception e) {
-                        return Stream.of(ImmutableFailedExport.of(e, createConfig.graphName()));
+                        return Stream.of(ImmutableFailedExport.of(e, store.userName(), createConfig.graphName()));
                     }
                 })
                 .collect(Collectors.toList());
 
             if (!exceptions.isEmpty()) {
                 for (var exception : exceptions) {
-                    log.warn("GraphStore persistence failed on graph " + exception.graphName(), exception.exception());
+                    log.warn(
+                        formatWithLocale(
+                            "GraphStore persistence failed on graph %s for user %s",
+                            exception.graphName(),
+                            exception.userName()
+                        ),
+                        exception.exception()
+                    );
                 }
                 return Stream.of(new ShutdownResult(false));
             }
@@ -113,6 +118,8 @@ public class AuraShutdownProc extends BaseProc {
     @ValueClass
     interface FailedExport {
         Exception exception();
+
+        String userName();
 
         String graphName();
     }

@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -144,8 +145,25 @@ public final class GraphStoreCatalog {
         return getUserCatalog(username).getGraphStores(databaseId);
     }
 
+    public static Stream<GraphStoreWithUserNameAndConfig> getAllGraphStores() {
+        return userCatalogs
+            .entrySet()
+            .stream()
+            .flatMap(entry -> entry.getValue().streamGraphStores(entry.getKey()));
+    }
+
     private static UserCatalog getUserCatalog(String username) {
         return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
+    }
+
+    @ValueClass
+    public interface GraphStoreWithUserNameAndConfig {
+
+        GraphStore graphStore();
+
+        String userName();
+
+        GraphCreateConfig config();
     }
 
     static class UserCatalog {
@@ -267,6 +285,17 @@ public final class GraphStoreCatalog {
 
         private void remove(String databaseName) {
             graphsByName.keySet().removeIf(userCatalogKey -> userCatalogKey.databaseName().equals(databaseName));
+        }
+
+        private Stream<GraphStoreWithUserNameAndConfig> streamGraphStores(String userName) {
+            return graphsByName
+                .values()
+                .stream()
+                .map(graphStoreWithConfig -> ImmutableGraphStoreWithUserNameAndConfig.of(
+                    graphStoreWithConfig.graphStore(),
+                    userName,
+                    graphStoreWithConfig.config()
+                ));
         }
 
         private Map<GraphCreateConfig, GraphStore> getGraphStores() {
