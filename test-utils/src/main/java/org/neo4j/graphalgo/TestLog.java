@@ -33,10 +33,10 @@ import java.util.function.Consumer;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class TestLog extends AbstractLog {
-    public static String DEBUG = "debug";
-    public static String INFO = "info";
-    public static String WARN = "warn";
-    public static String ERROR = "error";
+    public static final String DEBUG = "debug";
+    public static final String INFO = "info";
+    public static final String WARN = "warn";
+    public static final String ERROR = "error";
 
     private final ConcurrentMap<String, ConcurrentLinkedQueue<String>> messages;
 

@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.catalog;
+package org.neo4j.gds.internal;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -30,17 +29,24 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.logging.Log;
+import org.neo4j.logging.LogProvider;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-public class GraphStorePersistProcTest extends BaseProcTest {
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class AuraShutdownProcTest extends BaseProcTest {
 
     static String DB_CYPHER = "CREATE" +
                               "  (a:Label1 {prop1: 42})" +
@@ -54,9 +60,11 @@ public class GraphStorePersistProcTest extends BaseProcTest {
     @TempDir
     Path tempDir;
 
+    TestLog testLog;
+
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphStoreExportProc.class);
+        registerProcedures(AuraShutdownProc.class);
 
         runQuery(DB_CYPHER);
 
@@ -70,6 +78,7 @@ public class GraphStorePersistProcTest extends BaseProcTest {
             .builder()
             .gdlGraph("")
             .graphName("first")
+            .username("userA")
             .build();
         GraphStoreCatalog.set(createConfig1, graphStore1);
 
@@ -83,6 +92,7 @@ public class GraphStorePersistProcTest extends BaseProcTest {
             .builder()
             .gdlGraph("")
             .graphName("second")
+            .username("userB")
             .build();
         GraphStoreCatalog.set(createConfig2, graphStore2);
     }
@@ -91,36 +101,73 @@ public class GraphStorePersistProcTest extends BaseProcTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
+        testLog = new TestLog();
+        builder.setUserLogProvider(new LogProvider() {
+            @Override
+            public Log getLog(Class<?> loggingClass) {
+                return testLog;
+            }
+
+            @Override
+            public Log getLog(String name) {
+                return testLog;
+            }
+        });
         builder.setConfig(GraphStoreExportSettings.export_location_setting, tempDir);
     }
 
     @Test
     void shouldPersistGraphStores() {
-        var persistQuery =
-            "CALL gds.graphs.persist({ writeConcurrency: 1 })" +
-            "YIELD *";
+        var shutdownQuery = "CALL gds.internal.shutdown()";
 
-        assertCypherResult(persistQuery, List.of(
-            Map.of(
-                "exportName", "first",
-                "graphName", "first",
-                "nodeCount", 2L,
-                "relationshipCount", 1L,
-                "relationshipTypeCount", 1L,
-                "nodePropertyCount", 2L,
-                "relationshipPropertyCount", 0L,
-                "writeMillis", Matchers.greaterThan(0L)
-            ),
-            Map.of(
-                "exportName", "second",
-                "graphName", "second",
-                "nodeCount", 3L,
-                "relationshipCount", 1L,
-                "relationshipTypeCount", 1L,
-                "nodePropertyCount", 3L,
-                "relationshipPropertyCount", 0L,
-                "writeMillis", Matchers.greaterThan(0L)
-            )
-        ));
+        assertCypherResult(shutdownQuery, List.of(Map.of("done", true)));
+
+        assertThat(tempDir.resolve("first"))
+            .isDirectoryContaining("glob:**/graph_info.csv")
+            .isDirectoryContaining("glob:**/node-schema.csv")
+            .isDirectoryContaining("glob:**/relationship-schema.csv")
+            .isDirectoryContaining("glob:**/nodes_Label1_header.csv")
+            .isDirectoryContaining("regex:.+/nodes_Label1_\\d+.csv")
+            .isDirectoryContaining("glob:**/relationships_REL1_header.csv")
+            .isDirectoryContaining("regex:.+/relationships_REL1_\\d+.csv");
+
+        assertThat(tempDir.resolve("second"))
+            .isDirectoryContaining("glob:**/graph_info.csv")
+            .isDirectoryContaining("glob:**/node-schema.csv")
+            .isDirectoryContaining("glob:**/relationship-schema.csv")
+            .isDirectoryContaining("glob:**/nodes_Label2_header.csv")
+            .isDirectoryContaining("regex:.+/nodes_Label2_\\d+.csv")
+            .isDirectoryContaining("glob:**/relationships_REL2_header.csv")
+            .isDirectoryContaining("regex:.+/relationships_REL2_\\d+.csv");
+
+        assertThat(testLog.getMessages(TestLog.INFO))
+            .anySatisfy(msg -> assertThat(msg)
+                .matches(
+                    "Shutdown happened within the given timeout, it took \\d+ seconds and the provided timeout as 42 seconds."
+                ));
+    }
+
+    @Test
+    void shouldCollectErrorsWhenPersistingGraphStores() throws IOException {
+        var shutdownQuery = "CALL gds.internal.shutdown()";
+
+        var first = tempDir.resolve("first");
+        Files.createDirectories(first);
+
+        assertCypherResult(shutdownQuery, List.of(Map.of("done", false)));
+
+        assertThat(testLog.getMessages(TestLog.WARN))
+            .contains("GraphStore persistence failed on graph first for user userA - The specified import directory already exists.");
+
+        assertThat(first).isEmptyDirectory();
+
+        assertThat(tempDir.resolve("second"))
+            .isDirectoryContaining("glob:**/graph_info.csv")
+            .isDirectoryContaining("glob:**/node-schema.csv")
+            .isDirectoryContaining("glob:**/relationship-schema.csv")
+            .isDirectoryContaining("glob:**/nodes_Label2_header.csv")
+            .isDirectoryContaining("regex:.+/nodes_Label2_\\d+.csv")
+            .isDirectoryContaining("glob:**/relationships_REL2_header.csv")
+            .isDirectoryContaining("regex:.+/relationships_REL2_\\d+.csv");
     }
 }
