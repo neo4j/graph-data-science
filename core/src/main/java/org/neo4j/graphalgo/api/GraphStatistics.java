@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Map;
+import java.util.concurrent.atomic.LongAdder;
 
 public final class GraphStatistics {
 
@@ -83,5 +84,15 @@ public final class GraphStatistics {
 
     public static double density(Graph graph) {
         return density(graph.nodeCount(), graph.relationshipCount());
+    }
+
+    public static double averageDegree(Graph graph, int concurrency) {
+        var degreeSum = new LongAdder();
+        ParallelUtil.parallelForEachNode(
+            graph,
+            concurrency,
+            nodeId -> degreeSum.add(graph.degree(nodeId))
+        );
+        return (double) degreeSum.sum() / graph.nodeCount();
     }
 }
