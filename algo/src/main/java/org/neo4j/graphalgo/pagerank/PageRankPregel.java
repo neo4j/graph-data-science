@@ -40,7 +40,6 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
 
     static final String PAGE_RANK = "pagerank";
 
-    private final boolean weighted;
     private final String seedProperty;
     private final boolean hasSourceNodes;
     private final LongSet sourceNodes;
@@ -69,7 +68,6 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
     }
 
     private PageRankPregel(NodeMapping nodeMapping, PageRankPregelConfig config, LongToDoubleFunction degreeFunction) {
-        this.weighted = config.relationshipWeightProperty() != null;
         this.seedProperty = config.seedProperty();
         this.dampingFactor = config.dampingFactor();
         this.tolerance = config.tolerance();
