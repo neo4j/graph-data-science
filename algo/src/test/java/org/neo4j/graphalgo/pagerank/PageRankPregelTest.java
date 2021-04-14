@@ -206,14 +206,9 @@ class PageRankPregelTest {
 
             var actual = graph.nodeProperties("expectedRank");
 
-            graph.forEachNode(nodeId -> {
-                System.out.println(gdsResult.doubleValue(nodeId));
-                return true;
-            });
-
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
                 assertThat(gdsResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
-//                assertThat(pregelResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
+                assertThat(pregelResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
             }
         }
     }
@@ -246,10 +241,15 @@ class PageRankPregelTest {
             .isAsynchronous(false)
             .build();
 
+        var computation = config.relationshipWeightProperty() != null
+            ? PageRankPregel.weighted(graph, pregelConfig, Pools.DEFAULT, AllocationTracker.empty())
+            : PageRankPregel.unweighted(graph, pregelConfig);
+
+
         var pregelJob = Pregel.create(
             graph,
             pregelConfig,
-            new PageRankPregel(graph, pregelConfig),
+            computation,
             Pools.DEFAULT,
             AllocationTracker.empty()
         );

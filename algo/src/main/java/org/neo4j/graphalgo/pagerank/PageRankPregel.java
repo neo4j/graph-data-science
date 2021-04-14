@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.pagerank;
 
 import com.carrotsearch.hppc.LongScatterSet;
 import com.carrotsearch.hppc.LongSet;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
@@ -29,8 +30,11 @@ import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.Reducer;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.function.LongToDoubleFunction;
 
 public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
 
@@ -40,12 +44,31 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
     private final String seedProperty;
     private final boolean hasSourceNodes;
     private final LongSet sourceNodes;
+    private final LongToDoubleFunction degreeFunction;
 
     private final double dampingFactor;
     private final double tolerance;
     private final double alpha;
 
-    public PageRankPregel(NodeMapping nodeMapping, PageRankPregelConfig config) {
+
+    public static PageRankPregel unweighted(Graph graph, PageRankPregelConfig config) {
+        return new PageRankPregel(graph, config, graph::degree);
+    }
+
+    public static PageRankPregel weighted(
+        Graph graph,
+        PageRankPregelConfig config,
+        ExecutorService executor,
+        AllocationTracker tracker
+    ) {
+        var aggregatedWeights = new WeightedDegreeComputer(graph)
+            .degree(executor, config.concurrency(), tracker)
+            .aggregatedDegrees();
+
+        return new PageRankPregel(graph, config, aggregatedWeights::get);
+    }
+
+    private PageRankPregel(NodeMapping nodeMapping, PageRankPregelConfig config, LongToDoubleFunction degreeFunction) {
         this.weighted = config.relationshipWeightProperty() != null;
         this.seedProperty = config.seedProperty();
         this.dampingFactor = config.dampingFactor();
@@ -54,6 +77,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
         this.sourceNodes = new LongScatterSet();
         config.sourceNodeIds().map(nodeMapping::toMappedNodeId).forEach(sourceNodes::add);
         this.hasSourceNodes = !sourceNodes.isEmpty();
+        this.degreeFunction = degreeFunction;
     }
 
     @Override
@@ -93,11 +117,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
         }
 
         if (delta > tolerance || context.isInitialSuperstep()) {
-            if (weighted) {
-                context.sendToNeighbors(newRank);
-            } else {
-                context.sendToNeighbors(delta / context.degree());
-            }
+            context.sendToNeighbors(delta / degreeFunction.applyAsDouble(context.nodeId()));
         } else {
             context.voteToHalt();
         }
@@ -110,7 +130,6 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
 
     @Override
     public double applyRelationshipWeight(double nodeValue, double relationshipWeight) {
-        // ! assuming normalized relationshipWeights (sum of outgoing edge weights = 1 and none negative weights)
         return nodeValue * relationshipWeight;
     }
 
