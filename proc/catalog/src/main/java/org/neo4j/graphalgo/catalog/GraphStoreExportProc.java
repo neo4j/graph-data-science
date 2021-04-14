@@ -22,31 +22,24 @@ package org.neo4j.graphalgo.catalog;
 import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporter;
 import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporterConfig;
-import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporter;
+import org.neo4j.graphalgo.core.utils.export.file.GraphStoreExporterUtil;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.export.file.csv.estimation.CsvExportEstimation;
 import org.neo4j.graphalgo.core.utils.export.file.csv.estimation.GraphStoreToCsvEstimationConfig;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.utils.export.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStoreExportProc extends BaseProc {
@@ -100,52 +93,26 @@ public class GraphStoreExportProc extends BaseProc {
         return Stream.of(runGraphStoreExportToCsv(graphName, exportConfig));
     }
 
-    @Internal
-    @Procedure(name = "gds.graphs.persist", mode = READ)
-    @Description("Persists a graph store to disk.")
-    public Stream<FileExportResult> persist(
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        var cypherConfig = CypherMapWrapper.create(configuration);
-
-        return runWithExceptionLogging(
-            "GraphStore persistance failed",
-            () -> GraphStoreCatalog.getGraphStores(username(), databaseId()).keySet().stream().map(createConfig -> {
-                var exportConfig = cypherConfig
-                    .withBoolean("includeMetaData", true)
-                    .withString("exportName", createConfig.graphName());
-
-                var config = GraphStoreToFileExporterConfig.of(username(), exportConfig);
-
-                return runGraphStoreExportToCsv(createConfig.graphName(), config);
-            })
+    public FileExportResult runGraphStoreExportToCsv(String graphName, GraphStoreToFileExporterConfig exportConfig) {
+        var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
+        var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
+        var result = GraphStoreExporterUtil.runGraphStoreExportToCsv(
+            graphStore,
+            neo4jConfig,
+            exportConfig,
+            log,
+            allocationTracker()
         );
-    }
 
-    private FileExportResult runGraphStoreExportToCsv(String graphName, GraphStoreToFileExporterConfig exportConfig) {
-        return runWithExceptionLogging(
-            "CSV export failed", () -> {
-                var exportPath = getExportPath(exportConfig);
-
-                var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
-
-                var exporter = GraphStoreToFileExporter.csv(graphStore, exportConfig, exportPath);
-
-                var start = System.nanoTime();
-                var importedProperties = exporter.run(allocationTracker());
-                var end = System.nanoTime();
-
-                return new FileExportResult(
-                    graphName,
-                    exportConfig.exportName(),
-                    graphStore.nodeCount(),
-                    graphStore.relationshipCount(),
-                    graphStore.relationshipTypes().size(),
-                    importedProperties.nodePropertyCount(),
-                    importedProperties.relationshipPropertyCount(),
-                    java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(end - start)
-                );
-            }
+        return new FileExportResult(
+            graphName,
+            exportConfig.exportName(),
+            graphStore.nodeCount(),
+            graphStore.relationshipCount(),
+            graphStore.relationshipTypes().size(),
+            result.importedProperties().nodePropertyCount(),
+            result.importedProperties().relationshipPropertyCount(),
+            result.tookMillis()
         );
     }
 
@@ -173,42 +140,6 @@ public class GraphStoreExportProc extends BaseProc {
         );
 
         return Stream.of(new MemoryEstimateResult(estimate));
-    }
-
-    private Path getExportPath(GraphStoreToFileExporterConfig config) {
-        var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-        var exportLocation = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
-
-        if (exportLocation == null) {
-            throw new RuntimeException(formatWithLocale(
-                "The configuration option '%s' must be set.",
-                GraphStoreExportSettings.export_location_setting.name()
-            ));
-        }
-
-        DIRECTORY_IS_WRITABLE.validate(exportLocation);
-
-        var resolvedExportPath = exportLocation.resolve(config.exportName()).normalize();
-
-        if (!resolvedExportPath.startsWith(exportLocation)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Illegal parameter value for parameter exportName=%s. It attempts to write into forbidden directory %s.",
-                config.exportName(),
-                resolvedExportPath
-            ));
-        }
-
-        if (resolvedExportPath.toFile().exists()) {
-            throw new IllegalArgumentException("The specified import directory already exists.");
-        }
-
-        try {
-            Files.createDirectories(resolvedExportPath);
-        } catch (IOException e) {
-            throw new RuntimeException("Could not create import directory", e);
-        }
-
-        return resolvedExportPath;
     }
 
     @SuppressWarnings("unused")
