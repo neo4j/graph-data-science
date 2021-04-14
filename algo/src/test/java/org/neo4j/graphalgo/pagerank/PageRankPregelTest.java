@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
@@ -136,7 +137,7 @@ class PageRankPregelTest {
                 .build();
 
             var gdsResult = runOnGds(graph, config, sourceNodeIds).result().asNodeProperties();
-            var pregelResult = runOnPregel(graph, config, sourceNodeIds)
+            var pregelResult = runOnPregel(graph, config, sourceNodeIds, false)
                 .nodeValues()
                 .doubleProperties(PageRankPregel.PAGE_RANK)
                 .asNodeProperties();
@@ -213,6 +214,63 @@ class PageRankPregelTest {
         }
     }
 
+    @Nested
+    class ArticleRankGraph {
+
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Label1 { expectedRank: 0.19991328 })" +
+            ", (b:Label1 { expectedRank: 0.41704274 })" +
+            ", (c:Label1 { expectedRank: 0.31791456 })" +
+            ", (d:Label1 { expectedRank: 0.18921376 })" +
+            ", (e:Label1 { expectedRank: 0.19991328 })" +
+            ", (f:Label1 { expectedRank: 0.18921376 })" +
+            ", (g:Label1 { expectedRank: 0.15 })" +
+            ", (h:Label1 { expectedRank: 0.15 })" +
+            ", (i:Label1 { expectedRank: 0.15 })" +
+            ", (j:Label1 { expectedRank: 0.15 })" +
+            ", (b)-[:TYPE1]->(c)" +
+            ", (c)-[:TYPE1]->(b)" +
+            ", (d)-[:TYPE1]->(a)" +
+            ", (d)-[:TYPE1]->(b)" +
+            ", (e)-[:TYPE1]->(b)" +
+            ", (e)-[:TYPE1]->(d)" +
+            ", (e)-[:TYPE1]->(f)" +
+            ", (f)-[:TYPE1]->(b)" +
+            ", (f)-[:TYPE1]->(e)";
+
+        @Inject
+        private Graph graph;
+
+        @Inject
+        private IdFunction idFunction;
+
+        @Test
+        void articleRank() {
+            var config = ImmutablePageRankStreamConfig
+                .builder()
+                .maxIterations(40)
+                .tolerance(0)
+                .concurrency(1)
+                .build();
+
+            var pregelResult = runOnPregel(graph, config, new long[0], true)
+                .nodeValues()
+                .doubleProperties(PageRankPregel.PAGE_RANK)
+                .asNodeProperties();
+
+            var actual = graph.nodeProperties("expectedRank");
+
+            graph.forEachNode(nodeId -> {System.out.println(pregelResult.doubleValue(nodeId)); return true;});
+
+            for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+                assertThat(pregelResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-6));
+            }
+        }
+
+    }
+
     PageRank runOnGds(Graph graph, PageRankBaseConfig config) {
         return runOnGds(graph, config, new long[0]);
     }
@@ -227,10 +285,10 @@ class PageRankPregelTest {
     }
 
     PregelResult runOnPregel(Graph graph, PageRankBaseConfig config) {
-        return runOnPregel(graph, config, new long[0]);
+        return runOnPregel(graph, config, new long[0], false);
     }
 
-    PregelResult runOnPregel(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds) {
+    PregelResult runOnPregel(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds, boolean articleRank) {
         var pregelConfig = ImmutablePageRankPregelConfig.builder()
             .maxIterations(config.maxIterations() + 1)
             .dampingFactor(config.dampingFactor())
@@ -241,9 +299,15 @@ class PageRankPregelTest {
             .isAsynchronous(false)
             .build();
 
-        var computation = config.relationshipWeightProperty() != null
-            ? PageRankPregel.weighted(graph, pregelConfig, Pools.DEFAULT, AllocationTracker.empty())
-            : PageRankPregel.unweighted(graph, pregelConfig);
+        PageRankPregel computation;
+
+        if (articleRank) {
+            computation = PageRankPregel.articleRank(graph, pregelConfig);
+        } else if (config.relationshipWeightProperty() != null) {
+            computation = PageRankPregel.weighted(graph, pregelConfig, Pools.DEFAULT, AllocationTracker.empty());
+        } else {
+            computation = PageRankPregel.unweighted(graph, pregelConfig);
+        }
 
 
         var pregelJob = Pregel.create(
