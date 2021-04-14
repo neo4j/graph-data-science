@@ -98,13 +98,13 @@ class NodeClassificationIntegrationTest extends BaseProcTest {
                        "  randomSeed: 2," +
                        "  concurrency: 1," +
                        "  params: [" +
-                       "    {penalty: 0.0625, maxIterations: 1000}, " +
-                       "    {penalty: 0.125, maxIterations: 1000}, " +
-                       "    {penalty: 0.25, maxIterations: 1000}, " +
-                       "    {penalty: 0.5, maxIterations: 1000}, " +
-                       "    {penalty: 1.0, maxIterations: 1000}, " +
-                       "    {penalty: 2.0, maxIterations: 1000}, " +
-                       "    {penalty: 4.0, maxIterations: 1000}" +
+                       "    {penalty: 0.0625, maxEpochs: 1000}, " +
+                       "    {penalty: 0.125, maxEpochs: 1000}, " +
+                       "    {penalty: 0.25, maxEpochs: 1000}, " +
+                       "    {penalty: 0.5, maxEpochs: 1000}, " +
+                       "    {penalty: 1.0, maxEpochs: 1000}, " +
+                       "    {penalty: 2.0, maxEpochs: 1000}, " +
+                       "    {penalty: 4.0, maxEpochs: 1000}" +
                        "  ]" +
                        "})";
         runQuery(trainOnN);

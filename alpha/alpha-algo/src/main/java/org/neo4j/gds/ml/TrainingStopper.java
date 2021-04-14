@@ -26,9 +26,9 @@ public interface TrainingStopper {
 
     static TrainingStopper defaultStopper(TrainingConfig config) {
         return new StreakStopper(
-            config.minIterations(),
+            config.minEpochs(),
             config.patience(),
-            config.maxIterations(),
+            config.maxEpochs(),
             config.windowSize(),
             config.tolerance()
         );

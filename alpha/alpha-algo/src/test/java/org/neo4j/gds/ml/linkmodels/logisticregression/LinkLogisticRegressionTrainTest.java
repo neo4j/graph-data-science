@@ -60,7 +60,7 @@ class LinkLogisticRegressionTrainTest {
         var config =
             ImmutableLinkLogisticRegressionTrainConfig.builder()
                 .featureProperties(List.of("a", "b"))
-                .maxIterations(100000)
+                .maxEpochs(100000)
                 .tolerance(1e-4)
                 .concurrency(1)
                 .build();
@@ -89,7 +89,7 @@ class LinkLogisticRegressionTrainTest {
             ImmutableLinkLogisticRegressionTrainConfig.builder()
                 .featureProperties(List.of("a", "b"))
                 .penalty(1.0)
-                .maxIterations(1000000)
+                .maxEpochs(1000000)
                 .concurrency(4)
                 .sharedUpdater(false)
                 .tolerance(1e-10)
@@ -124,7 +124,7 @@ class LinkLogisticRegressionTrainTest {
             ImmutableLinkLogisticRegressionTrainConfig.builder()
                 .featureProperties(List.of("a", "b"))
                 .penalty(1)
-                .maxIterations(100000)
+                .maxEpochs(100000)
                 .tolerance(1e-4)
                 .concurrency(1)
                 .build();

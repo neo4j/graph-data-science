@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.config.ConcurrencyConfig;
 
 public interface TrainingConfig extends ConcurrencyConfig {
 
-    int MAX_ITERATIONS = 100;
+    int MAX_EPOCHS = 100;
 
     @Value.Default
     default int batchSize() {
@@ -32,7 +32,7 @@ public interface TrainingConfig extends ConcurrencyConfig {
     }
 
     @Value.Default
-    default int minIterations() {
+    default int minEpochs() {
         return 1;
     }
 
@@ -42,8 +42,8 @@ public interface TrainingConfig extends ConcurrencyConfig {
     }
 
     @Value.Default
-    default int maxIterations() {
-        return MAX_ITERATIONS;
+    default int maxEpochs() {
+        return MAX_EPOCHS;
     }
 
     @Value.Default

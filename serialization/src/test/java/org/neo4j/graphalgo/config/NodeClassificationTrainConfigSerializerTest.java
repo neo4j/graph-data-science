@@ -40,8 +40,8 @@ class NodeClassificationTrainConfigSerializerTest {
     @ParameterizedTest
     @MethodSource("allValidMetricSpecificationsProxy")
     void shouldSerializeConfig(String metric) {
-        Map<String, Object> model1 = Map.of("penalty", 1, "maxIterations", 0);
-        Map<String, Object> model2 = Map.of("penalty", 1, "maxIterations", 10000, "tolerance", 1e-5);
+        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 0);
+        Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
 
         var config = ImmutableNodeClassificationTrainConfig.builder()
             .modelName("model")
@@ -80,7 +80,7 @@ class NodeClassificationTrainConfigSerializerTest {
 
     @Test
     void shouldSerializeConfigWithMultipleMetrics() {
-        Map<String, Object> model1 = Map.of("penalty", 1, "maxIterations", 0);
+        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 0);
 
         var config = ImmutableNodeClassificationTrainConfig.builder()
             .modelName("model")
@@ -104,8 +104,8 @@ class NodeClassificationTrainConfigSerializerTest {
 
     @Test
     void shouldDeserializeConfig() {
-        Map<String, Object> model1 = Map.of("penalty", 1, "maxIterations", 0);
-        Map<String, Object> model2 = Map.of("penalty", 1, "maxIterations", 10000, "tolerance", 1e-5);
+        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 0);
+        Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
 
         var config = ImmutableNodeClassificationTrainConfig.builder()
             .modelName("model")

@@ -410,9 +410,9 @@ CALL gds.alpha.ml.linkPrediction.train('myGraph', {
   classRatio: 1.33,
   randomSeed: 2,
   params: [
-    {penalty: 0.5, maxIterations: 1000},
-    {penalty: 1.0, maxIterations: 1000},
-    {penalty: 0.0, maxIterations: 1000}
+    {penalty: 0.5, maxEpochs: 1000},
+    {penalty: 1.0, maxEpochs: 1000},
+    {penalty: 0.0, maxEpochs: 1000}
   ]
 }) YIELD modelInfo
 RETURN
@@ -424,8 +424,8 @@ RETURN
 .Results
 [opts="header"]
 |===
-| winningModel                        | trainGraphScore    | testGraphScore
-| {maxIterations: 1000, penalty: 0.5} | 0.7145922746781116 | 0.3512042965360351
+| winningModel                    | trainGraphScore    | testGraphScore
+| {maxEpochs: 1000, penalty: 0.5} | 0.7145922746781116 | 0.3512042965360351
 |===
 
 Here we can observe that the model candidate with penalty 0.5 performed the best in the training phase, with a score of about 71% over the train graph.

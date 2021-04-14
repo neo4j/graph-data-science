@@ -65,7 +65,7 @@ class NodeClassificationSerializerIntegrationTest {
     @ParameterizedTest
     @MethodSource("allValidMetricSpecificationsProxy")
     void roundTripTest(String metric) throws IOException {
-        Map<String, Object> model2 = Map.of("penalty", 1, "maxIterations", 10000, "tolerance", 1e-5);
+        Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
 
         var log = new TestLog();
         var config = createConfig(List.of(model2), List.of("a", "b"), metric);

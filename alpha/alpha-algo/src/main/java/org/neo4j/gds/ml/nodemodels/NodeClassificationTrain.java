@@ -109,18 +109,18 @@ public class NodeClassificationTrain
 
                 // 3. train each model candidate on the train sets
                 progressLogger.logStart(candidateAndSplitMessage + " :: Train");
-                // The best upper bound we have for bounding progress is maxIterations, so tell the user what that value is
+                // The best upper bound we have for bounding progress is maxEpochs, so tell the user what that value is
                 // TODO: we are circumventing type checking built into config creation
                 //       could we trigger this type checking earlier? there is a lot of distance between this interaction and the
                 //       actual trainin code, can we close the gap? could we create the TrainConfig here?
                 //       it's nice to have all the progress logging configuration here, but if we can't close the gap it may be
                 //       better to push it (back) down into the train logic
-                int maxIterations = ((Number) modelParams.getOrDefault("maxIterations", TrainingConfig.MAX_ITERATIONS)).intValue();
+                int maxEpochs = ((Number) modelParams.getOrDefault("maxEpochs", TrainingConfig.MAX_EPOCHS)).intValue();
                 progressLogger.logMessage(formatWithLocale(
                     candidateAndSplitMessage + " :: Train :: Max iterations: %s",
-                    maxIterations
+                    maxEpochs
                 ));
-                progressLogger.reset(maxIterations);
+                progressLogger.reset(maxEpochs);
                 var modelData = trainModel(trainSet, modelParams);
                 progressLogger.logFinish(candidateAndSplitMessage + " :: Train");
 
@@ -146,14 +146,14 @@ public class NodeClassificationTrain
         progressLogger.logFinish(":: Select Model");
 
         var bestConfig = winner.params();
-        int maxIterations = ((Number) bestConfig.getOrDefault("maxIterations", TrainingConfig.MAX_ITERATIONS)).intValue();
+        int maxEpochs = ((Number) bestConfig.getOrDefault("maxEpochs", TrainingConfig.MAX_EPOCHS)).intValue();
         var modelSelectResult = ModelSelectResult.of(bestConfig, trainStats, validationStats);
 
         var bestParameters = modelSelectResult.bestParameters();
 
         // 6. train best model on remaining
         progressLogger.logStart(":: Train Selected on Remainder");
-        progressLogger.reset(maxIterations);
+        progressLogger.reset(maxEpochs);
         MultiClassNLRData winnerModelData = trainModel(outerSplit.trainSet(), bestParameters);
         progressLogger.logFinish(":: Train Selected on Remainder");
 
@@ -169,7 +169,7 @@ public class NodeClassificationTrain
 
         // 8. retrain that model on the full graph
         progressLogger.logStart(":: Retrain Selected Model");
-        progressLogger.reset(maxIterations);
+        progressLogger.reset(maxEpochs);
         MultiClassNLRData retrainedModelData = trainModel(nodeIds, bestParameters);
         progressLogger.logFinish(":: Retrain Selected Model");
 

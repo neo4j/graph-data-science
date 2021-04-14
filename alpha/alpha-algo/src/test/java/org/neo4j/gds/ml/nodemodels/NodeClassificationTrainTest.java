@@ -81,8 +81,8 @@ class NodeClassificationTrainTest {
 
         var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
-        Map<String, Object> model1 = Map.of("penalty", 1, "maxIterations", 0);
-        Map<String, Object> model2 = Map.of("penalty", 1, "maxIterations", 10000, "tolerance", 1e-5);
+        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 0);
+        Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
 
         Map<String, Object> expectedWinner = model2;
         var config = createConfig(
@@ -121,13 +121,13 @@ class NodeClassificationTrainTest {
         var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
         var modelCandidates = List.of(
-            Map.<String, Object>of("penalty", 0.0625, "maxIterations", 1000),
-            Map.<String, Object>of("penalty", 0.125, "maxIterations", 1000),
-            Map.<String, Object>of("penalty", 0.25, "maxIterations", 1000),
-            Map.<String, Object>of("penalty", 0.5, "maxIterations", 1000),
-            Map.<String, Object>of("penalty", 1.0, "maxIterations", 1000),
-            Map.<String, Object>of("penalty", 2.0, "maxIterations", 1000),
-            Map.<String, Object>of("penalty", 4.0, "maxIterations", 1000)
+            Map.<String, Object>of("penalty", 0.0625, "maxEpochs", 1000),
+            Map.<String, Object>of("penalty", 0.125, "maxEpochs", 1000),
+            Map.<String, Object>of("penalty", 0.25, "maxEpochs", 1000),
+            Map.<String, Object>of("penalty", 0.5, "maxEpochs", 1000),
+            Map.<String, Object>of("penalty", 1.0, "maxEpochs", 1000),
+            Map.<String, Object>of("penalty", 2.0, "maxEpochs", 1000),
+            Map.<String, Object>of("penalty", 4.0, "maxEpochs", 1000)
         );
 
         var bananasConfig = createConfig(
@@ -188,8 +188,8 @@ class NodeClassificationTrainTest {
     @MethodSource("metricArguments")
     void shouldLogProgress(MetricSpecification metricSpecification) {
         var modelCandidates = List.of(
-            Map.<String, Object>of("penalty", 0.0625, "maxIterations", 100),
-            Map.<String, Object>of("penalty", 0.125, "maxIterations", 100)
+            Map.<String, Object>of("penalty", 0.0625, "maxEpochs", 100),
+            Map.<String, Object>of("penalty", 0.125, "maxEpochs", 100)
         );
         var log = new TestLog();
 

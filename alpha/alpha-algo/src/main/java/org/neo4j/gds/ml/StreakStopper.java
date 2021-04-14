@@ -21,9 +21,9 @@ package org.neo4j.gds.ml;
 
 class StreakStopper implements TrainingStopper {
 
-    private final int minIterations;
+    private final int minEpochs;
     private final int patience;
-    private final int maxIterations;
+    private final int maxEpochs;
     private final int windowSize;
     private final double tolerance;
 
@@ -32,10 +32,10 @@ class StreakStopper implements TrainingStopper {
     private int unproductiveStreak;
     private final double[] lossHistory;
 
-    StreakStopper(int minIterations, int patience, int maxIterations, int windowSize, double tolerance) {
-        this.minIterations = minIterations;
+    StreakStopper(int minEpochs, int patience, int maxEpochs, int windowSize, double tolerance) {
+        this.minEpochs = minEpochs;
         this.patience = patience;
-        this.maxIterations = maxIterations;
+        this.maxEpochs = maxEpochs;
         this.windowSize = windowSize;
         this.tolerance = tolerance;
         this.lossHistory = new double[windowSize];
@@ -55,7 +55,7 @@ class StreakStopper implements TrainingStopper {
         if(terminated()) {
             return; // or throw???
         }
-        if(count >= minIterations) {
+        if(count >= minEpochs) {
             if (loss - bestMovingAverage >= - tolerance * Math.abs(bestMovingAverage)) {
                 unproductiveStreak++;
             } else {
@@ -70,7 +70,7 @@ class StreakStopper implements TrainingStopper {
 
     @Override
     public boolean terminated() {
-        return count >= maxIterations ||
+        return count >= maxEpochs ||
                unproductiveStreak >= patience;
     }
 

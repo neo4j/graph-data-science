@@ -144,11 +144,11 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "  featureProperties: ['z'], " +
             "  classRatio: 5.5625," +
             "  randomSeed: -1, " +
-            "  params: [{penalty: 0.5, maxIterations: 1}, {penalty: 2.0, maxIterations: 100}] " +
+            "  params: [{penalty: 0.5, maxEpochs: 1}, {penalty: 2.0, maxEpochs: 100}] " +
             "})";
 
         var expectedModelInfo = Map.of(
-            "bestParameters", Map.of("penalty", 0.5, "maxIterations", 1),
+            "bestParameters", Map.of("penalty", 0.5, "maxEpochs", 1),
             "metrics", Map.of(
                 "AUCPR", Map.of(
                     "outerTrain", 1.0,
@@ -158,13 +158,13 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
                             "avg", 1.0,
                             "max", 1.0,
                             "min", 1.0,
-                            "params", Map.of("penalty", 0.5, "maxIterations", 1)
+                            "params", Map.of("penalty", 0.5, "maxEpochs", 1)
                         ),
                         Map.of(
                             "avg", 1.0,
                             "max", 1.0,
                             "min", 1.0,
-                            "params", Map.of("penalty", 2.0, "maxIterations", 100)
+                            "params", Map.of("penalty", 2.0, "maxEpochs", 100)
                         )
                     ),
                     "validation", List.of(
@@ -172,13 +172,13 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
                             "avg", 1.0,
                             "max", 1.0,
                             "min", 1.0,
-                            "params", Map.of("penalty", 0.5, "maxIterations", 1)
+                            "params", Map.of("penalty", 0.5, "maxEpochs", 1)
                         ),
                         Map.of(
                             "avg", 1.0,
                             "max", 1.0,
                             "min", 1.0,
-                            "params", Map.of("penalty", 2.0, "maxIterations", 100)
+                            "params", Map.of("penalty", 2.0, "maxEpochs", 100)
                         )
                     )
                 )

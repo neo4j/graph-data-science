@@ -54,7 +54,7 @@ class NodeLogisticRegressionTrainTest {
             ImmutableMultiClassNLRTrainConfig.builder()
                 .featureProperties(List.of("a", "b"))
                 .targetProperty("t")
-                .maxIterations(100000)
+                .maxEpochs(100000)
                 .tolerance(1e-4)
                 .penalty(0.0)
                 .concurrency(1)

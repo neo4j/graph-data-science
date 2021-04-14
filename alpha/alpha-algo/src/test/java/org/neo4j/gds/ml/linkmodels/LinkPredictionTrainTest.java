@@ -113,7 +113,7 @@ class LinkPredictionTrainTest {
         double trueNegatives = maxNumberOfRelationships - truePositives;
         var classRatio = trueNegatives / truePositives;
 
-        var expectedWinner = Map.<String, Object>of("maxIterations", 1000);
+        var expectedWinner = Map.<String, Object>of("maxEpochs", 1000);
         var config = ImmutableLinkPredictionTrainConfig.builder()
             .trainRelationshipType(RelationshipType.of("TRAIN"))
             .testRelationshipType(RelationshipType.of("TEST"))
@@ -123,7 +123,7 @@ class LinkPredictionTrainTest {
             .randomSeed(-1L)
             .classRatio(classRatio)
             .params(List.of(
-                Map.of("maxIterations", 0),
+                Map.of("maxEpochs", 0),
                 expectedWinner
             )).build();
 
@@ -157,7 +157,7 @@ class LinkPredictionTrainTest {
         double trueNegatives = maxNumberOfRelationships - truePositives;
         var classRatio = trueNegatives / truePositives;
 
-        var expectedWinner = Map.<String, Object>of("maxIterations", 1000);
+        var expectedWinner = Map.<String, Object>of("maxEpochs", 1000);
         var config = ImmutableLinkPredictionTrainConfig.builder()
             .trainRelationshipType(RelationshipType.of("TRAIN"))
             .testRelationshipType(RelationshipType.of("TEST"))
@@ -167,7 +167,7 @@ class LinkPredictionTrainTest {
             .randomSeed(-1L)
             .classRatio(classRatio)
             .params(List.of(
-                Map.of("maxIterations", 0),
+                Map.of("maxEpochs", 0),
                 expectedWinner
             )).build();
 

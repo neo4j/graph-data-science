@@ -87,7 +87,7 @@ class MultiClassNLRTrainTest {
             .featureProperties(List.of("a", "b"))
             .targetProperty("t")
             .penalty(NO_PENALTY)
-            .maxIterations(100000)
+            .maxEpochs(100000)
             .concurrency(1)
             .tolerance(1e-4)
             .build();
@@ -126,7 +126,7 @@ class MultiClassNLRTrainTest {
             .featureProperties(List.of("a", "b"))
             .targetProperty("t")
             .penalty(1.0)
-            .maxIterations(1000000)
+            .maxEpochs(1000000)
             .concurrency(4)
             .sharedUpdater(false)
             .tolerance(1e-10)
