@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelResult;
@@ -149,12 +150,83 @@ class PageRankPregelTest {
         }
     }
 
+    @Nested
+    class WeightedWikiTest {
+        // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Node { expectedRank: 0.24 })" +
+            ", (b:Node { expectedRank: 3.69 })" +
+            ", (c:Node { expectedRank: 3.29 })" +
+            ", (d:Node { expectedRank: 0.58 })" +
+            ", (e:Node { expectedRank: 0.72 })" +
+            ", (f:Node { expectedRank: 0.27 })" +
+            ", (g:Node { expectedRank: 0.15 })" +
+            ", (h:Node { expectedRank: 0.15 })" +
+            ", (i:Node { expectedRank: 0.15 })" +
+            ", (j:Node { expectedRank: 0.15 })" +
+            ", (k:Node { expectedRank: 0.15 })" +
+            ", (b)-[:TYPE { weight: 1.0,   unnormalizedWeight: 5.0 }]->(c)" +
+            ", (c)-[:TYPE { weight: 1.0,   unnormalizedWeight: 10.0 }]->(b)" +
+            ", (d)-[:TYPE { weight: 0.2,   unnormalizedWeight: 2.0 }]->(a)" +
+            ", (d)-[:TYPE { weight: 0.8,   unnormalizedWeight: 8.0 }]->(b)" +
+            ", (e)-[:TYPE { weight: 0.10,  unnormalizedWeight: 1.0 }]->(b)" +
+            ", (e)-[:TYPE { weight: 0.70,  unnormalizedWeight: 7.0 }]->(d)" +
+            ", (e)-[:TYPE { weight: 0.20,  unnormalizedWeight: 2.0 }]->(f)" +
+            ", (f)-[:TYPE { weight: 0.7,   unnormalizedWeight: 7.0 }]->(b)" +
+            ", (f)-[:TYPE { weight: 0.3,   unnormalizedWeight: 3.0 }]->(e)" +
+            ", (g)-[:TYPE { weight: 0.01,  unnormalizedWeight: 0.1 }]->(b)" +
+            ", (g)-[:TYPE { weight: 0.99,  unnormalizedWeight: 9.9 }]->(e)" +
+            ", (h)-[:TYPE { weight: 0.5,   unnormalizedWeight: 5.0 }]->(b)" +
+            ", (h)-[:TYPE { weight: 0.5,   unnormalizedWeight: 5.0 }]->(e)" +
+            ", (i)-[:TYPE { weight: 0.5,   unnormalizedWeight: 5.0 }]->(b)" +
+            ", (i)-[:TYPE { weight: 0.5,   unnormalizedWeight: 5.0 }]->(e)" +
+            ", (j)-[:TYPE { weight: 1.0,   unnormalizedWeight: 10.0 }]->(e)" +
+            ", (k)-[:TYPE { weight: 1.0,   unnormalizedWeight: 10.0 }]->(e)";
+
+        @Inject
+        private TestGraph graph;
+
+        @ParameterizedTest
+        @ValueSource(strings = {"weight", "unnormalizedWeight"})
+        void withWeights(String relationshipWeight) {
+            var config = ImmutablePageRankStreamConfig.builder()
+                .maxIterations(40)
+                .tolerance(0)
+                .relationshipWeightProperty(relationshipWeight)
+                .concurrency(1)
+                .build();
+
+            var gdsResult = runOnGds(graph, config).result().asNodeProperties();
+            var pregelResult = runOnPregel(graph, config)
+                .nodeValues()
+                .doubleProperties(PageRankPregel.PAGE_RANK)
+                .asNodeProperties();
+
+            var actual = graph.nodeProperties("expectedRank");
+
+            graph.forEachNode(nodeId -> {
+                System.out.println(gdsResult.doubleValue(nodeId));
+                return true;
+            });
+
+            for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+                assertThat(gdsResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
+//                assertThat(pregelResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
+            }
+        }
+    }
+
     PageRank runOnGds(Graph graph, PageRankBaseConfig config) {
         return runOnGds(graph, config, new long[0]);
     }
 
     PageRank runOnGds(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds) {
-        return PageRankAlgorithmType.NON_WEIGHTED
+        var algorithmType = config.relationshipWeightProperty() != null
+            ? PageRankAlgorithmType.WEIGHTED
+            : PageRankAlgorithmType.NON_WEIGHTED;
+        return algorithmType
             .create(graph, config, LongStream.of(sourceNodeIds), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
             .compute();
     }
@@ -168,6 +240,7 @@ class PageRankPregelTest {
             .maxIterations(config.maxIterations() + 1)
             .dampingFactor(config.dampingFactor())
             .concurrency(config.concurrency())
+            .relationshipWeightProperty(config.relationshipWeightProperty())
             .sourceNodeIds(LongStream.of(sourceNodeIds))
             .tolerance(config.tolerance())
             .isAsynchronous(false)
