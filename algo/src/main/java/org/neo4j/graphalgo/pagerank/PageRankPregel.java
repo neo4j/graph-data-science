@@ -82,7 +82,6 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
 
         double delta = newRank;
 
-        // compute new rank based on neighbor ranks
         if (!context.isInitialSuperstep()) {
             double sum = 0;
             for (var message : messages) {
@@ -94,13 +93,10 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
         }
 
         if (delta > tolerance || context.isInitialSuperstep()) {
-            // send new rank to neighbors
             if (weighted) {
-                // normalized via `applyRelationshipWeight`
                 context.sendToNeighbors(newRank);
             } else {
-                int degree = context.degree();
-                context.sendToNeighbors(delta / degree);
+                context.sendToNeighbors(delta / context.degree());
             }
         } else {
             context.voteToHalt();
