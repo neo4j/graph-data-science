@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipSchemaVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisitor;
+import org.neo4j.graphalgo.core.utils.export.file.csv.UserInfoVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.schema.NodeSchemaVisitor;
 import org.neo4j.graphalgo.core.utils.export.file.schema.RelationshipSchemaVisitor;
 import org.neo4j.internal.batchimport.input.Collector;
@@ -76,6 +77,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             graphStore,
             config,
             autoloadFlagVisitorSupplier,
+            () -> new UserInfoVisitor(exportPath),
             () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
             () -> new CsvRelationshipSchemaVisitor(exportPath),
@@ -88,6 +90,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
         Optional<Supplier<AutoloadFlagVisitor>> autoloadFlagVisitorSupplier,
+        Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier,
         Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
         Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
         Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
@@ -99,6 +102,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                 graphStore,
                 config,
                 autoloadFlagVisitorSupplier,
+                userInfoVisitorSupplier,
                 graphInfoVisitorSupplier,
                 nodeSchemaVisitorSupplier,
                 relationshipSchemaVisitorSupplier,
@@ -153,6 +157,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
 
     private static final class FullGraphStoreToFileExporter extends GraphStoreToFileExporter {
         private final Optional<Supplier<AutoloadFlagVisitor>> maybeAutoloadFlagSupplier;
+        private final Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier;
         private final Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier;
         private final Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier;
         private final Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier;
@@ -161,6 +166,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             GraphStore graphStore,
             GraphStoreToFileExporterConfig config,
             Optional<Supplier<AutoloadFlagVisitor>> maybeAutoloadFlagSupplier,
+            Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier,
             Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
             Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
             Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
@@ -169,6 +175,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         ) {
             super(graphStore, config, nodeVisitorSupplier, relationshipVisitorSupplier);
             this.maybeAutoloadFlagSupplier = maybeAutoloadFlagSupplier;
+            this.userInfoVisitorSupplier = userInfoVisitorSupplier;
             this.graphInfoVisitorSupplier = graphInfoVisitorSupplier;
             this.nodeSchemaVisitorSupplier = nodeSchemaVisitorSupplier;
             this.relationshipSchemaVisitorSupplier = relationshipSchemaVisitorSupplier;
@@ -177,6 +184,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         @Override
         protected void export(GraphStoreInput graphStoreInput) {
             exportAutoloadFlag();
+            exportUserName();
             exportGraphInfo(graphStoreInput);
             exportNodeSchema(graphStoreInput);
             exportRelationshipSchema(graphStoreInput);
@@ -187,6 +195,12 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             maybeAutoloadFlagSupplier.ifPresent(
                 autoLoadFlagSupplier -> autoLoadFlagSupplier.get().export()
             );
+        }
+
+        private void exportUserName() {
+            try(var userInfoVisitor = userInfoVisitorSupplier.get()) {
+                userInfoVisitor.export(config.username());
+            }
         }
 
         private void exportGraphInfo(GraphStoreInput graphStoreInput) {

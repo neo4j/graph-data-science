@@ -41,6 +41,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -221,9 +222,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertHeaderFile("relationships_REL1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
 
         // Sometimes we end up with only one file, so we cannot make absolute assumptions about the files created
-        var nodeContents = Arrays.stream(tempDir
+        var nodeContents = Arrays.stream(Objects.requireNonNull(tempDir
             .toFile()
-            .listFiles((file, name) -> name.startsWith("nodes") && !name.contains("header")))
+            .listFiles((file, name) -> name.matches("nodes(_.+)?(_\\d+).csv"))))
             .map(File::toPath)
             .flatMap(path -> {
                 try {
@@ -239,9 +240,9 @@ class GraphStoreToFileExporterTest extends CsvTest {
             Long.toString(idFunction.of("d"))
         );
 
-        var relationshipContents = Arrays.stream(tempDir
+        var relationshipContents = Arrays.stream(Objects.requireNonNull(tempDir
             .toFile()
-            .listFiles((file, name) -> name.startsWith("relationships") && !name.contains("header")))
+            .listFiles((file, name) -> name.matches("relationships(_.+)?(_\\d+).csv"))))
             .map(File::toPath)
             .flatMap(path -> {
                 try {
@@ -308,6 +309,26 @@ class GraphStoreToFileExporterTest extends CsvTest {
                 List.of(graphStore.databaseId().databaseId().uuid().toString(), graphStore.databaseId().name(), Long.toString(graphStore.nodeCount()), Long.toString(3L))
             )
         );
+    }
+
+    @Test
+    void exportUsername() {
+        var config = ImmutableGraphStoreToFileExporterConfig
+            .builder()
+            .exportName(tempDir.toString())
+            .username("UserA")
+            .writeConcurrency(1)
+            .includeMetaData(true)
+            .build();
+
+        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        exporter.run(AllocationTracker.empty());
+
+        assertThat(tempDir)
+            .isDirectoryContaining("glob:**.userinfo");
+
+        assertThat(tempDir.resolve(".userinfo"))
+            .hasContent("UserA");
     }
 
     @Test
