@@ -153,8 +153,10 @@ class PageRankPregelTest {
     }
 
     PageRank runOnGds(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds) {
+        // GDS PageRank maps to internal ids internally
+        long[] originalSourceIds = Arrays.stream(sourceNodeIds).map(graph::toOriginalNodeId).toArray();
         return PageRankAlgorithmType.NON_WEIGHTED
-            .create(graph, config, LongStream.of(sourceNodeIds), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            .create(graph, config, LongStream.of(originalSourceIds), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
             .compute();
     }
 
@@ -168,14 +170,13 @@ class PageRankPregelTest {
             .dampingFactor(config.dampingFactor())
             .concurrency(config.concurrency())
             .tolerance(config.tolerance())
-            .sourceNodeIds(LongStream.of(sourceNodeIds))
             .isAsynchronous(false)
             .build();
 
         var pregelJob = Pregel.create(
             graph,
             pregelConfig,
-            new PageRankPregel(pregelConfig),
+            new PageRankPregel(pregelConfig, sourceNodeIds),
             Pools.DEFAULT,
             AllocationTracker.empty()
         );

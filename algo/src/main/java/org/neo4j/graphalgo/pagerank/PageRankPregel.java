@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.beta.pregel.Reducer;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
@@ -43,14 +44,14 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
     private final double tolerance;
     private final double alpha;
 
-    public PageRankPregel(PageRankPregelConfig config) {
+    public PageRankPregel(PageRankPregelConfig config, long[] sourceNodeIds) {
         this.weighted = config.relationshipWeightProperty() != null;
         this.seedProperty = config.seedProperty();
         this.dampingFactor = config.dampingFactor();
         this.tolerance = config.tolerance();
         this.alpha = 1 - this.dampingFactor;
-        this.sourceNodes = new LongScatterSet();
-        config.sourceNodeIds().forEach(sourceNodes::add);
+        this.sourceNodes = new LongScatterSet(sourceNodeIds.length);
+        Arrays.stream(sourceNodeIds).forEach(sourceNodes::add);
     }
 
     @Override
