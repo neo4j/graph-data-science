@@ -19,18 +19,23 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.assertj.core.api.Assertions;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class FractionSplitterTest {
     @Test
     void shouldGiveEmptySets() {
         var fractionSplitter = new FractionSplitter(AllocationTracker.empty());
         var split = fractionSplitter.split(HugeLongArray.newArray(0, AllocationTracker.empty()), 0.5);
-        Assertions.assertThat(split.trainSet().toArray()).isEmpty();
-        Assertions.assertThat(split.testSet().toArray()).isEmpty();
+        assertThat(split.trainSet().toArray()).isEmpty();
+        assertThat(split.testSet().toArray()).isEmpty();
     }
 
     @Test
@@ -38,8 +43,8 @@ class FractionSplitterTest {
         double fraction = 0.65;
         var fractionSplitter = new FractionSplitter(AllocationTracker.empty());
         var split = fractionSplitter.split(HugeLongArray.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9), fraction);
-        Assertions.assertThat(split.trainSet().toArray()).containsExactly(0, 1, 2, 3, 4, 5);
-        Assertions.assertThat(split.testSet().toArray()).containsExactly(6, 7, 8, 9);
+        assertThat(split.trainSet().toArray()).containsExactly(0, 1, 2, 3, 4, 5);
+        assertThat(split.testSet().toArray()).containsExactly(6, 7, 8, 9);
     }
 
     @Test
@@ -48,9 +53,76 @@ class FractionSplitterTest {
         var fractionSplitter = new FractionSplitter(AllocationTracker.empty());
         var split = fractionSplitter.split(input, 0.6);
 
-        Assertions.assertThat(split.trainSet().toArray()).containsExactly(4, 2, 1);
-        Assertions.assertThat(split.testSet().toArray()).containsExactly(3, 3, 7);
+        assertThat(split.trainSet().toArray()).containsExactly(4, 2, 1);
+        assertThat(split.testSet().toArray()).containsExactly(3, 3, 7);
     }
 
+    @Test
+    void splittingNodesDifferentlyShouldNotAffectMemoryEstimation() {
+        assertThat(
+            FractionSplitter.estimate(0.1)
+                .estimate(GraphDimensions.of(1000), 1)
+                .memoryUsage()
+        ).isEqualTo(
+            FractionSplitter.estimate(0.9)
+                .estimate(GraphDimensions.of(1000), 1)
+                .memoryUsage()
+        ).isEqualTo(
+            FractionSplitter.estimate(0.45)
+                .estimate(GraphDimensions.of(1000), 1)
+                .memoryUsage()
+        );
+    }
+
+    @Test
+    void minAndMaxEstimationShouldBeTheSame() {
+        var range = FractionSplitter.estimate(0.1)
+            .estimate(GraphDimensions.of(1000), 1)
+            .memoryUsage();
+        assertThat(range.min).isEqualTo(range.max);
+    }
+
+    @Test
+    @GdsEditionTest(Edition.EE)
+    void estimationIsNotAffectedByConcurrency() {
+        var dimensions = GraphDimensions.of(1000);
+        var estimator = FractionSplitter.estimate(0.1);
+        assertThat(
+            estimator.estimate(dimensions, 1).memoryUsage()
+        ).isEqualTo(
+            estimator.estimate(dimensions, 4).memoryUsage()
+        ).isEqualTo(
+            estimator.estimate(dimensions, 16).memoryUsage()
+        );
+    }
+
+    @Test
+    void estimationShouldScaleWithNodeCount() {
+        var baseNodeCount = 1000;
+        var trainFraction = 0.1;
+        var estimator = FractionSplitter.estimate(trainFraction);
+        var estimation = estimator
+            .estimate(GraphDimensions.of(baseNodeCount), 1)
+            .memoryUsage();
+        var tolerance = 100L;
+
+        // our test assumes max == min. we could inline the test that proves this, but coupled tests smell and checking is cheap
+        assertThat(estimation.max).isEqualTo(
+            estimator.estimate(GraphDimensions.of(baseNodeCount), 1).memoryUsage().min
+        );
+
+        assertThat(estimation.max)
+            .isCloseTo(
+                FractionSplitter.estimate(trainFraction)
+                    .estimate(GraphDimensions.of(baseNodeCount * 10), 1)
+                    .memoryUsage().max / 10, // should be ten times
+                Offset.offset(tolerance)     // with some give
+            ).isCloseTo(
+                FractionSplitter.estimate(trainFraction)
+                    .estimate(GraphDimensions.of(baseNodeCount * 100), 1)
+                    .memoryUsage().max / 100, // should be a hundred times
+                Offset.offset(tolerance)      // with some give
+        );
+    }
 
 }
