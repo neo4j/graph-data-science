@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Arrays;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,17 +50,17 @@ class PageRankPregelTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.3040965, expectedPersonalizedRank: 0.17053529152163158 })" +
-            ", (b:Node { expectedRank: 3.5658695, expectedPersonalizedRank: 0.3216114449911402 })" +
-            ", (c:Node { expectedRank: 3.180981,  expectedPersonalizedRank: 0.27329311398643763 })" +
-            ", (d:Node { expectedRank: 0.3625935, expectedPersonalizedRank: 0.048318333106500536 })" +
-            ", (e:Node { expectedRank: 0.7503465, expectedPersonalizedRank: 0.17053529152163158 })" +
-            ", (f:Node { expectedRank: 0.3625935, expectedPersonalizedRank: 0.048318333106500536 })" +
-            ", (g:Node { expectedRank: 0.15,      expectedPersonalizedRank: 0.0 })" +
-            ", (h:Node { expectedRank: 0.15,      expectedPersonalizedRank: 0.0 })" +
-            ", (i:Node { expectedRank: 0.15,      expectedPersonalizedRank: 0.0 })" +
-            ", (j:Node { expectedRank: 0.15,      expectedPersonalizedRank: 0.0 })" +
-            ", (k:Node { expectedRank: 0.15,      expectedPersonalizedRank: 0.0 })" +
+            "  (a:Node { expectedRank: 0.3040965, expectedPersonalizedRank1: 0.17053529152163158 , expectedPersonalizedRank2: 0.017454997930076894 })" +
+            ", (b:Node { expectedRank: 3.5658695, expectedPersonalizedRank1: 0.3216114449911402  , expectedPersonalizedRank2: 0.813246950528992    })" +
+            ", (c:Node { expectedRank: 3.180981 , expectedPersonalizedRank1: 0.27329311398643763 , expectedPersonalizedRank2: 0.690991752640184    })" +
+            ", (d:Node { expectedRank: 0.3625935, expectedPersonalizedRank1: 0.048318333106500536, expectedPersonalizedRank2: 0.041070583050331164 })" +
+            ", (e:Node { expectedRank: 0.7503465, expectedPersonalizedRank1: 0.17053529152163158 , expectedPersonalizedRank2: 0.1449550029964717   })" +
+            ", (f:Node { expectedRank: 0.3625935, expectedPersonalizedRank1: 0.048318333106500536, expectedPersonalizedRank2: 0.041070583050331164 })" +
+            ", (g:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  })" +
+            ", (h:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  })" +
+            ", (i:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  })" +
+            ", (j:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.0                  })" +
+            ", (k:Node { expectedRank: 0.15     , expectedPersonalizedRank1: 0.0                 , expectedPersonalizedRank2: 0.15000000000000002  })" +
             ", (b)-[:TYPE]->(c)" +
             ", (c)-[:TYPE]->(b)" +
             ", (d)-[:TYPE]->(a)" +
@@ -118,9 +119,13 @@ class PageRankPregelTest {
             assertThat(pregelResult.ranIterations()).isEqualTo(expectedIterations);
         }
 
-        @Test
-        void withSourceNodes() {
-            var sourceNodeIds = new long[]{graph.toMappedNodeId("a"), graph.toMappedNodeId("e")};
+        @ParameterizedTest
+        @CsvSource(value = {
+            "a;e,expectedPersonalizedRank1",
+            "k;b,expectedPersonalizedRank2"
+        })
+        void withSourceNodes(String sourceNodesString, String expectedPropertyKey) {
+            var sourceNodeIds = Arrays.stream(sourceNodesString.split(";")).mapToLong(graph::toMappedNodeId).toArray();
 
             var config = ImmutablePageRankStreamConfig.builder()
                 .maxIterations(40)
@@ -134,7 +139,7 @@ class PageRankPregelTest {
                 .doubleProperties(PageRankPregel.PAGE_RANK)
                 .asNodeProperties();
 
-            var actual = graph.nodeProperties("expectedPersonalizedRank");
+            var actual = graph.nodeProperties(expectedPropertyKey);
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
                 assertThat(gdsResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
