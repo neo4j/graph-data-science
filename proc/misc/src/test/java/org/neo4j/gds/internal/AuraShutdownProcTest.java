@@ -123,6 +123,7 @@ public class AuraShutdownProcTest extends BaseProcTest {
         assertCypherResult(shutdownQuery, List.of(Map.of("done", true)));
 
         assertThat(tempDir.resolve("first"))
+            .isDirectoryContaining("glob:**/.userinfo")
             .isDirectoryContaining("glob:**/graph_info.csv")
             .isDirectoryContaining("glob:**/node-schema.csv")
             .isDirectoryContaining("glob:**/relationship-schema.csv")
@@ -132,6 +133,7 @@ public class AuraShutdownProcTest extends BaseProcTest {
             .isDirectoryContaining("regex:.+/relationships_REL1_\\d+.csv");
 
         assertThat(tempDir.resolve("second"))
+            .isDirectoryContaining("glob:**/.userinfo")
             .isDirectoryContaining("glob:**/graph_info.csv")
             .isDirectoryContaining("glob:**/node-schema.csv")
             .isDirectoryContaining("glob:**/relationship-schema.csv")

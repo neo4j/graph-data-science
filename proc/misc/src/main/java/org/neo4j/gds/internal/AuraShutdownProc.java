@@ -50,7 +50,7 @@ public class AuraShutdownProc extends BaseProc {
         var timer = ProgressTimer.start();
         try (timer) {
             var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-            var exceptions = GraphStoreCatalog.getAllGraphStores()
+            var failedExports = GraphStoreCatalog.getAllGraphStores()
                 .flatMap(store -> {
                     var createConfig = store.config();
                     var graphStore = store.graphStore();
@@ -59,6 +59,7 @@ public class AuraShutdownProc extends BaseProc {
                             .builder()
                             .includeMetaData(true)
                             .exportName(createConfig.graphName())
+                            .username(store.userName())
                             .build();
 
                         GraphStoreExporterUtil.runGraphStoreExportToCsv(
@@ -75,15 +76,15 @@ public class AuraShutdownProc extends BaseProc {
                 })
                 .collect(Collectors.toList());
 
-            if (!exceptions.isEmpty()) {
-                for (var exception : exceptions) {
+            if (!failedExports.isEmpty()) {
+                for (var failedExport : failedExports) {
                     log.warn(
                         formatWithLocale(
                             "GraphStore persistence failed on graph %s for user %s",
-                            exception.graphName(),
-                            exception.userName()
+                            failedExport.graphName(),
+                            failedExport.userName()
                         ),
-                        exception.exception()
+                        failedExport.exception()
                     );
                 }
                 return Stream.of(new ShutdownResult(false));
