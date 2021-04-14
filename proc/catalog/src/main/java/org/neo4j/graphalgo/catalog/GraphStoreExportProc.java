@@ -90,10 +90,6 @@ public class GraphStoreExportProc extends BaseProc {
         var exportConfig = GraphStoreToFileExporterConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
 
-        return Stream.of(runGraphStoreExportToCsv(graphName, exportConfig));
-    }
-
-    public FileExportResult runGraphStoreExportToCsv(String graphName, GraphStoreToFileExporterConfig exportConfig) {
         var graphStore = GraphStoreCatalog.get(username(), databaseId(), graphName).graphStore();
         var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
         var result = GraphStoreExporterUtil.runGraphStoreExportToCsv(
@@ -104,7 +100,7 @@ public class GraphStoreExportProc extends BaseProc {
             allocationTracker()
         );
 
-        return new FileExportResult(
+        return Stream.of(new FileExportResult(
             graphName,
             exportConfig.exportName(),
             graphStore.nodeCount(),
@@ -113,7 +109,7 @@ public class GraphStoreExportProc extends BaseProc {
             result.importedProperties().nodePropertyCount(),
             result.importedProperties().relationshipPropertyCount(),
             result.tookMillis()
-        );
+        ));
     }
 
     @Procedure(name = "gds.beta.graph.export.csv.estimate", mode = READ)

@@ -22,13 +22,9 @@ package org.neo4j.graphalgo.core.utils.export.file;
 import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.logging.Log;
 
 import java.io.IOException;
@@ -41,29 +37,21 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public final class GraphStoreExporterUtil {
 
     public static ExportToCsvResult runGraphStoreExportToCsv(
-//        String username,
-//        NamedDatabaseId databaseId,
-//        String graphName,
         GraphStore graphStore,
-
         Config neo4jConfig,
         GraphStoreToFileExporterConfig exportConfig,
-
         Log log,
         AllocationTracker allocationTracker
     ) {
         try {
             var exportPath = getExportPath(neo4jConfig, exportConfig);
-
-//            var graphStore = GraphStoreCatalog.get(username, databaseId, graphName).graphStore();
-
             var exporter = GraphStoreToFileExporter.csv(graphStore, exportConfig, exportPath);
 
             var start = System.nanoTime();
             var importedProperties = exporter.run(allocationTracker);
             var end = System.nanoTime();
 
-            return ExportToCsvResult.of(
+            return ImmutableExportToCsvResult.of(
                 importedProperties,
                 java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(end - start)
             );

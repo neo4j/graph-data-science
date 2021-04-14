@@ -21,6 +21,7 @@ package org.neo4j.gds.internal;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
@@ -32,6 +33,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -47,26 +49,40 @@ public class AuraShutdownProc extends BaseProc {
         var timer = ProgressTimer.start();
         try (timer) {
             var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-            GraphStoreCatalog
+            var exceptions = GraphStoreCatalog
                 .getGraphStores(username(), databaseId())
-                .forEach((createConfig, graphStore) -> {
-                    var config = ImmutableGraphStoreToFileExporterConfig
-                        .builder()
-                        .includeMetaData(true)
-                        .exportName(createConfig.graphName())
-                        .build();
+                .entrySet()
+                .stream()
+                .flatMap(entry -> {
+                    var createConfig = entry.getKey();
+                    var graphStore = entry.getValue();
+                    try {
+                        var config = ImmutableGraphStoreToFileExporterConfig
+                            .builder()
+                            .includeMetaData(true)
+                            .exportName(createConfig.graphName())
+                            .build();
 
-                    GraphStoreExporterUtil.runGraphStoreExportToCsv(
-                        graphStore,
-                        neo4jConfig,
-                        config,
-                        log,
-                        allocationTracker()
-                    );
-                });
-        } catch (Exception e) {
-            log.warn("GraphStore persistence failed", e);
-            return Stream.of(new ShutdownResult(false));
+                        GraphStoreExporterUtil.runGraphStoreExportToCsv(
+                            graphStore,
+                            neo4jConfig,
+                            config,
+                            log,
+                            allocationTracker()
+                        );
+                        return Stream.empty();
+                    } catch (Exception e) {
+                        return Stream.of(ImmutableFailedExport.of(e, createConfig.graphName()));
+                    }
+                })
+                .collect(Collectors.toList());
+
+            if (!exceptions.isEmpty()) {
+                for (var exception : exceptions) {
+                    log.warn("GraphStore persistence failed on graph " + exception.graphName(), exception.exception());
+                }
+                return Stream.of(new ShutdownResult(false));
+            }
         }
 
         var took = timer.getDuration();
@@ -89,8 +105,15 @@ public class AuraShutdownProc extends BaseProc {
     public static final class ShutdownResult {
         public final boolean done;
 
-        public ShutdownResult(boolean done) {
+        ShutdownResult(boolean done) {
             this.done = done;
         }
+    }
+
+    @ValueClass
+    interface FailedExport {
+        Exception exception();
+
+        String graphName();
     }
 }
