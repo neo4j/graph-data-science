@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.ml.nodemodels.metrics;
 
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,7 +37,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOf;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public interface MetricSpecification {
     SortedMap<String, Function<Long, Metric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(
@@ -47,6 +53,16 @@ public interface MetricSpecification {
     Pattern SINGLE_CLASS_METRIC_PATTERN = Pattern.compile(
         "(" + VALID_SINGLE_CLASS_METRICS + ")" +
         "\\([\\s]*CLASS[\\s]*=[\\s]*" + NUMBER_OR_STAR + "[\\s]*\\)");
+
+    static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder()
+            .rangePerNode("metrics", (nodeCount) -> {
+                var sizeOfRepresentativeMetric = sizeOf(new F1Score(1));
+                // class count is at least 2 and at most node count
+                return MemoryRange.of(2 * sizeOfRepresentativeMetric, nodeCount * sizeOfRepresentativeMetric);
+            })
+            .build();
+    }
 
     static String composeSpecification(String metricType, String classId) {
         return formatWithLocale("%s(class=%s)", metricType, classId);
@@ -85,7 +101,7 @@ public interface MetricSpecification {
     }
 
     static MetricSpecification parse(String userSpecification) {
-        var upperCaseSpecification = userSpecification.toUpperCase(Locale.ENGLISH);
+        var upperCaseSpecification = toUpperCaseWithLocale(userSpecification);
         var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
         if (!matcher.matches()) {
             try {

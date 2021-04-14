@@ -22,6 +22,8 @@ package org.neo4j.gds.ml.nodemodels.metrics;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -97,6 +99,13 @@ public class MetricSpecificationTest {
             );
     }
 
+    @Test
+    void shouldEstimateMemoryUsage() {
+        var nodeCount = 1000;
+        var actual = MetricSpecification.memoryEstimation().estimate(GraphDimensions.of(nodeCount), 1).memoryUsage();
+        var expected = MemoryRange.of(24 * 2, 24 * nodeCount);
+        assertThat(actual).isEqualTo(expected);
+    }
 
     private static List<String> invalidSingleClassSpecifications() {
         return List.of("F 1 ( class=2 3 4)", "F 1 ( class=3)", "f1(c las s = 01 0 30 2)", "JAMESBOND(class=0)", "F1(class=$)");
