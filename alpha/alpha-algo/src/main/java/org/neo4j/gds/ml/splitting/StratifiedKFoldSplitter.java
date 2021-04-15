@@ -23,6 +23,8 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.HashSet;
@@ -47,6 +49,33 @@ public class StratifiedKFoldSplitter {
     private final HugeLongArray targets;
     private final HugeLongArray ids;
     private final RandomDataGenerator random;
+
+    static MemoryEstimation memoryEstimation(int k) {
+        return MemoryEstimations.setup("", (dimensions) ->  {
+            var nodeCount = dimensions.nodeCount();
+            var builder = MemoryEstimations.builder(StratifiedKFoldSplitter.class);
+            int baseBucketSize = (int) nodeCount / k;
+            for (int fold = 0; fold < k; fold++) {
+                var testSize = fold < nodeCount % k ? baseBucketSize + 1 : baseBucketSize;
+                var test = HugeLongArray.memoryEstimation(testSize);
+                var train = HugeLongArray.memoryEstimation(nodeCount - testSize);
+                builder.add(
+                    "Fold " + fold, MemoryEstimations.builder()
+                        .add(
+                            MemoryEstimations.builder(HugeLongArray.class)
+                            .fixed("Test", test)
+                            .build()
+                        ).add(
+                            MemoryEstimations.builder(HugeLongArray.class)
+                                .fixed("Train", train)
+                                .build()
+                        ).build()
+                );
+            }
+            return builder.build();
+            }
+        );
+    }
 
     public StratifiedKFoldSplitter(int k, HugeLongArray ids, HugeLongArray targets, Optional<Long> randomSeed) {
         this.k = k;

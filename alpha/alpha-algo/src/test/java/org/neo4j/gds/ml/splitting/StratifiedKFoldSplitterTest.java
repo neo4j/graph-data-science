@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
@@ -106,6 +109,27 @@ class StratifiedKFoldSplitterTest {
                 });
         }
         assertThat(unionOfTestSets.size()).isEqualTo(nodeCount);
+    }
+
+    @Test
+    void minAndMaxEstimationsAreTheSame() {
+        var estimation = StratifiedKFoldSplitter.memoryEstimation(5)
+            .estimate(GraphDimensions.of(1000), 1)
+            .memoryUsage();
+        assertThat(estimation.min).isEqualTo(estimation.max);
+    }
+
+    @Test
+    void memoryEstimationShouldScaleWithNumberOfFolds() {
+        var dimensions = GraphDimensions.of(1000);
+        var memoryUsageForTenFolds = StratifiedKFoldSplitter.memoryEstimation(10)
+            .estimate(dimensions, 1)
+            .memoryUsage();
+        var memoryUsageForFiveFolds = StratifiedKFoldSplitter.memoryEstimation(5)
+            .estimate(dimensions, 1)
+            .memoryUsage();
+        assertThat(memoryUsageForTenFolds.min).isCloseTo(2 * memoryUsageForFiveFolds.min, Offset.offset(100L));
+        assertThat(memoryUsageForTenFolds.max).isCloseTo(2 * memoryUsageForFiveFolds.max, Offset.offset(100L));
     }
 
     private Map<Long, Integer> classCounts(HugeLongArray values) {
