@@ -42,7 +42,6 @@ public final class PageRankPregel implements PregelComputation<PageRankPregelCon
 
     static final String PAGE_RANK = "pagerank";
 
-    private final String seedProperty;
     private final boolean hasSourceNodes;
     private final LongSet sourceNodes;
     private final LongToDoubleFunction degreeFunction;
@@ -95,7 +94,6 @@ public final class PageRankPregel implements PregelComputation<PageRankPregelCon
         LongToDoubleFunction degreeFunction,
         double deltaCoefficient
     ) {
-        this.seedProperty = config.seedProperty();
         this.dampingFactor = config.dampingFactor();
         this.tolerance = config.tolerance();
         this.deltaCoefficient = deltaCoefficient;
@@ -117,10 +115,7 @@ public final class PageRankPregel implements PregelComputation<PageRankPregelCon
     }
 
     private double initialValue(InitContext<PageRankPregelConfig> context) {
-        var nodeId = context.nodeId();
-        if (seedProperty != null) {
-            return context.nodeProperties(seedProperty).doubleValue(nodeId);
-        } else if (!hasSourceNodes || sourceNodes.contains(nodeId)) {
+        if (!hasSourceNodes || sourceNodes.contains(context.nodeId())) {
             return alpha;
         }
         return 0;
@@ -128,9 +123,8 @@ public final class PageRankPregel implements PregelComputation<PageRankPregelCon
 
     @Override
     public void compute(ComputeContext<PageRankPregelConfig> context, Messages messages) {
-        double newRank = context.doubleNodeValue(PAGE_RANK);
-
-        double delta = newRank;
+        double rank = context.doubleNodeValue(PAGE_RANK);
+        double delta = rank;
 
         if (!context.isInitialSuperstep()) {
             double sum = 0;
@@ -139,7 +133,7 @@ public final class PageRankPregel implements PregelComputation<PageRankPregelCon
             }
 
             delta = dampingFactor * deltaCoefficient * sum;
-            context.setNodeValue(PAGE_RANK, newRank + delta);
+            context.setNodeValue(PAGE_RANK, rank + delta);
         }
 
         if (delta > tolerance || context.isInitialSuperstep()) {

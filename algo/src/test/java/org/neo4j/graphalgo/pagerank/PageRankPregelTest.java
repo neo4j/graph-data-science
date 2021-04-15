@@ -290,7 +290,7 @@ class PageRankPregelTest {
             configBuilder.mode(PageRankPregel.Mode.ARTICLE_RANK);
         }
 
-        return new PageRankPregelAlgorithmFactory()
+        return new PageRankPregelAlgorithmFactory<>()
             .build(
                 graph,
                 configBuilder.build(),

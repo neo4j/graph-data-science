@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.Partitioning;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.config.SourceNodesConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -37,7 +36,6 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface PageRankPregelConfig extends
     PregelConfig,
-    SeedConfig,
     ToleranceConfig,
     SourceNodesConfig
 {
