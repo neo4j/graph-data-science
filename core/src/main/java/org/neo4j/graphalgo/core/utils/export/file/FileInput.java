@@ -52,12 +52,14 @@ import java.util.stream.Collectors;
 public final class FileInput implements CompatInput {
 
     private final Path importPath;
+    private final String userName;
     private final GraphInfo graphInfo;
     private final NodeSchema nodeSchema;
     private final RelationshipSchema relationshipSchema;
 
     FileInput(Path importPath) {
         this.importPath = importPath;
+        this.userName = new UserInfoLoader(importPath).load();
         this.graphInfo = new GraphInfoLoader(importPath).load();
         this.nodeSchema = new NodeSchemaLoader(importPath).load();
         this.relationshipSchema = new RelationshipSchemaLoader(importPath).load();
@@ -96,6 +98,10 @@ public final class FileInput implements CompatInput {
     @Override
     public Input.Estimates calculateEstimates(CompatPropertySizeCalculator propertySizeCalculator) throws IOException {
         return null;
+    }
+
+    public String userName() {
+        return userName;
     }
 
     public GraphInfo graphInfo() {
