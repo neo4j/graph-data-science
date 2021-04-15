@@ -33,7 +33,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.isA;
 
 public class ArticleRankProcTest extends BaseProcTest {
@@ -118,7 +120,7 @@ public class ArticleRankProcTest extends BaseProcTest {
                 "computeMillis", greaterThan(-1L),
                 "writeMillis", greaterThan(-1L),
                 "postProcessingMillis", greaterThan(-1L),
-                "configuration", isA(Map.class),
+                "configuration", allOf(isA(Map.class), hasKey("writeProperty")),
                 "centralityDistribution", isA(Map.class),
                 "nodePropertiesWritten", 2L,
                 "didConverge", true,
@@ -142,7 +144,7 @@ public class ArticleRankProcTest extends BaseProcTest {
                 "computeMillis", greaterThan(-1L),
                 "mutateMillis", greaterThan(-1L),
                 "postProcessingMillis", greaterThan(-1L),
-                "configuration", isA(Map.class),
+                "configuration", allOf(isA(Map.class), hasKey("mutateProperty")),
                 "centralityDistribution", isA(Map.class),
                 "nodePropertiesWritten", 2L,
                 "didConverge", true,
