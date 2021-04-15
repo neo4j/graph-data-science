@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.pagerank;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.beta.pregel.Partitioning;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
@@ -70,6 +71,20 @@ public interface PageRankPregelConfig extends
         return relationshipWeightProperty() != null
             ? PageRankPregel.Mode.WEIGHTED
             : PageRankPregel.Mode.UNWEIGHTED;
+    }
+
+    @Override
+    @Value.Default
+    @Configuration.Ignore
+    default boolean isAsynchronous() {
+        return false;
+    }
+
+    @Override
+    @Value.Default
+    @Configuration.Ignore
+    default Partitioning partitioning() {
+        return Partitioning.RANGE;
     }
 
     static PageRankPregelConfig of(
