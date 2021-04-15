@@ -58,6 +58,14 @@ public interface PageRankPregelConfig extends
         return 0.85;
     }
 
+    @Value.Default
+    @Configuration.Ignore
+    default PageRankPregel.Mode mode() {
+        return relationshipWeightProperty() != null
+            ? PageRankPregel.Mode.WEIGHTED
+            : PageRankPregel.Mode.UNWEIGHTED;
+    }
+
     static PageRankPregelConfig of(
         String username,
         Optional<String> graphName,

@@ -25,16 +25,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.pregel.Pregel;
-import org.neo4j.graphalgo.beta.pregel.PregelResult;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
+import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
@@ -92,17 +90,16 @@ class PageRankPregelTest {
                 .tolerance(0)
                 .build();
 
-            var gdsResult = runOnGds(graph, config).result().asNodeProperties();
-            var pregelResult = runOnPregel(graph, config)
-                .nodeValues()
-                .doubleProperties(PageRankPregel.PAGE_RANK)
+            var actualGds = runOnGds(graph, config).result().asNodeProperties();
+            var actualPregel = runOnPregel(graph, config)
+                .scores()
                 .asNodeProperties();
 
-            var actual = graph.nodeProperties("expectedRank");
+            var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(gdsResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
-                assertThat(pregelResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
+                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
+                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
             }
         }
 
@@ -118,7 +115,7 @@ class PageRankPregelTest {
             var pregelResult = runOnPregel(graph, config);
 
             // initial iteration is counted extra in Pregel
-            assertThat(pregelResult.ranIterations()).isEqualTo(expectedIterations);
+            assertThat(pregelResult.iterations()).isEqualTo(expectedIterations);
         }
 
         @ParameterizedTest
@@ -136,17 +133,16 @@ class PageRankPregelTest {
                 .concurrency(1)
                 .build();
 
-            var gdsResult = runOnGds(graph, config, sourceNodeIds).result().asNodeProperties();
-            var pregelResult = runOnPregel(graph, config, sourceNodeIds, false)
-                .nodeValues()
-                .doubleProperties(PageRankPregel.PAGE_RANK)
+            var actualGds = runOnGds(graph, config, sourceNodeIds).result().asNodeProperties();
+            var actualPregel = runOnPregel(graph, config, sourceNodeIds, false)
+                .scores()
                 .asNodeProperties();
 
-            var actual = graph.nodeProperties(expectedPropertyKey);
+            var expected = graph.nodeProperties(expectedPropertyKey);
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(gdsResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
-                assertThat(pregelResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
+                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
+                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
             }
         }
     }
@@ -187,7 +183,7 @@ class PageRankPregelTest {
             ", (k)-[:TYPE { weight: 1.0,   unnormalizedWeight: 10.0 }]->(e)";
 
         @Inject
-        private TestGraph graph;
+        private Graph graph;
 
         @ParameterizedTest
         @ValueSource(strings = {"weight", "unnormalizedWeight"})
@@ -199,17 +195,16 @@ class PageRankPregelTest {
                 .concurrency(1)
                 .build();
 
-            var gdsResult = runOnGds(graph, config).result().asNodeProperties();
-            var pregelResult = runOnPregel(graph, config)
-                .nodeValues()
-                .doubleProperties(PageRankPregel.PAGE_RANK)
+            var actualGds = runOnGds(graph, config).result().asNodeProperties();
+            var actualPregel = runOnPregel(graph, config)
+                .scores()
                 .asNodeProperties();
 
-            var actual = graph.nodeProperties("expectedRank");
+            var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(gdsResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
-                assertThat(pregelResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-2));
+                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
+                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
             }
         }
     }
@@ -243,9 +238,6 @@ class PageRankPregelTest {
         @Inject
         private Graph graph;
 
-        @Inject
-        private IdFunction idFunction;
-
         @Test
         void articleRank() {
             var config = ImmutablePageRankStreamConfig
@@ -255,20 +247,16 @@ class PageRankPregelTest {
                 .concurrency(1)
                 .build();
 
-            var pregelResult = runOnPregel(graph, config, new long[0], true)
-                .nodeValues()
-                .doubleProperties(PageRankPregel.PAGE_RANK)
+            var actual = runOnPregel(graph, config, new long[0], true)
+                .scores()
                 .asNodeProperties();
 
-            var actual = graph.nodeProperties("expectedRank");
-
-            graph.forEachNode(nodeId -> {System.out.println(pregelResult.doubleValue(nodeId)); return true;});
+            var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(pregelResult.doubleValue(nodeId)).isEqualTo(actual.doubleValue(nodeId), within(1e-6));
+                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-6));
             }
         }
-
     }
 
     PageRank runOnGds(Graph graph, PageRankBaseConfig config) {
@@ -284,40 +272,32 @@ class PageRankPregelTest {
             .compute();
     }
 
-    PregelResult runOnPregel(Graph graph, PageRankBaseConfig config) {
+    PageRankPregelResult runOnPregel(Graph graph, PageRankBaseConfig config) {
         return runOnPregel(graph, config, new long[0], false);
     }
 
-    PregelResult runOnPregel(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds, boolean articleRank) {
-        var pregelConfig = ImmutablePageRankPregelConfig.builder()
+    PageRankPregelResult runOnPregel(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds, boolean articleRank) {
+        var configBuilder = ImmutablePageRankPregelConfig.builder()
             .maxIterations(config.maxIterations() + 1)
             .dampingFactor(config.dampingFactor())
             .concurrency(config.concurrency())
             .relationshipWeightProperty(config.relationshipWeightProperty())
             .sourceNodeIds(LongStream.of(sourceNodeIds))
             .tolerance(config.tolerance())
-            .isAsynchronous(false)
-            .build();
-
-        PageRankPregel computation;
+            .isAsynchronous(false);
 
         if (articleRank) {
-            computation = PageRankPregel.articleRank(graph, pregelConfig);
-        } else if (config.relationshipWeightProperty() != null) {
-            computation = PageRankPregel.weighted(graph, pregelConfig, Pools.DEFAULT, AllocationTracker.empty());
-        } else {
-            computation = PageRankPregel.unweighted(graph, pregelConfig);
+            configBuilder.mode(PageRankPregel.Mode.ARTICLE_RANK);
         }
 
-
-        var pregelJob = Pregel.create(
-            graph,
-            pregelConfig,
-            computation,
-            Pools.DEFAULT,
-            AllocationTracker.empty()
-        );
-
-        return pregelJob.run();
+        return new PageRankPregelAlgorithmFactory()
+            .build(
+                graph,
+                configBuilder.build(),
+                AllocationTracker.empty(),
+                NullLog.getInstance(),
+                EmptyProgressEventTracker.INSTANCE
+            )
+            .compute();
     }
 }
