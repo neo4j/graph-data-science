@@ -64,7 +64,11 @@ Trained models may then be used to predict the probability of a relationship bet
 A previously trained model can be applied by invoking the `gds.alpha.ml.linkPrediction.predict.mutate` mode.
 This will retrieve the model by name from the model catalog.
 The model will thereby be used to predict the probability of relationships between all node pairs in the graph that are not connected.
-To limit the size of output, configurations for two parameters are required; `topN` retains the most probable predictions and `threshold` retains predictions whose probability is above the threshold.
+There are two mandatory configuration parameters, which limit the size of the output:
+
+* `topN` retains the most probable predictions.
+* `threshold` retains predictions whose probability is above the threshold.
+
 
 [[algorithms-ml-train-test-splitting]]
 === Train/Test Splitting
