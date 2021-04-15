@@ -94,8 +94,8 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankPregelMutateConfig
     public String expectedMutatedGraph() {
         return
             "  (a {score: 0.243013d})" +
-            ", (b {score: 1.847962d})" +
-            ", (c {score: 1.712861d})" +
+            ", (b {score: 1.838660d})" +
+            ", (c {score: 1.697745d})" +
             ", (d {score: 0.218854d})" +
             ", (e {score: 0.243013d})" +
             ", (f {score: 0.218854d})" +

@@ -122,7 +122,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankPregelWriteConfig> 
             .yields("ranIterations");
 
         runQueryWithRowConsumer(query,
-            row -> assertEquals(5L, (long) row.getNumber("ranIterations"))
+            row -> assertEquals(4L, (long) row.getNumber("ranIterations"))
         );
 
         query = builder
@@ -130,7 +130,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankPregelWriteConfig> 
             .yields("ranIterations");
 
         runQueryWithRowConsumer(query,
-            row -> assertEquals(5L, (long) row.getNumber("ranIterations"))
+            row -> assertEquals(4L, (long) row.getNumber("ranIterations"))
         );
     }
 
