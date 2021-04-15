@@ -19,6 +19,7 @@
  */
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
@@ -37,11 +38,11 @@ public class ConfigurationHasNoFactoryMethod implements PregelComputation<Config
     }
 
     @Override
-    public void compute(ComputeContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
+    public void compute(ComputeContext<ConfigurationHasNoFactoryMethod.ComputationConfig> context, final long nodeId, Queue<Double> messages) {
 
     }
 
-    interface ComputationConfig extends PregelConfig {
+    interface ComputationConfig extends PregelProcedureConfig {
 
     }
 }

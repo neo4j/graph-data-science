@@ -78,7 +78,7 @@ class PregelProcessorTest {
             "BaseClassIsNotAClass",
             e(
                 "The annotated Pregel computation must be a class.",
-                33,
+                34,
                 8
             )
         );
@@ -109,6 +109,18 @@ class PregelProcessorTest {
     }
 
     @Test
+    void baseClassHasNoPregelProcedureConfig() {
+        runNegativeTest(
+            "BaseClassHasNoPregelProcedureConfig",
+            e(
+                "The annotated Pregel computation must have a configuration type which is a subtype of PregelProcedureConfiguration.",
+                33,
+                8
+            )
+        );
+    }
+
+    @Test
     void configurationMustHaveStaticFactoryMethod() {
         runNegativeTest(
             "ConfigurationHasNoFactoryMethod",
@@ -123,7 +135,7 @@ class PregelProcessorTest {
                 "org.neo4j.graphalgo.core.CypherMapWrapper userConfig" +
                 ")' " +
                 "in ConfigurationHasNoFactoryMethod.ComputationConfig.",
-                32,
+                33,
                 8
             )
         );

@@ -52,6 +52,8 @@ final class PregelValidation {
 
     // Represents the PregelComputation interface
     private final TypeMirror pregelComputation;
+    // Represents the PregelProcedureConfig interface
+    private final TypeMirror pregelProcedureConfig;
 
     PregelValidation(Messager messager, Elements elementUtils, Types typeUtils) {
         this.messager = messager;
@@ -60,12 +62,16 @@ final class PregelValidation {
         this.pregelComputation = MoreTypes.asDeclared(
             typeUtils.erasure(elementUtils.getTypeElement(PregelComputation.class.getName()).asType())
         );
+        this.pregelProcedureConfig = MoreTypes.asDeclared(elementUtils
+            .getTypeElement(PregelProcedureConfig.class.getName())
+            .asType());
     }
 
     Optional<Spec> validate(Element pregelElement) {
         if (
             !isClass(pregelElement) ||
             !isPregelComputation(pregelElement) ||
+            !isPregelProcedureConfig(pregelElement) ||
             !hasEmptyConstructor(pregelElement) ||
             !configHasFactoryMethod(pregelElement)
         ) {
@@ -124,6 +130,22 @@ final class PregelValidation {
             );
         }
         return isPregelComputation;
+    }
+
+    private boolean isPregelProcedureConfig(Element pregelElement) {
+        var config = config(pregelElement);
+
+        boolean isPregelProcedureConfig = typeUtils.isSubtype(config, pregelProcedureConfig);
+
+        if (!isPregelProcedureConfig) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "The annotated Pregel computation must have a configuration type which is a subtype of PregelProcedureConfiguration.",
+                pregelElement
+            );
+        }
+
+        return isPregelProcedureConfig;
     }
 
     private boolean hasEmptyConstructor(Element pregelElement) {

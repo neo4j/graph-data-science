@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.pregel.cc;
 
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
@@ -30,9 +31,9 @@ import java.util.Queue;
 
 @PregelProcedure(name = "gds.pregel.test", modes = {GDSMode.STREAM})
 @Description("Test computation description")
-public interface BaseClassIsNotAClass extends PregelComputation<PregelConfig> {
+public interface BaseClassIsNotAClass extends PregelComputation<PregelProcedureConfig> {
     @Override
-    default void compute(ComputeContext<PregelConfig> context, final long nodeId, Queue<Double> messages) {
+    default void compute(ComputeContext<PregelProcedureConfig> context, final long nodeId, Queue<Double> messages) {
 
     }
 }
