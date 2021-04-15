@@ -68,17 +68,13 @@ public class ArticleRankMutateProc extends MutatePropertyProc<PageRankPregelAlgo
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ImmutablePageRankPregelMutateConfig
-            .builder()
-            .from(PageRankPregelMutateConfig.of(username, graphName, maybeImplicitCreate, config))
-            .mode(PageRankPregelConfig.Mode.ARTICLE_RANK)
-            .build();
+        return PageRankPregelMutateConfig.of(username, graphName, maybeImplicitCreate, config);
 
     }
 
     @Override
     protected AlgorithmFactory<PageRankPregelAlgorithm, PageRankPregelMutateConfig> algorithmFactory() {
-        return new PageRankPregelAlgorithmFactory<>();
+        return new PageRankPregelAlgorithmFactory<>(PageRankPregelAlgorithmFactory.Mode.ARTICLE_RANK);
     }
 
     @Override

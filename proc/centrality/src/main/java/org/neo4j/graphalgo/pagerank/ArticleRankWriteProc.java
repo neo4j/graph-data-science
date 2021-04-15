@@ -77,7 +77,7 @@ public class ArticleRankWriteProc extends WriteProc<PageRankPregelAlgorithm, Pag
 
     @Override
     protected AlgorithmFactory<PageRankPregelAlgorithm, PageRankPregelWriteConfig> algorithmFactory() {
-        return new PageRankPregelAlgorithmFactory<>();
+        return new PageRankPregelAlgorithmFactory<>(PageRankPregelAlgorithmFactory.Mode.ARTICLE_RANK);
     }
 
     @Override
@@ -93,10 +93,6 @@ public class ArticleRankWriteProc extends WriteProc<PageRankPregelAlgorithm, Pag
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ImmutablePageRankPregelWriteConfig
-            .builder()
-            .from(PageRankPregelWriteConfig.of(username, graphName, maybeImplicitCreate, config))
-            .mode(PageRankPregelConfig.Mode.ARTICLE_RANK)
-            .build();
+        return PageRankPregelWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 }

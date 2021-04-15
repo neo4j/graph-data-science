@@ -81,16 +81,12 @@ public class ArticleRankStreamProc extends StreamProc<PageRankPregelAlgorithm, P
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ImmutablePageRankPregelStreamConfig
-            .builder()
-            .from(PageRankPregelStreamConfig.of(username, graphName, maybeImplicitCreate, config))
-            .mode(PageRankPregelConfig.Mode.ARTICLE_RANK)
-            .build();
+        return PageRankPregelStreamConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
     protected AlgorithmFactory<PageRankPregelAlgorithm, PageRankPregelStreamConfig> algorithmFactory() {
-        return new PageRankPregelAlgorithmFactory<>();
+        return new PageRankPregelAlgorithmFactory<>(PageRankPregelAlgorithmFactory.Mode.ARTICLE_RANK);
     }
 
     @Override

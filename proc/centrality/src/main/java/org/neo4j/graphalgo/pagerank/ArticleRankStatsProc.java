@@ -83,17 +83,13 @@ public class ArticleRankStatsProc extends StatsProc<PageRankPregelAlgorithm, Pag
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return ImmutablePageRankPregelStatsConfig
-            .builder()
-            .from(PageRankPregelStatsConfig.of(username, graphName, maybeImplicitCreate, config))
-            .mode(PageRankPregelConfig.Mode.ARTICLE_RANK)
-            .build();
+        return PageRankPregelStatsConfig.of(username, graphName, maybeImplicitCreate, config);
 
     }
 
     @Override
     protected AlgorithmFactory<PageRankPregelAlgorithm, PageRankPregelStatsConfig> algorithmFactory() {
-        return new PageRankPregelAlgorithmFactory<>();
+        return new PageRankPregelAlgorithmFactory<>(PageRankPregelAlgorithmFactory.Mode.ARTICLE_RANK);
     }
 
     @SuppressWarnings("unused")
