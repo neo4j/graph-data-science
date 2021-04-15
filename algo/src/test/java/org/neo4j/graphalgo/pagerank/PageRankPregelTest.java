@@ -48,7 +48,7 @@ class PageRankPregelTest {
     private static final double SCORE_PRECISION = 1E-5;
 
     @Nested
-    class WikiGraph {
+    class Unweighted {
 
         // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
         @GdlGraph
@@ -152,7 +152,7 @@ class PageRankPregelTest {
     }
 
     @Nested
-    class WeightedWikiTest {
+    class Weighted {
         // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
         @GdlGraph
         private static final String DB_CYPHER =
@@ -214,30 +214,30 @@ class PageRankPregelTest {
     }
 
     @Nested
-    class ArticleRankGraph {
+    class ArticleRank {
 
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Label1 { expectedRank: 0.19991328 })" +
-            ", (b:Label1 { expectedRank: 0.41704274 })" +
-            ", (c:Label1 { expectedRank: 0.31791456 })" +
-            ", (d:Label1 { expectedRank: 0.18921376 })" +
-            ", (e:Label1 { expectedRank: 0.19991328 })" +
-            ", (f:Label1 { expectedRank: 0.18921376 })" +
-            ", (g:Label1 { expectedRank: 0.15 })" +
-            ", (h:Label1 { expectedRank: 0.15 })" +
-            ", (i:Label1 { expectedRank: 0.15 })" +
-            ", (j:Label1 { expectedRank: 0.15 })" +
-            ", (b)-[:TYPE1]->(c)" +
-            ", (c)-[:TYPE1]->(b)" +
-            ", (d)-[:TYPE1]->(a)" +
-            ", (d)-[:TYPE1]->(b)" +
-            ", (e)-[:TYPE1]->(b)" +
-            ", (e)-[:TYPE1]->(d)" +
-            ", (e)-[:TYPE1]->(f)" +
-            ", (f)-[:TYPE1]->(b)" +
-            ", (f)-[:TYPE1]->(e)";
+            "  (a:Node { expectedRank: 0.19991328 })" +
+            ", (b:Node { expectedRank: 0.41704274 })" +
+            ", (c:Node { expectedRank: 0.31791456 })" +
+            ", (d:Node { expectedRank: 0.18921376 })" +
+            ", (e:Node { expectedRank: 0.19991328 })" +
+            ", (f:Node { expectedRank: 0.18921376 })" +
+            ", (g:Node { expectedRank: 0.15 })" +
+            ", (h:Node { expectedRank: 0.15 })" +
+            ", (i:Node { expectedRank: 0.15 })" +
+            ", (j:Node { expectedRank: 0.15 })" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(b)" +
+            ", (d)-[:TYPE]->(a)" +
+            ", (d)-[:TYPE]->(b)" +
+            ", (e)-[:TYPE]->(b)" +
+            ", (e)-[:TYPE]->(d)" +
+            ", (e)-[:TYPE]->(f)" +
+            ", (f)-[:TYPE]->(b)" +
+            ", (f)-[:TYPE]->(e)";
 
         @Inject
         private Graph graph;
@@ -264,7 +264,7 @@ class PageRankPregelTest {
     }
 
     @Nested
-    class EigenVectorGraph {
+    class Normalization {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
@@ -278,15 +278,15 @@ class PageRankPregelTest {
             ", (h:Node { expectedL1: 0.02875, expectedL2: 0.05616, expectedMean: -0.21052 })" +
             ", (i:Node { expectedL1: 0.02875, expectedL2: 0.05616, expectedMean: -0.21052 })" +
             ", (j:Node { expectedL1: 0.02875, expectedL2: 0.05616, expectedMean: -0.21052 })" +
-            ",  (b)-[:TYPE]->(c)" +
-            ",  (c)-[:TYPE]->(b)" +
-            ",  (d)-[:TYPE]->(a)" +
-            ",  (d)-[:TYPE]->(b)" +
-            ",  (e)-[:TYPE]->(b)" +
-            ",  (e)-[:TYPE]->(d)" +
-            ",  (e)-[:TYPE]->(f)" +
-            ",  (f)-[:TYPE]->(b)" +
-            ",  (f)-[:TYPE]->(e)";
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(b)" +
+            ", (d)-[:TYPE]->(a)" +
+            ", (d)-[:TYPE]->(b)" +
+            ", (e)-[:TYPE]->(b)" +
+            ", (e)-[:TYPE]->(d)" +
+            ", (e)-[:TYPE]->(f)" +
+            ", (f)-[:TYPE]->(b)" +
+            ", (f)-[:TYPE]->(e)";
 
         @Inject
         private Graph graph;
