@@ -17,26 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.catalog;
+package org.neo4j.graphalgo.core.utils.export.file;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.utils.export.file.csv.UserInfoVisitor;
 
-class GraphStoreImportProcTest extends GraphStorePersistProcTest {
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-    @BeforeEach
-    void setup() throws Exception {
-        super.setup();
+public class UserInfoLoader {
 
-        registerProcedures(GraphStoreImportProc.class);
+    private final Path userInfoFilePath;
+
+    UserInfoLoader(Path importPath) {
+        this.userInfoFilePath = importPath.resolve(UserInfoVisitor.USER_INFO_FILE_NAME);
     }
 
-    @Test
-    void shouldReadPersistedGraphStores() {
-        runQuery("CALL gds.graphs.persist({ writeConcurrency: 1 }) YIELD *");
-
-        var loadQuery = "CALL gds.graphs.load({ concurrency: 1 })";
-        runQuery(loadQuery);
+    String load() {
+        try {
+            return Files.readString(userInfoFilePath, StandardCharsets.UTF_8).trim();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
-
 }
