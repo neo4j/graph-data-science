@@ -72,6 +72,19 @@ public interface PageRankPregelConfig extends
             : PageRankPregel.Mode.UNWEIGHTED;
     }
 
+    @Value.Default
+    @Configuration.Ignore
+    @Override
+    default String writeProperty() {
+        return PregelConfig.super.writeProperty();
+    }
+
+    @Value.Default
+    @Configuration.Ignore
+    default String mutateProperty() {
+        return PregelConfig.super.mutateProperty();
+    }
+
     static PageRankPregelConfig of(
         String username,
         Optional<String> graphName,

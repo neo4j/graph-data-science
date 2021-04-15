@@ -21,10 +21,12 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
@@ -50,6 +52,8 @@ public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig>
 
     @Override
     public MemoryEstimation memoryEstimation(PageRankPregelConfig configuration) {
-        return MemoryEstimations.empty();
+        return Pregel.memoryEstimation(new PregelSchema.Builder()
+            .add(PageRankPregel.PAGE_RANK, ValueType.DOUBLE)
+            .build(), false, false);
     }
 }
