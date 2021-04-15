@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.pregel.cc;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -32,7 +32,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ConnectedComponentsConfig extends PregelConfig, SeedConfig {
+public interface ConnectedComponentsConfig extends PregelProcedureConfig, SeedConfig {
 
     @Value.Default
     @Override

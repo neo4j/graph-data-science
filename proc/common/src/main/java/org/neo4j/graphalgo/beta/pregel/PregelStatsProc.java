@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.StatsProc;
 
 public abstract class PregelStatsProc<
     ALGO extends Algorithm<ALGO, PregelResult>,
-    CONFIG extends PregelConfig>
+    CONFIG extends PregelProcedureConfig>
     extends StatsProc<ALGO, PregelResult, PregelStatsResult, CONFIG> {
 
 }

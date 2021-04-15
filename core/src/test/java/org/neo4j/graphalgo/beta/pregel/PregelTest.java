@@ -372,7 +372,7 @@ class PregelTest {
 
     @ValueClass
     @SuppressWarnings("immutables:subtype")
-    interface HackerManConfig extends PregelConfig {
+    interface HackerManConfig extends PregelProcedureConfig {
         @Override
         default void validateConcurrency() {
             // haha, h4ck3rm4n, so smart, much wow

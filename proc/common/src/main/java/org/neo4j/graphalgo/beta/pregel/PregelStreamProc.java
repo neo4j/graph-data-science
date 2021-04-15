@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 public abstract class PregelStreamProc<
     ALGO extends Algorithm<ALGO, PregelResult>,
-    CONFIG extends PregelConfig>
+    CONFIG extends PregelProcedureConfig>
     extends StreamProc<ALGO, PregelResult, PregelStreamResult, CONFIG> {
 
     @Override

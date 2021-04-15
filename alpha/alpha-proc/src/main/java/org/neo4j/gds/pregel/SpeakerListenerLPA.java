@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
@@ -149,7 +149,7 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     @ValueClass
     @Configuration
     @SuppressWarnings("immutables:subtype")
-    public interface SpeakerListenerLPAConfig extends PregelConfig {
+    public interface SpeakerListenerLPAConfig extends PregelProcedureConfig {
 
         @Value.Default
         default double minAssociationStrength() {

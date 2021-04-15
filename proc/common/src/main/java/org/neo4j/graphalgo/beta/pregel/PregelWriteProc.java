@@ -27,7 +27,7 @@ import java.util.List;
 
 public abstract class PregelWriteProc<
     ALGO extends Algorithm<ALGO, PregelResult>,
-    CONFIG extends PregelConfig>
+    CONFIG extends PregelProcedureConfig>
     extends WriteProc<ALGO, PregelResult, PregelWriteResult, CONFIG> {
 
     @Override

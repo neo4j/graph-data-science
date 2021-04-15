@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.beta.pregel.PregelWriteProc;
 import org.neo4j.graphalgo.beta.pregel.PregelWriteResult;
@@ -46,7 +46,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
-public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgorithm, PregelConfig> {
+public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgorithm, PregelProcedureConfig> {
     @Procedure(
             name = "gds.pregel.test.write",
             mode = Mode.WRITE
@@ -69,29 +69,29 @@ public final class ComputationWriteProc extends PregelWriteProc<ComputationAlgor
 
     @Override
     protected AbstractResultBuilder<PregelWriteResult> resultBuilder(
-            AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelConfig> computeResult) {
+            AlgoBaseProc.ComputationResult<ComputationAlgorithm, PregelResult, PregelProcedureConfig> computeResult) {
         var ranIterations = computeResult.result().ranIterations();
         var didConverge = computeResult.result().didConverge();
         return new PregelWriteResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
     }
 
     @Override
-    protected PregelConfig newConfig(String username, Optional<String> graphName,
+    protected PregelProcedureConfig newConfig(String username, Optional<String> graphName,
             Optional<GraphCreateConfig> maybeImplicitCreate, CypherMapWrapper config) {
-        return PregelConfig.of(username, graphName, maybeImplicitCreate, config);
+        return PregelProcedureConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<ComputationAlgorithm, PregelConfig> algorithmFactory() {
-        return new AlgorithmFactory<ComputationAlgorithm, PregelConfig>() {
+    protected AlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
+        return new AlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
             @Override
-            public ComputationAlgorithm build(Graph graph, PregelConfig configuration,
+            public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,
                     AllocationTracker tracker, Log log, ProgressEventTracker eventTracker) {
                 return new ComputationAlgorithm(graph, configuration, tracker, log);
             }
 
             @Override
-            public MemoryEstimation memoryEstimation(PregelConfig configuration) {
+            public MemoryEstimation memoryEstimation(PregelProcedureConfig configuration) {
                 var computation = new Computation();
                 return Pregel.memoryEstimation(computation.schema(configuration), computation.reducer().isPresent(), configuration.isAsynchronous());
             }

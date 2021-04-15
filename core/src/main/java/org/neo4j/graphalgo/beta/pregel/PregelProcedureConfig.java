@@ -22,11 +22,9 @@ package org.neo4j.graphalgo.beta.pregel;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.IterationsConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.graphalgo.config.MutatePropertyConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
@@ -34,36 +32,34 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface PregelConfig extends
-    AlgoBaseConfig,
-    RelationshipWeightConfig,
-    IterationsConfig,
-    ConcurrencyConfig {
+public interface PregelProcedureConfig extends
+    PregelConfig,
+    WritePropertyConfig,
+    MutatePropertyConfig {
 
     @Value.Default
-    default boolean isAsynchronous() {
-        return false;
+    default String writeProperty() {
+        return "";
     }
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.graphalgo.beta.pregel.Partitioning#parse")
-    @Configuration.ToMapValue("org.neo4j.graphalgo.beta.pregel.Partitioning#toString")
-    default Partitioning partitioning() {
-        return Partitioning.RANGE;
+    default String mutateProperty() {
+        return "";
     }
 
-    @Value.Derived
-    @Configuration.Ignore
-    default boolean useForkJoin() {
-        return partitioning() == Partitioning.AUTO;
+    @Value.Default
+    @Configuration.Key(WRITE_CONCURRENCY_KEY)
+    @Override
+    default int writeConcurrency() {
+        return concurrency();
     }
 
-    static PregelConfig of(
+    static PregelProcedureConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new PregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new PregelProcedureConfigImpl(graphName, maybeImplicitCreate, username, userInput);
     }
 }

@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
@@ -87,7 +87,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     @ValueClass
     @Configuration("SingleSourceShortestPathPregelConfigImpl")
     @SuppressWarnings("immutables:subtype")
-    interface SingleSourceShortestPathPregelConfig extends PregelConfig {
+    interface SingleSourceShortestPathPregelConfig extends PregelProcedureConfig {
         long startNode();
 
         static SingleSourceShortestPathPregelConfig of(

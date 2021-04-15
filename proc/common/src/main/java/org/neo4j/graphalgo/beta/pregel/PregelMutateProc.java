@@ -27,7 +27,7 @@ import java.util.List;
 
 public abstract class PregelMutateProc<
     ALGO extends Algorithm<ALGO, PregelResult>,
-    CONFIG extends PregelConfig>
+    CONFIG extends PregelProcedureConfig>
     extends MutatePropertyProc<ALGO, PregelResult, PregelMutateResult, CONFIG> {
 
     @Override

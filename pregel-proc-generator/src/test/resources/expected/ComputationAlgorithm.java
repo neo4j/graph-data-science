@@ -23,7 +23,7 @@ import javax.annotation.processing.Generated;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -31,9 +31,9 @@ import org.neo4j.logging.Log;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
 public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, PregelResult> {
-    private final Pregel<PregelConfig> pregelJob;
+    private final Pregel<PregelProcedureConfig> pregelJob;
 
-    ComputationAlgorithm(Graph graph, PregelConfig configuration, AllocationTracker tracker,
+    ComputationAlgorithm(Graph graph, PregelProcedureConfig configuration, AllocationTracker tracker,
             Log log) {
         this.pregelJob = Pregel.create(graph, configuration, new Computation(), Pools.DEFAULT,tracker);
     }

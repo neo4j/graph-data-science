@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.beta.pregel.cc;
 
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
@@ -32,15 +32,15 @@ import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
     description = "Test computation description",
     modes = {GDSMode.STREAM, GDSMode.WRITE, GDSMode.MUTATE, GDSMode.STATS}
 )
-public class Computation implements PregelComputation<PregelConfig> {
+public class Computation implements PregelComputation<PregelProcedureConfig> {
 
     @Override
-    public PregelSchema schema(PregelConfig config) {
+    public PregelSchema schema(PregelProcedureConfig config) {
         return null;
     }
 
     @Override
-    public void compute(ComputeContext<PregelConfig> context, Messages messages) {
+    public void compute(ComputeContext<PregelProcedureConfig> context, Messages messages) {
 
     }
 }

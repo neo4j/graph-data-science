@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.Reducer;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
@@ -102,7 +102,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     @ValueClass
     @Configuration("PageRankPregelConfigImpl")
     @SuppressWarnings("immutables:subtype")
-    public interface PageRankPregelConfig extends PregelConfig, SeedConfig {
+    public interface PageRankPregelConfig extends PregelProcedureConfig, SeedConfig {
         @Value.Default
         default double dampingFactor() {
             return 0.85;

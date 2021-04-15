@@ -21,9 +21,7 @@ package org.neo4j.graphalgo.beta.pregel.lp;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.beta.pregel.ImmutablePregelConfig;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -67,7 +65,7 @@ class LabelPropagationPregelAlgoTest {
     void runLP() {
         int maxIterations = 10;
 
-        var config = ImmutablePregelConfig.builder()
+        var config = ImmutableLabelPropagationPregelConfig.builder()
             .maxIterations(maxIterations)
             .build();
 
@@ -97,7 +95,7 @@ class LabelPropagationPregelAlgoTest {
     void runWeightedLP() {
         int maxIterations = 10;
 
-        PregelConfig config = ImmutablePregelConfig.builder()
+        var config = ImmutableLabelPropagationPregelConfig.builder()
             .maxIterations(maxIterations)
             .relationshipWeightProperty("weight")
             .build();

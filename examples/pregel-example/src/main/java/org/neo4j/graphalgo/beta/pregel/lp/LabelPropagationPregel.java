@@ -19,38 +19,44 @@
  */
 package org.neo4j.graphalgo.beta.pregel.lp;
 
+import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Basic implementation potentially suffering from oscillating vertex states due to synchronous computation.
  */
 @PregelProcedure(name = "example.pregel.lp", modes = {GDSMode.STREAM})
-public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
+public class LabelPropagationPregel implements PregelComputation<LabelPropagationPregel.LabelPropagationPregelConfig> {
 
     public static final String LABEL_KEY = "label";
 
     @Override
-    public PregelSchema schema(PregelConfig config) {
+    public PregelSchema schema(LabelPropagationPregel.LabelPropagationPregelConfig config) {
         return new PregelSchema.Builder().add(LABEL_KEY, ValueType.LONG).build();
     }
 
     @Override
-    public void init(InitContext<PregelConfig> context) {
+    public void init(InitContext<LabelPropagationPregel.LabelPropagationPregelConfig> context) {
         context.setNodeValue(LABEL_KEY, context.nodeId());
     }
 
     @Override
-    public void compute(ComputeContext<PregelConfig> context, Messages messages) {
+    public void compute(ComputeContext<LabelPropagationPregel.LabelPropagationPregelConfig> context, Messages messages) {
         if (context.isInitialSuperstep()) {
             context.sendToNeighbors(context.nodeId());
         } else {
@@ -98,5 +104,20 @@ public class LabelPropagationPregel implements PregelComputation<PregelConfig> {
             }
         }
         context.voteToHalt();
+    }
+
+    @ValueClass
+    @Configuration("LabelPropagationPregelConfigImpl")
+    @SuppressWarnings("immutables:subtype")
+    public interface LabelPropagationPregelConfig extends PregelProcedureConfig, SeedConfig {
+
+        static LabelPropagationPregelConfig of(
+            String username,
+            Optional<String> graphName,
+            Optional<GraphCreateConfig> maybeImplicitCreate,
+            CypherMapWrapper userInput
+        ) {
+            return new LabelPropagationPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        }
     }
 }
