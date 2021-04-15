@@ -43,6 +43,8 @@ import static org.assertj.core.api.Assertions.within;
 @GdlExtension
 class PageRankPregelTest {
 
+    private static final double SCORE_PRECISION = 1E-5;
+
     @Nested
     class WikiGraph {
 
@@ -51,8 +53,8 @@ class PageRankPregelTest {
         private static final String DB_CYPHER =
             "CREATE" +
             "  (a:Node { expectedRank: 0.3040965, expectedPersonalizedRank1: 0.17053529152163158 , expectedPersonalizedRank2: 0.017454997930076894 })" +
-            ", (b:Node { expectedRank: 3.5658695, expectedPersonalizedRank1: 0.3216114449911402  , expectedPersonalizedRank2: 0.813246950528992    })" +
-            ", (c:Node { expectedRank: 3.180981 , expectedPersonalizedRank1: 0.27329311398643763 , expectedPersonalizedRank2: 0.690991752640184    })" +
+            ", (b:Node { expectedRank: 3.5604297, expectedPersonalizedRank1: 0.3216114449911402  , expectedPersonalizedRank2: 0.813246950528992    })" +
+            ", (c:Node { expectedRank: 3.1757906, expectedPersonalizedRank1: 0.27329311398643763 , expectedPersonalizedRank2: 0.690991752640184    })" +
             ", (d:Node { expectedRank: 0.3625935, expectedPersonalizedRank1: 0.048318333106500536, expectedPersonalizedRank2: 0.041070583050331164 })" +
             ", (e:Node { expectedRank: 0.7503465, expectedPersonalizedRank1: 0.17053529152163158 , expectedPersonalizedRank2: 0.1449550029964717   })" +
             ", (f:Node { expectedRank: 0.3625935, expectedPersonalizedRank1: 0.048318333106500536, expectedPersonalizedRank2: 0.041070583050331164 })" +
@@ -98,8 +100,8 @@ class PageRankPregelTest {
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
-                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
+                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -141,8 +143,8 @@ class PageRankPregelTest {
             var expected = graph.nodeProperties(expectedPropertyKey);
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
-                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
+                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
     }
@@ -153,12 +155,12 @@ class PageRankPregelTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.24 })" +
-            ", (b:Node { expectedRank: 3.69 })" +
-            ", (c:Node { expectedRank: 3.29 })" +
-            ", (d:Node { expectedRank: 0.58 })" +
-            ", (e:Node { expectedRank: 0.72 })" +
-            ", (f:Node { expectedRank: 0.27 })" +
+            "  (a:Node { expectedRank: 0.24919 })" +
+            ", (b:Node { expectedRank: 3.69822 })" +
+            ", (c:Node { expectedRank: 3.29307 })" +
+            ", (d:Node { expectedRank: 0.58349 })" +
+            ", (e:Node { expectedRank: 0.72855 })" +
+            ", (f:Node { expectedRank: 0.27385 })" +
             ", (g:Node { expectedRank: 0.15 })" +
             ", (h:Node { expectedRank: 0.15 })" +
             ", (i:Node { expectedRank: 0.15 })" +
@@ -203,8 +205,8 @@ class PageRankPregelTest {
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
-                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-2));
+                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
     }
