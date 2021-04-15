@@ -112,19 +112,31 @@ The area under the Precision-Recall curve can also be interpreted as an average 
 Most graphs have far more non-connected node pairs than connected ones (e.g. sparse graphs).
 Thus, typically we have an issue with _class imbalance_.
 There are multiple strategies to account for imbalanced data.
-In our procedure, the AUCPR metric is used which is considered more suitable than the commonly used AUROC metric for imbalanced data.
-One can also specify the configuration parameter `classRatio` which determines the weighting of negative example (non-connected node pairs) to connected node pairs.
+In our procedure, the AUCPR metric is used which is considered more suitable than the commonly used AUROC (Area Under the Receiver Operating Characteristic) metric for imbalanced data.
+One must also specify the configuration parameter `classRatio` which determines the weighting of negative example (non-connected node pairs) to connected node pairs.
 This means upweighting the false positives by this ratio when computing precision.
 
-Note that the `classRatio` can be set arbitrarily, and not necessarily as the _true_ class ratio it the graph.
-There are `n(n-1)/2` node pairs in the graph, which can be used to compute the true class ratio as the ratio of `nodePairs - relationshipCount` to `relationshipCount`.
-Since the evaluation is typically done on graphs created by the `splitRelationships` procedure, this entails a set of equal number of positive and negative examples.
-
 Setting `classRatio` to `1.0` is consistent with _traditional_ evaluation and is recommended for comparison with other models evaluated this way.
-To compensate for the under sampling of negative examples, a higher value than `1.0`, or even the _true_ class ratio, can be used.
+
+The evaluation is typically done on graphs created by the `splitRelationships` procedure, which produces a set with equal number of positive and negative examples.
+To compensate for the under-sampling of negative examples, `classRatio` can be set to the _true_ class ratio.
+The true class ratio is computed as `(q - r) / q`, where `q = n(n-1)/2` is the number of possible undirected relationships, and `r` is the number of actual undirected relationships.
+Please note that the `relationshipCount` reported by the <<catalog-graph-list, catalog-graph-list>> procedure is the _directed_ count of relationships summed over all existing relationship types.
+Thus, we recommend using Cypher to obtain `r` on the source Neo4j graph.
+For example, this query will count the number of relationships of type `T` or `R`:
+
+[source, cypher]
+----
+MATCH (a)-[rel:T | R]-(b)
+WHERE a < b
+RETURN count(rel) AS r
+----
+
 Using the true class ratio approximates an evaluation on a sample according to the true class distribution.
 The reported metric (AUCPR) then better reflects the expected precision on unseen highly imbalanced data.
 With this type of evaluation one has to adjust expectations as the metric value then becomes much smaller.
+
+Note that the `classRatio` can be set arbitrarily, and will influence the reported AUCPR score.
 
 [[algorithms-ml-linkprediction-syntax]]
 == Syntax
