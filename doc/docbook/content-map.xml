@@ -201,7 +201,7 @@
                 </d:tocentry>
                 <d:tocentry linkend="algorithms-embeddings-graph-sage"><?dbhtml filename="algorithms/graph-sage/index.html"?>
                 </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-embeddings-node2vec"><?dbhtml filename="algorithms/node2vec/index.html"?>
+                <d:tocentry linkend="beta-algorithms-embeddings-node2vec"><?dbhtml filename="algorithms/node2vec/index.html"?>
                 </d:tocentry>
             </d:tocentry>
 
