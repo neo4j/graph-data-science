@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,8 +31,21 @@ import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 final class StatsMap {
+
+    static MemoryEstimation memoryEstimation(int numberOfMetricsSpecifications, int numberOfParams) {
+        int fudgedNumberOfClasses = 1000;
+        var numberOfMetrics = numberOfMetricsSpecifications * fudgedNumberOfClasses;
+        var numberOfModelStats = numberOfMetrics * numberOfParams;
+        var sizeOfOneModelStatsInBytes = sizeOfInstance(ModelStats.class);
+        var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfModelStats;
+        return MemoryEstimations.builder(StatsMap.class)
+            .fixed("array list", sizeOfInstance(ArrayList.class))
+            .fixed("model stats", sizeOfAllModelStatsInBytes)
+            .build();
+    }
 
     private final Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> map;
 
