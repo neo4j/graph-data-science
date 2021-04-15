@@ -206,6 +206,10 @@
             </d:tocentry>
 
             <d:tocentry linkend="algorithms-ml-models"><?dbhtml filename="algorithms/ml-models/index.html"?>
+                <d:tocentry linkend="algorithms-ml-models-preprocessing"><?dbhtml filename="algorithms/ml-models/pre-processing/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-ml-models-tuning"><?dbhtml filename="algorithms/ml-models/models-tuning/index.html"?>
+                </d:tocentry>
                 <d:tocentry linkend="algorithms-ml-nodeclassification"><?dbhtml filename="algorithms/ml-models/node-classification/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="algorithms-ml-linkprediction"><?dbhtml filename="algorithms/ml-models/linkprediction/index.html"?>

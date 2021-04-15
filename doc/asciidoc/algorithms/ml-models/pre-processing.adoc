@@ -1,0 +1,13 @@
+[[algorithms-ml-models-preprocessing]]
+= Pre-processing
+
+In most machine learning scenarios, several pre-processing steps are applied to produce data that is amenable to machine learning algorithms.
+This is also true for graph data.
+The goal of pre-processing is to provide good features for the learning algorithm.
+In GDS some options include:
+
+// todo mention embeddings
+* <<algorithms-centrality, Centrality algorithms>>
+* <<algorithms-auxiliary, Auxiliary algorithms>>
+** Of special interest are <<algorithms-scale-properties, Scale Properties>> and
+** <<algorithms-split-relationships, Split Relationships>> for <<algorithms-ml-linkprediction, Link Prediction>>.

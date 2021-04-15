@@ -67,6 +67,8 @@
 **** xref:algorithms/graph-sage/index.adoc[]
 **** xref:algorithms/node2vec/index.adoc[]
 *** xref:algorithms/ml-models/index.adoc[]
+**** xref:algorithms/ml-models/pre-processing/index.adoc[]
+**** xref:algorithms/ml-models/models-tuning/index.adoc[]
 **** xref:algorithms/ml-models/node-classification/index.adoc[]
 **** xref:algorithms/ml-models/linkprediction/index.adoc[]
 *** xref:algorithms/auxiliary/index.adoc[]

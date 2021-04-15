@@ -8,7 +8,11 @@ This chapter provides explanations and examples for the supervised machine learn
 
 The machine learning procedures in Neo4j GDS allow you to train supervised machine learning models.
 Models can then be accessed via the <<model-catalog-ops, Model Catalog>> and used to make predictions about your graph.
-It is often useful to enrich the input graph with other GDS algorithms, for example node embedding algorithms.
+
+To help with working with the ML models, there are additional guides for pre-processing and hyperparameter tuning available in:
+
+* <<algorithms-ml-models-preprocessing, Pre-processing>>
+* <<algorithms-ml-models-tuning, Tuning parameters for training>>
 
 The Neo4j GDS library includes the following machine learning models, grouped by quality tier:
 
@@ -16,46 +20,10 @@ The Neo4j GDS library includes the following machine learning models, grouped by
 ** <<algorithms-ml-nodeclassification, Node Classification>>
 ** <<algorithms-ml-linkprediction, Link Prediction>>
 
+include::ml-models/pre-processing.adoc[leveloffset=+1]
+
+include::ml-models/parameter-tuning.adoc[leveloffset=+1]
+
 include::alpha/nodeclassification/nodeclassification.adoc[leveloffset=+1]
 
 include::alpha/linkprediction/linkprediction.adoc[leveloffset=+1]
-
-[[algorithms-ml-models-preprocessing]]
-== Pre-processing
-
-In most machine learning scenarios, several pre-processing steps are applied to produce data that is amenable to machine learning algorithms.
-This is also true for graph data.
-The goal of pre-processing is to provide good features for the learning algorithm.
-In GDS some options include:
-
-* <<algorithms-centrality, Centrality algorithms>>
-* <<algorithms-auxiliary, Auxiliary algorithms>>
-** Of special interest are <<algorithms-scale-properties, Scale Properties>> and
-** <<algorithms-split-relationships, Split Relationships>> for <<algorithms-ml-linkprediction, Link Prediction>>.
-
-[[algorithms-ml-models-tuning]]
-== Tuning parameters for training
-
-Both <<algorithms-ml-nodeclassification, Node Classification>> and <<algorithms-ml-linkprediction, Link Prediction>> have training parameters that can be tuned automatically given a set of allowed values.
-The parameters `maxEpochs`, `tolerance` and `patience` control for how long the training will run until termination.
-These parameters give ways to limit a computational budget. In general, higher `maxEpochs` and `patience` and lower `tolerance` lead to longer training but higher quality models.
-It is however well-known that restricting the computational budget can serve the purpose of regularization and mitigate overfitting.
-
-When faced with a heavy training task, a strategy to perform hyperparameter optimization faster, is to initially use lower values for the budget related parameters while exploring better ranges for other general or algorithm specific parameters.
-
-More precisely, `maxEpochs` is the maximum number of epochs trained until termination.
-Whether the training exhausted the maximum number of epochs or converged prior is reported in the neo4j debug log.
-
-As for `patience` and `tolerance`, the former is the maximum number of consecutive epochs that do not improve the training loss at least by a `tolerance` fraction of the current loss.
-After `patience` such unproductive epochs, the training is terminated.
-In our experience, reasonable values for `patience` are in the range `1` to `3`.
-
-It is also possible, via `minEpochs`, to control a minimum number of epochs before the above termination criteria enter into play.
-
-The training algorithm applied to the above algorithms is stochastic gradient descent.
-The gradient updates are computed batch-wise on batches of `batchSize` examples, and batches are computed concurrently on `concurrency` threads.
-Thus `batchSize` and `concurrency` can affect the convergence rate, but since the algorithms above optimize convex functions, the resulting model is in theory (approximately) unique.
-
-The gradient updates are further managed by the ADAM optimizer.
-Configuring `sharedUpdater` controls whether the threads share a single updater and its state, or if each thread uses a dedicated updater.
-In our experience, the default value of `false` is better.
