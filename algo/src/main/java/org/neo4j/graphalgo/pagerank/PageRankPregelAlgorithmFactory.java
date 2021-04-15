@@ -19,29 +19,37 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStatistics;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
-import org.neo4j.logging.Log;
 
 import java.util.function.LongToDoubleFunction;
 
-public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig> implements AlgorithmFactory<PageRankPregelAlgorithm, CONFIG> {
+public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig> extends AbstractAlgorithmFactory<PageRankPregelAlgorithm, CONFIG> {
 
     @Override
-    public PageRankPregelAlgorithm build(
+    protected long taskVolume(Graph graph, PageRankPregelConfig configuration) {
+        return 0;
+    }
+
+    @Override
+    protected String taskName() {
+        return "PageRank";
+    }
+
+    @Override
+    protected PageRankPregelAlgorithm build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker tracker,
-        Log log,
-        ProgressEventTracker eventTracker
+        ProgressLogger progressLogger
     ) {
         LongToDoubleFunction degreeFunction;
         double deltaCoefficient = 1;
