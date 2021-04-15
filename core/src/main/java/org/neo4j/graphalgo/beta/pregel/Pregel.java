@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.concurrent.ExecutorService;
@@ -71,7 +70,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema, boolean isQueueBased, boolean isAsync) {
         var estimationBuilder = MemoryEstimations.builder(Pregel.class)
-            .perNode("vote bits", MemoryUsage::sizeOfHugeAtomicBitset)
+            .perNode("vote bits", HugeAtomicBitSet::memoryEstimation)
             .perThread("compute steps", MemoryEstimations.builder(PartitionedComputeStep.class).build())
             .add("node value", NodeValue.memoryEstimation(pregelSchema));
 

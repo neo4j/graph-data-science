@@ -26,7 +26,6 @@ import com.carrotsearch.hppc.ObjectLongMap;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.io.NullOutputStream;
 import org.openjdk.jol.info.GraphWalker;
 import org.openjdk.jol.vm.VM;
@@ -235,11 +234,6 @@ public final class MemoryUsage {
     public static long sizeOfBitset(final long length) {
         int numWords = BitSet.bits2words(length);
         return sizeOfLongArray(numWords) + sizeOfInstance(BitSet.class);
-    }
-
-    public static long sizeOfHugeAtomicBitset(final long length) {
-        int numWords = BitSet.bits2words(length);
-        return sizeOfLongArray(numWords) + sizeOfInstance(HugeAtomicBitSet.class);
     }
 
     public static long sizeOfLongDoubleHashMap(long length) {

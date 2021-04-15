@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.MAX_ARRAY_LENGTH;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class HugeAtomicBitSet {
@@ -32,6 +33,11 @@ public final class HugeAtomicBitSet {
     private final HugeAtomicLongArray bits;
     private final long numBits;
     private final int remainder;
+
+    public static long memoryEstimation(long size) {
+        var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
+        return HugeAtomicLongArray.memoryEstimation(wordsSize) + sizeOfInstance(HugeAtomicBitSet.class);
+    }
 
     public static HugeAtomicBitSet create(long size, AllocationTracker tracker) {
         var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
