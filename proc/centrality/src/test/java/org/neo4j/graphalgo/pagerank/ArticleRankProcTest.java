@@ -44,20 +44,48 @@ public class ArticleRankProcTest extends BaseProcTest {
         "  (a:Label1 {name: 'a'})" +
         ", (b:Label1 {name: 'b'})" +
         ", (a)-[:TYPE1]->(b)";
+
     public static final String GRAPH_NAME = "graph";
 
     private static Stream<Arguments> estimations() {
-        Map<String, Long> expected = Map.of("bytesMin", 544L, "bytesMax", 544L);
         return Stream.of(
-        Arguments.of(GdsCypher.ExecutionModes.STREAM, expected),
-        Arguments.of(GdsCypher.ExecutionModes.WRITE, expected),
-        Arguments.of(GdsCypher.ExecutionModes.MUTATE, expected)
-    );}
+            Arguments.of(GdsCypher.ExecutionModes.STREAM),
+            Arguments.of(GdsCypher.ExecutionModes.WRITE),
+            Arguments.of(GdsCypher.ExecutionModes.MUTATE),
+            Arguments.of(GdsCypher.ExecutionModes.STATS)
+        );}
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(GraphCreateProc.class, ArticleRankStreamProc.class, ArticleRankWriteProc.class, ArticleRankMutateProc.class);
+        registerProcedures(
+            GraphCreateProc.class,
+            ArticleRankStatsProc.class,
+            ArticleRankStreamProc.class,
+            ArticleRankWriteProc.class,
+            ArticleRankMutateProc.class
+        );
         runQuery("CALL gds.graph.create($graphName, '*', '*')", Map.of("graphName", GRAPH_NAME));
+    }
+
+    @Test
+    void stats() {
+        String propertyKey = "pr";
+        String query = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
+            .algo("articleRank")
+            .statsMode()
+            .yields();
+
+        assertCypherResult(query, List.of(
+            Map.of(
+                "createMillis", greaterThan(-1L),
+                "computeMillis", greaterThan(-1L),
+                "postProcessingMillis", greaterThan(-1L),
+                "configuration", isA(Map.class),
+                "centralityDistribution", isA(Map.class),
+                "didConverge", true,
+                "ranIterations", 2L
+            )));
     }
 
     @Test
@@ -124,7 +152,7 @@ public class ArticleRankProcTest extends BaseProcTest {
 
     @ParameterizedTest
     @MethodSource("estimations")
-    void estimates(GdsCypher.ExecutionModes mode, Map<String, Object> expected) {
+    void estimates(GdsCypher.ExecutionModes mode) {
         var queryBuilder = GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
             .algo("articleRank")
@@ -141,6 +169,9 @@ public class ArticleRankProcTest extends BaseProcTest {
                 break;
         }
 
-        assertCypherResult(queryBuilder.yields("bytesMin", "bytesMax"), List.of(expected));
+        assertCypherResult(
+            queryBuilder.yields("bytesMin", "bytesMax"),
+            List.of(Map.of("bytesMin", 544L, "bytesMax", 544L))
+        );
     }
 }
