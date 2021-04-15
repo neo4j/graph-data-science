@@ -30,6 +30,11 @@ final class PageRankProc {
     static final String PAGE_RANK_DESCRIPTION =
         "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
 
+    static final String ARTICLE_RANK_DESCRIPTION =
+        "ArticleRank is a variant of the Page Rank algorithm, which " +
+        "measures the transitive influence or connectivity of nodes.";
+
+
     private PageRankProc() {}
 
     static <PROC_RESULT, CONFIG extends PageRankPregelConfig> PageRankResultBuilder<PROC_RESULT> resultBuilder(
