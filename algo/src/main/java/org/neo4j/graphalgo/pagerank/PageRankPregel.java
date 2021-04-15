@@ -30,10 +30,12 @@ import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.Reducer;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongToDoubleFunction;
 
 public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
@@ -48,10 +50,19 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
     private final double dampingFactor;
     private final double tolerance;
     private final double alpha;
+    private double deltaFactor;
 
 
     public static PageRankPregel unweighted(Graph graph, PageRankPregelConfig config) {
-        return new PageRankPregel(graph, config, graph::degree);
+        return new PageRankPregel(graph, config, graph::degree, 1);
+    }
+
+    static PageRankPregel articleRank(Graph graph, PageRankPregelConfig config) {
+        var degreeSum = new LongAdder();
+        ParallelUtil.parallelForEachNode(graph, config.concurrency(), nodeId -> degreeSum.add(graph.degree(nodeId)));
+        double avgDegree = (double) degreeSum.sum() / graph.nodeCount();
+
+        return new PageRankPregel(graph, config, nodeId -> graph.degree(nodeId) + avgDegree, avgDegree);
     }
 
     public static PageRankPregel weighted(
@@ -64,13 +75,19 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
             .degree(executor, config.concurrency(), tracker)
             .aggregatedDegrees();
 
-        return new PageRankPregel(graph, config, aggregatedWeights::get);
+        return new PageRankPregel(graph, config, aggregatedWeights::get, 1);
     }
 
-    private PageRankPregel(NodeMapping nodeMapping, PageRankPregelConfig config, LongToDoubleFunction degreeFunction) {
+    private PageRankPregel(
+        NodeMapping nodeMapping,
+        PageRankPregelConfig config,
+        LongToDoubleFunction degreeFunction,
+        double deltaFactor
+    ) {
         this.seedProperty = config.seedProperty();
         this.dampingFactor = config.dampingFactor();
         this.tolerance = config.tolerance();
+        this.deltaFactor = deltaFactor;
         this.alpha = 1 - this.dampingFactor;
         this.sourceNodes = new LongScatterSet();
         config.sourceNodeIds().map(nodeMapping::toMappedNodeId).forEach(sourceNodes::add);
@@ -110,7 +127,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
                 sum += message;
             }
 
-            delta = dampingFactor * sum;
+            delta = dampingFactor * deltaFactor * sum;
             context.setNodeValue(PAGE_RANK, newRank + delta);
         }
 
