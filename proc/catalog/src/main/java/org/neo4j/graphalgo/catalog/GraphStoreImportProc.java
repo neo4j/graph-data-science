@@ -73,7 +73,7 @@ public class GraphStoreImportProc extends BaseProc {
                         graphStoreImporter.run(allocationTracker());
                         var end = System.nanoTime();
 
-                        var graphStore = graphStoreImporter.graphStore();
+                        var graphStore = graphStoreImporter.userGraphStore().graphStore();
 
                         var graphName = path.getFileName().toString();
                         var createConfig = GraphCreateFromStoreConfig.emptyWithName(

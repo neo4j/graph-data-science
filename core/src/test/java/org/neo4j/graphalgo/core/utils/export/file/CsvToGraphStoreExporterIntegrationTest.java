@@ -68,7 +68,7 @@ class CsvToGraphStoreExporterIntegrationTest {
         var importer = CsvToGraphStoreExporter.create(config(concurrency), graphLocation);
         importer.run(AllocationTracker.empty());
 
-        var importedGraphStore = importer.graphStore();
+        var importedGraphStore = importer.userGraphStore().graphStore();
         var importedGraph = importedGraphStore.getUnion();
         assertGraphEquals(graph, importedGraph);
     }

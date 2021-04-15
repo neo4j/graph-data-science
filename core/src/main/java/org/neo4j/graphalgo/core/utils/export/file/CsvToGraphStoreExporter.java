@@ -67,6 +67,7 @@ public final class CsvToGraphStoreExporter {
     private final GraphStoreToFileExporterConfig config;
 
     private final GraphStoreBuilder graphStoreBuilder;
+    private String userName;
 
     public static CsvToGraphStoreExporter create(
         GraphStoreToFileExporterConfig config,
@@ -93,13 +94,14 @@ public final class CsvToGraphStoreExporter {
         this.graphStoreBuilder = new GraphStoreBuilder().concurrency(config.writeConcurrency());
     }
 
-    public GraphStore graphStore() {
-        return graphStoreBuilder.build();
+    public UserGraphStore userGraphStore() {
+        return ImmutableUserGraphStore.of(userName, graphStoreBuilder.build());
     }
 
     public GraphStoreExporter.ImportedProperties run(AllocationTracker tracker) {
         var fileInput = new FileInput(importPath);
         graphStoreBuilder.tracker(tracker);
+        this.userName = fileInput.userName();
         return export(fileInput, tracker);
     }
 
@@ -270,6 +272,12 @@ public final class CsvToGraphStoreExporter {
                 );
             });
         }
+    }
+
+    @ValueClass
+    public interface UserGraphStore {
+        String userName();
+        GraphStore graphStore();
     }
 
     @ValueClass

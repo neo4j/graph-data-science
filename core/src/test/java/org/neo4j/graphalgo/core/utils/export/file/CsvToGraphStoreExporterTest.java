@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class CsvToGraphStoreExporterTest {
@@ -40,7 +41,10 @@ class CsvToGraphStoreExporterTest {
         var exporter = CsvToGraphStoreExporter.create(config(concurrency), importPath());
         exporter.run(AllocationTracker.empty());
 
-        var graphStore = exporter.graphStore();
+        var userGraphStore = exporter.userGraphStore();
+        var graphStore = userGraphStore.graphStore();
+
+        assertThat(userGraphStore.userName()).isEqualTo("UserA");
 
         var expectedGraph = TestSupport.fromGdl(
                                             "  (n0:A {prop1: 21})" +
