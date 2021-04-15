@@ -29,6 +29,9 @@ import org.neo4j.graphalgo.extension.Neo4jGraph;
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
+
 public class ArticleRankProcTest extends BaseProcTest {
 
     @Neo4jGraph
@@ -41,7 +44,7 @@ public class ArticleRankProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(GraphCreateProc.class, ArticleRankStreamProc.class);
+        registerProcedures(GraphCreateProc.class, ArticleRankStreamProc.class, ArticleRankWriteProc.class);
         runQuery("CALL gds.graph.create($graphName, '*', '*')", Map.of("graphName", GRAPH_NAME));
     }
 
@@ -57,5 +60,29 @@ public class ArticleRankProcTest extends BaseProcTest {
             Map.of("nodeId", 0L, "score", 0.15000000000000002),
             Map.of("nodeId", 1L, "score", 0.19250000000000003)
         ));
+    }
+
+    @Test
+    void write() {
+        String propertyKey = "pr";
+        String query = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
+            .algo("articleRank")
+            .writeMode()
+            .addParameter("writeProperty", propertyKey)
+            .yields();
+
+        assertCypherResult(query, List.of(
+            Map.of(
+                "createMillis", greaterThan(-1L),
+                "computeMillis", greaterThan(-1L),
+                "writeMillis", greaterThan(-1L),
+                "postProcessingMillis", greaterThan(-1L),
+                "configuration", isA(Map.class),
+                "centralityDistribution", isA(Map.class),
+                "nodePropertiesWritten", 2L,
+                "didConverge", true,
+                "ranIterations", 2L
+            )));
     }
 }
