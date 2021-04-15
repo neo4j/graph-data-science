@@ -159,36 +159,36 @@ The structure of `modelInfo` is:
     bestParameters: Map,     // one of the maps specified in `params`
     metrics: {
         AUCPR: {
-            "test": Float,
-            "outerTrain": Float,
-            "train": [{
-                "avg": Float,
-                "max": Float,
-                "min": Float,
-                "params": Map
+            test: Float,
+            outerTrain: Float,
+            train: [{
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
             },
             {
-                "avg": Float,
-                "max": Float,
-                "min": Float,
-                "params": Map
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
             },
             ...              // more results per model candidate
             ],
-            "validation": [{
-                "avg": Float,
-                "max": Float,
-                "min": Float,
-                "params": Map
+            validation: [{
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
             },
             {
-                "avg": Float,
-                "max": Float,
-                "min": Float,
-                "params": Map
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
             },
             ...              // more results per model candidate
-            ],
+            ]
         }
     }
 }
