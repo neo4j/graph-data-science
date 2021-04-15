@@ -58,6 +58,12 @@ public interface PregelConfig extends
         return partitioning() == Partitioning.AUTO;
     }
 
+    @Value.Derived
+    @Configuration.Ignore
+    default boolean isWeighted() {
+        return relationshipWeightProperty() != null;
+    }
+
     static PregelConfig of(
         String username,
         Optional<String> graphName,

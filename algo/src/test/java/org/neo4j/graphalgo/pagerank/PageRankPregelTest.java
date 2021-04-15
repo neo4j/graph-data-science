@@ -287,7 +287,7 @@ class PageRankPregelTest {
             .isAsynchronous(false);
 
         if (articleRank) {
-            configBuilder.mode(PageRankPregel.Mode.ARTICLE_RANK);
+            configBuilder.mode(PageRankPregelConfig.Mode.ARTICLE_RANK);
         }
 
         return new PageRankPregelAlgorithmFactory<>()

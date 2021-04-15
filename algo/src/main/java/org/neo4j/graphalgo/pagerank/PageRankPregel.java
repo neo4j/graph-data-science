@@ -21,9 +21,6 @@ package org.neo4j.graphalgo.pagerank;
 
 import com.carrotsearch.hppc.LongScatterSet;
 import com.carrotsearch.hppc.LongSet;
-import org.immutables.builder.Builder;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStatistics;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
@@ -32,10 +29,8 @@ import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.beta.pregel.Reducer;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.function.LongToDoubleFunction;
 
 public final class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
@@ -51,44 +46,7 @@ public final class PageRankPregel implements PregelComputation<PageRankPregelCon
     private final double alpha;
     private final double deltaCoefficient;
 
-    public enum Mode {
-        WEIGHTED,
-        UNWEIGHTED,
-        ARTICLE_RANK,
-    }
-
-    public static PageRankPregelBuilder builder() {
-        return new PageRankPregelBuilder();
-    }
-
-    @Builder.Factory
-    static PageRankPregel pageRankPregel(
-        Graph graph,
-        PageRankPregelConfig config,
-        Mode mode,
-        ExecutorService executorService,
-        AllocationTracker allocationTracker
-    ) {
-        switch (mode) {
-            case WEIGHTED:
-                var aggregatedWeights = new WeightedDegreeComputer(graph)
-                    .degree(executorService, config.concurrency(), allocationTracker)
-                    .aggregatedDegrees();
-                return new PageRankPregel(graph, config, aggregatedWeights::get, 1);
-
-            case UNWEIGHTED:
-                return new PageRankPregel(graph, config, graph::degree, 1);
-
-            case ARTICLE_RANK:
-                double avgDegree = GraphStatistics.averageDegree(graph, config.concurrency());
-                return new PageRankPregel(graph, config, nodeId -> graph.degree(nodeId) + avgDegree, avgDegree);
-
-            default:
-                throw new IllegalArgumentException("Unsupported mode: " + mode);
-        }
-    }
-
-    private PageRankPregel(
+    public PageRankPregel(
         NodeMapping nodeMapping,
         PageRankPregelConfig config,
         LongToDoubleFunction degreeFunction,

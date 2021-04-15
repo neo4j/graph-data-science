@@ -39,6 +39,12 @@ public interface PageRankPregelConfig extends
     ToleranceConfig,
     SourceNodesConfig
 {
+    enum Mode {
+        DEFAULT,
+        ARTICLE_RANK,
+        EIGENVECTOR,
+    }
+
     @Value.Default
     @Override
     default double tolerance() {
@@ -65,10 +71,8 @@ public interface PageRankPregelConfig extends
 
     @Value.Default
     @Configuration.Ignore
-    default PageRankPregel.Mode mode() {
-        return relationshipWeightProperty() != null
-            ? PageRankPregel.Mode.WEIGHTED
-            : PageRankPregel.Mode.UNWEIGHTED;
+    default Mode mode() {
+        return Mode.DEFAULT;
     }
 
     @Override

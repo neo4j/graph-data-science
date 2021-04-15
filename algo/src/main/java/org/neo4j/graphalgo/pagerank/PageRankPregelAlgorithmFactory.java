@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStatistics;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
@@ -29,6 +30,8 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
+
+import java.util.function.LongToDoubleFunction;
 
 public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig> implements AlgorithmFactory<PageRankPregelAlgorithm, CONFIG> {
 
@@ -40,14 +43,28 @@ public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig>
         Log log,
         ProgressEventTracker eventTracker
     ) {
-        var algoBuilder = PageRankPregel.builder()
-            .graph(graph)
-            .config(configuration)
-            .executorService(Pools.DEFAULT)
-            .allocationTracker(tracker)
-            .mode(configuration.mode());
+        LongToDoubleFunction degreeFunction;
+        double deltaCoefficient = 1;
 
-        return new PageRankPregelAlgorithm(graph, configuration, algoBuilder.build(), Pools.DEFAULT, tracker);
+        if (configuration.isWeighted()) {
+            var aggregatedWeights = new WeightedDegreeComputer(graph)
+                .degree(Pools.DEFAULT, configuration.concurrency(), tracker)
+                .aggregatedDegrees();
+            degreeFunction = aggregatedWeights::get;
+        } else {
+            degreeFunction = graph::degree;
+        }
+
+        if (configuration.mode() == PageRankPregelConfig.Mode.ARTICLE_RANK) {
+            double avgDegree = GraphStatistics.averageDegree(graph, configuration.concurrency());
+            var tempFn = degreeFunction;
+            degreeFunction = nodeId -> tempFn.applyAsDouble(nodeId) + avgDegree;
+            deltaCoefficient = avgDegree;
+        }
+
+        var computation = new PageRankPregel(graph, configuration, degreeFunction, deltaCoefficient);
+
+        return new PageRankPregelAlgorithm(graph, configuration, computation, Pools.DEFAULT, tracker);
     }
 
     @Override
