@@ -42,7 +42,7 @@ public abstract class ScalarScaler implements Scaler {
         return 1;
     }
 
-    public static final org.neo4j.gds.scaling.ScalarScaler ZERO = new org.neo4j.gds.scaling.ScalarScaler(null) {
+    public static final ScalarScaler ZERO = new ScalarScaler(null) {
         @Override
         public double scaleProperty(long nodeId) {
             return 0;
