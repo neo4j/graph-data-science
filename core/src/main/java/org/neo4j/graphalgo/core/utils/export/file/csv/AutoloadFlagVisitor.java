@@ -32,7 +32,7 @@ public class AutoloadFlagVisitor implements SingleRowVisitor<Void> {
 
     private final Path autoloadFlagPath;
 
-    AutoloadFlagVisitor(Path fileLocation) {
+    public AutoloadFlagVisitor(Path fileLocation) {
         autoloadFlagPath = fileLocation.resolve(AUTOLOAD_FILE_NAME);
     }
 
