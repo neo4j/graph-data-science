@@ -38,10 +38,14 @@ If the value is `1` the relationship represents a positive example, meaning a re
 To obtain the feature vector for an example, the algorithm first forms node feature vectors for the source and target nodes of the example in question.
 This is done by concatenating the property values of the specified feature properties in order into a node feature vector.
 Thereafter, the algorithm uses a _link feature combiner_ to combine the two node feature vectors into the feature vector for the training example.
-There are three supported link feature combiners.
-One is called `L2` and gives the feature vector `[(s_0 - t_0)^2 , (s_1 - t_1)^2, ..., (s_d - t_d)^2]`, where `[s_i]` and `[t_i]` are the source and target node feature vectors.
-The second link feature combiner is `HADAMARD` which gives `[s_0 * t_0, s_1 * t_1, ..., s_d * t_d]`.
-The `COSINE` link feature combiner computes a single scalar feature using the link:http://en.wikipedia.org/wiki/Cosine_similarity[Cosine similarity] of source and target node feature vectors.
+There are three supported link feature combiners:
+
+* `L2`
+** which gives a feature vector as `[(s_0 - t_0)^2 , (s_1 - t_1)^2, ..., (s_d - t_d)^2]`, where `[s_i]` and `[t_i]` are the source and target node feature vectors.
+* `HADAMARD`
+** which gives a feature vector as `[s_0 * t_0, s_1 * t_1, ..., s_d * t_d]`.
+* `COSINE`
+** which gives a single scalar feature, using the the link:http://en.wikipedia.org/wiki/Cosine_similarity[Cosine similarity] of source and target node feature vectors.
 
 The precise steps of the train mode are:
 
