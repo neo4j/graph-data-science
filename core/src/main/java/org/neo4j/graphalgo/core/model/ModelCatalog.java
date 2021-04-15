@@ -1,4 +1,5 @@
 /*
+/*
  * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
@@ -173,7 +174,7 @@ public final class ModelCatalog {
     }
 
     static class UserCatalog {
-        private static final long ALLOWED_MODELS_COUNT = 1;
+        private static final long ALLOWED_MODELS_COUNT = 3;
         private static final UserCatalog EMPTY = new UserCatalog();
 
         private final Map<String, Model<?, ?>> userModels = new ConcurrentHashMap<>();
@@ -295,7 +296,7 @@ public final class ModelCatalog {
 
         private void canStoreModel(String modelType) {
             if (GdsEdition.instance().isOnCommunityEdition() && reachedModelsLimit(modelType)) {
-                throw new IllegalArgumentException("Community users can only store one model in the catalog, see https://neo4j.com/docs/graph-data-science/");
+                throw new IllegalArgumentException(formatWithLocale("Community users can only store `%d` models in the catalog, see https://neo4j.com/docs/graph-data-science/", ALLOWED_MODELS_COUNT));
             }
         }
 

@@ -49,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ModelCatalogTest {
 
@@ -70,23 +71,26 @@ class ModelCatalogTest {
     }
 
     @Test
-    void onlyAllowOneModel() {
-        ModelCatalog.set(TEST_MODEL);
+    void shouldNotStoreMoreThanAllowedModels() {
+        int allowedModelsCount = 3;
 
-        assertDoesNotThrow(() -> {
-            ModelCatalog.set(Model.of(
-                USERNAME,
-                "testModel2",
-                "testAlgo2",
-                GRAPH_SCHEMA,
-                1337L,
-                TestTrainConfig.of()
-            ));
-        });
+        for (int i = 0; i < allowedModelsCount; i++) {
+            int modelIndex = i;
+            assertDoesNotThrow(() -> {
+                ModelCatalog.set(Model.of(
+                    USERNAME,
+                    "testModel_" + modelIndex,
+                    "testAlgo",
+                    GRAPH_SCHEMA,
+                    1337L,
+                    TestTrainConfig.of()
+                ));
+            });
+        }
 
-        var model2 = Model.of(
+        var tippingModel = Model.of(
             USERNAME,
-            "testModel2",
+            "testModel_" + (allowedModelsCount + 1),
             "testAlgo",
             GRAPH_SCHEMA,
             1337L,
@@ -95,10 +99,10 @@ class ModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> ModelCatalog.set(model2)
+            () -> ModelCatalog.set(tippingModel)
         );
 
-        assertEquals("Community users can only store one model in the catalog, see https://neo4j.com/docs/graph-data-science/", ex.getMessage());
+        assertEquals(formatWithLocale("Community users can only store `%d` models in the catalog, see https://neo4j.com/docs/graph-data-science/", allowedModelsCount), ex.getMessage());
     }
 
     @Test
