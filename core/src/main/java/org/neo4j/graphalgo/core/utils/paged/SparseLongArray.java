@@ -39,7 +39,7 @@ public final class SparseLongArray {
     public static final long NOT_FOUND = -1;
 
     public static final int BLOCK_SIZE = 64;
-    private static final int SUPER_BLOCK_SIZE = BLOCK_SIZE * Long.SIZE;
+    public static final int SUPER_BLOCK_SIZE = BLOCK_SIZE * Long.SIZE;
     private static final int BLOCK_SHIFT = Integer.numberOfTrailingZeros(BLOCK_SIZE);
     private static final int BLOCK_MASK = BLOCK_SIZE - 1;
 

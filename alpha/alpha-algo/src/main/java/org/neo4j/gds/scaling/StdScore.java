@@ -21,38 +21,33 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class StdScore implements Scaler {
+final class StdScore extends ScalarScaler {
 
-    private final NodeProperties properties;
     final double avg;
     final double std;
 
     private StdScore(NodeProperties properties, double avg, double std) {
-        this.properties = properties;
+        super(properties);
         this.avg = avg;
         this.std = std;
     }
 
-    static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
-        if (nodeCount == 0) {
-            return new StdScore(properties, 0, 0);
-        }
-
-        // calculate sum and squared sum
+    static ScalarScaler initialize(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new ComputeSums(partition.startNode(), partition.nodeCount(), properties)
+            partition -> new ComputeSumAndSquaredSum(partition, properties)
         );
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
         // calculate global metrics
-        var squaredSum = tasks.stream().mapToDouble(ComputeSums::squaredSum).sum();
-        var sum = tasks.stream().mapToDouble(ComputeSums::sum).sum();
+        var squaredSum = tasks.stream().mapToDouble(ComputeSumAndSquaredSum::squaredSum).sum();
+        var sum = tasks.stream().mapToDouble(ComputeSumAndSquaredSum::sum).sum();
         var avg = sum / nodeCount;
         // std = σ² = Σ(pᵢ - avg)² / N =
         // (Σ(pᵢ²) + Σ(avg²) - 2avgΣ(pᵢ)) / N =
@@ -62,7 +57,7 @@ final class StdScore implements Scaler {
         var std = Math.sqrt(variance);
 
         if (Math.abs(std) < CLOSE_TO_ZERO) {
-            return ZERO_SCALER;
+            return ZERO;
         } else {
             return new StdScore(properties, avg, std);
         }
@@ -73,29 +68,22 @@ final class StdScore implements Scaler {
         return (properties.doubleValue(nodeId) - avg) / std;
     }
 
-    static class ComputeSums implements Runnable {
+    static class ComputeSumAndSquaredSum extends AggregatesComputer {
 
-        private final long start;
-        private final long length;
-        private final NodeProperties properties;
         private double squaredSum;
         private double sum;
 
-        ComputeSums(long start, long length, NodeProperties property) {
-            this.start = start;
-            this.length = length;
-            this.properties = property;
+        ComputeSumAndSquaredSum(Partition partition, NodeProperties property) {
+            super(partition, property);
             this.squaredSum = 0D;
             this.sum = 0D;
         }
 
         @Override
-        public void run() {
-            for (long nodeId = start; nodeId < (start + length); nodeId++) {
-                double propertyValue = properties.doubleValue(nodeId);
-                this.sum += propertyValue;
-                this.squaredSum += propertyValue * propertyValue;
-            }
+        void compute(long nodeId) {
+            double propertyValue = properties.doubleValue(nodeId);
+            this.sum += propertyValue;
+            this.squaredSum += propertyValue * propertyValue;
         }
 
         double squaredSum() {

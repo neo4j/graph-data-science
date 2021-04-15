@@ -71,8 +71,18 @@ public final class GraphStoreCatalog {
         Consumer<GraphStoreWithConfig> removedGraphConsumer,
         boolean failOnMissing
     ) {
+        remove(username, databaseId.name(), graphName, removedGraphConsumer, failOnMissing);
+    }
+
+    public static void remove(
+        String username,
+        String databaseName,
+        String graphName,
+        Consumer<GraphStoreWithConfig> removedGraphConsumer,
+        boolean failOnMissing
+    ) {
         getUserCatalog(username).remove(
-            UserCatalog.UserCatalogKey.of(databaseId, graphName),
+            UserCatalog.UserCatalogKey.of(databaseName, graphName),
             removedGraphConsumer,
             failOnMissing
         );
@@ -123,7 +133,7 @@ public final class GraphStoreCatalog {
     }
 
     public static void removeAllLoadedGraphs(NamedDatabaseId databaseId) {
-        userCatalogs.forEach((user, userCatalog) -> userCatalog.remove(databaseId));
+        userCatalogs.forEach((user, userCatalog) -> userCatalog.remove(databaseId.name()));
     }
 
     public static Map<GraphCreateConfig, GraphStore> getGraphStores(String username) {
@@ -145,14 +155,18 @@ public final class GraphStoreCatalog {
 
             String graphName();
 
-            NamedDatabaseId namedDatabaseId();
+            String databaseName();
 
-            static UserCatalogKey of(GraphCreateConfig createConfig, NamedDatabaseId databaseId) {
-                return of(databaseId, createConfig.graphName());
+            static UserCatalogKey of(GraphCreateConfig createConfig, String databaseName) {
+                return of(databaseName, createConfig.graphName());
             }
 
             static UserCatalogKey of(NamedDatabaseId databaseId, String graphName) {
-                return ImmutableUserCatalogKey.of(graphName, databaseId);
+                return of(databaseId.name(), graphName);
+            }
+
+            static UserCatalogKey of(String databaseName, String graphName) {
+                return ImmutableUserCatalogKey.of(graphName, databaseName);
             }
         }
 
@@ -216,7 +230,7 @@ public final class GraphStoreCatalog {
                     formatWithLocale(
                         "Graph with name `%s` does not exist on database `%s`.",
                         graphName,
-                        userCatalogKey.namedDatabaseId().name()
+                        userCatalogKey.databaseName()
                     ),
                     graphName,
                     availableGraphNames
@@ -251,8 +265,8 @@ public final class GraphStoreCatalog {
             });
         }
 
-        private void remove(NamedDatabaseId databaseId) {
-            graphsByName.keySet().removeIf(userCatalogKey -> userCatalogKey.namedDatabaseId() == databaseId);
+        private void remove(String databaseName) {
+            graphsByName.keySet().removeIf(userCatalogKey -> userCatalogKey.databaseName().equals(databaseName));
         }
 
         private Map<GraphCreateConfig, GraphStore> getGraphStores() {
@@ -266,7 +280,7 @@ public final class GraphStoreCatalog {
 
         private Map<GraphCreateConfig, GraphStore> getGraphStores(NamedDatabaseId databaseId) {
             return graphsByName.entrySet().stream()
-                .filter(entry -> entry.getKey().namedDatabaseId().equals(databaseId))
+                .filter(entry -> entry.getKey().databaseName().equals(databaseId.name()))
                 .collect(Collectors.toMap(
                     entry -> entry.getValue().config(),
                     entry -> entry.getValue().graphStore()

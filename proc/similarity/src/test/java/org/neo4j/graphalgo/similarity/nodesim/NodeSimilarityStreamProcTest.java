@@ -59,6 +59,8 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
     private static final Collection<String> EXPECTED_INCOMING = new HashSet<>();
     private static final Collection<String> EXPECTED_TOP_OUTGOING = new HashSet<>();
     private static final Collection<String> EXPECTED_TOP_INCOMING = new HashSet<>();
+    private static final Collection<String> EXPECTED_DEGREE_CUTOFF_OUTGOING = new HashSet<>();
+    private static final Collection<String> EXPECTED_DEGREE_CUTOFF_INCOMING = new HashSet<>();
 
     private static String resultString(long node1, long node2, double similarity) {
         return formatWithLocale("%d,%d %f%n", node1, node2, similarity);
@@ -75,6 +77,16 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
 
         EXPECTED_TOP_OUTGOING.add(resultString(0, 1, 2 / 3.0));
         EXPECTED_TOP_OUTGOING.add(resultString(1, 0, 2 / 3.0));
+
+        EXPECTED_DEGREE_CUTOFF_OUTGOING.add(resultString(0, 1, 2 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_OUTGOING.add(resultString(1, 0, 2 / 3.0));
+
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(4,5, 3.0 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(5,4 ,3.0 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(4,6 ,1 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(6,4 ,1 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(5,6 ,1 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(6,5 ,1 / 3.0));
 
         EXPECTED_INCOMING.add(resultString(4, 5, 3.0 / 3.0));
         EXPECTED_INCOMING.add(resultString(4, 6, 1 / 3.0));
@@ -135,6 +147,33 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
             orientation == REVERSE
                 ? EXPECTED_TOP_INCOMING
                 : EXPECTED_TOP_OUTGOING,
+            result
+        );
+    }
+
+    @ParameterizedTest(name = "{2}")
+    @MethodSource("org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityProcTest#allValidGraphVariationsWithProjections")
+    void shouldStreamWithDegreeCutOff(GdsCypher.QueryBuilder queryBuilder, Orientation orientation, String testName) {
+        int degreeCutoff = 2;
+
+        Collection<String> result = new HashSet<>();
+        String query = queryBuilder
+            .algo("nodeSimilarity")
+            .streamMode()
+            .addParameter("degreeCutoff", degreeCutoff)
+            .yields("node1", "node2", "similarity");
+
+        runQueryWithRowConsumer(query, row -> {
+            long node1 = row.getNumber("node1").longValue();
+            long node2 = row.getNumber("node2").longValue();
+            double similarity = row.getNumber("similarity").doubleValue();
+            result.add(resultString(node1, node2, similarity));
+        });
+
+        assertEquals(
+            orientation == REVERSE
+                ? EXPECTED_DEGREE_CUTOFF_INCOMING
+                : EXPECTED_DEGREE_CUTOFF_OUTGOING,
             result
         );
     }

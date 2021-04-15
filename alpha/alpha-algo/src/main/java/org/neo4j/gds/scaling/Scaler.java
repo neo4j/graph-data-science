@@ -19,14 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.graphalgo.api.NodeProperties;
-
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import java.util.List;
 
 public interface Scaler {
 
@@ -34,99 +27,31 @@ public interface Scaler {
 
     double scaleProperty(long nodeId);
 
-    Scaler ZERO_SCALER = nodeId -> 0;
+    int dimension();
 
-    enum Variant {
-        NONE {
-            @Override
-            public Scaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return properties::doubleValue;
-            }
-        },
-        MAX {
-            @Override
-            public Scaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return Max.create(properties, nodeCount, concurrency, executor);
-            }
-        },
-        MINMAX {
-            @Override
-            public Scaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return MinMax.create(properties, nodeCount, concurrency, executor);
-            }
-        },
-        MEAN {
-            @Override
-            public Scaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return Mean.create(properties, nodeCount, concurrency, executor);
-            }
-        },
-        LOG {
-            @Override
-            public Scaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return LogTransformer.create(properties);
-            }
-        },
-        STDSCORE {
-            @Override
-            public Scaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return StdScore.create(properties, nodeCount, concurrency, executor);
-            }
-        },
-        L1NORM {
-            @Override
-            public Scaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return L1Norm.create(properties, nodeCount, concurrency, executor);
-            }
-        },
-        L2NORM {
-            @Override
-            public Scaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
-            ) {
-                return L2Norm.create(properties, nodeCount, concurrency, executor);
-            }
-        };
+    class ArrayScaler implements Scaler {
 
-        public static Variant lookup(String name) {
-            try {
-                return valueOf(name.toUpperCase(Locale.ENGLISH));
-            } catch (IllegalArgumentException e) {
-                String availableStrategies = Arrays
-                    .stream(values())
-                    .map(Variant::name)
-                    .collect(Collectors.joining(", "));
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Scaler `%s` is not supported. Must be one of: %s.",
-                    name,
-                    availableStrategies
-                ));
+        private final List<ScalarScaler> elementScalers;
+
+        ArrayScaler(List<ScalarScaler> elementScalers) {
+            this.elementScalers = elementScalers;
+        }
+
+        public void scaleProperty(long nodeId, double[] result, int offset) {
+            for (int i = 0; i < dimension(); i++) {
+                result[offset + i] = elementScalers.get(i).scaleProperty(nodeId);
             }
         }
 
-        public static String toString(Variant variant) {
-            return variant.name();
+        @Override
+        public double scaleProperty(long nodeId) {
+            throw new UnsupportedOperationException("Use the other scaleProperty method");
         }
 
-        public abstract Scaler create(
-            NodeProperties properties,
-            long nodeCount,
-            int concurrency,
-            ExecutorService executor
-        );
+        @Override
+        public int dimension() {
+            return elementScalers.size();
+        }
     }
+
 }

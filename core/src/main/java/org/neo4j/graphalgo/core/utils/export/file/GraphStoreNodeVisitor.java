@@ -32,8 +32,8 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
 
     private final NodesBuilder nodesBuilder;
 
-    public GraphStoreNodeVisitor(NodeSchema nodeSchema, NodesBuilder nodesBuilder, boolean reverseIdMapping) {
-        super(nodeSchema, reverseIdMapping);
+    public GraphStoreNodeVisitor(NodeSchema nodeSchema, NodesBuilder nodesBuilder) {
+        super(nodeSchema);
         this.nodesBuilder = nodesBuilder;
     }
 
@@ -42,9 +42,6 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
         NodeLabel[] nodeLabels = labels().stream().map(NodeLabel::of).toArray(NodeLabel[]::new);
         Map<String, Value> props = new HashMap<>();
         forEachProperty((key, value, type) -> {
-            if(NEO_ID_KEY.equals(key)) {
-                return;
-            }
             props.put(key, Values.of(value));
         });
 
@@ -67,7 +64,7 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
 
         @Override
         GraphStoreNodeVisitor build() {
-            return new GraphStoreNodeVisitor(nodeSchema, nodesBuilder, reverseIdMapping);
+            return new GraphStoreNodeVisitor(nodeSchema, nodesBuilder);
         }
     }
 }

@@ -40,15 +40,8 @@ public final class PartitionUtils {
     }
 
     public static <TASK> List<TASK> rangePartition(int concurrency, long nodeCount, long batchSize, Function<Partition, TASK> taskCreator) {
-        var result = new ArrayList<TASK>(concurrency);
-        for (long i = 0; i < nodeCount; i += batchSize) {
-            long actualBatchSize = i + batchSize < nodeCount ? batchSize : nodeCount - i;
-            result.add(taskCreator.apply(Partition.of(i, actualBatchSize)));
-        }
-
-        return result;
+        return tasks(concurrency, nodeCount, batchSize, taskCreator);
     }
-
 
     public static List<Partition> numberAlignedPartitioning(
         int concurrency,
@@ -65,6 +58,18 @@ public final class PartitionUtils {
         }
 
         return partitions;
+    }
+
+    public static <TASK> List<TASK> numberAlignedPartitioning(
+        int concurrency,
+        long nodeCount,
+        long alignTo,
+        Function<Partition, TASK> taskCreator
+    ) {
+        final long initialBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, alignTo);
+        final long remainder = initialBatchSize % alignTo;
+        final long adjustedBatchSize = remainder == 0 ? initialBatchSize : initialBatchSize + (alignTo - remainder);
+        return tasks(concurrency, nodeCount, adjustedBatchSize, taskCreator);
     }
 
     public static <TASK> List<TASK> degreePartition(Graph graph, long batchSize, Function<Partition, TASK> taskCreator) {
@@ -91,6 +96,20 @@ public final class PartitionUtils {
             long end = nodeId + 1;
             result.add(taskCreator.apply(Partition.of(start, end - start)));
             start = end;
+        }
+        return result;
+    }
+
+    private static <TASK> List<TASK> tasks(
+        int concurrency,
+        long nodeCount,
+        long batchSize,
+        Function<Partition, TASK> taskCreator
+    ) {
+        var result = new ArrayList<TASK>(concurrency);
+        for (long i = 0; i < nodeCount; i += batchSize) {
+            long actualBatchSize = i + batchSize < nodeCount ? batchSize : nodeCount - i;
+            result.add(taskCreator.apply(Partition.of(i, actualBatchSize)));
         }
         return result;
     }

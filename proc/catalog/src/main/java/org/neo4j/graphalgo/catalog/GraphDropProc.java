@@ -37,12 +37,17 @@ public class GraphDropProc extends CatalogProc {
     @Description(DESCRIPTION)
     public Stream<GraphInfo> drop(
         @Name(value = "graphName") String graphName,
-        @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
+        @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing,
+        @Name(value = "dbName", defaultValue = "") String dbName
     ) {
         validateGraphName(graphName);
 
+        if (dbName.isEmpty()) {
+            dbName = databaseId().name();
+        }
+
         AtomicReference<GraphInfo> result = new AtomicReference<>();
-        GraphStoreCatalog.remove(username(), databaseId(), graphName, (graphStoreWithConfig) ->
+        GraphStoreCatalog.remove(username(), dbName, graphName, (graphStoreWithConfig) ->
             result.set(GraphInfo.withoutMemoryUsage(graphStoreWithConfig.config(), graphStoreWithConfig.graphStore())), failIfMissing
         );
 

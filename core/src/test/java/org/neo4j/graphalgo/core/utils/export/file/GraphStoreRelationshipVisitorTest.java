@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.RelationshipPropertyStore;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -33,10 +34,12 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -65,13 +68,14 @@ class GraphStoreRelationshipVisitorTest {
     @Test
     void shouldAddRelationshipsToRelationshipBuilder() {
         var relationshipSchema = graphStore.schema().relationshipSchema();
-        var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
+
+        Map<String, RelationshipsBuilder> relationshipBuildersByType = new HashMap<>();
+        Supplier<RelationshipsBuilderBuilder> relationshipBuilderSupplier = () -> GraphFactory
+            .initRelationshipsBuilder()
             .concurrency(1)
             .nodes(graph)
             .tracker(AllocationTracker.empty());
-
-        ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
-        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipsBuilderBuilder, relationshipBuildersByType);
+        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipBuilderSupplier, relationshipBuildersByType);
 
         var relationshipTypeR = RelationshipType.of("R");
         var relationshipTypeR1 = RelationshipType.of("R1");
@@ -90,15 +94,13 @@ class GraphStoreRelationshipVisitorTest {
     @Test
     void shouldBuildRelationshipsWithMultipleProperties() {
         GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder = new GraphStoreRelationshipVisitor.Builder();
-        var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
-            .concurrency(1)
-            .nodes(multiplePropsGraph)
-            .tracker(AllocationTracker.empty());
-        ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
+        Map<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipVisitor = relationshipVisitorBuilder
-            .withRelationshipBuilderBuilder(relationshipsBuilderBuilder)
+            .withNodes(multiplePropsGraph)
             .withRelationshipSchema(multiplePropsGraph.schema().relationshipSchema())
             .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType)
+            .withAllocationTracker(AllocationTracker.empty())
+            .withConcurrency(1)
             .build();
 
         relationshipVisitor.type("R");

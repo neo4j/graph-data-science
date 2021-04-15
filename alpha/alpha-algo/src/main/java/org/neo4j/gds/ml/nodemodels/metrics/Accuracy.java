@@ -26,13 +26,15 @@ import java.util.Objects;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class F1Score implements Metric {
+public class Accuracy implements Metric {
 
-    public static final String NAME = "F1";
+    // TODO: Accuracy per class clashes with the global Accuracy metric.
+    // Let's solve that later, and call this APC for now.
+    public static final String NAME = "ACCURACY";
 
     private final long positiveTarget;
 
-    public F1Score(long positiveTarget) {
+    public Accuracy(long positiveTarget) {
         this.positiveTarget = positiveTarget;
     }
 
@@ -41,14 +43,16 @@ public class F1Score implements Metric {
         HugeLongArray targets, HugeLongArray predictions, Multiset<Long> ignore
     ) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
-                    "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
-                    targets.size(),
-                    predictions.size()
-                );
+            "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
+            targets.size(),
+            predictions.size()
+        );
 
-        long truePositives = 0L;
-        long falsePositives = 0L;
-        long falseNegatives = 0L;
+        if (targets.size() == 0) {
+            return 0;
+        }
+
+        long accurates = 0L;
         for (long row = 0; row < targets.size(); row++) {
 
             long targetClass = targets.get(row);
@@ -56,32 +60,18 @@ public class F1Score implements Metric {
 
             var predictedIsPositive = predictedClass == positiveTarget;
             var targetIsPositive = targetClass == positiveTarget;
-            var predictedIsNegative = !predictedIsPositive;
-            var targetIsNegative = !targetIsPositive;
 
-            if (predictedIsPositive && targetIsPositive) {
-                truePositives++;
+            if (predictedIsPositive == targetIsPositive) {
+                accurates++;
             }
 
-            if (predictedIsNegative && targetIsPositive) {
-                falseNegatives++;
-            }
-
-            if (predictedIsPositive && targetIsNegative) {
-                falsePositives++;
-            }
         }
 
-        var precision = truePositives / (truePositives + falsePositives + EPSILON);
-        var recall = truePositives / (truePositives + falseNegatives + EPSILON);
-        var result = 2 * (precision * recall) / (precision + recall + EPSILON);
-        assert result <= 1.0;
+        var result = ((double) accurates) / targets.size();
         return result;
     }
 
-    public double compute(
-        HugeLongArray targets, HugeLongArray predictions
-    ) {
+    public double compute(HugeLongArray targets, HugeLongArray predictions) {
         return compute(targets, predictions, null);
     }
 
@@ -89,8 +79,8 @@ public class F1Score implements Metric {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        F1Score f1Score = (F1Score) o;
-        return positiveTarget == f1Score.positiveTarget;
+        Accuracy accuracyScore = (Accuracy) o;
+        return positiveTarget == accuracyScore.positiveTarget;
     }
 
     @Override

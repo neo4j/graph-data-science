@@ -56,9 +56,12 @@ public class NonWeightedComputeStep extends BaseComputeStep implements Relations
     void singleIteration() {
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
             double delta = deltas[(int) (nodeId - startNode)];
+            // avoids rank computation
+            // TODO: is this equivalent of not receiving messages in Pregel?
             if (delta > 0.0) {
                 int degree = degrees.degree(nodeId);
                 if (degree > 0) {
+                    // this will be the value that we "send" to our neighbors
                     srcRankDelta = (float) (delta / degree);
                     relationshipIterator.forEachRelationship(nodeId, this);
                 }
@@ -70,8 +73,10 @@ public class NonWeightedComputeStep extends BaseComputeStep implements Relations
     @Override
     public boolean accept(long sourceNodeId, long targetNodeId) {
         if (srcRankDelta != 0F) {
+            // idx is partition id where the target lives
             int idx = binaryLookup(targetNodeId, starts);
-            nextScores[idx][(int) (targetNodeId - starts[idx])] += srcRankDelta;
+            int relativeTargetNodeId = (int) (targetNodeId - starts[idx]);
+            nextScores[idx][relativeTargetNodeId] += srcRankDelta;
         }
         return true;
     }

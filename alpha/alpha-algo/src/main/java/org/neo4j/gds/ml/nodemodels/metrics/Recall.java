@@ -26,20 +26,18 @@ import java.util.Objects;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class F1Score implements Metric {
+public class Recall implements Metric {
 
-    public static final String NAME = "F1";
+    public static final String NAME = "RECALL";
 
     private final long positiveTarget;
 
-    public F1Score(long positiveTarget) {
+    public Recall(long positiveTarget) {
         this.positiveTarget = positiveTarget;
     }
 
     @Override
-    public double compute(
-        HugeLongArray targets, HugeLongArray predictions, Multiset<Long> ignore
-    ) {
+    public double compute(HugeLongArray targets, HugeLongArray predictions, Multiset<Long> ignore) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
                     "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
                     targets.size(),
@@ -47,7 +45,6 @@ public class F1Score implements Metric {
                 );
 
         long truePositives = 0L;
-        long falsePositives = 0L;
         long falseNegatives = 0L;
         for (long row = 0; row < targets.size(); row++) {
 
@@ -57,7 +54,6 @@ public class F1Score implements Metric {
             var predictedIsPositive = predictedClass == positiveTarget;
             var targetIsPositive = targetClass == positiveTarget;
             var predictedIsNegative = !predictedIsPositive;
-            var targetIsNegative = !targetIsPositive;
 
             if (predictedIsPositive && targetIsPositive) {
                 truePositives++;
@@ -66,22 +62,12 @@ public class F1Score implements Metric {
             if (predictedIsNegative && targetIsPositive) {
                 falseNegatives++;
             }
-
-            if (predictedIsPositive && targetIsNegative) {
-                falsePositives++;
-            }
         }
 
-        var precision = truePositives / (truePositives + falsePositives + EPSILON);
-        var recall = truePositives / (truePositives + falseNegatives + EPSILON);
-        var result = 2 * (precision * recall) / (precision + recall + EPSILON);
-        assert result <= 1.0;
-        return result;
+        return truePositives / (truePositives + falseNegatives + EPSILON);
     }
 
-    public double compute(
-        HugeLongArray targets, HugeLongArray predictions
-    ) {
+    public double compute(HugeLongArray targets, HugeLongArray predictions) {
         return compute(targets, predictions, null);
     }
 
@@ -89,8 +75,8 @@ public class F1Score implements Metric {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        F1Score f1Score = (F1Score) o;
-        return positiveTarget == f1Score.positiveTarget;
+        Recall recallScore = (Recall) o;
+        return positiveTarget == recallScore.positiveTarget;
     }
 
     @Override

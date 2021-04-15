@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.centrality.eigenvector;
 
-import org.neo4j.gds.scaling.Scaler;
+import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
@@ -132,7 +132,7 @@ public final class EigenvectorCentralityProc extends AlgoBaseProc<PageRank, Page
     }
 
     private CentralityResult normalize(String scalerName, CentralityResult stats, int concurrency) {
-        var scaler = Scaler.Variant
+        var scaler = ScalarScaler.Variant
             .lookup(scalerName)
             .create(stats.asNodeProperties(), stats.array().size(), concurrency, Pools.DEFAULT);
         return new NormalizedCentralityResult(stats, scaler);

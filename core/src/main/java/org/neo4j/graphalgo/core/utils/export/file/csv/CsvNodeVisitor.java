@@ -49,10 +49,9 @@ public class CsvNodeVisitor extends NodeVisitor {
         Path fileLocation,
         NodeSchema nodeSchema,
         Set<String> headerFiles,
-        int visitorId,
-        boolean reverseIdMapping
+        int visitorId
     ) {
-        super(nodeSchema, reverseIdMapping);
+        super(nodeSchema);
         this.fileLocation = fileLocation;
         this.headerFiles = headerFiles;
         this.visitorId = visitorId;
@@ -61,8 +60,8 @@ public class CsvNodeVisitor extends NodeVisitor {
     }
 
     @TestOnly
-    public CsvNodeVisitor(Path fileLocation, NodeSchema nodeSchema, boolean reverseIdMapping) {
-        this(fileLocation, nodeSchema, new HashSet<>(), 0, reverseIdMapping);
+    public CsvNodeVisitor(Path fileLocation, NodeSchema nodeSchema) {
+        this(fileLocation, nodeSchema, new HashSet<>(), 0);
     }
 
     @Override

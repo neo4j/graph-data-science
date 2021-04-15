@@ -18,6 +18,18 @@ MATCH (p1:Author)-[:WROTE]->(a:Article)<-[:WROTE]-(p2:Author)
 RETURN id(p1) AS source, id(p2) AS target, count(a) AS weight
 ----
 
+Note that this is a structurally symmetric pattern.
+Say there are two authors, Bob and Alice, who wrote an article together.
+The query will match once with Bob as `p1` and Alice as `p2`, and then once with Bob as `p2` and Alice as `p1`.
+If we want to consider these paths to be the same, we can extend the pattern with a criterion that breaks the symmetry:
+
+[source, cypher, role=noplay]
+----
+MATCH (p1:Author)-[:WROTE]->(a:Article)<-[:WROTE]-(p2:Author)
+WHERE id(p1) < id(p2)
+RETURN id(p1) AS source, id(p2) AS target, count(a) AS weight
+----
+
 [NOTE]
 ====
 For certain Cypher patterns, the same behaviour can be achieved using the <<algorithms-collapse-path, Collapse Path>> algorithm in combination with native projections.

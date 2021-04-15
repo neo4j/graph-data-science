@@ -67,12 +67,12 @@ public class MetricSpecificationTest {
 
     @Test
     void shouldParseSyntacticSugar() {
-        var metricSpecification = MetricSpecification.parse(List.of("Accuracy", "F1")).get(1);
-        List<Metric> metrics = metricSpecification.createMetrics(List.of(42L, 1337L)).collect(Collectors.toList());
+        var metricSpecification = MetricSpecification.parse(List.of("Accuracy", "F1(class=*)")).get(1);
+        List<Metric> metrics = metricSpecification.createMetrics(List.of(42L, -1337L)).collect(Collectors.toList());
         assertThat(metrics.get(0).getClass()).isEqualTo(F1Score.class);
         assertThat(metrics.get(0).toString()).isEqualTo("F1_class_42");
         assertThat(metrics.get(1).getClass()).isEqualTo(F1Score.class);
-        assertThat(metrics.get(1).toString()).isEqualTo("F1_class_1337");
+        assertThat(metrics.get(1).toString()).isEqualTo("F1_class_-1337");
     }
 
     @ParameterizedTest
@@ -85,8 +85,18 @@ public class MetricSpecificationTest {
             );
     }
 
+    @Test
+    void shouldFailOnMultipleInvalidSingleClassSpecifications() {
+        assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> MetricSpecification.parse(invalidSingleClassSpecifications()))
+            .withMessageContaining(
+                "Invalid metric expressions"
+            );
+    }
+
+
     private static List<String> invalidSingleClassSpecifications() {
-        return List.of("F 1 ( class=2 3 4)", "F 1 ( class=000000003)", "f1(c las s = 01 0 30 2)", "JAMESBOND(class=0)");
+        return List.of("F 1 ( class=2 3 4)", "F 1 ( class=3)", "f1(c las s = 01 0 30 2)", "JAMESBOND(class=0)", "F1(class=$)");
     }
 
     public static List<String> allValidMetricSpecifications() {
@@ -96,7 +106,7 @@ public class MetricSpecificationTest {
             validExpressions.add(allClassExpression.name());
         }
         for (String singleClassMetric : MetricSpecification.SINGLE_CLASS_METRIC_FACTORIES.keySet()) {
-            validExpressions.add(singleClassMetric);
+            validExpressions.add(singleClassMetric + "(class=*)");
             validExpressions.add(singleClassMetric + "(class=0)");
         }
         return validExpressions;

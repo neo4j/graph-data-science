@@ -37,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 class NodeClassificationTrainProcTest extends BaseProcTest {
 
@@ -141,7 +140,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
         String resultAsString = runQuery(query, Result::resultAsString);
 
         assertThat(resultAsString).doesNotContain("f1_weighted", "aCcUrAcY", "f1(  ClAss = 0  )", "f1");
-        assertThat(resultAsString).contains("F1_WEIGHTED", "ACCURACY", "F1_class_0", "F1");
+        assertThat(resultAsString).contains("F1_WEIGHTED", "ACCURACY", "F1_class_0");
     }
 
     @Test
@@ -155,15 +154,19 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .addParameter("targetProperty", "t")
             .addParameter("holdoutFraction", 0.2)
             .addParameter("validationFolds", 4)
-            .addParameter("metrics", List.of("F1"))
+            .addParameter("metrics", List.of("F1(class=*)", "invalid"))
             .addParameter("params", List.of(Map.of("penalty", 1)))
             .yields();
 
-        assertError(query,"The primary (first) metric provided must be one of" );
+        assertError(query,
+            "The primary (first) metric provided must be one of " +
+            "F1_WEIGHTED, F1_MACRO, ACCURACY, ACCURACY(class=<class value>), " +
+            "F1(class=<class value>), PRECISION(class=<class value>), RECALL(class=<class value>). " +
+            "Invalid metric expression `invalid`.");
     }
 
     @Test
-    void shouldFailWithInvalidMetric() {
+    void shouldFailWithInvalidMetrics() {
 
         String query = GdsCypher
             .call()
@@ -174,11 +177,11 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .addParameter("targetProperty", "t")
             .addParameter("holdoutFraction", 0.2)
             .addParameter("validationFolds", 4)
-            .addParameter("metrics", List.of("foo"))
+            .addParameter("metrics", List.of("foo", "F1(class=-42)", "F1(class=bar)"))
             .addParameter("params", List.of(Map.of("penalty", 1)))
             .yields();
 
-        assertError(query, "Invalid metric expression `foo`.");
+        assertError(query, "Invalid metric expressions `foo`, `F1(class=bar)`.");
     }
 
     @Test
@@ -207,6 +210,66 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
                     "})";
 
         assertError(query, "No metrics specified, we require at least one");
+    }
+
+    @Test
+    void shouldHandlePerClassMetrics() {
+        var query = " CALL gds.alpha.ml.nodeClassification.train('g', {" +
+                    "   modelName: 'model'," +
+                    "   targetProperty: 't'," +
+                    "   metrics: ['PRECISION(class=0)', 'RECALL(class=0)', 'ACCURACY(class=0)', 'F1(class=0)']," +
+                    "   holdoutFraction: 0.2," +
+                    "   validationFolds: 5," +
+                    "   randomSeed: 42," +
+                    "   params: [{penalty: 1.0}]" +
+                    " }) YIELD modelInfo" +
+                    " RETURN " +
+                    "   modelInfo.metrics.F1_class_0.test AS f1_0," +
+                    "   modelInfo.metrics.PRECISION_class_0.test AS precision_0," +
+                    "   modelInfo.metrics.RECALL_class_0.test AS recall_0," +
+                    "   modelInfo.metrics.ACCURACY_class_0.test AS accuracy_0";
+        assertCypherResult(query, List.of(
+            Map.of(
+                "f1_0", 0.0,
+                "precision_0", 0.0,
+                "recall_0", 0.0,
+                "accuracy_0", 0.0
+            )
+        ));
+    }
+
+    @Test
+    void shouldHandleSyntacticSugarMetrics() {
+        var query = " CALL gds.alpha.ml.nodeClassification.train('g', {" +
+                    "   modelName: 'model'," +
+                    "   targetProperty: 't'," +
+                    "   metrics: ['F1_WEIGHTED', 'PRECISION(class=*)', 'RECALL(class=*)', 'ACCURACY(class=*)', 'F1(class=*)']," +
+                    "   holdoutFraction: 0.2," +
+                    "   validationFolds: 5," +
+                    "   randomSeed: 42," +
+                    "   params: [{penalty: 1.0}]" +
+                    " }) YIELD modelInfo" +
+                    " RETURN " +
+                    "   modelInfo.metrics.F1_class_0.test AS f1_0," +
+                    "   modelInfo.metrics.PRECISION_class_0.test AS precision_0," +
+                    "   modelInfo.metrics.RECALL_class_0.test AS recall_0," +
+                    "   modelInfo.metrics.ACCURACY_class_0.test AS accuracy_0," +
+                    "   modelInfo.metrics.F1_class_1.test AS f1_1," +
+                    "   modelInfo.metrics.PRECISION_class_1.test AS precision_1," +
+                    "   modelInfo.metrics.RECALL_class_1.test AS recall_1," +
+                    "   modelInfo.metrics.ACCURACY_class_1.test AS accuracy_1";
+        assertCypherResult(query, List.of(
+            Map.of(
+                "f1_0", 0.0,
+                "precision_0", 0.0,
+                "recall_0", 0.0,
+                "accuracy_0", 0.0,
+                "f1_1", 0.0,
+                "precision_1", 0.0,
+                "recall_1", 0.0,
+                "accuracy_1", 0.0
+            )
+        ));
     }
 
     public String createQuery() {

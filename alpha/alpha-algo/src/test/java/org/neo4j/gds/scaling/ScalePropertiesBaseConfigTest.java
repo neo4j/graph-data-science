@@ -39,8 +39,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
 class ScalePropertiesBaseConfigTest {
 
     @ParameterizedTest
-    @EnumSource(Scaler.Variant.class)
-    void parseValidScalers(Scaler.Variant scaler) {
+    @EnumSource(ScalarScaler.Variant.class)
+    void parseValidScalers(ScalarScaler.Variant scaler) {
         ScalePropertiesMutateConfigImpl config = new ScalePropertiesMutateConfigImpl(
             Optional.of("graph"),
             Optional.empty(),

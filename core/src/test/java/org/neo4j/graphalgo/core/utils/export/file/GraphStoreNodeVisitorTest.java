@@ -61,7 +61,7 @@ class GraphStoreNodeVisitorTest {
             .nodeCount(graph.nodeCount())
             .tracker(AllocationTracker.empty())
             .build();
-        GraphStoreNodeVisitor nodeVisitor = new GraphStoreNodeVisitor(nodeSchema, nodesBuilder, false);
+        GraphStoreNodeVisitor nodeVisitor = new GraphStoreNodeVisitor(nodeSchema, nodesBuilder);
         graph.forEachNode(nodeId -> {
             nodeVisitor.id(nodeId);
             Set<NodeLabel> nodeLabels = graph.nodeLabels(nodeId);

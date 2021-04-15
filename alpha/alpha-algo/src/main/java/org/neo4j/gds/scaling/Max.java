@@ -21,37 +21,32 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-final class Max implements Scaler {
+final class Max extends ScalarScaler {
 
-    private final NodeProperties properties;
     final double maxAbs;
 
     private Max(NodeProperties properties, double maxAbs) {
-        this.properties = properties;
+        super(properties);
         this.maxAbs = maxAbs;
     }
 
-    static Scaler create(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
-        if (nodeCount == 0) {
-            return ZERO_SCALER;
-        }
-
+    static ScalarScaler initialize(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new ComputeAggregates(partition.startNode(), partition.nodeCount(), properties)
+            partition -> new ComputeAbsMax(partition, properties)
         );
-
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
-        var absMax = tasks.stream().mapToDouble(ComputeAggregates::absMax).max().orElse(0);
+        var absMax = tasks.stream().mapToDouble(ComputeAbsMax::absMax).max().orElse(0);
 
         if (Math.abs(absMax) < CLOSE_TO_ZERO) {
-            return ZERO_SCALER;
+            return ZERO;
         } else {
             return new Max(properties, absMax);
         }
@@ -62,28 +57,20 @@ final class Max implements Scaler {
         return properties.doubleValue(nodeId) / maxAbs;
     }
 
-    static class ComputeAggregates implements Runnable {
+    static class ComputeAbsMax extends AggregatesComputer {
 
-        private final long start;
-        private final long length;
-        private final NodeProperties properties;
         private double absMax;
 
-        ComputeAggregates(long start, long length, NodeProperties property) {
-            this.start = start;
-            this.length = length;
-            this.properties = property;
+        ComputeAbsMax(Partition partition, NodeProperties property) {
+            super(partition, property);
             this.absMax = 0;
         }
 
         @Override
-        public void run() {
-            for (long nodeId = start; nodeId < (start + length); nodeId++) {
-                var absoluteValue = Math.abs(properties.doubleValue(nodeId));
-
-                if (absoluteValue > absMax) {
-                    absMax = absoluteValue;
-                }
+        void compute(long nodeId) {
+            var absoluteValue = Math.abs(properties.doubleValue(nodeId));
+            if (absoluteValue > absMax) {
+                absMax = absoluteValue;
             }
         }
 

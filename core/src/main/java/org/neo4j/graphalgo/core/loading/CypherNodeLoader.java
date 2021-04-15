@@ -52,7 +52,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     private final IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMapping;
 
     private final InternalHugeIdMappingBuilder builder;
-    private long maxNodeId;
+    private long highestNodeId;
     private CypherNodePropertyImporter nodePropertyImporter;
     private NodeImporter importer;
 
@@ -67,7 +67,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
         super(nodeQuery, nodeCount, api, config, loadingContext);
         this.nodeCount = nodeCount;
         this.outerDimensions = outerDimensions;
-        this.maxNodeId = 0L;
+        this.highestNodeId = 0L;
         this.labelTokenNodeLabelMapping = new IntObjectHashMap<>();
         this.builder = InternalHugeIdMappingBuilder.of(nodeCount, loadingContext.tracker());
     }
@@ -115,8 +115,8 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
 
     @Override
     void updateCounts(BatchLoadResult result) {
-        if (result.maxId() > maxNodeId) {
-            maxNodeId = result.maxId();
+        if (result.maxId() > highestNodeId) {
+            highestNodeId = result.maxId();
         }
     }
 
@@ -127,7 +127,7 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
             idMap = IdMapBuilder.buildChecked(
                 builder,
                 importer.nodeLabelBitSetMapping,
-                maxNodeId,
+                highestNodeId,
                 cypherConfig.readConcurrency(),
                 loadingContext.tracker()
             );

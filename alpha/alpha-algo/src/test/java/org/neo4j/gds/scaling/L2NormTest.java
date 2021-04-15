@@ -45,7 +45,7 @@ class L2NormTest {
     @ParameterizedTest
     @MethodSource("properties")
     void normalizes(NodeProperties properties, double euclideanLength, double[] expected) {
-        var scaler = (L2Norm) L2Norm.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = (L2Norm) L2Norm.initialize(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(scaler.euclideanLength).isEqualTo(euclideanLength);
 
@@ -56,7 +56,7 @@ class L2NormTest {
     @Test
     void avoidsDivByZero() {
         var properties = (DoubleNodeProperties) nodeId -> 0D;
-        var scaler = L2Norm.create(properties, 10, 1, Pools.DEFAULT);
+        var scaler = L2Norm.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);

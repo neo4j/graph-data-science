@@ -170,16 +170,14 @@ public final class CsvToGraphStoreExporter {
 
     private long exportRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker tracker) {
         int concurrency = config.writeConcurrency();
-        var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
-            .concurrency(concurrency)
-            .nodes(nodes)
-            .tracker(tracker);
 
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();
         this.relationshipVisitorBuilder
             .withRelationshipSchema(relationshipSchema)
-            .withRelationshipBuilderBuilder(relationshipsBuilderBuilder)
+            .withNodes(nodes)
+            .withConcurrency(concurrency)
+            .withAllocationTracker(tracker)
             .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType);
 
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
