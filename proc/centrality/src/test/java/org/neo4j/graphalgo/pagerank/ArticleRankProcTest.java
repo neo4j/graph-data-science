@@ -21,6 +21,9 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
@@ -28,6 +31,7 @@ import org.neo4j.graphalgo.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
@@ -41,6 +45,14 @@ public class ArticleRankProcTest extends BaseProcTest {
         ", (b:Label1 {name: 'b'})" +
         ", (a)-[:TYPE1]->(b)";
     public static final String GRAPH_NAME = "graph";
+
+    private static Stream<Arguments> estimations() {
+        Map<String, Long> expected = Map.of("bytesMin", 544L, "bytesMax", 544L);
+        return Stream.of(
+        Arguments.of(GdsCypher.ExecutionModes.STREAM, expected),
+        Arguments.of(GdsCypher.ExecutionModes.WRITE, expected),
+        Arguments.of(GdsCypher.ExecutionModes.MUTATE, expected)
+    );}
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -108,5 +120,27 @@ public class ArticleRankProcTest extends BaseProcTest {
                 "didConverge", true,
                 "ranIterations", 2L
             )));
+    }
+
+    @ParameterizedTest
+    @MethodSource("estimations")
+    void estimates(GdsCypher.ExecutionModes mode, Map<String, Object> expected) {
+        var queryBuilder = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
+            .algo("articleRank")
+            .estimationMode(mode);
+
+        switch (mode) {
+            case WRITE:
+                queryBuilder = queryBuilder.addParameter("writeProperty", "pr");
+                break;
+            case MUTATE:
+                queryBuilder = queryBuilder.addParameter("mutateProperty", "pr");
+                break;
+            default:
+                break;
+        }
+
+        assertCypherResult(queryBuilder.yields("bytesMin", "bytesMax"), List.of(expected));
     }
 }
