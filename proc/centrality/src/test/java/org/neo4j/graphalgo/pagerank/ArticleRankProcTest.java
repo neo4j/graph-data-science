@@ -44,7 +44,7 @@ public class ArticleRankProcTest extends BaseProcTest {
 
     @BeforeEach
     void setupGraph() throws Exception {
-        registerProcedures(GraphCreateProc.class, ArticleRankStreamProc.class, ArticleRankWriteProc.class);
+        registerProcedures(GraphCreateProc.class, ArticleRankStreamProc.class, ArticleRankWriteProc.class, ArticleRankMutateProc.class);
         runQuery("CALL gds.graph.create($graphName, '*', '*')", Map.of("graphName", GRAPH_NAME));
     }
 
@@ -77,6 +77,30 @@ public class ArticleRankProcTest extends BaseProcTest {
                 "createMillis", greaterThan(-1L),
                 "computeMillis", greaterThan(-1L),
                 "writeMillis", greaterThan(-1L),
+                "postProcessingMillis", greaterThan(-1L),
+                "configuration", isA(Map.class),
+                "centralityDistribution", isA(Map.class),
+                "nodePropertiesWritten", 2L,
+                "didConverge", true,
+                "ranIterations", 2L
+            )));
+    }
+
+    @Test
+    void mutate() {
+        String propertyKey = "pr";
+        String query = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
+            .algo("articleRank")
+            .mutateMode()
+            .addParameter("mutateProperty", propertyKey)
+            .yields();
+
+        assertCypherResult(query, List.of(
+            Map.of(
+                "createMillis", greaterThan(-1L),
+                "computeMillis", greaterThan(-1L),
+                "mutateMillis", greaterThan(-1L),
                 "postProcessingMillis", greaterThan(-1L),
                 "configuration", isA(Map.class),
                 "centralityDistribution", isA(Map.class),
