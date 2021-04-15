@@ -88,7 +88,8 @@ public final class AuraRestoreExtension extends ExtensionFactory<AuraRestoreExte
 
     private Stream<Path> getImportPaths(Path storePath) throws IOException {
         return Files.list(storePath)
-            .peek(CsvToGraphStoreExporter.DIRECTORY_IS_READABLE::validate);
+            .peek(CsvToGraphStoreExporter.DIRECTORY_IS_READABLE::validate)
+            .filter(graphDir -> Files.exists(graphDir.resolve(".autoload"))); // TODO: replace with the constant from AutoloadFileVisitor
     }
 
     interface Dependencies {

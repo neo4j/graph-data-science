@@ -75,6 +75,11 @@ class AuraRestoreExtensionTest extends BaseTest {
         assertGraphEquals(expectedGraph, testGraphStore.graphStore().getUnion());
     }
 
+    @Test
+    void shouldLoadOnlyAutoloadGraphStores() {
+        assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(1);
+    }
+
     private Path importPath() {
         try {
             var uri = Objects.requireNonNull(getClass().getClassLoader().getResource("AuraRestoreExtensionTest")).toURI();
