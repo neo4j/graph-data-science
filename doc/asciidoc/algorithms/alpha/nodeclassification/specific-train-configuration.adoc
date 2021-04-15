@@ -25,3 +25,4 @@
 | concurrency    | Integer | see description | yes      | Concurrency for training the model candidate. By default the value of the top level `concurrency` parameter is used.
 |===
 
+For hyperparameter tuning ideas, look <<algorithms-ml-models-tuning, here>>.

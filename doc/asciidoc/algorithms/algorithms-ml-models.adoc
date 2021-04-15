@@ -19,3 +19,30 @@ The Neo4j GDS library includes the following machine learning models, grouped by
 include::alpha/nodeclassification/nodeclassification.adoc[leveloffset=+1]
 
 include::alpha/linkprediction/linkprediction.adoc[leveloffset=+1]
+
+[[algorithms-ml-models-tuning]]
+== Tuning parameters for training
+
+Both <<algorithms-ml-nodeclassification, Node Classification>> and <<algorithms-ml-linkprediction, Link Prediction>> have training parameters that can be tuned automatically given a set of allowed values.
+The parameters `maxEpochs`, `tolerance` and `patience` control for how long the training will run until termination.
+These parameters give ways to limit a computational budget. In general, higher `maxEpochs` and `patience` and lower `tolerance` lead to longer training but higher quality models.
+It is however well-known that restricting the computational budget can serve the purpose of regularization and mitigate overfitting.
+
+When faced with a heavy training task, a strategy to perform hyperparameter optimization faster, is to initially use lower values for the budget related parameters while exploring better ranges for other general or algorithm specific parameters.
+
+More precisely, `maxEpochs` is the maximum number of epochs trained until termination.
+Whether the training exhausted the maximum number of epochs or converged prior is reported in the neo4j debug log.
+
+As for `patience` and `tolerance`, the former is the maximum number of consecutive epochs that do not improve the training loss at least by a `tolerance` fraction of the current loss.
+After `patience` such unproductive epochs, the training is terminated.
+In our experience, reasonable values for `patience` are in the range `1` to `3`.
+
+It is also possible, via `minEpochs`, to control a minimum number of epochs before the above termination criteria enter into play.
+
+The training algorithm applied to the above algorithms is stochastic gradient descent.
+The gradient updates are computed batch-wise on batches of `batchSize` examples, and batches are computed concurrently on `concurrency` threads.
+Thus `batchSize` and `concurrency` can affect the convergence rate, but since the algorithms above optimize convex functions, the resulting model is in theory (approximately) unique.
+
+The gradient updates are further managed by the ADAM optimizer.
+Configuring `sharedUpdater` controls whether the threads share a single updater and its state, or if each thread uses a dedicated updater.
+In our experience, the default value of `false` is better.
