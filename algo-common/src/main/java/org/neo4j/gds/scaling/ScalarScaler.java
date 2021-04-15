@@ -120,20 +120,23 @@ public abstract class ScalarScaler implements Scaler {
             }
         };
 
-        public static Variant lookup(String name) {
-            try {
-                return valueOf(name.toUpperCase(Locale.ENGLISH));
-            } catch (IllegalArgumentException e) {
-                String availableStrategies = Arrays
-                    .stream(values())
-                    .map(Variant::name)
-                    .collect(Collectors.joining(", "));
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Scaler `%s` is not supported. Must be one of: %s.",
-                    name,
-                    availableStrategies
-                ));
+        public static Variant lookup(Object name) {
+            if (name instanceof String) {
+                try {
+                    return valueOf(((String) name).toUpperCase(Locale.ENGLISH));
+                } catch (IllegalArgumentException e) {
+                    String availableStrategies = Arrays
+                        .stream(values())
+                        .map(Variant::name)
+                        .collect(Collectors.joining(", "));
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Scaler `%s` is not supported. Must be one of: %s.",
+                        name,
+                        availableStrategies
+                    ));
+                }
             }
+            return (Variant) name;
         }
 
         public static String toString(Variant variant) {

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -257,7 +258,56 @@ class PageRankPregelTest {
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(1e-6));
+                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+            }
+        }
+    }
+
+    @Nested
+    class EigenVectorGraph {
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Node { expectedL1: 0.04658, expectedL2: 0.09099, expectedMean: -0.15783 })" +
+            ", (b:Node { expectedL1: 0.36717, expectedL2: 0.71721, expectedMean:  0.78947 })" +
+            ", (c:Node { expectedL1: 0.34073, expectedL2: 0.66557, expectedMean:  0.71136 })" +
+            ", (d:Node { expectedL1: 0.04195, expectedL2: 0.08194, expectedMean: -0.17152 })" +
+            ", (e:Node { expectedL1: 0.04658, expectedL2: 0.09099, expectedMean: -0.15783 })" +
+            ", (f:Node { expectedL1: 0.04195, expectedL2: 0.08194, expectedMean: -0.17152 })" +
+            ", (g:Node { expectedL1: 0.02875, expectedL2: 0.05616, expectedMean: -0.21052 })" +
+            ", (h:Node { expectedL1: 0.02875, expectedL2: 0.05616, expectedMean: -0.21052 })" +
+            ", (i:Node { expectedL1: 0.02875, expectedL2: 0.05616, expectedMean: -0.21052 })" +
+            ", (j:Node { expectedL1: 0.02875, expectedL2: 0.05616, expectedMean: -0.21052 })" +
+            ",  (b)-[:TYPE]->(c)" +
+            ",  (c)-[:TYPE]->(b)" +
+            ",  (d)-[:TYPE]->(a)" +
+            ",  (d)-[:TYPE]->(b)" +
+            ",  (e)-[:TYPE]->(b)" +
+            ",  (e)-[:TYPE]->(d)" +
+            ",  (e)-[:TYPE]->(f)" +
+            ",  (f)-[:TYPE]->(b)" +
+            ",  (f)-[:TYPE]->(e)";
+
+        @Inject
+        private Graph graph;
+
+        @ParameterizedTest
+        @CsvSource({"L1NORM, expectedL1", "L2NORM, expectedL2", "MEAN, expectedMean"})
+        void test(ScalarScaler.Variant variant, String expectedPropertyKey) {
+            var config = ImmutablePageRankPregelConfig
+                .builder()
+                .maxIterations(40)
+                .tolerance(0)
+                .concurrency(1)
+                .normalization(variant)
+                .build();
+
+            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR).scores();
+
+            var expected = graph.nodeProperties(expectedPropertyKey);
+
+            for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
     }
@@ -289,10 +339,14 @@ class PageRankPregelTest {
             .tolerance(config.tolerance())
             .isAsynchronous(false);
 
+        return runOnPregel(graph, configBuilder.build(), mode);
+    }
+
+    PageRankPregelResult runOnPregel(Graph graph, PageRankPregelConfig config, Mode mode) {
         return new PageRankPregelAlgorithmFactory<>(mode)
             .build(
                 graph,
-                configBuilder.build(),
+                config,
                 AllocationTracker.empty(),
                 NullLog.getInstance(),
                 EmptyProgressEventTracker.INSTANCE

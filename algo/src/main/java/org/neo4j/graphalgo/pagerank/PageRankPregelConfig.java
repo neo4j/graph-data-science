@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.beta.pregel.Partitioning;
@@ -55,6 +56,13 @@ public interface PageRankPregelConfig extends
     @Configuration.DoubleRange(min = 0, max = 1, maxInclusive = false)
     default double dampingFactor() {
         return 0.85;
+    }
+
+    @Value.Default
+    @Configuration.ConvertWith("org.neo4j.gds.scaling.ScalarScaler.Variant#lookup")
+    @Configuration.ToMapValue("org.neo4j.gds.scaling.ScalarScaler.Variant#toString")
+    default ScalarScaler.Variant normalization() {
+        return ScalarScaler.Variant.NONE;
     }
 
     @Deprecated

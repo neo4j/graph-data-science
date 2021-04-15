@@ -19,17 +19,24 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
 public class PageRankPregelAlgorithm extends Algorithm<PageRankPregelAlgorithm, PageRankPregelResult> {
 
     private final Pregel<PageRankPregelConfig> pregelJob;
+    private final Graph graph;
+    private final PageRankPregelConfig config;
+    private final ExecutorService executorService;
 
     PageRankPregelAlgorithm(
         Graph graph,
@@ -39,17 +46,44 @@ public class PageRankPregelAlgorithm extends Algorithm<PageRankPregelAlgorithm, 
         AllocationTracker tracker
     ) {
         this.pregelJob = Pregel.create(graph, config, pregelComputation, executorService, tracker);
+        this.executorService = executorService;
+        this.config = config;
+        this.graph = graph;
     }
 
     @Override
     public PageRankPregelResult compute() {
         var pregelResult = pregelJob.run();
 
+        HugeDoubleArray scores = pregelResult.nodeValues().doubleProperties(PageRankPregel.PAGE_RANK);
+
+        normalizeScores(scores);
+
         return ImmutablePageRankPregelResult.builder()
-            .scores(pregelResult.nodeValues().doubleProperties(PageRankPregel.PAGE_RANK))
+            .scores(scores)
             .iterations(pregelResult.ranIterations())
             .didConverge(pregelResult.didConverge())
             .build();
+    }
+
+    private void normalizeScores(HugeDoubleArray scores) {
+        var normalization = config.normalization();
+        if (normalization == ScalarScaler.Variant.NONE) {
+            return;
+        }
+
+        var scaler = normalization.create(
+            scores.asNodeProperties(),
+            graph.nodeCount(),
+            config.concurrency(),
+            executorService
+        );
+
+        var tasks = PartitionUtils.rangePartition(config.concurrency(), graph.nodeCount(),
+            partition -> (Runnable) () -> partition.consume(nodeId -> scores.set(nodeId, scaler.scaleProperty(nodeId)))
+        );
+
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executorService);
     }
 
     @Override
