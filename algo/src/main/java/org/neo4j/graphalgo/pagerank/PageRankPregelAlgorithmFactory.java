@@ -28,12 +28,12 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.logging.Log;
 
-public class PageRankPregelAlgorithmFactory implements AlgorithmFactory<PageRankPregelAlgorithm, PageRankPregelConfig> {
+public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig> implements AlgorithmFactory<PageRankPregelAlgorithm, CONFIG> {
 
     @Override
     public PageRankPregelAlgorithm build(
         Graph graph,
-        PageRankPregelConfig configuration,
+        CONFIG configuration,
         AllocationTracker tracker,
         Log log,
         ProgressEventTracker eventTracker

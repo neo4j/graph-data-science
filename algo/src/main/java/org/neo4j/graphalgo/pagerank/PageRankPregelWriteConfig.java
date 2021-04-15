@@ -19,65 +19,30 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.SeedConfig;
-import org.neo4j.graphalgo.config.SourceNodesConfig;
-import org.neo4j.graphalgo.config.ToleranceConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
 @ValueClass
-@Configuration("PageRankPregelConfigImpl")
+@Configuration
 @SuppressWarnings("immutables:subtype")
-public interface PageRankPregelConfig extends
-    PregelConfig,
-    SeedConfig,
-    ToleranceConfig,
-    SourceNodesConfig
-{
-    @Value.Default
-    @Override
-    default double tolerance() {
-        return 1E-7;
-    }
+public interface PageRankPregelWriteConfig extends PageRankPregelConfig, WritePropertyConfig {
 
-    @Value.Default
-    @Override
-    default int maxIterations() {
-        return 20;
-    }
-
-    @Value.Default
-    @Configuration.DoubleRange(min = 0, max = 1, maxInclusive = false)
-    default double dampingFactor() {
-        return 0.85;
-    }
-
-    @Deprecated
-    @Value.Default
-    default boolean cacheWeights() {
-        return false;
-    }
-
-    @Value.Default
-    @Configuration.Ignore
-    default PageRankPregel.Mode mode() {
-        return relationshipWeightProperty() != null
-            ? PageRankPregel.Mode.WEIGHTED
-            : PageRankPregel.Mode.UNWEIGHTED;
-    }
-
-    static PageRankPregelConfig of(
+    static PageRankPregelWriteConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new PageRankPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new PageRankPregelWriteConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            userInput
+        );
     }
 }

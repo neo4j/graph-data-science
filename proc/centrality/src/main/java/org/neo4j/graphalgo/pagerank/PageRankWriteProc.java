@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWriteProc.WriteResult, PageRankWriteConfig> {
+public class PageRankWriteProc extends WriteProc<PageRankPregelAlgorithm, PageRankPregelResult, PageRankWriteProc.WriteResult, PageRankPregelWriteConfig> {
 
     @Procedure(value = "gds.pageRank.write", mode = WRITE)
     @Description(PAGE_RANK_DESCRIPTION)
@@ -48,7 +48,7 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRank, PageRank, PageRankWriteConfig> computationResult = compute(
+        ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelWriteConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -65,12 +65,12 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelWriteConfig> computationResult) {
         return PageRankProc.nodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankWriteConfig> computeResult) {
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelWriteConfig> computeResult) {
         return PageRankProc.resultBuilder(
             new WriteResult.Builder(callContext, computeResult.config().concurrency()),
             computeResult
@@ -78,24 +78,24 @@ public class PageRankWriteProc extends WriteProc<PageRank, PageRank, PageRankWri
     }
 
     @Override
-    protected AlgorithmFactory<PageRank, PageRankWriteConfig> algorithmFactory() {
-        return new PageRankFactory<>();
+    protected AlgorithmFactory<PageRankPregelAlgorithm, PageRankPregelWriteConfig> algorithmFactory() {
+        return new PageRankPregelAlgorithmFactory<>();
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankWriteConfig config) {
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankPregelWriteConfig config) {
         super.validateConfigs(graphCreateConfig, config);
         PageRankProc.validateAlgoConfig(config, log);
     }
 
     @Override
-    protected PageRankWriteConfig newConfig(
+    protected PageRankPregelWriteConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return PageRankWriteConfig.of(username, graphName, maybeImplicitCreate, config);
+        return PageRankPregelWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @SuppressWarnings("unused")

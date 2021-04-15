@@ -32,24 +32,24 @@ final class PageRankProc {
 
     private PageRankProc() {}
 
-    static <PROC_RESULT, CONFIG extends PageRankBaseConfig> PageRankResultBuilder<PROC_RESULT> resultBuilder(
+    static <PROC_RESULT, CONFIG extends PageRankPregelConfig> PageRankResultBuilder<PROC_RESULT> resultBuilder(
         PageRankResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<PageRank, PageRank, CONFIG> computeResult
+        AlgoBaseProc.ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, CONFIG> computeResult
     ) {
-        PageRank result = computeResult.result();
+        var result = computeResult.result();
         procResultBuilder
             .withDidConverge(!computeResult.isGraphEmpty() && result.didConverge())
             .withRanIterations(!computeResult.isGraphEmpty() ? result.iterations() : 0)
-            .withCentralityFunction(!computeResult.isGraphEmpty() ? computeResult.result().result()::score : null);
+            .withCentralityFunction(!computeResult.isGraphEmpty() ? computeResult.result().scores()::get : null);
 
         return procResultBuilder;
     }
 
-    static <CONFIG extends PageRankBaseConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<PageRank, PageRank, CONFIG> computeResult) {
-        return computeResult.result().result().asNodeProperties();
+    static <CONFIG extends PageRankPregelConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, CONFIG> computeResult) {
+        return computeResult.result().scores().asNodeProperties();
     }
 
-    static <CONFIG extends PageRankBaseConfig> void validateAlgoConfig(CONFIG config, Log log) {
+    static <CONFIG extends PageRankPregelConfig> void validateAlgoConfig(CONFIG config, Log log) {
         if (config.cacheWeights()) {
             log.warn("The configuration parameter `cacheWeights` is deprecated and has no effect.");
         }

@@ -35,11 +35,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implements
-    WritePropertyConfigTest<PageRank, PageRankWriteConfig, PageRank> {
+class PageRankWriteProcTest extends PageRankProcTest<PageRankPregelWriteConfig> implements
+    WritePropertyConfigTest<PageRankPregelAlgorithm, PageRankPregelWriteConfig, PageRankPregelResult> {
 
     @Override
-    public Class<? extends AlgoBaseProc<PageRank, PageRank, PageRankWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelWriteConfig>> getProcedureClazz() {
         return PageRankWriteProc.class;
     }
 
@@ -172,8 +172,8 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
     }
 
     @Override
-    public PageRankWriteConfig createConfig(CypherMapWrapper mapWrapper) {
-        return PageRankWriteConfig.of(
+    public PageRankPregelWriteConfig createConfig(CypherMapWrapper mapWrapper) {
+        return PageRankPregelWriteConfig.of(
             "",
             Optional.empty(),
             Optional.empty(),

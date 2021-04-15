@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, PageRankMutateProc.MutateResult, PageRankMutateConfig> {
+public class PageRankMutateProc extends MutatePropertyProc<PageRankPregelAlgorithm, PageRankPregelResult, PageRankMutateProc.MutateResult, PageRankPregelMutateConfig> {
 
     @Procedure(value = "gds.pageRank.mutate", mode = READ)
     @Description(PAGE_RANK_DESCRIPTION)
@@ -47,7 +47,7 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, P
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRank, PageRank, PageRankMutateConfig> computationResult = compute(
+        ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -64,27 +64,27 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, P
     }
 
     @Override
-    protected PageRankMutateConfig newConfig(
+    protected PageRankPregelMutateConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return PageRankMutateConfig.of(username, graphName, maybeImplicitCreate, config);
+        return PageRankPregelMutateConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<PageRank, PageRankMutateConfig> algorithmFactory() {
-        return new PageRankFactory<>();
+    protected AlgorithmFactory<PageRankPregelAlgorithm, PageRankPregelMutateConfig> algorithmFactory() {
+        return new PageRankPregelAlgorithmFactory<>();
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelMutateConfig> computationResult) {
         return PageRankProc.nodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<PageRank, PageRank, PageRankMutateConfig> computeResult) {
+    protected AbstractResultBuilder<MutateResult> resultBuilder(ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelMutateConfig> computeResult) {
         return PageRankProc.resultBuilder(
             new MutateResult.Builder(callContext, computeResult.config().concurrency()),
             computeResult
@@ -92,7 +92,7 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRank, PageRank, P
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankMutateConfig config) {
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankPregelMutateConfig config) {
         super.validateConfigs(graphCreateConfig, config);
         PageRankProc.validateAlgoConfig(config, log);
     }

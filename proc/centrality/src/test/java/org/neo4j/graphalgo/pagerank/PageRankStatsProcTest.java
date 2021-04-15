@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig> {
+public class PageRankStatsProcTest extends PageRankProcTest<PageRankPregelStatsConfig> {
 
     @Neo4jGraph
     private static final String DB_CYPHER = "CREATE " +
@@ -57,13 +57,13 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<PageRank, PageRank, PageRankStatsConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelStatsConfig>> getProcedureClazz() {
         return PageRankStatsProc.class;
     }
 
     @Override
-    public PageRankStatsConfig createConfig(CypherMapWrapper mapWrapper) {
-        return PageRankStatsConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+    public PageRankPregelStatsConfig createConfig(CypherMapWrapper mapWrapper) {
+        return PageRankPregelStatsConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Test

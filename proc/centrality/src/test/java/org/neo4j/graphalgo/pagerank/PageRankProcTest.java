@@ -61,13 +61,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
-abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<PageRank, CONFIG, PageRank>,
-    IterationsConfigTest<PageRank, CONFIG, PageRank>,
-    RelationshipWeightConfigTest<PageRank, CONFIG, PageRank>,
-    ToleranceConfigTest<PageRank, CONFIG, PageRank>,
-    MemoryEstimateTest<PageRank, CONFIG, PageRank>,
-    HeapControlTest<PageRank, CONFIG, PageRank> {
+abstract class PageRankProcTest<CONFIG extends PageRankPregelConfig> extends BaseProcTest implements
+    AlgoBaseProcTest<PageRankPregelAlgorithm, CONFIG, PageRankPregelResult>,
+    IterationsConfigTest<PageRankPregelAlgorithm, CONFIG, PageRankPregelResult>,
+    RelationshipWeightConfigTest<PageRankPregelAlgorithm, CONFIG, PageRankPregelResult>,
+    ToleranceConfigTest<PageRankPregelAlgorithm, CONFIG, PageRankPregelResult>,
+    MemoryEstimateTest<PageRankPregelAlgorithm, CONFIG, PageRankPregelResult>,
+    HeapControlTest<PageRankPregelAlgorithm, CONFIG, PageRankPregelResult> {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
@@ -269,9 +269,9 @@ abstract class PageRankProcTest<CONFIG extends PageRankBaseConfig> extends BaseP
     }
 
     @Override
-    public void assertResultEquals(PageRank result1, PageRank result2) {
-        HugeDoubleArray resultArray1 = result1.result().array();
-        HugeDoubleArray resultArray2 = result2.result().array();
+    public void assertResultEquals(PageRankPregelResult result1, PageRankPregelResult result2) {
+        HugeDoubleArray resultArray1 = result1.scores();
+        HugeDoubleArray resultArray2 = result2.scores();
         assertArrayEquals(resultArray1.toArray(), resultArray2.toArray());
     }
 
