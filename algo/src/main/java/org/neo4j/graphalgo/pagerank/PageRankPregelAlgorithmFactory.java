@@ -32,7 +32,25 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 
 import java.util.function.LongToDoubleFunction;
 
+import static org.neo4j.graphalgo.pagerank.PageRankPregelAlgorithmFactory.Mode.ARTICLE_RANK;
+
 public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig> extends AbstractAlgorithmFactory<PageRankPregelAlgorithm, CONFIG> {
+
+    public enum Mode {
+        DEFAULT,
+        ARTICLE_RANK,
+        EIGENVECTOR,
+    }
+
+    private final Mode mode;
+
+    public PageRankPregelAlgorithmFactory() {
+        this(Mode.DEFAULT);
+    }
+
+    public PageRankPregelAlgorithmFactory(Mode mode) {
+        this.mode = mode;
+    }
 
     @Override
     protected long taskVolume(Graph graph, PageRankPregelConfig configuration) {
@@ -63,7 +81,7 @@ public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig>
             degreeFunction = graph::degree;
         }
 
-        if (configuration.mode() == PageRankPregelConfig.Mode.ARTICLE_RANK) {
+        if (mode == ARTICLE_RANK) {
             double avgDegree = GraphStatistics.averageDegree(graph, configuration.concurrency());
             var tempFn = degreeFunction;
             degreeFunction = nodeId -> tempFn.applyAsDouble(nodeId) + avgDegree;

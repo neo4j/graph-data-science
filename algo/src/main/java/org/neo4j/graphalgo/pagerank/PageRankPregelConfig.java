@@ -39,12 +39,6 @@ public interface PageRankPregelConfig extends
     ToleranceConfig,
     SourceNodesConfig
 {
-    enum Mode {
-        DEFAULT,
-        ARTICLE_RANK,
-        EIGENVECTOR,
-    }
-
     @Value.Default
     @Override
     default double tolerance() {
@@ -67,12 +61,6 @@ public interface PageRankPregelConfig extends
     @Value.Default
     default boolean cacheWeights() {
         return false;
-    }
-
-    @Value.Default
-    @Configuration.Ignore
-    default Mode mode() {
-        return Mode.DEFAULT;
     }
 
     @Override

@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
+import org.neo4j.graphalgo.pagerank.PageRankPregelAlgorithmFactory.Mode;
 import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
@@ -136,7 +137,7 @@ class PageRankPregelTest {
                 .build();
 
             var actualGds = runOnGds(graph, config, sourceNodeIds).result().asNodeProperties();
-            var actualPregel = runOnPregel(graph, config, sourceNodeIds, false)
+            var actualPregel = runOnPregel(graph, config, sourceNodeIds, Mode.DEFAULT)
                 .scores()
                 .asNodeProperties();
 
@@ -249,7 +250,7 @@ class PageRankPregelTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config, new long[0], true)
+            var actual = runOnPregel(graph, config, new long[0], Mode.ARTICLE_RANK)
                 .scores()
                 .asNodeProperties();
 
@@ -275,10 +276,10 @@ class PageRankPregelTest {
     }
 
     PageRankPregelResult runOnPregel(Graph graph, PageRankBaseConfig config) {
-        return runOnPregel(graph, config, new long[0], false);
+        return runOnPregel(graph, config, new long[0], Mode.DEFAULT);
     }
 
-    PageRankPregelResult runOnPregel(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds, boolean articleRank) {
+    PageRankPregelResult runOnPregel(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds, Mode mode) {
         var configBuilder = ImmutablePageRankPregelConfig.builder()
             .maxIterations(config.maxIterations() + 1)
             .dampingFactor(config.dampingFactor())
@@ -288,11 +289,7 @@ class PageRankPregelTest {
             .tolerance(config.tolerance())
             .isAsynchronous(false);
 
-        if (articleRank) {
-            configBuilder.mode(PageRankPregelConfig.Mode.ARTICLE_RANK);
-        }
-
-        return new PageRankPregelAlgorithmFactory<>()
+        return new PageRankPregelAlgorithmFactory<>(mode)
             .build(
                 graph,
                 configBuilder.build(),
