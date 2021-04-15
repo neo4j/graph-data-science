@@ -56,17 +56,17 @@ public class AuraShutdownProc extends BaseProc {
             }
         }
 
-        var took = timer.getDuration();
-        if (TimeUnit.MILLISECONDS.toSeconds(took) > timeoutInSeconds) {
+        var elapsedTimeInSeconds = TimeUnit.MILLISECONDS.toSeconds(timer.getDuration());
+        if (elapsedTimeInSeconds > timeoutInSeconds) {
             log.warn(
                 "Shutdown took too long, the actual time of %d seconds is greater than the provided timeout of %d seconds",
-                TimeUnit.MILLISECONDS.toSeconds(took),
+                elapsedTimeInSeconds,
                 timeoutInSeconds
             );
         } else {
             log.info(
                 "Shutdown happened within the given timeout, it took %d seconds and the provided timeout as %d seconds.",
-                TimeUnit.MILLISECONDS.toSeconds(took),
+                elapsedTimeInSeconds,
                 timeoutInSeconds
             );
         }
