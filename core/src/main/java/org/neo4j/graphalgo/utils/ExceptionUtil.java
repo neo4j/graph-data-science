@@ -143,7 +143,7 @@ public final class ExceptionUtil {
             throw new IllegalArgumentException(
                 formatWithLocale(
                     "Failed to load a relationship because its %s-node with id %s is not part of the node query or projection. " +
-                    "To ignore the relationship, set the configuration parameter `relationshipValidation` to false.",
+                    "To ignore the relationship, set the configuration parameter `validateRelationships` to false.",
                     side,
                     neoId
                 )
