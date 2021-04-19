@@ -53,7 +53,15 @@ public class CELF extends Algorithm<CELF, CELF> {
      * monteCarloSimulations:   Number of Monte-Carlo simulations
      * propagationProbability:  Propagation Probability
      */
-    public CELF(Graph graph, int seedSetCount, double propagationProbability, int monteCarloSimulations, ExecutorService executorService, int concurrency, AllocationTracker tracker) {
+    public CELF(
+        Graph graph,
+        int seedSetCount,
+        double propagationProbability,
+        int monteCarloSimulations,
+        ExecutorService executorService,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
         this.graph = graph;
         long nodeCount = graph.nodeCount();
 
@@ -90,14 +98,20 @@ public class CELF extends Algorithm<CELF, CELF> {
 
         tasks.clear();
         //Calculate the first iteration sorted list
-        graph.forEachNode(
-                node ->
-                {
-                    if (!seedSetNodes.containsKey(node)) {
-                        tasks.add(new IndependentCascadeTask(graph, propagationProbability, monteCarloSimulations, node, seedSetNodes.keys().toArray(), spreads, tracker));
-                    }
-                    return true;
-                });
+        graph.forEachNode(node -> {
+            if (!seedSetNodes.containsKey(node)) {
+                tasks.add(new IndependentCascadeTask(
+                    graph,
+                    propagationProbability,
+                    monteCarloSimulations,
+                    node,
+                    seedSetNodes.keys().toArray(),
+                    spreads,
+                    tracker
+                ));
+            }
+            return true;
+        });
         ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
         //Add the node with the highest spread to the seed set
         highestScore = spreads.cost(spreads.top());
@@ -114,7 +128,15 @@ public class CELF extends Algorithm<CELF, CELF> {
             do {
                 highestNode = spreads.pop();
                 //Recalculate the spread of the top node
-                ParallelUtil.run(new IndependentCascadeTask(graph, propagationProbability, monteCarloSimulations, highestNode, seedSetNodes.keys().toArray(), spreads, tracker), executorService);
+                ParallelUtil.run(new IndependentCascadeTask(
+                    graph,
+                    propagationProbability,
+                    monteCarloSimulations,
+                    highestNode,
+                    seedSetNodes.keys().toArray(),
+                    spreads,
+                    tracker
+                ), executorService);
                 spreads.set(highestNode, spreads.cost(highestNode) - gain);
             }//Check if previous top node stayed on top after the sort
             while (highestNode != spreads.top());
@@ -142,6 +164,6 @@ public class CELF extends Algorithm<CELF, CELF> {
 
     public Stream<InfluenceMaximizationResult> resultStream() {
         return LongStream.of(seedSetNodes.keys().toArray())
-                .mapToObj(node -> new InfluenceMaximizationResult(graph.toOriginalNodeId(node), getNodeSpread(node)));
+            .mapToObj(node -> new InfluenceMaximizationResult(graph.toOriginalNodeId(node), getNodeSpread(node)));
     }
 }

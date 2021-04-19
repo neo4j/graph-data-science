@@ -45,10 +45,14 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
     @Procedure(name = "gds.alpha.influenceMaximization.greedy.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<InfluenceMaximizationResult> stream(
-            @Name(value = "graphName") Object graphNameOrConfig,
-            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
 
-        ComputationResult<Greedy, Greedy, InfluenceMaximizationConfig> computationResult = compute(graphNameOrConfig, configuration);
+        ComputationResult<Greedy, Greedy, InfluenceMaximizationConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
 
         if (computationResult.graph().isEmpty()) {
             computationResult.graph().release();
@@ -62,28 +66,31 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
     @Procedure(name = "gds.alpha.influenceMaximization.greedy.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<InfluenceMaximizationResult.Stats> stats(
-            @Name(value = "graphName") Object graphNameOrConfig,
-            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Greedy, Greedy, InfluenceMaximizationConfig> computationResult = compute(graphNameOrConfig, configuration);
+        ComputationResult<Greedy, Greedy, InfluenceMaximizationConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
 
         InfluenceMaximizationConfig config = computationResult.config();
         Graph graph = computationResult.graph();
 
         AbstractResultBuilder<InfluenceMaximizationResult.Stats> builder = new InfluenceMaximizationResult.Stats.Builder()
-                .withNodeCount(graph.nodeCount())
-                .withConfig(config)
-                .withComputeMillis(computationResult.computeMillis());
+            .withNodeCount(graph.nodeCount())
+            .withConfig(config)
+            .withComputeMillis(computationResult.computeMillis());
 
         return Stream.of(builder.build());
     }
 
     @Override
     protected InfluenceMaximizationConfig newConfig(
-            String username,
-            Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitCreate,
-            CypherMapWrapper config
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
     ) {
         return new InfluenceMaximizationConfigImpl(graphName, maybeImplicitCreate, username, config);
     }
@@ -91,13 +98,13 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
     @Override
     protected AlgorithmFactory<Greedy, InfluenceMaximizationConfig> algorithmFactory() {
         return (AlphaAlgorithmFactory<Greedy, InfluenceMaximizationConfig>) (graph, configuration, tracker, log, eventTracker) -> new Greedy(
-                graph,
-                configuration.k(),
-                configuration.p(),
-                configuration.mc(),
-                Pools.DEFAULT,
-                configuration.concurrency(),
-                tracker
+            graph,
+            configuration.k(),
+            configuration.p(),
+            configuration.mc(),
+            Pools.DEFAULT,
+            configuration.concurrency(),
+            tracker
         );
     }
 }

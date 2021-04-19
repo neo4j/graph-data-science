@@ -42,8 +42,15 @@ final class IndependentCascadeTask implements Runnable {
     private final Random rand;
     private double spread;
 
-    public IndependentCascadeTask(Graph graph, double propagationProbability, long monteCarloSimulations, long candidateNode, long[] seedSetNodes, HugeLongPriorityQueue spreads,
-                                  AllocationTracker tracker) {
+    public IndependentCascadeTask(
+        Graph graph,
+        double propagationProbability,
+        long monteCarloSimulations,
+        long candidateNode,
+        long[] seedSetNodes,
+        HugeLongPriorityQueue spreads,
+        AllocationTracker tracker
+    ) {
         this.graph = graph.concurrentCopy();
 
         this.propagationProbability = propagationProbability;

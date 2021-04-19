@@ -21,8 +21,7 @@ package org.neo4j.graphalgo.results;
 
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
-public class InfluenceMaximizationResult
-{
+public class InfluenceMaximizationResult {
     public final long nodeId;
     public final double spread;
 
@@ -41,8 +40,9 @@ public class InfluenceMaximizationResult
         public final long computeMillis;
 
         public Stats(
-                long nodes,
-                long computeMillis) {
+            long nodes,
+            long computeMillis
+        ) {
             this.nodes = nodes;
             this.computeMillis = computeMillis;
         }
@@ -52,8 +52,8 @@ public class InfluenceMaximizationResult
             @Override
             public InfluenceMaximizationResult.Stats build() {
                 return new InfluenceMaximizationResult.Stats(
-                        nodeCount,
-                        computeMillis
+                    nodeCount,
+                    computeMillis
                 );
             }
         }

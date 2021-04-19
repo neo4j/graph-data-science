@@ -51,7 +51,15 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
      * monteCarloSimulations:   Number of Monte-Carlo simulations
      * propagationProbability:  Propagation Probability
      */
-    public Greedy(Graph graph, int seedSetCount, double propagationProbability, int monteCarloSimulations, ExecutorService executorService, int concurrency, AllocationTracker tracker) {
+    public Greedy(
+        Graph graph,
+        int seedSetCount,
+        double propagationProbability,
+        int monteCarloSimulations,
+        ExecutorService executorService,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
         this.graph = graph;
         long nodeCount = graph.nodeCount();
 
@@ -83,14 +91,20 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
             tasks.clear();
             spreads.clear();
             //Over nodes that are not yet in seed set find biggest marginal gain
-            graph.forEachNode(
-                    node ->
-                    {
-                        if (!seedSetNodes.containsKey(node)) {
-                            tasks.add(new IndependentCascadeTask(graph, propagationProbability, monteCarloSimulations, node, seedSetNodes.keys().toArray(), spreads, tracker));
-                        }
-                        return true;
-                    });
+            graph.forEachNode(node -> {
+                if (!seedSetNodes.containsKey(node)) {
+                    tasks.add(new IndependentCascadeTask(
+                        graph,
+                        propagationProbability,
+                        monteCarloSimulations,
+                        node,
+                        seedSetNodes.keys().toArray(),
+                        spreads,
+                        tracker
+                    ));
+                }
+                return true;
+            });
             ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
             highestScore = spreads.cost(spreads.top());
             highestNode = spreads.pop();
@@ -114,6 +128,6 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
 
     public Stream<InfluenceMaximizationResult> resultStream() {
         return LongStream.of(seedSetNodes.keys().toArray())
-                .mapToObj(node -> new InfluenceMaximizationResult(graph.toOriginalNodeId(node), getNodeSpread(node)));
+            .mapToObj(node -> new InfluenceMaximizationResult(graph.toOriginalNodeId(node), getNodeSpread(node)));
     }
 }

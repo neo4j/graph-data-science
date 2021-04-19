@@ -30,7 +30,9 @@ import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  *     (c)-----|
@@ -45,42 +47,42 @@ import static org.mockito.Mockito.*;
  *    \(i)/--------| |
  *     (j)-----------|
  */
-public class CELFProcTest extends BaseProcTest {
+class CELFProcTest extends BaseProcTest {
     private static final String DB_CYPHER =
-            "CREATE " +
-                    "  (a:Node)" +
-                    ", (b:Node)" +
-                    ", (c:Node)" +
-                    ", (d:Node)" +
-                    ", (e:Node)" +
-                    ", (f:Node)" +
-                    ", (g:Node)" +
-                    ", (h:Node)" +
-                    ", (i:Node)" +
-                    ", (j:Node)" +
+        "CREATE " +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+        ", (g:Node)" +
+        ", (h:Node)" +
+        ", (i:Node)" +
+        ", (j:Node)" +
 
-                    ", (a)-[:RELATIONSHIP]->(c)" +
-                    ", (a)-[:RELATIONSHIP]->(d)" +
-                    ", (a)-[:RELATIONSHIP]->(e)" +
-                    ", (a)-[:RELATIONSHIP]->(f)" +
-                    ", (a)-[:RELATIONSHIP]->(g)" +
-                    ", (a)-[:RELATIONSHIP]->(h)" +
-                    ", (a)-[:RELATIONSHIP]->(i)" +
-                    ", (a)-[:RELATIONSHIP]->(j)" +
+        ", (a)-[:RELATIONSHIP]->(c)" +
+        ", (a)-[:RELATIONSHIP]->(d)" +
+        ", (a)-[:RELATIONSHIP]->(e)" +
+        ", (a)-[:RELATIONSHIP]->(f)" +
+        ", (a)-[:RELATIONSHIP]->(g)" +
+        ", (a)-[:RELATIONSHIP]->(h)" +
+        ", (a)-[:RELATIONSHIP]->(i)" +
+        ", (a)-[:RELATIONSHIP]->(j)" +
 
-                    ", (b)-[:RELATIONSHIP]->(c)" +
-                    ", (b)-[:RELATIONSHIP]->(d)" +
-                    ", (b)-[:RELATIONSHIP]->(e)" +
-                    ", (b)-[:RELATIONSHIP]->(f)" +
-                    ", (b)-[:RELATIONSHIP]->(g)" +
-                    ", (b)-[:RELATIONSHIP]->(h)" +
-                    ", (b)-[:RELATIONSHIP]->(i)" +
-                    ", (b)-[:RELATIONSHIP]->(j)" +
+        ", (b)-[:RELATIONSHIP]->(c)" +
+        ", (b)-[:RELATIONSHIP]->(d)" +
+        ", (b)-[:RELATIONSHIP]->(e)" +
+        ", (b)-[:RELATIONSHIP]->(f)" +
+        ", (b)-[:RELATIONSHIP]->(g)" +
+        ", (b)-[:RELATIONSHIP]->(h)" +
+        ", (b)-[:RELATIONSHIP]->(i)" +
+        ", (b)-[:RELATIONSHIP]->(j)" +
 
-                    ", (c)-[:RELATIONSHIP]->(g)" +
-                    ", (d)-[:RELATIONSHIP]->(h)" +
-                    ", (e)-[:RELATIONSHIP]->(i)" +
-                    ", (f)-[:RELATIONSHIP]->(j)";
+        ", (c)-[:RELATIONSHIP]->(g)" +
+        ", (d)-[:RELATIONSHIP]->(h)" +
+        ", (e)-[:RELATIONSHIP]->(i)" +
+        ", (f)-[:RELATIONSHIP]->(j)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -88,16 +90,16 @@ public class CELFProcTest extends BaseProcTest {
         runQuery(DB_CYPHER);
 
         String graphCreateQuery = GdsCypher.call()
-                .withNodeLabel("Node")
-                .withRelationshipType(
-                        "RELATIONSHIP",
-                        RelationshipProjection.of(
-                                "RELATIONSHIP",
-                                Orientation.NATURAL,
-                                Aggregation.DEFAULT
-                        )
-                ).graphCreate("celfGraph")
-                .yields();
+            .withNodeLabel("Node")
+            .withRelationshipType(
+                "RELATIONSHIP",
+                RelationshipProjection.of(
+                    "RELATIONSHIP",
+                    Orientation.NATURAL,
+                    Aggregation.DEFAULT
+                )
+            ).graphCreate("celfGraph")
+            .yields();
 
         runQuery(graphCreateQuery);
     }
@@ -112,14 +114,14 @@ public class CELFProcTest extends BaseProcTest {
         final Consumer consumer = mock(Consumer.class);
 
         final String cypher = "CALL gds.alpha.influenceMaximization.celf.stream" +
-                "('celfGraph'," +
-                "{" +
-                "   k:  2," +
-                "   p:  0.2," +
-                "   mc: 10," +
-                "   concurrency: 2" +
-                "})" +
-                "YIELD nodeId, spread RETURN nodeId, spread";
+                              "('celfGraph'," +
+                              "{" +
+                              "   k:  2," +
+                              "   p:  0.2," +
+                              "   mc: 10," +
+                              "   concurrency: 2" +
+                              "})" +
+                              "YIELD nodeId, spread RETURN nodeId, spread";
 
         runQueryWithRowConsumer(cypher, (tx, row) -> {
             long nodeId = row.getNumber("nodeId").longValue();

@@ -27,9 +27,8 @@ import org.neo4j.graphalgo.config.WritePropertyConfig;
 
 @Configuration
 @ValueClass
-@SuppressWarnings( "immutables:subtype" )
-public interface InfluenceMaximizationConfig extends AlgoBaseConfig, WritePropertyConfig
-{ //BaseConfig
+@SuppressWarnings("immutables:subtype")
+public interface InfluenceMaximizationConfig extends AlgoBaseConfig, WritePropertyConfig { //BaseConfig
     String DEFAULT_TARGET_PROPERTY = "spread";
 
     @Configuration.IntegerRange(min = 1)

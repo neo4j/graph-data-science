@@ -45,10 +45,14 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
     @Procedure(name = "gds.alpha.influenceMaximization.celf.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<InfluenceMaximizationResult> stream(
-            @Name(value = "graphName") Object graphNameOrConfig,
-            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration) {
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
 
-        ComputationResult<CELF, CELF, InfluenceMaximizationConfig> computationResult = compute(graphNameOrConfig, configuration);
+        ComputationResult<CELF, CELF, InfluenceMaximizationConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
 
         if (computationResult.graph().isEmpty()) {
             computationResult.graph().release();
@@ -62,28 +66,31 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
     @Procedure(name = "gds.alpha.influenceMaximization.celf.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<InfluenceMaximizationResult.Stats> stats(
-            @Name(value = "graphName") Object graphNameOrConfig,
-            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<CELF, CELF, InfluenceMaximizationConfig> computationResult = compute(graphNameOrConfig, configuration);
+        ComputationResult<CELF, CELF, InfluenceMaximizationConfig> computationResult = compute(
+            graphNameOrConfig,
+            configuration
+        );
 
         InfluenceMaximizationConfig config = computationResult.config();
         Graph graph = computationResult.graph();
 
         AbstractResultBuilder<InfluenceMaximizationResult.Stats> builder = new InfluenceMaximizationResult.Stats.Builder()
-                .withNodeCount(graph.nodeCount())
-                .withConfig(config)
-                .withComputeMillis(computationResult.computeMillis());
+            .withNodeCount(graph.nodeCount())
+            .withConfig(config)
+            .withComputeMillis(computationResult.computeMillis());
 
-        return Stream.of( builder.build() );
+        return Stream.of(builder.build());
     }
 
     @Override
     protected InfluenceMaximizationConfig newConfig(
-            String username,
-            Optional<String> graphName,
-            Optional<GraphCreateConfig> maybeImplicitCreate,
-            CypherMapWrapper config
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
     ) {
         return new InfluenceMaximizationConfigImpl(graphName, maybeImplicitCreate, username, config);
     }
@@ -91,13 +98,13 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
     @Override
     protected AlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
         return (AlphaAlgorithmFactory<CELF, InfluenceMaximizationConfig>) (graph, configuration, tracker, log, eventTracker) -> new CELF(
-                graph,
-                configuration.k(),
-                configuration.p(),
-                configuration.mc(),
-                Pools.DEFAULT,
-                configuration.concurrency(),
-                tracker
+            graph,
+            configuration.k(),
+            configuration.p(),
+            configuration.mc(),
+            Pools.DEFAULT,
+            configuration.concurrency(),
+            tracker
         );
     }
 }
