@@ -31,15 +31,15 @@ import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 
 @ServiceProvider
-public final class AuraMaintenanceFunctionExtension extends ExtensionFactory<AuraMaintenanceFunctionExtension.Dependencies> {
+public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMaintenanceExtension.Dependencies> {
 
     @SuppressWarnings("unused - entry point for service loader")
-    public AuraMaintenanceFunctionExtension() {
+    public AuraMaintenanceExtension() {
         super(ExtensionType.GLOBAL, "gds.aura.maintenance");
     }
 
     @Override
-    public Lifecycle newInstance(ExtensionContext context, AuraMaintenanceFunctionExtension.Dependencies dependencies) {
+    public Lifecycle newInstance(ExtensionContext context, AuraMaintenanceExtension.Dependencies dependencies) {
         var enabled = dependencies.config().get(AuraMaintenanceSettings.maintenance_function_enabled);
         if (enabled) {
             var registry = dependencies.globalProceduresRegistry();

@@ -62,7 +62,7 @@ class AuraMaintenanceFunctionTest extends BaseTest {
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
         builder.setConfig(AuraMaintenanceSettings.maintenance_function_enabled, true);
-        builder.addExtension(new AuraMaintenanceFunctionExtension());
+        builder.addExtension(new AuraMaintenanceExtension());
     }
 
     @AfterEach
@@ -118,7 +118,7 @@ class AuraMaintenanceFunctionTest extends BaseTest {
         protected void configuration(TestDatabaseManagementServiceBuilder builder) {
             super.configuration(builder);
             builder.setConfig(AuraMaintenanceSettings.maintenance_function_enabled, true);
-            builder.addExtension(new AuraMaintenanceFunctionExtension());
+            builder.addExtension(new AuraMaintenanceExtension());
             builder.setConfig(ProgressFeatureSettings.progress_tracking_enabled, true);
             // make sure that we 1) have our extension under test and 2) have it only once
             builder.removeExtensions(ex -> ex instanceof ProgressEventConsumerExtension);
@@ -173,7 +173,7 @@ class AuraMaintenanceFunctionTest extends BaseTest {
         protected void configuration(TestDatabaseManagementServiceBuilder builder) {
             super.configuration(builder);
             builder.setConfig(AuraMaintenanceSettings.maintenance_function_enabled, false);
-            builder.addExtension(new AuraMaintenanceFunctionExtension());
+            builder.addExtension(new AuraMaintenanceExtension());
         }
 
         @Test
