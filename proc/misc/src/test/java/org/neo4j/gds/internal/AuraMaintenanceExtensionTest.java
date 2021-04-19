@@ -50,7 +50,8 @@ class AuraMaintenanceExtensionTest extends BaseTest {
         builder
             .setConfig(GraphStoreExportSettings.export_location_setting, importPath())
             .setConfig(AuraMaintenanceSettings.maintenance_function_enabled, true)
-            .addExtension(new AuraMaintenanceExtension());
+            .removeExtensions(ext -> ext instanceof AuraMaintenanceExtension)
+            .addExtension(new AuraMaintenanceExtension(true));
     }
 
     @Test

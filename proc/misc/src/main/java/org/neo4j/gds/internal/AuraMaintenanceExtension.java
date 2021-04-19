@@ -48,9 +48,16 @@ import java.util.stream.Stream;
 @ServiceProvider
 public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMaintenanceExtension.Dependencies> {
 
+    private final boolean blockOnRestore;
+
     @SuppressWarnings("unused - entry point for service loader")
     public AuraMaintenanceExtension() {
+        this(false);
+    }
+
+    public AuraMaintenanceExtension(boolean blockOnRestore) {
         super(ExtensionType.GLOBAL, "gds.aura.maintenance");
+        this.blockOnRestore = blockOnRestore;
     }
 
     @Override
@@ -63,13 +70,16 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
                 registry.register(new AuraShutdownProc(), false);
                 return LifecycleAdapter.onInit(() -> {
                     var jobScheduler = dependencies.jobScheduler();
-                    jobScheduler.schedule(
+                    var jobHandle = jobScheduler.schedule(
                         Group.FILE_IO_HELPER,
                         () -> restorePersistedGraphs(
                             dependencies.config(),
                             dependencies.logService()
                         )
                     );
+                    if (blockOnRestore) {
+                        jobHandle.waitTermination();
+                    }
                 });
             } catch (ProcedureException e) {
                 dependencies.logService()
