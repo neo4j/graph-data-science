@@ -131,7 +131,7 @@ public class BaseProcTest extends BaseTest {
                 assertEquals(
                     entry.getValue(),
                     score,
-                    0.1,
+                    1e-5,
                     "score for " + entry.getKey()
                 );
             }
