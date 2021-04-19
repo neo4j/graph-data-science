@@ -186,7 +186,7 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
 
         var steps = PartitionUtils.degreePartition(
             new SetBitsIterable(nodesToColor).primitiveLongIterator(),
-            graph,
+            graph::degree,
             adjustedBatchSize,
             partition -> new ColoringStep(
                 graph.concurrentCopy(),

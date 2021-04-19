@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.partition;
 
-import org.neo4j.graphalgo.api.Degrees;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
@@ -73,12 +72,12 @@ public final class PartitionUtils {
     }
 
     public static <TASK> List<TASK> degreePartition(Graph graph, long batchSize, Function<Partition, TASK> taskCreator) {
-        return degreePartition(graph.nodeIterator(), graph, batchSize, taskCreator);
+        return degreePartition(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
     }
 
     public static <TASK> List<TASK> degreePartition(
         PrimitiveLongIterator nodes,
-        Degrees degrees,
+        DegreeFunction degrees,
         long batchSize,
         Function<Partition, TASK> taskCreator
     ) {
@@ -98,6 +97,11 @@ public final class PartitionUtils {
             start = end;
         }
         return result;
+    }
+
+    @FunctionalInterface
+    public interface DegreeFunction {
+        int degree(long node);
     }
 
     private static <TASK> List<TASK> tasks(

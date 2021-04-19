@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-final class ZigZagLongDecoding {
+public final class ZigZagLongDecoding {
 
-    static int zigZagUncompress(byte[] array, int limit, long[] out) {
+    public static int zigZagUncompress(byte[] array, int limit, long[] out) {
         return zigZagUncompress(array, 0, limit, out);
     }
 

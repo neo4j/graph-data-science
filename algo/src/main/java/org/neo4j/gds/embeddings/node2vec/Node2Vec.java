@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -42,7 +41,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
                 var randomWalkMemoryUsage = MemoryUsage.sizeOfLongArray(config.walkLength());
                 return HugeObjectArray.memoryEstimation(numberOfRandomWalks, randomWalkMemoryUsage);
             })
-            .add("probability cache", ProbabilityComputer.memoryEstimation())
+            .add("probability cache", RandomWalkProbabilities.memoryEstimation())
             .add("model", Node2VecModel.memoryEstimation(config))
             .build();
     }
@@ -67,30 +66,23 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
             config.randomSeed()
         );
 
-        HugeObjectArray<long[]> tempWalks = HugeObjectArray.newArray(
-            long[].class,
-            graph.nodeCount() * config.walksPerNode(),
-            tracker
-        );
-
-        MutableLong counter = new MutableLong(0);
-        randomWalk.compute().forEach(walk -> tempWalks.set(counter.getAndIncrement(), walk));
-        var walks = tempWalks.copyOf(counter.longValue(), tracker);
-
-        var probabilityComputer = new ProbabilityComputer(
-            walks,
+        var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             graph.nodeCount(),
-            config.centerSamplingFactor(),
-            config.contextSamplingExponent(),
-            config.concurrency(),
+            config.centerSamplingFactor(), config.contextSamplingExponent(), config.concurrency(),
             tracker
         );
+        var walks = new CompressedRandomWalks(graph.nodeCount() * config.walksPerNode(), tracker);
+
+        randomWalk.compute().forEach(walk -> {
+            probabilitiesBuilder.registerWalk(walk);
+            walks.add(walk);
+        });
 
         var node2VecModel = new Node2VecModel(
             graph.nodeCount(),
             config,
             walks,
-            probabilityComputer,
+            probabilitiesBuilder.build(),
             progressLogger,
             tracker
         );

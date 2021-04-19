@@ -35,7 +35,7 @@ public class NegativeSampleProducer {
         this.cumulativeProbability = contextNodeDistribution.get(contextNodeDistribution.size() - 1);
     }
 
-    public long nextSample() {
+    public long next() {
         long index = contextNodeDistribution.binarySearch(ThreadLocalRandom.current().nextLong(cumulativeProbability));
 
         if (index < contextNodeDistribution.size() - 1) {
