@@ -64,9 +64,7 @@ public final class AuraRestoreExtension extends ExtensionFactory<AuraRestoreExte
                             .build();
                         var graphStoreImporter = CsvToGraphStoreExporter.create(config, path);
 
-                        var start = System.nanoTime();
                         graphStoreImporter.run(AllocationTracker.empty());
-                        var end = System.nanoTime();
 
                         var graphStore = graphStoreImporter.userGraphStore();
 
