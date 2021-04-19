@@ -50,9 +50,9 @@ public class StratifiedKFoldSplitter {
     private final HugeLongArray ids;
     private final RandomDataGenerator random;
 
-    static MemoryEstimation memoryEstimation(int k) {
+    public static MemoryEstimation memoryEstimation(int k, double trainFraction) {
         return MemoryEstimations.setup("", (dimensions) ->  {
-            var nodeCount = dimensions.nodeCount();
+            long nodeCount = (long) (dimensions.nodeCount() * trainFraction);
             var builder = MemoryEstimations.builder(StratifiedKFoldSplitter.class);
             int baseBucketSize = (int) nodeCount / k;
             for (int fold = 0; fold < k; fold++) {
