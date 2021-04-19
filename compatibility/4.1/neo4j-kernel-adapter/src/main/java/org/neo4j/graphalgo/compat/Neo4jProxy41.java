@@ -55,6 +55,7 @@ import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
+import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -88,6 +89,7 @@ import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.LocalMemoryTracker;
 import org.neo4j.memory.MemoryPools;
 import org.neo4j.memory.MemoryTracker;
+import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.values.storable.ValueGroup;
@@ -442,6 +444,40 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
             allowed,
             description,
             caseInsensitive
+        );
+    }
+
+    @Override
+    public ProcedureSignature procedureSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        List<FieldSignature> outputSignature,
+        Mode mode,
+        boolean admin,
+        String deprecated,
+        String[] allowed,
+        String description,
+        String warning,
+        boolean eager,
+        boolean caseInsensitive,
+        boolean systemProcedure,
+        boolean internal,
+        boolean allowExpiredCredentials
+    ) {
+        return new ProcedureSignature(
+            name,
+            inputSignature,
+            outputSignature,
+            mode,
+            admin,
+            deprecated,
+            allowed,
+            description,
+            warning,
+            eager,
+            caseInsensitive,
+            systemProcedure,
+            internal
         );
     }
 
