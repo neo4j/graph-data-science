@@ -31,9 +31,11 @@ final class PageRankProc {
         "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
 
     static final String ARTICLE_RANK_DESCRIPTION =
-        "ArticleRank is a variant of the Page Rank algorithm, which " +
+        "Article Rank is a variant of the Page Rank algorithm, which " +
         "measures the transitive influence or connectivity of nodes.";
 
+    static final String EIGENVECTOR_DESCRIPTION =
+        "Eigenvector Centrality is an algorithm that measures the transitive influence or connectivity of nodes.";
 
     private PageRankProc() {}
 

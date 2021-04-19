@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.isA;
 
-public class ArticleRankProcTest extends BaseProcTest {
+class ArticleRankProcTest extends BaseProcTest {
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -48,7 +48,7 @@ public class ArticleRankProcTest extends BaseProcTest {
         ", (b:Label1 {name: 'b'})" +
         ", (a)-[:TYPE1]->(b)";
 
-    public static final String GRAPH_NAME = "graph";
+    private static final String GRAPH_NAME = "graph";
 
     private static Stream<Arguments> estimations() {
         return Stream.of(
