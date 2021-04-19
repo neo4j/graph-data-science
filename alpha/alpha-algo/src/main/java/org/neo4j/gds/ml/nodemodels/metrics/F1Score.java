@@ -37,9 +37,7 @@ public class F1Score implements Metric {
     }
 
     @Override
-    public double compute(
-        HugeLongArray targets, HugeLongArray predictions, Multiset<Long> ignore
-    ) {
+    public double compute(HugeLongArray targets, HugeLongArray predictions, Multiset<Long> ignore) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
                     "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
                     targets.size(),
@@ -79,9 +77,7 @@ public class F1Score implements Metric {
         return result;
     }
 
-    public double compute(
-        HugeLongArray targets, HugeLongArray predictions
-    ) {
+    public double compute(HugeLongArray targets, HugeLongArray predictions) {
         return compute(targets, predictions, null);
     }
 

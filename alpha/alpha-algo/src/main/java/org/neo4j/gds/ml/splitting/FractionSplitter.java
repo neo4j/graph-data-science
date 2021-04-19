@@ -30,7 +30,7 @@ public class FractionSplitter {
 
     private final AllocationTracker allocationTracker;
 
-    static MemoryEstimation estimate(double trainFraction) {
+    public static MemoryEstimation estimate(double trainFraction) {
         return MemoryEstimations.builder(FractionSplitter.class)
             .perNode("train", (n) -> HugeLongArray.memoryEstimation(trainSize(n, trainFraction)))
             .perNode("test", (n) -> HugeLongArray.memoryEstimation(n - trainSize(n, trainFraction)))

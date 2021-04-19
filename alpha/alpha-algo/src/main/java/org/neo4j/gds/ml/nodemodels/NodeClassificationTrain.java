@@ -27,6 +27,7 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPred
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrain;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
+import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
@@ -38,6 +39,9 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
@@ -64,6 +68,25 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     private final List<Metric> metrics;
     private final StatsMap trainStats;
     private final StatsMap validationStats;
+
+    static MemoryEstimation estimate(NodeClassificationTrainConfig config) {
+        var fudgedClassCount = 1000;
+        var fudgedFeatureCount = 500;
+        return MemoryEstimations.builder()
+            .perNode("global targets", HugeLongArray::memoryEstimation)
+            // there are between two and nodeCount classes, each is a long
+            // TODO: class counts could be it's own tree to also capture the multiset itself
+            .rangePerNode("global class counts", __ -> MemoryRange.of(2 * 8, fudgedClassCount * 8))
+            .add("metrics", MetricSpecification.memoryEstimation(fudgedClassCount))
+            .perNode("node IDs", HugeLongArray::memoryEstimation)
+            .add("outer split", FractionSplitter.estimate(1 - config.holdoutFraction()))
+            .add("splits", StratifiedKFoldSplitter.memoryEstimation(config.validationFolds(), 1 - config.holdoutFraction()))
+            .add("stats map train", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
+            .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
+            // TODO: Do we need to estimate the ModelStats and ModelStatsBuilder thingies?
+            .add("training", NodeLogisticRegressionTrain.memoryEstimation(fudgedClassCount, fudgedFeatureCount))
+            .build();
+    }
 
     public static NodeClassificationTrain create(
         Graph graph,

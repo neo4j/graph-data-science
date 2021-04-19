@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 public class NodeClassificationTrainAlgorithmFactory extends AbstractAlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> {
 
@@ -40,7 +40,19 @@ public class NodeClassificationTrainAlgorithmFactory extends AbstractAlgorithmFa
 
     @Override
     public MemoryEstimation memoryEstimation(NodeClassificationTrainConfig configuration) {
-        throw new MemoryEstimationNotImplementedException();
+        return MemoryEstimations.setup(
+            "",
+            dimensions -> estimate(
+                configuration,
+                dimensions.nodeCount()
+            )
+        );
+    }
+
+    private MemoryEstimation estimate(NodeClassificationTrainConfig config, long nodeCount) {
+        return MemoryEstimations.builder(NodeClassificationTrain.class)
+            .add("algorithm", NodeClassificationTrain.estimate(config))
+            .build();
     }
 
     @Override

@@ -20,12 +20,14 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.assertj.core.data.Percentage;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -43,6 +45,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
@@ -247,6 +250,24 @@ class NodeClassificationTrainTest {
             .extracting(removingThreadId())
             .as("All messages should start with the correct task name")
             .allMatch(s -> s.startsWith(factory.taskName()));
+    }
+
+    @Test
+    void shouldEstimate() {
+        Map<String, Object> model1 = Map.of("penalty", 1, "maxIterations", 0);
+        Map<String, Object> model2 = Map.of("penalty", 1, "maxIterations", 10000, "tolerance", 1e-5);
+        var metricSpecification = MetricSpecification.parse("F1(class=*)");
+        var config = createConfig(
+            List.of(model1, model2),
+            "model",
+            List.of("a", "b"),
+            metricSpecification,
+            1L
+        );
+//        NodeClassificationTrain.metrics(config).forEach(System.out::println);
+        var estimation = NodeClassificationTrain.estimate(config).estimate(GraphDimensions.of(1_000_000_000L), 1);
+        System.out.println(estimation.render());
+        fail("TODO");
     }
 
     private NodeClassificationTrainConfig createConfig(
