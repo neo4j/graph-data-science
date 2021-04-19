@@ -101,9 +101,10 @@ public class MetricSpecificationTest {
 
     @Test
     void shouldEstimateMemoryUsage() {
-        var nodeCount = 1000;
-        var actual = MetricSpecification.memoryEstimation().estimate(GraphDimensions.of(nodeCount), 1).memoryUsage();
-        var expected = MemoryRange.of(24 * 2, 24 * nodeCount);
+        var nodeCount = 1_000_000_000;
+        var numberOfClasses = 1000;
+        var actual = MetricSpecification.memoryEstimation(numberOfClasses).estimate(GraphDimensions.of(nodeCount), 1).memoryUsage();
+        var expected = MemoryRange.of(24 * 2, 24 * numberOfClasses);
         assertThat(actual).isEqualTo(expected);
     }
 

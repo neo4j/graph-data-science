@@ -54,12 +54,11 @@ public interface MetricSpecification {
         "(" + VALID_SINGLE_CLASS_METRICS + ")" +
         "\\([\\s]*CLASS[\\s]*=[\\s]*" + NUMBER_OR_STAR + "[\\s]*\\)");
 
-    static MemoryEstimation memoryEstimation() {
+    static MemoryEstimation memoryEstimation(int numberOfClasses) {
         return MemoryEstimations.builder()
-            .rangePerNode("metrics", (nodeCount) -> {
+            .rangePerNode("metrics", __ -> {
                 var sizeOfRepresentativeMetric = sizeOf(new F1Score(1));
-                // class count is at least 2 and at most node count
-                return MemoryRange.of(2 * sizeOfRepresentativeMetric, nodeCount * sizeOfRepresentativeMetric);
+                return MemoryRange.of(2 * sizeOfRepresentativeMetric, numberOfClasses * sizeOfRepresentativeMetric);
             })
             .build();
     }
