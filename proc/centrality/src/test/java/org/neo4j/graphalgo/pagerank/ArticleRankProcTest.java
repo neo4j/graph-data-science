@@ -71,7 +71,6 @@ public class ArticleRankProcTest extends BaseProcTest {
 
     @Test
     void stats() {
-        String propertyKey = "pr";
         String query = GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
             .algo("articleRank")
