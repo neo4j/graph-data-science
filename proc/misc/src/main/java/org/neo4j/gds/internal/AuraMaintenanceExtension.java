@@ -37,6 +37,8 @@ import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
+import org.neo4j.scheduler.Group;
+import org.neo4j.scheduler.JobScheduler;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -60,9 +62,13 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
                 registry.register(new AuraMaintenanceFunction(), false);
                 registry.register(new AuraShutdownProc(), false);
                 return LifecycleAdapter.onInit(() -> {
-                    restorePersistedGraphs(
-                        dependencies.config(),
-                        dependencies.logService()
+                    var jobScheduler = dependencies.jobScheduler();
+                    jobScheduler.schedule(
+                        Group.FILE_IO_HELPER,
+                        () -> restorePersistedGraphs(
+                            dependencies.config(),
+                            dependencies.logService()
+                        )
                     );
                 });
             } catch (ProcedureException e) {
@@ -113,5 +119,7 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
         GlobalProcedures globalProceduresRegistry();
 
         LogService logService();
+
+        JobScheduler jobScheduler();
     }
 }
