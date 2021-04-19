@@ -36,7 +36,7 @@ import java.util.Objects;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-class AuraRestoreExtensionTest extends BaseTest {
+class AuraMaintenanceExtensionTest extends BaseTest {
 
     @AfterEach
     void teardown() {
@@ -49,7 +49,8 @@ class AuraRestoreExtensionTest extends BaseTest {
         super.configuration(builder);
         builder
             .setConfig(GraphStoreExportSettings.export_location_setting, importPath())
-            .addExtension(new AuraRestoreExtension());
+            .setConfig(AuraMaintenanceSettings.maintenance_function_enabled, true)
+            .addExtension(new AuraMaintenanceExtension());
     }
 
     @Test
@@ -79,7 +80,9 @@ class AuraRestoreExtensionTest extends BaseTest {
 
     private Path importPath() {
         try {
-            var uri = Objects.requireNonNull(getClass().getClassLoader().getResource("AuraRestoreExtensionTest")).toURI();
+            var uri = Objects
+                .requireNonNull(getClass().getClassLoader().getResource("AuraMaintenanceExtensionTest"))
+                .toURI();
             return Paths.get(uri);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);

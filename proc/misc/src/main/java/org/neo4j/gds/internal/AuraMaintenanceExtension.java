@@ -21,6 +21,14 @@ package org.neo4j.gds.internal;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
+import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.utils.export.file.CsvToGraphStoreExporter;
+import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExporterConfig;
+import org.neo4j.graphalgo.core.utils.export.file.csv.AutoloadFlagVisitor;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
@@ -29,6 +37,11 @@ import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.stream.Stream;
 
 @ServiceProvider
 public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMaintenanceExtension.Dependencies> {
@@ -46,6 +59,12 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
             try {
                 registry.register(new AuraMaintenanceFunction(), false);
                 registry.register(new AuraShutdownProc(), false);
+                return LifecycleAdapter.onInit(() -> {
+                    restorePersistedGraphs(
+                        dependencies.config(),
+                        dependencies.logService()
+                    );
+                });
             } catch (ProcedureException e) {
                 dependencies.logService()
                     .getInternalLog(getClass())
@@ -53,6 +72,39 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
             }
         }
         return new LifecycleAdapter();
+    }
+
+    private static void restorePersistedGraphs(Configuration neo4jConfig, LogService logService) {
+        var userLog = logService.getUserLog(AuraMaintenanceExtension.class);
+        var storePath = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
+        try {
+            getImportPaths(storePath).forEach(path -> {
+                var config = ImmutableGraphStoreToFileExporterConfig.builder()
+                    .exportName("")
+                    .includeMetaData(true)
+                    .build();
+                var graphStoreImporter = CsvToGraphStoreExporter.create(config, path);
+
+                graphStoreImporter.run(AllocationTracker.empty());
+
+                var graphStore = graphStoreImporter.userGraphStore();
+
+                var graphName = path.getFileName().toString();
+                var createConfig = GraphCreateFromStoreConfig.emptyWithName(
+                    graphStore.userName(),
+                    graphName
+                );
+                GraphStoreCatalog.set(createConfig, graphStore.graphStore());
+            });
+        } catch (Exception e) {
+            userLog.warn("Graph store loading failed", e);
+        }
+    }
+
+    private static Stream<Path> getImportPaths(Path storePath) throws IOException {
+        return Files.list(storePath)
+            .peek(CsvToGraphStoreExporter.DIRECTORY_IS_READABLE::validate)
+            .filter(graphDir -> Files.exists(graphDir.resolve(AutoloadFlagVisitor.AUTOLOAD_FILE_NAME)));
     }
 
     interface Dependencies {
