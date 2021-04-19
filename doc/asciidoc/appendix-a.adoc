@@ -160,6 +160,15 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.degree.stream.estimate`
 | `gds.degree.write`
 | `gds.degree.write.estimate`
+.8+<.^|ArticleRank
+| `gds.articleRank.mutate`
+| `gds.articleRank.mutate.estimate`
+| `gds.articleRank.write`
+| `gds.articleRank.write.estimate`
+| `gds.articleRank.stream`
+| `gds.articleRank.stream.estimate`
+| `gds.articleRank.stats`
+| `gds.articleRank.stats.estimate`
 |===
 
 [[beta-tier]]
