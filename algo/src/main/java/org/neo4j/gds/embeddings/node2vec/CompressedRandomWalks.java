@@ -22,7 +22,7 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.graphalgo.core.loading.ZigZagLongDecoding;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
@@ -35,14 +35,14 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CompressedRandomWalks {
     private final HugeObjectArray<byte[]> compressedWalks;
-    private final HugeLongArray walkLengths;
+    private final HugeIntArray walkLengths;
 
     private int maxWalkLength;
     private long size = 0L;
 
     public CompressedRandomWalks(long maxWalkCount, AllocationTracker tracker) {
         this.compressedWalks = HugeObjectArray.newArray(byte[].class, maxWalkCount, tracker);
-        this.walkLengths = HugeLongArray.newArray(maxWalkCount, tracker);
+        this.walkLengths = HugeIntArray.newArray(maxWalkCount, tracker);
     }
 
     public void add(long... walk) {
@@ -89,12 +89,12 @@ public class CompressedRandomWalks {
     }
 
     public int walkLength(long index) {
-        return (int) walkLengths.get(index);
+        return walkLengths.get(index);
     }
 
     public static class CompressedWalkIterator implements Iterator<long[]> {
         private final HugeCursor<byte[][]> cursor;
-        private final HugeLongArray walkLengths;
+        private final HugeIntArray walkLengths;
         private final long[] outputBuffer;
 
         private int currentIndex;
@@ -103,7 +103,7 @@ public class CompressedRandomWalks {
             long startIndex,
             long endIndex,
             HugeObjectArray<byte[]> compressedWalks,
-            HugeLongArray walkLengths,
+            HugeIntArray walkLengths,
             int maxWalkLength
         ) {
             this.walkLengths = walkLengths;
@@ -136,7 +136,7 @@ public class CompressedRandomWalks {
         @Override
         public long[] next() {
             var compressedWalk = cursor.array[currentIndex];
-            var walkLength = (int) walkLengths.get(currentIndex);
+            var walkLength = walkLengths.get(currentIndex);
             Arrays.fill(outputBuffer, -1L);
             ZigZagLongDecoding.zigZagUncompress(compressedWalk, walkLength, outputBuffer);
 
