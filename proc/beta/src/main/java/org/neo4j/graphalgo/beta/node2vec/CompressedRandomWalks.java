@@ -130,7 +130,7 @@ public class CompressedRandomWalks {
 
         /**
          * Returns the next random walk in the specified range.
-         * The long array returned by this method will be reused in the following next call.
+         * The long array returned by this method will be reused in the following call to `next` and must not be shared.
          * If the current walk is shorter than the maximum walk length, the remaining elements will be filled with -1.
          */
         @Override

@@ -82,7 +82,10 @@ class PositiveSampleProducerTest {
 
         // our sample producer is supposed to work within the first nbrOfWalks - 1 walks
         // it prefetches in the constructor
-        HugeDoubleArray probabilities = HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 0).toArray());
+        HugeDoubleArray probabilities = HugeDoubleArray.of(LongStream
+            .range(0, nbrOfWalks)
+            .mapToDouble((l) -> 0)
+            .toArray());
         var sampleProducer = new PositiveSampleProducer(
             walks.iterator(0, nbrOfWalks),
             probabilities,
@@ -102,7 +105,10 @@ class PositiveSampleProducerTest {
     @Test
     void doesNotAttemptToFetchOutsideBatch() {
         int nbrOfWalks = 100;
-        var walks = createCompressedRandomWalks(nbrOfWalks, (l1) -> new long[]{l1, (l1 + 1) % nbrOfWalks, (l1 + 2) % nbrOfWalks});
+        var walks = createCompressedRandomWalks(
+            nbrOfWalks,
+            (l1) -> new long[]{l1, (l1 + 1) % nbrOfWalks, (l1 + 2) % nbrOfWalks}
+        );
 
         var sampleProducer = new PositiveSampleProducer(
             walks.iterator(0, nbrOfWalks / 2),

@@ -117,7 +117,7 @@ public class PositiveSampleProducer {
 
         contextWordIndex++;
 
-        if(contextWordIndex <= currentWindowEnd && contextWordIndex != centerWordIndex && currentWalk[contextWordIndex] >= 0) {
+        if (contextWordIndex <= currentWindowEnd && contextWordIndex != centerWordIndex && currentWalk[contextWordIndex] >= 0) {
             return true;
         } else if (contextWordIndex > currentWindowEnd) {
             return nextCenterWord();
@@ -147,15 +147,15 @@ public class PositiveSampleProducer {
     private void setContextBoundaries() {
         var currentPrefixSize = prefixWindowSize;
         currentWindowStart = centerWordIndex;
-        while(currentPrefixSize > 0 && currentWindowStart > 0) {
+        while (currentPrefixSize > 0 && currentWindowStart > 0) {
             currentWindowStart--;
             if (currentWindowStart >= 0 && currentWalk[currentWindowStart] > 0) {
                 currentPrefixSize--;
             }
-        };
+        }
 
         var currentPostfixSize = postfixWindowSize;
-        currentWindowEnd = centerWordIndex ;
+        currentWindowEnd = centerWordIndex;
         while (currentPostfixSize > 0 && currentWindowEnd < currentWalk.length - 1 && currentWalk[currentWindowEnd] != -1) {
             currentWindowEnd++;
             if (currentWalk[currentWindowEnd] > 0) {
