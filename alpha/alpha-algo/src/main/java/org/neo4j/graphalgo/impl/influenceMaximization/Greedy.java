@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.results.InfluenceMaximizationResult;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -41,10 +42,11 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
     private final ExecutorService executorService;
     private final int concurrency;
     private final AllocationTracker tracker;
-    private final ArrayList<Runnable> tasks;
+    private final ArrayList<IndependentCascadeRunner> tasks;
 
     private final LongDoubleScatterMap seedSetNodes;
     private final HugeLongPriorityQueue spreads;
+    private final AtomicLong globalNodeProgress;
 
     /*
      * seedSetCount:            Number of seed set nodes
@@ -70,15 +72,17 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.tracker = tracker;
-        this.tasks = new ArrayList<>();
 
-        seedSetNodes = new LongDoubleScatterMap(seedSetCount);
-        spreads = new HugeLongPriorityQueue(nodeCount) {
+        this.seedSetNodes = new LongDoubleScatterMap(seedSetCount);
+        this.spreads = new HugeLongPriorityQueue(nodeCount) {
             @Override
             protected boolean lessThan(long a, long b) {
                 return (costValues.get(a) != costValues.get(b)) ? costValues.get(a) > costValues.get(b) : a < b;
             }
         };
+
+        this.globalNodeProgress = new AtomicLong(0);
+        this.tasks = initializeTasks();
     }
 
     @Override
@@ -88,28 +92,17 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
 
         //Find k nodes with largest marginal gain
         for (long i = 0; i < seedSetCount; i++) {
-            tasks.clear();
+            globalNodeProgress.set(0);
             spreads.clear();
-            //Over nodes that are not yet in seed set find biggest marginal gain
-            graph.forEachNode(node -> {
-                if (!seedSetNodes.containsKey(node)) {
-                    tasks.add(new IndependentCascadeTask(
-                        graph,
-                        propagationProbability,
-                        monteCarloSimulations,
-                        node,
-                        seedSetNodes.keys().toArray(),
-                        spreads,
-                        tracker
-                    ));
-                }
-                return true;
-            });
+
+            tasks.forEach(task -> task.setSeedSetNodes(seedSetNodes.keys().toArray()));
             ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+
             highestScore = spreads.cost(spreads.top());
             highestNode = spreads.pop();
             seedSetNodes.put(highestNode, highestScore);
         }
+
         return this;
     }
 
@@ -129,5 +122,20 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
     public Stream<InfluenceMaximizationResult> resultStream() {
         return LongStream.of(seedSetNodes.keys().toArray())
             .mapToObj(node -> new InfluenceMaximizationResult(graph.toOriginalNodeId(node), getNodeSpread(node)));
+    }
+
+    private ArrayList<IndependentCascadeRunner> initializeTasks() {
+        var tasks = new ArrayList<IndependentCascadeRunner>();
+        for (int ignore = 0; ignore < concurrency; ignore++) {
+            tasks.add(new IndependentCascadeRunner(
+                graph,
+                spreads,
+                globalNodeProgress,
+                propagationProbability,
+                monteCarloSimulations,
+                tracker
+            ));
+        }
+        return tasks;
     }
 }

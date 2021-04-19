@@ -34,17 +34,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 @GdlExtension
 final class CELFTest {
     /**
-     * (c)-----|
-     * /(d)\----|-|
-     * //(e)\\---|-|-|
-     * ///(f)\\\--|-|-|-|
+     *     (c)-----|
+     *    /(d)\----|-|
+     *   //(e)\\---|-|-|
+     *  ///(f)\\\--|-|-|-|
      * ////   \\\\ | | | |
      * (a)     (b) | | | |
      * \\\\   //// | | | |
-     * \\\(g)///--| | | |
-     * \\(h)//-----| | |
-     * \(i)/--------| |
-     * (j)-----------|
+     *  \\\(g)///--| | | |
+     *   \\(h)//-----| | |
+     *    \(i)/--------| |
+     *     (j)-----------|
      */
     @GdlGraph(orientation = Orientation.NATURAL)
     private static final String DB_CYPHER =

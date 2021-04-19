@@ -26,37 +26,27 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.Random;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-final class IndependentCascadeTask implements Runnable {
-    private static final ReadWriteLock lock = new ReentrantReadWriteLock();
+final class IndependentCascade {
     private final Graph graph;
     private final double propagationProbability;
     private final long monteCarloSimulations;
-    private final long candidateNode;
-    private final long[] seedSetNodes;
     private final HugeLongPriorityQueue spreads;
     private final LongScatterSet active;
     private final HugeLongArrayStack newActive;
     private final Random rand;
     private double spread;
 
-    public IndependentCascadeTask(
+    IndependentCascade(
         Graph graph,
         double propagationProbability,
         long monteCarloSimulations,
-        long candidateNode,
-        long[] seedSetNodes,
         HugeLongPriorityQueue spreads,
         AllocationTracker tracker
     ) {
         this.graph = graph.concurrentCopy();
-
         this.propagationProbability = propagationProbability;
         this.monteCarloSimulations = monteCarloSimulations;
-        this.candidateNode = candidateNode;
-        this.seedSetNodes = seedSetNodes;
         this.spreads = spreads;
 
         this.active = new LongScatterSet();
@@ -65,17 +55,16 @@ final class IndependentCascadeTask implements Runnable {
         this.rand = new Random();
     }
 
-    @Override
-    public void run() {
+    public void run(long candidateNode, long[] seedSetNodes) {
         //Loop over the Monte-Carlo simulations
         spread = 0;
         for (long i = 0; i < monteCarloSimulations; i++) {
-            initStructures();
+            initStructures(candidateNode, seedSetNodes);
             spread += newActive.size();
             //For each newly active node, find its neighbors that become activated
             while (!newActive.isEmpty()) {
                 //Determine neighbors that become infected
-                rand.setSeed(i);
+                rand.setSeed(graph.toOriginalNodeId(i));
                 long node = newActive.pop();
                 graph.forEachRelationship(node, (source, target) ->
                 {
@@ -91,15 +80,15 @@ final class IndependentCascadeTask implements Runnable {
                 });
             }
         }
-        lock.writeLock().lock();
-        try {
-            spreads.add(candidateNode, (double) Math.round((spread /= monteCarloSimulations) * 1000) / 1000);
-        } finally {
-            lock.writeLock().unlock();
-        }
+        spread /= monteCarloSimulations;
+        addCandidateNode(candidateNode);
     }
 
-    private void initStructures() {
+    private synchronized void addCandidateNode(long candidateNode) {
+        spreads.add(candidateNode, (double) Math.round(spread * 1000) / 1000);
+    }
+
+    private void initStructures(long candidateNode, long[] seedSetNodes) {
         active.clear();
         active.add(candidateNode);
         active.addAll(seedSetNodes);

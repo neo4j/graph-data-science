@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -48,6 +49,8 @@ import static org.mockito.Mockito.verify;
  *     (j)-----------|
  */
 class CELFProcTest extends BaseProcTest {
+
+    @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE " +
         "  (a:Node)" +

@@ -29,22 +29,23 @@ import org.neo4j.graphalgo.results.InfluenceMaximizationResult;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class CELF extends Algorithm<CELF, CELF> {
-    private final Graph graph;
+
     private final long seedSetCount;
     private final double propagationProbability;
     private final int monteCarloSimulations;
-
-    private final ExecutorService executorService;
     private final int concurrency;
-    private final AllocationTracker tracker;
-    private final ArrayList<Runnable> tasks;
 
+    private final Graph graph;
+    private final ArrayList<Runnable> tasks;
     private final LongDoubleScatterMap seedSetNodes;
     private final HugeLongPriorityQueue spreads;
+    private final AllocationTracker tracker;
+    private final ExecutorService executorService;
 
     private double gain;
 
@@ -78,7 +79,7 @@ public class CELF extends Algorithm<CELF, CELF> {
         spreads = new HugeLongPriorityQueue(nodeCount) {
             @Override
             protected boolean lessThan(long a, long b) {
-                return (costValues.get(a) != costValues.get(b)) ? costValues.get(a) > costValues.get(b) : a < b;
+                return costValues.get(a) != costValues.get(b) ? costValues.get(a) > costValues.get(b) : a < b;
             }
         };
     }
@@ -96,23 +97,18 @@ public class CELF extends Algorithm<CELF, CELF> {
         double highestScore;
         long highestNode;
 
-        tasks.clear();
-        //Calculate the first iteration sorted list
-        graph.forEachNode(node -> {
-            if (!seedSetNodes.containsKey(node)) {
-                tasks.add(new IndependentCascadeTask(
-                    graph,
-                    propagationProbability,
-                    monteCarloSimulations,
-                    node,
-                    seedSetNodes.keys().toArray(),
-                    spreads,
-                    tracker
-                ));
-            }
-            return true;
-        });
+        var globalNodeProgress = new AtomicLong(0);
+        for (int i = 0; i < concurrency; i++) {
+            var runner = new IndependentCascadeRunner(graph, spreads, globalNodeProgress,
+                propagationProbability,
+                monteCarloSimulations,
+                tracker
+            );
+            runner.setSeedSetNodes(new long[0]);
+            tasks.add(runner);
+        }
         ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+
         //Add the node with the highest spread to the seed set
         highestScore = spreads.cost(spreads.top());
         highestNode = spreads.pop();
@@ -124,22 +120,24 @@ public class CELF extends Algorithm<CELF, CELF> {
         double highestScore;
         long highestNode;
 
+        var independentCascade = new IndependentCascade(
+            graph,
+            propagationProbability,
+            monteCarloSimulations,
+            spreads,
+            tracker
+        );
+
         for (long i = 0; i < seedSetCount - 1; i++) {
             do {
+
                 highestNode = spreads.pop();
                 //Recalculate the spread of the top node
-                ParallelUtil.run(new IndependentCascadeTask(
-                    graph,
-                    propagationProbability,
-                    monteCarloSimulations,
-                    highestNode,
-                    seedSetNodes.keys().toArray(),
-                    spreads,
-                    tracker
-                ), executorService);
+                independentCascade.run(highestNode, seedSetNodes.keys().toArray());
                 spreads.set(highestNode, spreads.cost(highestNode) - gain);
-            }//Check if previous top node stayed on top after the sort
-            while (highestNode != spreads.top());
+
+                //Check if previous top node stayed on top after the sort
+            } while (highestNode != spreads.top());
 
             //Add the node with the highest spread to the seed set
             highestScore = spreads.cost(spreads.top());
