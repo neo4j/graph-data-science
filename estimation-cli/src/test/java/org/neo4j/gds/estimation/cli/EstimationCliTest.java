@@ -77,6 +77,10 @@ import org.neo4j.graphalgo.pagerank.ArticleRankMutateProc;
 import org.neo4j.graphalgo.pagerank.ArticleRankStatsProc;
 import org.neo4j.graphalgo.pagerank.ArticleRankStreamProc;
 import org.neo4j.graphalgo.pagerank.ArticleRankWriteProc;
+import org.neo4j.graphalgo.pagerank.EigenvectorMutateProc;
+import org.neo4j.graphalgo.pagerank.EigenvectorStatsProc;
+import org.neo4j.graphalgo.pagerank.EigenvectorStreamProc;
+import org.neo4j.graphalgo.pagerank.EigenvectorWriteProc;
 import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
@@ -199,6 +203,11 @@ final class EstimationCliTest {
         "gds.degree.stats.estimate",
         "gds.degree.stream.estimate",
         "gds.degree.write.estimate",
+
+        "gds.eigenvector.mutate.estimate",
+        "gds.eigenvector.stats.estimate",
+        "gds.eigenvector.stream.estimate",
+        "gds.eigenvector.write.estimate",
 
         "gds.fastRP.mutate.estimate",
         "gds.fastRP.stats.estimate",
@@ -629,6 +638,11 @@ final class EstimationCliTest {
             runEstimation(new DegreeCentralityStatsProc()::estimate),
             runEstimation(new DegreeCentralityStreamProc()::estimate),
             runEstimation(new DegreeCentralityWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new EigenvectorMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new EigenvectorStatsProc()::estimateStats),
+            runEstimation(new EigenvectorStreamProc()::estimate),
+            runEstimation(new EigenvectorWriteProc()::estimate, "writeProperty", "foo"),
 
             runEstimation(new FastRPMutateProc()::estimate, "mutateProperty", "foo", "embeddingDimension", 128),
             runEstimation(new FastRPStatsProc()::estimate, "embeddingDimension", 128),
