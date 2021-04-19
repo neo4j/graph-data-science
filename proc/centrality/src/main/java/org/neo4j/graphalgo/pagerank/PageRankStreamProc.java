@@ -91,6 +91,6 @@ public class PageRankStreamProc extends StreamProc<PageRankPregelAlgorithm, Page
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelStreamConfig> computationResult) {
-        return computationResult.result().scores().asNodeProperties();
+        return PageRankProc.nodeProperties(computationResult);
     }
 }
