@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.internal;
 
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -28,7 +27,6 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.procedure.CallableUserFunction;
-import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.Values;
 
@@ -70,16 +68,7 @@ public class AuraMaintenanceFunction implements CallableUserFunction {
 
     @Override
     public AnyValue apply(org.neo4j.kernel.api.procedure.Context ctx, AnyValue[] input) throws ProcedureException {
-        var globalProcedures = GraphDatabaseApiProxy.resolveDependency(
-            ctx.dependencyResolver(),
-            GlobalProcedures.class
-        );
-        var lookupProgressStore = Neo4jProxy.lookupComponentProvider(
-            globalProcedures,
-            ProgressEventStore.class,
-            true
-        );
-        var progressEventStore = lookupProgressStore.apply(ctx);
+        var progressEventStore = InternalProceduresUtil.lookup(ctx, ProgressEventStore.class);
         return Values.booleanValue(compute(progressEventStore));
     }
 
