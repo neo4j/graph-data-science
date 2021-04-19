@@ -379,7 +379,7 @@ public class PregelProcTest extends BaseProcTest {
                     context.setNodeValue(LONG_ARRAY_KEY, new long[]{1, 3, 3, 7});
                     context.setNodeValue(DOUBLE_ARRAY_KEY, new double[]{1, 9, 8, 4});
                 }
-            }, Pools.DEFAULT, tracker);
+            }, Pools.DEFAULT, tracker, progressLogger);
         }
 
         @Override

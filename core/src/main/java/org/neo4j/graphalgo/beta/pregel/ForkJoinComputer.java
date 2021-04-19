@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 
@@ -40,9 +41,10 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
         NodeValue nodeValues,
         Messenger<?> messenger,
         HugeAtomicBitSet voteBits,
-        ForkJoinPool forkJoinPool
+        ForkJoinPool forkJoinPool,
+        ProgressLogger progressLogger
     ) {
-        super(graph, computation, config, nodeValues, messenger, voteBits);
+        super(graph, computation, config, nodeValues, messenger, voteBits, progressLogger);
         this.forkJoinPool = forkJoinPool;
     }
 
@@ -64,7 +66,8 @@ public class ForkJoinComputer<CONFIG extends PregelConfig> extends PregelCompute
             messenger,
             voteBits,
             null,
-            sentMessage
+            sentMessage,
+            progressLogger
         );
     }
 

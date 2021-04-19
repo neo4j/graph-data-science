@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 
@@ -45,6 +46,8 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
     InitContext<CONFIG> initContext();
 
     ComputeContext<CONFIG> computeContext();
+
+    ProgressLogger progressLogger();
 
     int iteration();
 
@@ -99,6 +102,7 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
                 computation.compute(computeContext, messages);
             }
         }
+        progressLogger().logProgress(nodeBatch.nodeCount());
     }
 
     default void sendToNeighbors(long sourceNodeId, double message) {

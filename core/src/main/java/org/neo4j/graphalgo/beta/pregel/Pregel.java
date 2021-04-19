@@ -23,12 +23,15 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.concurrent.ExecutorService;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class Pregel<CONFIG extends PregelConfig> {
@@ -45,12 +48,15 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final PregelComputer<CONFIG> computer;
 
+    private final ProgressLogger progressLogger;
+
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
         Graph graph,
         CONFIG config,
         PregelComputation<CONFIG> computation,
         ExecutorService executor,
-        AllocationTracker tracker
+        AllocationTracker tracker,
+        ProgressLogger progressLogger
     ) {
         // This prevents users from disabling concurrency
         // validation in custom PregelConfig implementations.
@@ -64,7 +70,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
             computation,
             NodeValue.of(computation.schema(config), graph.nodeCount(), config.concurrency(), tracker),
             executor,
-            tracker
+            tracker,
+            progressLogger
         );
     }
 
@@ -93,12 +100,14 @@ public final class Pregel<CONFIG extends PregelConfig> {
         final PregelComputation<CONFIG> computation,
         final NodeValue initialNodeValue,
         final ExecutorService executor,
-        final AllocationTracker tracker
+        final AllocationTracker tracker,
+        final ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.config = config;
         this.computation = computation;
         this.nodeValues = initialNodeValue;
+        this.progressLogger = progressLogger;
 
         var reducer = computation.reducer();
 
@@ -118,6 +127,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .executorService(config.useForkJoin()
                 ? ParallelUtil.getFJPoolWithConcurrency(config.concurrency())
                 : executor)
+            .progressLogger(progressLogger)
             .build();
     }
 
@@ -128,14 +138,19 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
         int iteration = 0;
         for (; iteration < config.maxIterations(); iteration++) {
+            logIterationStart(iteration);
+
             computer.initIteration(iteration);
             messenger.initIteration(iteration);
 
             computer.runIteration();
             runMasterComputeStep(iteration);
 
-            if (computer.hasConverged()) {
-                didConverge = true;
+            didConverge = computer.hasConverged();
+
+            logIterationFinish(iteration, didConverge);
+
+            if (didConverge) {
                 break;
             }
         }
@@ -152,7 +167,22 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     private void runMasterComputeStep(int iteration) {
+        progressLogger.startSubTask("Master Compute");
         var context = new MasterComputeContext<>(config, graph, iteration, nodeValues);
         computation.masterCompute(context);
+        progressLogger.finishSubTask("Master Compute");
+    }
+
+    private void logIterationStart(int iteration) {
+        progressLogger
+            .startSubTask(formatWithLocale("Iteration %d/%d", iteration + 1, config.maxIterations()));
+    }
+
+    private void logIterationFinish(int iteration, boolean didConverge) {
+        var maxIterations = config.maxIterations();
+        progressLogger.finishSubTask(formatWithLocale("Iteration %d/%d", iteration + 1, maxIterations));
+        if (!didConverge && iteration < maxIterations - 1) {
+            progressLogger.reset(graph.nodeCount());
+        }
     }
 }

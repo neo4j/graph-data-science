@@ -24,6 +24,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -36,6 +39,7 @@ import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.beta.pregel.context.MasterComputeContext;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -55,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_ARRAY_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.LONG_ARRAY_KEY;
@@ -92,11 +97,78 @@ class PregelTest {
             config,
             computation,
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         );
 
         var nodeValues = pregelJob.run().nodeValues();
         assertArrayEquals(expected, nodeValues.doubleProperties(KEY).toArray());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"AUTO", "RANGE"})
+    void logProgress(Partitioning partitioning) {
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(40_000)
+            .averageDegree(10)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .seed(42L)
+            .allocationTracker(AllocationTracker.empty())
+            .build()
+            .generate();
+
+        var config = ImmutablePregelConfig.builder()
+            .username("")
+            .maxIterations(2)
+            .partitioning(partitioning)
+            .concurrency(4)
+            .isAsynchronous(false)
+            .build();
+
+        var computation = new TestPregelComputation();
+
+        var progressLogger =  new TestProgressLogger(
+            graph.nodeCount(),
+            computation.getClass().getSimpleName(),
+            config.concurrency()
+        );
+
+        Pregel.create(
+            graph,
+            config,
+            computation,
+            Pools.DEFAULT,
+            AllocationTracker.empty(),
+            progressLogger
+        ).run();
+
+        assertThat(progressLogger.getProgresses()).allMatch(progress -> graph.nodeCount() == progress.get());
+
+        assertThat(progressLogger.getMessages(TestLog.INFO))
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .contains(
+                "TestPregelComputation :: Iteration 1/2 :: Start",
+                "TestPregelComputation :: Iteration 1/2 25%",
+                "TestPregelComputation :: Iteration 1/2 50%",
+                "TestPregelComputation :: Iteration 1/2 75%",
+                "TestPregelComputation :: Iteration 1/2 100%",
+                "TestPregelComputation :: Iteration 1/2 :: Master Compute :: Start",
+                "TestPregelComputation :: Iteration 1/2 :: Master Compute :: Finished",
+                "TestPregelComputation :: Iteration 1/2 :: Finished",
+
+                "TestPregelComputation :: Iteration 2/2 :: Start",
+                "TestPregelComputation :: Iteration 2/2 25%",
+                "TestPregelComputation :: Iteration 2/2 50%",
+                "TestPregelComputation :: Iteration 2/2 75%",
+                "TestPregelComputation :: Iteration 2/2 100%",
+                "TestPregelComputation :: Iteration 2/2 :: Master Compute :: Start",
+                "TestPregelComputation :: Iteration 2/2 :: Master Compute :: Finished",
+                "TestPregelComputation :: Iteration 2/2 :: Finished"
+            );
+
+
+
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {
@@ -152,7 +224,8 @@ class PregelTest {
             config,
             computation,
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         );
 
         return pregelJob.run().nodeValues().doubleProperties(KEY);
@@ -172,7 +245,8 @@ class PregelTest {
             config,
             new TestSendTo(),
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -197,7 +271,8 @@ class PregelTest {
             config,
             new CompositeTestComputation(),
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         );
 
         var result = pregelJob.run().nodeValues();
@@ -235,7 +310,8 @@ class PregelTest {
             ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(),
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         );
 
         var nodeValues = pregelJob.run().nodeValues();
@@ -398,7 +474,8 @@ class PregelTest {
             config,
             new TestSendTo(),
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         ));
     }
 
@@ -421,7 +498,8 @@ class PregelTest {
             config,
             new TestEmptyMessageInInitialSuperstep(),
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         );
 
         // assertion is happening in the computation

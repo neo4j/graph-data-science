@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.pregel.pr;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -89,7 +90,8 @@ class PageRankPregelAlgoTest {
             config,
             new PageRankPregel(),
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         );
 
         HugeDoubleArray nodeValues = pregelJob.run().nodeValues().doubleProperties(PAGE_RANK);

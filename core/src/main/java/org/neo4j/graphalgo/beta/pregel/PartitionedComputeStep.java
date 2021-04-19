@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.pregel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 
@@ -30,6 +31,7 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
 
     private final InitContext<CONFIG> initContext;
     private final ComputeContext<CONFIG> computeContext;
+    private final ProgressLogger progressLogger;
     private final Partition nodeBatch;
     private final HugeAtomicBitSet voteBits;
     private final Messenger<ITERATOR> messenger;
@@ -48,7 +50,8 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
         Partition nodeBatch,
         NodeValue nodeValue,
         Messenger<ITERATOR> messenger,
-        HugeAtomicBitSet voteBits
+        HugeAtomicBitSet voteBits,
+        ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.iteration = iteration;
@@ -58,6 +61,7 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
         this.nodeBatch = nodeBatch;
         this.messenger = messenger;
         this.computeContext = new ComputeContext<>(this, config);
+        this.progressLogger = progressLogger;
         this.initContext = new InitContext<>(this, config, graph);
     }
 
@@ -104,6 +108,11 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
     @Override
     public ComputeContext<CONFIG> computeContext() {
         return computeContext;
+    }
+
+    @Override
+    public ProgressLogger progressLogger() {
+        return progressLogger;
     }
 
     @Override

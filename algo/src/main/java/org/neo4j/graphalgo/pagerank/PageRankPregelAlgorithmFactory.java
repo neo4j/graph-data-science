@@ -54,7 +54,7 @@ public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig>
 
     @Override
     protected long taskVolume(Graph graph, PageRankPregelConfig configuration) {
-        return 0;
+        return graph.nodeCount();
     }
 
     @Override
@@ -90,7 +90,7 @@ public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig>
 
         var computation = new PageRankPregel(graph, configuration, degreeFunction, deltaCoefficient);
 
-        return new PageRankPregelAlgorithm(graph, configuration, computation, Pools.DEFAULT, tracker);
+        return new PageRankPregelAlgorithm(graph, configuration, computation, Pools.DEFAULT, tracker, progressLogger);
     }
 
     @Override

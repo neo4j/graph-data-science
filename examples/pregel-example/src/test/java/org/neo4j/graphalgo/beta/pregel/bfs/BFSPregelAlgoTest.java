@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -112,7 +113,8 @@ class BFSPregelAlgoTest {
             config,
             new BFSLevelPregel(),
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         );
 
         var result = pregelJob.run();
@@ -148,7 +150,8 @@ class BFSPregelAlgoTest {
             config,
             new BFSParentPregel(),
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         );
 
         var result = pregelJob.run();
@@ -184,7 +187,8 @@ class BFSPregelAlgoTest {
             config,
             new BFSParentPregel(),
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         );
 
         var expected = Map.of(

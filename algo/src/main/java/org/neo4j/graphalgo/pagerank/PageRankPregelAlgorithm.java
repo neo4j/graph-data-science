@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
@@ -43,9 +44,10 @@ public class PageRankPregelAlgorithm extends Algorithm<PageRankPregelAlgorithm, 
         PageRankPregelConfig config,
         PregelComputation<PageRankPregelConfig> pregelComputation,
         ExecutorService executorService,
-        AllocationTracker tracker
+        AllocationTracker tracker,
+        ProgressLogger progressLogger
     ) {
-        this.pregelJob = Pregel.create(graph, config, pregelComputation, executorService, tracker);
+        this.pregelJob = Pregel.create(graph, config, pregelComputation, executorService, tracker, progressLogger);
         this.executorService = executorService;
         this.config = config;
         this.graph = graph;

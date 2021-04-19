@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
@@ -47,9 +48,10 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
         Messenger<?> messenger,
         HugeAtomicBitSet voteBits,
         int concurrency,
-        ExecutorService executorService
+        ExecutorService executorService,
+        ProgressLogger progressLogger
     ) {
-        super(graph, computation, config, nodeValues, messenger, voteBits);
+        super(graph, computation, config, nodeValues, messenger, voteBits, progressLogger);
         this.executorService = executorService;
         this.concurrency = concurrency;
     }
@@ -91,7 +93,8 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             partition,
             nodeValues,
             messenger,
-            voteBits
+            voteBits,
+            progressLogger
         );
 
         switch (config.partitioning()) {

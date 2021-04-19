@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.beta.pregel.sssp;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -80,7 +81,8 @@ class SingleSourceShortestPathPregelAlgoTest {
             config,
             new SingleSourceShortestPathPregel(),
             Pools.DEFAULT,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
         );
 
         HugeLongArray nodeValues = pregelJob.run().nodeValues().longProperties(DISTANCE);

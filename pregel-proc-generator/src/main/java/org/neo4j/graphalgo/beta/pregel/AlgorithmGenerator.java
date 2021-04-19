@@ -28,6 +28,7 @@ import com.squareup.javapoet.TypeSpec;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.logging.Log;
 
@@ -83,24 +84,36 @@ class AlgorithmGenerator extends PregelGenerator {
     }
 
     private MethodSpec constructor() {
+        var computationVar = "computation";
+        var configurationVar = "configuration";
         return MethodSpec.constructorBuilder()
             .addParameter(Graph.class, "graph")
-            .addParameter(pregelSpec.configTypeName(), "configuration")
+            .addParameter(pregelSpec.configTypeName(), configurationVar)
             .addParameter(AllocationTracker.class, "tracker")
             .addParameter(Log.class, "log")
+            .addStatement(CodeBlock.of("var $1N = new $2T()", computationVar, computationClassName(pregelSpec, "")))
+            .addStatement(CodeBlock.of(
+                "var progressLogger = new $1T(" +
+                "log, " +
+                "graph.nodeCount(), " +
+                "$2N.getClass().getSimpleName(), " +
+                "$3N.concurrency()" +
+                ")", BatchingProgressLogger.class, computationVar, configurationVar))
             .addStatement(
                 CodeBlock.builder().addNamed(
                     "this.pregelJob = $pregel:T.create(" +
                     "graph, " +
-                    "configuration, " +
-                    "new $computation:T(), " +
-                    "$pools:T.DEFAULT," +
-                    "tracker" +
+                    "$config:N, " +
+                    "$computation:N, " +
+                    "$pools:T.DEFAULT, " +
+                    "tracker, " +
+                    "progressLogger" +
                     ")",
                     Map.of(
                         "pregel", Pregel.class,
-                        "computation", computationClassName(pregelSpec, ""),
-                        "pools", Pools.class
+                        "pools", Pools.class,
+                        "config", configurationVar,
+                        "computation", computationVar
                     )
                 )
                     .build()

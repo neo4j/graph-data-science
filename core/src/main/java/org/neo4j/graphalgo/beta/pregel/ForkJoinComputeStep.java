@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
 import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import org.neo4j.graphalgo.core.utils.BitUtil;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 
@@ -50,6 +51,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     private final int iteration;
     private boolean hasSendMessage;
     private final AtomicBoolean sentMessage;
+    private final ProgressLogger progressLogger;
 
     ForkJoinComputeStep(
         Graph graph,
@@ -61,7 +63,8 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
         Messenger<ITERATOR> messenger,
         HugeAtomicBitSet voteBits,
         @Nullable CountedCompleter<Void> parent,
-        AtomicBoolean sentMessage
+        AtomicBoolean sentMessage,
+        ProgressLogger progressLogger
     ) {
         super(parent);
         this.graph = graph;
@@ -74,6 +77,7 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
         this.messenger = messenger;
         this.computeContext = new ComputeContext<>(this, config);
         this.sentMessage = sentMessage;
+        this.progressLogger = progressLogger;
         this.initContext = new InitContext<>(this, config, graph);
     }
 
@@ -102,7 +106,8 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
                 messenger,
                 voteBits,
                 this,
-                sentMessage
+                sentMessage,
+                progressLogger
             );
 
             this.nodeBatch = rightBatch;
@@ -156,6 +161,11 @@ public final class ForkJoinComputeStep<CONFIG extends PregelConfig, ITERATOR ext
     @Override
     public ComputeContext<CONFIG> computeContext() {
         return computeContext;
+    }
+
+    @Override
+    public ProgressLogger progressLogger() {
+        return progressLogger;
     }
 
     @Override

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.beta.pregel;
 
 import org.immutables.builder.Builder;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.concurrent.ExecutorService;
@@ -35,6 +36,7 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
     final NodeValue nodeValues;
     final Messenger<?> messenger;
     final HugeAtomicBitSet voteBits;
+    final ProgressLogger progressLogger;
 
     PregelComputer(
         Graph graph,
@@ -42,7 +44,8 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
         CONFIG config,
         NodeValue nodeValues,
         Messenger<?> messenger,
-        HugeAtomicBitSet voteBits
+        HugeAtomicBitSet voteBits,
+        ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.computation = computation;
@@ -50,6 +53,7 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
         this.nodeValues = nodeValues;
         this.messenger = messenger;
         this.voteBits = voteBits;
+        this.progressLogger = progressLogger;
     }
 
     abstract void initComputation();
@@ -72,7 +76,8 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
         NodeValue nodeValues,
         Messenger<?> messenger,
         HugeAtomicBitSet voteBits,
-        ExecutorService executorService
+        ExecutorService executorService,
+        ProgressLogger progressLogger
     ) {
         if (config.useForkJoin()) {
             if (!(executorService instanceof ForkJoinPool)) {
@@ -89,7 +94,8 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
                 nodeValues,
                 messenger,
                 voteBits,
-                (ForkJoinPool) executorService
+                (ForkJoinPool) executorService,
+                progressLogger
             );
         }
 
@@ -101,7 +107,8 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
             messenger,
             voteBits,
             config.concurrency(),
-            executorService
+            executorService,
+            progressLogger
         );
     }
 }
