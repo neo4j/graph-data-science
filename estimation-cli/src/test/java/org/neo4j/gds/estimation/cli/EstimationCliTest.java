@@ -73,6 +73,10 @@ import org.neo4j.graphalgo.louvain.LouvainMutateProc;
 import org.neo4j.graphalgo.louvain.LouvainStatsProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 import org.neo4j.graphalgo.louvain.LouvainWriteProc;
+import org.neo4j.graphalgo.pagerank.ArticleRankMutateProc;
+import org.neo4j.graphalgo.pagerank.ArticleRankStatsProc;
+import org.neo4j.graphalgo.pagerank.ArticleRankStreamProc;
+import org.neo4j.graphalgo.pagerank.ArticleRankWriteProc;
 import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
@@ -144,6 +148,11 @@ final class EstimationCliTest {
         "}";
 
     private static final List<String> PROCEDURES = List.of(
+        "gds.articleRank.mutate.estimate",
+        "gds.articleRank.stats.estimate",
+        "gds.articleRank.stream.estimate",
+        "gds.articleRank.write.estimate",
+
         "gds.beta.allShortestPaths.dijkstra.mutate.estimate",
         "gds.beta.allShortestPaths.dijkstra.stream.estimate",
         "gds.beta.allShortestPaths.dijkstra.write.estimate",
@@ -487,6 +496,11 @@ final class EstimationCliTest {
 
     private static Stream<MemoryEstimateResult> allEstimations() {
         return Stream.of(
+            runEstimation(new ArticleRankMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new ArticleRankStatsProc()::estimateStats),
+            runEstimation(new ArticleRankStreamProc()::estimate),
+            runEstimation(new ArticleRankWriteProc()::estimate, "writeProperty", "foo"),
+
             runEstimation(new AllShortestPathsDijkstraStreamProc()::streamEstimate, "sourceNode", 0L),
             runEstimation(new AllShortestPathsDijkstraWriteProc()::writeEstimate,
                 "sourceNode", 0L,
