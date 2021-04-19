@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.embeddings.graphsage.subgraph;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.GraphDimensions;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LocalIdMapTest {
@@ -55,6 +58,23 @@ class LocalIdMapTest {
                 assertEquals(id,localIdMap.toMapped(i));
             }
         }
+    }
+
+    @Test
+    void shouldEstimateMemory() {
+        var ignored = 0;
+        var dimensions = GraphDimensions.of(ignored);
+
+
+        var memoryUsageFor10Classes = LocalIdMap.memoryEstimation(10)
+            .estimate(dimensions, 1)
+            .memoryUsage();
+        var memoryUsageFor20Classes = LocalIdMap.memoryEstimation(20)
+            .estimate(dimensions, 1)
+            .memoryUsage();
+
+        assertThat(memoryUsageFor20Classes.min).isCloseTo(2 * memoryUsageFor10Classes.min, Offset.offset(72L));
+        assertThat(memoryUsageFor20Classes.max).isCloseTo(2 * memoryUsageFor10Classes.max, Offset.offset(72L));
     }
 
 }

@@ -24,6 +24,8 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 import java.util.List;
 
@@ -57,4 +59,11 @@ public class Weights<T extends Tensor<T>> extends AbstractVariable<T> {
     public static Weights<Matrix> ofMatrix(int rows, int cols) {
         return new Weights<>(new Matrix(rows, cols));
     }
+
+    public static MemoryEstimation memoryEstimationOfMatrix(int rows, int cols) {
+        return MemoryEstimations.builder(Weights.class)
+            .add("matrix", Matrix.memoryEstimation(rows, cols))
+            .build();
+    }
+
 }

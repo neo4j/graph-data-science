@@ -25,12 +25,21 @@ import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 import java.util.List;
 import java.util.TreeSet;
 
 @ValueClass
 public interface NodeLogisticRegressionData {
+
+    static MemoryEstimation memoryEstimation(int fudgedNumberOfClasses, int fudgedNumberOfFeatures) {
+        return MemoryEstimations.builder(NodeLogisticRegressionData.class)
+            .add("classIdMap", LocalIdMap.memoryEstimation(fudgedNumberOfClasses))
+            .add("weights", Weights.memoryEstimationOfMatrix(fudgedNumberOfClasses, fudgedNumberOfFeatures))
+            .build();
+    }
 
     Weights<Matrix> weights();
 

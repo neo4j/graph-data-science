@@ -21,12 +21,21 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Matrix extends Tensor<Matrix> {
+
+    public static MemoryEstimation memoryEstimation(int rows, int cols) {
+        return MemoryEstimations.builder(Matrix.class)
+            .fixed("data", MemoryUsage.sizeOfDoubleArray(rows * cols))
+            .build();
+    }
 
     public Matrix(double[] data, int rows, int cols) {
         super(data, Dimensions.matrix(rows, cols));

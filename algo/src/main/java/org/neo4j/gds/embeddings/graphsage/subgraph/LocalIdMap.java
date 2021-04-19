@@ -22,6 +22,9 @@ package org.neo4j.gds.embeddings.graphsage.subgraph;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongIntHashMap;
 import com.carrotsearch.hppc.cursors.LongCursor;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,13 @@ import java.util.function.Consumer;
 public class LocalIdMap {
     private final LongArrayList originalIds;
     private final LongIntHashMap toInternalId;
+
+    public static MemoryEstimation memoryEstimation(int numberOfClasses) {
+        return MemoryEstimations.builder(LocalIdMap.class)
+            .fixed("original IDs", MemoryUsage.sizeOfLongArray(numberOfClasses))
+            .fixed("id mapping", MemoryUsage.sizeOfLongArray(numberOfClasses) + MemoryUsage.sizeOfIntArray(numberOfClasses))
+            .build();
+    }
 
     public LocalIdMap() {
         this.originalIds = new LongArrayList();

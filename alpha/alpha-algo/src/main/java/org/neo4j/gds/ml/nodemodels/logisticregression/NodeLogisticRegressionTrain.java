@@ -24,6 +24,8 @@ import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.batch.HugeBatchQueue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.function.Supplier;
@@ -34,6 +36,12 @@ public class NodeLogisticRegressionTrain {
     private final HugeLongArray trainSet;
     private final NodeLogisticRegressionTrainConfig config;
     private final ProgressLogger progressLogger;
+
+    public static MemoryEstimation memoryEstimation(int numberOfClasses, int numberOfFeatures) {
+        return MemoryEstimations.builder(NodeLogisticRegressionTrain.class)
+            .add("model data", NodeLogisticRegressionData.memoryEstimation(numberOfClasses, numberOfFeatures))
+            .build();
+    }
 
     public NodeLogisticRegressionTrain(
         Graph graph,
