@@ -37,7 +37,7 @@ import static org.neo4j.graphalgo.pagerank.PageRankPregelAlgorithmFactory.Mode.A
 public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig> extends AbstractAlgorithmFactory<PageRankPregelAlgorithm, CONFIG> {
 
     public enum Mode {
-        DEFAULT,
+        PAGE_RANK,
         ARTICLE_RANK,
         EIGENVECTOR,
     }
@@ -45,7 +45,7 @@ public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig>
     private final Mode mode;
 
     public PageRankPregelAlgorithmFactory() {
-        this(Mode.DEFAULT);
+        this(Mode.PAGE_RANK);
     }
 
     public PageRankPregelAlgorithmFactory(Mode mode) {
@@ -59,7 +59,7 @@ public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig>
 
     @Override
     protected String taskName() {
-        return "PageRank";
+        return mode.name();
     }
 
     @Override

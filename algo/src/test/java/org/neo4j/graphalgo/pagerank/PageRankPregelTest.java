@@ -25,22 +25,25 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.scaling.ScalarScaler;
+import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.pagerank.PageRankPregelAlgorithmFactory.Mode;
-import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class PageRankPregelTest {
@@ -138,7 +141,7 @@ class PageRankPregelTest {
                 .build();
 
             var actualGds = runOnGds(graph, config, sourceNodeIds).result().asNodeProperties();
-            var actualPregel = runOnPregel(graph, config, sourceNodeIds, Mode.DEFAULT)
+            var actualPregel = runOnPregel(graph, config, sourceNodeIds, Mode.PAGE_RANK)
                 .scores()
                 .asNodeProperties();
 
@@ -148,6 +151,39 @@ class PageRankPregelTest {
                 assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
                 assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
+        }
+
+        @Test
+        void shouldLogProgress() {
+            var config = ImmutablePageRankPregelConfig.builder().build();
+
+            var testLogger = new TestProgressLogger(
+                graph.nodeCount(),
+                "PageRank",
+                config.concurrency()
+            );
+
+            runOnPregel(graph, config, Mode.PAGE_RANK, testLogger);
+
+            testLogger.getProgresses().forEach(progress -> assertEquals(graph.nodeCount(), progress.get()));
+
+            LongStream.rangeClosed(1, config.maxIterations()).forEach(iteration ->
+                assertThat(testLogger.getMessages(TestLog.INFO))
+                    // avoid asserting on the thread id
+                    .extracting(removingThreadId())
+                    .contains(
+                        formatWithLocale(
+                            "PageRank :: Iteration %d/%d :: Start",
+                            iteration,
+                            config.maxIterations()
+                        ),
+                        formatWithLocale(
+                            "PageRank :: Iteration %d/%d :: Finished",
+                            iteration,
+                            config.maxIterations()
+                        )
+                    )
+            );
         }
     }
 
@@ -302,7 +338,7 @@ class PageRankPregelTest {
                 .normalization(variant)
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR).scores();
+            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR, ProgressLogger.NULL_LOGGER).scores();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
 
@@ -326,7 +362,7 @@ class PageRankPregelTest {
     }
 
     PageRankPregelResult runOnPregel(Graph graph, PageRankBaseConfig config) {
-        return runOnPregel(graph, config, new long[0], Mode.DEFAULT);
+        return runOnPregel(graph, config, new long[0], Mode.PAGE_RANK);
     }
 
     PageRankPregelResult runOnPregel(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds, Mode mode) {
@@ -339,17 +375,16 @@ class PageRankPregelTest {
             .tolerance(config.tolerance())
             .isAsynchronous(false);
 
-        return runOnPregel(graph, configBuilder.build(), mode);
+        return runOnPregel(graph, configBuilder.build(), mode, ProgressLogger.NULL_LOGGER);
     }
 
-    PageRankPregelResult runOnPregel(Graph graph, PageRankPregelConfig config, Mode mode) {
+    PageRankPregelResult runOnPregel(Graph graph, PageRankPregelConfig config, Mode mode, ProgressLogger progressLogger) {
         return new PageRankPregelAlgorithmFactory<>(mode)
             .build(
                 graph,
                 config,
                 AllocationTracker.empty(),
-                NullLog.getInstance(),
-                EmptyProgressEventTracker.INSTANCE
+                progressLogger
             )
             .compute();
     }
