@@ -146,6 +146,16 @@ public interface ProgressLogger {
         }
 
         @Override
+        public ProgressLogger startSubTask(String subTaskName) {
+            return this;
+        }
+
+        @Override
+        public ProgressLogger finishSubTask(String subTaskName) {
+            return this;
+        }
+
+        @Override
         public long reset(long newTaskVolume) {
             return 0L;
         }
