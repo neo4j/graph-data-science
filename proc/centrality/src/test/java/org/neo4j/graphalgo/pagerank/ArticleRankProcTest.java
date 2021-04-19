@@ -29,15 +29,19 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
+import org.neo4j.graphalgo.scaling.ScalarScaler;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 
 class ArticleRankProcTest extends BaseProcTest {
 
@@ -68,6 +72,47 @@ class ArticleRankProcTest extends BaseProcTest {
             ArticleRankMutateProc.class
         );
         runQuery("CALL gds.graph.create($graphName, '*', '*')", Map.of("graphName", GRAPH_NAME));
+    }
+
+    static Stream<Arguments> normalizations() {
+        return Stream.of(
+            Arguments.of(ScalarScaler.Variant.NONE, 0.15, 0.1925),
+            Arguments.of(ScalarScaler.Variant.L1NORM, 0.43795, 0.56204),
+            Arguments.of(ScalarScaler.Variant.L2NORM, 0.61464, 0.7888),
+            Arguments.of(ScalarScaler.Variant.MEAN, -0.5, 0.5),
+            Arguments.of(ScalarScaler.Variant.MINMAX, 0.0, 1.0),
+            Arguments.of(ScalarScaler.Variant.MAX, 0.77922, 1.0)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("normalizations")
+    void normalizations(ScalarScaler.Variant variant, double expectedNode0, double expectedNode1) {
+        String query = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
+            .algo("articleRank")
+            .streamMode()
+            .addParameter("normalization", variant.name().toLowerCase(Locale.ENGLISH))
+            .yields();
+
+        assertCypherResult(query, List.of(
+            Map.of("nodeId", 0L, "score", closeTo(expectedNode0, 1E-5)),
+            Map.of("nodeId", 1L, "score", closeTo(expectedNode1, 1E-5))
+        ));
+    }
+
+    @Test
+    void invalidNormalization() {
+        assertThatThrownBy(() -> runQuery(GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
+            .algo("articleRank")
+            .streamMode()
+            .addParameter("normalization", "SUPERDUPERSCALARSCALERVARIANT")
+            .yields())
+        )
+            .getRootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Scaler `SUPERDUPERSCALARSCALERVARIANT` is not supported.");
     }
 
     @Test
