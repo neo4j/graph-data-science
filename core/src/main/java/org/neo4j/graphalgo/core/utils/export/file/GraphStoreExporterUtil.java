@@ -61,10 +61,7 @@ public final class GraphStoreExporterUtil {
         }
     }
 
-    public static Path getExportPath(
-        Config neo4jConfig,
-        GraphStoreToFileExporterConfig config
-    ) {
+    public static Path getExportPath(Config neo4jConfig, GraphStoreToFileExporterConfig config) {
         var exportLocation = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
 
         if (exportLocation == null) {

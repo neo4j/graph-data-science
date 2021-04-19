@@ -43,10 +43,8 @@ public class AuraShutdownProc extends BaseProc {
 
     @Internal
     @Procedure(name = "gds.internal.shutdown", mode = READ)
-    @Description("Persists graph stores to disk.")
-    public Stream<ShutdownResult> persist(
-        @Name(value = "timeoutInSeconds", defaultValue = "42") long timeoutInSeconds
-    ) {
+    @Description("Prepare for a showdown of the DBMS.")
+    public Stream<ShutdownResult> shutdown(@Name(value = "timeoutInSeconds", defaultValue = "42") long timeoutInSeconds) {
         var timer = ProgressTimer.start();
         try (timer) {
             var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
