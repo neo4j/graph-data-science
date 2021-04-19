@@ -45,6 +45,7 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
             var registry = dependencies.globalProceduresRegistry();
             try {
                 registry.register(new AuraMaintenanceFunction(), false);
+                registry.register(new AuraShutdownProc(), false);
             } catch (ProcedureException e) {
                 dependencies.logService()
                     .getInternalLog(getClass())

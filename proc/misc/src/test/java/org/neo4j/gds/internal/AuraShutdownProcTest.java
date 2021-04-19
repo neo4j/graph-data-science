@@ -30,9 +30,11 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.LogProvider;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -64,7 +66,7 @@ public class AuraShutdownProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(AuraShutdownProc.class);
+        GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class).register(new AuraShutdownProc());
 
         runQuery(DB_CYPHER);
 
@@ -159,7 +161,8 @@ public class AuraShutdownProcTest extends BaseProcTest {
         assertCypherResult(shutdownQuery, List.of(Map.of("done", false)));
 
         assertThat(testLog.getMessages(TestLog.WARN))
-            .contains("GraphStore persistence failed on graph first for user userA - The specified import directory already exists.");
+            .contains(
+                "GraphStore persistence failed on graph first for user userA - The specified import directory already exists.");
 
         assertThat(first).isEmptyDirectory();
 

@@ -19,38 +19,110 @@
  */
 package org.neo4j.gds.internal;
 
+import org.neo4j.collection.RawIterator;
 import org.neo4j.configuration.Config;
-import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreExporterUtil;
 import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExporterConfig;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Internal;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
+import org.neo4j.internal.kernel.api.procs.DefaultParameterValue;
+import org.neo4j.internal.kernel.api.procs.FieldSignature;
+import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
+import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.kernel.api.ResourceTracker;
+import org.neo4j.kernel.api.procedure.CallableProcedure;
+import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.logging.Log;
+import org.neo4j.values.AnyValue;
+import org.neo4j.values.storable.NumberValue;
+import org.neo4j.values.storable.Values;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.internal.helpers.collection.Iterators.asRawIterator;
+import static org.neo4j.internal.kernel.api.procs.Neo4jTypes.NTBoolean;
+import static org.neo4j.internal.kernel.api.procs.Neo4jTypes.NTInteger;
 import static org.neo4j.procedure.Mode.READ;
 
-public class AuraShutdownProc extends BaseProc {
+public class AuraShutdownProc implements CallableProcedure {
 
-    @Internal
-    @Procedure(name = "gds.internal.shutdown", mode = READ)
-    @Description("Prepare for a showdown of the DBMS.")
-    public Stream<ShutdownResult> shutdown(@Name(value = "timeoutInSeconds", defaultValue = "42") long timeoutInSeconds) {
+    private static final QualifiedName PROCEDURE_NAME = new QualifiedName(
+        new String[]{"gds", "internal"},
+        "shutdown"
+    );
+
+    private static final ProcedureSignature SIGNATURE = Neo4jProxy.procedureSignature(
+        PROCEDURE_NAME,
+        // Input signature: [
+        //   @Name(value = "timeoutInSeconds", defaultValue = "42") long timeoutInSeconds
+        // ]
+        List.of(FieldSignature.inputField("timeoutInSeconds", NTInteger, DefaultParameterValue.ntInteger(42))),
+        // Output type: return a boolean
+        List.of(FieldSignature.outputField("done", NTBoolean)),
+        // Procedure mode
+        READ,
+        // Do not require admin user for execution
+        false,
+        // No deprecation
+        null,
+        // Roles that are explicitly allowed to call this procedure (none)
+        new String[0],
+        // Procedure description
+        "Prepare for a showdown of the DBMS.",
+        // No warning
+        null,
+        // eagerness
+        false,
+        // case sensitive name match
+        false,
+        // Do not allow procedure on the system db
+        false,
+        // Hide procedure from listings (@Internal)
+        true,
+        // Require valid credentials
+        false
+    );
+
+    @Override
+    public ProcedureSignature signature() {
+        return SIGNATURE;
+    }
+
+    @Override
+    public RawIterator<AnyValue[], ProcedureException> apply(
+        Context ctx,
+        AnyValue[] input,
+        ResourceTracker resourceTracker
+    ) throws ProcedureException {
+        long timeoutInSeconds = ((NumberValue) input[0]).longValue();
+        var result = shutdown(
+            InternalProceduresUtil.resolve(ctx, Config.class),
+            InternalProceduresUtil.lookup(ctx, Log.class),
+            timeoutInSeconds,
+            InternalProceduresUtil.lookup(ctx, AllocationTracker.class)
+        );
+        return asRawIterator(Stream.ofNullable(new AnyValue[]{Values.booleanValue(result)}));
+    }
+
+    private static boolean shutdown(
+        Config neo4jConfig,
+        Log log,
+        long timeoutInSeconds,
+        AllocationTracker allocationTracker
+    ) {
         var timer = ProgressTimer.start();
         try (timer) {
-            var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-            var success = exportAllGraphStores(neo4jConfig);
+            var success = exportAllGraphStores(neo4jConfig, log, allocationTracker);
             if(!success) {
-                return Stream.of(new ShutdownResult(false));
+                return false;
             }
         }
 
@@ -68,10 +140,14 @@ public class AuraShutdownProc extends BaseProc {
                 timeoutInSeconds
             );
         }
-        return Stream.of(new ShutdownResult(true));
+        return true;
     }
 
-    private boolean exportAllGraphStores(Config neo4jConfig) {
+    private static boolean exportAllGraphStores(
+        Config neo4jConfig,
+        Log log,
+        AllocationTracker allocationTracker
+    ) {
         var failedExports = GraphStoreCatalog.getAllGraphStores()
             .flatMap(store -> {
                 var createConfig = store.config();
@@ -89,7 +165,7 @@ public class AuraShutdownProc extends BaseProc {
                         neo4jConfig,
                         config,
                         log,
-                        allocationTracker()
+                        allocationTracker
                     );
                     return Stream.empty();
                 } catch (Exception e) {
@@ -110,14 +186,6 @@ public class AuraShutdownProc extends BaseProc {
         }
 
         return failedExports.isEmpty();
-    }
-
-    public static final class ShutdownResult {
-        public final boolean done;
-
-        ShutdownResult(boolean done) {
-            this.done = done;
-        }
     }
 
     @ValueClass
