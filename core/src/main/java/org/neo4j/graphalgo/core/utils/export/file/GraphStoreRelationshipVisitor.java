@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.IdMapping;
@@ -32,6 +31,7 @@ import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -40,6 +40,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
 
     private final Supplier<RelationshipsBuilderBuilder> relationshipBuilderSupplier;
     private final Map<String, RelationshipsBuilder> relationshipBuilders;
+    private final Map<String, RelationshipBuilderFromVisitor> relationshipFromVisitorBuilders;
 
     protected GraphStoreRelationshipVisitor(
         RelationshipSchema relationshipSchema,
@@ -49,43 +50,31 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         super(relationshipSchema);
         this.relationshipBuilderSupplier = relationshipBuilderSupplier;
         this.relationshipBuilders = relationshipBuilders;
+        relationshipFromVisitorBuilders = new HashMap<>();
     }
 
     @Override
     protected void exportElement() {
         // TODO: this logic should move to the RelationshipsBuilder
-        if (elementSchema.hasProperties(RelationshipType.of(relationshipType()))) {
-            var relationshipsBuilder = relationshipBuilders.computeIfAbsent(
+        var relationshipsBuilder = relationshipFromVisitorBuilders.computeIfAbsent(
                 relationshipType(),
-                (key) -> relationshipBuilderSupplier.get()
-                    .propertyConfigs(
-                        getPropertySchema().stream().map(schema ->
-                            ImmutablePropertyConfig.of(schema.aggregation(), schema.defaultValue())
-                        ).collect(Collectors.toList())
-                    )
-                    .build()
+                (key) -> {
+                    var propertyConfigs = getPropertySchema()
+                        .stream()
+                        .map(schema -> ImmutablePropertyConfig.of(schema.aggregation(), schema.defaultValue()))
+                        .collect(Collectors.toList());
+                    var relBuilder = relationshipBuilderSupplier.get()
+                        .propertyConfigs(propertyConfigs)
+                        .build();
+                    relationshipBuilders.put(key, relBuilder);
+                    return RelationshipBuilderFromVisitor.of(
+                        propertyConfigs.size(),
+                        relBuilder,
+                        GraphStoreRelationshipVisitor.this
+                    );
+                }
             );
-
-            var numberOfProperties = getPropertySchema().size();
-            if(numberOfProperties > 1) {
-                double[] propertyValues = new double[numberOfProperties];
-                MutableInt index = new MutableInt();
-                forEachProperty((propertyKey, propertyValue, valueType) -> {
-                    propertyValues[index.getAndIncrement()] = Double.parseDouble(propertyValue.toString());
-                });
-                relationshipsBuilder.add(startNode(), endNode(), propertyValues);
-            } else {
-                forEachProperty((propertyKey, propertyValue, valueType) -> {
-                    relationshipsBuilder.add(startNode(), endNode(), Double.parseDouble(propertyValue.toString()));
-                });
-            }
-        } else {
-            var relationshipsBuilder = relationshipBuilders.computeIfAbsent(
-                relationshipType(),
-                (key) -> relationshipBuilderSupplier.get().build()
-            );
-            relationshipsBuilder.add(startNode(), endNode());
-        }
+        relationshipsBuilder.addFromVisitor();
     }
 
     static final class Builder extends RelationshipVisitor.Builder<Builder, GraphStoreRelationshipVisitor> {
