@@ -26,8 +26,12 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.Random;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 final class IndependentCascade {
+    private static final Lock lock = new ReentrantLock();
+
     private final Graph graph;
     private final double propagationProbability;
     private final long monteCarloSimulations;
@@ -84,8 +88,13 @@ final class IndependentCascade {
         addCandidateNode(candidateNode);
     }
 
-    private synchronized void addCandidateNode(long candidateNode) {
-        spreads.add(candidateNode, (double) Math.round(spread * 1000) / 1000);
+    private void addCandidateNode(long candidateNode) {
+        try {
+            lock.lock();
+            spreads.add(candidateNode, (double) Math.round(spread * 1000) / 1000);
+        } finally {
+            lock.unlock();
+        }
     }
 
     private void initStructures(long candidateNode, long[] seedSetNodes) {
