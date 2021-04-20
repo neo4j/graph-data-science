@@ -21,13 +21,15 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.Arrays;
-import java.util.Locale;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public abstract class ScalarScaler implements Scaler {
 
@@ -120,19 +122,22 @@ public abstract class ScalarScaler implements Scaler {
             }
         };
 
+        private static final List<String> VALUES = Arrays
+            .stream(Variant.values())
+            .map(Variant::name)
+            .collect(Collectors.toList());
+
         public static Variant lookup(Object name) {
             if (name instanceof String) {
-                try {
-                    return valueOf(((String) name).toUpperCase(Locale.ENGLISH));
-                } catch (IllegalArgumentException e) {
-                    String availableStrategies = Arrays
-                        .stream(values())
-                        .map(Variant::name)
-                        .collect(Collectors.joining(", "));
+                var inputString = toUpperCaseWithLocale((String) name);
+
+                if (VALUES.contains(inputString)) {
+                    return valueOf(inputString);
+                } else {
                     throw new IllegalArgumentException(formatWithLocale(
                         "Scaler `%s` is not supported. Must be one of: %s.",
                         name,
-                        availableStrategies
+                        StringJoining.join(VALUES)
                     ));
                 }
             }
