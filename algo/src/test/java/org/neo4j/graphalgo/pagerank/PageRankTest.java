@@ -397,7 +397,7 @@ class PageRankTest {
 
     @Nested
     @GdlExtension
-    class Normalization {
+    class Scaling {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
@@ -432,7 +432,7 @@ class PageRankTest {
                 .maxIterations(40)
                 .tolerance(0)
                 .concurrency(1)
-                .normalization(variant)
+                .scaler(variant)
                 .build();
 
             var actual = runOnPregel(graph, config, Mode.EIGENVECTOR, ProgressLogger.NULL_LOGGER).scores();

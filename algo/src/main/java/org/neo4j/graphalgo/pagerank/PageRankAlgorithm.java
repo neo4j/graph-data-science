@@ -59,7 +59,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResu
 
         HugeDoubleArray scores = pregelResult.nodeValues().doubleProperties(PageRankComputation.PAGE_RANK);
 
-        normalizeScores(scores);
+        scaleScores(scores);
 
         return ImmutablePageRankResult.builder()
             .scores(scores)
@@ -68,13 +68,13 @@ public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResu
             .build();
     }
 
-    private void normalizeScores(HugeDoubleArray scores) {
-        var normalization = config.normalization();
-        if (normalization == ScalarScaler.Variant.NONE) {
+    private void scaleScores(HugeDoubleArray scores) {
+        var scalerVariant = config.scaler();
+        if (scalerVariant == ScalarScaler.Variant.NONE) {
             return;
         }
 
-        var scaler = normalization.create(
+        var scaler = scalerVariant.create(
             scores.asNodeProperties(),
             graph.nodeCount(),
             config.concurrency(),

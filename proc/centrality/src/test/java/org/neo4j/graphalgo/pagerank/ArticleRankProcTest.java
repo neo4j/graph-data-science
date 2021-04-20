@@ -73,7 +73,7 @@ class ArticleRankProcTest extends BaseProcTest {
         runQuery("CALL gds.graph.create($graphName, '*', '*')", Map.of("graphName", GRAPH_NAME));
     }
 
-    static Stream<Arguments> normalizations() {
+    static Stream<Arguments> scalers() {
         return Stream.of(
             Arguments.of(ScalarScaler.Variant.NONE, 0.15, 0.1925),
             Arguments.of(ScalarScaler.Variant.L1NORM, 0.43795, 0.56204),
@@ -85,13 +85,13 @@ class ArticleRankProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @MethodSource("normalizations")
-    void normalizations(ScalarScaler.Variant variant, double expectedNode0, double expectedNode1) {
+    @MethodSource("scalers")
+    void scalers(ScalarScaler.Variant variant, double expectedNode0, double expectedNode1) {
         String query = GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
             .algo("articleRank")
             .streamMode()
-            .addParameter("normalization", variant.name().toLowerCase(Locale.ENGLISH))
+            .addParameter("scaler", variant.name().toLowerCase(Locale.ENGLISH))
             .yields();
 
         assertCypherResult(query, List.of(
@@ -101,12 +101,12 @@ class ArticleRankProcTest extends BaseProcTest {
     }
 
     @Test
-    void invalidNormalization() {
+    void invalidScaler() {
         assertThatThrownBy(() -> runQuery(GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
             .algo("articleRank")
             .streamMode()
-            .addParameter("normalization", "SUPERDUPERSCALARSCALERVARIANT")
+            .addParameter("scaler", "SUPERDUPERSCALARSCALERVARIANT")
             .yields())
         )
             .getRootCause()
