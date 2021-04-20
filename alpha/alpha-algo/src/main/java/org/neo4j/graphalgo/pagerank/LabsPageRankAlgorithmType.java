@@ -32,16 +32,4 @@ public enum LabsPageRankAlgorithmType implements PageRankAlgorithm {
             return EigenvectorCentralityComputeStep.class;
         }
     },
-
-    ARTICLE_RANK {
-        @Override
-        public PageRankVariant variant() {
-            return new ArticleRankVariant();
-        }
-
-        @Override
-        public Class<ArticleRankComputeStep> computeStepClass() {
-            return ArticleRankComputeStep.class;
-        }
-    }
 }

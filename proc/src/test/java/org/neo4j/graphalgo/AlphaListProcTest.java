@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
-import org.neo4j.graphalgo.centrality.ArticleRankProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.HarmonicCentralityProc;
 import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
@@ -132,7 +131,6 @@ class AlphaListProcTest extends BaseProcTest {
         registerProcedures(
             AllShortestPathsProc.class,
             ApproxNearestNeighborsProc.class,
-            ArticleRankProc.class,
             ClosenessCentralityProc.class,
             EigenvectorCentralityProc.class,
             HarmonicCentralityProc.class,
