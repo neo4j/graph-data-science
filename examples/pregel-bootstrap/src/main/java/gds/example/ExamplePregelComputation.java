@@ -22,10 +22,7 @@ package gds.example;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.beta.pregel.Messages;
-import org.neo4j.graphalgo.beta.pregel.PregelComputation;
-import org.neo4j.graphalgo.beta.pregel.PregelConfig;
-import org.neo4j.graphalgo.beta.pregel.PregelSchema;
+import org.neo4j.graphalgo.beta.pregel.*;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
@@ -61,7 +58,7 @@ public class ExamplePregelComputation implements PregelComputation<ExamplePregel
     @ValueClass
     @Configuration
     @SuppressWarnings("immutables:subtype")
-    public interface ExampleConfig extends PregelConfig {
+    public interface ExampleConfig extends PregelProcedureConfig {
 
         static ExamplePregelComputation.ExampleConfig of(
                 String username,
