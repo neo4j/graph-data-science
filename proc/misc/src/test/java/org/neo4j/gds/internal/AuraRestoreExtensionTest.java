@@ -53,7 +53,9 @@ class AuraRestoreExtensionTest extends BaseTest {
     }
 
     @Test
-    void shouldLoadGraphStore() {
+    void shouldLoadOnlyAutoloadGraphStores() {
+        assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(1);
+
         var testGraphStore = GraphStoreCatalog.get("UserA", db.databaseId(), "test-graph");
         assertThat(testGraphStore).isNotNull();
 
@@ -73,11 +75,6 @@ class AuraRestoreExtensionTest extends BaseTest {
         );
 
         assertGraphEquals(expectedGraph, testGraphStore.graphStore().getUnion());
-    }
-
-    @Test
-    void shouldLoadOnlyAutoloadGraphStores() {
-        assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(1);
     }
 
     private Path importPath() {
