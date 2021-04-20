@@ -22,13 +22,14 @@ package org.neo4j.graphalgo.pagerank;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -38,19 +39,21 @@ import org.neo4j.graphalgo.pagerank.PageRankPregelAlgorithmFactory.Mode;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
+import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-@GdlExtension
 class PageRankPregelTest {
 
     private static final double SCORE_PRECISION = 1E-5;
 
     @Nested
+    @GdlExtension
     class Unweighted {
 
         // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
@@ -97,16 +100,14 @@ class PageRankPregelTest {
                 .tolerance(0)
                 .build();
 
-            var actualGds = runOnGds(graph, config).result().asNodeProperties();
-            var actualPregel = runOnPregel(graph, config)
+            var actual = runOnPregel(graph, config)
                 .scores()
                 .asNodeProperties();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
-                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -140,16 +141,14 @@ class PageRankPregelTest {
                 .concurrency(1)
                 .build();
 
-            var actualGds = runOnGds(graph, config, sourceNodeIds).result().asNodeProperties();
-            var actualPregel = runOnPregel(graph, config, sourceNodeIds, Mode.PAGE_RANK)
+            var actual = runOnPregel(graph, config, sourceNodeIds, Mode.PAGE_RANK)
                 .scores()
                 .asNodeProperties();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
-                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
 
@@ -188,6 +187,7 @@ class PageRankPregelTest {
     }
 
     @Nested
+    @GdlExtension
     class Weighted {
         // https://en.wikipedia.org/wiki/PageRank#/media/File:PageRanks-Example.jpg
         @GdlGraph
@@ -235,21 +235,20 @@ class PageRankPregelTest {
                 .concurrency(1)
                 .build();
 
-            var actualGds = runOnGds(graph, config).result().asNodeProperties();
-            var actualPregel = runOnPregel(graph, config)
+            var actual = runOnPregel(graph, config)
                 .scores()
                 .asNodeProperties();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actualGds.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
-                assertThat(actualPregel.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
     }
 
     @Nested
+    @GdlExtension
     class ArticleRank {
 
         @GdlGraph
@@ -349,6 +348,7 @@ class PageRankPregelTest {
     }
 
     @Nested
+    @GdlExtension
     class Normalization {
         @GdlGraph
         private static final String DB_CYPHER =
@@ -397,17 +397,51 @@ class PageRankPregelTest {
         }
     }
 
-    PageRank runOnGds(Graph graph, PageRankBaseConfig config) {
-        return runOnGds(graph, config, new long[0]);
+
+    static Stream<Arguments> expectedMemoryEstimation() {
+        return Stream.of(
+            Arguments.of(1, 2412824L, 2412824L),
+            Arguments.of(4, 2412992L, 2412992L),
+            Arguments.of(42, 2415120L, 2415120L)
+        );
     }
 
-    PageRank runOnGds(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds) {
-        var algorithmType = config.relationshipWeightProperty() != null
-            ? PageRankAlgorithmType.WEIGHTED
-            : PageRankAlgorithmType.NON_WEIGHTED;
-        return algorithmType
-            .create(graph, config, LongStream.of(sourceNodeIds), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
-            .compute();
+    @ParameterizedTest
+    @MethodSource("expectedMemoryEstimation")
+    void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
+        var config = ImmutablePageRankPregelConfig
+            .builder()
+            .build();
+
+        var nodeCount = 100_000;
+        var relationshipCount = nodeCount * 10;
+
+        assertMemoryEstimation(
+            () -> new PageRankPregelAlgorithmFactory<>().memoryEstimation(config),
+            nodeCount,
+            relationshipCount,
+            concurrency,
+            expectedMinBytes,
+            expectedMaxBytes
+        );
+    }
+
+    @Test
+    void shouldComputeMemoryEstimationFor10BElements() {
+        var config = ImmutablePageRankPregelConfig
+            .builder()
+            .build();
+
+        var nodeCount = 10_000_000_000L;
+        var relationshipCount = 10_000_000_000L;
+        assertMemoryEstimation(
+            () -> new PageRankPregelAlgorithmFactory<>().memoryEstimation(config),
+            nodeCount,
+            relationshipCount,
+            4,
+            241_286_621_632L,
+            241_286_621_632L
+        );
     }
 
     PageRankPregelResult runOnPregel(Graph graph, PageRankBaseConfig config) {
