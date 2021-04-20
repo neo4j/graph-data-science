@@ -78,7 +78,15 @@
                 <d:tocentry linkend="algorithms-hits">
                     <?dbhtml filename="algorithms/hits/index.html"?>
                 </d:tocentry>
-
+                <d:tocentry linkend="algorithms-influence-maximization">
+                    <?dbhtml filename="algorithms/influence-maximization/index.html"?>
+                    <d:tocentry linkend="algorithms-celf">
+                        <?dbhtml filename="algorithms/influence-maximization/celf/index.html"?>
+                    </d:tocentry>
+                    <d:tocentry linkend="algorithms-greedy">
+                        <?dbhtml filename="algorithms/influence-maximization/greedy/index.html"?>
+                    </d:tocentry>
+                </d:tocentry>
             </d:tocentry>
             <d:tocentry linkend="algorithms-community">
                 <?dbhtml filename="algorithms/community/index.html"?>
@@ -213,13 +221,6 @@
                 <d:tocentry linkend="algorithms-ml-nodeclassification"><?dbhtml filename="algorithms/ml-models/node-classification/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="algorithms-ml-linkprediction"><?dbhtml filename="algorithms/ml-models/linkprediction/index.html"?>
-                </d:tocentry>
-            </d:tocentry>
-
-            <d:tocentry linkend="algorithms-influence-maximization"><?dbhtml filename="algorithms/influence-maximization/index.html"?>
-                <d:tocentry linkend="algorithms-greedy"><?dbhtml filename="algorithms/greedy/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-celf"><?dbhtml filename="algorithms/celf/index.html"?>
                 </d:tocentry>
             </d:tocentry>
 
