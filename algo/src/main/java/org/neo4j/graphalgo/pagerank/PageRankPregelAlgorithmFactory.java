@@ -73,10 +73,15 @@ public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig>
         double deltaCoefficient = 1;
 
         if (configuration.isWeighted()) {
-            var aggregatedWeights = new WeightedDegreeComputer(graph)
-                .degree(Pools.DEFAULT, configuration.concurrency(), tracker)
-                .aggregatedDegrees();
-            degreeFunction = aggregatedWeights::get;
+            var degreeCentrality = new WeightedDegreeCentrality(
+                graph,
+                configuration.concurrency(),
+                Pools.DEFAULT,
+                tracker
+            );
+            degreeCentrality.compute();
+            var weightedDegrees = degreeCentrality.degrees();
+            degreeFunction = weightedDegrees::get;
         } else {
             degreeFunction = graph::degree;
         }
