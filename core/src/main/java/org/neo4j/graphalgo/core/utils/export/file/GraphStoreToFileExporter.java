@@ -89,7 +89,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private static GraphStoreToFileExporter of(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
-        Optional<Supplier<SingleRowVisitor<Void>>> autoloadFlagVisitorSupplier,
+        Optional<Supplier<AutoloadFlagVisitor>> autoloadFlagVisitorSupplier,
         Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
         Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
         Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
@@ -154,7 +154,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     }
 
     private static final class FullGraphStoreToFileExporter extends GraphStoreToFileExporter {
-        private final Optional<Supplier<SingleRowVisitor<Void>>> maybeAutoloadFlagSupplier;
+        private final Optional<Supplier<AutoloadFlagVisitor>> maybeAutoloadFlagSupplier;
         private final Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier;
         private final Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier;
         private final Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier;
@@ -162,7 +162,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         private FullGraphStoreToFileExporter(
             GraphStore graphStore,
             GraphStoreToFileExporterConfig config,
-            Optional<Supplier<SingleRowVisitor<Void>>> maybeAutoloadFlagSupplier,
+            Optional<Supplier<AutoloadFlagVisitor>> maybeAutoloadFlagSupplier,
             Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
             Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
             Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
@@ -186,11 +186,9 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         }
 
         private void exportAutoloadFlag() {
-            maybeAutoloadFlagSupplier.ifPresent(autoLoadFlagSupplier -> {
-                try(var autoloadFlagVisitor = autoLoadFlagSupplier.get()) {
-                    autoloadFlagVisitor.export(null);
-                }
-            });
+            maybeAutoloadFlagSupplier.ifPresent(
+                autoLoadFlagSupplier -> autoLoadFlagSupplier.get().export()
+            );
         }
 
         private void exportGraphInfo(GraphStoreInput graphStoreInput) {

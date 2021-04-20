@@ -19,14 +19,12 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
-import org.neo4j.graphalgo.core.utils.export.file.SingleRowVisitor;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class AutoloadFlagVisitor implements SingleRowVisitor<Void> {
+public class AutoloadFlagVisitor {
 
     private static final String AUTOLOAD_FILE_NAME = ".autoload";
 
@@ -36,17 +34,11 @@ public class AutoloadFlagVisitor implements SingleRowVisitor<Void> {
         autoloadFlagPath = fileLocation.resolve(AUTOLOAD_FILE_NAME);
     }
 
-    @Override
-    public void export(Void unused) {
+    public void export() {
         try {
             Files.createFile(autoloadFlagPath);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-    }
-
-    @Override
-    public void close() {
-
     }
 }
