@@ -50,7 +50,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         GraphStoreToFileExporterConfig config,
         Path exportPath
     ) {
-        return csv(graphStore, config, exportPath, true);
+        return csv(graphStore, config, exportPath, Optional.of(() -> new AutoloadFlagVisitor(exportPath)));
     }
 
     public static GraphStoreToFileExporter csv(
@@ -58,14 +58,14 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         GraphStoreToFileExporterConfig config,
         Path exportPath
     ) {
-        return csv(graphStore, config, exportPath, false);
+        return csv(graphStore, config, exportPath, Optional.empty());
     }
 
     private static GraphStoreToFileExporter csv(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
         Path exportPath,
-        boolean autoExport
+        Optional<Supplier<AutoloadFlagVisitor>> autoloadFlagVisitorSupplier
     ) {
         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
 
@@ -75,9 +75,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         return GraphStoreToFileExporter.of(
             graphStore,
             config,
-            autoExport
-                ? Optional.of(() -> new AutoloadFlagVisitor(exportPath))
-                : Optional.empty(),
+            autoloadFlagVisitorSupplier,
             () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
             () -> new CsvRelationshipSchemaVisitor(exportPath),
