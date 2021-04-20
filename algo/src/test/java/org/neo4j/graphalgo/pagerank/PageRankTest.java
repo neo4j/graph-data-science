@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class PageRankPregelTest {
+class PageRankTest {
 
     private static final double SCORE_PRECISION = 1E-5;
 
