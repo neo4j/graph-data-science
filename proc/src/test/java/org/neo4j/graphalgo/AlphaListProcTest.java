@@ -61,8 +61,6 @@ class AlphaListProcTest extends BaseProcTest {
 
     private static final Collection<String> PROCEDURES = new HashSet<>(asList(
         "gds.alpha.allShortestPaths.stream",
-        "gds.alpha.articleRank.write",
-        "gds.alpha.articleRank.stream",
         "gds.alpha.bfs.stream",
         "gds.alpha.closeness.write",
         "gds.alpha.closeness.stream",
@@ -92,8 +90,6 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.spanningTree.maximum.write",
         "gds.alpha.spanningTree.minimum.write",
         "gds.alpha.triangles",
-        "gds.alpha.eigenvector.write",
-        "gds.alpha.eigenvector.stream",
         "gds.alpha.ml.ann.write",
         "gds.alpha.ml.ann.stream",
         "gds.alpha.ml.nodeClassification.train",
@@ -164,7 +160,7 @@ class AlphaListProcTest extends BaseProcTest {
     @Test
     void listFilteredResult() {
         assertEquals(SPANNING_TREE, listProcs("spanningTree"));
-        assertEquals(singleton("gds.alpha.articleRank.stream"), listProcs("gds.alpha.articleRank.stream"));
+        assertEquals(singleton("gds.alpha.dfs.stream"), listProcs("gds.alpha.dfs.stream"));
         assertEquals(emptySet(), listProcs("foo"));
     }
 
