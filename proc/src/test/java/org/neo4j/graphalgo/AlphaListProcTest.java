@@ -26,7 +26,6 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.HarmonicCentralityProc;
-import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphalgo.functions.OneHotEncodingFunc;
@@ -132,7 +131,6 @@ class AlphaListProcTest extends BaseProcTest {
             AllShortestPathsProc.class,
             ApproxNearestNeighborsProc.class,
             ClosenessCentralityProc.class,
-            EigenvectorCentralityProc.class,
             HarmonicCentralityProc.class,
             IsFiniteFunc.class,
             KSpanningTreeProc.class,
