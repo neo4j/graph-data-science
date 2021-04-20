@@ -222,8 +222,34 @@ class PageRankPregelTest {
             ", (j)-[:TYPE { weight: 1.0,   unnormalizedWeight: 10.0 }]->(e)" +
             ", (k)-[:TYPE { weight: 1.0,   unnormalizedWeight: 10.0 }]->(e)";
 
+        @GdlGraph(graphNamePrefix = "zeroWeights")
+        private static final String DB_ZERO_WEIGHTS =
+            "CREATE" +
+            "  (a:Node { expectedRank: 0.15 })" +
+            ", (b:Node { expectedRank: 0.15 })" +
+            ", (c:Node { expectedRank: 0.15 })" +
+            ", (d:Node { expectedRank: 0.15 })" +
+            ", (e:Node { expectedRank: 0.15 })" +
+            ", (f:Node { expectedRank: 0.15 })" +
+            ", (g:Node { expectedRank: 0.15 })" +
+            ", (h:Node { expectedRank: 0.15 })" +
+            ", (i:Node { expectedRank: 0.15 })" +
+            ", (j:Node { expectedRank: 0.15 })" +
+            ", (b)-[:TYPE1 {weight: 0}]->(c)" +
+            ", (c)-[:TYPE1 {weight: 0}]->(b)" +
+            ", (d)-[:TYPE1 {weight: 0}]->(a)" +
+            ", (d)-[:TYPE1 {weight: 0}]->(b)" +
+            ", (e)-[:TYPE1 {weight: 0}]->(b)" +
+            ", (e)-[:TYPE1 {weight: 0}]->(d)" +
+            ", (e)-[:TYPE1 {weight: 0}]->(f)" +
+            ", (f)-[:TYPE1 {weight: 0}]->(b)" +
+            ", (f)-[:TYPE1 {weight: 0}]->(e)";
+
         @Inject
         private Graph graph;
+
+        @Inject
+        private Graph zeroWeightsGraph;
 
         @ParameterizedTest
         @ValueSource(strings = {"weight", "unnormalizedWeight"})
@@ -242,6 +268,26 @@ class PageRankPregelTest {
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+            }
+        }
+
+        @Test
+        void withZeroWeights() {
+            var config = ImmutablePageRankStreamConfig.builder()
+                .maxIterations(40)
+                .tolerance(0)
+                .relationshipWeightProperty("weight")
+                .concurrency(1)
+                .build();
+
+            var actual = runOnPregel(zeroWeightsGraph, config)
+                .scores()
+                .asNodeProperties();
+
+            var expected = zeroWeightsGraph.nodeProperties("expectedRank");
+
+            for (int nodeId = 0; nodeId < zeroWeightsGraph.nodeCount(); nodeId++) {
                 assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
