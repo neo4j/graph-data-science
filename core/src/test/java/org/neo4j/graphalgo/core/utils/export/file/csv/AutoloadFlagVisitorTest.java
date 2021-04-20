@@ -39,7 +39,7 @@ class AutoloadFlagVisitorTest {
     void shouldCreateAutoloadFlagFile() {
         var autoloadFlagVisitor = new AutoloadFlagVisitor(tempDir);
 
-        autoloadFlagVisitor.export(null);
+        autoloadFlagVisitor.export();
 
         assertThat(tempDir).isDirectoryContaining("glob:**/.autoload");
     }
@@ -50,7 +50,7 @@ class AutoloadFlagVisitorTest {
 
         var autoloadFlagVisitor = new AutoloadFlagVisitor(tempDir);
 
-        assertThatThrownBy(() -> autoloadFlagVisitor.export(null))
+        assertThatThrownBy(autoloadFlagVisitor::export)
             .hasRootCauseInstanceOf(FileAlreadyExistsException.class);
     }
 
