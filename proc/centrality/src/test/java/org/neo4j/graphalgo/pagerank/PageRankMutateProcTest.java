@@ -37,7 +37,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class PageRankMutateProcTest extends PageRankProcTest<PageRankPregelMutateConfig> implements MutateNodePropertyTest<PageRankPregelAlgorithm, PageRankPregelMutateConfig, PageRankPregelResult> {
+class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements MutateNodePropertyTest<PageRankAlgorithm, PageRankMutateConfig, PageRankResult> {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
@@ -115,13 +115,13 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankPregelMutateConfig
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankMutateConfig>> getProcedureClazz() {
         return PageRankMutateProc.class;
     }
 
     @Override
-    public PageRankPregelMutateConfig createConfig(CypherMapWrapper mapWrapper) {
-        return PageRankPregelMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
+    public PageRankMutateConfig createConfig(CypherMapWrapper mapWrapper) {
+        return PageRankMutateConfig.of(getUsername(), Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     @Test

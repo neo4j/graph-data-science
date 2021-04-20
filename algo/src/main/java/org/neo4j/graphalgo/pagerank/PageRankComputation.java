@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.beta.pregel.context.InitContext;
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
 
-public final class PageRankPregel implements PregelComputation<PageRankPregelConfig> {
+public final class PageRankComputation implements PregelComputation<PageRankConfig> {
 
     static final String PAGE_RANK = "pagerank";
 
@@ -46,9 +46,9 @@ public final class PageRankPregel implements PregelComputation<PageRankPregelCon
     private final double alpha;
     private final double deltaCoefficient;
 
-    public PageRankPregel(
+    PageRankComputation(
         NodeMapping nodeMapping,
-        PageRankPregelConfig config,
+        PageRankConfig config,
         LongToDoubleFunction degreeFunction,
         double deltaCoefficient
     ) {
@@ -63,16 +63,16 @@ public final class PageRankPregel implements PregelComputation<PageRankPregelCon
     }
 
     @Override
-    public PregelSchema schema(PageRankPregelConfig config) {
+    public PregelSchema schema(PageRankConfig config) {
         return new PregelSchema.Builder().add(PAGE_RANK, ValueType.DOUBLE).build();
     }
 
     @Override
-    public void init(InitContext<PageRankPregelConfig> context) {
+    public void init(InitContext<PageRankConfig> context) {
         context.setNodeValue(PAGE_RANK, initialValue(context));
     }
 
-    private double initialValue(InitContext<PageRankPregelConfig> context) {
+    private double initialValue(InitContext<PageRankConfig> context) {
         if (!hasSourceNodes || sourceNodes.contains(context.nodeId())) {
             return alpha;
         }
@@ -80,7 +80,7 @@ public final class PageRankPregel implements PregelComputation<PageRankPregelCon
     }
 
     @Override
-    public void compute(ComputeContext<PageRankPregelConfig> context, Messages messages) {
+    public void compute(ComputeContext<PageRankConfig> context, Messages messages) {
         double rank = context.doubleNodeValue(PAGE_RANK);
         double delta = rank;
 

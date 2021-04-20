@@ -39,9 +39,9 @@ final class PageRankProc {
 
     private PageRankProc() {}
 
-    static <PROC_RESULT, CONFIG extends PageRankPregelConfig> PageRankResultBuilder<PROC_RESULT> resultBuilder(
+    static <PROC_RESULT, CONFIG extends PageRankConfig> PageRankResultBuilder<PROC_RESULT> resultBuilder(
         PageRankResultBuilder<PROC_RESULT> procResultBuilder,
-        AlgoBaseProc.ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, CONFIG> computeResult
+        AlgoBaseProc.ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult
     ) {
         var result = computeResult.result();
         procResultBuilder
@@ -52,11 +52,11 @@ final class PageRankProc {
         return procResultBuilder;
     }
 
-    static <CONFIG extends PageRankPregelConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, CONFIG> computeResult) {
+    static <CONFIG extends PageRankConfig> NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult) {
         return computeResult.result().scores().asNodeProperties();
     }
 
-    static <CONFIG extends PageRankPregelConfig> void validateAlgoConfig(CONFIG config, Log log) {
+    static <CONFIG extends PageRankConfig> void validateAlgoConfig(CONFIG config, Log log) {
         if (config.cacheWeights()) {
             log.warn("The configuration parameter `cacheWeights` is deprecated and has no effect.");
         }

@@ -19,15 +19,30 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.MutatePropertyConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+
+import java.util.Optional;
 
 @ValueClass
-public interface PageRankPregelResult {
+@Configuration
+@SuppressWarnings("immutables:subtype")
+public interface PageRankMutateConfig extends PageRankConfig, MutatePropertyConfig {
 
-    HugeDoubleArray scores();
-
-    int iterations();
-
-    boolean didConverge();
+    static PageRankMutateConfig of(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper userInput
+    ) {
+        return new PageRankMutateConfigImpl(
+            graphName,
+            maybeImplicitCreate,
+            username,
+            userInput
+        );
+    }
 }

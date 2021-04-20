@@ -29,15 +29,15 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface PageRankPregelStatsConfig extends PageRankPregelConfig {
+public interface PageRankStreamConfig extends PageRankConfig {
 
-    static PageRankPregelStatsConfig of(
+    static PageRankStreamConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new PageRankPregelStatsConfigImpl(
+        return new PageRankStreamConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

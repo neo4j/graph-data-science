@@ -30,12 +30,13 @@ import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
-import org.neo4j.graphalgo.pagerank.PageRankPregelAlgorithmFactory.Mode;
+import org.neo4j.graphalgo.pagerank.PageRankAlgorithmFactory.Mode;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
@@ -95,7 +96,7 @@ class PageRankTest {
         @Test
         void withoutTolerance() {
             var config = ImmutablePageRankStreamConfig.builder()
-                .maxIterations(40)
+                .maxIterations(41)
                 .concurrency(1)
                 .tolerance(0)
                 .build();
@@ -133,15 +134,16 @@ class PageRankTest {
         })
         void withSourceNodes(String sourceNodesString, String expectedPropertyKey) {
             // ids are converted to mapped ids within the algorithms
-            var sourceNodeIds = Arrays.stream(sourceNodesString.split(";")).mapToLong(graph::toOriginalNodeId).toArray();
+            var sourceNodeIds = Arrays.stream(sourceNodesString.split(";")).mapToLong(graph::toOriginalNodeId);
 
             var config = ImmutablePageRankStreamConfig.builder()
-                .maxIterations(40)
+                .maxIterations(41)
                 .tolerance(0)
                 .concurrency(1)
+                .sourceNodeIds(sourceNodeIds)
                 .build();
 
-            var actual = runOnPregel(graph, config, sourceNodeIds, Mode.PAGE_RANK)
+            var actual = runOnPregel(graph, config)
                 .scores()
                 .asNodeProperties();
 
@@ -154,7 +156,7 @@ class PageRankTest {
 
         @Test
         void shouldLogProgress() {
-            var config = ImmutablePageRankPregelConfig.builder().build();
+            var config = ImmutablePageRankConfig.builder().build();
 
             var testLogger = new TestProgressLogger(
                 graph.nodeCount(),
@@ -255,7 +257,7 @@ class PageRankTest {
         @ValueSource(strings = {"weight", "unnormalizedWeight"})
         void withWeights(String relationshipWeight) {
             var config = ImmutablePageRankStreamConfig.builder()
-                .maxIterations(40)
+                .maxIterations(41)
                 .tolerance(0)
                 .relationshipWeightProperty(relationshipWeight)
                 .concurrency(1)
@@ -360,7 +362,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config, new long[0], Mode.ARTICLE_RANK)
+            var actual = runOnPregel(graph, config, Mode.ARTICLE_RANK)
                 .scores()
                 .asNodeProperties();
 
@@ -381,7 +383,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(paperGraph, config, new long[0], Mode.ARTICLE_RANK)
+            var actual = runOnPregel(paperGraph, config, Mode.ARTICLE_RANK)
                 .scores()
                 .asNodeProperties();
 
@@ -425,7 +427,7 @@ class PageRankTest {
         @ParameterizedTest
         @CsvSource({"L1NORM, expectedL1", "L2NORM, expectedL2", "MEAN, expectedMean"})
         void test(ScalarScaler.Variant variant, String expectedPropertyKey) {
-            var config = ImmutablePageRankPregelConfig
+            var config = ImmutablePageRankConfig
                 .builder()
                 .maxIterations(40)
                 .tolerance(0)
@@ -455,7 +457,7 @@ class PageRankTest {
     @ParameterizedTest
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
-        var config = ImmutablePageRankPregelConfig
+        var config = ImmutablePageRankConfig
             .builder()
             .build();
 
@@ -463,7 +465,7 @@ class PageRankTest {
         var relationshipCount = nodeCount * 10;
 
         assertMemoryEstimation(
-            () -> new PageRankPregelAlgorithmFactory<>().memoryEstimation(config),
+            () -> new PageRankAlgorithmFactory<>().memoryEstimation(config),
             nodeCount,
             relationshipCount,
             concurrency,
@@ -474,14 +476,14 @@ class PageRankTest {
 
     @Test
     void shouldComputeMemoryEstimationFor10BElements() {
-        var config = ImmutablePageRankPregelConfig
+        var config = ImmutablePageRankConfig
             .builder()
             .build();
 
         var nodeCount = 10_000_000_000L;
         var relationshipCount = 10_000_000_000L;
         assertMemoryEstimation(
-            () -> new PageRankPregelAlgorithmFactory<>().memoryEstimation(config),
+            () -> new PageRankAlgorithmFactory<>().memoryEstimation(config),
             nodeCount,
             relationshipCount,
             4,
@@ -490,25 +492,16 @@ class PageRankTest {
         );
     }
 
-    PageRankPregelResult runOnPregel(Graph graph, PageRankBaseConfig config) {
-        return runOnPregel(graph, config, new long[0], Mode.PAGE_RANK);
+    PageRankResult runOnPregel(Graph graph, PageRankConfig config) {
+        return runOnPregel(graph, config, Mode.PAGE_RANK);
     }
 
-    PageRankPregelResult runOnPregel(Graph graph, PageRankBaseConfig config, long[] sourceNodeIds, Mode mode) {
-        var configBuilder = ImmutablePageRankPregelConfig.builder()
-            .maxIterations(config.maxIterations() + 1)
-            .dampingFactor(config.dampingFactor())
-            .concurrency(config.concurrency())
-            .relationshipWeightProperty(config.relationshipWeightProperty())
-            .sourceNodeIds(LongStream.of(sourceNodeIds))
-            .tolerance(config.tolerance())
-            .isAsynchronous(false);
-
-        return runOnPregel(graph, configBuilder.build(), mode, ProgressLogger.NULL_LOGGER);
+    PageRankResult runOnPregel(Graph graph, PageRankConfig config, Mode mode) {
+        return runOnPregel(graph, config, mode, ProgressLogger.NULL_LOGGER);
     }
 
-    PageRankPregelResult runOnPregel(Graph graph, PageRankPregelConfig config, Mode mode, ProgressLogger progressLogger) {
-        return new PageRankPregelAlgorithmFactory<>(mode)
+    PageRankResult runOnPregel(Graph graph, PageRankConfig config, Mode mode, ProgressLogger progressLogger) {
+        return new PageRankAlgorithmFactory<>(mode)
             .build(
                 graph,
                 config,

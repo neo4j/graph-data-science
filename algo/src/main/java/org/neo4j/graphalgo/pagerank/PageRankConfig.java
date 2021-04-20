@@ -33,9 +33,9 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.Optional;
 
 @ValueClass
-@Configuration("PageRankPregelConfigImpl")
+@Configuration("PageRankConfigImpl")
 @SuppressWarnings("immutables:subtype")
-public interface PageRankPregelConfig extends
+public interface PageRankConfig extends
     PregelConfig,
     ToleranceConfig,
     SourceNodesConfig
@@ -85,12 +85,12 @@ public interface PageRankPregelConfig extends
         return Partitioning.DEGREE;
     }
 
-    static PageRankPregelConfig of(
+    static PageRankConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new PageRankPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
+        return new PageRankConfigImpl(graphName, maybeImplicitCreate, username, userInput);
     }
 }

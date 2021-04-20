@@ -39,16 +39,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PageRankStreamProcTest extends PageRankProcTest<PageRankPregelStreamConfig> {
+class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
     @Override
-    public Class<? extends AlgoBaseProc<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankStreamConfig>> getProcedureClazz() {
         return PageRankStreamProc.class;
     }
 
     @Override
-    public PageRankPregelStreamConfig createConfig(CypherMapWrapper mapWrapper) {
-        return PageRankPregelStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+    public PageRankStreamConfig createConfig(CypherMapWrapper mapWrapper) {
+        return PageRankStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 
     private void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual) {

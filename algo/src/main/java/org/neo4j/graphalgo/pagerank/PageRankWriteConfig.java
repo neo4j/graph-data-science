@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.pagerank;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
@@ -29,15 +30,15 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface PageRankPregelStreamConfig extends PageRankPregelConfig {
+public interface PageRankWriteConfig extends PageRankConfig, WritePropertyConfig {
 
-    static PageRankPregelStreamConfig of(
+    static PageRankWriteConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper userInput
     ) {
-        return new PageRankPregelStreamConfigImpl(
+        return new PageRankWriteConfigImpl(
             graphName,
             maybeImplicitCreate,
             username,

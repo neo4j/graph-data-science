@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class PageRankStatsProc extends StatsProc<PageRankPregelAlgorithm, PageRankPregelResult, PageRankStatsProc.StatsResult, PageRankPregelStatsConfig> {
+public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResult, PageRankStatsProc.StatsResult, PageRankStatsConfig> {
 
     @Procedure(value = "gds.pageRank.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -46,7 +46,7 @@ public class PageRankStatsProc extends StatsProc<PageRankPregelAlgorithm, PageRa
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelStatsConfig> computationResult = compute(
+        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStatsConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -63,7 +63,7 @@ public class PageRankStatsProc extends StatsProc<PageRankPregelAlgorithm, PageRa
     }
 
     @Override
-    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelStatsConfig> computeResult) {
+    protected AbstractResultBuilder<StatsResult> resultBuilder(ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStatsConfig> computeResult) {
         return PageRankProc.resultBuilder(
             new StatsResult.Builder(callContext, computeResult.config().concurrency()),
             computeResult
@@ -71,24 +71,24 @@ public class PageRankStatsProc extends StatsProc<PageRankPregelAlgorithm, PageRa
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankPregelStatsConfig config) {
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankStatsConfig config) {
         super.validateConfigs(graphCreateConfig, config);
         PageRankProc.validateAlgoConfig(config, log);
     }
 
     @Override
-    protected PageRankPregelStatsConfig newConfig(
+    protected PageRankStatsConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return PageRankPregelStatsConfig.of(username, graphName, maybeImplicitCreate, config);
+        return PageRankStatsConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<PageRankPregelAlgorithm, PageRankPregelStatsConfig> algorithmFactory() {
-        return new PageRankPregelAlgorithmFactory<>();
+    protected AlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
+        return new PageRankAlgorithmFactory<>();
     }
 
     @SuppressWarnings("unused")

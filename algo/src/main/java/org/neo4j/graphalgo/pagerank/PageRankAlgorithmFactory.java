@@ -32,9 +32,9 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 
 import java.util.function.LongToDoubleFunction;
 
-import static org.neo4j.graphalgo.pagerank.PageRankPregelAlgorithmFactory.Mode.ARTICLE_RANK;
+import static org.neo4j.graphalgo.pagerank.PageRankAlgorithmFactory.Mode.ARTICLE_RANK;
 
-public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig> extends AbstractAlgorithmFactory<PageRankPregelAlgorithm, CONFIG> {
+public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends AbstractAlgorithmFactory<PageRankAlgorithm, CONFIG> {
 
     public enum Mode {
         PAGE_RANK,
@@ -44,16 +44,16 @@ public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig>
 
     private final Mode mode;
 
-    public PageRankPregelAlgorithmFactory() {
+    public PageRankAlgorithmFactory() {
         this(Mode.PAGE_RANK);
     }
 
-    public PageRankPregelAlgorithmFactory(Mode mode) {
+    public PageRankAlgorithmFactory(Mode mode) {
         this.mode = mode;
     }
 
     @Override
-    protected long taskVolume(Graph graph, PageRankPregelConfig configuration) {
+    protected long taskVolume(Graph graph, PageRankConfig configuration) {
         return graph.nodeCount();
     }
 
@@ -63,7 +63,7 @@ public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig>
     }
 
     @Override
-    protected PageRankPregelAlgorithm build(
+    protected PageRankAlgorithm build(
         Graph graph,
         CONFIG configuration,
         AllocationTracker tracker,
@@ -93,15 +93,15 @@ public class PageRankPregelAlgorithmFactory<CONFIG extends PageRankPregelConfig>
             deltaCoefficient = avgDegree;
         }
 
-        var computation = new PageRankPregel(graph, configuration, degreeFunction, deltaCoefficient);
+        var computation = new PageRankComputation(graph, configuration, degreeFunction, deltaCoefficient);
 
-        return new PageRankPregelAlgorithm(graph, configuration, computation, Pools.DEFAULT, tracker, progressLogger);
+        return new PageRankAlgorithm(graph, configuration, computation, Pools.DEFAULT, tracker, progressLogger);
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(PageRankPregelConfig configuration) {
+    public MemoryEstimation memoryEstimation(PageRankConfig configuration) {
         return Pregel.memoryEstimation(new PregelSchema.Builder()
-            .add(PageRankPregel.PAGE_RANK, ValueType.DOUBLE)
+            .add(PageRankComputation.PAGE_RANK, ValueType.DOUBLE)
             .build(), false, false);
     }
 }

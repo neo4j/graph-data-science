@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class PageRankStreamProc extends StreamProc<PageRankPregelAlgorithm, PageRankPregelResult, CentralityStreamResult, PageRankPregelStreamConfig> {
+public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankResult, CentralityStreamResult, PageRankStreamConfig> {
 
     @Procedure(value = "gds.pageRank.stream", mode = READ)
     @Description(PAGE_RANK_DESCRIPTION)
@@ -45,7 +45,7 @@ public class PageRankStreamProc extends StreamProc<PageRankPregelAlgorithm, Page
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelStreamConfig> computationResult = compute(
+        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStreamConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -69,28 +69,28 @@ public class PageRankStreamProc extends StreamProc<PageRankPregelAlgorithm, Page
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankPregelStreamConfig config) {
+    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankStreamConfig config) {
         super.validateConfigs(graphCreateConfig, config);
         PageRankProc.validateAlgoConfig(config, log);
     }
 
     @Override
-    protected PageRankPregelStreamConfig newConfig(
+    protected PageRankStreamConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return PageRankPregelStreamConfig.of(username, graphName, maybeImplicitCreate, config);
+        return PageRankStreamConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 
     @Override
-    protected AlgorithmFactory<PageRankPregelAlgorithm, PageRankPregelStreamConfig> algorithmFactory() {
-        return new PageRankPregelAlgorithmFactory<>();
+    protected AlgorithmFactory<PageRankAlgorithm, PageRankStreamConfig> algorithmFactory() {
+        return new PageRankAlgorithmFactory<>();
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<PageRankPregelAlgorithm, PageRankPregelResult, PageRankPregelStreamConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStreamConfig> computationResult) {
         return PageRankProc.nodeProperties(computationResult);
     }
 }

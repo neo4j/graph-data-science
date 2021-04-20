@@ -32,17 +32,17 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
-public class PageRankPregelAlgorithm extends Algorithm<PageRankPregelAlgorithm, PageRankPregelResult> {
+public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResult> {
 
-    private final Pregel<PageRankPregelConfig> pregelJob;
+    private final Pregel<PageRankConfig> pregelJob;
     private final Graph graph;
-    private final PageRankPregelConfig config;
+    private final PageRankConfig config;
     private final ExecutorService executorService;
 
-    PageRankPregelAlgorithm(
+    PageRankAlgorithm(
         Graph graph,
-        PageRankPregelConfig config,
-        PregelComputation<PageRankPregelConfig> pregelComputation,
+        PageRankConfig config,
+        PregelComputation<PageRankConfig> pregelComputation,
         ExecutorService executorService,
         AllocationTracker tracker,
         ProgressLogger progressLogger
@@ -54,14 +54,14 @@ public class PageRankPregelAlgorithm extends Algorithm<PageRankPregelAlgorithm, 
     }
 
     @Override
-    public PageRankPregelResult compute() {
+    public PageRankResult compute() {
         var pregelResult = pregelJob.run();
 
-        HugeDoubleArray scores = pregelResult.nodeValues().doubleProperties(PageRankPregel.PAGE_RANK);
+        HugeDoubleArray scores = pregelResult.nodeValues().doubleProperties(PageRankComputation.PAGE_RANK);
 
         normalizeScores(scores);
 
-        return ImmutablePageRankPregelResult.builder()
+        return ImmutablePageRankResult.builder()
             .scores(scores)
             .iterations(pregelResult.ranIterations())
             .didConverge(pregelResult.didConverge())
@@ -89,7 +89,7 @@ public class PageRankPregelAlgorithm extends Algorithm<PageRankPregelAlgorithm, 
     }
 
     @Override
-    public PageRankPregelAlgorithm me() {
+    public PageRankAlgorithm me() {
         return this;
     }
 
