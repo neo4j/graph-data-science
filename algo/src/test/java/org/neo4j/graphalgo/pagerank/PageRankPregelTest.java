@@ -255,12 +255,12 @@ class PageRankPregelTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.19991328 })" +
-            ", (b:Node { expectedRank: 0.41704274 })" +
-            ", (c:Node { expectedRank: 0.31791456 })" +
-            ", (d:Node { expectedRank: 0.18921376 })" +
-            ", (e:Node { expectedRank: 0.19991328 })" +
-            ", (f:Node { expectedRank: 0.18921376 })" +
+            "  (a:Node { expectedRank: 0.19991 })" +
+            ", (b:Node { expectedRank: 0.41704 })" +
+            ", (c:Node { expectedRank: 0.31791 })" +
+            ", (d:Node { expectedRank: 0.18921 })" +
+            ", (e:Node { expectedRank: 0.19991 })" +
+            ", (f:Node { expectedRank: 0.18921 })" +
             ", (g:Node { expectedRank: 0.15 })" +
             ", (h:Node { expectedRank: 0.15 })" +
             ", (i:Node { expectedRank: 0.15 })" +
@@ -275,8 +275,36 @@ class PageRankPregelTest {
             ", (f)-[:TYPE]->(b)" +
             ", (f)-[:TYPE]->(e)";
 
+        @GdlGraph(graphNamePrefix = "paper")
+        public static final String DB_PAPERS =
+            "CREATE" +
+            "  (a:Node { expectedRank: 0.75619 })" +
+            ", (b:Node { expectedRank: 0.56405 })" +
+            ", (c:Node { expectedRank: 0.30635 })" +
+            ", (d:Node { expectedRank: 0.22862 })" +
+            ", (e:Node { expectedRank: 0.27750 })" +
+            ", (f:Node { expectedRank: 0.15000 })" +
+            ", (g:Node { expectedRank: 0.15000 })" +
+            ", (b)-[:TYPE]->(a)" +
+            ", (c)-[:TYPE]->(a)" +
+            ", (c)-[:TYPE]->(b)" +
+            ", (d)-[:TYPE]->(a)" +
+            ", (d)-[:TYPE]->(b)" +
+            ", (d)-[:TYPE]->(c)" +
+            ", (e)-[:TYPE]->(a)" +
+            ", (e)-[:TYPE]->(b)" +
+            ", (e)-[:TYPE]->(c)" +
+            ", (e)-[:TYPE]->(d)" +
+            ", (f)-[:TYPE]->(b)" +
+            ", (f)-[:TYPE]->(e)" +
+            ", (g)-[:TYPE]->(b)" +
+            ", (g)-[:TYPE]->(e)";
+
         @Inject
         private Graph graph;
+
+        @Inject
+        private Graph paperGraph;
 
         @Test
         void articleRank() {
@@ -294,6 +322,27 @@ class PageRankPregelTest {
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+            }
+        }
+
+        @Test
+        void articleRankOnPaperGraph() {
+            var config = ImmutablePageRankStreamConfig
+                .builder()
+                .maxIterations(20)
+                .tolerance(0)
+                .dampingFactor(0.85)
+                .concurrency(1)
+                .build();
+
+            var actual = runOnPregel(paperGraph, config, new long[0], Mode.ARTICLE_RANK)
+                .scores()
+                .asNodeProperties();
+
+            var expected = paperGraph.nodeProperties("expectedRank");
+
+            for (int nodeId = 0; nodeId < paperGraph.nodeCount(); nodeId++) {
                 assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }

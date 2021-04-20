@@ -84,7 +84,7 @@ public abstract class BaseComputeStep implements ComputeStep {
     ) {
         this(
             dampingFactor,
-            PageRank.DEFAULT_TOLERANCE,
+            0,
             sourceNodeIds,
             graph,
             tracker,
