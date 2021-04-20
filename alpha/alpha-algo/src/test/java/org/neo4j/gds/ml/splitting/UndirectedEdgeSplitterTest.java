@@ -47,7 +47,7 @@ import static org.neo4j.gds.ml.splitting.DirectedEdgeSplitter.POSITIVE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
-class UndirectedEdgeSplitterTest {
+class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     static String gdl = "(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)";
@@ -57,7 +57,7 @@ class UndirectedEdgeSplitterTest {
 
     @Test
     void split() {
-        var splitter = new UndirectedEdgeSplitter(1337L);
+        var splitter = new UndirectedEdgeSplitter(1337L, 1.0);
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
@@ -73,27 +73,22 @@ class UndirectedEdgeSplitterTest {
         assertThat(selectedRels.topology()).satisfies(topology -> {
             // it selected 2,5 (neg) and 3,2 (pos) relationships
             assertEquals(2L, topology.elementCount());
-            var cursor = topology.list().decompressingCursor(topology.offsets().get(3L), topology.degrees().degree(3L));
-            assertEquals(2L, cursor.nextVLong());
-            var cursor2 = topology.list().decompressingCursor(topology.offsets().get(2L), topology.degrees().degree(2L));
-            assertEquals(5L, cursor2.nextVLong());
+            assertRelExists(topology, 2, 5);
+            assertRelExists(topology, 3, 2);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
-        assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
-            assertEquals(2L, p.elementCount());
-            var cursor = p.list().cursor(p.offsets().get(3L), p.degrees().degree(3L));
-            // 3,2 is positive
-            assertEquals(POSITIVE, Double.longBitsToDouble(cursor.nextLong()));
-            var cursor2 = p.list().cursor(p.offsets().get(2L), p.degrees().degree(2L));
-            // 2,5 is negative
-            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor2.nextLong()));
-        });
+
+        var selectedProperties = selectedRels.properties().get();
+        assertEquals(2, selectedProperties.elementCount());
+        assertRelProperties(selectedProperties, 3, POSITIVE);
+        assertRelProperties(selectedProperties, 2, NEGATIVE);
     }
 
+
     @Test
-    void splitWithNegativeRatio2() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(2021L), 2);
+    void splitWithNegativeRatio() {
+        var splitter = new UndirectedEdgeSplitter(1337L, 2.0);
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
@@ -107,26 +102,19 @@ class UndirectedEdgeSplitterTest {
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
-            // it selected 2,5 and 4,1 (neg) and 2,1 (pos) relationships
+            // it selected 2,5 (neg), 4,2 (neg) and 3,2 (pos) relationships
             assertEquals(3L, topology.elementCount());
-            var cursor = topology.list().decompressingCursor(topology.offsets().get(2L), topology.degrees().degree(2L));
-            assertEquals(1L, cursor.nextVLong());
-            assertEquals(5L, cursor.nextVLong());
-            var cursor2 = topology.list().decompressingCursor(topology.offsets().get(4L), topology.degrees().degree(4L));
-            assertEquals(1L, cursor2.nextVLong());
+            assertRelExists(topology, 3, 2);
+            assertRelExists(topology, 2, 5);
+            assertRelExists(topology, 4, 2);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
         assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
             assertEquals(3L, p.elementCount());
-            var cursor = p.list().cursor(p.offsets().get(2L), p.degrees().degree(2L));
-            // 2,1 is positive
-            assertEquals(POSITIVE, Double.longBitsToDouble(cursor.nextLong()));
-            // 2,5 is negative
-            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
-            var cursor2 = p.list().cursor(p.offsets().get(4L), p.degrees().degree(4L));
-            // 4,1 is negative
-            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor2.nextLong()));
+            assertRelProperties(p, 3, POSITIVE);
+            assertRelProperties(p, 2, NEGATIVE);
+            assertRelProperties(p, 4, NEGATIVE);
         });
     }
 
@@ -144,7 +132,7 @@ class UndirectedEdgeSplitterTest {
             .build()
             .generate();
 
-        var splitter = new UndirectedEdgeSplitter(42L);
+        var splitter = new UndirectedEdgeSplitter(42L, 1);
         var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
@@ -182,8 +170,8 @@ class UndirectedEdgeSplitterTest {
             .build()
             .generate();
 
-        var splitResult1 = new UndirectedEdgeSplitter(12L).split(graph, 0.5);
-        var splitResult2 = new UndirectedEdgeSplitter(12L).split(graph, 0.5);
+        var splitResult1 = new UndirectedEdgeSplitter(12L, 1).split(graph, 0.5);
+        var splitResult2 = new UndirectedEdgeSplitter(12L, 1).split(graph, 0.5);
         var remainingAreEqual = relationshipsAreEqual(
             graph,
             splitResult1.remainingRels(),
@@ -213,8 +201,8 @@ class UndirectedEdgeSplitterTest {
             .build()
             .generate();
 
-        var splitResult1 = new UndirectedEdgeSplitter(Optional.empty()).split(graph, 0.5);
-        var splitResult2 = new UndirectedEdgeSplitter(Optional.empty()).split(graph, 0.5);
+        var splitResult1 = new UndirectedEdgeSplitter(Optional.empty(), 1.0).split(graph, 0.5);
+        var splitResult2 = new UndirectedEdgeSplitter(Optional.empty(), 1.0).split(graph, 0.5);
         var remainingAreEqual = relationshipsAreEqual(
             graph,
             splitResult1.remainingRels(),
@@ -232,7 +220,7 @@ class UndirectedEdgeSplitterTest {
 
     @Test
     void negativeEdgeSampling() {
-        var splitter = new UndirectedEdgeSplitter(42L);
+        var splitter = new UndirectedEdgeSplitter(42L, 1.0);
 
         var sum = 0;
         for (int i = 0; i < 100; i++) {
@@ -245,7 +233,7 @@ class UndirectedEdgeSplitterTest {
 
     @Test
     void samplesWithinBounds() {
-        var splitter = new UndirectedEdgeSplitter(42L);
+        var splitter = new UndirectedEdgeSplitter(42L, 1.0);
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));

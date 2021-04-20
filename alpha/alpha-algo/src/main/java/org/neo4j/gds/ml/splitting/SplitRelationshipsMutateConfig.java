@@ -43,10 +43,7 @@ public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateCo
 
     double holdoutFraction();
 
-    @Value.Default
-    default int negativeRatio() {
-        return 1;
-    }
+    double negativeSamplingRatio();
 
     @Configuration.ConvertWith("org.neo4j.graphalgo.RelationshipType#of")
     @Configuration.ToMapValue("org.neo4j.graphalgo.RelationshipType#toString")

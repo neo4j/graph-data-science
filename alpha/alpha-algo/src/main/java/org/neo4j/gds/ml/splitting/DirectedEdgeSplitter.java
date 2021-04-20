@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
@@ -28,16 +29,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class DirectedEdgeSplitter extends EdgeSplitter {
 
-    public DirectedEdgeSplitter(Optional<Long> maybeSeed) {
-        super(maybeSeed);
+    @TestOnly
+    public DirectedEdgeSplitter(long seed, double negativeSamplingRatio) {
+        this(Optional.of(seed), negativeSamplingRatio);
     }
 
-    public DirectedEdgeSplitter(long seed) {
-        this(Optional.of(seed));
-    }
-
-    public DirectedEdgeSplitter(Optional<Long> maybeSeed, int negativeRatio) {
-        super(maybeSeed, negativeRatio);
+    public DirectedEdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio) {
+        super(maybeSeed, negativeSamplingRatio);
     }
 
     @Override
@@ -59,17 +57,17 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
 
         RelationshipsBuilder remainingRelsBuilder = newRelationshipsBuilder(graph, Orientation.NATURAL);
 
-        int totalPositiveSamples = (int) (graph.relationshipCount() * holdoutFraction);
-        var negativeSamplesRemaining = new AtomicLong((long) (negativeRatio * graph.relationshipCount() * holdoutFraction));
+        int positiveSamples = (int) (graph.relationshipCount() * holdoutFraction);
+        var positiveSamplesRemaining = new AtomicLong(positiveSamples);
+        var negativeSamples = (long) (negativeSamplingRatio * graph.relationshipCount() * holdoutFraction);
+        var negativeSamplesRemaining = new AtomicLong(negativeSamples);
 
-        var selectedPositiveCount = new AtomicLong(0L);
         graph.forEachNode(nodeId -> {
             positiveSampling(
                 graph,
                 selectedRelsBuilder,
                 remainingRelsBuilder,
-                totalPositiveSamples,
-                selectedPositiveCount,
+                positiveSamplesRemaining,
                 nodeId
             );
 
@@ -90,27 +88,25 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         Graph graph,
         RelationshipsBuilder selectedRelsBuilder,
         RelationshipsBuilder remainingRelsBuilder,
-        int totalPositiveSamples,
-        AtomicLong selectedPositiveCount,
+        AtomicLong positiveSamplesRemaining,
         long nodeId
     ) {
         var degree = graph.degree(nodeId);
 
-        var positiveEdgeCount = samplesPerNode(
+        var relsToSelectFromThisNode = samplesPerNode(
             degree,
-            totalPositiveSamples - selectedPositiveCount.get(),
+            positiveSamplesRemaining.get(),
             graph.nodeCount() - nodeId
         );
-        var preSelectedCount = selectedPositiveCount.get();
-
+        var localSelectedRemaining = new AtomicLong(relsToSelectFromThisNode);
         var targetsRemaining = new AtomicLong(degree);
 
         graph.forEachRelationship(nodeId, (source, target) -> {
-            var localSelectedCount = selectedPositiveCount.get() - preSelectedCount;
-            double localSelectedRemaining = positiveEdgeCount - localSelectedCount;
-            var isSelected = sample(localSelectedRemaining / targetsRemaining.getAndDecrement());
-            if (positiveEdgeCount > 0 && localSelectedRemaining > 0 && isSelected) {
-                selectedPositiveCount.incrementAndGet();
+            double localSelectedDouble = localSelectedRemaining.get();
+            var isSelected = sample(localSelectedDouble / targetsRemaining.getAndDecrement());
+            if (relsToSelectFromThisNode > 0 && localSelectedDouble > 0 && isSelected) {
+                positiveSamplesRemaining.decrementAndGet();
+                localSelectedRemaining.decrementAndGet();
                 selectedRelsBuilder.addFromInternal(source, target, POSITIVE);
             } else {
                 remainingRelsBuilder.addFromInternal(source, target);

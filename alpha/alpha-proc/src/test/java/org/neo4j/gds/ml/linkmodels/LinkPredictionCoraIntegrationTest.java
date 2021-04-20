@@ -24,8 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
-import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictMutateProc;
-import org.neo4j.gds.ml.linkmodels.LinkPredictionTrainProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedMutateProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
@@ -137,6 +135,7 @@ class LinkPredictionCoraIntegrationTest {
             " remainingRelationshipType: $trainGraphRelType, " +
             " holdoutRelationshipType: $testSetRelType, " +
             " holdoutFraction: 0.1," +
+            " negativeSamplingRatio: 1.0," +
             " randomSeed: 42" +
             "})";
 
@@ -158,6 +157,7 @@ class LinkPredictionCoraIntegrationTest {
             " remainingRelationshipType: $embeddingGraphRelType, " +
             " holdoutRelationshipType: $trainSetRelType, " +
             " holdoutFraction: 0.1," +
+            " negativeSamplingRatio: 1.0," +
             " randomSeed: 42" +
             "})";
 

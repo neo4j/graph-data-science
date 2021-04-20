@@ -42,7 +42,7 @@ import static org.neo4j.gds.ml.splitting.DirectedEdgeSplitter.POSITIVE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
-class DirectedEdgeSplitterTest {
+class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @GdlGraph
     static String gdl = "(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)-[:T]->(:A)";
@@ -52,7 +52,7 @@ class DirectedEdgeSplitterTest {
 
     @Test
     void split() {
-        var splitter = new DirectedEdgeSplitter(3L);
+        var splitter = new DirectedEdgeSplitter(-1L, 1.0);
 
         // select 40%, which is 2 rels in this graph
         var result = splitter.split(graph, .4);
@@ -67,31 +67,58 @@ class DirectedEdgeSplitterTest {
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
-            // it selected 5,0 and 5,3 (neg) and 1,2 and 2,3 (pos) relationships
+            // it selected 4,0 and 5,4 (neg) and 0,1 and 2,3 (pos) relationships
             assertEquals(4L, topology.elementCount());
-            var cursor = topology.list().decompressingCursor(topology.offsets().get(5L), topology.degrees().degree(5L));
-            assertEquals(0L, cursor.nextVLong());
-            assertEquals(3L, cursor.nextVLong());
-            var cursor2 = topology.list().decompressingCursor(topology.offsets().get(1L), topology.degrees().degree(1L));
-            assertEquals(2L, cursor2.nextVLong());
-            var cursor3 = topology.list().decompressingCursor(topology.offsets().get(2L), topology.degrees().degree(2L));
-            assertEquals(3L, cursor3.nextVLong());
+            assertRelExists(topology, 4, 0);
+            assertRelExists(topology, 5, 4);
+            assertRelExists(topology, 0, 1);
+            assertRelExists(topology, 2, 3);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
         assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
             assertEquals(4L, p.elementCount());
-            var cursor = p.list().cursor(p.offsets().get(5L), p.degrees().degree(5L));
-            // 5,0 is negative
-            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
-            // 5,3 is positive
-            assertEquals(NEGATIVE, Double.longBitsToDouble(cursor.nextLong()));
-            var cursor2 = p.list().cursor(p.offsets().get(1L), p.degrees().degree(1L));
-            // 1,2 is positive
-            assertEquals(POSITIVE, Double.longBitsToDouble(cursor2.nextLong()));
-            var cursor3 = p.list().cursor(p.offsets().get(2L), p.degrees().degree(2L));
-            // 2,3 is positive
-            assertEquals(POSITIVE, Double.longBitsToDouble(cursor3.nextLong()));
+            assertRelProperties(p, 4, NEGATIVE);
+            assertRelProperties(p, 5, NEGATIVE);
+            assertRelProperties(p, 0, POSITIVE);
+            assertRelProperties(p, 2, POSITIVE);
+        });
+    }
+
+    @Test
+    void splitWithNegativeRatio() {
+        var splitter = new DirectedEdgeSplitter(-1L, 2.0);
+
+        // select 40%, which is 2 rels in this graph
+        var result = splitter.split(graph, .4);
+
+        var remainingRels = result.remainingRels();
+
+        // 2 positive selected reduces remaining
+        assertEquals(3L, remainingRels.topology().elementCount());
+        assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
+        assertFalse(remainingRels.topology().isMultiGraph());
+        assertThat(remainingRels.properties()).isEmpty();
+
+        var selectedRels = result.selectedRels();
+        assertThat(selectedRels.topology()).satisfies(topology -> {
+            // it selected 0,5; 3,0; 4,2; 5,3 (neg) and 0,1 and 1,2 (pos) relationships
+            assertEquals(6L, topology.elementCount());
+            assertRelExists(topology, 0, 1, 5);
+            assertRelExists(topology, 3, 0);
+            assertRelExists(topology, 4, 2);
+            assertRelExists(topology, 5, 3);
+            assertRelExists(topology, 1, 2);
+            assertEquals(Orientation.NATURAL, topology.orientation());
+            assertFalse(topology.isMultiGraph());
+        });
+        assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
+            assertEquals(6L, p.elementCount());
+            assertRelProperties(p, 0, POSITIVE, NEGATIVE);
+            assertRelProperties(p, 3, NEGATIVE);
+            assertRelProperties(p, 4, NEGATIVE);
+            assertRelProperties(p, 5, NEGATIVE);
+            assertRelProperties(p, 1, POSITIVE);
         });
     }
 
@@ -109,7 +136,7 @@ class DirectedEdgeSplitterTest {
             .build()
             .generate();
 
-        var splitter = new DirectedEdgeSplitter(42L);
+        var splitter = new DirectedEdgeSplitter(42L, 1.0);
         var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
@@ -135,7 +162,7 @@ class DirectedEdgeSplitterTest {
 
     @Test
     void negativeEdgeSampling() {
-        var splitter = new DirectedEdgeSplitter(42L);
+        var splitter = new DirectedEdgeSplitter(42L, 1.0);
 
         var sum = 0;
         for (int i = 0; i < 100; i++) {
@@ -148,10 +175,9 @@ class DirectedEdgeSplitterTest {
 
     @Test
     void samplesWithinBounds() {
-        var splitter = new DirectedEdgeSplitter(42L);
+        var splitter = new DirectedEdgeSplitter(42L, 1.0);
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));
     }
-
 }

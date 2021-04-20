@@ -357,7 +357,8 @@ CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
   relationshipTypes: ['KNOWS'],
   remainingRelationshipType: 'KNOWS_REMAINING',
   holdoutRelationshipType: 'KNOWS_TESTGRAPH',
-  holdoutFraction: 0.2
+  holdoutFraction: 0.2,
+  negativeSamplingRatio: 1.0
 }) YIELD relationshipsWritten
 ----
 
@@ -380,7 +381,8 @@ CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
   relationshipTypes: ['KNOWS_REMAINING'],
   remainingRelationshipType: 'KNOWS_IGNORED_FOR_TRAINING',
   holdoutRelationshipType: 'KNOWS_TRAINGRAPH',
-  holdoutFraction: 0.2
+  holdoutFraction: 0.2,
+  negativeSamplingRatio: 1.0
 }) YIELD relationshipsWritten
 ----
 
