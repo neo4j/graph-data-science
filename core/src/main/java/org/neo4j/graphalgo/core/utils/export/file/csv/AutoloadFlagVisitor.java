@@ -26,7 +26,7 @@ import java.nio.file.Path;
 
 public class AutoloadFlagVisitor {
 
-    private static final String AUTOLOAD_FILE_NAME = ".autoload";
+    public static final String AUTOLOAD_FILE_NAME = ".autoload";
 
     private final Path autoloadFlagPath;
 

@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.export.file.CsvToGraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExporterConfig;
+import org.neo4j.graphalgo.core.utils.export.file.csv.AutoloadFlagVisitor;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
@@ -89,7 +90,7 @@ public final class AuraRestoreExtension extends ExtensionFactory<AuraRestoreExte
     private Stream<Path> getImportPaths(Path storePath) throws IOException {
         return Files.list(storePath)
             .peek(CsvToGraphStoreExporter.DIRECTORY_IS_READABLE::validate)
-            .filter(graphDir -> Files.exists(graphDir.resolve(".autoload"))); // TODO: replace with the constant from AutoloadFileVisitor
+            .filter(graphDir -> Files.exists(graphDir.resolve(AutoloadFlagVisitor.AUTOLOAD_FILE_NAME)));
     }
 
     interface Dependencies {
