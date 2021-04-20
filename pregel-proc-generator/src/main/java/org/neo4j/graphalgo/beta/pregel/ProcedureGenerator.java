@@ -26,17 +26,17 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -185,8 +185,8 @@ abstract class ProcedureGenerator extends PregelGenerator {
 
     private MethodSpec algorithmFactoryMethod(ClassName algorithmClassName) {
         TypeSpec anonymousFactoryType = TypeSpec.anonymousClassBuilder("")
-            .addSuperinterface(ParameterizedTypeName.get(
-                ClassName.get(AlgorithmFactory.class),
+            .superclass(ParameterizedTypeName.get(
+                ClassName.get(AbstractAlgorithmFactory.class),
                 algorithmClassName,
                 pregelSpec.configTypeName()
             ))
@@ -196,12 +196,26 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addParameter(Graph.class, "graph")
                 .addParameter(pregelSpec.configTypeName(), "configuration")
                 .addParameter(AllocationTracker.class, "tracker")
-                .addParameter(Log.class, "log")
-                .addParameter(ProgressEventTracker.class, "eventTracker")
+                .addParameter(ProgressLogger.class, "progressLogger")
                 .returns(algorithmClassName)
-                .addStatement("return new $T(graph, configuration, tracker, log)", algorithmClassName)
+                .addStatement("return new $T(graph, configuration, tracker, progressLogger)", algorithmClassName)
                 .build()
             )
+            .addMethod(MethodSpec.methodBuilder("taskVolume")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PROTECTED)
+                .addParameter(Graph.class, "graph")
+                .addParameter(pregelSpec.configTypeName(), "config")
+                .returns(long.class)
+                .addStatement("return graph.nodeCount()")
+                .build()
+            )
+            .addMethod(MethodSpec.methodBuilder("taskName")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PROTECTED)
+                .returns(String.class)
+                .addStatement("return $T.class.getSimpleName()", algorithmClassName)
+                .build())
             .addMethod(MethodSpec.methodBuilder("memoryEstimation")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)

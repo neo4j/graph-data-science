@@ -26,19 +26,16 @@ import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.logging.Log;
 
 @Generated("org.neo4j.graphalgo.beta.pregel.PregelProcessor")
 public final class ComputationAlgorithm extends Algorithm<ComputationAlgorithm, PregelResult> {
     private final Pregel<PregelProcedureConfig> pregelJob;
 
     ComputationAlgorithm(Graph graph, PregelProcedureConfig configuration,
-                         AllocationTracker tracker, Log log) {
-        var computation = new Computation();
-        var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), computation.getClass().getSimpleName(), configuration.concurrency());
-        this.pregelJob = Pregel.create(graph, configuration, computation, Pools.DEFAULT, tracker, progressLogger);
+                         AllocationTracker tracker, ProgressLogger progressLogger) {
+        this.pregelJob = Pregel.create(graph, configuration, new Computation(), Pools.DEFAULT, tracker, progressLogger);
     }
 
     @Override

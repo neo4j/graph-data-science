@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.annotation.processing.Generated;
+import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProc;
@@ -34,12 +35,11 @@ import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.beta.pregel.PregelResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -83,11 +83,21 @@ public final class ComputationMutateProc extends PregelMutateProc<ComputationAlg
 
     @Override
     protected AlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig> algorithmFactory() {
-        return new AlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
+        return new AbstractAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
             @Override
             public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,
-                    AllocationTracker tracker, Log log, ProgressEventTracker eventTracker) {
-                return new ComputationAlgorithm(graph, configuration, tracker, log);
+                                              AllocationTracker tracker, ProgressLogger progressLogger) {
+                return new ComputationAlgorithm(graph, configuration, tracker, progressLogger);
+            }
+
+            @Override
+            protected long taskVolume(Graph graph, PregelProcedureConfig config) {
+                return graph.nodeCount();
+            }
+
+            @Override
+            protected String taskName() {
+                return ComputationAlgorithm.class.getSimpleName();
             }
 
             @Override
