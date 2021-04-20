@@ -64,7 +64,7 @@ final class IndependentCascade {
             //For each newly active node, find its neighbors that become activated
             while (!newActive.isEmpty()) {
                 //Determine neighbors that become infected
-                rand.setSeed(graph.toOriginalNodeId(i));
+                rand.setSeed(i);
                 long node = newActive.pop();
                 graph.forEachRelationship(node, (source, target) ->
                 {
