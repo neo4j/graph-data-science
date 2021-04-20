@@ -42,6 +42,7 @@ final class ElementImportRunner implements Runnable {
                 while (chunk.next(visitor)) {
 
                 }
+                visitor.flush();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

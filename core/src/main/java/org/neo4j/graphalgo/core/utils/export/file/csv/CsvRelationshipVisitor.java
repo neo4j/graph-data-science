@@ -143,4 +143,11 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
             throw new RuntimeException("Could not write header file", e);
         }
     }
+
+    @Override
+    public void flush() throws IOException {
+        for (CsvAppender csvAppender : csvAppenders.values()) {
+            csvAppender.flush();
+        }
+    }
 }

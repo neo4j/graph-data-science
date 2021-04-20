@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.api.schema.ElementSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
+import java.io.Flushable;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -35,7 +37,7 @@ import java.util.List;
 abstract class ElementVisitor<
     ELEMENT_SCHEMA extends ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA>,
     I extends ElementIdentifier,
-    PROPERTY_SCHEMA extends PropertySchema> extends InputEntityVisitor.Adapter {
+    PROPERTY_SCHEMA extends PropertySchema> extends InputEntityVisitor.Adapter implements Flushable {
 
     final ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema;
 
@@ -100,4 +102,7 @@ abstract class ElementVisitor<
         propertySchemas.put(elementIdentifier(), propertySchema);
     }
 
+
+    @Override
+    public void flush() throws IOException {}
 }
