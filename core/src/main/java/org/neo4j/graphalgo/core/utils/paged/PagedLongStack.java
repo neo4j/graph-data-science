@@ -69,6 +69,14 @@ public class PagedLongStack extends PagedDataStructure<long[]> {
     }
 
     public long peek() {
+        int pageTop = this.pageTop;
+        if (pageTop < 0) {
+            int pageIndex = this.pageIndex;
+            --pageIndex;
+            
+            pageLimit = pages[pageIndex].length;
+            return pages[pageIndex][pageLimit - 1];
+        }
         return currentPage[pageTop];
     }
 
