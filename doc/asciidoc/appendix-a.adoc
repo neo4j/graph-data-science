@@ -294,9 +294,6 @@ The following table lists all alpha procedures in the GDS library:
 |Algorithm | Procedure
 .1+<.^|<<alpha-algorithm-all-pairs-shortest-path, All Shortest Paths>>
 | `gds.alpha.allShortestPaths.stream`
-.2+<.^|<<algorithms-articlerank, Article Rank>>
-| `gds.alpha.articleRank.stream`
-| `gds.alpha.articleRank.write`
 .1+<.^|<<algorithms-bfs, Breadth First Search>>
 | `gds.alpha.bfs.stream`
 .4+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
@@ -308,9 +305,6 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.collapsePath.mutate`
 .1+<.^|<<algorithms-dfs, Depth First Search>>
 | `gds.alpha.dfs.stream`
-.2+<.^|<<algorithms-eigenvector, Eigenvector Centrality>>
-| `gds.alpha.eigenvector.stream`
-| `gds.alpha.eigenvector.write`
 .8+<.^|<<algorithms-hits, HITS>>
 | `gds.alpha.hits.mutate`
 | `gds.alpha.hits.mutate.estimate`

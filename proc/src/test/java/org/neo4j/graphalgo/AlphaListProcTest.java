@@ -24,10 +24,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
-import org.neo4j.graphalgo.centrality.ArticleRankProc;
 import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
 import org.neo4j.graphalgo.centrality.HarmonicCentralityProc;
-import org.neo4j.graphalgo.centrality.eigenvector.EigenvectorCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphalgo.functions.OneHotEncodingFunc;
@@ -63,8 +61,6 @@ class AlphaListProcTest extends BaseProcTest {
 
     private static final Collection<String> PROCEDURES = new HashSet<>(asList(
         "gds.alpha.allShortestPaths.stream",
-        "gds.alpha.articleRank.write",
-        "gds.alpha.articleRank.stream",
         "gds.alpha.bfs.stream",
         "gds.alpha.closeness.write",
         "gds.alpha.closeness.stream",
@@ -94,8 +90,6 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.spanningTree.maximum.write",
         "gds.alpha.spanningTree.minimum.write",
         "gds.alpha.triangles",
-        "gds.alpha.eigenvector.write",
-        "gds.alpha.eigenvector.stream",
         "gds.alpha.ml.ann.write",
         "gds.alpha.ml.ann.stream",
         "gds.alpha.ml.nodeClassification.train",
@@ -132,9 +126,7 @@ class AlphaListProcTest extends BaseProcTest {
         registerProcedures(
             AllShortestPathsProc.class,
             ApproxNearestNeighborsProc.class,
-            ArticleRankProc.class,
             ClosenessCentralityProc.class,
-            EigenvectorCentralityProc.class,
             HarmonicCentralityProc.class,
             IsFiniteFunc.class,
             KSpanningTreeProc.class,
@@ -168,7 +160,7 @@ class AlphaListProcTest extends BaseProcTest {
     @Test
     void listFilteredResult() {
         assertEquals(SPANNING_TREE, listProcs("spanningTree"));
-        assertEquals(singleton("gds.alpha.articleRank.stream"), listProcs("gds.alpha.articleRank.stream"));
+        assertEquals(singleton("gds.alpha.dfs.stream"), listProcs("gds.alpha.dfs.stream"));
         assertEquals(emptySet(), listProcs("foo"));
     }
 
