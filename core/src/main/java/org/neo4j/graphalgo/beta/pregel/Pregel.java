@@ -50,6 +50,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final ProgressLogger progressLogger;
 
+    private final ExecutorService executor;
+
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
         Graph graph,
         CONFIG config,
@@ -108,6 +110,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.computation = computation;
         this.nodeValues = initialNodeValue;
         this.progressLogger = progressLogger;
+        this.executor = executor;
 
         var reducer = computation.reducer();
 
@@ -144,9 +147,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
             messenger.initIteration(iteration);
 
             computer.runIteration();
-            runMasterComputeStep(iteration);
 
-            didConverge = computer.hasConverged();
+            didConverge = runMasterComputeStep(iteration) || computer.hasConverged();
 
             logIterationFinish(iteration, didConverge);
 
@@ -166,11 +168,12 @@ public final class Pregel<CONFIG extends PregelConfig> {
         messenger.release();
     }
 
-    private void runMasterComputeStep(int iteration) {
+    private boolean runMasterComputeStep(int iteration) {
         progressLogger.startSubTask("Master Compute");
-        var context = new MasterComputeContext<>(config, graph, iteration, nodeValues);
-        computation.masterCompute(context);
+        var context = new MasterComputeContext<>(config, graph, iteration, nodeValues, executor);
+        var didConverge = computation.masterCompute(context);
         progressLogger.finishSubTask("Master Compute");
+        return didConverge;
     }
 
     private void logIterationStart(int iteration) {

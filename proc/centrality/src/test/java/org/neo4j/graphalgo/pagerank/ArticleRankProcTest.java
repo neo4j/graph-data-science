@@ -217,7 +217,7 @@ class ArticleRankProcTest extends BaseProcTest {
 
         assertCypherResult(
             queryBuilder.yields("bytesMin", "bytesMax"),
-            List.of(Map.of("bytesMin", 544L, "bytesMax", 544L))
+            List.of(Map.of("bytesMin", 552L, "bytesMax", 552L))
         );
     }
 }

@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.NodeValue;
 import org.neo4j.graphalgo.beta.pregel.PregelConfig;
 
+import java.util.concurrent.ExecutorService;
 import java.util.function.LongPredicate;
 
 public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelContext<CONFIG> {
@@ -30,17 +31,21 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
     private final Graph graph;
     private final int iteration;
     private final NodeValue nodeValue;
+    private final ExecutorService executorService;
+
 
     public MasterComputeContext(
         CONFIG config,
         Graph graph,
         int iteration,
-        NodeValue nodeValue
+        NodeValue nodeValue,
+        ExecutorService executorService
     ) {
         super(config);
         this.graph = graph;
         this.iteration = iteration;
         this.nodeValue = nodeValue;
+        this.executorService = executorService;
     }
 
     @Override
@@ -63,6 +68,13 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
      */
     public int superstep() {
         return iteration;
+    }
+
+    /**
+     * Returns an executor service that can be used for parallel master computations.
+     */
+    public ExecutorService executorService() {
+        return executorService;
     }
 
     /**

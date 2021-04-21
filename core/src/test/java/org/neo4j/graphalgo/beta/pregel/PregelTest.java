@@ -318,11 +318,31 @@ class PregelTest {
         assertArrayEquals(new long[]{4L, 4L, 4L}, nodeValues.longProperties(KEY).toArray());
     }
 
+    @ParameterizedTest
+    @EnumSource(Partitioning.class)
+    void testMasterComputeStepWithConvergence(Partitioning partitioning) {
+        var pregelJob = Pregel.create(
+            graph,
+            ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
+            new TestMasterCompute(2),
+            Pools.DEFAULT,
+            AllocationTracker.empty(),
+            ProgressLogger.NULL_LOGGER
+        );
+
+        var result = pregelJob.run();
+        assertThat(result.didConverge()).isTrue();
+        assertThat(result.ranIterations()).isEqualTo(2);
+
+        var nodeValues = result.nodeValues();
+        assertArrayEquals(new long[]{3L, 3L, 3L}, nodeValues.longProperties(KEY).toArray());
+    }
+
     static Stream<Arguments> estimations() {
         return Stream.of(
             // queue based sync
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7441696L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7442200L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7441704L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7442208L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -331,7 +351,7 @@ class PregelTest {
                     .build(),
                 true,
                 false,
-                9441768L
+                9441776L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -341,12 +361,12 @@ class PregelTest {
                     .build(),
                 true,
                 false,
-                9442272L
+                9442280L
             ),
 
             // queue based async
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3841656L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3842160L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3841664L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3842168L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -355,7 +375,7 @@ class PregelTest {
                     .build(),
                 true,
                 true,
-                5841728L
+                5841736L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -365,12 +385,12 @@ class PregelTest {
                     .build(),
                 true,
                 true,
-                5842232L
+                5842240L
             ),
 
             // array based
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 241576L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 242080L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 241584L),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 242088L),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -379,7 +399,7 @@ class PregelTest {
                     .build(),
                 false,
                 false,
-                2241648L
+                2241656L
             ),
             Arguments.of(10, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
@@ -389,7 +409,7 @@ class PregelTest {
                     .build(),
                 false,
                 false,
-                2242152L
+                2242160L
             )
         );
     }
@@ -630,6 +650,17 @@ class PregelTest {
     }
 
     static class TestMasterCompute implements PregelComputation<PregelConfig> {
+
+        private final int stopAtIteration;
+
+        TestMasterCompute() {
+            this(-1);
+        }
+
+        TestMasterCompute(int stopAtIteration) {
+            this.stopAtIteration = stopAtIteration;
+        }
+
         @Override
         public PregelSchema schema(PregelConfig config) {
             return new PregelSchema.Builder().add(KEY, ValueType.LONG).build();
@@ -646,11 +677,12 @@ class PregelTest {
         }
 
         @Override
-        public void masterCompute(MasterComputeContext<PregelConfig> context) {
+        public boolean masterCompute(MasterComputeContext<PregelConfig> context) {
             context.forEachNode(nodeId -> {
                 context.setNodeValue(nodeId, KEY, context.longNodeValue(nodeId, KEY) + 1);
                 return true;
             });
+            return context.superstep() == stopAtIteration;
         }
     }
 

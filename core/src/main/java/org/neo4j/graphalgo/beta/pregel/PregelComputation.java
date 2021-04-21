@@ -84,8 +84,12 @@ public interface PregelComputation<C extends PregelConfig> {
     /**
      * The masterCompute method is called exactly once after every superstep.
      * It is called by a single thread.
+     *
+     * @return true, iff the computation converged and should stop
      */
-    default void masterCompute(MasterComputeContext<C> context) { }
+    default boolean masterCompute(MasterComputeContext<C> context) {
+        return false;
+    }
 
     /**
      * A reducer is used to combine messages sent to a single node. Based on

@@ -448,9 +448,9 @@ class PageRankTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1, 2412824L, 2412824L),
-            Arguments.of(4, 2412992L, 2412992L),
-            Arguments.of(42, 2415120L, 2415120L)
+            Arguments.of(1, 2412832L, 2412832L),
+            Arguments.of(4, 2413000L, 2413000L),
+            Arguments.of(42, 2415128L, 2415128L)
         );
     }
 
@@ -487,8 +487,8 @@ class PageRankTest {
             nodeCount,
             relationshipCount,
             4,
-            241_286_621_632L,
-            241_286_621_632L
+            241_286_621_640L,
+            241_286_621_640L
         );
     }
 

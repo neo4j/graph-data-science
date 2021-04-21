@@ -90,7 +90,7 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
     }
 
     @Override
-    public void masterCompute(MasterComputeContext<HitsConfig> context) {
+    public boolean masterCompute(MasterComputeContext<HitsConfig> context) {
         if (state == HitsState.RECEIVE_IDS || state == HitsState.CALCULATE_AUTHS || state == HitsState.CALCULATE_HUBS) {
             var norm = globalNorm.sumThenReset();
             globalNorm.add(Math.sqrt(norm));
@@ -98,6 +98,8 @@ public class Hits implements PregelComputation<Hits.HitsConfig> {
             globalNorm.reset();
         }
         state = state.advance();
+
+        return false;
     }
 
     private void receiveIds(ComputeContext<HitsConfig> context, Messages messages) {
