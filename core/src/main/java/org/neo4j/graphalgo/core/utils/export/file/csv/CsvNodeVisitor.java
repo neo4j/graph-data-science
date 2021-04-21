@@ -21,12 +21,13 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.core.utils.export.file.NodeVisitor;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -73,19 +74,7 @@ public class CsvNodeVisitor extends NodeVisitor {
             // write properties
             forEachProperty(((key, value, type) -> {
                 try {
-                    if(value instanceof Double) {
-                        fileAppender.append((double) value);
-                    } else if(value instanceof Long) {
-                        fileAppender.append((long) value);
-                    } else if(value instanceof double[]) {
-                        fileAppender.append((double[]) value);
-                    } else if(value instanceof long[]) {
-                        fileAppender.append((long[]) value);
-                    } else if(value instanceof float[]) {
-                        fileAppender.append((float[]) value);
-                    } else if (value == null) {
-                        fileAppender.append("");
-                    }
+                    fileAppender.appendAny(value);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -159,10 +148,11 @@ public class CsvNodeVisitor extends NodeVisitor {
     }
 
     private FileAppender fileAppender(Path filePath, UnaryOperator<CsvSchema.Builder> builderUnaryOperator) {
-        return new JacksonGeneratorFileAppender<>(
+        var propertySchema = getPropertySchema();
+        propertySchema.sort(Comparator.comparing(PropertySchema::key));
+        return JacksonGeneratorFileAppender.of(
             filePath,
-            elementSchema,
-            labels().stream().map(NodeLabel::of),
+            propertySchema,
             builderUnaryOperator
         );
     }

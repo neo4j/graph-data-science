@@ -77,7 +77,7 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
     }
 
     @Override
-    List<PropertySchema> getPropertySchema() {
+    protected List<PropertySchema> getPropertySchema() {
         var nodeLabelList = currentLabels.isEmpty()
             ? EMPTY_LABELS_LABEL
             : currentLabels.stream().map(NodeLabel::of).collect(Collectors.toSet());

@@ -23,86 +23,62 @@ import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import org.neo4j.graphalgo.ElementIdentifier;
-import org.neo4j.graphalgo.api.schema.ElementSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-
-class JacksonGeneratorFileAppender<ELEMENT_IDENTIFIER extends ElementIdentifier, PROPERTY_SCHEMA extends PropertySchema> implements FileAppender {
+final class JacksonGeneratorFileAppender implements FileAppender {
 
     private final CsvGenerator csvEncoder;
     private final CsvSchema csvSchema;
 
     private int currentColumnIndex = 0;
 
-    public JacksonGeneratorFileAppender(Path filePath, ElementSchema<?, ELEMENT_IDENTIFIER, PROPERTY_SCHEMA> elementSchema, Stream<? extends ELEMENT_IDENTIFIER> elements, UnaryOperator<CsvSchema.Builder> schemaEnricher) {
-        List<PropertySchema> propertySchemaForLabels;
-
-            var schemaProperties = elementSchema.properties();
-            var propertySchemaForElementsMap = elements.flatMap(element -> {
-                var properties = schemaProperties.getOrDefault(element, Map.of());
-                return properties.entrySet().stream();
-            }).collect(Collectors.groupingBy(
-                Map.Entry::getKey,
-                Collectors.collectingAndThen(
-                    Collectors.reducing(
-                        (leftSchema, rightSchema) -> {
-                            if (leftSchema.getValue().valueType() != rightSchema.getValue().valueType()) {
-                                throw new IllegalArgumentException(formatWithLocale(
-                                    "Combining schema entries with value type %s and %s is not supported.",
-                                    leftSchema.getValue().valueType(),
-                                    rightSchema.getValue().valueType()
-                                ));
-                            } else {
-                                return leftSchema;
-                            }
-                        }
-                    ),
-                    schemas -> schemas.get().getValue()
-                )
-            ));
-
-            propertySchemaForLabels = new ArrayList<>(propertySchemaForElementsMap.values());
-            propertySchemaForLabels.sort(Comparator.comparing(PropertySchema::key));
-
-
+    static <PROPERTY_SCHEMA extends PropertySchema> FileAppender of(
+        Path filePath,
+        List<PROPERTY_SCHEMA> propertySchemas,
+        UnaryOperator<CsvSchema.Builder> schemaEnricher
+    ) {
         var csvSchemaBuilder = schemaEnricher.apply(CsvSchema.builder());
-        for (PropertySchema propertySchemaForLabel : propertySchemaForLabels) {
-            switch (propertySchemaForLabel.valueType()) {
+        for (PROPERTY_SCHEMA propertySchema : propertySchemas) {
+            switch (propertySchema.valueType()) {
                 case LONG:
                 case DOUBLE:
-                    csvSchemaBuilder.addNumberColumn(propertySchemaForLabel.key());
+                    csvSchemaBuilder.addNumberColumn(propertySchema.key());
                     break;
                 case DOUBLE_ARRAY:
                 case FLOAT_ARRAY:
                 case LONG_ARRAY:
-                    csvSchemaBuilder.addArrayColumn(propertySchemaForLabel.key(), ";");
+                    csvSchemaBuilder.addArrayColumn(propertySchema.key(), ";");
                     break;
                 case UNKNOWN:
                     break;
             }
         }
-        csvSchema = csvSchemaBuilder.build();
+        var csvSchema = csvSchemaBuilder.build();
+
+        var mapper = CsvMapper.csvBuilder().build();
+        var factory = mapper.getFactory();
 
         try {
-            var mapper = CsvMapper.csvBuilder().build();
-            csvEncoder = mapper.getFactory().createGenerator(filePath.toFile(), JsonEncoding.UTF8);
+            var csvEncoder = factory.createGenerator(filePath.toFile(), JsonEncoding.UTF8);
             csvEncoder.setSchema(csvSchema);
+            return new JacksonGeneratorFileAppender(csvEncoder, csvSchema);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private JacksonGeneratorFileAppender(
+        CsvGenerator csvEncoder,
+        CsvSchema csvSchema
+    ) {
+        this.csvEncoder = csvEncoder;
+        this.csvSchema = csvSchema;
     }
 
     @Override
@@ -143,6 +119,12 @@ class JacksonGeneratorFileAppender<ELEMENT_IDENTIFIER extends ElementIdentifier,
             csvEncoder.writeNumber(v);
         }
         csvEncoder.writeEndArray();
+    }
+
+    @Override
+    public void appendEmptyField() throws IOException {
+        setFieldName();
+        csvEncoder.writeNull();
     }
 
     @Override

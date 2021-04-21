@@ -78,7 +78,7 @@ public abstract class RelationshipVisitor extends ElementVisitor<RelationshipSch
     }
 
     @Override
-    List<RelationshipPropertySchema> getPropertySchema() {
+    protected List<RelationshipPropertySchema> getPropertySchema() {
         return elementSchema.propertySchemasFor(RelationshipType.of(relationshipType));
     }
 

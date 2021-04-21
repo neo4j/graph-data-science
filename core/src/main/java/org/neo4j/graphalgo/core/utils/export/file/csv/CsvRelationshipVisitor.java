@@ -20,17 +20,17 @@
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.utils.export.file.RelationshipVisitor;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -75,19 +75,7 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
             // write properties
             forEachProperty(((key, value, type) -> {
                 try {
-                    if(value instanceof Double) {
-                        fileAppender.append((double) value);
-                    } else if(value instanceof Long) {
-                        fileAppender.append((long) value);
-                    } else if(value instanceof double[]) {
-                        fileAppender.append((double[]) value);
-                    } else if(value instanceof long[]) {
-                        fileAppender.append((long[]) value);
-                    } else if(value instanceof float[]) {
-                        fileAppender.append((float[]) value);
-                    } else if (value == null) {
-                        fileAppender.append("");
-                    }
+                    fileAppender.appendAny(value);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -159,10 +147,11 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
     }
 
     private FileAppender fileAppender(Path filePath) {
-        return new JacksonGeneratorFileAppender<>(
+        var propertySchema = getPropertySchema();
+        propertySchema.sort(Comparator.comparing(PropertySchema::key));
+        return JacksonGeneratorFileAppender.of(
             filePath,
-            elementSchema,
-            Stream.of(RelationshipType.of(relationshipType())),
+            propertySchema,
             csvSchemaBuilder -> csvSchemaBuilder
                 .addNumberColumn(START_ID_COLUMN_NAME)
                 .addNumberColumn(END_ID_COLUMN_NAME)
