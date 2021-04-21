@@ -95,23 +95,23 @@ class PersonalizedPageRankProcTest extends BaseProcTest {
         Map<Long, Double> expected = new HashMap<>();
 
         runInTransaction(db, tx -> {
-            expected.put(tx.findNode(PERSON_LABEL, "name", "John").getId(), 0.24851499999999993);
-            expected.put(tx.findNode(PERSON_LABEL, "name", "Jill").getId(), 0.12135449999999998);
-            expected.put(tx.findNode(PERSON_LABEL, "name", "Mary").getId(), 0.12135449999999998);
-            expected.put(tx.findNode(PERSON_LABEL, "name", "Todd").getId(), 0.043511499999999995);
+            expected.put(tx.findNode(PERSON_LABEL, "name", "John").getId(), 0.24572);
+            expected.put(tx.findNode(PERSON_LABEL, "name", "Jill").getId(), 0.11718);
+            expected.put(tx.findNode(PERSON_LABEL, "name", "Mary").getId(), 0.11718);
+            expected.put(tx.findNode(PERSON_LABEL, "name", "Todd").getId(), 0.03949);
 
-            expected.put(tx.findNode(PRODUCT_LABEL, "name", "Kindle Fire").getId(), 0.17415649999999996);
-            expected.put(tx.findNode(PRODUCT_LABEL, "name", "iPhone5").getId(), 0.17415649999999996);
-            expected.put(tx.findNode(PRODUCT_LABEL, "name", "Fitbit Flex Wireless").getId(), 0.08085200000000001);
-            expected.put(tx.findNode(PRODUCT_LABEL, "name", "Harry Potter").getId(), 0.01224);
-            expected.put(tx.findNode(PRODUCT_LABEL, "name", "Hobbit").getId(), 0.01224);
+            expected.put(tx.findNode(PRODUCT_LABEL, "name", "Kindle Fire").getId(), 0.17083);
+            expected.put(tx.findNode(PRODUCT_LABEL, "name", "iPhone5").getId(), 0.17083);
+            expected.put(tx.findNode(PRODUCT_LABEL, "name", "Fitbit Flex Wireless").getId(), 0.07759);
+            expected.put(tx.findNode(PRODUCT_LABEL, "name", "Harry Potter").getId(), 0.01119);
+            expected.put(tx.findNode(PRODUCT_LABEL, "name", "Hobbit").getId(), 0.01119);
         });
 
         return expected;
     }
 
     private void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual) {
-        super.assertMapEqualsWithTolerance(expected, actual, 0.1);
+        super.assertMapEqualsWithTolerance(expected, actual, 1e-5);
     }
 
     @Test
