@@ -37,9 +37,10 @@ public class NodeLogisticRegressionTrain {
     private final NodeLogisticRegressionTrainConfig config;
     private final ProgressLogger progressLogger;
 
-    public static MemoryEstimation memoryEstimation(int numberOfClasses, int numberOfFeatures) {
+    public static MemoryEstimation memoryEstimation(int numberOfClasses, int numberOfFeatures, int batchSize) {
         return MemoryEstimations.builder(NodeLogisticRegressionTrain.class)
             .add("model data", NodeLogisticRegressionData.memoryEstimation(numberOfClasses, numberOfFeatures))
+            .add("training", Training.memoryEstimation(batchSize, numberOfFeatures))
             .build();
     }
 

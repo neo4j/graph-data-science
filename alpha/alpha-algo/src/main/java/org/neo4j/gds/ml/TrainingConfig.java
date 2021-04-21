@@ -26,12 +26,13 @@ import org.neo4j.graphalgo.core.model.Model;
 
 public interface TrainingConfig extends ConcurrencyConfig, Model.Mappable {
 
+    int DEFAULT_BATCH_SIZE = 100;
     int MAX_EPOCHS = 100;
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int batchSize() {
-        return 100;
+        return DEFAULT_BATCH_SIZE;
     }
 
     @Value.Default

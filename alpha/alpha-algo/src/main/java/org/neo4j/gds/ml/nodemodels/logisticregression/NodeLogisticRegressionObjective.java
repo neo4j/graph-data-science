@@ -41,6 +41,21 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
     private final double penalty;
     private final NodeLogisticRegressionPredictor predictor;
 
+    public static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures) {
+        return
+            costOfMakeTargets() +
+            NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, numberOfFeatures) +
+            moreThings();
+    }
+
+    private static long costOfMakeTargets() {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    private static long moreThings() {
+        throw new UnsupportedOperationException("TODO");
+    }
+
     public NodeLogisticRegressionObjective(
         Graph graph,
         NodeLogisticRegressionPredictor predictor,

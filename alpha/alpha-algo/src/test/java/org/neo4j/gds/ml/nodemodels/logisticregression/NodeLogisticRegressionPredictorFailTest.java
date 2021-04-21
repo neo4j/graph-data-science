@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
@@ -27,6 +28,8 @@ import org.neo4j.gds.ml.features.FeatureExtractionBaseTest;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NodeLogisticRegressionPredictorFailTest extends FeatureExtractionBaseTest {
 
@@ -39,5 +42,14 @@ public class NodeLogisticRegressionPredictorFailTest extends FeatureExtractionBa
         var predictor = new NodeLogisticRegressionPredictor(modelData, featureProperties);
         var batch = new LazyBatch(0, 4, 4);
         predictor.predict(graph, batch);
+    }
+
+    @Test
+    public void shouldEstimateMemoryUsage() throws Exception {
+        var memoryUsageInBytes = NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(100, 10);
+
+        int memoryUsageOfFeatureExtractors = 240; // 24 bytes * number of features
+        int memoryUsageOfFeatureMatrix = 8032; // 8 bytes * batch size * number of features + 32
+        assertThat(memoryUsageInBytes).isEqualTo(memoryUsageOfFeatureExtractors + memoryUsageOfFeatureMatrix);
     }
 }

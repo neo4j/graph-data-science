@@ -23,6 +23,7 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
@@ -36,6 +37,10 @@ public class Softmax extends SingleParentVariable<Matrix> {
         super(parent, parent.dimensions());
         rows = dimension(ROWS_INDEX);
         cols = dimension(COLUMNS_INDEX);
+    }
+
+    public static MemoryEstimation memoryEstimation() {
+        throw new UnsupportedOperationException("TODO");
     }
 
     @Override

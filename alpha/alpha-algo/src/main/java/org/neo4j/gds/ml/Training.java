@@ -24,11 +24,16 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.batch.BatchQueue;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionObjective;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public class Training {
     private final TrainingConfig config;
@@ -39,6 +44,37 @@ public class Training {
         this.config = config;
         this.progressLogger = progressLogger;
         this.trainSize = trainSize;
+    }
+
+    public static MemoryEstimation memoryEstimation(int batchSize, int numberOfFeatures) {
+        return MemoryEstimations.builder(Training.class)
+            .add("updater", estimateUpdater())
+            .add("train epoch", estimateTrainEpoch(batchSize, numberOfFeatures))
+            .add("evaluate loss", estimateEvaluateLoss())
+            .build();
+    }
+
+    private static MemoryEstimation estimateUpdater() {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    private static MemoryEstimation estimateTrainEpoch(int batchSize, int numberOfFeatures) {
+        return MemoryEstimations.builder()
+            .perThread("consumer", sizeOfInstance(ObjectiveUpdateConsumer.class))
+            .perThread("calculating loss", ObjectiveUpdateConsumer.sizeOfBatchInBytes(batchSize, numberOfFeatures))
+
+            /*
+            loss
+            ctx
+            forward
+            backward
+            update
+             */
+            .build();
+    }
+
+    private static MemoryEstimation estimateEvaluateLoss() {
+        throw new UnsupportedOperationException("TODO");
     }
 
     public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
@@ -110,6 +146,10 @@ public class Training {
             this.objective = objective;
             this.updater = updater;
             this.trainSize = trainSize;
+        }
+
+        static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures) {
+            return NodeLogisticRegressionObjective.sizeOfBatchInBytes(batchSize, numberOfFeatures); // yeah yeah polymorphism :facepalm:
         }
 
         @Override

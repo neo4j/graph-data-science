@@ -24,12 +24,14 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.max;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
@@ -139,5 +141,10 @@ public final class FeatureExtraction {
         featureExtractors.add(new BiasFeature());
         return featureCount(featureExtractors);
     }
-}
 
+    public static long memoryUsageInBytes(int numberOfFeatures) {
+        long sizeIfAllScalars = numberOfFeatures * MemoryUsage.sizeOfInstance(ScalarPropertyExtractor.class);
+        long sizeIfAllArrays = numberOfFeatures * MemoryUsage.sizeOfInstance(ArrayPropertyExtractor.class);
+        return max(sizeIfAllScalars, sizeIfAllArrays); // they are identical :shrug:
+    }
+}

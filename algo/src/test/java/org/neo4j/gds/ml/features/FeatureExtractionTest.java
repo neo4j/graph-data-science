@@ -125,4 +125,11 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
                 "Missing node property for property key `a` on node with id `0`."
             );
     }
+
+    @Test
+    public void shouldCalculateMemoryUsage() throws Exception {
+        assertThat(FeatureExtraction.memoryUsageInBytes(1)).isEqualTo(24L);
+        assertThat(FeatureExtraction.memoryUsageInBytes(42)).isEqualTo(1008L);
+        assertThat(FeatureExtraction.memoryUsageInBytes(43)).isEqualTo(1032L);
+    }
 }
