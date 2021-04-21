@@ -135,27 +135,27 @@ abstract class PageRankProcTest<CONFIG extends PageRankPregelConfig> extends Bas
 
         runInTransaction(db, tx -> {
             final Label label = Label.label("Label1");
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.243);
-            expected.put(tx.findNode(label, "name", "b").getId(), 1.844);
-            expected.put(tx.findNode(label, "name", "c").getId(), 1.777);
-            expected.put(tx.findNode(label, "name", "d").getId(), 0.218);
-            expected.put(tx.findNode(label, "name", "e").getId(), 0.243);
-            expected.put(tx.findNode(label, "name", "f").getId(), 0.218);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.150);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.150);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.150);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.150);
+            expected.put(tx.findNode(label, "name", "a").getId(), 0.24301);
+            expected.put(tx.findNode(label, "name", "b").getId(), 1.83865);
+            expected.put(tx.findNode(label, "name", "c").getId(), 1.69774);
+            expected.put(tx.findNode(label, "name", "d").getId(), 0.21885);
+            expected.put(tx.findNode(label, "name", "e").getId(), 0.24301);
+            expected.put(tx.findNode(label, "name", "f").getId(), 0.21885);
+            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
+            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
 
-            weightedExpected.put(tx.findNode(label, "name", "a").getId(), 0.218);
-            weightedExpected.put(tx.findNode(label, "name", "b").getId(), 2.008);
-            weightedExpected.put(tx.findNode(label, "name", "c").getId(), 1.850);
-            weightedExpected.put(tx.findNode(label, "name", "d").getId(), 0.185);
-            weightedExpected.put(tx.findNode(label, "name", "e").getId(), 0.182);
-            weightedExpected.put(tx.findNode(label, "name", "f").getId(), 0.174);
-            weightedExpected.put(tx.findNode(label, "name", "g").getId(), 0.150);
-            weightedExpected.put(tx.findNode(label, "name", "h").getId(), 0.150);
-            weightedExpected.put(tx.findNode(label, "name", "i").getId(), 0.150);
-            weightedExpected.put(tx.findNode(label, "name", "j").getId(), 0.150);
+            weightedExpected.put(tx.findNode(label, "name", "a").getId(), 0.21803);
+            weightedExpected.put(tx.findNode(label, "name", "b").getId(), 2.00083);
+            weightedExpected.put(tx.findNode(label, "name", "c").getId(), 1.83298);
+            weightedExpected.put(tx.findNode(label, "name", "d").getId(), 0.18471);
+            weightedExpected.put(tx.findNode(label, "name", "e").getId(), 0.18194);
+            weightedExpected.put(tx.findNode(label, "name", "f").getId(), 0.17367);
+            weightedExpected.put(tx.findNode(label, "name", "g").getId(), 0.15);
+            weightedExpected.put(tx.findNode(label, "name", "h").getId(), 0.15);
+            weightedExpected.put(tx.findNode(label, "name", "i").getId(), 0.15);
+            weightedExpected.put(tx.findNode(label, "name", "j").getId(), 0.15);
         });
     }
 

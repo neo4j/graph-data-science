@@ -52,7 +52,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankPregelStreamConfig
     }
 
     private void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual) {
-        super.assertMapEqualsWithTolerance(expected, actual, 0.1);
+        super.assertMapEqualsWithTolerance(expected, actual, 1e-5);
     }
 
     @ParameterizedTest(name = "{1}")
@@ -67,6 +67,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankPregelStreamConfig
                 actual.put(nodeId, (Double) row.get("score"));
             }
         );
+
         assertMapEqualsWithTolerance(expected, actual);
     }
 

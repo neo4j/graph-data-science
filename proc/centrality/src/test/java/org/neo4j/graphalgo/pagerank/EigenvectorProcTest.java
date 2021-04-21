@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
-import org.neo4j.graphalgo.scaling.ScalarScaler;
 
 import java.util.List;
 import java.util.Locale;
@@ -43,7 +42,7 @@ import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 
-class ArticleRankProcTest extends BaseProcTest {
+class EigenvectorProcTest extends BaseProcTest {
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -52,7 +51,7 @@ class ArticleRankProcTest extends BaseProcTest {
         ", (b:Label1 {name: 'b'})" +
         ", (a)-[:TYPE1]->(b)";
 
-    private static final String GRAPH_NAME = "graph";
+    public static final String GRAPH_NAME = "graph";
 
     private static Stream<Arguments> estimations() {
         return Stream.of(
@@ -60,28 +59,29 @@ class ArticleRankProcTest extends BaseProcTest {
             Arguments.of(GdsCypher.ExecutionModes.WRITE),
             Arguments.of(GdsCypher.ExecutionModes.MUTATE),
             Arguments.of(GdsCypher.ExecutionModes.STATS)
-        );}
+        );
+    }
 
     @BeforeEach
     void setupGraph() throws Exception {
         registerProcedures(
             GraphCreateProc.class,
-            ArticleRankStatsProc.class,
-            ArticleRankStreamProc.class,
-            ArticleRankWriteProc.class,
-            ArticleRankMutateProc.class
+            EigenvectorStatsProc.class,
+            EigenvectorStreamProc.class,
+            EigenvectorWriteProc.class,
+            EigenvectorMutateProc.class
         );
         runQuery("CALL gds.graph.create($graphName, '*', '*')", Map.of("graphName", GRAPH_NAME));
     }
 
     static Stream<Arguments> normalizations() {
         return Stream.of(
-            Arguments.of(ScalarScaler.Variant.NONE, 0.15, 0.1925),
-            Arguments.of(ScalarScaler.Variant.L1NORM, 0.43795, 0.56204),
-            Arguments.of(ScalarScaler.Variant.L2NORM, 0.61464, 0.7888),
+            Arguments.of(ScalarScaler.Variant.NONE, 0.15, 0.2775),
+            Arguments.of(ScalarScaler.Variant.L1NORM, 0.35087, 0.64912),
+            Arguments.of(ScalarScaler.Variant.L2NORM, 0.47551, 0.8797),
             Arguments.of(ScalarScaler.Variant.MEAN, -0.5, 0.5),
             Arguments.of(ScalarScaler.Variant.MINMAX, 0.0, 1.0),
-            Arguments.of(ScalarScaler.Variant.MAX, 0.77922, 1.0)
+            Arguments.of(ScalarScaler.Variant.MAX, 0.54054, 1.0)
         );
     }
 
@@ -90,7 +90,7 @@ class ArticleRankProcTest extends BaseProcTest {
     void normalizations(ScalarScaler.Variant variant, double expectedNode0, double expectedNode1) {
         String query = GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
-            .algo("articleRank")
+            .algo("eigenvector")
             .streamMode()
             .addParameter("normalization", variant.name().toLowerCase(Locale.ENGLISH))
             .yields();
@@ -105,7 +105,7 @@ class ArticleRankProcTest extends BaseProcTest {
     void invalidNormalization() {
         assertThatThrownBy(() -> runQuery(GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
-            .algo("articleRank")
+            .algo("eigenvector")
             .streamMode()
             .addParameter("normalization", "SUPERDUPERSCALARSCALERVARIANT")
             .yields())
@@ -119,7 +119,7 @@ class ArticleRankProcTest extends BaseProcTest {
     void stats() {
         String query = GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
-            .algo("articleRank")
+            .algo("eigenvector")
             .statsMode()
             .yields();
 
@@ -139,13 +139,13 @@ class ArticleRankProcTest extends BaseProcTest {
     void stream() {
         String query = GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
-            .algo("articleRank")
+            .algo("eigenvector")
             .streamMode()
             .yields();
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "score", 0.15000000000000002),
-            Map.of("nodeId", 1L, "score", 0.19250000000000003)
+            Map.of("nodeId", 0L, "score", closeTo(0.15, 1E-5)),
+            Map.of("nodeId", 1L, "score", closeTo(0.2775, 1E-5))
         ));
     }
 
@@ -154,7 +154,7 @@ class ArticleRankProcTest extends BaseProcTest {
         String propertyKey = "pr";
         String query = GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
-            .algo("articleRank")
+            .algo("eigenvector")
             .writeMode()
             .addParameter("writeProperty", propertyKey)
             .yields();
@@ -178,7 +178,7 @@ class ArticleRankProcTest extends BaseProcTest {
         String propertyKey = "pr";
         String query = GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
-            .algo("articleRank")
+            .algo("eigenvector")
             .mutateMode()
             .addParameter("mutateProperty", propertyKey)
             .yields();
@@ -202,7 +202,7 @@ class ArticleRankProcTest extends BaseProcTest {
     void estimates(GdsCypher.ExecutionModes mode) {
         var queryBuilder = GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
-            .algo("articleRank")
+            .algo("eigenvector")
             .estimationMode(mode);
 
         switch (mode) {

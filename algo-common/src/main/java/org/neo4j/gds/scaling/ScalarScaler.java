@@ -21,13 +21,15 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.Arrays;
-import java.util.Locale;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public abstract class ScalarScaler implements Scaler {
 
@@ -42,7 +44,7 @@ public abstract class ScalarScaler implements Scaler {
         return 1;
     }
 
-    public static final org.neo4j.gds.scaling.ScalarScaler ZERO = new org.neo4j.gds.scaling.ScalarScaler(null) {
+    public static final ScalarScaler ZERO = new ScalarScaler(null) {
         @Override
         public double scaleProperty(long nodeId) {
             return 0;
@@ -120,20 +122,26 @@ public abstract class ScalarScaler implements Scaler {
             }
         };
 
-        public static Variant lookup(String name) {
-            try {
-                return valueOf(name.toUpperCase(Locale.ENGLISH));
-            } catch (IllegalArgumentException e) {
-                String availableStrategies = Arrays
-                    .stream(values())
-                    .map(Variant::name)
-                    .collect(Collectors.joining(", "));
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Scaler `%s` is not supported. Must be one of: %s.",
-                    name,
-                    availableStrategies
-                ));
+        private static final List<String> VALUES = Arrays
+            .stream(Variant.values())
+            .map(Variant::name)
+            .collect(Collectors.toList());
+
+        public static Variant lookup(Object name) {
+            if (name instanceof String) {
+                var inputString = toUpperCaseWithLocale((String) name);
+
+                if (VALUES.contains(inputString)) {
+                    return valueOf(inputString);
+                } else {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Scaler `%s` is not supported. Must be one of: %s.",
+                        name,
+                        StringJoining.join(VALUES)
+                    ));
+                }
             }
+            return (Variant) name;
         }
 
         public static String toString(Variant variant) {

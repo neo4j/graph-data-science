@@ -169,6 +169,15 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.articleRank.stream.estimate`
 | `gds.articleRank.stats`
 | `gds.articleRank.stats.estimate`
+.8+<.^|Eigenvector
+| `gds.eigenvector.mutate`
+| `gds.eigenvector.mutate.estimate`
+| `gds.eigenvector.write`
+| `gds.eigenvector.write.estimate`
+| `gds.eigenvector.stream`
+| `gds.eigenvector.stream.estimate`
+| `gds.eigenvector.stats`
+| `gds.eigenvector.stats.estimate`
 |===
 
 [[beta-tier]]

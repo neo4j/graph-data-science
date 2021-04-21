@@ -96,16 +96,16 @@ class EigenvectorCentralityProcTest extends BaseProcTest {
 
         runInTransaction(db, tx -> {
             final Label label = Label.label("Character");
-            noNormExpected.put(tx.findNode(label, "name", "Ned").getId(), 111.68570401574802);
-            noNormExpected.put(tx.findNode(label, "name", "Robert").getId(), 88.09448401574804);
-            noNormExpected.put(tx.findNode(label, "name", "Cersei").getId(), 84.59226401574804);
-            noNormExpected.put(tx.findNode(label, "name", "Catelyn").getId(), 84.51566401574803);
-            noNormExpected.put(tx.findNode(label, "name", "Tyrion").getId(), 82.00291401574802);
-            noNormExpected.put(tx.findNode(label, "name", "Joffrey").getId(), 77.67397401574803);
-            noNormExpected.put(tx.findNode(label, "name", "Robb").getId(), 73.56551401574802);
-            noNormExpected.put(tx.findNode(label, "name", "Arya").getId(), 73.32532401574804);
-            noNormExpected.put(tx.findNode(label, "name", "Petyr").getId(), 72.26733401574802);
-            noNormExpected.put(tx.findNode(label, "name", "Sansa").getId(), 71.56470401574803);
+            noNormExpected.put(tx.findNode(label, "name", "Ned").getId(),     111.69100);
+            noNormExpected.put(tx.findNode(label, "name", "Robert").getId(),  88.09788);
+            noNormExpected.put(tx.findNode(label, "name", "Cersei").getId(),  84.59480);
+            noNormExpected.put(tx.findNode(label, "name", "Catelyn").getId(), 84.51924);
+            noNormExpected.put(tx.findNode(label, "name", "Tyrion").getId(),  82.00707);
+            noNormExpected.put(tx.findNode(label, "name", "Joffrey").getId(), 77.67631);
+            noNormExpected.put(tx.findNode(label, "name", "Robb").getId(),    73.56841);
+            noNormExpected.put(tx.findNode(label, "name", "Arya").getId(),    73.32777);
+            noNormExpected.put(tx.findNode(label, "name", "Petyr").getId(),   72.26964);
+            noNormExpected.put(tx.findNode(label, "name", "Sansa").getId(),   71.56689);
         });
 
         runInTransaction(db, tx -> {
