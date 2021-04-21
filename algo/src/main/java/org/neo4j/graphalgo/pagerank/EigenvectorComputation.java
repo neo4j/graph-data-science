@@ -113,7 +113,6 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
             context.executorService()
         );
 
-
         // We use a mutable boolean instead of an AtomicBoolean
         // since we only ever flip from true to false. If multiple
         // threads try to change the value, only one needs to succeed.

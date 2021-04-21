@@ -76,12 +76,12 @@ class EigenvectorProcTest extends BaseProcTest {
 
     static Stream<Arguments> scalers() {
         return Stream.of(
-            Arguments.of(ScalarScaler.Variant.NONE, 0.15, 0.2775),
-            Arguments.of(ScalarScaler.Variant.L1NORM, 0.35087, 0.64912),
-            Arguments.of(ScalarScaler.Variant.L2NORM, 0.47551, 0.8797),
-            Arguments.of(ScalarScaler.Variant.MEAN, -0.5, 0.5),
-            Arguments.of(ScalarScaler.Variant.MINMAX, 0.0, 1.0),
-            Arguments.of(ScalarScaler.Variant.MAX, 0.54054, 1.0)
+            Arguments.of(ScalarScaler.Variant.NONE,   0.04371, 0.99904),
+            Arguments.of(ScalarScaler.Variant.L1NORM, 0.04192, 0.95807),
+            Arguments.of(ScalarScaler.Variant.L2NORM, 0.04371, 0.99904),
+            Arguments.of(ScalarScaler.Variant.MEAN,      -0.5, 0.5),
+            Arguments.of(ScalarScaler.Variant.MINMAX,     0.0, 1.0),
+            Arguments.of(ScalarScaler.Variant.MAX,    0.04375, 1.0)
         );
     }
 
@@ -121,6 +121,7 @@ class EigenvectorProcTest extends BaseProcTest {
             .explicitCreation(GRAPH_NAME)
             .algo("eigenvector")
             .statsMode()
+            .addParameter("tolerance", 1E-2)
             .yields();
 
         assertCypherResult(query, List.of(
@@ -131,7 +132,7 @@ class EigenvectorProcTest extends BaseProcTest {
                 "configuration", isA(Map.class),
                 "centralityDistribution", isA(Map.class),
                 "didConverge", true,
-                "ranIterations", 2L
+                "ranIterations", 9L
             )));
     }
 
@@ -144,8 +145,8 @@ class EigenvectorProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "score", closeTo(0.15, 1E-5)),
-            Map.of("nodeId", 1L, "score", closeTo(0.2775, 1E-5))
+            Map.of("nodeId", 0L, "score", closeTo(0.04371, 1E-5)),
+            Map.of("nodeId", 1L, "score", closeTo(0.99904, 1E-5))
         ));
     }
 
@@ -157,6 +158,7 @@ class EigenvectorProcTest extends BaseProcTest {
             .algo("eigenvector")
             .writeMode()
             .addParameter("writeProperty", propertyKey)
+            .addParameter("tolerance", 1E-2)
             .yields();
 
         assertCypherResult(query, List.of(
@@ -169,7 +171,7 @@ class EigenvectorProcTest extends BaseProcTest {
                 "centralityDistribution", isA(Map.class),
                 "nodePropertiesWritten", 2L,
                 "didConverge", true,
-                "ranIterations", 2L
+                "ranIterations", 9L
             )));
     }
 
@@ -181,6 +183,7 @@ class EigenvectorProcTest extends BaseProcTest {
             .algo("eigenvector")
             .mutateMode()
             .addParameter("mutateProperty", propertyKey)
+            .addParameter("tolerance", 1E-2)
             .yields();
 
         assertCypherResult(query, List.of(
@@ -193,7 +196,7 @@ class EigenvectorProcTest extends BaseProcTest {
                 "centralityDistribution", isA(Map.class),
                 "nodePropertiesWritten", 2L,
                 "didConverge", true,
-                "ranIterations", 2L
+                "ranIterations", 9L
             )));
     }
 
@@ -218,7 +221,7 @@ class EigenvectorProcTest extends BaseProcTest {
 
         assertCypherResult(
             queryBuilder.yields("bytesMin", "bytesMax"),
-            List.of(Map.of("bytesMin", 544L, "bytesMax", 544L))
+            List.of(Map.of("bytesMin", 552L, "bytesMax", 552L))
         );
     }
 }
