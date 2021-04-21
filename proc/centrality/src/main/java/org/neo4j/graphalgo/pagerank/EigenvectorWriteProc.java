@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -51,5 +52,10 @@ public class EigenvectorWriteProc extends PageRankWriteProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return super.estimate(graphNameOrConfig, configuration);
+    }
+
+    @Override
+    protected AlgorithmFactory<PageRankAlgorithm, PageRankWriteConfig> algorithmFactory() {
+        return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
     }
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.common.CentralityStreamResult;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -51,5 +52,10 @@ public class EigenvectorStreamProc extends PageRankStreamProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return super.estimate(graphNameOrConfig, configuration);
+    }
+
+    @Override
+    protected AlgorithmFactory<PageRankAlgorithm, PageRankStreamConfig> algorithmFactory() {
+        return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
     }
 }
