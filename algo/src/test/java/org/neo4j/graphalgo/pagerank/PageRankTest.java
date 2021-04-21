@@ -397,6 +397,57 @@ class PageRankTest {
 
     @Nested
     @GdlExtension
+    class Eigenvector {
+
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:Node { expectedRank: 0.01262})" +
+            ", (b:Node { expectedRank: 0.71623})" +
+            ", (c:Node { expectedRank: 0.69740 })" +
+            ", (d:Node { expectedRank: 0.01262 })" +
+            ", (e:Node { expectedRank: 0.01262 })" +
+            ", (f:Node { expectedRank: 0.01262 })" +
+            ", (g:Node { expectedRank: 0.0 })" +
+            ", (h:Node { expectedRank: 0.0 })" +
+            ", (i:Node { expectedRank: 0.0 })" +
+            ", (j:Node { expectedRank: 0.0 })" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(b)" +
+            ", (d)-[:TYPE]->(a)" +
+            ", (d)-[:TYPE]->(b)" +
+            ", (e)-[:TYPE]->(b)" +
+            ", (e)-[:TYPE]->(d)" +
+            ", (e)-[:TYPE]->(f)" +
+            ", (f)-[:TYPE]->(b)" +
+            ", (f)-[:TYPE]->(e)";
+
+        @Inject
+        private Graph graph;
+
+        @Test
+        void eigenvector() {
+            var config = ImmutablePageRankStreamConfig
+                .builder()
+                .maxIterations(40)
+                .tolerance(0)
+                .concurrency(1)
+                .build();
+
+            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR)
+                .scores()
+                .asNodeProperties();
+
+            var expected = graph.nodeProperties("expectedRank");
+
+            for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+            }
+        }
+    }
+
+    @Nested
+    @GdlExtension
     class Scaling {
         @GdlGraph
         private static final String DB_CYPHER =
@@ -435,7 +486,7 @@ class PageRankTest {
                 .scaler(variant)
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR, ProgressLogger.NULL_LOGGER).scores();
+            var actual = runOnPregel(graph, config).scores();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
 

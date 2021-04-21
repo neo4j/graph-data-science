@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStatistics;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
+import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -33,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import java.util.function.LongToDoubleFunction;
 
 import static org.neo4j.graphalgo.pagerank.PageRankAlgorithmFactory.Mode.ARTICLE_RANK;
+import static org.neo4j.graphalgo.pagerank.PageRankAlgorithmFactory.Mode.EIGENVECTOR;
 
 public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends AbstractAlgorithmFactory<PageRankAlgorithm, CONFIG> {
 
@@ -69,6 +71,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
+        PregelComputation<PageRankConfig> computation;
         LongToDoubleFunction degreeFunction;
         double deltaCoefficient = 1;
 
@@ -91,9 +94,21 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
             var tempFn = degreeFunction;
             degreeFunction = nodeId -> tempFn.applyAsDouble(nodeId) + avgDegree;
             deltaCoefficient = avgDegree;
-        }
+            computation = new PageRankComputation(graph, configuration, degreeFunction, deltaCoefficient);
+        } else if (mode == EIGENVECTOR) {
+            // Degrees are generally not respected in eigenvector centrality.
+            //
+            // However, relationship weights need to be normalized by the weighted degree.
+            // The score is divided by the weighted degree before being sent to the neighbors.
+            // For the unweighted case, we want a no-op and divide by 1.
+            degreeFunction = configuration.isWeighted()
+                ? degreeFunction
+                : (nodeId) -> 1;
 
-        var computation = new PageRankComputation(graph, configuration, degreeFunction, deltaCoefficient);
+            computation = new EigenvectorComputation(graph, configuration, degreeFunction);
+        } else {
+            computation = new PageRankComputation(graph, configuration, degreeFunction, deltaCoefficient);
+        }
 
         return new PageRankAlgorithm(graph, configuration, computation, Pools.DEFAULT, tracker, progressLogger);
     }
