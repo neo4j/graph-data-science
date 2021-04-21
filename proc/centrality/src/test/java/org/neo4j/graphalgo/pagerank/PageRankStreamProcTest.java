@@ -185,4 +185,23 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
         assertThat(log.getMessages(TestLog.WARN)).anyMatch(message -> message.contains("deprecated"));
     }
 
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
+    void streamWithSourceNodes(ModeBuildStage queryBuilder, String testCaseName) {
+        var sourceNodes = allNodes();
+
+        String queryWithSourceNodes = queryBuilder
+            .streamMode()
+            .addPlaceholder("sourceNodes", "sources")
+            .yields();
+
+        var actual = new HashMap<Long, Double>();
+
+        runQueryWithRowConsumer(queryWithSourceNodes, Map.of("sources", sourceNodes),
+            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
+        );
+
+        assertMapEqualsWithTolerance(expected, actual);
+    }
+
 }

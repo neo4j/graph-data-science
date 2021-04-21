@@ -151,6 +151,23 @@ class EigenvectorProcTest extends BaseProcTest {
     }
 
     @Test
+    void streamWithSourceNodes() {
+        var sourceNodes = allNodes();
+
+        var query = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
+            .algo("eigenvector")
+            .streamMode()
+            .addPlaceholder("sourceNodes", "sources")
+            .yields();
+
+        assertCypherResult(query, Map.of("sources", sourceNodes), List.of(
+            Map.of("nodeId", 0L, "score", closeTo(0.15, 1E-5)),
+            Map.of("nodeId", 1L, "score", closeTo(0.2775, 1E-5))
+        ));
+    }
+
+    @Test
     void write() {
         String propertyKey = "pr";
         String query = GdsCypher.call()

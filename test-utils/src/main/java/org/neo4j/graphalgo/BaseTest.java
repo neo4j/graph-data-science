@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.Neo4jGraphExtension;
 import org.neo4j.graphalgo.extension.NodeFunction;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -36,6 +37,7 @@ import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 import org.neo4j.test.extension.ImpermanentDbmsExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -81,6 +83,12 @@ public abstract class BaseTest {
         runQueryWithRowConsumer("MATCH (n) DETACH DELETE n RETURN count(n)",
             row -> deletedNodes.set(row.getNumber("count(n)").longValue()));
         return deletedNodes.get();
+    }
+
+    protected List<Node> allNodes() {
+        var sourceNodes = new ArrayList<Node>();
+        runQueryWithRowConsumer("MATCH (n) RETURN n", row -> sourceNodes.add(row.getNode("n")));
+        return sourceNodes;
     }
 
     protected void runQueryWithRowConsumer(

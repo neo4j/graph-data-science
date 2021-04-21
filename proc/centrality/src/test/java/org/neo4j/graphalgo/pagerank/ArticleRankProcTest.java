@@ -143,8 +143,25 @@ class ArticleRankProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "score", 0.15000000000000002),
-            Map.of("nodeId", 1L, "score", 0.19250000000000003)
+            Map.of("nodeId", 0L, "score", closeTo(0.15, 1e-5)),
+            Map.of("nodeId", 1L, "score", closeTo(0.1925, 1e-5))
+        ));
+    }
+
+    @Test
+    void streamWithSourceNodes() {
+        var sourceNodes = allNodes();
+
+        var query = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
+            .algo("articleRank")
+            .streamMode()
+            .addPlaceholder("sourceNodes", "sources")
+            .yields();
+
+        assertCypherResult(query, Map.of("sources", sourceNodes), List.of(
+            Map.of("nodeId", 0L, "score", closeTo(0.15, 1e-5)),
+            Map.of("nodeId", 1L, "score", closeTo(0.1925, 1e-5))
         ));
     }
 
