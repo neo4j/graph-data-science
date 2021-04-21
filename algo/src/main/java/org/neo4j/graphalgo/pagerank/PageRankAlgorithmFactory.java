@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import com.carrotsearch.hppc.LongScatterSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
@@ -34,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.degree.DegreeCentrality;
 import org.neo4j.graphalgo.degree.ImmutableDegreeCentralityConfig;
 
+import java.util.Arrays;
 import java.util.function.LongToDoubleFunction;
 
 import static org.neo4j.graphalgo.pagerank.PageRankAlgorithmFactory.Mode.ARTICLE_RANK;
@@ -84,12 +86,18 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
             progressLogger
         );
 
+        var mappedNodeIds = configuration.sourceNodeIds()
+            .map(graph::toMappedNodeId)
+            .toArray();
+        var sourceNodes = new LongScatterSet(mappedNodeIds.length);
+        Arrays.stream(mappedNodeIds).forEach(sourceNodes::add);
+
         if (mode == ARTICLE_RANK) {
             double avgDegree = GraphStatistics.averageDegree(graph, configuration.concurrency());
             var tempFn = degreeFunction;
             degreeFunction = nodeId -> tempFn.applyAsDouble(nodeId) + avgDegree;
             deltaCoefficient = avgDegree;
-            computation = new PageRankComputation(graph, configuration, degreeFunction, deltaCoefficient);
+            computation = new PageRankComputation(configuration, sourceNodes, degreeFunction, deltaCoefficient);
         } else if (mode == EIGENVECTOR) {
             // Degrees are generally not respected in eigenvector centrality.
             //
@@ -100,9 +108,9 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
                 ? degreeFunction
                 : (nodeId) -> 1;
 
-            computation = new EigenvectorComputation(graph, configuration, degreeFunction);
+            computation = new EigenvectorComputation(graph.nodeCount(), configuration, sourceNodes, degreeFunction);
         } else {
-            computation = new PageRankComputation(graph, configuration, degreeFunction, deltaCoefficient);
+            computation = new PageRankComputation(configuration, sourceNodes, degreeFunction, deltaCoefficient);
         }
 
         return new PageRankAlgorithm(graph, configuration, computation, mode, Pools.DEFAULT, tracker, progressLogger);
