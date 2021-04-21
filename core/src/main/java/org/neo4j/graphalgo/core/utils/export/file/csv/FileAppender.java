@@ -5,9 +5,20 @@ import java.io.IOException;
 
 public interface FileAppender extends Flushable, AutoCloseable {
 
+    void append(double value) throws IOException;
+    void append(double[] value) throws IOException;
+
     void append(long value) throws IOException;
 
+    void append(long[] value) throws IOException;
+
+    void append(float[] value) throws IOException;
+
     void append(String value) throws IOException;
+
+    default void startLine() throws IOException {
+
+    }
 
     void endLine() throws IOException;
 

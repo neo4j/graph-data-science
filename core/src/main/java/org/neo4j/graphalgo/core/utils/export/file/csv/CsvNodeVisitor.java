@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.utils.export.file.NodeVisitor;
 
@@ -29,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -65,12 +68,24 @@ public class CsvNodeVisitor extends NodeVisitor {
         var fileAppender = getAppender();
 
         try {
+            fileAppender.startLine();
             fileAppender.append(id());
             // write properties
             forEachProperty(((key, value, type) -> {
-                var propertyString = type.csvValue(value);
                 try {
-                    fileAppender.append(propertyString);
+                    if(value instanceof Double) {
+                        fileAppender.append((double) value);
+                    } else if(value instanceof Long) {
+                        fileAppender.append((long) value);
+                    } else if(value instanceof double[]) {
+                        fileAppender.append((double[]) value);
+                    } else if(value instanceof long[]) {
+                        fileAppender.append((long[]) value);
+                    } else if(value instanceof float[]) {
+                        fileAppender.append((float[]) value);
+                    } else if (value == null) {
+                        fileAppender.append("");
+                    }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -106,12 +121,15 @@ public class CsvNodeVisitor extends NodeVisitor {
                 writeHeaderFile(headerFileName);
             }
 
-            return fileAppender(fileLocation.resolve(dataFileName));
+            return fileAppender(fileLocation.resolve(dataFileName),
+                csvSchemaBuilder -> csvSchemaBuilder.addNumberColumn(ID_COLUMN_NAME));
         });
     }
 
     private void writeHeaderFile(String headerFileName) {
-        try (var headerAppender = fileAppender(fileLocation.resolve(headerFileName))) {
+        try (var headerAppender = fileAppender(fileLocation.resolve(headerFileName),
+            csvSchemaBuilder -> csvSchemaBuilder.addColumn(ID_COLUMN_NAME, CsvSchema.ColumnType.STRING))) {
+            headerAppender.startLine();
             headerAppender.append(ID_COLUMN_NAME);
 
             forEachProperty(((key, value, type) -> {
@@ -140,7 +158,12 @@ public class CsvNodeVisitor extends NodeVisitor {
         }
     }
 
-    private FileAppender fileAppender(Path filePath) {
-        return new JacksonFileAppender(filePath);
+    private FileAppender fileAppender(Path filePath, UnaryOperator<CsvSchema.Builder> builderUnaryOperator) {
+        return new JacksonGeneratorFileAppender<>(
+            filePath,
+            elementSchema,
+            labels().stream().map(NodeLabel::of),
+            builderUnaryOperator
+        );
     }
 }

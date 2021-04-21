@@ -55,9 +55,45 @@ class JacksonFileAppender implements FileAppender {
     public void append(long value) throws IOException {
         csvEncoder.write(csvEncoder.nextColumnIndex(), value);
     }
+
+    @Override
+    public void append(double value) throws IOException {
+        csvEncoder.write(csvEncoder.nextColumnIndex(), value);
+    }
+
     @Override
     public void append(String value) throws IOException {
         csvEncoder.write(csvEncoder.nextColumnIndex(), value);
+    }
+
+    @Override
+    public void append(double[] value) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        sb.append(value[0]);
+        for (int i = 1; i < value.length; i++) {
+            sb.append(";").append(value[i]);
+        }
+        append(sb.toString());
+    }
+
+    @Override
+    public void append(long[] value) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        sb.append(value[0]);
+        for (int i = 1; i < value.length; i++) {
+            sb.append(";").append(value[i]);
+        }
+        append(sb.toString());
+    }
+
+    @Override
+    public void append(float[] value) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        sb.append(value[0]);
+        for (int i = 1; i < value.length; i++) {
+            sb.append(";").append(value[i]);
+        }
+        append(sb.toString());
     }
 
     @Override

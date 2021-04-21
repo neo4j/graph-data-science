@@ -39,7 +39,7 @@ abstract class ElementVisitor<
     I extends ElementIdentifier,
     PROPERTY_SCHEMA extends PropertySchema> extends InputEntityVisitor.Adapter implements Flushable {
 
-    final ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema;
+    protected final ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema;
 
     private final Object[] currentProperties;
     private final ObjectObjectMap<String, List<PROPERTY_SCHEMA>> propertySchemas;

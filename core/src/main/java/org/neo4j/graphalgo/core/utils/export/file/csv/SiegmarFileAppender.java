@@ -40,6 +40,11 @@ class SiegmarFileAppender implements FileAppender {
     }
 
     @Override
+    public void append(double value) throws IOException {
+        csvAppender.appendField(Double.toString(value));
+    }
+
+    @Override
     public void append(long value) throws IOException {
         csvAppender.appendField(Long.toString(value));
     }
@@ -47,6 +52,21 @@ class SiegmarFileAppender implements FileAppender {
     @Override
     public void append(String value) throws IOException {
         csvAppender.appendField(value);
+    }
+
+    @Override
+    public void append(double[] value) throws IOException {
+
+    }
+
+    @Override
+    public void append(long[] value) throws IOException {
+
+    }
+
+    @Override
+    public void append(float[] value) throws IOException {
+
     }
 
     @Override

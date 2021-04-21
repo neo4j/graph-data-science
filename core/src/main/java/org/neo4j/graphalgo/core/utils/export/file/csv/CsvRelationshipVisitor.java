@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.utils.export.file.RelationshipVisitor;
 
@@ -29,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -63,23 +65,36 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
     @Override
     protected void exportElement() {
         // do the import
-        var csvAppender = getAppender();
+        var fileAppender = getAppender();
         try {
+            fileAppender.startLine();
             // write start and end nodes
-            csvAppender.append(startNode());
-            csvAppender.append(endNode());
+            fileAppender.append(startNode());
+            fileAppender.append(endNode());
 
             // write properties
             forEachProperty(((key, value, type) -> {
-                var propertyString = type.csvValue(value);
                 try {
-                    csvAppender.append(propertyString);
+                    if(value instanceof Double) {
+                        fileAppender.append((double) value);
+                    } else if(value instanceof Long) {
+                        fileAppender.append((long) value);
+                    } else if(value instanceof double[]) {
+                        fileAppender.append((double[]) value);
+                    } else if(value instanceof long[]) {
+                        fileAppender.append((long[]) value);
+                    } else if(value instanceof float[]) {
+                        fileAppender.append((float[]) value);
+                    } else if (value == null) {
+                        fileAppender.append("");
+                    }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+
             }));
 
-            csvAppender.endLine();
+            fileAppender.endLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -113,6 +128,7 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
 
     private void writeHeaderFile(String headerFileName) {
         try (var headerAppender = fileAppender(fileLocation.resolve(headerFileName))) {
+            headerAppender.startLine();
             headerAppender.append(START_ID_COLUMN_NAME);
             headerAppender.append(END_ID_COLUMN_NAME);
 
@@ -143,6 +159,13 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
     }
 
     private FileAppender fileAppender(Path filePath) {
-        return new JacksonFileAppender(filePath);
+        return new JacksonGeneratorFileAppender<>(
+            filePath,
+            elementSchema,
+            Stream.of(RelationshipType.of(relationshipType())),
+            csvSchemaBuilder -> csvSchemaBuilder
+                .addNumberColumn(START_ID_COLUMN_NAME)
+                .addNumberColumn(END_ID_COLUMN_NAME)
+        );
     }
 }

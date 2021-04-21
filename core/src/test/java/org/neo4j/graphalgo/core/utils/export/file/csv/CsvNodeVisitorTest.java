@@ -139,6 +139,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
             .addProperty(bLabel, "baz", ValueType.DOUBLE)
 
             .addProperty(cLabel, "isolated", ValueType.DOUBLE)
+            .addProperty(cLabel, "isolated_array", ValueType.LONG_ARRAY)
 
             .build();
         var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema);
@@ -169,6 +170,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         nodeVisitor.id(3L);
         nodeVisitor.labels(new String[]{"C"});
         nodeVisitor.property("isolated", 1337.0);
+        nodeVisitor.property("isolated_array", new long[]{1L, 42L, 19L});
         nodeVisitor.endOfEntity();
 
         // :A:B
@@ -216,7 +218,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         assertDataContent(
             "nodes_C_0.csv",
             List.of(  //id   isolated
-                List.of("3", "1337.0")
+                List.of("3", "1337.0", "1;42;19")
             )
         );
 
