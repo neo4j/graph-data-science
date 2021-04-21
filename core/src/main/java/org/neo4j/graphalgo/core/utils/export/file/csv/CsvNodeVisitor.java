@@ -19,14 +19,11 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
-import de.siegmar.fastcsv.writer.CsvAppender;
-import de.siegmar.fastcsv.writer.CsvWriter;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.utils.export.file.NodeVisitor;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,8 +38,7 @@ public class CsvNodeVisitor extends NodeVisitor {
 
     private final Path fileLocation;
     private final int visitorId;
-    private final Map<String, CsvAppender> csvAppenders;
-    private final CsvWriter csvWriter;
+    private final Map<String, FileAppender> csvAppenders;
     private final Set<String> headerFiles;
 
     public CsvNodeVisitor(
@@ -56,7 +52,6 @@ public class CsvNodeVisitor extends NodeVisitor {
         this.headerFiles = headerFiles;
         this.visitorId = visitorId;
         this.csvAppenders = new HashMap<>();
-        this.csvWriter = new CsvWriter();
     }
 
     @TestOnly
@@ -67,21 +62,21 @@ public class CsvNodeVisitor extends NodeVisitor {
     @Override
     protected void exportElement() {
         // do the export
-        var csvAppender = getAppender();
-        try {
-            csvAppender.appendField(Long.toString(id()));
+        var fileAppender = getAppender();
 
+        try {
+            fileAppender.append(id());
             // write properties
             forEachProperty(((key, value, type) -> {
                 var propertyString = type.csvValue(value);
                 try {
-                    csvAppender.appendField(propertyString);
+                    fileAppender.append(propertyString);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }));
 
-            csvAppender.endLine();
+            fileAppender.endLine();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -99,7 +94,7 @@ public class CsvNodeVisitor extends NodeVisitor {
         });
     }
 
-    private CsvAppender getAppender() {
+    private FileAppender getAppender() {
         var labelsString = elementIdentifier();
 
         return csvAppenders.computeIfAbsent(labelsString, (ignore) -> {
@@ -111,17 +106,13 @@ public class CsvNodeVisitor extends NodeVisitor {
                 writeHeaderFile(headerFileName);
             }
 
-            try {
-                return csvWriter.append(fileLocation.resolve(dataFileName), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            return fileAppender(fileLocation.resolve(dataFileName));
         });
     }
 
     private void writeHeaderFile(String headerFileName) {
-        try (var headerAppender = csvWriter.append(fileLocation.resolve(headerFileName), StandardCharsets.UTF_8)) {
-            headerAppender.appendField(ID_COLUMN_NAME);
+        try (var headerAppender = fileAppender(fileLocation.resolve(headerFileName))) {
+            headerAppender.append(ID_COLUMN_NAME);
 
             forEachProperty(((key, value, type) -> {
                 var propertyHeader = formatWithLocale(
@@ -130,7 +121,7 @@ public class CsvNodeVisitor extends NodeVisitor {
                     type.csvName()
                 );
                 try {
-                    headerAppender.appendField(propertyHeader);
+                    headerAppender.append(propertyHeader);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -144,8 +135,12 @@ public class CsvNodeVisitor extends NodeVisitor {
 
     @Override
     public void flush() throws IOException {
-        for (CsvAppender csvAppender : csvAppenders.values()) {
+        for (var csvAppender : csvAppenders.values()) {
             csvAppender.flush();
         }
+    }
+
+    private FileAppender fileAppender(Path filePath) {
+        return new JacksonFileAppender(filePath);
     }
 }

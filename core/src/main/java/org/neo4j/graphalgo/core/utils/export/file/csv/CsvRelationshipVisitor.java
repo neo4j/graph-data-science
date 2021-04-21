@@ -19,14 +19,11 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file.csv;
 
-import de.siegmar.fastcsv.writer.CsvAppender;
-import de.siegmar.fastcsv.writer.CsvWriter;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.utils.export.file.RelationshipVisitor;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,8 +40,7 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
     private final Path fileLocation;
     private final Set<String> headerFiles;
     private final int visitorId;
-    private final Map<String, CsvAppender> csvAppenders;
-    private final CsvWriter csvWriter;
+    private final Map<String, FileAppender> csvAppenders;
 
     public CsvRelationshipVisitor(
         Path fileLocation,
@@ -57,7 +53,6 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
         this.headerFiles = headerFiles;
         this.visitorId = visitorId;
         this.csvAppenders = new HashMap<>();
-        this.csvWriter = new CsvWriter();
     }
 
     @TestOnly
@@ -71,14 +66,14 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
         var csvAppender = getAppender();
         try {
             // write start and end nodes
-            csvAppender.appendField(Long.toString(startNode()));
-            csvAppender.appendField(Long.toString(endNode()));
+            csvAppender.append(startNode());
+            csvAppender.append(endNode());
 
             // write properties
             forEachProperty(((key, value, type) -> {
                 var propertyString = type.csvValue(value);
                 try {
-                    csvAppender.appendField(propertyString);
+                    csvAppender.append(propertyString);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -102,7 +97,7 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
         });
     }
 
-    private CsvAppender getAppender() {
+    private FileAppender getAppender() {
         return csvAppenders.computeIfAbsent(relationshipType(), (ignore) -> {
             var fileName = formatWithLocale("relationships_%s", relationshipType());
             var headerFileName = formatWithLocale("%s_header.csv", fileName);
@@ -112,18 +107,14 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
                 writeHeaderFile(headerFileName);
             }
 
-            try {
-                return csvWriter.append(fileLocation.resolve(dataFileName), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            return fileAppender(fileLocation.resolve(dataFileName));
         });
     }
 
     private void writeHeaderFile(String headerFileName) {
-        try (var headerAppender = csvWriter.append(fileLocation.resolve(headerFileName), StandardCharsets.UTF_8)) {
-            headerAppender.appendField(START_ID_COLUMN_NAME);
-            headerAppender.appendField(END_ID_COLUMN_NAME);
+        try (var headerAppender = fileAppender(fileLocation.resolve(headerFileName))) {
+            headerAppender.append(START_ID_COLUMN_NAME);
+            headerAppender.append(END_ID_COLUMN_NAME);
 
             forEachProperty(((key, value, type) -> {
                 var propertyHeader = formatWithLocale(
@@ -132,7 +123,7 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
                     type.csvName()
                 );
                 try {
-                    headerAppender.appendField(propertyHeader);
+                    headerAppender.append(propertyHeader);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -146,8 +137,12 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
 
     @Override
     public void flush() throws IOException {
-        for (CsvAppender csvAppender : csvAppenders.values()) {
+        for (var csvAppender : csvAppenders.values()) {
             csvAppender.flush();
         }
+    }
+
+    private FileAppender fileAppender(Path filePath) {
+        return new JacksonFileAppender(filePath);
     }
 }
