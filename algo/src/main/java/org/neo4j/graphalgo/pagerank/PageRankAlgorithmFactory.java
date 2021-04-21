@@ -110,7 +110,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
             computation = new PageRankComputation(graph, configuration, degreeFunction, deltaCoefficient);
         }
 
-        return new PageRankAlgorithm(graph, configuration, computation, Pools.DEFAULT, tracker, progressLogger);
+        return new PageRankAlgorithm(graph, configuration, computation, mode, Pools.DEFAULT, tracker, progressLogger);
     }
 
     @Override

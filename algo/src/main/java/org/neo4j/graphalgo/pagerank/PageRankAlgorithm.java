@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
@@ -32,10 +31,15 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
 
+import static org.neo4j.gds.scaling.ScalarScaler.Variant.L2NORM;
+import static org.neo4j.gds.scaling.ScalarScaler.Variant.NONE;
+import static org.neo4j.graphalgo.pagerank.PageRankAlgorithmFactory.Mode.EIGENVECTOR;
+
 public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResult> {
 
     private final Pregel<PageRankConfig> pregelJob;
     private final Graph graph;
+    private final PageRankAlgorithmFactory.Mode mode;
     private final PageRankConfig config;
     private final ExecutorService executorService;
 
@@ -43,11 +47,13 @@ public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResu
         Graph graph,
         PageRankConfig config,
         PregelComputation<PageRankConfig> pregelComputation,
+        PageRankAlgorithmFactory.Mode mode,
         ExecutorService executorService,
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
         this.pregelJob = Pregel.create(graph, config, pregelComputation, executorService, tracker, progressLogger);
+        this.mode = mode;
         this.executorService = executorService;
         this.config = config;
         this.graph = graph;
@@ -57,7 +63,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResu
     public PageRankResult compute() {
         var pregelResult = pregelJob.run();
 
-        HugeDoubleArray scores = pregelResult.nodeValues().doubleProperties(PageRankComputation.PAGE_RANK);
+        var scores = pregelResult.nodeValues().doubleProperties(PageRankComputation.PAGE_RANK);
 
         scaleScores(scores);
 
@@ -69,12 +75,14 @@ public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResu
     }
 
     private void scaleScores(HugeDoubleArray scores) {
-        var scalerVariant = config.scaler();
-        if (scalerVariant == ScalarScaler.Variant.NONE) {
+        var variant = config.scaler();
+
+        // Eigenvector produces L2NORM-scaled results by default.
+        if (variant == NONE || (variant == L2NORM && mode == EIGENVECTOR)) {
             return;
         }
 
-        var scaler = scalerVariant.create(
+        var scaler = variant.create(
             scores.asNodeProperties(),
             graph.nodeCount(),
             config.concurrency(),
