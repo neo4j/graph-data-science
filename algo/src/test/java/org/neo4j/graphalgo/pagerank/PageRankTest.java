@@ -168,6 +168,13 @@ class PageRankTest {
 
             testLogger.getProgresses().forEach(progress -> assertEquals(graph.nodeCount(), progress.get()));
 
+            assertThat(testLogger.getMessages(TestLog.INFO))
+                // avoid asserting on the thread id
+                .extracting(removingThreadId())
+                .contains("PageRank :: Degree computation :: Start")
+                .contains("PageRank :: Degree computation 100%")
+                .contains("PageRank :: Degree computation :: Finished");
+
             LongStream.rangeClosed(1, config.maxIterations()).forEach(iteration ->
                 assertThat(testLogger.getMessages(TestLog.INFO))
                     // avoid asserting on the thread id

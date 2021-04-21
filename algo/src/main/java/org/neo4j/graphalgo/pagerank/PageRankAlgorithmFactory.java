@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStatistics;
@@ -30,6 +31,8 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.degree.DegreeCentrality;
+import org.neo4j.graphalgo.degree.ImmutableDegreeCentralityConfig;
 
 import java.util.function.LongToDoubleFunction;
 
@@ -72,22 +75,14 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
         ProgressLogger progressLogger
     ) {
         PregelComputation<PageRankConfig> computation;
-        LongToDoubleFunction degreeFunction;
         double deltaCoefficient = 1;
 
-        if (configuration.isWeighted()) {
-            var degreeCentrality = new WeightedDegreeCentrality(
-                graph,
-                configuration.concurrency(),
-                Pools.DEFAULT,
-                tracker
-            );
-            degreeCentrality.compute();
-            var weightedDegrees = degreeCentrality.degrees();
-            degreeFunction = weightedDegrees::get;
-        } else {
-            degreeFunction = graph::degree;
-        }
+        var degreeFunction = degreeFunction(
+            graph,
+            configuration,
+            tracker,
+            progressLogger
+        );
 
         if (mode == ARTICLE_RANK) {
             double avgDegree = GraphStatistics.averageDegree(graph, configuration.concurrency());
@@ -111,6 +106,36 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
         }
 
         return new PageRankAlgorithm(graph, configuration, computation, mode, Pools.DEFAULT, tracker, progressLogger);
+    }
+
+    @NotNull
+    private LongToDoubleFunction degreeFunction(
+        Graph graph,
+        CONFIG configuration,
+        AllocationTracker tracker,
+        ProgressLogger progressLogger
+    ) {
+        var rootTaskName = progressLogger.getTask();
+        progressLogger.setTask(rootTaskName + " :: Degree computation");
+
+        var config = ImmutableDegreeCentralityConfig.builder()
+            .concurrency(configuration.concurrency())
+            .relationshipWeightProperty(configuration.relationshipWeightProperty())
+            .build();
+
+        var degreeCentrality = new DegreeCentrality(
+            graph,
+            Pools.DEFAULT,
+            config,
+            progressLogger,
+            tracker
+        );
+
+        var degrees = degreeCentrality.compute();
+
+        progressLogger.setTask(rootTaskName);
+        progressLogger.reset(taskVolume(graph, configuration));
+        return degrees::get;
     }
 
     @Override
