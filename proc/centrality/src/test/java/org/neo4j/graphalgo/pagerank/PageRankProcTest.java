@@ -69,6 +69,8 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
     MemoryEstimateTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     HeapControlTest<PageRankAlgorithm, CONFIG, PageRankResult> {
 
+    static final double RESULT_ERROR = 1e-5;
+
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
            "  (a:Label1 {name: 'a'})" +

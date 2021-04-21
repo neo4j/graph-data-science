@@ -41,6 +41,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.neo4j.graphalgo.pagerank.PageRankProcTest.RESULT_ERROR;
 
 class ArticleRankProcTest extends BaseProcTest {
 
@@ -95,8 +96,8 @@ class ArticleRankProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "score", closeTo(expectedNode0, 1E-5)),
-            Map.of("nodeId", 1L, "score", closeTo(expectedNode1, 1E-5))
+            Map.of("nodeId", 0L, "score", closeTo(expectedNode0, RESULT_ERROR)),
+            Map.of("nodeId", 1L, "score", closeTo(expectedNode1, RESULT_ERROR))
         ));
     }
 
@@ -143,8 +144,8 @@ class ArticleRankProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, List.of(
-            Map.of("nodeId", 0L, "score", closeTo(0.15, 1e-5)),
-            Map.of("nodeId", 1L, "score", closeTo(0.1925, 1e-5))
+            Map.of("nodeId", 0L, "score", closeTo(0.15, RESULT_ERROR)),
+            Map.of("nodeId", 1L, "score", closeTo(0.1925, RESULT_ERROR))
         ));
     }
 
@@ -160,8 +161,8 @@ class ArticleRankProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, Map.of("sources", sourceNodes), List.of(
-            Map.of("nodeId", 0L, "score", closeTo(0.15, 1e-5)),
-            Map.of("nodeId", 1L, "score", closeTo(0.1925, 1e-5))
+            Map.of("nodeId", 0L, "score", closeTo(0.15, RESULT_ERROR)),
+            Map.of("nodeId", 1L, "score", closeTo(0.1925, RESULT_ERROR))
         ));
     }
 
