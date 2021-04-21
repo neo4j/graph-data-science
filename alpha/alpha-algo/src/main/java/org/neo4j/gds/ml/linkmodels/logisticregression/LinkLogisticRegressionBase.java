@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
@@ -31,12 +30,17 @@ import org.neo4j.gds.ml.features.FeatureConsumer;
 import org.neo4j.gds.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.api.Graph;
 
+import java.util.List;
+
 public class LinkLogisticRegressionBase {
 
     protected final LinkLogisticRegressionData modelData;
 
-    LinkLogisticRegressionBase(LinkLogisticRegressionData modelData) {
+    protected final List<String> featureProperties;
+
+    LinkLogisticRegressionBase(LinkLogisticRegressionData modelData, List<String> featureProperties) {
         this.modelData = modelData;
+        this.featureProperties = featureProperties;
     }
 
     protected Variable<Matrix> predictions(MatrixConstant features) {
@@ -77,13 +81,12 @@ public class LinkLogisticRegressionBase {
         FeatureExtraction.extract(
             nodeId,
             -1,
-            FeatureExtraction.propertyExtractors(graph, modelData.featureProperties()),
+            FeatureExtraction.propertyExtractors(graph, featureProperties),
             consumer
         );
         return features;
     }
 
-    @NotNull
     private FeatureConsumer featureConsumer(double[] features) {
         return new FeatureConsumer() {
             @Override

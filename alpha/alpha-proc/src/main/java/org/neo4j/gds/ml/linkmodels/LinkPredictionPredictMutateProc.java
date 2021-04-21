@@ -116,7 +116,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
                 );
 
                 return new LinkPredictionPredict(
-                    new LinkLogisticRegressionPredictor(model.data()),
+                    new LinkLogisticRegressionPredictor(model.data(), model.trainConfig().featureProperties()),
                     graph,
                     configuration.batchSize(),
                     configuration.concurrency(),

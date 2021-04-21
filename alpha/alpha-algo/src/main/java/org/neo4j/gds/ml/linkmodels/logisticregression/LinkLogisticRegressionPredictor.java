@@ -22,10 +22,12 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
 import org.neo4j.graphalgo.api.Graph;
 
+import java.util.List;
+
 public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase {
 
-    public LinkLogisticRegressionPredictor(LinkLogisticRegressionData modelData) {
-        super(modelData);
+    public LinkLogisticRegressionPredictor(LinkLogisticRegressionData modelData, List<String> featureProperties) {
+        super(modelData, featureProperties);
     }
 
     public LinkLogisticRegressionData modelData() {

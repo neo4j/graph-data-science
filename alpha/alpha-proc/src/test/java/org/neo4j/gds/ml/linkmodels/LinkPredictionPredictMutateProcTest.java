@@ -135,6 +135,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
     }
 
     private void addModel(String modelName, GraphSchema graphSchema) {
+        List<String> featureProperties = List.of("a");
         ModelCatalog.set(Model.of(
             getUsername(),
             modelName,
@@ -148,7 +149,6 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
                     )
                 )
                 .linkFeatureCombiner(LinkFeatureCombiners.L2)
-                .featureProperties(List.of("a"))
                 .nodeFeatureDimension(2)
                 .build(),
             ImmutableLinkPredictionTrainConfig.builder()
@@ -156,7 +156,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
                 .validationFolds(1)
                 .trainRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
                 .testRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
-                .featureProperties(List.of("a"))
+                .featureProperties(featureProperties)
                 .negativeClassWeight(1d)
                 .build()
         ));

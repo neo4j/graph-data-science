@@ -36,8 +36,6 @@ public interface LinkLogisticRegressionData {
 
     LinkFeatureCombiner linkFeatureCombiner();
 
-    List<String> featureProperties();
-
     @Value.Derived
     default int linkFeatureDimension() {
         return linkFeatureCombiner().linkFeatureDimension(nodeFeatureDimension());
@@ -59,7 +57,6 @@ public interface LinkLogisticRegressionData {
         return builder()
             .weights(weights)
             .linkFeatureCombiner(linkFeatureCombiner)
-            .featureProperties(featureProperties)
             .nodeFeatureDimension(nodeFeatureDimension)
             .build();
     }

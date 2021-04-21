@@ -79,12 +79,13 @@ class LinkLogisticRegressionPredictorTest {
     @MethodSource("inputs")
     @ParameterizedTest
     void computesProbability(String sourceNode, String targetNode, double expectedResult) {
+        List<String> featureProperties = List.of("x", "y");
         var modelData = LinkLogisticRegressionData
             .builder()
-            .from(LinkLogisticRegressionData.from(graph, List.of("x", "y"), new SumCombiner()))
+            .from(LinkLogisticRegressionData.from(graph, featureProperties, new SumCombiner()))
             .weights(new Weights<>(new Matrix(WEIGHTS, 1, WEIGHTS.length)))
             .build();
-        var predictor = new LinkLogisticRegressionPredictor(modelData);
+        var predictor = new LinkLogisticRegressionPredictor(modelData, featureProperties);
 
         var result = predictor.predictedProbability(graph, idFunction.of(sourceNode), idFunction.of(targetNode));
 

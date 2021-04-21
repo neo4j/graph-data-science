@@ -55,12 +55,13 @@ public class LinkLogisticRegressionTrain {
         );
         var objective = new LinkLogisticRegressionObjective(
             llrData,
+            config.featureProperties(),
             config.penalty(),
             graph
         );
         var training = new Training(config, progressLogger, graph.nodeCount());
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
         training.train(objective, queueSupplier, config.concurrency());
-        return new LinkLogisticRegressionPredictor(objective.modelData);
+        return new LinkLogisticRegressionPredictor(objective.modelData, config.featureProperties());
     }
 }

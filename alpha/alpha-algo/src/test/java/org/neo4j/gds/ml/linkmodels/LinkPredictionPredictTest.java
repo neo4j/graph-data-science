@@ -61,17 +61,17 @@ class LinkPredictionPredictTest {
     void shouldPredictCorrectly(int topN) {
         var numberOfFeatures = 3;
         var numberOfNodeFeatures = 2;
+        List<String> featureProperties = List.of("a", "b");
         var modelData = LinkLogisticRegressionData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 -2.0, -1.0, 3.0,
             }, 1, numberOfFeatures)))
             .linkFeatureCombiner(LinkFeatureCombiners.L2)
             .nodeFeatureDimension(numberOfNodeFeatures)
-            .featureProperties(List.of("a", "b"))
             .build();
 
         var result = new LinkPredictionPredict(
-            new LinkLogisticRegressionPredictor(modelData),
+            new LinkLogisticRegressionPredictor(modelData, featureProperties),
             graph,
             1,
             1,
