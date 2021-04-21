@@ -115,15 +115,17 @@ Most graphs have far more non-connected node pairs than connected ones (e.g. spa
 Thus, typically we have an issue with _class imbalance_.
 There are multiple strategies to account for imbalanced data.
 In our procedure, the AUCPR metric is used which is considered more suitable than the commonly used AUROC (Area Under the Receiver Operating Characteristic) metric for imbalanced data.
-One must also specify the configuration parameter `classRatio` which determines the weighting of negative example (non-connected node pairs) to connected node pairs.
-This means upweighting the false positives by this ratio when computing precision.
+For the metric to appropriately reflect both positive (connected node pairs) and negative (non-connected pairs) examples, we provide the ability to both control the ratio of sampling between the classes, and to control the relative weight of classes via `negativeClassWeight`.
+The former is configured by the configuration parameter `negativeSamplingRatio` in <<algorithms-split-relationships, splitRelationships>> when using that procedure to generate the test set.
+Tuning the `negativeClassWeight`, which is elaborated below, means weighting up or down the false positives when computing precision.
 
-Setting `classRatio` to `1.0` is consistent with _traditional_ evaluation and is recommended for comparison with other models evaluated this way.
+The recommended value for `negativeSamplingRatio` is the _true class ratio_ of the graph, in other words, not applying _undersampling_.
+However, the higher the value, the slower evaluation becomes.
+The ratio of total probability mass of negative versus positive examples in the test set is approximately `negativeSamplingRatio * negativeClassWeight`.
+Thus, both of these parameters can be adjusted in tandem to trade off evaluation accuracy with speed.
 
-The evaluation is typically done on graphs created by the `splitRelationships` procedure, which produces a set with equal number of positive and negative examples.
-To compensate for the under-sampling of negative examples, `classRatio` can be set to the _true_ class ratio.
 The true class ratio is computed as `(q - r) / q`, where `q = n(n-1)/2` is the number of possible undirected relationships, and `r` is the number of actual undirected relationships.
-Please note that the `relationshipCount` reported by the <<catalog-graph-list, catalog-graph-list>> procedure is the _directed_ count of relationships summed over all existing relationship types.
+Please note that the `relationshipCount` reported by the <<catalog-graph-list, graph list>> procedure is the _directed_ count of relationships summed over all existing relationship types.
 Thus, we recommend using Cypher to obtain `r` on the source Neo4j graph.
 For example, this query will count the number of relationships of type `T` or `R`:
 
@@ -134,11 +136,15 @@ WHERE a < b
 RETURN count(rel) AS r
 ----
 
-Using the true class ratio approximates an evaluation on a sample according to the true class distribution.
+When choosing a value for `negativeClassWeight`, two factors should be considered.
+First, the desired ratio of total probability mass of negative versus positive examples in the test set.
+Second, what the ratio of sampled negative examples to positive examples was in the test set.
+To be consistent with _traditional_ evaluation, one should choose parameters so that `negativeSamplingRatio * negativeClassWeight = 1.0`, for example by setting the values to the true class ratio and its reciprocal, or both values to `1.0`.
+
+Alternatively, one can aim for the ratio of total probability weight between the classes to be close to the true class ratio.
+That is, making sure `negativeSamplingRatio * negativeClassWeight` is close to the true class ratio.
 The reported metric (AUCPR) then better reflects the expected precision on unseen highly imbalanced data.
 With this type of evaluation one has to adjust expectations as the metric value then becomes much smaller.
-
-Note that the `classRatio` can be set arbitrarily, and will influence the reported AUCPR score.
 
 [[algorithms-ml-linkprediction-syntax]]
 == Syntax
