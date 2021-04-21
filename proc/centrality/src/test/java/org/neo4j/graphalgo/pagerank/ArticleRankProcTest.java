@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
-import org.neo4j.graphalgo.scaling.ScalarScaler;
 
 import java.util.List;
 import java.util.Locale;
