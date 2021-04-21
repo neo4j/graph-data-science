@@ -20,6 +20,7 @@
 package org.neo4j.gds.model;
 
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.ml.linkmodels.LinkPredictionTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.graphalgo.utils.StringJoining;
 
@@ -30,7 +31,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public final class ModelSupport {
     public static final Set<String> SUPPORTED_TYPES = Set.of(
         GraphSage.MODEL_TYPE,
-        NodeClassificationTrain.MODEL_TYPE
+        NodeClassificationTrain.MODEL_TYPE,
+        LinkPredictionTrain.MODEL_TYPE
     );
 
     private static void validateAlgoType(String algoType) {
@@ -48,11 +50,11 @@ public final class ModelSupport {
         SupportedModelVisitor<R, E> visitor
     ) throws E {
         validateAlgoType(algoType);
-        return visitor.graphSage();
+        return visitor.model();
     }
 
     public interface SupportedModelVisitor<R, E extends Exception> {
-        R graphSage() throws E;
+        R model() throws E;
     }
 
     private ModelSupport() {

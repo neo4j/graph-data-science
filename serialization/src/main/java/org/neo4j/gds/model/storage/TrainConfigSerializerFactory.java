@@ -22,8 +22,10 @@ package org.neo4j.gds.model.storage;
 import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.TrainConfigSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.ml.linkmodels.LinkPredictionTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.graphalgo.config.GraphSageTrainConfigSerializer;
+import org.neo4j.graphalgo.config.LinkPredictionTrainConfigSerializer;
 import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.config.NodeClassificationTrainConfigSerializer;
 import org.neo4j.graphalgo.utils.StringJoining;
@@ -41,6 +43,8 @@ public final class TrainConfigSerializerFactory {
                 return (R) new GraphSageTrainConfigSerializer();
             case NodeClassificationTrain.MODEL_TYPE:
                 return (R) new NodeClassificationTrainConfigSerializer();
+            case LinkPredictionTrain.MODEL_TYPE:
+                return (R) new LinkPredictionTrainConfigSerializer();
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Unknown model type '%s', supported model types are: %s.",

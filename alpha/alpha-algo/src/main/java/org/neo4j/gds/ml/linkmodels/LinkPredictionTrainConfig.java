@@ -85,4 +85,8 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeatureProper
             config
         );
     }
+
+    static ImmutableLinkPredictionTrainConfig.Builder builder() {
+        return ImmutableLinkPredictionTrainConfig.builder();
+    }
 }

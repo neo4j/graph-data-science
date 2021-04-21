@@ -50,8 +50,8 @@ public class ModelFileReader {
         return ModelSupport.onValidAlgoType(algoType, () -> {
             ModelSerializer<D, PD> serializer = ModelSerializerFactory.serializer(algoType);
             var parser = serializer.modelParser();
-            var graphSageModelProto = readModelData(persistenceDir, parser);
-            return serializer.deserializeModelData(graphSageModelProto);
+            var modelProto = readModelData(persistenceDir, parser);
+            return serializer.deserializeModelData(modelProto);
         });
     }
 

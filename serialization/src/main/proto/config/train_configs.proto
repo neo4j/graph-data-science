@@ -45,6 +45,19 @@ message NodeClassificationTrainConfig {
   repeated string params = 9;
 }
 
+message LinkPredictionTrainConfig {
+  AlgoBaseConfigProto algoBaseConfig = 1;
+  ModelConfigProto modelConfig = 2;
+  FeaturePropertiesConfigProto featurePropertiesConfig = 3;
+
+  RandomSeed randomSeed = 4;
+  int32 validationFolds = 5;
+  repeated string params = 6;
+  double negativeClassWeight = 7;
+  string trainRelationshipType = 8;
+  string testRelationshipType = 9;
+}
+
 message RandomSeed {
   int64 value = 1;
   bool present = 2;

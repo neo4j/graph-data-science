@@ -23,6 +23,8 @@ import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.ml.linkmodels.LinkPredictionSerializer;
+import org.neo4j.gds.ml.linkmodels.LinkPredictionTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationSerializer;
 import org.neo4j.graphalgo.utils.StringJoining;
@@ -40,6 +42,9 @@ public final class ModelSerializerFactory {
                 return (R) new GraphSageModelSerializer();
             case NodeClassificationTrain.MODEL_TYPE:
                 return (R) new NodeClassificationSerializer();
+            case LinkPredictionTrain.MODEL_TYPE:
+                return (R) new LinkPredictionSerializer();
+
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Unknown model type '%s', supported model types are: %s.",
