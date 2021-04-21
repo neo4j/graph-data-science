@@ -28,12 +28,16 @@ import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.closeTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implements
     WritePropertyConfigTest<PageRankAlgorithm, PageRankWriteConfig, PageRankResult> {
@@ -58,41 +62,46 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
         );
-        assertResult(writeProperty, expected);
+
+        assertWriteResult(writeProperty, expected);
     }
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsWeight")
     void testWeightedPageRankWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
+        var writeProperty = "pagerank";
         String query = queryBuilder
             .writeMode()
-            .addParameter("writeProperty", "pagerank")
+            .addParameter("writeProperty", writeProperty)
             .addParameter("relationshipWeightProperty", "weight")
             .yields("writeMillis", "configuration");
 
         runQueryWithRowConsumer(
             query,
             row -> {
-                assertUserInput(row, "writeProperty", "pagerank");
+                assertUserInput(row, "writeProperty", writeProperty);
                 assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
             }
         );
-        assertResult("pagerank", weightedExpected);
+
+        assertWriteResult(writeProperty, weightedExpected);
     }
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testPageRankParallelWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
+        var writeProperty = "pagerank";
         String query = queryBuilder
             .writeMode()
-            .addParameter("writeProperty", "pagerank")
+            .addParameter("writeProperty", writeProperty)
             .yields("writeMillis");
 
         runQueryWithRowConsumer(
             query,
             row -> assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set")
         );
-        assertResult("pagerank", expected);
+
+        assertWriteResult(writeProperty, expected);
     }
 
     @ParameterizedTest(name = "{1}")
@@ -187,5 +196,18 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
             return mapWrapper.withString("writeProperty", "writeProperty");
         }
         return mapWrapper;
+    }
+
+    private void assertWriteResult(String writeProperty, Map<Long, Double> expectedScores) {
+        var expected = expectedScores.entrySet().stream().sorted(Map.Entry.comparingByKey())
+            .map(entry -> Map.of("id", entry.getKey(), "score", closeTo(entry.getValue(), RESULT_ERROR)))
+            .collect(Collectors.toList());
+
+        assertCypherResult(
+            formatWithLocale("MATCH (n) WHERE n.%1$s IS NOT null RETURN id(n) AS id, n.%1$s AS score ORDER BY id",
+                writeProperty
+            ),
+            expected
+        );
     }
 }

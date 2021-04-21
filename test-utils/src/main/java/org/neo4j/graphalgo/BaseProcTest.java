@@ -46,7 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
@@ -120,22 +119,6 @@ public class BaseProcTest extends BaseTest {
         for (Long expectedKey : expectedKeys) {
             fail("missing key " + expectedKey);
         }
-    }
-
-    protected void assertResult(String scoreProperty, Map<Long, Double> expected) {
-        runInTransaction(db, tx -> {
-            for (Map.Entry<Long, Double> entry : expected.entrySet()) {
-                double score = ((Number) GraphDatabaseApiProxy.getNodeById(tx, entry.getKey())
-                    .getProperty(scoreProperty))
-                    .doubleValue();
-                assertEquals(
-                    entry.getValue(),
-                    score,
-                    1e-5,
-                    "score for " + entry.getKey()
-                );
-            }
-        });
     }
 
     protected void assertError(
