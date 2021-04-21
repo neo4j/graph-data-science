@@ -23,22 +23,27 @@ import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-final class JacksonGeneratorFileAppender implements FileAppender {
+import static org.neo4j.graphalgo.api.DefaultValue.INTEGER_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
+
+final class JacksonFileAppender implements Flushable, AutoCloseable {
 
     private final CsvGenerator csvEncoder;
     private final CsvSchema csvSchema;
 
     private int currentColumnIndex = 0;
 
-    static <PROPERTY_SCHEMA extends PropertySchema> FileAppender of(
+    static <PROPERTY_SCHEMA extends PropertySchema> JacksonFileAppender of(
         Path filePath,
         List<PROPERTY_SCHEMA> propertySchemas,
         UnaryOperator<CsvSchema.Builder> schemaEnricher
@@ -67,13 +72,13 @@ final class JacksonGeneratorFileAppender implements FileAppender {
         try {
             var csvEncoder = factory.createGenerator(filePath.toFile(), JsonEncoding.UTF8);
             csvEncoder.setSchema(csvSchema);
-            return new JacksonGeneratorFileAppender(csvEncoder, csvSchema);
+            return new JacksonFileAppender(csvEncoder, csvSchema);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    private JacksonGeneratorFileAppender(
+    private JacksonFileAppender(
         CsvGenerator csvEncoder,
         CsvSchema csvSchema
     ) {
@@ -81,38 +86,32 @@ final class JacksonGeneratorFileAppender implements FileAppender {
         this.csvSchema = csvSchema;
     }
 
-    @Override
-    public void append(long value) throws IOException {
+    void append(long value) throws IOException {
         setFieldName();
         csvEncoder.writeNumber(value);
     }
 
-    @Override
-    public void append(double value) throws IOException {
+    void append(double value) throws IOException {
         setFieldName();
         csvEncoder.writeNumber(value);
     }
 
-    @Override
-    public void append(String value) throws IOException {
+    void append(String value) throws IOException {
         setFieldName();
         csvEncoder.writeString(value);
     }
 
-    @Override
-    public void append(double[] value) throws IOException {
+    void append(double[] value) throws IOException {
         setFieldName();
         csvEncoder.writeArray(value, 0, value.length);
     }
 
-    @Override
-    public void append(long[] value) throws IOException {
+    void append(long[] value) throws IOException {
         setFieldName();
         csvEncoder.writeArray(value, 0, value.length);
     }
 
-    @Override
-    public void append(float[] value) throws IOException {
+    void append(float[] value) throws IOException {
         setFieldName();
         csvEncoder.writeStartArray(value, value.length);
         for (float v : value) {
@@ -121,20 +120,38 @@ final class JacksonGeneratorFileAppender implements FileAppender {
         csvEncoder.writeEndArray();
     }
 
-    @Override
-    public void appendEmptyField() throws IOException {
-        setFieldName();
-        csvEncoder.writeNull();
+    void appendAny(@Nullable Object value) throws IOException {
+        if (value instanceof Double) {
+            var doubleValue = (double) value;
+            if (!Double.isNaN(doubleValue)) {
+                append(doubleValue);
+            } else {
+                appendEmptyField();
+            }
+        } else if (value instanceof Long) {
+            var longValue = (long) value;
+            if (longValue != LONG_DEFAULT_FALLBACK && longValue != INTEGER_DEFAULT_FALLBACK) {
+                append(longValue);
+            } else {
+                appendEmptyField();
+            }
+        } else if (value instanceof double[]) {
+            append((double[]) value);
+        } else if (value instanceof long[]) {
+            append((long[]) value);
+        } else if (value instanceof float[]) {
+            append((float[]) value);
+        } else if (value == null) {
+            appendEmptyField();
+        }
     }
 
-    @Override
-    public void startLine() throws IOException {
+    void startLine() throws IOException {
         currentColumnIndex = 0;
         csvEncoder.writeStartObject();
     }
 
-    @Override
-    public void endLine() throws IOException {
+    void endLine() throws IOException {
         csvEncoder.writeEndObject();
     }
 
@@ -146,6 +163,11 @@ final class JacksonGeneratorFileAppender implements FileAppender {
     @Override
     public void close() throws IOException {
         csvEncoder.close();
+    }
+
+    private void appendEmptyField() throws IOException {
+        setFieldName();
+        csvEncoder.writeNull();
     }
 
     private void setFieldName() throws IOException {

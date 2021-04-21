@@ -42,7 +42,7 @@ public class CsvNodeVisitor extends NodeVisitor {
 
     private final Path fileLocation;
     private final int visitorId;
-    private final Map<String, FileAppender> csvAppenders;
+    private final Map<String, JacksonFileAppender> csvAppenders;
     private final Set<String> headerFiles;
 
     public CsvNodeVisitor(
@@ -98,7 +98,7 @@ public class CsvNodeVisitor extends NodeVisitor {
         });
     }
 
-    private FileAppender getAppender() {
+    private JacksonFileAppender getAppender() {
         var labelsString = elementIdentifier();
 
         return csvAppenders.computeIfAbsent(labelsString, (ignore) -> {
@@ -147,10 +147,10 @@ public class CsvNodeVisitor extends NodeVisitor {
         }
     }
 
-    private FileAppender fileAppender(Path filePath, UnaryOperator<CsvSchema.Builder> builderUnaryOperator) {
+    private JacksonFileAppender fileAppender(Path filePath, UnaryOperator<CsvSchema.Builder> builderUnaryOperator) {
         var propertySchema = getPropertySchema();
         propertySchema.sort(Comparator.comparing(PropertySchema::key));
-        return JacksonGeneratorFileAppender.of(
+        return JacksonFileAppender.of(
             filePath,
             propertySchema,
             builderUnaryOperator

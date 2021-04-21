@@ -42,7 +42,7 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
     private final Path fileLocation;
     private final Set<String> headerFiles;
     private final int visitorId;
-    private final Map<String, FileAppender> csvAppenders;
+    private final Map<String, JacksonFileAppender> csvAppenders;
 
     public CsvRelationshipVisitor(
         Path fileLocation,
@@ -100,7 +100,7 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
         });
     }
 
-    private FileAppender getAppender() {
+    private JacksonFileAppender getAppender() {
         return csvAppenders.computeIfAbsent(relationshipType(), (ignore) -> {
             var fileName = formatWithLocale("relationships_%s", relationshipType());
             var headerFileName = formatWithLocale("%s_header.csv", fileName);
@@ -146,10 +146,10 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
         }
     }
 
-    private FileAppender fileAppender(Path filePath) {
+    private JacksonFileAppender fileAppender(Path filePath) {
         var propertySchema = getPropertySchema();
         propertySchema.sort(Comparator.comparing(PropertySchema::key));
-        return JacksonGeneratorFileAppender.of(
+        return JacksonFileAppender.of(
             filePath,
             propertySchema,
             csvSchemaBuilder -> csvSchemaBuilder
