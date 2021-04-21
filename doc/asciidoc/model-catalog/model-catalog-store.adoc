@@ -44,6 +44,7 @@ YIELD
 
 * <<algorithms-embeddings-graph-sage,GraphSAGE model>>
 * <<algorithms-ml-nodeclassification,Node Classification model>>
+* <<algorithms-ml-linkprediction,Link Prediction model>>
 
 [.alpha]
 [[catalog-model-load]]
