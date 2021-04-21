@@ -204,7 +204,7 @@ class LinkPredictionCoraIntegrationTest {
             "  modelName: $modelName," +
             "  featureProperties: [$embeddingFeature], " +
             "  validationFolds: 5, " +
-            "  classRatio: 673.6," + // (2707 * 2706 - 10858) / 10858
+            "  negativeClassWeight: 673.6," + // (2707 * 2706 - 10858) / 10858
             "  randomSeed: 2," +
             "  concurrency: 1," +
             "  params: [" +

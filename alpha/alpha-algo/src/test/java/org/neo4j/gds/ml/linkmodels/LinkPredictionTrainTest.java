@@ -108,10 +108,10 @@ class LinkPredictionTrainTest {
         var testGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
 
         var nodeCount = 15;
-        var truePositives = 16;
+        var totalPositives = 16;
         double maxNumberOfRelationships = nodeCount * (nodeCount - 1) / 2d;
-        double trueNegatives = maxNumberOfRelationships - truePositives;
-        var classRatio = trueNegatives / truePositives;
+        double totalNegatives = maxNumberOfRelationships - totalPositives;
+        var classRatio = totalNegatives / totalPositives;
 
         var expectedWinner = Map.<String, Object>of("maxEpochs", 1000);
         var config = ImmutableLinkPredictionTrainConfig.builder()
@@ -121,7 +121,7 @@ class LinkPredictionTrainTest {
             .modelName("model")
             .validationFolds(3)
             .randomSeed(-1L)
-            .classRatio(classRatio)
+            .negativeClassWeight(classRatio)
             .params(List.of(
                 Map.of("maxEpochs", 0),
                 expectedWinner
@@ -152,10 +152,10 @@ class LinkPredictionTrainTest {
         var testGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
 
         var nodeCount = 15;
-        var truePositives = 16;
+        var totalPositives = 16;
         double maxNumberOfRelationships = nodeCount * (nodeCount - 1) / 2d;
-        double trueNegatives = maxNumberOfRelationships - truePositives;
-        var classRatio = trueNegatives / truePositives;
+        double totalNegatives = maxNumberOfRelationships - totalPositives;
+        var classRatio = totalNegatives / totalPositives;
 
         var expectedWinner = Map.<String, Object>of("maxEpochs", 1000);
         var config = ImmutableLinkPredictionTrainConfig.builder()
@@ -165,7 +165,7 @@ class LinkPredictionTrainTest {
             .modelName("model")
             .validationFolds(3)
             .randomSeed(-1L)
-            .classRatio(classRatio)
+            .negativeClassWeight(classRatio)
             .params(List.of(
                 Map.of("maxEpochs", 0),
                 expectedWinner

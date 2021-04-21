@@ -91,7 +91,7 @@ class LinkMetricTest {
     }
 
     @Test
-    void shouldComputeAUCPRWithClassratio() {
+    void shouldComputeAUCPRWithNegativeClassWeight() {
         var signedProbabilities = SignedProbabilities.create(4);
         signedProbabilities.add(4);
         signedProbabilities.add(-3);

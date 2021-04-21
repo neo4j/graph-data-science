@@ -409,7 +409,7 @@ CALL gds.alpha.ml.linkPrediction.train('myGraph', {
   modelName: 'lp-numberOfPosts-model',
   featureProperties: ['numberOfPosts'],
   validationFolds: 5,
-  classRatio: 1.33,
+  negativeClassWeight: 1.33,
   randomSeed: 2,
   params: [
     {penalty: 0.5, maxEpochs: 1000},

@@ -157,7 +157,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
                 .trainRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
                 .testRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
                 .featureProperties(List.of("a"))
-                .classRatio(1d)
+                .negativeClassWeight(1d)
                 .build()
         ));
     }

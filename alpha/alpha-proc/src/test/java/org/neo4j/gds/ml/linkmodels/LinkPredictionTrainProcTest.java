@@ -142,7 +142,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "  validationFolds: 2, " +
             "  modelName: 'model', " +
             "  featureProperties: ['z'], " +
-            "  classRatio: 5.5625," +
+            "  negativeClassWeight: 5.5625," +
             "  randomSeed: -1, " +
             "  params: [{penalty: 0.5, maxEpochs: 1}, {penalty: 2.0, maxEpochs: 100}] " +
             "})";
@@ -206,7 +206,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "CALL gds.alpha.ml.linkPrediction.train('g2', { " +
             "  trainRelationshipType: 'TRAIN', " +
             "  testRelationshipType: 'TEST', " +
-            "  classRatio: 5.5625," +
+            "  negativeClassWeight: 5.5625," +
             "  validationFolds: 2, " +
             "  modelName: 'model', " +
             "  featureProperties: ['z'], " +
@@ -224,7 +224,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "CALL gds.alpha.ml.linkPrediction.train('g', { " +
             "  trainRelationshipType: 'NOPE', " +
             "  testRelationshipType: 'NIX', " +
-            "  classRatio: 5.5625," +
+            "  negativeClassWeight: 5.5625," +
             "  validationFolds: 2, " +
             "  modelName: 'model', " +
             "  featureProperties: ['z'], " +
@@ -242,7 +242,7 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "CALL gds.alpha.ml.linkPrediction.train('g', { " +
             "  trainRelationshipType: 'TRAIN', " +
             "  testRelationshipType: 'TEST', " +
-            "  classRatio: 5.5625," +
+            "  negativeClassWeight: 5.5625," +
             "  validationFolds: 2, " +
             "  modelName: 'model', " +
             "  featureProperties: ['z'], " +
