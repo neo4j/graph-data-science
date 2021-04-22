@@ -29,6 +29,10 @@ import java.util.List;
 public interface Updater {
     void update(ComputationContext ctx);
 
+    static long sizeInBytesOfDefaultUpdater(int rows, int cols, int numberOfWeights) {
+        return AdamOptimizer.sizeInBytes(rows, cols, numberOfWeights);
+    }
+
     static Updater defaultUpdater(List<Weights<? extends Tensor<?>>> weights) {
         AdamOptimizer adamOptimizer = new AdamOptimizer(weights);
         return adamOptimizer::update;

@@ -84,7 +84,15 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             .add("stats map train", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
             .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
             // TODO: Do we need to estimate the ModelStats and ModelStatsBuilder thingies?
-            .add("training", NodeLogisticRegressionTrain.memoryEstimation(fudgedClassCount, fudgedFeatureCount, TrainingConfig.DEFAULT_BATCH_SIZE))
+            .add(
+                "training",
+                NodeLogisticRegressionTrain.memoryEstimation(
+                    fudgedClassCount,
+                    fudgedFeatureCount,
+                    TrainingConfig.DEFAULT_BATCH_SIZE,
+                    TrainingConfig.DEFAULT_SHARED_UPDATER
+                )
+            )
             .build();
     }
 

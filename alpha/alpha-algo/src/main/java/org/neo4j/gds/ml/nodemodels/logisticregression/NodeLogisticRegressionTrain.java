@@ -30,6 +30,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.function.Supplier;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+
 public class NodeLogisticRegressionTrain {
 
     private final Graph graph;
@@ -37,10 +39,19 @@ public class NodeLogisticRegressionTrain {
     private final NodeLogisticRegressionTrainConfig config;
     private final ProgressLogger progressLogger;
 
-    public static MemoryEstimation memoryEstimation(int numberOfClasses, int numberOfFeatures, int batchSize) {
+    public static MemoryEstimation memoryEstimation(
+        int numberOfClasses,
+        int numberOfFeatures,
+        int batchSize,
+        boolean sharedUpdater
+    ) {
+        var CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA = 1;
         return MemoryEstimations.builder(NodeLogisticRegressionTrain.class)
             .add("model data", NodeLogisticRegressionData.memoryEstimation(numberOfClasses, numberOfFeatures))
-            .add("training", Training.memoryEstimation(batchSize, numberOfFeatures))
+            .fixed("predictor", sizeOfInstance(NodeLogisticRegressionPredictor.class))
+            // TODO: the objective is not trivial, need to drill down
+            .fixed("objective", sizeOfInstance(NodeLogisticRegressionObjective.class))
+            .add("training", Training.memoryEstimation(batchSize, numberOfFeatures, numberOfClasses, sharedUpdater, CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA))
             .build();
     }
 

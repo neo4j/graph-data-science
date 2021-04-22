@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage.ddl4j.tensor;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,13 +89,8 @@ class MatrixTest {
 
     @Test
     void shouldEstimateMemory() {
-        var dimensions = GraphDimensions.of(0);
-        var _05_10 = Matrix.memoryEstimation(5, 10)
-            .estimate(dimensions, 1)
-            .memoryUsage();
-        var _10_05 = Matrix.memoryEstimation(10, 5)
-            .estimate(dimensions, 1)
-            .memoryUsage();
+        var _05_10 = Matrix.sizeInBytes(5, 10);
+        var _10_05 = Matrix.sizeInBytes(10, 5);
         assertThat(_05_10).isEqualTo(_10_05);
     }
 }

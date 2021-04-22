@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
@@ -43,25 +44,22 @@ public class NodeLogisticRegressionPredictor implements Predictor<Matrix, NodeLo
     private final NodeLogisticRegressionData modelData;
     private final List<String> featureProperties;
 
-    /**
-     * Memory usage for this guy is initially zero - it just holds fields
-     *
-     * It then gets called, `predict(batch)` stylee, where it constructs some small (batch-size) structures that will cost memory
-     *
-     * That memory needs to be accounted for by calling code I reckon
-     */
-    public static long sizeOfPredictionsVariableInBytes(int batchSize, int numberOfFeatures) {
+    public static long sizeOfPredictionsVariableInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
+        var dimensionsOfFirstMatrix = Tuples.pair(batchSize, numberOfFeatures);
+        var dimensionsOfSecondMatrix = Tuples.pair(numberOfClasses, numberOfFeatures);
+        var resultRows = dimensionsOfFirstMatrix.getOne();
+        var resultCols = dimensionsOfSecondMatrix.getOne(); // transposed second operand means we get the rows
         return
             sizeOfFeatureExtractorsInBytes(numberOfFeatures) +
             MatrixConstant.sizeInBytes(batchSize, numberOfFeatures) +
-            MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(batchSize, weights); // this is where we got to
-
-//            .add("softmax", Softmax.memoryEstimation())
+            MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(dimensionsOfFirstMatrix, dimensionsOfSecondMatrix) +
+            Softmax.sizeInBytes(resultRows, resultCols);
     }
 
     private static long sizeOfFeatureExtractorsInBytes(int numberOfFeatures) {
         return FeatureExtraction.memoryUsageInBytes(numberOfFeatures) + sizeOfInstance(BiasFeature.class);
     }
+
 
     public NodeLogisticRegressionPredictor(NodeLogisticRegressionData modelData, List<String> featureProperties) {
         this.modelData = modelData;

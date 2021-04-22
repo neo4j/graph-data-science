@@ -41,10 +41,10 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
     private final double penalty;
     private final NodeLogisticRegressionPredictor predictor;
 
-    public static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures) {
+    public static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
         return
             costOfMakeTargets() +
-            NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, numberOfFeatures) +
+            NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, numberOfFeatures, numberOfClasses) +
             moreThings();
     }
 

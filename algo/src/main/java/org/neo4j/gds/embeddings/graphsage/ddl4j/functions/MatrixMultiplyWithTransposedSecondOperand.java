@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
+import org.eclipse.collections.api.tuple.Pair;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.AbstractVariable;
@@ -35,6 +36,12 @@ import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<Matrix> {
+
+    public static long sizeInBytes(Pair<Integer, Integer> dimensionsOfFirstMatrix, Pair<Integer, Integer> dimensionsOfSecondMatrix) {
+        var resultRows = dimensionsOfFirstMatrix.getOne();
+        var resultCols = dimensionsOfSecondMatrix.getOne(); // transposed second operand means we get the rows
+        return Matrix.sizeInBytes(resultRows, resultCols);
+    }
 
     private final Variable<Matrix> A;
     private final Variable<Matrix> B;

@@ -34,10 +34,10 @@ import java.util.TreeSet;
 @ValueClass
 public interface NodeLogisticRegressionData {
 
-    static MemoryEstimation memoryEstimation(int fudgedNumberOfClasses, int fudgedNumberOfFeatures) {
+    static MemoryEstimation memoryEstimation(int numberOfClasses, int numberOfFeatures) {
         return MemoryEstimations.builder(NodeLogisticRegressionData.class)
-            .add("classIdMap", LocalIdMap.memoryEstimation(fudgedNumberOfClasses))
-            .add("weights", Weights.memoryEstimationOfMatrix(fudgedNumberOfClasses, fudgedNumberOfFeatures))
+            .add("classIdMap", LocalIdMap.memoryEstimation(numberOfClasses))
+            .fixed("weights", Weights.sizeInBytes(numberOfClasses, numberOfFeatures))
             .build();
     }
 

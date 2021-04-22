@@ -45,11 +45,13 @@ public class NodeLogisticRegressionPredictorFailTest extends FeatureExtractionBa
     }
 
     @Test
-    public void shouldEstimateMemoryUsage() throws Exception {
-        var memoryUsageInBytes = NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(100, 10);
+    public void shouldEstimateMemoryUsage() {
+        var memoryUsageInBytes = NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(100, 10, 10);
 
         int memoryUsageOfFeatureExtractors = 240; // 24 bytes * number of features
         int memoryUsageOfFeatureMatrix = 8032; // 8 bytes * batch size * number of features + 32
-        assertThat(memoryUsageInBytes).isEqualTo(memoryUsageOfFeatureExtractors + memoryUsageOfFeatureMatrix);
+        int memoryUsageOfMatrixMultiplication = 8000; // 8 bytes per double * batchSize * numberOfClasses
+        int memoryUsageOfSoftMax = memoryUsageOfMatrixMultiplication; // computed over the matrix multiplication, it requires an equally-sized matrix
+        assertThat(memoryUsageInBytes).isEqualTo(memoryUsageOfFeatureExtractors + memoryUsageOfFeatureMatrix + memoryUsageOfFeatureMatrix + memoryUsageOfSoftMax);
     }
 }

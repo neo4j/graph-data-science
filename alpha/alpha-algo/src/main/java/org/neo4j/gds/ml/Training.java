@@ -46,23 +46,41 @@ public class Training {
         this.trainSize = trainSize;
     }
 
-    public static MemoryEstimation memoryEstimation(int batchSize, int numberOfFeatures) {
+    public static MemoryEstimation memoryEstimation(
+        int batchSize,
+        int numberOfFeatures,
+        int numberOfClasses,
+        boolean sharedUpdater,
+        int numberOfWeights
+    ) {
         return MemoryEstimations.builder(Training.class)
-            .add("updater", estimateUpdater())
-            .add("train epoch", estimateTrainEpoch(batchSize, numberOfFeatures))
+            .add("updater", estimateUpdater(sharedUpdater, numberOfClasses, numberOfFeatures, numberOfWeights))
+            .add("train epoch", estimateTrainEpoch(batchSize, numberOfFeatures, numberOfClasses))
             .add("evaluate loss", estimateEvaluateLoss())
             .build();
     }
 
-    private static MemoryEstimation estimateUpdater() {
-        throw new UnsupportedOperationException("TODO");
+    private static MemoryEstimation estimateUpdater(
+        boolean sharedUpdater,
+        int numberOfClasses,
+        int numberOfFeatures,
+        int numberOfWeights
+    ) {
+        var builder = MemoryEstimations.builder();
+        var bytes = Updater.sizeInBytesOfDefaultUpdater(numberOfClasses, numberOfFeatures, numberOfWeights);
+        if (sharedUpdater) {
+            builder.fixed("", bytes);
+        } else {
+            builder.perThread("", bytes);
+        }
+        return builder.build();
     }
 
-    private static MemoryEstimation estimateTrainEpoch(int batchSize, int numberOfFeatures) {
+    private static MemoryEstimation estimateTrainEpoch(int batchSize, int numberOfFeatures, int numberOfClasses) {
+        var memoryUsageOfLossComputation = ObjectiveUpdateConsumer.sizeOfBatchInBytes(batchSize, numberOfFeatures, numberOfClasses);
         return MemoryEstimations.builder()
             .perThread("consumer", sizeOfInstance(ObjectiveUpdateConsumer.class))
-            .perThread("calculating loss", ObjectiveUpdateConsumer.sizeOfBatchInBytes(batchSize, numberOfFeatures))
-
+            .perThread("calculating loss", memoryUsageOfLossComputation)
             /*
             loss
             ctx
@@ -74,7 +92,9 @@ public class Training {
     }
 
     private static MemoryEstimation estimateEvaluateLoss() {
-        throw new UnsupportedOperationException("TODO");
+        return MemoryEstimations.builder()
+            .perThread("", LossEvalConsumer.memoryEstimation())
+            .build();
     }
 
     public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
@@ -148,8 +168,8 @@ public class Training {
             this.trainSize = trainSize;
         }
 
-        static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures) {
-            return NodeLogisticRegressionObjective.sizeOfBatchInBytes(batchSize, numberOfFeatures); // yeah yeah polymorphism :facepalm:
+        static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
+            return NodeLogisticRegressionObjective.sizeOfBatchInBytes(batchSize, numberOfFeatures, numberOfClasses); // yeah yeah polymorphism :facepalm:
         }
 
         @Override
@@ -171,6 +191,12 @@ public class Training {
             this.objective = objective;
             this.totalLoss = lossAdder;
             this.trainSize = trainSize;
+        }
+
+        static MemoryEstimation memoryEstimation() {
+            return MemoryEstimations.builder(LossEvalConsumer.class)
+                .add("computation context", ComputationContext.memoryEstimation())
+                .build();
         }
 
         @Override

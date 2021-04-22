@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
+
 // Division, squaring and square-rooting is done elementwise.
 public class AdamOptimizer {
 
@@ -50,6 +52,13 @@ public class AdamOptimizer {
     private List<? extends Tensor<?>> velocityTerms;
 
     private int iteration = 0;
+
+    public static long sizeInBytes(int rows, int cols, int numberOfWeights) {
+        var termSize = Weights.sizeInBytes(rows, cols) * numberOfWeights;
+        return sizeOfInstance(AdamOptimizer.class) +
+                2 * termSize + // fields
+                4 * termSize; // working memory
+    }
 
     public AdamOptimizer(List<Weights<? extends Tensor<?>>> variables) {
         this(variables, DEFAULT_ALPHA);
