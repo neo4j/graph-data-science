@@ -30,12 +30,22 @@ See <<algorithms-scale-properties-examples-list, the list example>> for more det
 
 In the following equations, `p` denotes the vector containing all property values for a single property across all nodes in the graph.
 
+
 [[algorithms-scale-properties-minmax]]
 === Min-max scaler
 
 Scales all property values into the range `[0, 1]` where the minimum value(s) get the scaled value `0` and the maximum value(s) get the scaled value `1`, according to this formula:
 
 image::equations/scale-properties/minmax.svg[scaled p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
+
+
+[[algorithms-scale-properties-max]]
+=== Max scaler
+
+Scales all property values into the range `[0, 1]` for positive values where the maximum value(s) get the scaled value `1`, according to this formula:
+
+image::equations/scale-properties/max.svg[scaled p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
+
 
 [[algorithms-scale-properties-mean]]
 === Mean scaler
@@ -44,6 +54,8 @@ Scales all property values into the range `[-1, 1]` where the average value(s) g
 
 image::equations/scale-properties/mean.svg[scaled p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
 
+
+[[algorithms-scale-properties-log]]
 === Log scaler
 
 Transforms all property values using the natural logarithm.
@@ -51,13 +63,23 @@ Transforms all property values using the natural logarithm.
 image::equations/scale-properties/log.svg[scaled p equals natural logarithm of p,align="center"]
 
 
+[[algorithms-scale-properties-standard]]
 === Standard Score
 
 Scales all property values using the https://en.wikipedia.org/wiki/Standard_score[Standard Score (Wikipedia)].
 
-image::equations/scale-properties/standardScore.svg[scaled p equals  p minus average of p divided by standard deviation of p,align="center"]
+image::equations/scale-properties/standardScore.svg[scaled p equals p minus average of p divided by standard deviation of p,align="center"]
 
 
+[[algorithms-scale-properties-l1norm]]
+=== L1 Norm
+
+Scales all property values into the range `[0.0, 1.0]`.
+
+image::equations/scale-properties/l1norm.svg[scaled p equals p divided by l1 norm of p ,align="center"]
+
+
+[[algorithms-scale-properties-l2norm]]
 === L2 Norm
 
 Scales all property values using the https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[L2 Norm (Wikipedia)].
