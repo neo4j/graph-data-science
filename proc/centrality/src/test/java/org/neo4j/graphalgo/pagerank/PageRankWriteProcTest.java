@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.pagerank;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
@@ -36,8 +35,6 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.isA;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -91,45 +88,6 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
-    void testPageRankWithToleranceParam(ModeBuildStage queryBuilder, String testCaseName) {
-        GdsCypher.ParametersBuildStage builder = queryBuilder
-            .writeMode()
-            .addParameter("writeProperty", "writeProp");
-        String query = builder
-            .addParameter("tolerance", 0.0001)
-            .yields("ranIterations");
-
-        runQueryWithRowConsumer(query,
-            row -> assertEquals(20L, (long) row.getNumber("ranIterations"))
-        );
-
-        query = builder
-            .addParameter("tolerance", 100.0)
-            .yields("ranIterations");
-
-        runQueryWithRowConsumer(query,
-            row -> assertEquals(1L, (long) row.getNumber("ranIterations"))
-        );
-
-        query = builder
-            .addParameter("tolerance", 0.20010237991809848)
-            .yields("ranIterations");
-
-        runQueryWithRowConsumer(query,
-            row -> assertEquals(4L, (long) row.getNumber("ranIterations"))
-        );
-
-        query = builder
-            .addParameter("tolerance", 0.20010237991809843)
-            .yields("ranIterations");
-
-        runQueryWithRowConsumer(query,
-            row -> assertEquals(4L, (long) row.getNumber("ranIterations"))
-        );
-    }
-
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testWriteYields(ModeBuildStage queryBuilder, String testCaseName) {
         var writeProp = "writeProp";
         String query = queryBuilder
@@ -149,23 +107,6 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
             "centralityDistribution", isA(Map.class),
             "configuration", allOf(isA(Map.class), hasEntry("writeProperty", writeProp))
         )));
-    }
-
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
-    void testWriteYieldCentralityDistribution(ModeBuildStage queryBuilder, String testCaseName) {
-        String query = queryBuilder
-            .writeMode()
-            .addParameter("writeProperty", "writeProp")
-            .yields("centralityDistribution", "postProcessingMillis");
-
-        runQueryWithRowConsumer(
-            query,
-            row -> {
-                assertNotNull(row.get("centralityDistribution"));
-                assertTrue(row.getNumber("postProcessingMillis").intValue() >= 0);
-            }
-        );
     }
 
     @Override
