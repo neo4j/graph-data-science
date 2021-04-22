@@ -21,16 +21,16 @@ package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.graphalgo.api.Relationships;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class EdgeSplitterBaseTest {
+class EdgeSplitterBaseTest {
     void assertRelExists(Relationships.Topology topology, long source, long... targets) {
         var cursor = topology.list().decompressingCursor(
             topology.offsets().get(source),
             topology.degrees().degree(source)
         );
         for (long target : targets) {
-            assertEquals(target, cursor.nextVLong());
+            assertThat(cursor.nextVLong()).isEqualTo(target);
         }
     }
 
@@ -40,7 +40,7 @@ public class EdgeSplitterBaseTest {
             properties.degrees().degree(source)
         );
         for (double property : values) {
-            assertEquals(property, Double.longBitsToDouble(cursor.nextLong()));
+            assertThat(Double.longBitsToDouble(cursor.nextLong())).isEqualTo(property);
         }
     }
 }
