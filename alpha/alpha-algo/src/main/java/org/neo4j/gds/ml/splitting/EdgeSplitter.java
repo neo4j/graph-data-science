@@ -46,7 +46,7 @@ public abstract class EdgeSplitter {
     private final ThreadLocal<Random> rng;
     final double negativeSamplingRatio;
 
-    public EdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio) {
+    EdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio) {
         this.rng = ThreadLocal.withInitial(() -> maybeSeed.map(Random::new).orElseGet(Random::new));
         this.negativeSamplingRatio = negativeSamplingRatio;
     }
@@ -66,7 +66,7 @@ public abstract class EdgeSplitter {
         return rng.get().nextDouble() < probability;
     }
 
-    protected long randomNodeId(Graph graph) {
+    private long randomNodeId(Graph graph) {
         return Math.abs(rng.get().nextLong() % graph.nodeCount());
     }
 
@@ -77,11 +77,11 @@ public abstract class EdgeSplitter {
         return Math.min(maxSamples, wholeSamples + extraSample);
     }
 
-    protected RelationshipsBuilder newRelationshipsBuilderWithProp(Graph graph, Orientation orientation) {
+    RelationshipsBuilder newRelationshipsBuilderWithProp(Graph graph, Orientation orientation) {
         return newRelationshipsBuilder(graph, orientation, true);
     }
 
-    protected RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation) {
+    RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation) {
         return newRelationshipsBuilder(graph, orientation, false);
     }
 
@@ -100,7 +100,7 @@ public abstract class EdgeSplitter {
             .build();
     }
 
-    protected void negativeSampling(
+    void negativeSampling(
         Graph graph,
         Graph masterGraph,
         RelationshipsBuilder selectedRelsBuilder,
