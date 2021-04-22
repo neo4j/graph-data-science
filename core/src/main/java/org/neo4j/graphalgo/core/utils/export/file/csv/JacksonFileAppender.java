@@ -87,13 +87,22 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
     }
 
     void append(long value) throws IOException {
-        setFieldName();
-        csvEncoder.writeNumber(value);
+        if (value != LONG_DEFAULT_FALLBACK && value != INTEGER_DEFAULT_FALLBACK) {
+            setFieldName();
+            csvEncoder.writeNumber(value);
+        } else {
+            appendEmptyField();
+        }
+
     }
 
     void append(double value) throws IOException {
-        setFieldName();
-        csvEncoder.writeNumber(value);
+        if (!Double.isNaN(value)) {
+            setFieldName();
+            csvEncoder.writeNumber(value);
+        } else {
+            appendEmptyField();
+        }
     }
 
     void append(String value) throws IOException {
@@ -122,19 +131,9 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
 
     void appendAny(@Nullable Object value) throws IOException {
         if (value instanceof Double) {
-            var doubleValue = (double) value;
-            if (!Double.isNaN(doubleValue)) {
-                append(doubleValue);
-            } else {
-                appendEmptyField();
-            }
+            append((double) value);
         } else if (value instanceof Long) {
-            var longValue = (long) value;
-            if (longValue != LONG_DEFAULT_FALLBACK && longValue != INTEGER_DEFAULT_FALLBACK) {
-                append(longValue);
-            } else {
-                appendEmptyField();
-            }
+            append((long) value);
         } else if (value instanceof double[]) {
             append((double[]) value);
         } else if (value instanceof long[]) {
