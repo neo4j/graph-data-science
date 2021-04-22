@@ -163,8 +163,8 @@ class EigenvectorProcTest extends BaseProcTest {
             .yields();
 
         assertCypherResult(query, Map.of("sources", sourceNodes), List.of(
-            Map.of("nodeId", 0L, "score", closeTo(0.15, RESULT_ERROR)),
-            Map.of("nodeId", 1L, "score", closeTo(0.2775, RESULT_ERROR))
+            Map.of("nodeId", 0L, "score", closeTo(0.04371, RESULT_ERROR)),
+            Map.of("nodeId", 1L, "score", closeTo(0.99904, RESULT_ERROR))
         ));
     }
 
