@@ -64,8 +64,13 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
     @Override
     public boolean labels(String[] labels) {
         Arrays.sort(labels);
-        currentLabels = Arrays.asList(labels);
-        labelIdentifier = String.join("_", labels);
+        var labelCandidates = Arrays.asList(labels);
+
+        if(!currentLabels.equals(labelCandidates)) {
+            currentLabels = labelCandidates;
+            labelIdentifier = String.join("_", labels);
+        }
+
         return true;
     }
 
