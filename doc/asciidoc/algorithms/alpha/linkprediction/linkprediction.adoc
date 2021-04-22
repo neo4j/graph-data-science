@@ -117,7 +117,7 @@ There are multiple strategies to account for imbalanced data.
 In our procedure, the AUCPR metric is used which is considered more suitable than the commonly used AUROC (Area Under the Receiver Operating Characteristic) metric for imbalanced data.
 For the metric to appropriately reflect both positive (connected node pairs) and negative (non-connected pairs) examples, we provide the ability to both control the ratio of sampling between the classes, and to control the relative weight of classes via `negativeClassWeight`.
 The former is configured by the configuration parameter `negativeSamplingRatio` in <<algorithms-split-relationships, splitRelationships>> when using that procedure to generate the test set.
-Tuning the `negativeClassWeight`, which is elaborated below, means weighting up or down the false positives when computing precision.
+Tuning the `negativeClassWeight`, which is explained below, means weighting up or down the false positives when computing precision.
 
 The recommended value for `negativeSamplingRatio` is the _true class ratio_ of the graph, in other words, not applying _undersampling_.
 However, the higher the value, the slower evaluation becomes.
