@@ -19,17 +19,21 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -530,6 +534,26 @@ class PageRankTest {
             expectedMinBytes,
             expectedMaxBytes
         );
+    }
+
+    @ParameterizedTest
+    @EnumSource(Mode.class)
+    void parallelExecution(Mode mode) {
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(40_000)
+            .averageDegree(5)
+            .relationshipDistribution(RelationshipDistribution.RANDOM)
+            .build()
+            .generate();
+
+        var configBuilder = ImmutablePageRankConfig.builder();
+
+        var singleThreaded = runOnPregel(graph, configBuilder.concurrency(1).build(), mode).scores();
+        var multiThreaded = runOnPregel(graph, configBuilder.concurrency(4).build(), mode).scores();
+
+        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            assertThat(singleThreaded.get(nodeId)).isEqualTo(multiThreaded.get(nodeId), Offset.offset(1e-5));
+        }
     }
 
     @Test
