@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
@@ -28,11 +27,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class DirectedEdgeSplitter extends EdgeSplitter {
-
-    @TestOnly
-    public DirectedEdgeSplitter(long seed, double negativeSamplingRatio) {
-        this(Optional.of(seed), negativeSamplingRatio);
-    }
 
     public DirectedEdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio) {
         super(maybeSeed, negativeSamplingRatio);

@@ -57,7 +57,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void split() {
-        var splitter = new UndirectedEdgeSplitter(1337L, 1.0);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 1.0);
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
@@ -88,7 +88,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void splitWithNegativeRatio() {
-        var splitter = new UndirectedEdgeSplitter(1337L, 2.0);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 2.0);
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
@@ -132,7 +132,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitter = new UndirectedEdgeSplitter(42L, 1);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1);
         var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
@@ -170,8 +170,8 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitResult1 = new UndirectedEdgeSplitter(12L, 1).split(graph, 0.5);
-        var splitResult2 = new UndirectedEdgeSplitter(12L, 1).split(graph, 0.5);
+        var splitResult1 = new UndirectedEdgeSplitter(Optional.of(12L), 1).split(graph, 0.5);
+        var splitResult2 = new UndirectedEdgeSplitter(Optional.of(12L), 1).split(graph, 0.5);
         var remainingAreEqual = relationshipsAreEqual(
             graph,
             splitResult1.remainingRels(),
@@ -220,7 +220,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void negativeEdgeSampling() {
-        var splitter = new UndirectedEdgeSplitter(42L, 1.0);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1.0);
 
         var sum = 0;
         for (int i = 0; i < 100; i++) {
@@ -233,7 +233,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void samplesWithinBounds() {
-        var splitter = new UndirectedEdgeSplitter(42L, 1.0);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1.0);
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));

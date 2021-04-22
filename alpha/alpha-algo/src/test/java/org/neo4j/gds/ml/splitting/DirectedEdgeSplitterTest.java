@@ -34,6 +34,8 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -52,7 +54,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void split() {
-        var splitter = new DirectedEdgeSplitter(-1L, 1.0);
+        var splitter = new DirectedEdgeSplitter(Optional.of(-1L), 1.0);
 
         // select 40%, which is 2 rels in this graph
         var result = splitter.split(graph, .4);
@@ -87,7 +89,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void splitWithNegativeRatio() {
-        var splitter = new DirectedEdgeSplitter(-1L, 2.0);
+        var splitter = new DirectedEdgeSplitter(Optional.of(-1L), 2.0);
 
         // select 40%, which is 2 rels in this graph
         var result = splitter.split(graph, .4);
@@ -136,7 +138,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitter = new DirectedEdgeSplitter(42L, 1.0);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0);
         var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
@@ -162,7 +164,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void negativeEdgeSampling() {
-        var splitter = new DirectedEdgeSplitter(42L, 1.0);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0);
 
         var sum = 0;
         for (int i = 0; i < 100; i++) {
@@ -175,7 +177,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void samplesWithinBounds() {
-        var splitter = new DirectedEdgeSplitter(42L, 1.0);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0);
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));

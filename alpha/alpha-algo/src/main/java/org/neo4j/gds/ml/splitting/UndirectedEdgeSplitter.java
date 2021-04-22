@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
@@ -37,11 +36,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * The holdout fraction is denominated in fraction of undirected edges.
  */
 public class UndirectedEdgeSplitter extends EdgeSplitter {
-
-    @TestOnly
-    public UndirectedEdgeSplitter(long seed, double negativeSamplingRatio) {
-        super(Optional.of(seed), negativeSamplingRatio);
-    }
 
     public UndirectedEdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio) {
         super(maybeSeed, negativeSamplingRatio);
