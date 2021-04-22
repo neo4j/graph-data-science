@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 public class Greedy extends Algorithm<Greedy, Greedy> {
     private final Graph graph;
-    private final long seedSetCount;
+    private final int seedSetCount;
     private final double propagationProbability;
     private final int monteCarloSimulations;
 
@@ -65,7 +65,7 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
         this.graph = graph;
         long nodeCount = graph.nodeCount();
 
-        this.seedSetCount = (seedSetCount <= nodeCount) ? seedSetCount : nodeCount; // k <= nodeCount
+        this.seedSetCount = (seedSetCount <= nodeCount) ? seedSetCount : (int) nodeCount;
         this.propagationProbability = propagationProbability;
         this.monteCarloSimulations = monteCarloSimulations;
 
@@ -73,7 +73,7 @@ public class Greedy extends Algorithm<Greedy, Greedy> {
         this.concurrency = concurrency;
         this.tracker = tracker;
 
-        this.seedSetNodes = new LongDoubleScatterMap(seedSetCount);
+        this.seedSetNodes = new LongDoubleScatterMap(this.seedSetCount);
         this.spreads = new HugeLongPriorityQueue(nodeCount) {
             @Override
             protected boolean lessThan(long a, long b) {

@@ -99,9 +99,9 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
     protected AlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
         return (AlphaAlgorithmFactory<CELF, InfluenceMaximizationConfig>) (graph, configuration, tracker, log, eventTracker) -> new CELF(
             graph,
-            configuration.k(),
-            configuration.p(),
-            configuration.mc(),
+            configuration.seedSetSize(),
+            configuration.propagationProbability(),
+            configuration.monteCarloSimulations(),
             Pools.DEFAULT,
             configuration.concurrency(),
             tracker

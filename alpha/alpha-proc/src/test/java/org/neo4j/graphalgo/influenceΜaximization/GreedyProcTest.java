@@ -113,15 +113,14 @@ class GreedyProcTest extends BaseProcTest {
     void testResultStream() {
         final Consumer consumer = mock(Consumer.class);
 
-        final String cypher = "CALL gds.alpha.influenceMaximization.greedy.stream" +
-                              "('greedyGraph'," +
-                              "{" +
-                              "   k:  2," +
-                              "   p:  0.2," +
-                              "   mc: 10," +
-                              "   concurrency: 2" +
-                              "})" +
-                              "YIELD nodeId, spread RETURN nodeId, spread";
+        var cypher = GdsCypher.call()
+            .explicitCreation("greedyGraph")
+            .algo("gds.alpha.influenceMaximization.greedy")
+            .streamMode()
+            .addParameter("seedSetSize", 2)
+            .addParameter("propagationProbability", 0.2)
+            .addParameter("monteCarloSimulations", 10)
+            .yields("nodeId", "spread");
 
         runQueryWithRowConsumer(cypher, (tx, row) -> {
             long nodeId = row.getNumber("nodeId").longValue();

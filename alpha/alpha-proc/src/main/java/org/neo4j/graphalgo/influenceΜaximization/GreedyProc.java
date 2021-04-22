@@ -99,9 +99,9 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
     protected AlgorithmFactory<Greedy, InfluenceMaximizationConfig> algorithmFactory() {
         return (AlphaAlgorithmFactory<Greedy, InfluenceMaximizationConfig>) (graph, configuration, tracker, log, eventTracker) -> new Greedy(
             graph,
-            configuration.k(),
-            configuration.p(),
-            configuration.mc(),
+            configuration.seedSetSize(),
+            configuration.propagationProbability(),
+            configuration.monteCarloSimulations(),
             Pools.DEFAULT,
             configuration.concurrency(),
             tracker

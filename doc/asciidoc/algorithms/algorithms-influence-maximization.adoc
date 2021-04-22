@@ -6,7 +6,7 @@
 This chapter provides explanations and examples for each of the influence maximization algorithms in the Neo4j Graph Data Science library.
 --
 
-The objective of Influence Maximization is to find a small subset of k nodes from a network in order to achieve maximization to the total number of nodes influenced by these k nodes.
+The objective of influence maximization is to find a small subset of k nodes from a network in order to achieve maximization to the total number of nodes influenced by these k nodes.
 The Neo4j GDS library includes the following alpha influence maximization algorithms:
 
 * Alpha

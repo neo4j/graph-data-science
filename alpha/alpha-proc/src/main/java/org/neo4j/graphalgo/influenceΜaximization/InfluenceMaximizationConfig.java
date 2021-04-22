@@ -23,31 +23,23 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
 
 @Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface InfluenceMaximizationConfig extends AlgoBaseConfig, WritePropertyConfig { //BaseConfig
-    String DEFAULT_TARGET_PROPERTY = "spread";
-
+public interface InfluenceMaximizationConfig extends AlgoBaseConfig { //BaseConfig
     @Configuration.IntegerRange(min = 1)
-    int k();
+    int seedSetSize();
 
     @Value.Default
     @Configuration.DoubleRange(min = 0.01, max = 1)
-    default double p() {
+    default double propagationProbability() {
         return 0.1;
     }
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)
-    default int mc() {
+    default int monteCarloSimulations() {
         return 1000;
-    }
-
-    @Override
-    default String writeProperty() {
-        return DEFAULT_TARGET_PROPERTY;
     }
 }
