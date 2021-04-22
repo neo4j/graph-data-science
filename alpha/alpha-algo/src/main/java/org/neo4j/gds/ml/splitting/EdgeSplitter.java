@@ -41,7 +41,7 @@ public abstract class EdgeSplitter {
     public static final double NEGATIVE = 0D;
     public static final double POSITIVE = 1D;
     public static final String RELATIONSHIP_PROPERTY = "label";
-    private static final int MAX_RETRIES = 5;
+    private static final int MAX_RETRIES = 20;
 
     private final ThreadLocal<Random> rng;
     final double negativeSamplingRatio;
