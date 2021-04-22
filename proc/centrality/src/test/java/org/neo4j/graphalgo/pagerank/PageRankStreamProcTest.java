@@ -51,10 +51,6 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
         return PageRankStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 
-    private void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual) {
-        super.assertMapEqualsWithTolerance(expected, actual, RESULT_ERROR);
-    }
-
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsLabel3")
     void testWeightedPageRankFromLoadedGraphWithDirectionBoth(ModeBuildStage queryBuilder, String testCaseName) {

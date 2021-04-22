@@ -33,8 +33,6 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -99,26 +97,6 @@ public class BaseProcTest extends BaseTest {
 
     protected String getUsername() {
         return AuthSubject.ANONYMOUS.username();
-    }
-
-    protected void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual, Double tolerance) {
-        assertEquals(expected.size(), actual.size(), "number of elements");
-        Collection<Long> expectedKeys = new HashSet<>(expected.keySet());
-        for (Map.Entry<Long, Double> entry : actual.entrySet()) {
-            assertTrue(
-                expectedKeys.remove(entry.getKey()),
-                "unknown key " + entry.getKey()
-            );
-            assertEquals(
-                expected.get(entry.getKey()),
-                entry.getValue(),
-                tolerance,
-                "value for " + entry.getKey()
-            );
-        }
-        for (Long expectedKey : expectedKeys) {
-            fail("missing key " + expectedKey);
-        }
     }
 
     protected void assertError(
