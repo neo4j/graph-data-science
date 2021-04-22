@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.neo4j.graphalgo.pagerank.PageRankProcTest.RESULT_ERROR;
@@ -185,7 +185,7 @@ class EigenvectorProcTest extends BaseProcTest {
                 "computeMillis", greaterThan(-1L),
                 "writeMillis", greaterThan(-1L),
                 "postProcessingMillis", greaterThan(-1L),
-                "configuration", allOf(isA(Map.class), hasKey("writeProperty")),
+                "configuration", allOf(isA(Map.class), hasEntry("writeProperty", propertyKey)),
                 "centralityDistribution", isA(Map.class),
                 "nodePropertiesWritten", 2L,
                 "didConverge", true,
@@ -210,7 +210,7 @@ class EigenvectorProcTest extends BaseProcTest {
                 "computeMillis", greaterThan(-1L),
                 "mutateMillis", greaterThan(-1L),
                 "postProcessingMillis", greaterThan(-1L),
-                "configuration", allOf(isA(Map.class), hasKey("mutateProperty")),
+                "configuration", allOf(isA(Map.class), hasEntry("mutateProperty", propertyKey)),
                 "centralityDistribution", isA(Map.class),
                 "nodePropertiesWritten", 2L,
                 "didConverge", true,

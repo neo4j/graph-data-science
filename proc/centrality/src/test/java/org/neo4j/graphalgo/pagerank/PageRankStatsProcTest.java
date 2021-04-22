@@ -36,10 +36,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig> {
@@ -74,29 +73,17 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
             .withAnyRelationshipType()
             .algo("pageRank")
             .statsMode()
-            .yields(
-                "createMillis",
-                "computeMillis",
-                "postProcessingMillis",
-                "didConverge",
-                "ranIterations",
-                "centralityDistribution",
-                "configuration"
-            );
+            .yields();
 
-        runQueryWithRowConsumer(
-            query,
-            row -> {
-                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
-
-                assertEquals(true, row.get("didConverge"));
-                assertEquals(2L, row.get("ranIterations"));
-
-                assertNotNull(row.get("centralityDistribution"));
-            }
-        );
+        assertCypherResult(query, List.of(Map.of(
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
+            "didConverge", true,
+            "ranIterations", 2L,
+            "centralityDistribution", isA(Map.class),
+            "configuration", isA(Map.class)
+        )));
     }
 
     @ParameterizedTest(name = "{1}")

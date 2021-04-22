@@ -28,13 +28,15 @@ import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -128,22 +130,25 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
-    void testWriteYieldRanAndMaxIterationsAndDidConverge(ModeBuildStage queryBuilder, String testCaseName) {
+    void testWriteYields(ModeBuildStage queryBuilder, String testCaseName) {
+        var writeProp = "writeProp";
         String query = queryBuilder
             .writeMode()
-            .addParameter("writeProperty", "writeProp")
+            .addParameter("writeProperty", writeProp)
             .addParameter("tolerance", 0.0001)
-            .yields("ranIterations", "didConverge", "configuration");
+            .yields();
 
-        runQueryWithRowConsumer(
-            query,
-            row -> {
-                assertEquals(20, row.getNumber("ranIterations").longValue());
-                assertUserInput(row, "maxIterations", 20);
-                assertFalse(row.getBoolean("didConverge"));
-            }
-        );
-
+        assertCypherResult(query, List.of(Map.of(
+            "nodePropertiesWritten", 10L,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
+            "writeMillis", greaterThan(-1L),
+            "didConverge", false,
+            "ranIterations", 20L,
+            "centralityDistribution", isA(Map.class),
+            "configuration", allOf(isA(Map.class), hasEntry("writeProperty", writeProp))
+        )));
     }
 
     @ParameterizedTest(name = "{1}")
@@ -181,11 +186,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
         return mapWrapper;
     }
 
-    private void assertWriteResult(String writeProperty, Map<Long, Double> expectedScores) {
-        var expected = expectedScores.entrySet().stream().sorted(Map.Entry.comparingByKey())
-            .map(entry -> Map.of("id", entry.getKey(), "score", closeTo(entry.getValue(), RESULT_ERROR)))
-            .collect(Collectors.toList());
-
+    private void assertWriteResult(String writeProperty, List<Map<String, Object>> expected) {
         assertCypherResult(
             formatWithLocale("MATCH (n) WHERE n.%1$s IS NOT null RETURN id(n) AS id, n.%1$s AS score ORDER BY id",
                 writeProperty
