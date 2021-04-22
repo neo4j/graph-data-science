@@ -46,12 +46,12 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
 
     private final boolean hasSourceNodes;
     private final LongSet sourceNodes;
-    private final LongToDoubleFunction degreeFunction;
+    private final LongToDoubleFunction weightDenominator;
 
     private final double tolerance;
     private final double initialValue;
 
-    EigenvectorComputation(NodeMapping nodeMapping, PageRankConfig config, LongToDoubleFunction degreeFunction) {
+    EigenvectorComputation(NodeMapping nodeMapping, PageRankConfig config, LongToDoubleFunction weightDenominator) {
         this.tolerance = config.tolerance();
         this.sourceNodes = new LongScatterSet();
         config.sourceNodeIds().map(nodeMapping::toMappedNodeId).forEach(sourceNodes::add);
@@ -64,7 +64,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
             ? 1.0 / sourceNodes.size()
             : 1.0 / nodeMapping.nodeCount();
 
-        this.degreeFunction = degreeFunction;
+        this.weightDenominator = weightDenominator;
     }
 
     @Override
@@ -89,6 +89,10 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
 
     @Override
     public void compute(ComputeContext<PageRankConfig> context, Messages messages) {
+        // Instead of just using the adjacency matrix A, we add
+        // the centrality score from the previous iteration (A + I).
+        // This makes the difference between dominant eigenvalues
+        // more distinguishable.
         double nextRank = context.doubleNodeValue(RANK);
 
         if (!context.isInitialSuperstep()) {
@@ -97,7 +101,11 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
             }
         }
 
-        context.setNodeValue(NEXT_RANK, nextRank / degreeFunction.applyAsDouble(context.nodeId()));
+        // The degree function returns either 1 if the graph is unweighted
+        // or the sum of relationship weights if the graph is weighted.
+        // For weighted graphs, we multiply the sent values with the relationship
+        // weight and need to make sure that those weights are normalized.
+        context.setNodeValue(NEXT_RANK, nextRank / weightDenominator.applyAsDouble(context.nodeId()));
         context.sendToNeighbors(nextRank);
     }
 
