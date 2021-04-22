@@ -56,22 +56,6 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
-    void testPageRankParallelExecution(ModeBuildStage queryBuilder, String testName) {
-        final Map<Long, Double> actual = new HashMap<>();
-        String query = queryBuilder.streamMode().yields("nodeId", "score");
-
-        runQueryWithRowConsumer(query,
-            row -> {
-                final long nodeId = row.getNumber("nodeId").longValue();
-                actual.put(nodeId, (Double) row.get("score"));
-            }
-        );
-
-        assertMapEqualsWithTolerance(expected, actual);
-    }
-
-    @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsEqualWeight")
     void testWeightedPageRankWithAllRelationshipsEqual(ModeBuildStage queryBuilder, String testCase) {
         final Map<Long, Double> actual = new HashMap<>();

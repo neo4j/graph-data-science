@@ -89,23 +89,6 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
-    void testPageRankParallelWriteBack(ModeBuildStage queryBuilder, String testCaseName) {
-        var writeProperty = "pagerank";
-        String query = queryBuilder
-            .writeMode()
-            .addParameter("writeProperty", writeProperty)
-            .yields("writeMillis");
-
-        runQueryWithRowConsumer(
-            query,
-            row -> assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set")
-        );
-
-        assertWriteResult(writeProperty, expected);
-    }
-
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testPageRankWithToleranceParam(ModeBuildStage queryBuilder, String testCaseName) {
         GdsCypher.ParametersBuildStage builder = queryBuilder
             .writeMode()
