@@ -97,10 +97,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
             .streamMode()
             .yields("nodeId", "score");
 
-        runQueryWithRowConsumer(query,
-            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
-        );
-        assertMapEqualsWithTolerance(expected, actual);
+        assertCypherResult(query, expected);
     }
 
     @ParameterizedTest(name = "{1}")
@@ -112,10 +109,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
             .addParameter("relationshipWeightProperty", "weight")
             .yields("nodeId", "score");
 
-        runQueryWithRowConsumer(query,
-            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
-        );
-        assertMapEqualsWithTolerance(weightedExpected, actual);
+        assertCypherResult(query, weightedExpected);
     }
 
     @Test
@@ -149,11 +143,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
         var actual = new HashMap<Long, Double>();
 
-        runQueryWithRowConsumer(queryWithSourceNodes, Map.of("sources", sourceNodes),
-            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
-        );
-
-        assertMapEqualsWithTolerance(expected, actual);
+        assertCypherResult(queryWithSourceNodes, Map.of("sources", sourceNodes), expected);
     }
 
 }

@@ -188,7 +188,7 @@ class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implem
 
     private void assertWriteResult(String writeProperty, List<Map<String, Object>> expected) {
         assertCypherResult(
-            formatWithLocale("MATCH (n) WHERE n.%1$s IS NOT null RETURN id(n) AS id, n.%1$s AS score ORDER BY id",
+            formatWithLocale("MATCH (n) WHERE n.%1$s IS NOT null RETURN id(n) AS nodeId, n.%1$s AS score ORDER BY nodeId",
                 writeProperty
             ),
             expected
