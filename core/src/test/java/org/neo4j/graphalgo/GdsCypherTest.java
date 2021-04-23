@@ -25,9 +25,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.cypher.internal.evaluator.EvaluationException;
-import org.neo4j.cypher.internal.evaluator.Evaluator;
-import org.neo4j.cypher.internal.evaluator.ExpressionEvaluator;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -49,8 +46,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 
 class GdsCypherTest {
-
-    private static final ExpressionEvaluator EVALUATOR = Evaluator.expressionEvaluator();
 
     private static final GraphCreateFromStoreConfig GRAPH_CREATE_PROJECT_STAR =
         ImmutableGraphCreateFromStoreConfig.of(
@@ -93,49 +88,47 @@ class GdsCypherTest {
     }
 
     static Stream<Arguments> implicitBuilders() {
-        String configString =
-            "{" +
-            "  nodeProjection: {" +
-            "    FooNode: {" +
-            "      label: 'Foo'," +
-            "      properties: {" +
-            "        nodeProp: {" +
-            "          property: 'NodePropertyName'," +
-            "          defaultValue: 42.1337" +
-            "        }" +
-            "      }" +
-            "    }" +
-            "  }," +
-            "  relationshipProjection: {" +
-            "    Rel: 'TYPE'," +
-            "    BarRel: {" +
-            "      type: 'Bar'," +
-            "      orientation: 'UNDIRECTED'," +
-            "      aggregation: 'SINGLE'," +
-            "      properties: {" +
-            "        relProp: {" +
-            "          property: 'RelationshipPropertyName'," +
-            "          defaultValue: 1337," +
-            "          aggregation: 'MAX'" +
-            "        }" +
-            "      }" +
-            "    }" +
-            "  }," +
-            "  nodeProperties: ['GlobalNodeProp']," +
-            "  relationshipProperties: {" +
-            "    global: 'RelProp'" +
-            "  }" +
-            "}";
+        var configMap = Map.of(
+            "nodeProjection", Map.of(
+                "FooNode", Map.of(
+                    "label", "Foo",
+                    "properties", Map.of(
+                        "nodeProp", Map.of(
+                            "property", "NodePropertyName",
+                            "defaultValue", 42.1337
+                        )
+                    )
+                )
+            ),
+            "relationshipProjection", Map.of(
+                "Rel", "TYPE",
+                "BarRel", Map.of(
+                    "type", "Bar",
+                    "orientation", "UNDIRECTED",
+                    "aggregation", "SINGLE",
+                    "properties", Map.of(
+                        "relProp", Map.of(
+                            "property", "RelationshipPropertyName",
+                            "defaultValue", 1337L,
+                            "aggregation", "MAX"
+                        )
+                    )
+                )
+            ),
+            "nodeProperties", List.of("GlobalNodeProp"),
+            "relationshipProperties", Map.of(
+                "global", "RelProp"
+            )
+        );
 
-        Map<String, Object> map = convert(configString);
         GraphCreateFromStoreConfig parsedConfig = ImmutableGraphCreateFromStoreConfig
             .builder()
             .username("")
             .graphName("")
-            .nodeProjections(NodeProjections.fromObject(map.get("nodeProjection")))
-            .relationshipProjections(RelationshipProjections.fromObject(map.get("relationshipProjection")))
-            .nodeProperties(PropertyMappings.fromObject(map.get("nodeProperties")))
-            .relationshipProperties(PropertyMappings.fromObject(map.get("relationshipProperties")))
+            .nodeProjections(NodeProjections.fromObject(configMap.get("nodeProjection")))
+            .relationshipProjections(RelationshipProjections.fromObject(configMap.get("relationshipProjection")))
+            .nodeProperties(PropertyMappings.fromObject(configMap.get("nodeProperties")))
+            .relationshipProperties(PropertyMappings.fromObject(configMap.get("relationshipProperties")))
             .build();
 
         NodeProjection fooNode = NodeProjection.builder()
@@ -686,14 +679,6 @@ class GdsCypherTest {
                 return "train";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + executionMode + " (sad java 😞)");
-        }
-    }
-
-    private static Map<String, Object> convert(String value) {
-        try {
-            return EVALUATOR.evaluate(value, Map.class);
-        } catch (EvaluationException e) {
-            throw new IllegalArgumentException(value + " is not a valid map expression", e);
         }
     }
 }
