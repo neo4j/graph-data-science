@@ -30,6 +30,7 @@ ext {
             'commons-math3':                '3.6.1',
             'commons-text':                 '1.9',
             'compile-testing':              '0.18',
+            'cypher-dsl':                   '2021.2.0',
             'deeplearning4j':               '1.0.0-beta7',
             'eclipse-collections':          '10.4.0',
             'ejml':                         '0.39',

@@ -36,4 +36,5 @@ dependencies {
         exclude group:'org.junit.vintage', module: 'junit-vintage-engine'
     }
     implementation(group: 'junit', name: 'junit', version: ver.'junit4')
+    implementation group: 'org.neo4j', name: 'neo4j-cypher-dsl', version: ver.'cypher-dsl'
 }

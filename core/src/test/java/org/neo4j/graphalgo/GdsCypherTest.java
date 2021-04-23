@@ -69,11 +69,11 @@ class GdsCypherTest {
             arguments("graphName" , "'graphName'"),
             arguments("foo.bar"   , "'foo.bar'"),
             arguments("  spa ces ", "'  spa ces '"),
-            arguments("space's"   , "'space's'"),
-            arguments("space\"s"  , "'space\"s'"),
+            arguments("space's"   , "'space\\'s'"),
+            arguments("space\"s"  , "'space\\\"s'"),
             arguments(""          , "''"),
-            arguments("''"        , "''''"),
-            arguments("\"\""      , "'\"\"'"),
+            arguments("''"        , "'\\'\\''"),
+            arguments("\"\""      , "'\\\"\\\"'"),
             arguments("🙈"        , "'🙈'")
         );
         //@formatter:on
@@ -507,6 +507,23 @@ class GdsCypherTest {
         );
     }
 
+    @Test
+    void testExplicitNanDefaultValueInNodeProperties() {
+        String query = GdsCypher.call()
+            .withNodeLabel("N")
+            .withAnyRelationshipType()
+            .withNodeProperties(List.of("a", "b"), DefaultValue.of(Double.NaN))
+            .graphCreate("g")
+            .yields();
+        assertThat(query).isEqualTo(
+            "CALL gds.graph.create('g', {" +
+            "N: {label: 'N', properties: {" +
+            "a: {property: 'a', defaultValue: (0.0 / 0.0)}, " +
+            "b: {property: 'b', defaultValue: (0.0 / 0.0)}" +
+            "}}}, '*')"
+        );
+    }
+
     static Stream<Arguments> testAdditionalProperties() {
         return Stream.of(
             arguments(true, "true"),
@@ -514,12 +531,12 @@ class GdsCypherTest {
             arguments(42, "42"),
             arguments(42.0, "42.0"),
             arguments(1337.42, "1337.42"),
-            arguments(Double.NaN, "0.0 / 0.0"),
+            arguments(Double.NaN, "(0.0 / 0.0)"),
             arguments("42", "'42'"),
             arguments(new StringBuilder("forty-two"), "'forty-two'"),
-            arguments("string with '", "'string with ''"),
-            arguments("string with \"", "'string with \"'"),
-            arguments("string with both ' and \"", "\"string with both ' and \\\"\""),
+            arguments("string with '", "'string with \\''"),
+            arguments("string with \"", "'string with \\\"'"),
+            arguments("string with both ' and \"", "'string with both \\' and \\\"'"),
             arguments(Direction.BOTH, "'BOTH'"),
             arguments(Orientation.NATURAL, "'NATURAL'"),
             arguments(Arrays.asList("foo", 42, true), "['foo', 42, true]"),
@@ -560,8 +577,8 @@ class GdsCypherTest {
             .algo("algoName")
             .writeMode()
             .addParameter("foo", value)
-            .addParameter(new AbstractMap.SimpleImmutableEntry<>("bar", value))
-            .addAllParameters(Collections.singletonMap("baz", value))
+            .addParameter(Map.entry("bar", value))
+            .addAllParameters(Map.of("baz", value))
             .yields();
 
         assertThat(query).isEqualTo("CALL gds.algoName.write('', {})");
@@ -573,13 +590,11 @@ class GdsCypherTest {
             arguments("g"               , "$g"),
             arguments("var"             , "$var"),
             arguments("graphName"       , "$graphName"),
-            arguments("\"$graphName\""  , "$`\"$graphName\"`"),
-            arguments("'$graphName'"    , "$`'$graphName'`"),
-            arguments("\"graphName\""   , "$`\"graphName\"`"),
-            arguments("'graphName'"     , "$`'graphName'`"),
-            arguments("     "           , "$`     `"),
-            arguments(" "               , "$` `"),
-            arguments("%"               , "$`%`")
+            arguments("\"$graphName\""  , "$\"$graphName\""),
+            arguments("'$graphName'"    , "$'$graphName'"),
+            arguments("\"graphName\""   , "$\"graphName\""),
+            arguments("'graphName'"     , "$'graphName'"),
+            arguments("%"               , "$%")
             //@formatter:on
         );
     }
@@ -603,14 +618,7 @@ class GdsCypherTest {
             //@formatter:off
             arguments("g"               , "g"),
             arguments("var"             , "var"),
-            arguments("graphName"       , "graphName"),
-            arguments("\"$graphName\""  , "`\"$graphName\"`"),
-            arguments("'$graphName'"    , "`'$graphName'`"),
-            arguments("\"graphName\""   , "`\"graphName\"`"),
-            arguments("'graphName'"     , "`'graphName'`"),
-            arguments("     "           , "`     `"),
-            arguments(" "               , "` `"),
-            arguments("%"               , "`%`")
+            arguments("graphName"       , "graphName")
             //@formatter:on
         );
     }
@@ -643,10 +651,8 @@ class GdsCypherTest {
 
     static Stream<List<String>> testYields() {
         return Stream.of(
-            Collections.singletonList("foo"),
-            Arrays.asList("foo", "BAR"),
-            Arrays.asList("foo BAR", "foo.BAR"),
-            Arrays.asList("", "'", "__", "ಠ__ಠ", "🙈")
+            List.of("foo"),
+            List.of("foo", "BAR")
         );
     }
 

@@ -22,14 +22,19 @@ package org.neo4j.graphalgo;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.cypherdsl.core.Cypher;
+import org.neo4j.cypherdsl.core.Expression;
+import org.neo4j.cypherdsl.core.renderer.Configuration;
+import org.neo4j.cypherdsl.core.renderer.Renderer;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.utils.cypher.CypherPrinterProxy;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,13 +44,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonMap;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.AGGREGATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
 import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
@@ -57,12 +59,10 @@ import static org.neo4j.graphalgo.PropertyMapping.DEFAULT_VALUE_KEY;
 import static org.neo4j.graphalgo.PropertyMapping.PROPERTY_KEY;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PACKAGE, depluralize = true, deepImmutablesDetection = true)
 public abstract class GdsCypher {
 
-    private static final int ADDITIONAL_PARAMETERS_FOR_IMPLICIT_GRAPH_CREATION = 4;
     private static final Pattern PERIOD = Pattern.compile(Pattern.quote("."));
 
     public static CreationBuildStage call() {
@@ -104,7 +104,10 @@ public abstract class GdsCypher {
         default QueryBuilder loadEverything(Orientation orientation) {
             return this
                 .withNodeLabel(ALL_NODES.name, NodeProjection.all())
-                .withRelationshipType(ALL_RELATIONSHIPS.name(), RelationshipProjection.all().withOrientation(orientation));
+                .withRelationshipType(
+                    ALL_RELATIONSHIPS.name(),
+                    RelationshipProjection.all().withOrientation(orientation)
+                );
         }
 
         default ImplicitCreationBuildStage withAnyLabel() {
@@ -116,7 +119,7 @@ public abstract class GdsCypher {
         }
 
         default ImplicitCreationBuildStage withNodeLabel(String label, NodeProjection nodeProjection) {
-            return withNodeLabels(singletonMap(label, nodeProjection));
+            return withNodeLabels(Map.of(label, nodeProjection));
         }
 
         default ImplicitCreationBuildStage withNodeLabels(String... labels) {
@@ -397,23 +400,28 @@ public abstract class GdsCypher {
         Map<String, Object> parameters,
         List<String> yields
     ) {
-        String procedureName = procedureName(algoNamespace, algoName, executionMode, specialExecution);
-        String queryArguments = queryArguments(explicitGraphName, implicitCreateConfig, executionMode, parameters);
-        String yieldsFields = yieldsFields(yields);
-        return formatWithLocale("CALL %s(%s)%s", procedureName, queryArguments, yieldsFields);
+        var procedureName = procedureName(algoNamespace, algoName, executionMode, specialExecution);
+        var queryArguments = queryArguments(explicitGraphName, implicitCreateConfig, executionMode, parameters);
+        var yieldsFields = yieldsFields(yields);
+
+        var query = Cypher.call(procedureName).withArgs(queryArguments);
+        var statement = yieldsFields.map(fields -> query.yield(fields).build()).orElseGet(query::build);
+
+        var cypherRenderer = Renderer.getRenderer(Configuration.defaultConfig());
+        return cypherRenderer.render(statement);
     }
 
-    private static String procedureName(
+    private static String[] procedureName(
         Collection<String> algoNamespace,
-        CharSequence algoName,
+        String algoName,
         ExecutionMode executionMode,
         SpecialExecution specialExecution
     ) {
-        StringJoiner procedureName = new StringJoiner(".");
+        var procedureName = new ArrayList<String>(algoNamespace.size());
         if (algoNamespace.isEmpty()) {
             procedureName.add("gds");
         } else {
-            algoNamespace.forEach(procedureName::add);
+            procedureName.addAll(algoNamespace);
         }
         procedureName.add(algoName);
         if (executionMode instanceof ExecutionModes) {
@@ -423,29 +431,27 @@ public abstract class GdsCypher {
             procedureName.add("estimate");
         }
 
-        return procedureName.toString();
+        return procedureName.toArray(new String[0]);
     }
 
-    private static String queryArguments(
+    private static Expression[] queryArguments(
         Optional<String> explicitGraphName,
         Optional<GraphCreateFromStoreConfig> implicitCreateConfig,
         ExecutionMode executionMode,
         Map<String, Object> parameters
     ) {
-        StringJoiner queryArguments = new StringJoiner(", ");
-        explicitGraphName.ifPresent(name -> queryArguments.add(CypherPrinterProxy.toCypherString(name)));
+        var queryArguments = new ArrayList<Expression>();
+        explicitGraphName.ifPresent(name -> queryArguments.add(Cypher.literalOf(name)));
 
         if (implicitCreateConfig.isPresent()) {
             GraphCreateFromStoreConfig config = implicitCreateConfig.get();
-            Map<String, Object> newParameters = new LinkedHashMap<>(
-                parameters.size() + ADDITIONAL_PARAMETERS_FOR_IMPLICIT_GRAPH_CREATION
-            );
+            Map<String, Object> newParameters = new LinkedHashMap<>(parameters.size());
 
             Optional<Object> nodeProjection = toMinimalObject(config.nodeProjections()).toObject();
             Optional<Object> relationshipProjection = toMinimalObject(config.relationshipProjections()).toObject();
             if (executionMode == InternalExecutionMode.GRAPH_CREATE) {
-                queryArguments.add(CypherPrinterProxy.toCypherString(nodeProjection.orElse(emptyMap())));
-                queryArguments.add(CypherPrinterProxy.toCypherString(relationshipProjection.orElse(emptyMap())));
+                queryArguments.add(nodeProjection.map(GdsCypher::toExpression).orElseGet(() -> Cypher.literalOf("")));
+                queryArguments.add(relationshipProjection.map(GdsCypher::toExpression).orElseGet(() -> Cypher.literalOf("")));
             } else {
                 nodeProjection.ifPresent(np -> newParameters.put("nodeProjection", np));
                 relationshipProjection.ifPresent(rp -> newParameters.put("relationshipProjection", rp));
@@ -463,18 +469,17 @@ public abstract class GdsCypher {
         }
 
         if (!parameters.isEmpty()) {
-            queryArguments.add(CypherPrinterProxy.toCypherStringOr(parameters, "{}"));
+            queryArguments.add(Objects.requireNonNullElseGet(toExpression(parameters), Cypher::mapOf));
         }
 
-        return queryArguments.toString();
+        return queryArguments.toArray(new Expression[0]);
     }
 
-    private static String yieldsFields(Iterable<String> yields) {
-        StringJoiner yieldsFields = new StringJoiner(", ", " YIELD ", "");
-        yieldsFields.setEmptyValue("");
-        yields.forEach(yieldsFields::add);
-
-        return yieldsFields.toString();
+    private static Optional<String[]> yieldsFields(Collection<String> yields) {
+        if (yields.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(yields.toArray(new String[0]));
     }
 
     private static final class StagedBuilder implements CreationBuildStage, ImplicitCreationBuildStage, QueryBuilder, ModeBuildStage, ParametersBuildStage {
@@ -590,13 +595,13 @@ public abstract class GdsCypher {
 
         @Override
         public StagedBuilder addPlaceholder(String key, String placeholder) {
-            builder.putParameter(key, CypherPrinterProxy.parameter(placeholder));
+            builder.putParameter(key, Cypher.parameter(placeholder));
             return this;
         }
 
         @Override
         public StagedBuilder addVariable(String key, String variable) {
-            builder.putParameter(key, CypherPrinterProxy.variable(variable));
+            builder.putParameter(key, Cypher.name(variable));
             return this;
         }
 
@@ -666,6 +671,57 @@ public abstract class GdsCypher {
             .build();
     }
 
+    private static @Nullable Expression toExpression(@Nullable Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Expression) {
+            return (Expression) value;
+        }
+        if (value instanceof Iterable) {
+            return list((Iterable<?>) value);
+        }
+        if (value instanceof Map) {
+            return map((Map<?, ?>) value);
+        }
+        if (value instanceof Enum) {
+            value = ((Enum<?>) value).name();
+        }
+        if (value instanceof Number && Double.isNaN(((Number) value).doubleValue())) {
+            return Cypher.literalOf(0.0).divide(Cypher.literalOf(0.0));
+        }
+        return Cypher.literalOf(value);
+    }
+
+    private static @Nullable Expression list(@NotNull Iterable<?> values) {
+        var list = new ArrayList<Expression>();
+        for (Object value : values) {
+            var expression = toExpression(value);
+            if (expression != null) {
+                list.add(expression);
+            }
+        }
+        if (list.isEmpty()) {
+            return null;
+        }
+        return Cypher.listOf(list.toArray(new Expression[0]));
+    }
+
+    private static @Nullable Expression map(@NotNull Map<?, ?> values) {
+        var entries = new ArrayList<>();
+        values.forEach((key, value) -> {
+            var expression = toExpression(value);
+            if (expression != null) {
+                entries.add(String.valueOf(key));
+                entries.add(expression);
+            }
+        });
+        if (entries.isEmpty()) {
+            return null;
+        }
+        return Cypher.mapOf(entries.toArray());
+    }
+
     @ValueClass
     @Value.Immutable(singleton = true)
     interface MinimalObject {
@@ -724,7 +780,7 @@ public abstract class GdsCypher {
         }
 
         static MinimalObject map(String key, Object value) {
-            return map(singletonMap(key, value));
+            return map(Map.of(key, value));
         }
 
         static MinimalObject empty() {
