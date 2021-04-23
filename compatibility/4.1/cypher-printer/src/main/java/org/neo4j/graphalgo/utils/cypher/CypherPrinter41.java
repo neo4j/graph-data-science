@@ -53,7 +53,7 @@ public final class CypherPrinter41 implements CypherPrinterApi {
             new CanonicalStringFallback(),
             /* alwaysParens */ false,
             /* alwaysBacktick */ false,
-            /* preferSingleQuotes */ false,
+            /* preferSingleQuotes */ true,
             /* sensitiveParamsAsParams */false
         );
 

@@ -61,20 +61,20 @@ class GdsCypherTest {
         );
 
     private static final String STAR_PROJECTION_CYPHER_SYNTAX =
-        "{nodeProjection: \"*\", relationshipProjection: \"*\"}";
+        "{nodeProjection: '*', relationshipProjection: '*'}";
 
     static Stream<Arguments> testExplicitCreationWithAnyName() {
         //@formatter:off
         return Stream.of(
-            arguments("graphName" , "\"graphName\""),
-            arguments("foo.bar"   , "\"foo.bar\""),
-            arguments("  spa ces ", "\"  spa ces \""),
-            arguments("space's"   , "\"space's\""),
+            arguments("graphName" , "'graphName'"),
+            arguments("foo.bar"   , "'foo.bar'"),
+            arguments("  spa ces ", "'  spa ces '"),
+            arguments("space's"   , "'space's'"),
             arguments("space\"s"  , "'space\"s'"),
-            arguments(""          , "\"\""),
-            arguments("''"        , "\"''\""),
+            arguments(""          , "''"),
+            arguments("''"        , "''''"),
             arguments("\"\""      , "'\"\"'"),
-            arguments("🙈"        , "\"🙈\"")
+            arguments("🙈"        , "'🙈'")
         );
         //@formatter:on
     }
@@ -226,7 +226,7 @@ class GdsCypherTest {
             .yields();
 
         assertThat(query).isEqualTo(
-            "CALL gds.graph.create(\"foo42\", %s, %s, {nodeProjection: \"SOMETHING | ELSE\"})",
+            "CALL gds.graph.create('foo42', %s, %s, {nodeProjection: 'SOMETHING | ELSE'})",
             expectedNodeProjection(),
             expectedRelationshipProjection()
         );
@@ -254,8 +254,8 @@ class GdsCypherTest {
             .yields();
 
         assertThat(query).isEqualTo(
-            "CALL gds.foo.write({nodeProjection: \"*\", relationshipProjection: %s})",
-            "{__ALL__: {type: \"*\", orientation: \"UNDIRECTED\"}}"
+            "CALL gds.foo.write({nodeProjection: '*', relationshipProjection: %s})",
+            "{__ALL__: {type: '*', orientation: 'UNDIRECTED'}}"
         );
     }
 
@@ -272,11 +272,11 @@ class GdsCypherTest {
         assertThat(query).isEqualTo(
             //@formatter:off
             "CALL gds.foo.write({" +
-              "nodeProjection: \"*\", " +
+              "nodeProjection: '*', " +
               "relationshipProjection: {" +
                 "__ALL__: {" +
-                  "type: \"*\", " +
-                  "properties: \"weight\"" +
+                  "type: '*', " +
+                  "properties: 'weight'" +
                 "}" +
               "}" +
             "})"
@@ -302,14 +302,14 @@ class GdsCypherTest {
         return
             "{" +
                 "FooNode: {" +
-                    "label: \"Foo\", " +
+                    "label: 'Foo', " +
                     "properties: {" +
                         "nodeProp: {" +
-                            "property: \"NodePropertyName\", " +
+                            "property: 'NodePropertyName', " +
                             "defaultValue: 42.1337" +
                         "}, " +
                         "GlobalNodeProp: {" +
-                            "property: \"GlobalNodeProp\"" +
+                            "property: 'GlobalNodeProp'" +
                         "}" +
                     "}" +
                 "}" +
@@ -322,26 +322,26 @@ class GdsCypherTest {
         return
             "{" +
                 "Rel: {" +
-                    "type: \"TYPE\", " +
+                    "type: 'TYPE', " +
                     "properties: {" +
                         "global: {" +
-                            "property: \"RelProp\"" +
+                            "property: 'RelProp'" +
                         "}" +
                     "}" +
                 "}, " +
                 "BarRel: {" +
-                    "type: \"Bar\", " +
-                    "orientation: \"UNDIRECTED\", " +
-                    "aggregation: \"SINGLE\", " +
+                    "type: 'Bar', " +
+                    "orientation: 'UNDIRECTED', " +
+                    "aggregation: 'SINGLE', " +
                     "properties: {" +
                         "relProp: {" +
-                            "property: \"RelationshipPropertyName\", " +
+                            "property: 'RelationshipPropertyName', " +
                             "defaultValue: 1337, " +
-                            "aggregation: \"MAX\"" +
+                            "aggregation: 'MAX'" +
                         "}, " +
                         "global: {" +
-                            "property: \"RelProp\", " +
-                            "aggregation: \"SINGLE\"" +
+                            "property: 'RelProp', " +
+                            "aggregation: 'SINGLE'" +
                         "}" +
                     "}" +
                 "}" +
@@ -515,14 +515,14 @@ class GdsCypherTest {
             arguments(42.0, "42.0"),
             arguments(1337.42, "1337.42"),
             arguments(Double.NaN, "0.0 / 0.0"),
-            arguments("42", "\"42\""),
-            arguments(new StringBuilder("forty-two"), "\"forty-two\""),
-            arguments("string with '", "\"string with '\""),
+            arguments("42", "'42'"),
+            arguments(new StringBuilder("forty-two"), "'forty-two'"),
+            arguments("string with '", "'string with ''"),
             arguments("string with \"", "'string with \"'"),
             arguments("string with both ' and \"", "\"string with both ' and \\\"\""),
-            arguments(Direction.BOTH, "\"BOTH\""),
-            arguments(Orientation.NATURAL, "\"NATURAL\""),
-            arguments(Arrays.asList("foo", 42, true), "[\"foo\", 42, true]"),
+            arguments(Direction.BOTH, "'BOTH'"),
+            arguments(Orientation.NATURAL, "'NATURAL'"),
+            arguments(Arrays.asList("foo", 42, true), "['foo', 42, true]"),
             arguments(MapUtil.map(new LinkedHashMap<>(), "foo", 42, "bar", true), "{foo: 42, bar: true}")
         );
     }
@@ -540,7 +540,7 @@ class GdsCypherTest {
             .addAllParameters(Collections.singletonMap("baz", value))
             .yields();
 
-        assertThat(query).isEqualTo("CALL gds.algoName.write(\"\", {foo: %1$s, bar: %1$s, baz: %1$s})", expected);
+        assertThat(query).isEqualTo("CALL gds.algoName.write('', {foo: %1$s, bar: %1$s, baz: %1$s})", expected);
     }
 
     static Stream<Object> testEmptyProperties() {
@@ -564,7 +564,7 @@ class GdsCypherTest {
             .addAllParameters(Collections.singletonMap("baz", value))
             .yields();
 
-        assertThat(query).isEqualTo("CALL gds.algoName.write(\"\", {})");
+        assertThat(query).isEqualTo("CALL gds.algoName.write('', {})");
     }
 
     static Stream<Arguments> placeholders() {
@@ -595,7 +595,7 @@ class GdsCypherTest {
             .addPlaceholder("foo", placeholder)
             .yields();
 
-        assertThat(query).isEqualTo("CALL gds.algoName.write(\"\", {foo: %s})", expected);
+        assertThat(query).isEqualTo("CALL gds.algoName.write('', {foo: %s})", expected);
     }
 
     static Stream<Arguments> variables() {
@@ -626,7 +626,7 @@ class GdsCypherTest {
             .addVariable("foo", variable)
             .yields();
 
-        assertThat(query).isEqualTo("CALL gds.algoName.write(\"\", {foo: %s})", expected);
+        assertThat(query).isEqualTo("CALL gds.algoName.write('', {foo: %s})", expected);
     }
 
     @Test
@@ -638,7 +638,7 @@ class GdsCypherTest {
             .writeMode()
             .yields();
 
-        assertThat(query).isEqualTo("CALL gds.algoName.write(\"\")");
+        assertThat(query).isEqualTo("CALL gds.algoName.write('')");
     }
 
     static Stream<List<String>> testYields() {
@@ -661,7 +661,7 @@ class GdsCypherTest {
             .yields(yieldedFields);
 
         assertThat(query).isEqualTo(
-            "CALL gds.algoName.write(\"\") YIELD %s",
+            "CALL gds.algoName.write('') YIELD %s",
             String.join(", ", yieldedFields)
         );
     }
