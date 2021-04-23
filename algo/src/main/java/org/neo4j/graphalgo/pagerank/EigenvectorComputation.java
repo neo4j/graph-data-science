@@ -105,8 +105,8 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
         // or the sum of relationship weights if the graph is weighted.
         // For weighted graphs, we multiply the sent values with the relationship
         // weight and need to make sure that those weights are normalized.
-        context.setNodeValue(NEXT_RANK, nextRank / weightDenominator.applyAsDouble(context.nodeId()));
-        context.sendToNeighbors(nextRank);
+        context.sendToNeighbors(nextRank / weightDenominator.applyAsDouble(context.nodeId()));
+        context.setNodeValue(NEXT_RANK, nextRank);
     }
 
     @Override

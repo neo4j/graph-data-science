@@ -409,25 +409,25 @@ class PageRankTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.01262})" +
-            ", (b:Node { expectedRank: 0.71623})" +
-            ", (c:Node { expectedRank: 0.69740 })" +
-            ", (d:Node { expectedRank: 0.01262 })" +
-            ", (e:Node { expectedRank: 0.01262 })" +
-            ", (f:Node { expectedRank: 0.01262 })" +
-            ", (g:Node { expectedRank: 0.0 })" +
-            ", (h:Node { expectedRank: 0.0 })" +
-            ", (i:Node { expectedRank: 0.0 })" +
-            ", (j:Node { expectedRank: 0.0 })" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (c)-[:TYPE]->(b)" +
-            ", (d)-[:TYPE]->(a)" +
-            ", (d)-[:TYPE]->(b)" +
-            ", (e)-[:TYPE]->(b)" +
-            ", (e)-[:TYPE]->(d)" +
-            ", (e)-[:TYPE]->(f)" +
-            ", (f)-[:TYPE]->(b)" +
-            ", (f)-[:TYPE]->(e)";
+            "  (a:Node { expectedRank: 0.01262 , expectedWeightedRank: 0.00210 })" +
+            ", (b:Node { expectedRank: 0.71623 , expectedWeightedRank: 0.70774 })" +
+            ", (c:Node { expectedRank: 0.69740 , expectedWeightedRank: 0.70645 })" +
+            ", (d:Node { expectedRank: 0.01262 , expectedWeightedRank: 0.00172 })" +
+            ", (e:Node { expectedRank: 0.01262 , expectedWeightedRank: 0.00210 })" +
+            ", (f:Node { expectedRank: 0.01262 , expectedWeightedRank: 0.00172 })" +
+            ", (g:Node { expectedRank: 0.0, expectedWeightedRank: 0.0 })" +
+            ", (h:Node { expectedRank: 0.0, expectedWeightedRank: 0.0 })" +
+            ", (i:Node { expectedRank: 0.0, expectedWeightedRank: 0.0 })" +
+            ", (j:Node { expectedRank: 0.0, expectedWeightedRank: 0.0 })" +
+            ", (b)-[:TYPE { weight: 1.0 } ]->(c)" +
+            ", (c)-[:TYPE { weight: 3.0 } ]->(b)" +
+            ", (d)-[:TYPE { weight: 5.0 } ]->(a)" +
+            ", (d)-[:TYPE { weight: 5.0 } ]->(b)" +
+            ", (e)-[:TYPE { weight: 4.0 } ]->(b)" +
+            ", (e)-[:TYPE { weight: 4.0 } ]->(d)" +
+            ", (e)-[:TYPE { weight: 4.0 } ]->(f)" +
+            ", (f)-[:TYPE { weight: 10.0 } ]->(b)" +
+            ", (f)-[:TYPE { weight: 10.0 } ]->(e)";
 
         @Inject
         private Graph graph;
@@ -446,6 +446,27 @@ class PageRankTest {
                 .asNodeProperties();
 
             var expected = graph.nodeProperties("expectedRank");
+
+            for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+            }
+        }
+
+        @Test
+        void weighted() {
+            var config = ImmutablePageRankStreamConfig
+                .builder()
+                .relationshipWeightProperty("weight")
+                .maxIterations(10)
+                .tolerance(0)
+                .concurrency(1)
+                .build();
+
+            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR)
+                .scores()
+                .asNodeProperties();
+
+            var expected = graph.nodeProperties("expectedWeightedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
                 assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
