@@ -32,14 +32,12 @@ import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
-import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralityBaseConfig>
     extends BaseProcTest
@@ -63,7 +61,7 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
                                        ", (c)-[:REL]->(d)" +
                                        ", (d)-[:REL]->(e)";
 
-    static Map<Long, Double> EXPECTED = new HashMap<>();
+    List<Map<String, Object>> expected;
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -78,14 +76,13 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
             GraphCreateProc.class
         );
 
-        runInTransaction(db, tx -> {
-            var label = Label.label("Node");
-            EXPECTED.put(tx.findNode(label, "name", "a").getId(), 0.0);
-            EXPECTED.put(tx.findNode(label, "name", "b").getId(), 3.0);
-            EXPECTED.put(tx.findNode(label, "name", "c").getId(), 4.0);
-            EXPECTED.put(tx.findNode(label, "name", "d").getId(), 3.0);
-            EXPECTED.put(tx.findNode(label, "name", "e").getId(), 0.0);
-        });
+        expected = List.of(
+            Map.of("nodeId", idFunction.of("a"), "score", 0.0),
+            Map.of("nodeId", idFunction.of("b"), "score", 3.0),
+            Map.of("nodeId", idFunction.of("c"), "score", 4.0),
+            Map.of("nodeId", idFunction.of("d"), "score", 3.0),
+            Map.of("nodeId", idFunction.of("e"), "score", 0.0)
+        );
 
         String loadQuery = GdsCypher.call()
             .withNodeLabel("Node")

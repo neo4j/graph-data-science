@@ -46,20 +46,18 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
-import org.neo4j.graphdb.Label;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.hamcrest.Matchers.closeTo;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 
 abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcTest implements
     AlgoBaseProcTest<PageRankAlgorithm, CONFIG, PageRankResult>,
@@ -117,8 +115,8 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
            ", (u)-[:TYPE3 {weight: 1.0}]->(w)" +
            ", (v)-[:TYPE3 {weight: 1.0}]->(w)";
 
-    static Map<Long, Double> expected = new HashMap<>();
-    static Map<Long, Double> weightedExpected = new HashMap<>();
+    static List<Map<String, Object>> expected;
+    static List<Map<String, Object>> weightedExpected;
 
     @Override
     public GraphDatabaseAPI graphDb() {
@@ -135,30 +133,31 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
 
         graphCreateQueries().forEach(this::runQuery);
 
-        runInTransaction(db, tx -> {
-            final Label label = Label.label("Label1");
-            expected.put(tx.findNode(label, "name", "a").getId(), 0.24301);
-            expected.put(tx.findNode(label, "name", "b").getId(), 1.83865);
-            expected.put(tx.findNode(label, "name", "c").getId(), 1.69774);
-            expected.put(tx.findNode(label, "name", "d").getId(), 0.21885);
-            expected.put(tx.findNode(label, "name", "e").getId(), 0.24301);
-            expected.put(tx.findNode(label, "name", "f").getId(), 0.21885);
-            expected.put(tx.findNode(label, "name", "g").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "h").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "i").getId(), 0.15);
-            expected.put(tx.findNode(label, "name", "j").getId(), 0.15);
+        expected = List.of(
+            Map.of("nodeId", idFunction.of("a"), "score", closeTo(0.24301, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("b"), "score", closeTo(1.83865, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("c"), "score", closeTo(1.69774, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("d"), "score", closeTo(0.21885, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("e"), "score", closeTo(0.24301, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("f"), "score", closeTo(0.21885, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("g"), "score", closeTo(0.15, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("h"), "score", closeTo(0.15, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("i"), "score", closeTo(0.15, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("j"), "score", closeTo(0.15, RESULT_ERROR))
+        );
 
-            weightedExpected.put(tx.findNode(label, "name", "a").getId(), 0.21803);
-            weightedExpected.put(tx.findNode(label, "name", "b").getId(), 2.00083);
-            weightedExpected.put(tx.findNode(label, "name", "c").getId(), 1.83298);
-            weightedExpected.put(tx.findNode(label, "name", "d").getId(), 0.18471);
-            weightedExpected.put(tx.findNode(label, "name", "e").getId(), 0.18194);
-            weightedExpected.put(tx.findNode(label, "name", "f").getId(), 0.17367);
-            weightedExpected.put(tx.findNode(label, "name", "g").getId(), 0.15);
-            weightedExpected.put(tx.findNode(label, "name", "h").getId(), 0.15);
-            weightedExpected.put(tx.findNode(label, "name", "i").getId(), 0.15);
-            weightedExpected.put(tx.findNode(label, "name", "j").getId(), 0.15);
-        });
+        weightedExpected = List.of(
+            Map.of("nodeId", idFunction.of("a"), "score", closeTo(0.21803, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("b"), "score", closeTo(2.00083, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("c"), "score", closeTo(1.83298, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("d"), "score", closeTo(0.18471, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("e"), "score", closeTo(0.18194, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("f"), "score", closeTo(0.17367, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("g"), "score", closeTo(0.15, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("h"), "score", closeTo(0.15, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("i"), "score", closeTo(0.15, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("j"), "score", closeTo(0.15, RESULT_ERROR))
+        );
     }
 
     List<String> graphCreateQueries() {

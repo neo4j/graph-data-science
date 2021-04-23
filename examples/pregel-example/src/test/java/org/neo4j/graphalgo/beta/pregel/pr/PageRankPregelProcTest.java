@@ -24,14 +24,17 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.extension.Neo4jGraph;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.closeTo;
 import static org.neo4j.graphalgo.beta.pregel.pr.PageRankPregel.PAGE_RANK;
 
 class PageRankPregelProcTest extends BaseProcTest {
 
+    @Neo4jGraph
     private static final String TEST_GRAPH =
         "CREATE" +
         "  (a:Node)" +
@@ -62,28 +65,28 @@ class PageRankPregelProcTest extends BaseProcTest {
         ", (i)-[:REL]->(e)" +
         ", (j)-[:REL]->(e)" +
         ", (k)-[:REL]->(e)";
+    
+    private static final double RESULT_ERROR = 1e-3;
 
-    private static final Map<Long, Double> EXPECTED_RANKS = new HashMap<>();
-
-    static {
-        EXPECTED_RANKS.put(0L, 0.0276D);
-        EXPECTED_RANKS.put(1L, 0.3483D);
-        EXPECTED_RANKS.put(2L, 0.2650D);
-        EXPECTED_RANKS.put(3L, 0.0330D);
-        EXPECTED_RANKS.put(4L, 0.0682D);
-        EXPECTED_RANKS.put(5L, 0.0330D);
-        EXPECTED_RANKS.put(6L, 0.0136D);
-        EXPECTED_RANKS.put(7L, 0.0136D);
-        EXPECTED_RANKS.put(8L, 0.0136D);
-        EXPECTED_RANKS.put(9L, 0.0136D);
-        EXPECTED_RANKS.put(10L, 0.0136D);
-    }
+    private List<Map<String, Object>> expected;
 
     @BeforeEach
     void setup() throws Exception {
-        runQuery(TEST_GRAPH);
-
         registerProcedures(GraphCreateProc.class, PageRankPregelStreamProc.class, PageRankPregelMutateProc.class);
+
+        expected = List.of(
+            Map.of("nodeId", idFunction.of("a"), "score", closeTo(0.0276D, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("b"), "score", closeTo(0.3483D, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("c"), "score", closeTo(0.2650D, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("d"), "score", closeTo(0.0330D, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("e"), "score", closeTo(0.0682D, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("f"), "score", closeTo(0.0330D, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("g"), "score", closeTo(0.0136D, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("h"), "score", closeTo(0.0136D, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("i"), "score", closeTo(0.0136D, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("j"), "score", closeTo(0.0136D, RESULT_ERROR)),
+            Map.of("nodeId", idFunction.of("k"), "score", closeTo(0.0136D, RESULT_ERROR))
+        );
     }
 
     @Test
@@ -95,15 +98,7 @@ class PageRankPregelProcTest extends BaseProcTest {
             .addParameter("maxIterations", 10)
             .yields("nodeId", "values");
 
-        HashMap<Long, Double> actual = new HashMap<>();
-        runQueryWithRowConsumer(query, r -> {
-            actual.put(
-                r.getNumber("nodeId").longValue(),
-                ((Map<String, Double>) r.get("values")).get(PAGE_RANK)
-            );
-        });
-
-        assertMapEqualsWithTolerance(EXPECTED_RANKS, actual, 0.001);
+        assertCypherResult(query + " RETURN nodeId, values.pagerank AS score", expected);
     }
 
     @Test
@@ -136,14 +131,6 @@ class PageRankPregelProcTest extends BaseProcTest {
             .addParameter("seedProperty", "value_" + PAGE_RANK)
             .yields("nodeId", "values");
 
-        HashMap<Long, Double> actual = new HashMap<>();
-        runQueryWithRowConsumer(query, r -> {
-            actual.put(
-                r.getNumber("nodeId").longValue(),
-                ((Map<String, Double>) r.get("values")).get(PAGE_RANK)
-            );
-        });
-
-        assertMapEqualsWithTolerance(EXPECTED_RANKS, actual, 0.001);
+        assertCypherResult(query + " RETURN nodeId, values.pagerank AS score", expected);
     }
 }

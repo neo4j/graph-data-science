@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
-import java.util.HashMap;
 import java.util.Optional;
 
 class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<BetweennessCentralityStreamConfig> {
@@ -53,13 +52,7 @@ class BetweennessCentralityStreamProcTest extends BetweennessCentralityProcTest<
             .streamMode()
             .yields();
 
-        var actual = new HashMap<Long, Double>();
-        runQueryWithRowConsumer(
-            query,
-            row -> actual.put(row.getNumber("nodeId").longValue(), row.getNumber("score").doubleValue())
-        );
-
-        assertMapEqualsWithTolerance(EXPECTED, actual, 1E-1);
+        assertCypherResult(query, expected);
     }
 
     @Test

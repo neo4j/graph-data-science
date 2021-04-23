@@ -30,12 +30,14 @@ import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.isA;
 
 class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> implements MutateNodePropertyTest<PageRankAlgorithm, PageRankMutateConfig, PageRankResult> {
 
@@ -132,33 +134,19 @@ class PageRankMutateProcTest extends PageRankProcTest<PageRankMutateConfig> impl
             .algo("pageRank")
             .mutateMode()
             .addParameter("mutateProperty", mutateProperty())
-            .yields(
-                "nodePropertiesWritten",
-                "createMillis",
-                "computeMillis",
-                "postProcessingMillis",
-                "mutateMillis",
-                "didConverge",
-                "ranIterations",
-                "configuration",
-                "centralityDistribution"
-            );
+            .yields();
 
-        runQueryWithRowConsumer(
-            query,
-            row -> {
-                assertEquals(10L, row.getNumber("nodePropertiesWritten"));
 
-                assertThat(-1L, lessThan(row.getNumber("createMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("computeMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("postProcessingMillis").longValue()));
-                assertThat(-1L, lessThan(row.getNumber("mutateMillis").longValue()));
-
-                assertEquals(false, row.get("didConverge"));
-                assertEquals(20L, row.get("ranIterations"));
-
-                assertNotNull(row.get("centralityDistribution"));
-            }
-        );
+        assertCypherResult(query, List.of(Map.of(
+            "nodePropertiesWritten", 10L,
+            "createMillis", greaterThan(-1L),
+            "computeMillis", greaterThan(-1L),
+            "postProcessingMillis", greaterThan(-1L),
+            "mutateMillis", greaterThan(-1L),
+            "didConverge", false,
+            "ranIterations", 20L,
+            "centralityDistribution", isA(Map.class),
+            "configuration", allOf(isA(Map.class), hasEntry("mutateProperty", mutateProperty()))
+        )));
     }
 }

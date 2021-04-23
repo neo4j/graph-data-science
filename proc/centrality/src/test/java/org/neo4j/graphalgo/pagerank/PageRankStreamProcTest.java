@@ -51,41 +51,6 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
         return PageRankStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
     }
 
-    private void assertMapEqualsWithTolerance(Map<Long, Double> expected, Map<Long, Double> actual) {
-        super.assertMapEqualsWithTolerance(expected, actual, RESULT_ERROR);
-    }
-
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
-    void testPageRankParallelExecution(ModeBuildStage queryBuilder, String testName) {
-        final Map<Long, Double> actual = new HashMap<>();
-        String query = queryBuilder.streamMode().yields("nodeId", "score");
-
-        runQueryWithRowConsumer(query,
-            row -> {
-                final long nodeId = row.getNumber("nodeId").longValue();
-                actual.put(nodeId, (Double) row.get("score"));
-            }
-        );
-
-        assertMapEqualsWithTolerance(expected, actual);
-    }
-
-    @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsEqualWeight")
-    void testWeightedPageRankWithAllRelationshipsEqual(ModeBuildStage queryBuilder, String testCase) {
-        final Map<Long, Double> actual = new HashMap<>();
-        String query = queryBuilder
-            .streamMode()
-            .addParameter("relationshipWeightProperty", "equalWeight")
-            .yields("nodeId", "score");
-
-        runQueryWithRowConsumer(query,
-            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
-        );
-        assertMapEqualsWithTolerance(expected, actual);
-    }
-
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsLabel3")
     void testWeightedPageRankFromLoadedGraphWithDirectionBoth(ModeBuildStage queryBuilder, String testCaseName) {
@@ -121,34 +86,14 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
     }
 
     @ParameterizedTest(name = "{1}")
-    @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariationsWeight")
-    void testWeightedPageRankWithCachedWeights(ModeBuildStage queryBuilder, String testCaseName) {
-        String query = queryBuilder
-            .streamMode()
-            .addParameter("relationshipWeightProperty", "weight")
-            .addParameter("cacheWeights", true)
-            .yields("nodeId", "score");
-
-        final Map<Long, Double> actual = new HashMap<>();
-        runQueryWithRowConsumer(query,
-            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
-        );
-        assertMapEqualsWithTolerance(weightedExpected, actual);
-    }
-
-    @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void testPageRank(ModeBuildStage queryBuilder, String testCaseName) {
         final Map<Long, Double> actual = new HashMap<>();
         String query = queryBuilder
             .streamMode()
-            .addParameter("dampingFactor", 0.85)
             .yields("nodeId", "score");
 
-        runQueryWithRowConsumer(query,
-            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
-        );
-        assertMapEqualsWithTolerance(expected, actual);
+        assertCypherResult(query, expected);
     }
 
     @ParameterizedTest(name = "{1}")
@@ -160,10 +105,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
             .addParameter("relationshipWeightProperty", "weight")
             .yields("nodeId", "score");
 
-        runQueryWithRowConsumer(query,
-            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
-        );
-        assertMapEqualsWithTolerance(weightedExpected, actual);
+        assertCypherResult(query, weightedExpected);
     }
 
     @Test
@@ -197,11 +139,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
 
         var actual = new HashMap<Long, Double>();
 
-        runQueryWithRowConsumer(queryWithSourceNodes, Map.of("sources", sourceNodes),
-            row -> actual.put((Long) row.get("nodeId"), (Double) row.get("score"))
-        );
-
-        assertMapEqualsWithTolerance(expected, actual);
+        assertCypherResult(queryWithSourceNodes, Map.of("sources", sourceNodes), expected);
     }
 
 }
