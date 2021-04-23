@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:cc="http://creativecommons.org/ns#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns="http://www.w3.org/2000/svg"
+     xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+     xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+     width="304.19489"
+     height="162.57976"
+     viewBox="-122.63686 -33.077244 304.19489 162.57976"
+     version="1.1"
+     id="svg106"
+     sodipodi:docname="randomWalk.svg"
+     inkscape:version="1.0.2 (e86c870879, 2021-01-15, custom)">
+  <metadata
+     id="metadata112">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Neo4j Graph Visualization</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs110">
+    <marker
+       style="overflow:visible"
+       id="Arrow1Lend"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend"
+       inkscape:isstock="true">
+      <path
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path964" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="3840"
+     inkscape:window-height="2077"
+     id="namedview108"
+     showgrid="false"
+     inkscape:zoom="7.688302"
+     inkscape:cx="165.17136"
+     inkscape:cy="94.852401"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g86"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <title
+     id="title2">Neo4j Graph Visualization</title>
+  <desc
+     id="desc4">Created using Neo4j (http://www.neo4j.com/)</desc>
+  <g
+     class="node"
+     transform="translate(22.734768,-7.6214182)"
+     id="g94">
+    <circle
+       class="outline"
+       cx="4.1918263"
+       cy="0.54417437"
+       r="25"
+       fill="#a5abb6"
+       stroke="#9aa1ac"
+       stroke-width="2px"
+       id="circle88" />
+    <text
+       text-anchor="middle"
+       pointer-events="none"
+       font-family="sans-serif"
+       dy="1.5625"
+       font-size="25px"
+       fill="#ffffff"
+       id="text90" />
+    <text
+       text-anchor="middle"
+       pointer-events="none"
+       x="0"
+       y="5"
+       font-size="10px"
+       fill="#ffffff"
+       font-family="sans-serif"
+       id="text92" />
+  </g>
+  <g
+     class="layer relationships"
+     id="g54"
+     transform="translate(-5.0658607,-10.952808)" />
+  <g
+     class="node"
+     transform="translate(155.55803,84.919507)"
+     id="g70">
+    <circle
+       class="outline"
+       cx="0"
+       cy="0"
+       r="25"
+       fill="#a5abb6"
+       stroke="#9aa1ac"
+       stroke-width="2px"
+       id="circle64" />
+    <text
+       text-anchor="middle"
+       pointer-events="none"
+       font-family="sans-serif"
+       dy="1.5625"
+       font-size="25px"
+       fill="#ffffff"
+       id="text66" />
+    <text
+       text-anchor="middle"
+       pointer-events="none"
+       x="0"
+       y="5"
+       font-size="10px"
+       fill="#ffffff"
+       font-family="sans-serif"
+       id="text68" />
+  </g>
+  <g
+     class="node"
+     transform="translate(-96.636864,86.201562)"
+     id="g78">
+    <circle
+       class="outline"
+       cx="0"
+       cy="0"
+       r="25"
+       fill="#a5abb6"
+       stroke="#9aa1ac"
+       stroke-width="2px"
+       id="circle72" />
+    <text
+       text-anchor="middle"
+       pointer-events="none"
+       font-family="sans-serif"
+       dy="1.5625"
+       font-size="25px"
+       fill="#ffffff"
+       id="text74" />
+    <text
+       text-anchor="middle"
+       pointer-events="none"
+       x="0"
+       y="5"
+       font-size="10px"
+       fill="#ffffff"
+       font-family="sans-serif"
+       id="text76" />
+  </g>
+  <g
+     class="node"
+     transform="translate(26.159407,87.114821)"
+     id="g86">
+    <circle
+       class="outline"
+       cx="0"
+       cy="0"
+       fill="#a5abb6"
+       stroke="#9aa1ac"
+       stroke-width="2px"
+       id="circle80"
+       r="25" />
+    <text
+       text-anchor="middle"
+       pointer-events="none"
+       font-family="sans-serif"
+       dy="1.5625"
+       font-size="25px"
+       fill="#ffffff"
+       id="text82" />
+    <text
+       text-anchor="middle"
+       pointer-events="none"
+       x="0"
+       y="5"
+       font-size="10px"
+       fill="#ffffff"
+       font-family="sans-serif"
+       id="text84" />
+    <text
+       xml:space="preserve"
+       style="font-size:24px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003"
+       x="-7.5054355"
+       y="6.5719681"
+       id="text1331"><tspan
+         sodipodi:role="line"
+         id="tspan1329"
+         x="-7.5054355"
+         y="6.5719681"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:sans-serif;-inkscape-font-specification:sans-serif">v</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003"
+       x="-127.82066"
+       y="6.6646876"
+       id="text1331-1"><tspan
+         sodipodi:role="line"
+         id="tspan1329-1"
+         x="-127.82066"
+         y="6.6646876"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:sans-serif;-inkscape-font-specification:sans-serif">t</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:24px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003"
+       x="-10.579059"
+       y="-89.62326"
+       id="text1331-5"><tspan
+         sodipodi:role="line"
+         id="tspan1329-9"
+         x="-10.579059"
+         y="-89.62326"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:sans-serif;-inkscape-font-specification:sans-serif">x<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan1533">1</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:40px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003"
+       x="117.60261"
+       y="3.9862769"
+       id="text1331-5-4"><tspan
+         sodipodi:role="line"
+         id="tspan1329-9-8"
+         x="117.60261"
+         y="3.9862769"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:sans-serif;-inkscape-font-specification:sans-serif">x<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan1535">2</tspan></tspan></text>
+  </g>
+  <path
+     style="fill:#a5abb6;fill-opacity:1;stroke:#9aa1ac;stroke-width:2.8;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="M -71.374649,85.76501 1.0011847,86.026716"
+     id="path1243"
+     sodipodi:nodetypes="cc" />
+  <path
+     style="fill:#a5abb6;fill-opacity:1;stroke:#9aa1ac;stroke-width:2.8;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="m 50.517667,86.448135 79.719123,0.136314"
+     id="path1243-3"
+     sodipodi:nodetypes="cc" />
+  <path
+     style="fill:#a5abb6;fill-opacity:1;stroke:#9aa1ac;stroke-width:2.8;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="m 26.286924,17.903264 -0.04023,44.727294"
+     id="path1243-3-6-7"
+     sodipodi:nodetypes="cc" />
+  <path
+     style="fill:#a5abb6;fill-opacity:1;stroke:#9aa1ac;stroke-width:2.8;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     d="M 8.0163983,9.73866 -78.779618,69.396551"
+     id="path1243-3-6-7-5"
+     sodipodi:nodetypes="cc" />
+  <text
+     xml:space="preserve"
+     style="font-size:40px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003"
+     x="-47.747459"
+     y="98.898796"
+     id="text1415"><tspan
+       sodipodi:role="line"
+       id="tspan1413"
+       x="-47.747459"
+       y="98.898796" /></text>
+  <text
+     xml:space="preserve"
+     style="font-size:16px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003"
+     x="-33.774849"
+     y="107.95171"
+     id="text1419"><tspan
+       sodipodi:role="line"
+       id="tspan1417"
+       x="-33.774849"
+       y="107.95171"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle">1</tspan><tspan
+       sodipodi:role="line"
+       x="-33.774849"
+       y="129.27596"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle"
+       id="tspan1421">returnFactor</tspan></text>
+  <path
+     style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     d="m -79.802207,112.43579 92.782786,0.7519"
+     id="path1451" />
+  <text
+     xml:space="preserve"
+     style="font-size:16px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003"
+     x="89.511719"
+     y="107.75819"
+     id="text1419-4"><tspan
+       sodipodi:role="line"
+       id="tspan1417-4"
+       x="89.511719"
+       y="107.75819"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle">1</tspan><tspan
+       sodipodi:role="line"
+       x="89.511719"
+       y="129.08244"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle"
+       id="tspan1421-4">inOutFactor</tspan></text>
+  <path
+     style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     d="m 43.484359,112.24228 92.782791,0.7519"
+     id="path1451-7" />
+  <text
+     xml:space="preserve"
+     style="font-size:16px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003"
+     x="-35.984444"
+     y="28.972141"
+     id="text1419-6"><tspan
+       sodipodi:role="line"
+       x="-35.984444"
+       y="28.972141"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;font-family:sans-serif;-inkscape-font-specification:sans-serif;text-align:center;text-anchor:middle"
+       id="tspan1421-1">1</tspan></text>
+</svg>

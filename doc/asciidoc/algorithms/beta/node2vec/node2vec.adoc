@@ -19,7 +19,24 @@ For more information on this algorithm, see:
 * https://arxiv.org/pdf/1607.00653.pdf[Grover, Aditya, and Jure Leskovec. "node2vec: Scalable feature learning for networks." Proceedings of the 22nd ACM SIGKDD international conference on Knowledge discovery and data mining. 2016.^]
 * https://snap.stanford.edu/node2vec/
 
-// TODO: Explain random walk p and q parameters
+[[algorithms-embeddings-node2vec-random-walks]]
+== Random Walks
+
+A main concept of the Node2Vec algorithm are the second order random walks.
+A random walk simulates a traversal of the graph in which the traversed relationships are chosen at random.
+In a classic random walk, each relationship has the same, possibly weighted, probability of being picked.
+This probability is not influenced by the previously visited nodes.
+The concept of second order random walks, however, tries to model the transition probability based on the currently visited node `v`, the node `t` visited before the current one, and the node `x` which is the target of a candidate relationship.
+Node2Vec random walks are thus influenced by two parameters: the `returnFactor` and the `inOutFactor`:
+
+* The `returnFactor` is used if `t` equals `x`, i.e., the random walk returns to the previously visited node.
+* The `inOutFactor` is used if the distance from `t` to `x` is equal to 2, i.e., the walk traverses further away from the node `t`
+
+image::randomWalk.svg[Visuzalition of random walk parameters,align="center"]
+
+For every node in the graph Node2Vec generates a series of random walks with the particular node as start node.
+The number of random walks per node can be influenced by the `walkPerNode` configuration parameters, the walk length is controlled by the `walkLength` parameter.
+
 
 [[algorithms-embeddings-node2vec-syntax]]
 == Syntax
@@ -54,6 +71,44 @@ include::specific-configuration.adoc[]
 | Name   | Type        | Description
 | nodeId | Integer     | The Neo4j node ID.
 | embedding | List<Float> | The computed node embedding.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run Node2Vec in mutate mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.node2vec.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  nodeCount: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| nodesCount            | Integer | The number of nodes processed.
+| nodePropertiesWritten | Integer | The number of node properties written.
+| createMillis          | Integer | Milliseconds for loading data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
+| configuration         | Map     | The configuration used for running the algorithm.
 |===
 ======
 
@@ -157,13 +212,18 @@ CREATE (dave)-[:LIKES]->(bongos);
 CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 ----
 
-[source, cypher, role=noplay query-example, no-result, group=node2vec]
+[role=query-example,no-result=true]
+--
+.Run the Node2Vec algorithm on `myGraph`
+[source, cypher, role=noplay]
 ----
-CALL gds.beta.node2vec.stream('myGraph', {embeddingDimension: 2})
+CALL gds.beta.node2vec.stream('myGraph', {embeddingDimension: 2, randomSeed: 42})
+YIELD nodeId, embedding
+RETURN nodeId, embedding
 ----
 
-[opts=header]
 .Results
+[opts="header"]
 |===
 | nodeId | embedding
 | 0 | [-0.14295829832553864, 0.08884537220001221]
@@ -175,4 +235,6 @@ CALL gds.beta.node2vec.stream('myGraph', {embeddingDimension: 2})
 | 6 | [-0.007779224775731564, 0.02114257402718067]
 | 7 | [-0.213893860578537, 0.06195802614092827]
 | 8 | [0.2479933649301529, -0.137322798371315]
+|9 rows
 |===
+--
