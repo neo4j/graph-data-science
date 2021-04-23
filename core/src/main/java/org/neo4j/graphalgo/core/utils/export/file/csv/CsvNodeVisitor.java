@@ -110,14 +110,18 @@ public class CsvNodeVisitor extends NodeVisitor {
                 writeHeaderFile(headerFileName);
             }
 
-            return fileAppender(fileLocation.resolve(dataFileName),
-                csvSchemaBuilder -> csvSchemaBuilder.addNumberColumn(ID_COLUMN_NAME));
+            return fileAppender(
+                fileLocation.resolve(dataFileName),
+                csvSchemaBuilder -> csvSchemaBuilder.addNumberColumn(ID_COLUMN_NAME)
+            );
         });
     }
 
     private void writeHeaderFile(String headerFileName) {
-        try (var headerAppender = fileAppender(fileLocation.resolve(headerFileName),
-            csvSchemaBuilder -> csvSchemaBuilder.addColumn(ID_COLUMN_NAME, CsvSchema.ColumnType.STRING))) {
+        try (var headerAppender = fileAppender(
+            fileLocation.resolve(headerFileName),
+            csvSchemaBuilder -> csvSchemaBuilder.addColumn(ID_COLUMN_NAME, CsvSchema.ColumnType.STRING)
+        )) {
             headerAppender.startLine();
             headerAppender.append(ID_COLUMN_NAME);
 
