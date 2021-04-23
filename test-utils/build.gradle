@@ -16,7 +16,6 @@ dependencies {
     api (
             platform(dep.junit5bom),
             dep.junit5jupiter,
-            project(':cypher-printer'),
             project(':algo'),
             [group: 'org.assertj',             name: 'assertj-core',            version: ver.'assertj'],
             [group: 'org.jetbrains',           name: 'annotations',             version: ver.'jetbrains-annotations'],

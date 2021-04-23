@@ -27,11 +27,6 @@ ext {
                     project(':neo4j-kernel-adapter-4.0'),
                     project(':neo4j-kernel-adapter-4.1'),
                     project(':neo4j-kernel-adapter-4.2'),
-            ],
-            'cypher-printer': [
-                    project(':cypher-printer-4.0'),
-                    project(':cypher-printer-4.1'),
-                    project(':cypher-printer-4.2'),
             ]
     ]
 }
