@@ -43,8 +43,8 @@ class Neo4jVersionTest {
         "4.2.1, V_4_2",
         "4.2.1-foo, V_4_2",
         "dev, V_4_3",
-        "4.0-Aura, V_Aura",
-        "4.2-Aura, V_Aura",
+        "4.0-aura, V_Aura",
+        "4.2-aura, V_Aura",
         "4.3.0-drop03.0, V_Aura",
     })
     void testParse(String input, Neo4jVersion expected) {

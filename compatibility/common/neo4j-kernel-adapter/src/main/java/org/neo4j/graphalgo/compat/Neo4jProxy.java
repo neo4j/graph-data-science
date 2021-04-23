@@ -23,6 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -86,8 +87,10 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.ServiceLoader;
 
+@SuppressForbidden(reason = "This is the best we can do at the moment")
 public final class Neo4jProxy {
 
     private static final Neo4jProxyApi IMPL;
@@ -102,6 +105,9 @@ public final class Neo4jProxy {
             .findFirst()
             .orElseThrow(() -> new LinkageError("Could not load the " + Neo4jProxy.class + " implementation for " + neo4jVersion));
         IMPL = neo4jProxyFactory.load();
+        var log = LogBuilders.outputStreamLog( System.out, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+        log.info("Loaded compatibility layer: %s", IMPL.getClass());
+        log.info("Loaded version: %s", neo4jVersion);
     }
 
     public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
