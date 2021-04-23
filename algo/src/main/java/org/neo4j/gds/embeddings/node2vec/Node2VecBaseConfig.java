@@ -73,13 +73,13 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
 
     @Value.Default
     @Configuration.DoubleRange(min = 0.00001, minInclusive = false, max=1.0)
-    default double centerSamplingFactor() {
+    default double positiveSamplingFactor() {
         return 0.001;
     }
 
     @Value.Default
     @Configuration.DoubleRange(min = 0.00001, minInclusive = false, max=1.0)
-    default double contextSamplingExponent() {
+    default double negativeSamplingExponent() {
         return 0.75;
     }
 

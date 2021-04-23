@@ -32,7 +32,7 @@ public class PositiveSampleProducer {
     private static final int FILTERED_NODE_MARKER = -2;
 
     private final Iterator<long[]> walks;
-    private final HugeDoubleArray centerNodeProbabilities;
+    private final HugeDoubleArray samplingProbabilities;
     private final int prefixWindowSize;
     private final int postfixWindowSize;
     private final ProgressLogger progressLogger;
@@ -45,13 +45,13 @@ public class PositiveSampleProducer {
 
     PositiveSampleProducer(
         Iterator<long[]> walks,
-        HugeDoubleArray centerNodeProbabilities,
+        HugeDoubleArray samplingProbabilities,
         int windowSize,
         ProgressLogger progressLogger
     ) {
         this.walks = walks;
         this.progressLogger = progressLogger;
-        this.centerNodeProbabilities = centerNodeProbabilities;
+        this.samplingProbabilities = samplingProbabilities;
 
         prefixWindowSize = ceilDiv(windowSize - 1, 2);
         postfixWindowSize = (windowSize - 1) / 2;
@@ -140,7 +140,7 @@ public class PositiveSampleProducer {
     }
 
     private boolean shouldPickNode(long nodeId) {
-        return ThreadLocalRandom.current().nextDouble(0, 1) < centerNodeProbabilities.get(nodeId);
+        return ThreadLocalRandom.current().nextDouble(0, 1) < samplingProbabilities.get(nodeId);
     }
 
     // We need to adjust the window size for a given center word to ignore filtered nodes that might occur in the window
