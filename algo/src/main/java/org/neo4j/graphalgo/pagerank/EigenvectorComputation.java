@@ -19,11 +19,9 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import com.carrotsearch.hppc.LongScatterSet;
 import com.carrotsearch.hppc.LongSet;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.gds.scaling.ScalarScaler;
-import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
@@ -51,10 +49,14 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
     private final double tolerance;
     private final double initialValue;
 
-    EigenvectorComputation(NodeMapping nodeMapping, PageRankConfig config, LongToDoubleFunction weightDenominator) {
+    EigenvectorComputation(
+        long nodeCount,
+        PageRankConfig config,
+        LongSet sourceNodes,
+        LongToDoubleFunction weightDenominator
+    ) {
         this.tolerance = config.tolerance();
-        this.sourceNodes = new LongScatterSet();
-        config.sourceNodeIds().map(nodeMapping::toMappedNodeId).forEach(sourceNodes::add);
+        this.sourceNodes = sourceNodes;
         this.hasSourceNodes = !sourceNodes.isEmpty();
 
         // The initial value needs to be normalized. If there are no source nodes,
@@ -62,7 +64,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
         // every non-source nodes gets 0.
         this.initialValue = hasSourceNodes
             ? 1.0 / sourceNodes.size()
-            : 1.0 / nodeMapping.nodeCount();
+            : 1.0 / nodeCount;
 
         this.weightDenominator = weightDenominator;
     }

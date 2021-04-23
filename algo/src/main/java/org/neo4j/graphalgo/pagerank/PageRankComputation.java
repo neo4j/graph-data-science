@@ -19,9 +19,7 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
-import com.carrotsearch.hppc.LongScatterSet;
 import com.carrotsearch.hppc.LongSet;
-import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Messages;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
@@ -47,8 +45,8 @@ public final class PageRankComputation implements PregelComputation<PageRankConf
     private final double deltaCoefficient;
 
     PageRankComputation(
-        NodeMapping nodeMapping,
         PageRankConfig config,
+        LongSet sourceNodes,
         LongToDoubleFunction degreeFunction,
         double deltaCoefficient
     ) {
@@ -56,8 +54,7 @@ public final class PageRankComputation implements PregelComputation<PageRankConf
         this.tolerance = config.tolerance();
         this.deltaCoefficient = deltaCoefficient;
         this.alpha = 1 - this.dampingFactor;
-        this.sourceNodes = new LongScatterSet();
-        config.sourceNodeIds().map(nodeMapping::toMappedNodeId).forEach(sourceNodes::add);
+        this.sourceNodes = sourceNodes;
         this.hasSourceNodes = !sourceNodes.isEmpty();
         this.degreeFunction = degreeFunction;
     }
