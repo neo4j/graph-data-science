@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.cypherdsl.core.Cypher;
 import org.neo4j.cypherdsl.core.Expression;
+import org.neo4j.cypherdsl.core.SymbolicName;
 import org.neo4j.cypherdsl.core.renderer.Configuration;
 import org.neo4j.cypherdsl.core.renderer.Renderer;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -475,11 +476,27 @@ public abstract class GdsCypher {
         return queryArguments.toArray(new Expression[0]);
     }
 
-    private static Optional<String[]> yieldsFields(Collection<String> yields) {
+    private static Optional<SymbolicName[]> yieldsFields(Collection<String> yields) {
         if (yields.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(yields.toArray(new String[0]));
+
+        var yieldNames = yields.stream().map(GdsCypher::name).toArray(SymbolicName[]::new);
+        return Optional.of(yieldNames);
+    }
+
+    private static SymbolicName name(String name) {
+        try {
+            return Cypher.name(name.trim());
+        } catch (IllegalArgumentException e) {
+            var message = String.format(
+                Locale.ENGLISH,
+                "`%s` is not a valid Cypher name: %s",
+                name,
+                e.getMessage()
+            );
+            throw new IllegalArgumentException(message, e);
+        }
     }
 
     private static final class StagedBuilder implements CreationBuildStage, ImplicitCreationBuildStage, QueryBuilder, ModeBuildStage, ParametersBuildStage {
@@ -601,7 +618,7 @@ public abstract class GdsCypher {
 
         @Override
         public StagedBuilder addVariable(String key, String variable) {
-            builder.putParameter(key, Cypher.name(variable));
+            builder.putParameter(key, GdsCypher.name(variable));
             return this;
         }
 

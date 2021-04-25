@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 
@@ -663,6 +664,35 @@ class GdsCypherTest {
             "CALL gds.algoName.write('') YIELD %s",
             String.join(", ", yieldedFields)
         );
+    }
+
+    @Test
+    void testYieldTrims() {
+        String query = GdsCypher
+            .call()
+            .explicitCreation("")
+            .algo("algoName")
+            .writeMode()
+            .yields(" foo", "bar ", "  baz  ", "qux\t\r\n");
+
+        assertThat(query).isEqualTo(
+            "CALL gds.algoName.write('') YIELD foo, bar, baz, qux"
+        );
+    }
+
+    @Test
+    void testYieldErrorOnIllegalName() {
+        var builder = GdsCypher
+            .call()
+            .explicitCreation("")
+            .algo("algoName")
+            .writeMode();
+
+        assertThatThrownBy(() -> builder.yields("123"))
+            .hasMessage("`123` is not a valid Cypher name: Name must be a valid identifier.");
+
+        assertThatThrownBy(() -> builder.yields("       "))
+            .hasMessage("`       ` is not a valid Cypher name: Name must not be empty.");
     }
 
     private static String executionModeName(GdsCypher.ExecutionModes executionMode) {
