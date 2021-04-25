@@ -643,16 +643,18 @@ class GdsCypherTest {
         assertThat(query).isEqualTo("CALL gds.algoName.write('')");
     }
 
-    static Stream<List<String>> testYields() {
+    static Stream<Arguments> testYields() {
         return Stream.of(
-            List.of("foo"),
-            List.of("foo", "BAR")
+            arguments(List.of("foo"), "foo"),
+            arguments(List.of("foo", "BAR"), "foo, BAR"),
+            arguments(List.of(" foo", "bar ", "  baz  ", "qux\t\r\n"), "foo, bar, baz, qux"),
+            arguments(List.of("foo, bar", "baz"), "foo, bar, baz")
         );
     }
 
     @ParameterizedTest
     @MethodSource("testYields")
-    void testYields(Iterable<String> yieldedFields) {
+    void testYields(Iterable<String> yieldedFields, String expectedYield) {
         String query = GdsCypher
             .call()
             .explicitCreation("")
@@ -662,21 +664,7 @@ class GdsCypherTest {
 
         assertThat(query).isEqualTo(
             "CALL gds.algoName.write('') YIELD %s",
-            String.join(", ", yieldedFields)
-        );
-    }
-
-    @Test
-    void testYieldTrims() {
-        String query = GdsCypher
-            .call()
-            .explicitCreation("")
-            .algo("algoName")
-            .writeMode()
-            .yields(" foo", "bar ", "  baz  ", "qux\t\r\n");
-
-        assertThat(query).isEqualTo(
-            "CALL gds.algoName.write('') YIELD foo, bar, baz, qux"
+            expectedYield
         );
     }
 
@@ -692,7 +680,7 @@ class GdsCypherTest {
             .hasMessage("`123` is not a valid Cypher name: Name must be a valid identifier.");
 
         assertThatThrownBy(() -> builder.yields("       "))
-            .hasMessage("`       ` is not a valid Cypher name: Name must not be empty.");
+            .hasMessage("`` is not a valid Cypher name: Name must not be empty.");
     }
 
     private static String executionModeName(GdsCypher.ExecutionModes executionMode) {

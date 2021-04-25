@@ -476,18 +476,24 @@ public abstract class GdsCypher {
         return queryArguments.toArray(new Expression[0]);
     }
 
+    private static final Pattern COMMA = Pattern.compile(",");
+
     private static Optional<SymbolicName[]> yieldsFields(Collection<String> yields) {
         if (yields.isEmpty()) {
             return Optional.empty();
         }
 
-        var yieldNames = yields.stream().map(GdsCypher::name).toArray(SymbolicName[]::new);
+        var yieldNames = yields.stream()
+            .flatMap(COMMA::splitAsStream)
+            .map(String::trim)
+            .map(GdsCypher::name)
+            .toArray(SymbolicName[]::new);
         return Optional.of(yieldNames);
     }
 
     private static SymbolicName name(String name) {
         try {
-            return Cypher.name(name.trim());
+            return Cypher.name(name);
         } catch (IllegalArgumentException e) {
             var message = String.format(
                 Locale.ENGLISH,
