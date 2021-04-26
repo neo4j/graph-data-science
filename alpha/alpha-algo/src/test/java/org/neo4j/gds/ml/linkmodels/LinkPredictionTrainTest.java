@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
@@ -26,8 +27,11 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.CSRGraph;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -37,6 +41,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.TestLog.INFO;
+import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 @GdlExtension
 class LinkPredictionTrainTest {
@@ -102,6 +108,9 @@ class LinkPredictionTrainTest {
     @Inject
     GraphStore graphStore;
 
+    @Inject
+    Graph graph;
+
     @Test
     void trainsAModel() {
         var trainGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
@@ -130,7 +139,7 @@ class LinkPredictionTrainTest {
         var linkPredictionTrain = new LinkPredictionTrain(
             UnionGraph.of(List.of(trainGraph, testGraph)),
             config,
-            TestProgressLogger.NULL_LOGGER.getLog()
+            TestProgressLogger.NULL_LOGGER
         );
 
         var model = linkPredictionTrain.compute();
@@ -174,7 +183,7 @@ class LinkPredictionTrainTest {
         var linkPredictionTrain = new LinkPredictionTrain(
             UnionGraph.of(List.of(trainGraph, testGraph)),
             config,
-            TestProgressLogger.NULL_LOGGER.getLog()
+            TestProgressLogger.NULL_LOGGER
         );
 
         var model = linkPredictionTrain.compute();
@@ -188,5 +197,63 @@ class LinkPredictionTrainTest {
         double model1Score = validationScores.get(0).avg();
         double model2Score = validationScores.get(1).avg();
         assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
+    }
+
+    @Test
+    void testLogging() {
+        var trainGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
+        var testGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
+
+        var nodeCount = 15;
+        var totalPositives = 16;
+        double maxNumberOfRelationships = nodeCount * (nodeCount - 1) / 2d;
+        double totalNegatives = maxNumberOfRelationships - totalPositives;
+        var classRatio = totalNegatives / totalPositives;
+
+        var expectedWinner = Map.<String, Object>of("maxEpochs", 1000);
+        var config = ImmutableLinkPredictionTrainConfig.builder()
+            .trainRelationshipType(RelationshipType.of("TRAIN"))
+            .testRelationshipType(RelationshipType.of("TEST"))
+            .featureProperties(List.of("array"))
+            .modelName("model")
+            .validationFolds(3)
+            .randomSeed(-1L)
+            .negativeClassWeight(classRatio)
+            .params(List.of(
+                Map.of("maxEpochs", 0),
+                expectedWinner
+            )).build();
+
+        var algo = new LinkPredictionTrainFactory(TestProgressLogger.FACTORY).build(
+            graph,
+            config,
+            AllocationTracker.empty(),
+            TestProgressLogger.NULL_LOGGER.getLog(),
+            EmptyProgressEventTracker.INSTANCE
+        );
+        algo.compute();
+
+        var messagesInOrder = ((TestProgressLogger) algo.getProgressLogger()).getMessages(INFO);
+
+        AssertionsForInterfaceTypes.assertThat(messagesInOrder)
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .doesNotHaveDuplicates()
+            .containsExactly(
+                "LinkPredictionTrain :: Start",
+                "LinkPredictionTrain :: ModelSelection :: Start",
+                "LinkPredictionTrain :: ModelSelection 16%",
+                "LinkPredictionTrain :: ModelSelection 33%",
+                "LinkPredictionTrain :: ModelSelection 50%",
+                "LinkPredictionTrain :: ModelSelection 66%",
+                "LinkPredictionTrain :: ModelSelection 83%",
+                "LinkPredictionTrain :: ModelSelection 100%",
+                "LinkPredictionTrain :: ModelSelection :: Finished",
+                "LinkPredictionTrain :: Training :: Start",
+                "LinkPredictionTrain :: Training :: Finished",
+                "LinkPredictionTrain :: Evaluation :: Start",
+                "LinkPredictionTrain :: Evaluation :: Finished",
+                "LinkPredictionTrain :: Finished"
+            );
     }
 }

@@ -85,7 +85,7 @@ class LinkPredictionSerializerIntegrationTest {
 
         var config = createConfig(List.of(model2), List.of("a", "b"));
 
-        var lpTrain = new LinkPredictionTrain(trainGraph, config, TestProgressLogger.NULL_LOGGER.getLog());
+        var lpTrain = new LinkPredictionTrain(trainGraph, config, TestProgressLogger.NULL_LOGGER);
 
         var modelBeforeSerialization = lpTrain.compute();
 

@@ -24,15 +24,9 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.TrainProc;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
-import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.logging.Log;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -95,22 +89,6 @@ public class LinkPredictionTrainProc extends
 
     @Override
     protected AlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> algorithmFactory() {
-        return new AlgorithmFactory<>() {
-            @Override
-            public LinkPredictionTrain build(
-                Graph graph,
-                LinkPredictionTrainConfig configuration,
-                AllocationTracker tracker,
-                Log log,
-                ProgressEventTracker eventTracker
-            ) {
-                return new LinkPredictionTrain(graph, configuration, log);
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(LinkPredictionTrainConfig configuration) {
-                throw new MemoryEstimationNotImplementedException();
-            }
-        };
+        return new LinkPredictionTrainFactory();
     }
 }

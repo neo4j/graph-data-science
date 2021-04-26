@@ -36,9 +36,9 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,40 +58,47 @@ public class LinkPredictionTrain
     private final Graph trainGraph;
     private final Graph testGraph;
     private final LinkPredictionTrainConfig config;
-    private final Log log;
     private final AllocationTracker allocationTracker;
 
     public LinkPredictionTrain(
         Graph graph,
         LinkPredictionTrainConfig config,
-        Log log
+        ProgressLogger progressLogger
     ) {
         this.trainGraph = graph.relationshipTypeFilteredGraph(Set.of(config.trainRelationshipType()));
         this.testGraph = graph.relationshipTypeFilteredGraph(Set.of(config.testRelationshipType()));
         this.config = config;
-        this.log = log;
+        this.progressLogger = progressLogger;
         this.allocationTracker = AllocationTracker.empty();
     }
 
     @Override
     public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> compute() {
 
+        progressLogger.logStart();
         // init and shuffle node ids
         var nodeIds = HugeLongArray.newArray(trainGraph.nodeCount(), allocationTracker);
         nodeIds.setAll(i -> i);
         ShuffleUtil.shuffleHugeLongArray(nodeIds, getRandomDataGenerator());
 
+        progressLogger.startSubTask("ModelSelection");
         var modelSelectResult = modelSelect(nodeIds);
+        progressLogger.finishSubTask("ModelSelection");
         var bestParameters = modelSelectResult.bestParameters();
 
         // train best model on the entire training graph
+        progressLogger.startSubTask("Training");
         var predictor = trainModel(nodeIds, bestParameters);
+        progressLogger.finishSubTask("Training");
 
         // evaluate the best model on the training and test graphs
+        progressLogger.startSubTask("Evaluation");
         var outerTrainMetrics = computeMetric(trainGraph, nodeIds, predictor);
         var testMetrics = computeMetric(testGraph, nodeIds, predictor);
 
         var metrics = mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
+        progressLogger.finishSubTask("Evaluation");
+        progressLogger.logFinish();
 
         return Model.of(
             config.username(),
@@ -150,6 +157,7 @@ public class LinkPredictionTrain
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
                 var predictor = trainModel(trainSet, modelParams);
+                progressLogger.logProgress();
 
                 // 4. evaluate each model candidate on the train and validation sets
                 computeMetric(trainGraph, trainSet, predictor).forEach(trainStatsBuilder::update);
@@ -215,7 +223,8 @@ public class LinkPredictionTrain
             evaluationGraph.concurrentCopy(),
             predictor,
             signedProbabilities,
-            progressLogger
+            // we want to reduce the verbosity compared to NodeClassification
+            ProgressLogger.NULL_LOGGER
         ));
 
         return config.metrics().stream().collect(Collectors.toMap(
