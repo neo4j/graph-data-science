@@ -40,18 +40,8 @@ public class NodeClassificationTrainAlgorithmFactory extends AbstractAlgorithmFa
 
     @Override
     public MemoryEstimation memoryEstimation(NodeClassificationTrainConfig configuration) {
-        return MemoryEstimations.setup(
-            "",
-            dimensions -> estimate(
-                configuration,
-                dimensions.nodeCount()
-            )
-        );
-    }
-
-    private MemoryEstimation estimate(NodeClassificationTrainConfig config, long nodeCount) {
         return MemoryEstimations.builder(NodeClassificationTrain.class)
-            .add("algorithm", NodeClassificationTrain.estimate(config))
+            .add("algorithm", NodeClassificationTrain.estimate(configuration))
             .build();
     }
 

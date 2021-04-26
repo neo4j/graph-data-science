@@ -70,6 +70,11 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     private final StatsMap validationStats;
 
     static MemoryEstimation estimate(NodeClassificationTrainConfig config) {
+        var maxBatchSize = config.params().stream()
+            .map(params -> NodeLogisticRegressionTrainConfig.of(config.featureProperties(), config.targetProperty(), config.concurrency(), params).batchSize())
+            .mapToInt(i -> i)
+            .max()
+            .getAsInt();
         var fudgedClassCount = 1000;
         var fudgedFeatureCount = 500;
         return MemoryEstimations.builder()
@@ -80,7 +85,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             .add("metrics", MetricSpecification.memoryEstimation(fudgedClassCount))
             .perNode("node IDs", HugeLongArray::memoryEstimation)
             .add("outer split", FractionSplitter.estimate(1 - config.holdoutFraction()))
-            .add("splits", StratifiedKFoldSplitter.memoryEstimation(config.validationFolds(), 1 - config.holdoutFraction()))
+            .add("inner split", StratifiedKFoldSplitter.memoryEstimation(config.validationFolds(), 1 - config.holdoutFraction()))
             .add("stats map train", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
             .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
             // TODO: Do we need to estimate the ModelStats and ModelStatsBuilder thingies?
@@ -89,7 +94,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
                 NodeLogisticRegressionTrain.memoryEstimation(
                     fudgedClassCount,
                     fudgedFeatureCount,
-                    TrainingConfig.DEFAULT_BATCH_SIZE,
+                    maxBatchSize,
                     TrainingConfig.DEFAULT_SHARED_UPDATER
                 )
             )

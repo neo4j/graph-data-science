@@ -72,4 +72,14 @@ class NodeLogisticRegressionObjectiveTest {
         assertThat(classList).containsExactly(0L, 1L, 2L);
     }
 
+    @Test
+    void shouldEstimateMemoryUsage() {
+        var memoryUsageInBytes = NodeLogisticRegressionObjective.sizeOfBatchInBytes(100, 10, 10);
+        var memoryUsageOfMakeTargets = 8 * 100 * 1 + 16; // 8 bytes for a double * batchSize * 1 for the single target property + 16 for the double array
+        var memoryUsageOfApplyingL2NormSquared = 8 + 16; // 8 bytes for a double + 16 for the double array
+        var memoryUsageOfPredictor = 24304; // black box, not from this class
+        assertThat(memoryUsageOfMakeTargets).isEqualTo(NodeLogisticRegressionObjective.costOfMakeTargets(100));
+        assertThat(memoryUsageInBytes).isEqualTo(memoryUsageOfPredictor + memoryUsageOfMakeTargets + memoryUsageOfApplyingL2NormSquared);
+    }
+
 }

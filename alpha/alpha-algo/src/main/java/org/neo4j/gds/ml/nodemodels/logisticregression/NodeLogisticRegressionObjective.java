@@ -19,13 +19,16 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ConstantScale;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.CrossEntropyLoss;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2NormSquared;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.ml.Objective;
@@ -41,19 +44,55 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
     private final double penalty;
     private final NodeLogisticRegressionPredictor predictor;
 
+    @SuppressWarnings({"PointlessArithmeticExpression", "UnnecessaryLocalVariable"})
     public static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
-        return
-            costOfMakeTargets() +
-            NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, numberOfFeatures, numberOfClasses) +
-            moreThings();
+        // perThread
+        var batchLocalWeightGradient = Weights.sizeInBytes(numberOfClasses, numberOfFeatures);
+        var targets = Matrix.sizeInBytes(batchSize, 1);
+        var weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(
+            Tuples.pair(batchSize, numberOfFeatures),
+            Tuples.pair(numberOfClasses, numberOfFeatures)
+        );
+        var softMax = weightedFeatures;
+        var unpenalizedLoss = CrossEntropyLoss.sizeInBytes();
+        var l2norm = L2NormSquared.sizeInBytesOfApply();
+        var constantScale = L2NormSquared.sizeInBytesOfApply(); //
+        var elementSum = constantScale;
+
+        long sizeOfPredictionsVariableInBytes = NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(
+            batchSize,
+            numberOfFeatures,
+            numberOfClasses
+        );
+
+        long sizeOfComputationGraphForTrainEpoch =
+            1 * targets +
+            1 * weightedFeatures + // gradient
+            1 * softMax +          // gradient
+            2 * unpenalizedLoss +  // data and gradient
+            2 * l2norm +           // data and gradient
+            2 * constantScale +    // data and gradient
+            2 * elementSum +       // data and gradient
+            sizeOfPredictionsVariableInBytes;
+
+        var sizeOfComputationGraphForEvaluateLoss =
+            1 * targets +
+            1 * weightedFeatures + // gradient
+            1 * softMax +          // gradient
+            1 * unpenalizedLoss +  // data
+            1 * l2norm +           // data
+            1 * constantScale +    // data
+            1 * elementSum +
+            sizeOfPredictionsVariableInBytes;
+
+        return batchLocalWeightGradient +
+               sizeOfComputationGraphForTrainEpoch +
+               sizeOfComputationGraphForEvaluateLoss;
     }
 
-    private static long costOfMakeTargets() {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    private static long moreThings() {
-        throw new UnsupportedOperationException("TODO");
+    @SuppressWarnings("SameParameterValue")
+    static long costOfMakeTargets(int batchSize) {
+        return Matrix.sizeInBytes(batchSize, 1);
     }
 
     public NodeLogisticRegressionObjective(

@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.graphsage.ddl4j;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.PassthroughVariable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.TensorFactory;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,10 +37,6 @@ public class ComputationContext {
     public ComputationContext() {
         this.data = new ConcurrentHashMap<>();
         this.gradients = new ConcurrentHashMap<>();
-    }
-
-    public static MemoryEstimation memoryEstimation() {
-        throw new UnsupportedOperationException("TODO");
     }
 
     public <T extends Tensor<T>> T forward(Variable<T> variable) {
