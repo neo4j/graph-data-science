@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
@@ -31,6 +33,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ValueClass
 @Configuration
@@ -56,6 +59,14 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
 
     List<Map<String, Object>> params();
 
+    @Value.Derived
+    default List<ParamConfig> paramsConfig() {
+        return params()
+            .stream()
+            .map(ParamConfig::of)
+            .collect(Collectors.toList());
+    }
+
     static NodeClassificationTrainConfig of(
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
@@ -72,5 +83,44 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
 
     static ImmutableNodeClassificationTrainConfig.Builder builder() {
         return ImmutableNodeClassificationTrainConfig.builder();
+    }
+
+    @ValueClass
+    @Configuration
+    interface ParamConfig extends ConcurrencyConfig {
+        double penalty();
+
+        @Configuration.IntegerRange(min = 1)
+        default int batchSize() {
+            return 100;
+        }
+
+        @Configuration.IntegerRange(min = 1)
+        default int minEpochs() {
+            return 1;
+        }
+
+        @Configuration.IntegerRange(min = 1)
+        default int maxEpochs() {
+            return 100;
+        }
+
+        @Configuration.IntegerRange(min = 0)
+        default int patience() {
+            return 1;
+        }
+
+        @Configuration.DoubleRange(min = 0)
+        default double tolerance() {
+            return 0.001D;
+        }
+
+        default boolean sharedUpdater() {
+            return false;
+        }
+
+        static ParamConfig of(Map<String, Object> rawParams) {
+            return new ParamConfigImpl(CypherMapWrapper.create(rawParams));
+        }
     }
 }

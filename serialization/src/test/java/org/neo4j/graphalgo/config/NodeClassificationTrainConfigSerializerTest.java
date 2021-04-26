@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.neo4j.gds.ml.nodemodels.metrics.MetricSpecificationTest.allValidMetricSpecifications;
 
@@ -137,6 +138,25 @@ class NodeClassificationTrainConfigSerializerTest {
         assertThat(deserializedConfig.params()).containsExactly(model1, model2);
     }
 
+    @Test
+    void shouldValidateParamsMap() {
+        Map<String, Object> model1 = Map.of("penlty", 1, "maxEpochs", 1);
+
+        assertThatThrownBy(() ->
+            ImmutableNodeClassificationTrainConfig.builder()
+                .modelName("model")
+                .featureProperties(List.of("a", "b"))
+                .holdoutFraction(0.33)
+                .validationFolds(2)
+                .concurrency(1)
+                .randomSeed(19L)
+                .targetProperty("t")
+                .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
+                .params(List.of(model1))
+                .build())
+            .hasMessageContaining("No value specified for the mandatory configuration parameter `penalty` (a similar parameter exists: [penlty])");
+    }
+
     private Map<String, Object> protoToMap(String p) {
         try {
             return ObjectMapperSingleton.OBJECT_MAPPER.readValue(p, Map.class);
@@ -149,4 +169,6 @@ class NodeClassificationTrainConfigSerializerTest {
     static List<String> allValidMetricSpecificationsProxy() {
         return allValidMetricSpecifications();
     }
+
+
 }
