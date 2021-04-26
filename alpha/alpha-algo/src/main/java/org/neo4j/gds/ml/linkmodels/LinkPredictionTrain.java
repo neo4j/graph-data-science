@@ -49,6 +49,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
+import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
 
 public class LinkPredictionTrain
     extends Algorithm<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig>> {
@@ -93,8 +94,12 @@ public class LinkPredictionTrain
 
         // evaluate the best model on the training and test graphs
         progressLogger.startSubTask("Evaluation");
-        var outerTrainMetrics = computeMetric(trainGraph, nodeIds, predictor);
-        var testMetrics = computeMetric(testGraph, nodeIds, predictor);
+        progressLogger.startSubTask("Training");
+        var outerTrainMetrics = computeMetric(trainGraph, nodeIds, predictor, progressLogger);
+        progressLogger.finishSubTask("Training");
+        progressLogger.startSubTask("Testing");
+        var testMetrics = computeMetric(testGraph, nodeIds, predictor, progressLogger);
+        progressLogger.finishSubTask("Testing");
 
         var metrics = mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
         progressLogger.finishSubTask("Evaluation");
@@ -157,12 +162,12 @@ public class LinkPredictionTrain
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
                 // we use a less fine grained progress logging for LP than for NC
-                var predictor = trainModel(trainSet, modelParams, ProgressLogger.NULL_LOGGER);
+                var predictor = trainModel(trainSet, modelParams, NULL_LOGGER);
                 progressLogger.logProgress();
 
                 // 4. evaluate each model candidate on the train and validation sets
-                computeMetric(trainGraph, trainSet, predictor).forEach(trainStatsBuilder::update);
-                computeMetric(trainGraph, validationSet, predictor).forEach(validationStatsBuilder::update);
+                computeMetric(trainGraph, trainSet, predictor, NULL_LOGGER).forEach(trainStatsBuilder::update);
+                computeMetric(trainGraph, validationSet, predictor, NULL_LOGGER).forEach(validationStatsBuilder::update);
             }
             // insert the candidates metrics into trainStats and validationStats
             config.metrics().forEach(metric -> {
@@ -215,17 +220,18 @@ public class LinkPredictionTrain
     private Map<LinkMetric, Double> computeMetric(
         Graph evaluationGraph,
         HugeLongArray evaluationSet,
-        LinkLogisticRegressionPredictor predictor
+        LinkLogisticRegressionPredictor predictor,
+        ProgressLogger progressLogger
     ) {
         var signedProbabilities = SignedProbabilities.create(evaluationGraph.relationshipCount());
 
+        progressLogger.reset(evaluationGraph.nodeCount());
         var queue = new HugeBatchQueue(evaluationSet);
         queue.parallelConsume(config.concurrency(), ignore -> new SignedProbabilitiesCollector(
             evaluationGraph.concurrentCopy(),
             predictor,
             signedProbabilities,
-            // we want to reduce the verbosity compared to NodeClassification
-            ProgressLogger.NULL_LOGGER
+            progressLogger
         ));
 
         return config.metrics().stream().collect(Collectors.toMap(

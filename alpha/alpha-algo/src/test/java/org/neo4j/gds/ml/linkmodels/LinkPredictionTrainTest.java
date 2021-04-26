@@ -261,6 +261,12 @@ class LinkPredictionTrainTest {
                 "LinkPredictionTrain :: Training 100%",
                 "LinkPredictionTrain :: Training :: Finished",
                 "LinkPredictionTrain :: Evaluation :: Start",
+                "LinkPredictionTrain :: Evaluation :: Training :: Start",
+                "LinkPredictionTrain :: Evaluation :: Training 100%",
+                "LinkPredictionTrain :: Evaluation :: Training :: Finished",
+                "LinkPredictionTrain :: Evaluation :: Testing :: Start",
+                "LinkPredictionTrain :: Evaluation :: Testing 100%",
+                "LinkPredictionTrain :: Evaluation :: Testing :: Finished",
                 "LinkPredictionTrain :: Evaluation :: Finished",
                 "LinkPredictionTrain :: Finished"
             );
