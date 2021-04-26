@@ -34,7 +34,7 @@ import static java.lang.Math.log;
 /**
    This variable represents the composition of the logistic regression model's prediction function
    and cross-entropy loss. This therefore represents a function from weights, features and targets
-   to a scalar loss value. Compared to using CrossEntropyLoss variable, composed with predictions from
+   to a scalar loss value. Compared to using MultiClassCrossEntropyLoss variable, composed with predictions from
    the model, this variable does not register the predictions as a parent in the computation graph.
    Rather, the gradient method directly computes the loss gradient for the weights and circumvents
    the loss gradient for the predictions variable.
