@@ -379,7 +379,7 @@ The above query is running the algorithm in `stream` mode as `unweighted` and th
 Below, one can find an example for <<algorithms-page-rank-examples-weighted, weighted graphs>>.
 Another <<algorithms-page-rank-examples-scaler, example>> shows the application of a scaler to normalize the final scores.
 
-NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
+NOTE: While we are using the `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
 
 [[algorithms-page-rank-examples-stats]]
 === Stats
@@ -629,7 +629,7 @@ Comparing these results to the ones from the <<algorithms-page-rank-examples-str
 
 
 [[algorithms-page-rank-examples-scaler]]
-=== Scalers
+=== Scaling centrality scores
 
 To normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
 A common scaler is the `L1Norm`, which normalizes each score to a value between 0 and 1.
@@ -662,3 +662,5 @@ ORDER BY score DESC, name ASC
 | "Site D"  | 0.04263473956974027
 |===
 --
+
+Comparing the results with the <<algorithms-page-rank-examples-stream, stream example>>, we can see that the relative order of scores is the same.
