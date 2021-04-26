@@ -63,7 +63,6 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
 
     @Override
     public LinkPredictionResult compute() {
-        progressLogger.reset(graph.nodeCount());
         progressLogger.logStart();
         var result = new LinkPredictionResult(topN);
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
@@ -87,7 +86,7 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
 
     }
 
-    private class LinkPredictionScoreByIdsConsumer implements Consumer<Batch> {
+    private final class LinkPredictionScoreByIdsConsumer implements Consumer<Batch> {
         private final Graph graph;
         private final LinkLogisticRegressionPredictor predictor;
         private final LinkPredictionResult predictedLinks;

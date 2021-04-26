@@ -19,26 +19,17 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
-import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
-import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
@@ -89,49 +80,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
 
     @Override
     protected AlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictMutateConfig> algorithmFactory() {
-        return new AbstractAlgorithmFactory<>() {
-
-            @Override
-            protected long taskVolume(Graph graph, LinkPredictionPredictMutateConfig configuration) {
-                return graph.nodeCount() * graph.nodeCount();
-            }
-
-            @Override
-            protected String taskName() {
-                return "LinkPredictionPredict";
-            }
-
-            @Override
-            protected LinkPredictionPredict build(
-                Graph graph,
-                LinkPredictionPredictMutateConfig configuration,
-                AllocationTracker tracker,
-                ProgressLogger progressLogger
-            ) {
-                var model = ModelCatalog.get(
-                    configuration.username(),
-                    configuration.modelName(),
-                    LinkLogisticRegressionData.class,
-                    LinkPredictionTrainConfig.class
-                );
-
-                return new LinkPredictionPredict(
-                    new LinkLogisticRegressionPredictor(model.data(), model.trainConfig().featureProperties()),
-                    graph,
-                    configuration.batchSize(),
-                    configuration.concurrency(),
-                    configuration.topN(),
-                    tracker,
-                    progressLogger,
-                    configuration.threshold()
-                );
-            }
-
-            @Override
-            public MemoryEstimation memoryEstimation(LinkPredictionPredictMutateConfig configuration) {
-                throw new MemoryEstimationNotImplementedException();
-            }
-        };
+        return new LinkPredictionPredictFactory();
     }
 
     @Override
