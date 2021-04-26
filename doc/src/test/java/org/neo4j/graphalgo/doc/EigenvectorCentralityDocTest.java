@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.List;
 
 class EigenvectorCentralityDocTest extends DocTestBase {
-
     @Override
     List<Class<?>> procedures() {
         return Arrays.asList(

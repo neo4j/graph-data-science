@@ -111,11 +111,6 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
 
     @Override
     public boolean masterCompute(MasterComputeContext<PageRankConfig> context) {
-        // In the first iteration, we just copy values from RANK to NEXT_RANK.
-        if (context.isInitialSuperstep()) {
-            return false;
-        }
-
         var concurrency = context.config().concurrency();
 
         // Normalize using L2-Norm (Power iteration)
@@ -150,7 +145,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, context.executorService());
 
-        return didConverge.booleanValue();
+        return !context.isInitialSuperstep() && didConverge.booleanValue();
     }
 
     @Override

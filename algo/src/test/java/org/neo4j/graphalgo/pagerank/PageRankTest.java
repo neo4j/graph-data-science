@@ -414,16 +414,16 @@ class PageRankTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00210, expectedPersonalizedRank: 0.0    })" +
-            ", (b:Node { expectedRank: 0.71631, expectedWeightedRank: 0.70774, expectedPersonalizedRank: 0.7071 })" +
-            ", (c:Node { expectedRank: 0.69731, expectedWeightedRank: 0.70645, expectedPersonalizedRank: 0.7071 })" +
-            ", (d:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00172, expectedPersonalizedRank: 0.0    })" +
-            ", (e:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00210, expectedPersonalizedRank: 0.0    })" +
-            ", (f:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00172, expectedPersonalizedRank: 0.0    })" +
-            ", (g:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank: 0.0    })" +
-            ", (h:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank: 0.0    })" +
-            ", (i:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank: 0.0    })" +
-            ", (j:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank: 0.0    })" +
+            "  (a:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00210, expectedPersonalizedRank:  0.00997 })" +
+            ", (b:Node { expectedRank: 0.71631, expectedWeightedRank: 0.70774, expectedPersonalizedRank:  0.70735 })" +
+            ", (c:Node { expectedRank: 0.69731, expectedWeightedRank: 0.70645, expectedPersonalizedRank:  0.70678 })" +
+            ", (d:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00172, expectedPersonalizedRank:  0.00056 })" +
+            ", (e:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00210, expectedPersonalizedRank:  0.0     })" +
+            ", (f:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00172, expectedPersonalizedRank:  0.0     })" +
+            ", (g:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank:  0.0     })" +
+            ", (h:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank:  0.0     })" +
+            ", (i:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank:  0.0     })" +
+            ", (j:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank:  0.0     })" +
             ", (b)-[:TYPE { weight: 1.0 } ]->(c)" +
             ", (c)-[:TYPE { weight: 3.0 } ]->(b)" +
             ", (d)-[:TYPE { weight: 5.0 } ]->(a)" +
@@ -485,10 +485,10 @@ class PageRankTest {
         void withSourceNodes() {
             var config = ImmutablePageRankStreamConfig
                 .builder()
-                .maxIterations(40)
-                .tolerance(0)
+                .maxIterations(10)
+                .tolerance(0.1)
                 .concurrency(1)
-                .sourceNodeIds(LongStream.of(idFunction.of("b")))
+                .sourceNodeIds(LongStream.of(idFunction.of("d")))
                 .build();
 
             var actual = runOnPregel(graph, config, Mode.EIGENVECTOR)
