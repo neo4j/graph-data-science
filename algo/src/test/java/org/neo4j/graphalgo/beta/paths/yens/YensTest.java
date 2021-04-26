@@ -179,8 +179,7 @@ class YensTest {
             .k(k)
             .build();
 
-        var ignored = Yens
-            .sourceTarget(graph, config, testLogger, AllocationTracker.empty())
+        Yens.sourceTarget(graph, config, testLogger, AllocationTracker.empty())
             .compute()
             .pathSet();
 

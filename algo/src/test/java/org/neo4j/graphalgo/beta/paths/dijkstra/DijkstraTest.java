@@ -274,8 +274,7 @@ final class DijkstraTest {
                 .targetNode(idFunction.of("f"))
                 .build();
 
-            var ignored = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), testLogger, AllocationTracker.empty())
+            Dijkstra.sourceTarget(graph, config, Optional.empty(), testLogger, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 

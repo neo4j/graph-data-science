@@ -158,8 +158,7 @@ class AStarTest {
             .targetNode(idFunction.of("nX"))
             .build();
 
-        var ignored = AStar
-            .sourceTarget(graph, config, testLogger, AllocationTracker.empty())
+        AStar.sourceTarget(graph, config, testLogger, AllocationTracker.empty())
             .compute()
             .pathSet();
 
