@@ -47,7 +47,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeatureProper
     int validationFolds();
 
     @Configuration.DoubleRange(min = 0, minInclusive = false)
-    double classRatio();
+    double negativeClassWeight();
 
     List<Map<String, Object>> params();
 

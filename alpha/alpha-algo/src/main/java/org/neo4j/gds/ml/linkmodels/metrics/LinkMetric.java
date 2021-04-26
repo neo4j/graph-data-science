@@ -24,7 +24,7 @@ import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 public enum LinkMetric {
     AUCPR;
 
-    public double compute(SignedProbabilities signedProbabilities, double classRatio) {
+    public double compute(SignedProbabilities signedProbabilities, double negativeClassWeight) {
         var positiveCount = signedProbabilities.positiveCount();
         var negativeCount = signedProbabilities.negativeCount();
         if (positiveCount == 0) return 0.0;
@@ -33,7 +33,7 @@ public enum LinkMetric {
             curveConsumer,
             positiveCount,
             negativeCount,
-            classRatio
+            negativeClassWeight
         );
         curveConsumer.acceptFirstPoint(
             signedProbabilitiesConsumer.recall(positiveCount),
@@ -49,7 +49,7 @@ public enum LinkMetric {
         private final CurveConsumer innerConsumer;
         private final long positiveCount;
         private final long negativeCount;
-        private final double classRatio;
+        private final double negativeClassWeight;
 
         private double lastThreshold;
 
@@ -60,12 +60,12 @@ public enum LinkMetric {
             CurveConsumer innerConsumer,
             long positiveCount,
             long negativeCount,
-            double classRatio
+            double negativeClassWeight
         ) {
             this.innerConsumer = innerConsumer;
             this.positiveCount = positiveCount;
             this.negativeCount = negativeCount;
-            this.classRatio = classRatio;
+            this.negativeClassWeight = negativeClassWeight;
             this.positivesSeen = 0;
             this.negativesSeen = 0;
         }
@@ -97,7 +97,7 @@ public enum LinkMetric {
 
         private double precision(double truePositives) {
             var falsePositives = negativeCount - negativesSeen;
-            return truePositives / (truePositives + classRatio * falsePositives);
+            return truePositives / (truePositives + negativeClassWeight * falsePositives);
         }
 
         private double recall(double truePositives) {

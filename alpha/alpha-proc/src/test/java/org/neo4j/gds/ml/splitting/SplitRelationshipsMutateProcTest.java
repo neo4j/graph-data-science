@@ -78,7 +78,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .addParameter("holdoutRelationshipType", "test")
             .addParameter("remainingRelationshipType", "train")
             .addParameter("holdoutFraction", 0.2)
-            .addParameter("randomSeed", 1337L)
+            .addParameter("negativeSamplingRatio", 1.0)
             .yields();
         var ex = assertThrows(
             Exception.class,
@@ -103,7 +103,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .addParameter("holdoutRelationshipType", "test")
             .addParameter("remainingRelationshipType", "T")
             .addParameter("holdoutFraction", 0.2)
-            .addParameter("randomSeed", 1337L)
+            .addParameter("negativeSamplingRatio", 1.0)
             .yields();
         var ex = assertThrows(
             Exception.class,
@@ -128,7 +128,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .addParameter("holdoutRelationshipType", "T")
             .addParameter("remainingRelationshipType", "train")
             .addParameter("holdoutFraction", 0.2)
-            .addParameter("randomSeed", 1337L)
+            .addParameter("negativeSamplingRatio", 1.0)
             .yields();
         var ex = assertThrows(
             Exception.class,
@@ -153,6 +153,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                               ",(e {id: 4})" +
                               ",(f {id: 5})" +
                               ",(c)-[{w: 0.0}]->(f)" +
+                              ",(e)-[{w: 0.0}]->(c)" +
                               ",(d)-[{w: 1.0}]->(c)";
         var expectedTrain = "CREATE" +
                                " (a {id: 0})" +
@@ -177,6 +178,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .addParameter("remainingRelationshipType", "train")
             .addParameter("holdoutFraction", 0.2)
             .addParameter("randomSeed", 1337L)
+            .addParameter("negativeSamplingRatio", 2.0)
             .yields();
         runQuery(query);
 
@@ -199,6 +201,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                               ",(e {id: 4})" +
                               ",(f {id: 5})" +
                               ",(c)-[{w: 0.0}]->(e)" +
+                              ",(e)-[{w: 0.0}]->(c)" +
                               ",(d)-[{w: 1.0}]->(e)";
         var expectedTrain = "CREATE" +
                                " (a {id: 0})" +
@@ -221,6 +224,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .addParameter("remainingRelationshipType", "train")
             .addParameter("holdoutFraction", 0.2)
             .addParameter("randomSeed", 1337L)
+            .addParameter("negativeSamplingRatio", 2.0)
             .yields();
         runQuery(outerSplitQuery);
 
@@ -234,6 +238,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .addParameter("remainingRelationshipType", "innerTrain")
             .addParameter("holdoutFraction", 0.25)
             .addParameter("randomSeed", 1337L)
+            .addParameter("negativeSamplingRatio", 2.0)
             .yields();
         runQuery(innerSplitQuery);
 

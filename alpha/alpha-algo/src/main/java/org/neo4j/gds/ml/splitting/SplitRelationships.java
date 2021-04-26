@@ -38,8 +38,8 @@ public class SplitRelationships extends Algorithm<SplitRelationships, SplitResul
     @Override
     public SplitResult compute() {
         var splitter = graph.isUndirected()
-            ? new UndirectedEdgeSplitter(config.randomSeed())
-            : new DirectedEdgeSplitter(config.randomSeed());
+            ? new UndirectedEdgeSplitter(config.randomSeed(), config.negativeSamplingRatio())
+            : new DirectedEdgeSplitter(config.randomSeed(), config.negativeSamplingRatio());
         return splitter.split(graph, masterGraph, config.holdoutFraction());
     }
 

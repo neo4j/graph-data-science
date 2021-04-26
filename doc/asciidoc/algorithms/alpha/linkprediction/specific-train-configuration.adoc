@@ -5,7 +5,7 @@
 | trainRelationshipType | String    | n/a     | no       | Relationship type to use during model training.
 | testRelationshipType  | String    | n/a     | no       | Relationship type to use during model evaluation.
 | validationFolds       | Integer   | n/a     | no       | Number of divisions of the training graph used during model selection.
-| classRatio            | Float     | n/a     | no       | Ratio of non-connected node pairs to connected node pairs in the original graph.
+| negativeClassWeight   | Float     | n/a     | no       | Weight of negative examples in model evaluation. Positive examples have weight 1.
 | params                | List<Map> | n/a     | no       | List of model configurations to be trained and compared. See next table for details.
 | randomSeed            | Integer   | n/a     | yes      | Seed for the random number generator used during training.
 |===

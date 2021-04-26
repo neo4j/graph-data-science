@@ -41,11 +41,14 @@ public abstract class EdgeSplitter {
     public static final double NEGATIVE = 0D;
     public static final double POSITIVE = 1D;
     public static final String RELATIONSHIP_PROPERTY = "label";
+    private static final int MAX_RETRIES = 20;
 
-    protected final ThreadLocal<Random> rng;
+    private final ThreadLocal<Random> rng;
+    final double negativeSamplingRatio;
 
-    public EdgeSplitter(Optional<Long> maybeSeed) {
+    EdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio) {
         this.rng = ThreadLocal.withInitial(() -> maybeSeed.map(Random::new).orElseGet(Random::new));
+        this.negativeSamplingRatio = negativeSamplingRatio;
     }
 
     public abstract SplitResult split(
@@ -63,7 +66,7 @@ public abstract class EdgeSplitter {
         return rng.get().nextDouble() < probability;
     }
 
-    protected long randomNodeId(Graph graph) {
+    private long randomNodeId(Graph graph) {
         return Math.abs(rng.get().nextLong() % graph.nodeCount());
     }
 
@@ -74,11 +77,11 @@ public abstract class EdgeSplitter {
         return Math.min(maxSamples, wholeSamples + extraSample);
     }
 
-    protected RelationshipsBuilder newRelationshipsBuilderWithProp(Graph graph, Orientation orientation) {
+    RelationshipsBuilder newRelationshipsBuilderWithProp(Graph graph, Orientation orientation) {
         return newRelationshipsBuilder(graph, orientation, true);
     }
 
-    protected RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation) {
+    RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation) {
         return newRelationshipsBuilder(graph, orientation, false);
     }
 
@@ -97,7 +100,7 @@ public abstract class EdgeSplitter {
             .build();
     }
 
-    protected void negativeSampling(
+    void negativeSampling(
         Graph graph,
         Graph masterGraph,
         RelationshipsBuilder selectedRelsBuilder,
@@ -120,12 +123,18 @@ public abstract class EdgeSplitter {
         // this will not try to avoid duplicate negative relationships,
         // nor will it avoid sampling edges that are sampled as negative in
         // an outer split.
+        int retries = MAX_RETRIES;
         for (int i = 0; i < negativeEdgeCount; i++) {
             var negativeTarget = randomNodeId(graph);
             // no self-relationships
             if (!neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
                 negativeSamplesRemaining.decrementAndGet();
                 selectedRelsBuilder.addFromInternal(nodeId, negativeTarget, NEGATIVE);
+            } else if (retries-- > 0) {
+                // we retry with a different negative target
+                // skipping here and relying on finding another source node is not safe
+                // we only retry a few times to protect against resampling forever for high deg nodes
+                i--;
             }
         }
     }

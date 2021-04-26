@@ -41,7 +41,11 @@ public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateCo
 
     Optional<Long> randomSeed();
 
+    @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     double holdoutFraction();
+
+    @Configuration.DoubleRange(min = 0.0, minInclusive = false)
+    double negativeSamplingRatio();
 
     @Configuration.ConvertWith("org.neo4j.graphalgo.RelationshipType#of")
     @Configuration.ToMapValue("org.neo4j.graphalgo.RelationshipType#toString")

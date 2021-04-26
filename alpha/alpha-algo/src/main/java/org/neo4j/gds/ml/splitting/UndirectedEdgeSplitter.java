@@ -37,12 +37,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class UndirectedEdgeSplitter extends EdgeSplitter {
 
-    public UndirectedEdgeSplitter(Optional<Long> maybeSeed) {
-        super(maybeSeed);
-    }
-
-    public UndirectedEdgeSplitter(long seed) {
-        this(Optional.of(seed));
+    public UndirectedEdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio) {
+        super(maybeSeed, negativeSamplingRatio);
     }
 
     @Override
@@ -71,8 +67,10 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
 
         RelationshipsBuilder remainingRelsBuilder = newRelationshipsBuilder(graph, Orientation.UNDIRECTED);
 
-        var positiveSamplesRemaining = new AtomicLong((long) (graph.relationshipCount() * holdoutFraction) / 2);
-        var negativeSamplesRemaining = new AtomicLong((long) (graph.relationshipCount() * holdoutFraction) / 2);
+        var positiveSamples = (long) (graph.relationshipCount() * holdoutFraction) / 2;
+        var positiveSamplesRemaining = new AtomicLong(positiveSamples);
+        var negativeSamples = (long) (negativeSamplingRatio * graph.relationshipCount() * holdoutFraction) / 2;
+        var negativeSamplesRemaining = new AtomicLong(negativeSamples);
         var edgesRemaining = new AtomicLong(graph.relationshipCount());
 
         graph.forEachNode(nodeId -> {

@@ -220,7 +220,7 @@ public class LinkPredictionTrain
 
         return config.metrics().stream().collect(Collectors.toMap(
             metric -> metric,
-            metric -> metric.compute(signedProbabilities, config.classRatio())
+            metric -> metric.compute(signedProbabilities, config.negativeClassWeight())
         ));
     }
 

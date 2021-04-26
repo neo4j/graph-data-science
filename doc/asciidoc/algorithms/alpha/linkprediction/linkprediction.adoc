@@ -115,15 +115,17 @@ Most graphs have far more non-connected node pairs than connected ones (e.g. spa
 Thus, typically we have an issue with _class imbalance_.
 There are multiple strategies to account for imbalanced data.
 In our procedure, the AUCPR metric is used which is considered more suitable than the commonly used AUROC (Area Under the Receiver Operating Characteristic) metric for imbalanced data.
-One must also specify the configuration parameter `classRatio` which determines the weighting of negative example (non-connected node pairs) to connected node pairs.
-This means upweighting the false positives by this ratio when computing precision.
+For the metric to appropriately reflect both positive (connected node pairs) and negative (non-connected pairs) examples, we provide the ability to both control the ratio of sampling between the classes, and to control the relative weight of classes via `negativeClassWeight`.
+The former is configured by the configuration parameter `negativeSamplingRatio` in <<algorithms-split-relationships, splitRelationships>> when using that procedure to generate the test set.
+Tuning the `negativeClassWeight`, which is explained below, means weighting up or down the false positives when computing precision.
 
-Setting `classRatio` to `1.0` is consistent with _traditional_ evaluation and is recommended for comparison with other models evaluated this way.
+The recommended value for `negativeSamplingRatio` is the _true class ratio_ of the graph, in other words, not applying _undersampling_.
+However, the higher the value, the bigger the test set and thus the time to evaluate.
+The ratio of total probability mass of negative versus positive examples in the test set is approximately `negativeSamplingRatio * negativeClassWeight`.
+Thus, both of these parameters can be adjusted in tandem to trade off evaluation accuracy with speed.
 
-The evaluation is typically done on graphs created by the `splitRelationships` procedure, which produces a set with equal number of positive and negative examples.
-To compensate for the under-sampling of negative examples, `classRatio` can be set to the _true_ class ratio.
-The true class ratio is computed as `(q - r) / q`, where `q = n(n-1)/2` is the number of possible undirected relationships, and `r` is the number of actual undirected relationships.
-Please note that the `relationshipCount` reported by the <<catalog-graph-list, catalog-graph-list>> procedure is the _directed_ count of relationships summed over all existing relationship types.
+The true class ratio is computed as `(q - r) / r`, where `q = n(n-1)/2` is the number of possible undirected relationships, and `r` is the number of actual undirected relationships.
+Please note that the `relationshipCount` reported by the <<catalog-graph-list, graph list>> procedure is the _directed_ count of relationships summed over all existing relationship types.
 Thus, we recommend using Cypher to obtain `r` on the source Neo4j graph.
 For example, this query will count the number of relationships of type `T` or `R`:
 
@@ -134,11 +136,15 @@ WHERE a < b
 RETURN count(rel) AS r
 ----
 
-Using the true class ratio approximates an evaluation on a sample according to the true class distribution.
+When choosing a value for `negativeClassWeight`, two factors should be considered.
+First, the desired ratio of total probability mass of negative versus positive examples in the test set.
+Second, what the ratio of sampled negative examples to positive examples was in the test set.
+To be consistent with _traditional_ evaluation, one should choose parameters so that `negativeSamplingRatio * negativeClassWeight = 1.0`, for example by setting the values to the true class ratio and its reciprocal, or both values to `1.0`.
+
+Alternatively, one can aim for the ratio of total probability weight between the classes to be close to the true class ratio.
+That is, making sure `negativeSamplingRatio * negativeClassWeight` is close to the true class ratio.
 The reported metric (AUCPR) then better reflects the expected precision on unseen highly imbalanced data.
 With this type of evaluation one has to adjust expectations as the metric value then becomes much smaller.
-
-Note that the `classRatio` can be set arbitrarily, and will influence the reported AUCPR score.
 
 [[algorithms-ml-linkprediction-syntax]]
 == Syntax
@@ -350,14 +356,21 @@ In the following examples we will demonstrate using the Link Prediction model on
 First, we must do the test/train splits.
 For this we will make use of the `gds.alpha.ml.splitRelationships` procedure.
 We will do one split to generate the test graph.
+We note that in the example graph there are eight nodes and twelve directed relationships.
+Recall that we compute the class ratio as `(q - r) / q`, where we then have `q = 8(8-1)/2` and `r = 12` which gives us class ratio of `(28 - 12) / 12 ~= 1.33`.
+We use this to configure `negativeSampleRatio` to achieve a sampling proportional to the class ratio.
 
-[source, cypher, role=noplay example-query]
+[role=query-example, group=lp]
+--
+[source, cypher]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
   relationshipTypes: ['KNOWS'],
   remainingRelationshipType: 'KNOWS_REMAINING',
   holdoutRelationshipType: 'KNOWS_TESTGRAPH',
-  holdoutFraction: 0.2
+  holdoutFraction: 0.2,
+  negativeSamplingRatio: 1.33,
+  randomSeed: 1984
 }) YIELD relationshipsWritten
 ----
 
@@ -365,8 +378,9 @@ CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
 [opts="header"]
 |===
 | relationshipsWritten
-| 24
+| 25
 |===
+--
 
 We will create copied relationships for each existing relationship, into either the `KNOWS_REMAINING` or the `KNOWS_TESTGRAPH` relationship types.
 All relationships in `KNOWS_TESTGRAPH` will have a `label` property.
@@ -374,13 +388,17 @@ Additionally, a number of non-existing relationships will be created into the `K
 
 Next, we will create the train graph.
 
-[source, cypher, role=noplay example-query]
+[role=query-example, group=lp]
+--
+[source, cypher]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
   relationshipTypes: ['KNOWS_REMAINING'],
   remainingRelationshipType: 'KNOWS_IGNORED_FOR_TRAINING',
   holdoutRelationshipType: 'KNOWS_TRAINGRAPH',
-  holdoutFraction: 0.2
+  holdoutFraction: 0.2,
+  negativeSamplingRatio: 1.33,
+  randomSeed: 1984
 }) YIELD relationshipsWritten
 ----
 
@@ -390,16 +408,18 @@ CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
 | relationshipsWritten
 | 20
 |===
+--
 
 With both training and test graphs, we are ready to train models.
 We will use 5 validation folds, meaning we will split the train graph into 5 pairs, using one part of each pair for training and one for validation.
-We set the class ratio to 1.33, which is calculated as the number of non-existing relationships over the number of existing relationships.
-In our graph we have 8 nodes, which gives us a maximum of `8 * 7 / 2 = 28` undirected relationships.
-We have 12 actual relationships, giving us a class ratio of `(28 - 12) / 12 = 1.33`.
+Since we set the `negativeSamplingRatio` to 1.33 (the class ratio of the graph) above, we'll set the `negativeClassWeight` during training to `1 / 1.33` to assign equal weight to both classes.
 
 [[algorithms-ml-linkprediction-examples-train-query]]
+[role=query-example, group=lp]
+--
+
 .Train a Link Prediction model:
-[source, cypher, role=noplay example-query]
+[source, cypher]
 ----
 CALL gds.alpha.ml.linkPrediction.train('myGraph', {
   trainRelationshipType: 'KNOWS_TRAINGRAPH',
@@ -407,7 +427,7 @@ CALL gds.alpha.ml.linkPrediction.train('myGraph', {
   modelName: 'lp-numberOfPosts-model',
   featureProperties: ['numberOfPosts'],
   validationFolds: 5,
-  classRatio: 1.33,
+  negativeClassWeight: 1.0 / 1.33,
   randomSeed: 2,
   params: [
     {penalty: 0.5, maxEpochs: 1000},
@@ -424,9 +444,10 @@ RETURN
 .Results
 [opts="header"]
 |===
-| winningModel                    | trainGraphScore    | testGraphScore
-| {maxEpochs: 1000, penalty: 0.5} | 0.7145922746781116 | 0.3512042965360351
+| winningModel                  | trainGraphScore     | testGraphScore
+| {maxEpochs=1000, penalty=0.5} | 0.38525757517173825 | 0.46710171439292664
 |===
+--
 
 Here we can observe that the model candidate with penalty 0.5 performed the best in the training phase, with a score of about 71% over the train graph.
 On the test graph, the model scored much lower at about 35%.
@@ -443,7 +464,9 @@ We will use the model which we trained in the <<algorithms-ml-linkprediction-exa
 
 We must also make sure that we do not include any of the relationships from the train or test graphs, which we do by specifying a relationship filter for the original relationship type `'KNOWS'`.
 
-[source, cypher, role=noplay example-query]
+[role=query-example, group=lp2]
+--
+[source, cypher]
 ----
 CALL gds.alpha.ml.linkPrediction.predict.mutate('myGraph', {
   relationshipTypes: ['KNOWS'],
@@ -460,13 +483,16 @@ CALL gds.alpha.ml.linkPrediction.predict.mutate('myGraph', {
 | relationshipsWritten
 | 10
 |===
+--
 
 We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
 Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
 
 In order to analyze our predicted relationships we will write them back to Neo4j:
 
-[source, cypher, role=noplay example-query]
+[role=query-example, group=lp2]
+--
+[source, cypher]
 ----
 CALL gds.graph.writeRelationship('myGraph', 'KNOWS_PREDICTED', 'probability')
 YIELD relationshipsWritten, propertiesWritten
@@ -478,6 +504,7 @@ YIELD relationshipsWritten, propertiesWritten
 | relationshipsWritten | propertiesWritten
 | 10                   | 10
 |===
+--
 
 The end result looks like this:
 
