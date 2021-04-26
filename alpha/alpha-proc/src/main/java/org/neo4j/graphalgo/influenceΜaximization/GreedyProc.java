@@ -63,7 +63,7 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
         return computationResult.algorithm().resultStream();
     }
 
-    @Procedure(name = "gds.alpha.influenceMaximization.greedy.stats", mode = READ)
+//    @Procedure(name = "gds.alpha.influenceMaximization.greedy.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<InfluenceMaximizationResult.Stats> stats(
         @Name(value = "graphName") Object graphNameOrConfig,

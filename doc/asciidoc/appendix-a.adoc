@@ -371,11 +371,9 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.ml.splitRelationships.mutate`
 .1+<.^| Triangle Finding
 | `gds.alpha.triangles`
-.2+<.^| <<algorithms-greedy, Influence Maximization - Greedy>>
-| `gds.alpha.influenceMaximization.greedy.stats`
+.1+<.^| <<algorithms-greedy, Influence Maximization - Greedy>>
 | `gds.alpha.influenceMaximization.greedy.stream`
-.2+<.^| <<algorithms-celf, Influence Maximization - CELF>>
-| `gds.alpha.influenceMaximization.celf.stats`
+.1+<.^| <<algorithms-celf, Influence Maximization - CELF>>
 | `gds.alpha.influenceMaximization.celf.stream`
 |===
 

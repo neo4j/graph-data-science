@@ -63,7 +63,7 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
         return computationResult.algorithm().resultStream();
     }
 
-    @Procedure(name = "gds.alpha.influenceMaximization.celf.stats", mode = READ)
+//    @Procedure(name = "gds.alpha.influenceMaximization.celf.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<InfluenceMaximizationResult.Stats> stats(
         @Name(value = "graphName") Object graphNameOrConfig,

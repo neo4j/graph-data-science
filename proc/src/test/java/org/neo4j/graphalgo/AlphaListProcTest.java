@@ -97,9 +97,7 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.ml.nodeClassification.train",
         "gds.alpha.ml.splitRelationships.mutate",
         "gds.alpha.influenceMaximization.greedy.stream",
-        "gds.alpha.influenceMaximization.greedy.stats",
-        "gds.alpha.influenceMaximization.celf.stream",
-        "gds.alpha.influenceMaximization.celf.stats"
+        "gds.alpha.influenceMaximization.celf.stream"
     ));
 
     private static final Collection<String> FUNCTIONS = new HashSet<>(asList(
