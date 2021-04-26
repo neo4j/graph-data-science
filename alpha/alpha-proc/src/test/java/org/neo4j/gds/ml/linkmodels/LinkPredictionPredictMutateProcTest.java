@@ -90,7 +90,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
     }
 
     @Test
-    void producesAModel() {
+    void canPredict() {
         var graphStore = GraphStoreCatalog
             .get(getUsername(), db.databaseId(), "g")
             .graphStore();
