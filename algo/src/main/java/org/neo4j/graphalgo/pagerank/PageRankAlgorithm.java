@@ -65,7 +65,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResu
 
         var scores = pregelResult.nodeValues().doubleProperties(PageRankComputation.PAGE_RANK);
 
-        scaleScores(scores, pregelResult.ranIterations());
+        scaleScores(scores);
 
         return ImmutablePageRankResult.builder()
             .scores(scores)
@@ -74,11 +74,11 @@ public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResu
             .build();
     }
 
-    private void scaleScores(HugeDoubleArray scores, int ranIterations) {
+    private void scaleScores(HugeDoubleArray scores) {
         var variant = config.scaler();
 
         // Eigenvector produces L2NORM-scaled results by default.
-        if (variant == NONE || (variant == L2NORM && mode == EIGENVECTOR && ranIterations > 1)) {
+        if (variant == NONE || (variant == L2NORM && mode == EIGENVECTOR)) {
             return;
         }
 
