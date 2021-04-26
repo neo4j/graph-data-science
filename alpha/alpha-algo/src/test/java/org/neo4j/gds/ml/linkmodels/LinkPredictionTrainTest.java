@@ -210,7 +210,7 @@ class LinkPredictionTrainTest {
         double totalNegatives = maxNumberOfRelationships - totalPositives;
         var classRatio = totalNegatives / totalPositives;
 
-        var expectedWinner = Map.<String, Object>of("maxEpochs", 1000);
+        var expectedWinner = Map.<String, Object>of("maxEpochs", 10);
         var config = ImmutableLinkPredictionTrainConfig.builder()
             .trainRelationshipType(RelationshipType.of("TRAIN"))
             .testRelationshipType(RelationshipType.of("TEST"))
@@ -238,7 +238,6 @@ class LinkPredictionTrainTest {
         AssertionsForInterfaceTypes.assertThat(messagesInOrder)
             // avoid asserting on the thread id
             .extracting(removingThreadId())
-            .doesNotHaveDuplicates()
             .containsExactly(
                 "LinkPredictionTrain :: Start",
                 "LinkPredictionTrain :: ModelSelection :: Start",
@@ -250,6 +249,16 @@ class LinkPredictionTrainTest {
                 "LinkPredictionTrain :: ModelSelection 100%",
                 "LinkPredictionTrain :: ModelSelection :: Finished",
                 "LinkPredictionTrain :: Training :: Start",
+                "LinkPredictionTrain :: Training 10%",
+                "LinkPredictionTrain :: Training 20%",
+                "LinkPredictionTrain :: Training 30%",
+                "LinkPredictionTrain :: Training 40%",
+                "LinkPredictionTrain :: Training 50%",
+                "LinkPredictionTrain :: Training 60%",
+                "LinkPredictionTrain :: Training 70%",
+                "LinkPredictionTrain :: Training 80%",
+                "LinkPredictionTrain :: Training 90%",
+                "LinkPredictionTrain :: Training 100%",
                 "LinkPredictionTrain :: Training :: Finished",
                 "LinkPredictionTrain :: Evaluation :: Start",
                 "LinkPredictionTrain :: Evaluation :: Finished",

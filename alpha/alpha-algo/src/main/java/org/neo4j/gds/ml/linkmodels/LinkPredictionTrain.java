@@ -88,7 +88,7 @@ public class LinkPredictionTrain
 
         // train best model on the entire training graph
         progressLogger.startSubTask("Training");
-        var predictor = trainModel(nodeIds, bestParameters);
+        var predictor = trainModel(nodeIds, bestParameters, progressLogger);
         progressLogger.finishSubTask("Training");
 
         // evaluate the best model on the training and test graphs
@@ -156,7 +156,8 @@ public class LinkPredictionTrain
                 // 3. train each model candidate on the train sets
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
-                var predictor = trainModel(trainSet, modelParams);
+                // we use a less fine grained progress logging for LP than for NC
+                var predictor = trainModel(trainSet, modelParams, ProgressLogger.NULL_LOGGER);
                 progressLogger.logProgress();
 
                 // 4. evaluate each model candidate on the train and validation sets
@@ -235,13 +236,15 @@ public class LinkPredictionTrain
 
     private LinkLogisticRegressionPredictor trainModel(
         HugeLongArray trainSet,
-        Map<String, Object> modelParams
+        Map<String, Object> modelParams,
+        ProgressLogger progressLogger
     ) {
         var llrConfig = LinkLogisticRegressionTrainConfig.of(
             config.featureProperties(),
             config.concurrency(),
             modelParams
         );
+        progressLogger.reset(llrConfig.maxEpochs());
         var llrTrain = new LinkLogisticRegressionTrain(
             trainGraph,
             trainSet,

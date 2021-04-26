@@ -59,8 +59,7 @@ public class LinkLogisticRegressionTrain {
             config.penalty(),
             graph
         );
-        // we use a less fine grained progress logging for LP than for NC
-        var training = new Training(config, ProgressLogger.NULL_LOGGER, graph.nodeCount());
+        var training = new Training(config, progressLogger, graph.nodeCount());
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
         training.train(objective, queueSupplier, config.concurrency());
         return new LinkLogisticRegressionPredictor(objective.modelData, config.featureProperties());
