@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.pagerank.PageRankAlgorithmFactory.Mode;
@@ -413,16 +414,16 @@ class PageRankTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.01262 , expectedWeightedRank: 0.00210 })" +
-            ", (b:Node { expectedRank: 0.71623 , expectedWeightedRank: 0.70774 })" +
-            ", (c:Node { expectedRank: 0.69740 , expectedWeightedRank: 0.70645 })" +
-            ", (d:Node { expectedRank: 0.01262 , expectedWeightedRank: 0.00172 })" +
-            ", (e:Node { expectedRank: 0.01262 , expectedWeightedRank: 0.00210 })" +
-            ", (f:Node { expectedRank: 0.01262 , expectedWeightedRank: 0.00172 })" +
-            ", (g:Node { expectedRank: 0.0, expectedWeightedRank: 0.0 })" +
-            ", (h:Node { expectedRank: 0.0, expectedWeightedRank: 0.0 })" +
-            ", (i:Node { expectedRank: 0.0, expectedWeightedRank: 0.0 })" +
-            ", (j:Node { expectedRank: 0.0, expectedWeightedRank: 0.0 })" +
+            "  (a:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00210, expectedPersonalizedRank: 0.0    })" +
+            ", (b:Node { expectedRank: 0.71631, expectedWeightedRank: 0.70774, expectedPersonalizedRank: 0.7071 })" +
+            ", (c:Node { expectedRank: 0.69731, expectedWeightedRank: 0.70645, expectedPersonalizedRank: 0.7071 })" +
+            ", (d:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00172, expectedPersonalizedRank: 0.0    })" +
+            ", (e:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00210, expectedPersonalizedRank: 0.0    })" +
+            ", (f:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00172, expectedPersonalizedRank: 0.0    })" +
+            ", (g:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank: 0.0    })" +
+            ", (h:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank: 0.0    })" +
+            ", (i:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank: 0.0    })" +
+            ", (j:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank: 0.0    })" +
             ", (b)-[:TYPE { weight: 1.0 } ]->(c)" +
             ", (c)-[:TYPE { weight: 3.0 } ]->(b)" +
             ", (d)-[:TYPE { weight: 5.0 } ]->(a)" +
@@ -435,6 +436,9 @@ class PageRankTest {
 
         @Inject
         private Graph graph;
+
+        @Inject
+        IdFunction idFunction;
 
         @Test
         void eigenvector() {
@@ -471,6 +475,27 @@ class PageRankTest {
                 .asNodeProperties();
 
             var expected = graph.nodeProperties("expectedWeightedRank");
+
+            for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+                assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+            }
+        }
+
+        @Test
+        void withSourceNodes() {
+            var config = ImmutablePageRankStreamConfig
+                .builder()
+                .maxIterations(40)
+                .tolerance(0)
+                .concurrency(1)
+                .sourceNodeIds(LongStream.of(idFunction.of("b")))
+                .build();
+
+            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR)
+                .scores()
+                .asNodeProperties();
+
+            var expected = graph.nodeProperties("expectedPersonalizedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
                 assertThat(actual.doubleValue(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));

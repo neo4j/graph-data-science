@@ -97,10 +97,8 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
         // more distinguishable.
         double nextRank = context.doubleNodeValue(RANK);
 
-        if (!context.isInitialSuperstep()) {
-            for (var message : messages) {
-                nextRank += message;
-            }
+        for (var message : messages) {
+            nextRank += message;
         }
 
         // The degree function returns either 1 if the graph is unweighted
@@ -113,6 +111,11 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
 
     @Override
     public boolean masterCompute(MasterComputeContext<PageRankConfig> context) {
+        // In the first iteration, we just copy values from RANK to NEXT_RANK.
+        if (context.isInitialSuperstep()) {
+            return false;
+        }
+
         var concurrency = context.config().concurrency();
 
         // Normalize using L2-Norm (Power iteration)
