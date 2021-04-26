@@ -217,7 +217,7 @@ CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 .Run the Node2Vec algorithm on `myGraph`
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.node2vec.stream('myGraph', {embeddingDimension: 2, randomSeed: 42})
+CALL gds.beta.node2vec.stream('myGraph', {embeddingDimension: 2})
 YIELD nodeId, embedding
 RETURN nodeId, embedding
 ----
