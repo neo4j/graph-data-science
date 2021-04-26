@@ -414,12 +414,12 @@ class PageRankTest {
         @GdlGraph
         private static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00210, expectedPersonalizedRank:  0.00997 })" +
-            ", (b:Node { expectedRank: 0.71631, expectedWeightedRank: 0.70774, expectedPersonalizedRank:  0.70735 })" +
-            ", (c:Node { expectedRank: 0.69731, expectedWeightedRank: 0.70645, expectedPersonalizedRank:  0.70678 })" +
-            ", (d:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00172, expectedPersonalizedRank:  0.00056 })" +
-            ", (e:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00210, expectedPersonalizedRank:  0.0     })" +
-            ", (f:Node { expectedRank: 0.01267, expectedWeightedRank: 0.00172, expectedPersonalizedRank:  0.0     })" +
+            "  (a:Node { expectedRank: 0.01262, expectedWeightedRank: 0.00210, expectedPersonalizedRank:  0.00997 })" +
+            ", (b:Node { expectedRank: 0.71623, expectedWeightedRank: 0.70774, expectedPersonalizedRank:  0.70735 })" +
+            ", (c:Node { expectedRank: 0.69740, expectedWeightedRank: 0.70645, expectedPersonalizedRank:  0.70678 })" +
+            ", (d:Node { expectedRank: 0.01262, expectedWeightedRank: 0.00172, expectedPersonalizedRank:  0.00056 })" +
+            ", (e:Node { expectedRank: 0.01262, expectedWeightedRank: 0.00210, expectedPersonalizedRank:  0.0     })" +
+            ", (f:Node { expectedRank: 0.01262, expectedWeightedRank: 0.00172, expectedPersonalizedRank:  0.0     })" +
             ", (g:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank:  0.0     })" +
             ", (h:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank:  0.0     })" +
             ", (i:Node { expectedRank: 0.0    , expectedWeightedRank: 0.0    , expectedPersonalizedRank:  0.0     })" +
