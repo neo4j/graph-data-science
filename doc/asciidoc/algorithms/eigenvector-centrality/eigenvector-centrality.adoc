@@ -62,7 +62,7 @@ include::../common-configuration/common-parameters-named-graph.adoc[]
 
 include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
 
-include::../page-rank/specific-configuration.adoc[]
+include::specific-configuration.adoc[]
 
 .Results
 [opts="header"]
@@ -98,7 +98,7 @@ include::../common-configuration/common-parameters-named-graph.adoc[]
 
 include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
 
-include::../page-rank/specific-configuration.adoc[]
+include::specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -141,7 +141,7 @@ include::../common-configuration/common-parameters-named-graph.adoc[]
 
 include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
 
-include::../page-rank/specific-configuration.adoc[]
+include::specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -186,7 +186,7 @@ include::../common-configuration/common-parameters-named-graph.adoc[]
 
 include::../common-configuration/common-write-configuration-named-graph.adoc[]
 
-include::../page-rank/specific-configuration.adoc[]
+include::specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -232,7 +232,7 @@ YIELD
 
 include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
 
-include::../page-rank/specific-configuration.adoc[]
+include::specific-configuration.adoc[]
 
 The results are the same as for running write mode with a named graph, see the <<algorithms-page-rank-syntax, write mode syntax above>>.
 
