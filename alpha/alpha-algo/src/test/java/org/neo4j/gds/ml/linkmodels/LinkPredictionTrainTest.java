@@ -201,9 +201,6 @@ class LinkPredictionTrainTest {
 
     @Test
     void testLogging() {
-        var trainGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
-        var testGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
-
         var nodeCount = 15;
         var totalPositives = 16;
         double maxNumberOfRelationships = nodeCount * (nodeCount - 1) / 2d;
