@@ -25,7 +25,7 @@ import org.neo4j.gds.ml.Predictor;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.batch.BatchTransformer;
 import org.neo4j.gds.ml.batch.MappedBatch;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;

@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionPredictor;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.ModelCatalog;

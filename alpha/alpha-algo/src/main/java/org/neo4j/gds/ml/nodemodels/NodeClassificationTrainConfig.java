@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;

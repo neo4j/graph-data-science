@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionResult;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;

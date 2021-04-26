@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.core.model.proto.TensorProto;
 import org.neo4j.graphalgo.ml.model.proto.NodeClassificationProto;
 

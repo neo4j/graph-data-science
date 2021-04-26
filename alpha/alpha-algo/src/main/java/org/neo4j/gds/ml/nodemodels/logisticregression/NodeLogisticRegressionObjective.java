@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
+package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ConstantScale;

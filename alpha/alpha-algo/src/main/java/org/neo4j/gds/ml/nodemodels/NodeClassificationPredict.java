@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.ml.batch.BatchQueue;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionPredictor;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionResult;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;

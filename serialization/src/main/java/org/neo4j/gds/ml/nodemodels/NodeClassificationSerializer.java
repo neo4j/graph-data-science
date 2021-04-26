@@ -26,7 +26,7 @@ import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;

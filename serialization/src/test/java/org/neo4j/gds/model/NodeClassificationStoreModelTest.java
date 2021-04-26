@@ -27,7 +27,7 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
 
