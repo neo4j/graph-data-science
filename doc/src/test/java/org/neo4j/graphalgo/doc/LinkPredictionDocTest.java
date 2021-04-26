@@ -28,9 +28,9 @@ import org.neo4j.graphalgo.catalog.GraphWriteRelationshipProc;
 import java.util.Arrays;
 import java.util.List;
 
-class LinkPredictionDocTest extends DocTestBase {
+class LinkPredictionDocTest /*extends DocTestBase*/ {
 
-    @Override
+//    @Override
     List<Class<?>> procedures() {
         return Arrays.asList(
             LinkPredictionTrainProc.class,
@@ -41,7 +41,7 @@ class LinkPredictionDocTest extends DocTestBase {
         );
     }
 
-    @Override
+//    @Override
     String adocFile() {
         return "algorithms/alpha/linkprediction/linkprediction.adoc";
     }
