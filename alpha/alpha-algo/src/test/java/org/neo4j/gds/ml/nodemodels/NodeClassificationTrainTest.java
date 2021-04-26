@@ -81,7 +81,7 @@ class NodeClassificationTrainTest {
 
         var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
-        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 0);
+        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 1);
         Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
 
         Map<String, Object> expectedWinner = model2;

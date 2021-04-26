@@ -60,6 +60,7 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
     List<Map<String, Object>> params();
 
     @Value.Derived
+    @Configuration.Ignore
     default List<ParamConfig> paramsConfig() {
         return params()
             .stream()

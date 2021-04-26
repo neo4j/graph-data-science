@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -270,6 +271,48 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
                 "accuracy_1", 0.0
             )
         ));
+    }
+
+    @Test
+    void shouldFailForMisspelledPenaltyParameter() {
+        var query = "CALL gds.alpha.ml.nodeClassification.train('g', {" +
+                    "modelName: 'model'," +
+                    "targetProperty: 't', featureProperties: ['a', 'b'], " +
+                    "metrics: ['F1_WEIGHTED', 'ACCURACY'], " +
+                    "holdoutFraction: 0.2, " +
+                    "validationFolds: 5, " +
+                    "randomSeed: 2," +
+                    "params: [{penlty: 1.0}]})";
+
+        assertError(query, "No value specified for the mandatory configuration parameter `penalty` (a similar parameter exists: [penlty])");
+    }
+
+    @Test
+    void shouldFailOnMisspelledOptionalParameters() {
+        var query = "CALL gds.alpha.ml.nodeClassification.train('g', {" +
+                    "modelName: 'model'," +
+                    "targetProperty: 't', featureProperties: ['a', 'b'], " +
+                    "metrics: ['F1_WEIGHTED', 'ACCURACY'], " +
+                    "holdoutFraction: 0.2, " +
+                    "validationFolds: 5, " +
+                    "randomSeed: 2," +
+                    "params: [{" +
+                    "   penalty: 1.0," +
+                    "   batchSizes: 1," +
+                    "   minepochs: 1," +
+                    "   maxepochs: 1," +
+                    "   patiences: 1," +
+                    "   tollerance: 1," +
+                    "   shareUpdaters: true" +
+                    "}]})";
+
+        assertThatThrownBy(() -> runQuery(query))
+            .hasMessageContaining("batchSizes (Did you mean [batchSize]?)")
+            .hasMessageContaining("minepochs (Did you mean [minEpochs]?)")
+            .hasMessageContaining("maxepochs (Did you mean [maxEpochs]?)")
+            .hasMessageContaining("patiences (Did you mean [patience]?)")
+            .hasMessageContaining("tollerance (Did you mean [tolerance]?)")
+            .hasMessageContaining("shareUpdaters (Did you mean [sharedUpdater]?)");
     }
 
     public String createQuery() {
