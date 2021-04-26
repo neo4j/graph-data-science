@@ -80,7 +80,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
 
     @Override
     protected AlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictMutateConfig> algorithmFactory() {
-        return new LinkPredictionPredictFactory();
+        return new LinkPredictionPredictFactory<>();
     }
 
     @Override

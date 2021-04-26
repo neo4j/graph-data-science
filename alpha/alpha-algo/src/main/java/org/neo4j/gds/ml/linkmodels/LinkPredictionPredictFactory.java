@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 
-class LinkPredictionPredictFactory extends AbstractAlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictMutateConfig> {
+class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfig> extends AbstractAlgorithmFactory<LinkPredictionPredict, CONFIG> {
 
     public LinkPredictionPredictFactory() {
         super();
@@ -42,7 +42,7 @@ class LinkPredictionPredictFactory extends AbstractAlgorithmFactory<LinkPredicti
     }
 
     @Override
-    protected long taskVolume(Graph graph, LinkPredictionPredictMutateConfig configuration) {
+    protected long taskVolume(Graph graph, CONFIG configuration) {
         return graph.nodeCount();
     }
 
@@ -54,7 +54,7 @@ class LinkPredictionPredictFactory extends AbstractAlgorithmFactory<LinkPredicti
     @Override
     protected LinkPredictionPredict build(
         Graph graph,
-        LinkPredictionPredictMutateConfig configuration,
+        CONFIG configuration,
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
@@ -78,7 +78,7 @@ class LinkPredictionPredictFactory extends AbstractAlgorithmFactory<LinkPredicti
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(LinkPredictionPredictMutateConfig configuration) {
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
         throw new MemoryEstimationNotImplementedException();
     }
 }
