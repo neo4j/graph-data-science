@@ -4,7 +4,7 @@ plugins {
     id 'de.undercouch.download'                     version '3.4.3'                 apply false
     id 'ch.kk7.spawn'                               version '1.0.20180924200750'    apply false
     id 'com.vanniktech.dependency.graph.generator'  version '0.5.0'
-    id 'de.thetaphi.forbiddenapis'                  version '2.7'                   apply false
+    id 'de.thetaphi.forbiddenapis'                  version '3.1'                   apply false
     id 'com.github.spotbugs'                        version '4.4.4'                 apply false
     id 'nebula.info-dependencies'                   version '9.1.1'                 apply false
     id 'com.google.protobuf'                        version '0.8.14'                apply false

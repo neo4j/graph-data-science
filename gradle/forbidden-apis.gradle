@@ -6,7 +6,7 @@ if (shouldForbiddenApis) {
             proj.apply plugin: 'de.thetaphi.forbiddenapis'
             proj.forbiddenApis {
                 signaturesFiles = files("$publicDir/etc/forbidden-apis")
-                failOnUnresolvableSignatures = false
+                ignoreSignaturesOfMissingClasses = true
                 suppressAnnotations = ["org.neo4j.graphalgo.annotation.SuppressForbidden"]
             }
             proj.tasks.matching { it.name.startsWith('forbiddenApis') }.each {
