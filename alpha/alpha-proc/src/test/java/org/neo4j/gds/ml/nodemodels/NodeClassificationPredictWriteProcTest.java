@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRResult;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionResult;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -58,7 +58,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 
-class NodeClassificationPredictWriteProcTest extends BaseProcTest implements WritePropertyConfigTest<NodeClassificationPredict, NodeClassificationPredictWriteConfig, MultiClassNLRResult> {
+class NodeClassificationPredictWriteProcTest extends BaseProcTest implements WritePropertyConfigTest<NodeClassificationPredict, NodeClassificationPredictWriteConfig, NodeLogisticRegressionResult> {
 
     private static final String DB_CYPHER =
         "CREATE " +
@@ -136,7 +136,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Wri
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationPredictWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig>> getProcedureClazz() {
         return NodeClassificationPredictWriteProc.class;
     }
 
@@ -156,7 +156,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Wri
     }
 
     @Override
-    public void assertResultEquals(MultiClassNLRResult result1, MultiClassNLRResult result2) {
+    public void assertResultEquals(NodeLogisticRegressionResult result1, NodeLogisticRegressionResult result2) {
         assertArrayEquals(result1.predictedClasses().toArray(), result2.predictedClasses().toArray());
         var probabilities1 = result1.predictedProbabilities();
         var probabilities2 = result2.predictedProbabilities();

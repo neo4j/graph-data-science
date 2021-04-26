@@ -29,11 +29,11 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 
 import java.util.List;
 
-public class MultiClassCrossEntropyLoss extends AbstractVariable<Scalar> {
+public class CrossEntropyLoss extends AbstractVariable<Scalar> {
     private final Variable<Matrix> predictions;
     private final Variable<Matrix> targets;
 
-    public MultiClassCrossEntropyLoss(Variable<Matrix> predictions, Variable<Matrix> targets) {
+    public CrossEntropyLoss(Variable<Matrix> predictions, Variable<Matrix> targets) {
         super(List.of(predictions, targets), Dimensions.scalar());
         this.predictions = predictions;
         this.targets = targets;

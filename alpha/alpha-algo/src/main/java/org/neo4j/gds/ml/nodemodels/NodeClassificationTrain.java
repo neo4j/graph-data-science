@@ -23,10 +23,10 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictor;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrain;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionPredictor;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionTrain;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.util.ShuffleUtil;
@@ -49,10 +49,9 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class NodeClassificationTrain
-    extends Algorithm<NodeClassificationTrain, Model<MultiClassNLRData, NodeClassificationTrainConfig>> {
+public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig>> {
 
-    public static final String MODEL_TYPE = "multiClassNodeLogisticRegression";
+    public static final String MODEL_TYPE = "nodeLogisticRegression";
 
     private final Graph graph;
     private final NodeClassificationTrainConfig config;
@@ -72,7 +71,7 @@ public class NodeClassificationTrain
 
 
     @Override
-    public Model<MultiClassNLRData, NodeClassificationTrainConfig> compute() {
+    public Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> compute() {
         var globalTargets = makeGlobalTargets();
         var globalClassCounts = countClassesGlobally();
         var metrics = createMetrics(globalClassCounts);
@@ -149,7 +148,7 @@ public class NodeClassificationTrain
         // 6. train best model on remaining
         progressLogger.logStart(":: Train Selected on Remainder");
         progressLogger.reset(maxEpochs);
-        MultiClassNLRData winnerModelData = trainModel(outerSplit.trainSet(), bestParameters);
+        NodeLogisticRegressionData winnerModelData = trainModel(outerSplit.trainSet(), bestParameters);
         progressLogger.logFinish(":: Train Selected on Remainder");
 
         // 7. evaluate it on the holdout set and outer training set
@@ -165,7 +164,7 @@ public class NodeClassificationTrain
         // 8. retrain that model on the full graph
         progressLogger.logStart(":: Retrain Selected Model");
         progressLogger.reset(maxEpochs);
-        MultiClassNLRData retrainedModelData = trainModel(nodeIds, bestParameters);
+        NodeLogisticRegressionData retrainedModelData = trainModel(nodeIds, bestParameters);
         progressLogger.logFinish(":: Retrain Selected Model");
 
         var modelInfo = NodeClassificationModelInfo.of(
@@ -227,7 +226,7 @@ public class NodeClassificationTrain
     private Map<Metric, Double> computeMetrics(
         Multiset<Long> globalClassCounts,
         HugeLongArray evaluationSet,
-        MultiClassNLRData modelData,
+        NodeLogisticRegressionData modelData,
         List<Metric> metrics
     ) {
         var localTargets = makeLocalTargets(evaluationSet);
@@ -255,21 +254,21 @@ public class NodeClassificationTrain
         ));
     }
 
-    private MultiClassNLRPredictor predictor(MultiClassNLRData modelData) {
-        return new MultiClassNLRPredictor(modelData, config.featureProperties());
+    private NodeLogisticRegressionPredictor predictor(NodeLogisticRegressionData modelData) {
+        return new NodeLogisticRegressionPredictor(modelData, config.featureProperties());
     }
 
-    private MultiClassNLRData trainModel(
+    private NodeLogisticRegressionData trainModel(
         HugeLongArray trainSet,
         Map<String, Object> modelParams
     ) {
-        var nlrConfig = MultiClassNLRTrainConfig.of(
+        var nlrConfig = NodeLogisticRegressionTrainConfig.of(
             config.featureProperties(),
             config.targetProperty(),
             config.concurrency(),
             modelParams
         );
-        var train = new MultiClassNLRTrain(graph, trainSet, nlrConfig, progressLogger);
+        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressLogger);
         return train.compute();
     }
 

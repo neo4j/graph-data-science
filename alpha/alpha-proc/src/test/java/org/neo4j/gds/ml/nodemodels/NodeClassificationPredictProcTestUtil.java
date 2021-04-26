@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.nodemodels;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -45,7 +45,7 @@ public final class NodeClassificationPredictProcTestUtil {
             modelName,
             MODEL_TYPE,
             GraphSchema.empty(),
-            MultiClassNLRData.builder()
+            NodeLogisticRegressionData.builder()
                 .weights(new Weights<>(new Matrix(new double[]{
                     1.12730619, -0.84532386, 0.93216654,
                     -1.12730619, 0.84532386, 0.0

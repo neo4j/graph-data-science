@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictor;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -43,7 +43,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
 
     @Override
     protected String taskName() {
-        return "MultiClassNodeLogisticRegressionPredict";
+        return "NodeLogisticRegressionPredict";
     }
 
     @Override
@@ -56,12 +56,12 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
         var model = ModelCatalog.get(
             configuration.username(),
             configuration.modelName(),
-            MultiClassNLRData.class,
+            NodeLogisticRegressionData.class,
             NodeClassificationTrainConfig.class
         );
         var featureProperties = model.trainConfig().featureProperties();
         return new NodeClassificationPredict(
-            new MultiClassNLRPredictor(model.data(), featureProperties),
+            new NodeLogisticRegressionPredictor(model.data(), featureProperties),
             graph,
             configuration.batchSize(),
             configuration.concurrency(),

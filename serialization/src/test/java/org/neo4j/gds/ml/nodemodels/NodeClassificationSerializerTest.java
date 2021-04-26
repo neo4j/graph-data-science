@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.core.model.proto.TensorProto;
 import org.neo4j.graphalgo.ml.model.proto.NodeClassificationProto;
 
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class NodeClassificationSerializerTest {
 
     @Test
-    void shouldSerializeMultiClassNLRData() {
+    void shouldSerializeData() {
         var weightData = Matrix.fill(0.5D, 3, 4);
         var weight = new Weights<>(weightData);
         var classIdMap = new LocalIdMap();
@@ -44,7 +44,7 @@ class NodeClassificationSerializerTest {
         classIdMap.toMapped(19L);
         classIdMap.toMapped(42L);
 
-        var modelData = MultiClassNLRData.builder()
+        var modelData = NodeLogisticRegressionData.builder()
             .weights(weight)
             .classIdMap(classIdMap)
             .build();
@@ -69,7 +69,7 @@ class NodeClassificationSerializerTest {
     }
 
     @Test
-    void shouldDeserializeMultiClassNLRData() {
+    void shouldData() {
         var meh = new ArrayList<Double>(12);
         Collections.fill(meh, 0.5D);
         var serialized =
@@ -82,13 +82,13 @@ class NodeClassificationSerializerTest {
                 .build();
 
         var serializer = new NodeClassificationSerializer();
-        var multiClassNLRData = serializer.deserializeModelData(serialized);
+        var data = serializer.deserializeModelData(serialized);
 
-        assertThat(multiClassNLRData).isNotNull();
+        assertThat(data).isNotNull();
 
-        assertThat(multiClassNLRData.classIdMap().originalIds()).containsExactly(19L, 42L);
+        assertThat(data.classIdMap().originalIds()).containsExactly(19L, 42L);
 
-        assertThat(multiClassNLRData.weights().data().data()).containsExactly(meh
+        assertThat(data.weights().data().data()).containsExactly(meh
             .stream()
             .mapToDouble(Double::doubleValue)
             .toArray());

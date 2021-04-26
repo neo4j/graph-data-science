@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.gds.ml.MLTrainResult;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.TrainProc;
@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, MultiClassNLRData, NodeClassificationTrainConfig> {
+public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, NodeLogisticRegressionData, NodeClassificationTrainConfig> {
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model")

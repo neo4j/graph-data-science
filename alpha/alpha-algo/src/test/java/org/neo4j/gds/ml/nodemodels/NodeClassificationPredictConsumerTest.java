@@ -22,8 +22,8 @@ package org.neo4j.gds.ml.nodemodels;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.batch.BatchTransformer;
 import org.neo4j.gds.ml.batch.ListBatch;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictor;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -68,8 +68,8 @@ class NodeClassificationPredictConsumerTest {
         );
         Graph graph = graphStore.getUnion();
         var featureProperties = List.of("nan-embedding-1", "nan-embedding-2");
-        var data = MultiClassNLRData.from(graph, featureProperties, "class");
-        var predictor = new MultiClassNLRPredictor(data, featureProperties);
+        var data = NodeLogisticRegressionData.from(graph, featureProperties, "class");
+        var predictor = new NodeLogisticRegressionPredictor(data, featureProperties);
         var consumer = new NodeClassificationPredictConsumer(
             graph,
             BatchTransformer.IDENTITY,

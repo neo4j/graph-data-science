@@ -37,18 +37,18 @@ import java.util.List;
 
 import static org.neo4j.gds.ml.features.FeatureExtraction.extract;
 
-public class MultiClassNLRPredictor implements Predictor<Matrix, MultiClassNLRData> {
+public class NodeLogisticRegressionPredictor implements Predictor<Matrix, NodeLogisticRegressionData> {
 
-    private final MultiClassNLRData modelData;
+    private final NodeLogisticRegressionData modelData;
     private final List<String> featureProperties;
 
-    public MultiClassNLRPredictor(MultiClassNLRData modelData, List<String> featureProperties) {
+    public NodeLogisticRegressionPredictor(NodeLogisticRegressionData modelData, List<String> featureProperties) {
         this.modelData = modelData;
         this.featureProperties = featureProperties;
     }
 
     @Override
-    public MultiClassNLRData modelData() {
+    public NodeLogisticRegressionData modelData() {
         return modelData;
     }
 

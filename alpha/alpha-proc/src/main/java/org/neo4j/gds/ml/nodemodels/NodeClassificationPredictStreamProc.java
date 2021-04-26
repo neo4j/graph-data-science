@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRResult;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
@@ -45,7 +45,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class NodeClassificationPredictStreamProc
-    extends StreamProc<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationPredictStreamProc.StreamResult, NodeClassificationStreamConfig> {
+    extends StreamProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictStreamProc.StreamResult, NodeClassificationStreamConfig> {
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.stream", mode = Mode.READ)
     @Description("Predicts classes for all nodes based on a previously trained model")
@@ -58,7 +58,7 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    protected Stream<StreamResult> stream(ComputationResult<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationStreamConfig> computationResult) {
+    protected Stream<StreamResult> stream(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationStreamConfig> computationResult) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();
 
@@ -87,7 +87,7 @@ public class NodeClassificationPredictStreamProc
         var trainConfig = ModelCatalog.get(
             config.username(),
             config.modelName(),
-            MultiClassNLRData.class,
+            NodeLogisticRegressionData.class,
             NodeClassificationTrainConfig.class
         ).trainConfig();
         GraphStoreValidation.validate(
@@ -112,7 +112,7 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationStreamConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationStreamConfig> computationResult) {
         return super.nodeProperties(computationResult);
     }
 

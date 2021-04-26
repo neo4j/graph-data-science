@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRResult;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class NodeClassificationPredictWriteProc
-    extends WriteProc<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationPredictWriteProc.Result, NodeClassificationPredictWriteConfig> {
+    extends WriteProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteProc.Result, NodeClassificationPredictWriteConfig> {
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.write", mode = WRITE)
     @Description("Predicts classes for all nodes based on a previously trained model")
@@ -53,7 +53,7 @@ public class NodeClassificationPredictWriteProc
     }
 
     @Override
-    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationPredictWriteConfig> computationResult) {
+    protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig> computationResult) {
         var config = computationResult.config();
         var writeProperty = config.writeProperty();
         var result = computationResult.result();
@@ -87,7 +87,7 @@ public class NodeClassificationPredictWriteProc
     }
 
     @Override
-    protected AbstractResultBuilder<Result> resultBuilder(ComputationResult<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationPredictWriteConfig> computeResult) {
+    protected AbstractResultBuilder<Result> resultBuilder(ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictWriteConfig> computeResult) {
         return new Result.Builder();
     }
 

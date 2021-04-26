@@ -30,13 +30,13 @@ import java.util.List;
 import java.util.TreeSet;
 
 @ValueClass
-public interface MultiClassNLRData {
+public interface NodeLogisticRegressionData {
 
     Weights<Matrix> weights();
 
     LocalIdMap classIdMap();
 
-    static MultiClassNLRData from(
+    static NodeLogisticRegressionData from(
         Graph graph,
         List<String> featureProperties,
         String targetProperty
@@ -62,7 +62,7 @@ public interface MultiClassNLRData {
         return classIdMap;
     }
 
-    static ImmutableMultiClassNLRData.Builder builder() {
-        return ImmutableMultiClassNLRData.builder();
+    static ImmutableNodeLogisticRegressionData.Builder builder() {
+        return ImmutableNodeLogisticRegressionData.builder();
     }
 }

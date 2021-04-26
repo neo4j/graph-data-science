@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictor;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
@@ -86,7 +86,7 @@ class NodeClassificationPredictTest {
         classIdMap.toMapped(100);
         classIdMap.toMapped(2);
         List<String> featureProperties = List.of("a", "b");
-        var modelData = MultiClassNLRData.builder()
+        var modelData = NodeLogisticRegressionData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 1.12730619, -0.84532386, 0.93216654,
                 1.63908065, -0.08391665, -1.46620738,
@@ -97,7 +97,7 @@ class NodeClassificationPredictTest {
             .build();
 
         var result = new NodeClassificationPredict(
-            new MultiClassNLRPredictor(modelData, featureProperties),
+            new NodeLogisticRegressionPredictor(modelData, featureProperties),
             graph,
             1,
             1,
@@ -145,7 +145,7 @@ class NodeClassificationPredictTest {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(1);
         List<String> featureProperties = List.of("a", "b");
-        var modelData = MultiClassNLRData.builder()
+        var modelData = NodeLogisticRegressionData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 1.12730619, -0.84532386, 0.93216654
             }, 1, 3)))
@@ -153,7 +153,7 @@ class NodeClassificationPredictTest {
             .build();
 
         var result = new NodeClassificationPredict(
-            new MultiClassNLRPredictor(modelData, featureProperties),
+            new NodeLogisticRegressionPredictor(modelData, featureProperties),
             graph,
             1,
             1,
@@ -207,7 +207,7 @@ class NodeClassificationPredictTest {
             modelName,
             "",
             GraphSchema.empty(),
-            MultiClassNLRData.builder()
+            NodeLogisticRegressionData.builder()
                 .weights(new Weights<>(new Matrix(new double[]{
                     1.12730619, -0.84532386, 0.93216654
                 }, 1, 3)))
@@ -247,13 +247,13 @@ class NodeClassificationPredictTest {
             .doesNotHaveDuplicates()
             .hasSize(7)
             .containsExactly(
-                "MultiClassNodeLogisticRegressionPredict :: Start",
-                "MultiClassNodeLogisticRegressionPredict 20%",
-                "MultiClassNodeLogisticRegressionPredict 40%",
-                "MultiClassNodeLogisticRegressionPredict 60%",
-                "MultiClassNodeLogisticRegressionPredict 80%",
-                "MultiClassNodeLogisticRegressionPredict 100%",
-                "MultiClassNodeLogisticRegressionPredict :: Finished"
+                "NodeLogisticRegressionPredict :: Start",
+                "NodeLogisticRegressionPredict 20%",
+                "NodeLogisticRegressionPredict 40%",
+                "NodeLogisticRegressionPredict 60%",
+                "NodeLogisticRegressionPredict 80%",
+                "NodeLogisticRegressionPredict 100%",
+                "NodeLogisticRegressionPredict :: Finished"
             );
         ModelCatalog.drop("", modelName);
     }

@@ -22,8 +22,8 @@ package org.neo4j.gds.ml.nodemodels;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictor;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -118,9 +118,9 @@ class NodeClassificationEndToEndTest {
             .isEqualTo(predictionsBeforeSerialization);
     }
 
-    private NodeClassificationPredict predictAlgorithm(Model<MultiClassNLRData, NodeClassificationTrainConfig> model) {
+    private NodeClassificationPredict predictAlgorithm(Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> model) {
         var featureProperties = model.trainConfig().featureProperties();
-        var predictor = new MultiClassNLRPredictor(model.data(), featureProperties);
+        var predictor = new NodeLogisticRegressionPredictor(model.data(), featureProperties);
         return new NodeClassificationPredict(
             predictor,
             predictGraph,

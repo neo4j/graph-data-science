@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRResult;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.GraphStoreValidation;
@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationPredictMutateProc
-    extends MutatePropertyProc<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationMutateConfig> {
+    extends MutatePropertyProc<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationPredictMutateProc.MutateResult, NodeClassificationMutateConfig> {
 
     @Procedure(name = "gds.alpha.ml.nodeClassification.predict.mutate", mode = Mode.READ)
     @Description("Predicts classes for all nodes based on a previously trained model")
@@ -60,7 +60,7 @@ public class NodeClassificationPredictMutateProc
 
     @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationMutateConfig> computeResult
+        ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationMutateConfig> computeResult
     ) {
         return new MutateResult.Builder();
     }
@@ -85,7 +85,7 @@ public class NodeClassificationPredictMutateProc
         var trainConfig = ModelCatalog.get(
             config.username(),
             config.modelName(),
-            MultiClassNLRData.class,
+            NodeLogisticRegressionData.class,
             NodeClassificationTrainConfig.class
         ).trainConfig();
         GraphStoreValidation.validate(
@@ -111,7 +111,7 @@ public class NodeClassificationPredictMutateProc
 
     @Override
     protected List<NodeProperty> nodePropertyList(
-        ComputationResult<NodeClassificationPredict, MultiClassNLRResult, NodeClassificationMutateConfig> computationResult
+        ComputationResult<NodeClassificationPredict, NodeLogisticRegressionResult, NodeClassificationMutateConfig> computationResult
     ) {
         var config = computationResult.config();
         var mutateProperty = config.mutateProperty();

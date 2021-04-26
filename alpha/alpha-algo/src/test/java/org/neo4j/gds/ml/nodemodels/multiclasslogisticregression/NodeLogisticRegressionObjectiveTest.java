@@ -34,7 +34,7 @@ import static java.lang.Math.log;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class MultiClassNLRObjectiveTest {
+class NodeLogisticRegressionObjectiveTest {
 
     private static final int NUMBER_OF_CLASSES = 3;
 
@@ -53,8 +53,8 @@ class MultiClassNLRObjectiveTest {
     void shouldProduceCorrectLoss() {
         var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
         var featureProps = List.of("a", "b");
-        var predictor = new MultiClassNLRPredictor(MultiClassNLRData.from(graph, featureProps, "t"), featureProps);
-        var objective = new MultiClassNLRObjective(graph, predictor, "t", 0.0);
+        var predictor = new NodeLogisticRegressionPredictor(NodeLogisticRegressionData.from(graph, featureProps, "t"), featureProps);
+        var objective = new NodeLogisticRegressionObjective(graph, predictor, "t", 0.0);
         var loss = objective.loss(allNodesBatch, 4);
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
@@ -66,8 +66,8 @@ class MultiClassNLRObjectiveTest {
     @Test
     void shouldSortClasses() {
         var featureProps = List.of("a", "b");
-        var predictor = new MultiClassNLRPredictor(MultiClassNLRData.from(graph, featureProps, "t"), featureProps);
-        var objective = new MultiClassNLRObjective(graph, predictor, "t", 0.0);
+        var predictor = new NodeLogisticRegressionPredictor(NodeLogisticRegressionData.from(graph, featureProps, "t"), featureProps);
+        var objective = new NodeLogisticRegressionObjective(graph, predictor, "t", 0.0);
         var classList = objective.modelData().classIdMap().originalIdsList();
         assertThat(classList).containsExactly(0L, 1L, 2L);
     }

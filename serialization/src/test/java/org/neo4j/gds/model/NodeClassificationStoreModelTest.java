@@ -27,7 +27,7 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
 
@@ -37,7 +37,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NodeClassificationStoreModelTest extends BaseStoreModelTest<MultiClassNLRData, NodeClassificationTrainConfig> {
+class NodeClassificationStoreModelTest extends BaseStoreModelTest<NodeLogisticRegressionData, NodeClassificationTrainConfig> {
 
     @Test
     @Override
@@ -47,11 +47,11 @@ class NodeClassificationStoreModelTest extends BaseStoreModelTest<MultiClassNLRD
         storedModel.load();
 
         assertThat(storedModel.loaded()).isTrue();
-        assertThat(storedModel.data()).isInstanceOf(MultiClassNLRData.class);
+        assertThat(storedModel.data()).isInstanceOf(NodeLogisticRegressionData.class);
     }
 
     @Override
-    Model<MultiClassNLRData, NodeClassificationTrainConfig> model() {
+    Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> model() {
         var trainConfig = NodeClassificationTrainConfig.builder()
             .modelName(MODEL)
             .metrics(List.of(MetricSpecification.parse(AllClassMetric.ACCURACY.name())))
@@ -62,7 +62,7 @@ class NodeClassificationStoreModelTest extends BaseStoreModelTest<MultiClassNLRD
             .addParam(Map.of("penalty", 1.0))
             .build();
 
-        var modelData = MultiClassNLRData.builder()
+        var modelData = NodeLogisticRegressionData.builder()
             .weights(new Weights<>(Matrix.fill(0.19, 3, 4)))
             .classIdMap(new LocalIdMap())
             .build();

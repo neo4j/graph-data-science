@@ -21,10 +21,10 @@ package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ConstantScale;
+import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.CrossEntropyLoss;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementSum;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2NormSquared;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MultiClassCrossEntropyLoss;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
@@ -34,16 +34,16 @@ import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
-public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
+public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRegressionData> {
 
     private final String targetProperty;
     private final Graph graph;
     private final double penalty;
-    private final MultiClassNLRPredictor predictor;
+    private final NodeLogisticRegressionPredictor predictor;
 
-    public MultiClassNLRObjective(
+    public NodeLogisticRegressionObjective(
         Graph graph,
-        MultiClassNLRPredictor predictor,
+        NodeLogisticRegressionPredictor predictor,
         String targetProperty,
         double penalty
     ) {
@@ -62,7 +62,7 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
     public Variable<Scalar> loss(Batch batch, long trainSize) {
         var targets = makeTargets(batch);
         var predictions = predictor.predictionsVariable(graph, batch);
-        var unpenalizedLoss = new MultiClassCrossEntropyLoss(
+        var unpenalizedLoss = new CrossEntropyLoss(
             predictions,
             targets
         );
@@ -86,7 +86,7 @@ public class MultiClassNLRObjective implements Objective<MultiClassNLRData> {
     }
 
     @Override
-    public MultiClassNLRData modelData() {
+    public NodeLogisticRegressionData modelData() {
         return predictor.modelData();
     }
 }

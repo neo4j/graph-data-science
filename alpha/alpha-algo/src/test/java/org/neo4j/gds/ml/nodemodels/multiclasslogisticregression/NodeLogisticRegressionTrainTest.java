@@ -37,7 +37,7 @@ import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
 
 @GdlExtension
-class MultiClassNLRTrainTest {
+class NodeLogisticRegressionTrainTest {
 
     @GdlGraph
     private static final String DB_QUERY =
@@ -54,7 +54,7 @@ class MultiClassNLRTrainTest {
 
     @Test
     void shouldHandleLargeValuedFeatures() {
-        var config = ImmutableMultiClassNLRTrainConfig.builder()
+        var config = ImmutableNodeLogisticRegressionTrainConfig.builder()
             .featureProperties(List.of("a", "x"))
             .targetProperty("t")
             .penalty(NO_PENALTY)
@@ -63,7 +63,7 @@ class MultiClassNLRTrainTest {
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
-        var algo = new MultiClassNLRTrain(graph, nodeIds, config, ProgressLogger.NULL_LOGGER);
+        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressLogger.NULL_LOGGER);
         var result = algo.compute();
 
         var data = result.weights().data().data();
@@ -83,7 +83,7 @@ class MultiClassNLRTrainTest {
 
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {
-        var config = ImmutableMultiClassNLRTrainConfig.builder()
+        var config = ImmutableNodeLogisticRegressionTrainConfig.builder()
             .featureProperties(List.of("a", "b"))
             .targetProperty("t")
             .penalty(NO_PENALTY)
@@ -94,7 +94,7 @@ class MultiClassNLRTrainTest {
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
-        var algo = new MultiClassNLRTrain(graph, nodeIds, config, ProgressLogger.NULL_LOGGER);
+        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressLogger.NULL_LOGGER);
 
         var result = algo.compute();
 
@@ -122,7 +122,7 @@ class MultiClassNLRTrainTest {
 
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopperConcurrently() {
-        var config = ImmutableMultiClassNLRTrainConfig.builder()
+        var config = ImmutableNodeLogisticRegressionTrainConfig.builder()
             .featureProperties(List.of("a", "b"))
             .targetProperty("t")
             .penalty(1.0)
@@ -134,7 +134,7 @@ class MultiClassNLRTrainTest {
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
-        var algo = new MultiClassNLRTrain(graph, nodeIds, config, ProgressLogger.NULL_LOGGER);
+        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressLogger.NULL_LOGGER);
 
         var result = algo.compute();
 

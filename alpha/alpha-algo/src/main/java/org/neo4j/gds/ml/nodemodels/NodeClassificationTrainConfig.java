@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -61,11 +61,11 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
 
     @Value.Derived
     @Configuration.Ignore
-    default List<MultiClassNLRTrainConfig> paramsConfig() {
+    default List<NodeLogisticRegressionTrainConfig> paramsConfig() {
         return params()
             .stream()
             .map(map ->
-                MultiClassNLRTrainConfig.of(
+                NodeLogisticRegressionTrainConfig.of(
                     featureProperties(),
                     targetProperty(),
                     concurrency(),

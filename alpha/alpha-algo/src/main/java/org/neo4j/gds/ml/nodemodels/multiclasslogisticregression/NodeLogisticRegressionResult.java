@@ -19,29 +19,26 @@
  */
 package org.neo4j.gds.ml.nodemodels.multiclasslogisticregression;
 
-import org.junit.jupiter.api.Test;
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+@ValueClass
+public interface NodeLogisticRegressionResult {
 
-class MultiClassNLRTrainConfigTest {
+    HugeLongArray predictedClasses();
+    Optional<HugeObjectArray<double[]>> predictedProbabilities();
 
-    @Test
-    void shouldOverrideConcurrency() {
-        var foo = MultiClassNLRTrainConfig.of(List.of("foo"), "target", 4,
-            Map.of("concurrency", 3, "penalty", 0)
-        );
-        assertEquals(3, foo.concurrency());
+    static NodeLogisticRegressionResult of(
+        HugeLongArray classes,
+        @Nullable HugeObjectArray<double[]> probabilities
+    ) {
+        return ImmutableNodeLogisticRegressionResult.builder()
+            .predictedProbabilities(Optional.ofNullable(probabilities))
+            .predictedClasses(classes)
+            .build();
     }
-
-    @Test
-    void shouldUseDefaultConcurrency() {
-        var foo = MultiClassNLRTrainConfig.of(List.of("foo"), "target", 2,
-            Map.of("penalty", 0)
-        );
-        assertEquals(2, foo.concurrency());
-    }
-
 }

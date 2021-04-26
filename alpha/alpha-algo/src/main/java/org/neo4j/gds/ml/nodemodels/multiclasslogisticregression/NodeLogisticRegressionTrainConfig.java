@@ -36,7 +36,7 @@ import java.util.Map;
 @SuppressWarnings("immutables:subtype")
 // This class is currently used internally in NodeClassification and is not
 // a procedure-level configuration. it is derived from a NodeClassificationTrainConfig
-public interface MultiClassNLRTrainConfig extends FeaturePropertiesConfig, TrainingConfig {
+public interface NodeLogisticRegressionTrainConfig extends FeaturePropertiesConfig, TrainingConfig {
 
     @Configuration.Parameter
     List<String> featureProperties();
@@ -54,7 +54,7 @@ public interface MultiClassNLRTrainConfig extends FeaturePropertiesConfig, Train
         return Collections.emptyList();
     }
 
-    static MultiClassNLRTrainConfig of(
+    static NodeLogisticRegressionTrainConfig of(
         List<String> featureProperties,
         String targetProperty,
         int defaultConcurrency,
@@ -64,7 +64,7 @@ public interface MultiClassNLRTrainConfig extends FeaturePropertiesConfig, Train
         if (!cypherMapWrapper.containsKey(CONCURRENCY_KEY)) {
             cypherMapWrapper = cypherMapWrapper.withNumber(CONCURRENCY_KEY, defaultConcurrency);
         }
-        var config = new MultiClassNLRTrainConfigImpl(
+        var config = new NodeLogisticRegressionTrainConfigImpl(
             featureProperties,
             targetProperty,
             cypherMapWrapper

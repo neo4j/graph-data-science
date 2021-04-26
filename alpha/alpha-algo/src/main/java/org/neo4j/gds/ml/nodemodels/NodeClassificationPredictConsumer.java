@@ -25,7 +25,7 @@ import org.neo4j.gds.ml.Predictor;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.batch.BatchTransformer;
 import org.neo4j.gds.ml.batch.MappedBatch;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -48,7 +48,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class NodeClassificationPredictConsumer implements Consumer<Batch> {
     private final Graph graph;
     private final BatchTransformer nodeIds;
-    private final Predictor<Matrix, MultiClassNLRData> predictor;
+    private final Predictor<Matrix, NodeLogisticRegressionData> predictor;
     private final HugeObjectArray<double[]> predictedProbabilities;
     private final HugeLongArray predictedClasses;
     private final List<String> featureProperties;
@@ -57,7 +57,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
     public NodeClassificationPredictConsumer(
         Graph graph,
         BatchTransformer nodeIds,
-        Predictor<Matrix, MultiClassNLRData> predictor,
+        Predictor<Matrix, NodeLogisticRegressionData> predictor,
         @Nullable HugeObjectArray<double[]> predictedProbabilities,
         HugeLongArray predictedClasses,
         List<String> featureProperties,

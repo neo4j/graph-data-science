@@ -28,16 +28,16 @@ import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
-public class MultiClassNLRPredictorFailTest extends FeatureExtractionBaseTest {
+public class NodeLogisticRegressionPredictorFailTest extends FeatureExtractionBaseTest {
 
     @Override
     public void makeExtractions(Graph graph) {
         var weights = new Weights<>(Matrix.fill(0.0, 5, 4));
         var classIdMap = new LocalIdMap();
         var featureProperties = List.of("a", "b");
-        var modelData = ImmutableMultiClassNLRData.of(weights, classIdMap);
-        var multiClassNLRPredictor = new MultiClassNLRPredictor(modelData, featureProperties);
+        var modelData = ImmutableNodeLogisticRegressionData.of(weights, classIdMap);
+        var predictor = new NodeLogisticRegressionPredictor(modelData, featureProperties);
         var batch = new LazyBatch(0, 4, 4);
-        multiClassNLRPredictor.predict(graph, batch);
+        predictor.predict(graph, batch);
     }
 }

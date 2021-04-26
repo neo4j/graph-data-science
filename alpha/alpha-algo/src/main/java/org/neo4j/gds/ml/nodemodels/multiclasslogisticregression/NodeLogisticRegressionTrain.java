@@ -28,17 +28,17 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.function.Supplier;
 
-public class MultiClassNLRTrain {
+public class NodeLogisticRegressionTrain {
 
     private final Graph graph;
     private final HugeLongArray trainSet;
-    private final MultiClassNLRTrainConfig config;
+    private final NodeLogisticRegressionTrainConfig config;
     private final ProgressLogger progressLogger;
 
-    public MultiClassNLRTrain(
+    public NodeLogisticRegressionTrain(
         Graph graph,
         HugeLongArray trainSet,
-        MultiClassNLRTrainConfig config,
+        NodeLogisticRegressionTrainConfig config,
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
@@ -47,14 +47,14 @@ public class MultiClassNLRTrain {
         this.progressLogger = progressLogger;
     }
 
-    public MultiClassNLRData compute() {
-        var modelData = MultiClassNLRData.from(
+    public NodeLogisticRegressionData compute() {
+        var modelData = NodeLogisticRegressionData.from(
             graph,
             config.featureProperties(),
             config.targetProperty()
         );
-        var predictor = new MultiClassNLRPredictor(modelData, config.featureProperties());
-        var objective = new MultiClassNLRObjective(
+        var predictor = new NodeLogisticRegressionPredictor(modelData, config.featureProperties());
+        var objective = new NodeLogisticRegressionObjective(
             graph,
             predictor,
             config.targetProperty(),

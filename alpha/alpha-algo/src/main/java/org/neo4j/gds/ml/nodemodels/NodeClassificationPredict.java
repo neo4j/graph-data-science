@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.ml.batch.BatchQueue;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRPredictor;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRResult;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionPredictor;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.NodeLogisticRegressionResult;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -35,9 +35,9 @@ import java.util.List;
 
 import static org.neo4j.gds.ml.batch.BatchTransformer.IDENTITY;
 
-public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, MultiClassNLRResult> {
+public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, NodeLogisticRegressionResult> {
 
-    private final MultiClassNLRPredictor predictor;
+    private final NodeLogisticRegressionPredictor predictor;
     private final Graph graph;
     private final int batchSize;
     private final int concurrency;
@@ -46,7 +46,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     private final AllocationTracker tracker;
 
     NodeClassificationPredict(
-        MultiClassNLRPredictor predictor,
+        NodeLogisticRegressionPredictor predictor,
         Graph graph,
         int batchSize,
         int concurrency,
@@ -66,7 +66,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     }
 
     @Override
-    public MultiClassNLRResult compute() {
+    public NodeLogisticRegressionResult compute() {
         progressLogger.logStart();
         var predictedProbabilities = initProbabilities();
         var predictedClasses = HugeLongArray.newArray(graph.nodeCount(), tracker);
@@ -82,7 +82,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(consumer, concurrency);
         progressLogger.logFinish();
-        return MultiClassNLRResult.of(predictedClasses, predictedProbabilities);
+        return NodeLogisticRegressionResult.of(predictedClasses, predictedProbabilities);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
 
     private @Nullable HugeObjectArray<double[]> initProbabilities() {
         if (produceProbabilities) {
-            var data = (MultiClassNLRData) predictor.modelData();
+            var data = (NodeLogisticRegressionData) predictor.modelData();
             var numberOfClasses = data.classIdMap().originalIds().length;
             var predictions = HugeObjectArray.newArray(
                 double[].class,

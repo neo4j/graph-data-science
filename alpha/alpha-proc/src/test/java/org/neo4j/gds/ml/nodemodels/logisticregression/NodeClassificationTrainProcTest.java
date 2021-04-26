@@ -95,7 +95,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
                 )
             ),
             "name", "model",
-            "type", "multiClassNodeLogisticRegression"
+            "type", "nodeLogisticRegression"
         );
         assertCypherResult(query, List.of(Map.of(
             "trainMillis", greaterThan(0L),
@@ -105,7 +105,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
 
         assertTrue(ModelCatalog.exists("", "model"));
         var model = ModelCatalog.list("", "model");
-        assertThat(model.algoType()).isEqualTo("multiClassNodeLogisticRegression");
+        assertThat(model.algoType()).isEqualTo("nodeLogisticRegression");
         assertThat(model.customInfo().toMap()).containsKeys("metrics", "classes", "bestParameters");
     }
 
