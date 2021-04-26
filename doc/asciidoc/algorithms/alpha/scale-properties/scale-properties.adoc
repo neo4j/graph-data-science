@@ -44,7 +44,7 @@ image::equations/scale-properties/minmax.svg[scaled p equals p minus minimum of 
 
 Scales all property values into the range `[0, 1]` for positive values where the maximum value(s) get the scaled value `1`, according to this formula:
 
-image::equations/scale-properties/max.svg[scaled p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
+image::equations/scale-properties/max.svg[scaled p equals p divided by the absolute maximum of p,align="center"]
 
 
 [[algorithms-scale-properties-mean]]
