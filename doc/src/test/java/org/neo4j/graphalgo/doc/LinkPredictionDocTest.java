@@ -24,13 +24,15 @@ import org.neo4j.gds.ml.linkmodels.LinkPredictionTrainProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteRelationshipProc;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.Arrays;
 import java.util.List;
 
-class LinkPredictionDocTest /*extends DocTestBase*/ {
+class LinkPredictionDocTest extends DocTestBase {
 
-//    @Override
+    @Override
     List<Class<?>> procedures() {
         return Arrays.asList(
             LinkPredictionTrainProc.class,
@@ -41,8 +43,16 @@ class LinkPredictionDocTest /*extends DocTestBase*/ {
         );
     }
 
-//    @Override
+    @Override
     String adocFile() {
         return "algorithms/alpha/linkprediction/linkprediction.adoc";
+    }
+
+    @Override
+    protected Runnable cleanup() {
+        return () -> {
+            GraphStoreCatalog.removeAllLoadedGraphs();
+            ModelCatalog.removeAllLoadedModels();
+        };
     }
 }

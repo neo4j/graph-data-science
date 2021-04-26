@@ -430,9 +430,9 @@ CALL gds.alpha.ml.linkPrediction.train('myGraph', {
   negativeClassWeight: 1.0 / 1.33,
   randomSeed: 2,
   params: [
-    {penalty: 0.5, maxEpochs: 1000},
-    {penalty: 1.0, maxEpochs: 1000},
-    {penalty: 0.0, maxEpochs: 1000}
+    {penalty: 0.5, maxEpochs: 1000, tolerance: 1e-5},
+    {penalty: 1.0, maxEpochs: 1000, tolerance: 1e-5},
+    {penalty: 0.0, maxEpochs: 1000, tolerance: 1e-5}
   ]
 }) YIELD modelInfo
 RETURN
@@ -444,8 +444,8 @@ RETURN
 .Results
 [opts="header"]
 |===
-| winningModel                  | trainGraphScore     | testGraphScore
-| {maxEpochs=1000, penalty=0.5} | 0.38525757517173825 | 0.46710171439292664
+| winningModel                                    | trainGraphScore     | testGraphScore
+| {maxEpochs=1000, penalty=0.5, tolerance=1.0E-5} | 0.38525757517173825 | 0.46710171439292664
 |===
 --
 
@@ -464,7 +464,7 @@ We will use the model which we trained in the <<algorithms-ml-linkprediction-exa
 
 We must also make sure that we do not include any of the relationships from the train or test graphs, which we do by specifying a relationship filter for the original relationship type `'KNOWS'`.
 
-[role=query-example, group=lp2]
+[role=query-example, group=lp]
 --
 [source, cypher]
 ----
@@ -490,7 +490,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 
 In order to analyze our predicted relationships we will write them back to Neo4j:
 
-[role=query-example, group=lp2]
+[role=query-example, group=lp]
 --
 [source, cypher]
 ----
