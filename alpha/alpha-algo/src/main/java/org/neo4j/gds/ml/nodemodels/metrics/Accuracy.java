@@ -71,10 +71,6 @@ public class Accuracy implements Metric {
         return result;
     }
 
-    public double compute(HugeLongArray targets, HugeLongArray predictions) {
-        return compute(targets, predictions, null);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

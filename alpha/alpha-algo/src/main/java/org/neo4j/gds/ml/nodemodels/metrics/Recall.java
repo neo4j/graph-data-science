@@ -67,10 +67,6 @@ public class Recall implements Metric {
         return truePositives / (truePositives + falseNegatives + EPSILON);
     }
 
-    public double compute(HugeLongArray targets, HugeLongArray predictions) {
-        return compute(targets, predictions, null);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
