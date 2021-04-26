@@ -36,15 +36,15 @@ import static java.lang.Math.addExact;
 interface RandomWalkProbabilities {
 
     HugeLongArray nodeFrequencies();
-    HugeDoubleArray centerProbabilities();
-    HugeLongArray contextDistribution();
+    HugeDoubleArray positiveSamplingProbabilities();
+    HugeLongArray negativeSamplingDistribution();
     long sampleCount();
 
     static MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(RandomWalkProbabilities.class)
             .perNode("node frequencies", HugeLongArray::memoryEstimation)
-            .perNode("center probabilities", HugeDoubleArray::memoryEstimation)
-            .perNode("context distribution", HugeLongArray::memoryEstimation)
+            .perNode("positive sampling probabilities", HugeDoubleArray::memoryEstimation)
+            .perNode("negative sampling distribution", HugeLongArray::memoryEstimation)
             .build();
     }
 
@@ -53,21 +53,23 @@ interface RandomWalkProbabilities {
         private final long nodeCount;
         private final int concurrency;
         private final AllocationTracker tracker;
-        private final double centerSamplingFactor;
-        private final double contextSamplingExponent;
+        private final double positiveSamplingFactor;
+        private final double negativeSamplingExponent;
         private final HugeLongArray nodeFrequencies;
         private final MutableLong sampleCount;
 
         Builder(
             long nodeCount,
-            double centerSamplingFactor, double contextSamplingExponent, int concurrency,
+            double positiveSamplingFactor,
+            double negativeSamplingExponent,
+            int concurrency,
             AllocationTracker tracker
         ) {
             this.nodeCount = nodeCount;
             this.concurrency = concurrency;
             this.tracker = tracker;
-            this.centerSamplingFactor = centerSamplingFactor;
-            this.contextSamplingExponent = contextSamplingExponent;
+            this.positiveSamplingFactor = positiveSamplingFactor;
+            this.negativeSamplingExponent = negativeSamplingExponent;
 
             this.nodeFrequencies = HugeLongArray.newArray(nodeCount, tracker);
             this.sampleCount = new MutableLong(0);
@@ -83,19 +85,19 @@ interface RandomWalkProbabilities {
         }
 
         RandomWalkProbabilities build() {
-            var centerProbabilities = computeCenterProbabilities();
-            var contextDistribution = computeContextDistribution();
+            var centerProbabilities = computePositiveSamplingProbabilities();
+            var contextDistribution = computeNegativeSamplingDistribution();
 
             return ImmutableRandomWalkProbabilities
                 .builder()
                 .nodeFrequencies(nodeFrequencies)
-                .centerProbabilities(centerProbabilities)
-                .contextDistribution(contextDistribution)
+                .positiveSamplingProbabilities(centerProbabilities)
+                .negativeSamplingDistribution(contextDistribution)
                 .sampleCount(sampleCount.getValue())
                 .build();
         }
 
-        private HugeDoubleArray computeCenterProbabilities() {
+        private HugeDoubleArray computePositiveSamplingProbabilities() {
             var centerProbabilities = HugeDoubleArray.newArray(nodeCount, tracker);
             var sum = sampleCount.getValue();
 
@@ -106,7 +108,7 @@ interface RandomWalkProbabilities {
                     double frequency = ((double) nodeFrequencies.get(nodeId)) / sum;
                     centerProbabilities.set(
                         nodeId,
-                        (Math.sqrt(frequency / centerSamplingFactor) + 1) * (centerSamplingFactor / frequency)
+                        (Math.sqrt(frequency / positiveSamplingFactor) + 1) * (positiveSamplingFactor / frequency)
                     );
                 })
             );
@@ -114,12 +116,12 @@ interface RandomWalkProbabilities {
             return centerProbabilities;
         }
 
-        private HugeLongArray computeContextDistribution() {
+        private HugeLongArray computeNegativeSamplingDistribution() {
             var contextDistribution = HugeLongArray.newArray(nodeCount, tracker);
             long sum = 0;
             for (var i = 0L; i < nodeCount; i++) {
-                sum += Math.pow(nodeFrequencies.get(i), contextSamplingExponent);
-                sum = addExact(sum, (long) Math.pow(nodeFrequencies.get(i), contextSamplingExponent));
+                sum += Math.pow(nodeFrequencies.get(i), negativeSamplingExponent);
+                sum = addExact(sum, (long) Math.pow(nodeFrequencies.get(i), negativeSamplingExponent));
                 contextDistribution.set(i, sum);
             }
 

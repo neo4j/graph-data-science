@@ -68,7 +68,9 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             graph.nodeCount(),
-            config.centerSamplingFactor(), config.contextSamplingExponent(), config.concurrency(),
+            config.positiveSamplingFactor(),
+            config.negativeSamplingExponent(),
+            config.concurrency(),
             tracker
         );
         var walks = new CompressedRandomWalks(graph.nodeCount() * config.walksPerNode(), tracker);

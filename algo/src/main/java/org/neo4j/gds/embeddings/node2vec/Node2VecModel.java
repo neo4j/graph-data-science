@@ -74,7 +74,7 @@ public class Node2VecModel {
         this.walks = walks;
         this.randomWalkProbabilities = randomWalkProbabilities;
         this.progressLogger = progressLogger;
-        this.negativeSamples = new NegativeSampleProducer(randomWalkProbabilities.contextDistribution());
+        this.negativeSamples = new NegativeSampleProducer(randomWalkProbabilities.negativeSamplingDistribution());
         this.tracker = tracker;
 
         centerEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension());
@@ -101,7 +101,7 @@ public class Node2VecModel {
                 (partition -> {
                     var positiveSampleProducer = new PositiveSampleProducer(
                         walks.iterator(partition.startNode(), partition.nodeCount()),
-                        randomWalkProbabilities.centerProbabilities(),
+                        randomWalkProbabilities.positiveSamplingProbabilities(),
                         config.windowSize(),
                         progressLogger
                     );
