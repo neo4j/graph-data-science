@@ -21,10 +21,10 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
@@ -61,11 +61,24 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
 
     @Value.Derived
     @Configuration.Ignore
-    default List<ParamConfig> paramsConfig() {
+    default List<MultiClassNLRTrainConfig> paramsConfig() {
         return params()
             .stream()
-            .map(ParamConfig::of)
-            .collect(Collectors.toList());
+            .map(map ->
+                MultiClassNLRTrainConfig.of(
+                    featureProperties(),
+                    targetProperty(),
+                    concurrency(),
+                    map
+                )
+            ).collect(Collectors.toList());
+    }
+
+    @Value.Check
+    default void validateParametersAreNotEmpty() {
+        if (params().isEmpty()) {
+            throw new IllegalArgumentException("No model candidates (params) specified, we require at least one");
+        }
     }
 
     static NodeClassificationTrainConfig of(
@@ -84,44 +97,5 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
 
     static ImmutableNodeClassificationTrainConfig.Builder builder() {
         return ImmutableNodeClassificationTrainConfig.builder();
-    }
-
-    @ValueClass
-    @Configuration
-    interface ParamConfig extends ConcurrencyConfig {
-        double penalty();
-
-        @Configuration.IntegerRange(min = 1)
-        default int batchSize() {
-            return 100;
-        }
-
-        @Configuration.IntegerRange(min = 1)
-        default int minEpochs() {
-            return 1;
-        }
-
-        @Configuration.IntegerRange(min = 1)
-        default int maxEpochs() {
-            return 100;
-        }
-
-        @Configuration.IntegerRange(min = 0)
-        default int patience() {
-            return 1;
-        }
-
-        @Configuration.DoubleRange(min = 0)
-        default double tolerance() {
-            return 0.001D;
-        }
-
-        default boolean sharedUpdater() {
-            return false;
-        }
-
-        static ParamConfig of(Map<String, Object> rawParams) {
-            return new ParamConfigImpl(CypherMapWrapper.create(rawParams));
-        }
     }
 }

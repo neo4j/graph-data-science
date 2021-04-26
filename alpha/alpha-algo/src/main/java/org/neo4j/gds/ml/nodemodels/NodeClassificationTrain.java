@@ -110,11 +110,6 @@ public class NodeClassificationTrain
                 // 3. train each model candidate on the train sets
                 progressLogger.logStart(candidateAndSplitMessage + " :: Train");
                 // The best upper bound we have for bounding progress is maxEpochs, so tell the user what that value is
-                // TODO: we are circumventing type checking built into config creation
-                //       could we trigger this type checking earlier? there is a lot of distance between this interaction and the
-                //       actual trainin code, can we close the gap? could we create the TrainConfig here?
-                //       it's nice to have all the progress logging configuration here, but if we can't close the gap it may be
-                //       better to push it (back) down into the train logic
                 int maxEpochs = ((Number) modelParams.getOrDefault("maxEpochs", TrainingConfig.MAX_EPOCHS)).intValue();
                 progressLogger.logMessage(formatWithLocale(
                     candidateAndSplitMessage + " :: Train :: Max iterations: %s",

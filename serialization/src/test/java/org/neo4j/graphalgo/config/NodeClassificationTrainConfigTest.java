@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.neo4j.gds.ml.nodemodels.metrics.MetricSpecificationTest.allValidMetricSpecifications;
 
-class NodeClassificationTrainConfigSerializerTest {
+class NodeClassificationTrainConfigTest {
 
     @ParameterizedTest
     @MethodSource("allValidMetricSpecificationsProxy")
@@ -155,6 +155,20 @@ class NodeClassificationTrainConfigSerializerTest {
                 .params(List.of(model1))
                 .build())
             .hasMessageContaining("No value specified for the mandatory configuration parameter `penalty` (a similar parameter exists: [penlty])");
+    }
+
+    @Test
+    void shouldNotAcceptEmptyModelCandidates() {
+        assertThatThrownBy(() ->
+            ImmutableNodeClassificationTrainConfig.builder()
+                .modelName("model")
+                .featureProperties(List.of("a", "b"))
+                .holdoutFraction(0.33)
+                .validationFolds(2)
+                .targetProperty("t")
+                .params(List.of())
+                .build())
+            .hasMessageContaining("No model candidates (params) specified, we require at least one");
     }
 
     private Map<String, Object> protoToMap(String p) {
