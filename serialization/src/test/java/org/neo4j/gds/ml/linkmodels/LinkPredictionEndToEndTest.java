@@ -92,7 +92,7 @@ class LinkPredictionEndToEndTest {
         var config = createConfig(List.of(model2), featureProperties);
 
 
-        var lpTrain = new LinkPredictionTrain(graph, config, TestProgressLogger.NULL_LOGGER.getLog());
+        var lpTrain = new LinkPredictionTrain(graph, config, TestProgressLogger.NULL_LOGGER);
 
         var modelBeforeSerialization = lpTrain.compute();
 
