@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
+import org.neo4j.kernel.impl.core.NodeEntity;
 
 import java.util.List;
 import java.util.Locale;
@@ -166,6 +167,27 @@ class EigenvectorProcTest extends BaseProcTest {
             Map.of("nodeId", 0L, "score", closeTo(0.04371, RESULT_ERROR)),
             Map.of("nodeId", 1L, "score", closeTo(0.99904, RESULT_ERROR))
         ));
+    }
+
+    @Test
+    void failOnMissingSourceNodes() {
+        var sourceNodes = List.of(
+            new NodeEntity(null, 42),
+            new NodeEntity(null, 1337)
+        );
+
+        var query = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
+            .algo("eigenvector")
+            .streamMode()
+            .addPlaceholder("sourceNodes", "sources")
+            .yields();
+
+
+        assertThatThrownBy(() -> runQuery(query, Map.of("sources", sourceNodes)))
+            .hasRootCauseExactlyInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Source nodes do not exist in the in-memory graph")
+            .hasMessageContaining("['1337', '42']");
     }
 
     @Test
