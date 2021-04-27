@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.logging.NullLog;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -219,6 +220,7 @@ class NodeClassificationPredictTest {
                 .featureProperties(featureProperties)
                 .holdoutFraction(0.2)
                 .validationFolds(4)
+                .addParam(Map.of("penalty", 1.0))
                 .build()
         );
         ModelCatalog.set(model);
