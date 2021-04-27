@@ -19,6 +19,7 @@ The Neo4j GDS library includes the following centrality algorithms, grouped by q
 ** <<algorithms-harmonic-centrality, Harmonic Centrality>>
 ** <<algorithms-eigenvector, Eigenvector Centrality>>
 ** <<algorithms-hits, HITS>>
+** <<algorithms-influence-maximization, Influence Maximization>>
 
 include::page-rank/page-rank.adoc[leveloffset=+1]
 
@@ -35,3 +36,5 @@ include::alpha/alpha-harmonic-centrality.adoc[leveloffset=+1]
 include::alpha/alpha-eigenvector-centrality.adoc[leveloffset=+1]
 
 include::alpha/hits/hits.adoc[leveloffset=+1]
+
+include::algorithms-influence-maximization.adoc[leveloffset=+1]
