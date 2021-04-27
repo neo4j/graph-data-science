@@ -134,8 +134,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             }
             // insert the candidates metrics into trainStats and validationStats
             metrics.forEach(metric -> {
-                validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
-                trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
+                validationStats.get(metric).add(validationStatsBuilder.build(metric));
+                trainStats.get(metric).add(trainStatsBuilder.build(metric));
             });
         }
 
@@ -304,10 +304,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     @ValueClass
     interface ModelSelectResult {
         Map<String, Object> bestParameters();
-
-        // key is metric
         Map<Metric, List<ModelStats>> trainStats();
-        // key is metric
         Map<Metric, List<ModelStats>> validationStats();
 
         static ModelSelectResult of(
@@ -320,7 +317,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
     }
 
-    private class ModelStatsBuilder {
+    private static class ModelStatsBuilder {
         private final Map<Metric, Double> min;
         private final Map<Metric, Double> max;
         private final Map<Metric, Double> sum;
@@ -341,7 +338,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             sum.merge(metric, value, Double::sum);
         }
 
-        ModelStats modelStats(Metric metric) {
+        ModelStats build(Metric metric) {
             return ImmutableModelStats.of(
                 modelParams,
                 sum.get(metric) / numberOfSplits,
