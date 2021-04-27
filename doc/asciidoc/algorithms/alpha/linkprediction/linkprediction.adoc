@@ -487,6 +487,48 @@ This indicates that the model reacted fairly well to the train graph, but did no
 In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
 
 
+[[algorithms-ml-linkprediction-examples-stream]]
+=== Stream
+
+In the `stream` execution mode, the algorithm returns the top predicted relationships.
+This allows us to inspect the results directly or post-process them in Cypher without any side effects.
+
+For more details on the `stream` mode in general, see <<running-algos-stream>>.
+
+[role=query-example, group=lp]
+--
+[source, cypher]
+----
+CALL gds.alpha.ml.linkPrediction.predict.stream('myGraph', {
+  relationshipTypes: ['KNOWS'],
+  modelName: 'lp-numberOfPosts-model',
+  topN: 5,
+  threshold: 0.45
+}) YIELD node1, node2, probability
+MATCH (n), (m)
+WHERE id(n) = node1 AND id(m) = node2
+RETURN
+  n.name AS name1,
+  m.name AS name2,
+  probability
+----
+
+.Results
+[opts="header"]
+|===
+| name1   | name2     | probability
+| "Karin" | "Greg"    | 0.4991363247445545
+| "Karin" | "Mark"    | 0.49896977670628373
+| "Mark"  | "Greg"    | 0.49869219716877955
+| "Will"  | "Veselin" | 0.49869219716877955
+| "Alice" | "Mark"    | 0.49719328593255546
+|===
+--
+
+We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+Note that the predicted link between the Karin and Greg nodes does not reflect any particular direction between them.
+
+
 [[algorithms-ml-linkprediction-examples-mutate]]
 === Mutate
 
