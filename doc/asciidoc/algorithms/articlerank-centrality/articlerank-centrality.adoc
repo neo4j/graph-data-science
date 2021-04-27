@@ -1,0 +1,607 @@
+[[algorithms-article-rank-centrality]]
+= Article Rank
+:entity: node
+:result: score
+:algorithm: Article Rank
+
+[abstract]
+--
+This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library.
+--
+
+
+[[algorithms-article-rank-centrality-introduction]]
+== Introduction
+
+ArticleRank is a variant of the <<algorithms-page-rank, Page Rank algorithm>>, which measures the *transitive* influence of nodes.
+
+Page Rank follows the assumption that relationships originating from low-degree nodes have a higher influence than relationships from high-degree nodes.
+Article Rank lowers the influence of low-degree nodes by lowering the scores being sent to their neighbors in each iteration.
+
+The Article Rank of a node _v_ at iteration _i_ is defined as:
+
+image::equations/articleRank.svg[]
+
+where,
+
+* _N~in~(v)_ denotes incoming neighbors and _N~out~(v)_ denotes outgoing neighbors of node _v_.
+* _d_ is a damping factor in _[0, 1]_.
+* _[overline]#N#~out~_ is the average out-degree
+
+For more information, see https://www.emeraldinsight.com/doi/abs/10.1108/00012530911005544[ArticleRank: a PageRank‐based alternative to numbers of citations for analysing citation networks^].
+
+[[algorithms-article-rank-centrality-considerations]]
+== Considerations
+
+There are some things to be aware of when using the Article Rank algorithm:
+
+* If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
+* Rank sink can occur when a network of pages is forming an infinite cycle.
+* Dead-ends occur when pages have no out-links.
+
+Changing the value of damping factor can help with these considerations.
+It can be interpreted as a probability of a web surfer to sometimes jump to a random page and therefore not getting stuck in sinks.
+
+
+
+[[algorithms-article-rank-centrality-syntax]]
+== Syntax
+
+include::../shared/syntax-intro-named-graph.adoc[]
+
+.Article Rank syntax per mode
+[.tabbed-example]
+====
+
+[.include-with-stream]
+======
+
+.Run Article Rank in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.articlerank.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  score: Float
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header"]
+|===
+| Name    | Type    | Description
+| nodeId  | Integer | Node ID.
+| score   | Float   | Eigenvector score.
+|===
+
+======
+
+[.include-with-stats]
+======
+
+.Run Article Rank in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.articlerank.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-mutate]
+======
+
+.Run Article Rank in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.articlerank.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten  | Integer   | The number of properties that were written to the in-memory graph.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-write]
+======
+
+.Run Article Rank in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.articlerank.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
+| writeMillis            | Integer   | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+====
+
+
+[[algorithms-article-rank-centrality-syntax-anonymous]]
+=== Anonymous graphs
+
+include::../shared/syntax-anonymous-graphs.adoc[]
+
+.Run Article Rank in write mode on an anonymous graph:
+[source, cypher, role=noplay]
+----
+CALL gds.articlerank.write(
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, see the <<algorithms-page-rank-syntax, write mode syntax above>>.
+
+
+[[algorithms-article-rank-centrality-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: web network
+:image-file: page-rank-graph.svg
+include::../shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (home:Page {name:'Home'}),
+  (about:Page {name:'About'}),
+  (product:Page {name:'Product'}),
+  (links:Page {name:'Links'}),
+  (a:Page {name:'Site A'}),
+  (b:Page {name:'Site B'}),
+  (c:Page {name:'Site C'}),
+  (d:Page {name:'Site D'}),
+
+  (home)-[:LINKS {weight: 0.2}]->(about),
+  (home)-[:LINKS {weight: 0.2}]->(links),
+  (home)-[:LINKS {weight: 0.6}]->(product),
+  (about)-[:LINKS {weight: 1.0}]->(home),
+  (product)-[:LINKS {weight: 1.0}]->(home),
+  (a)-[:LINKS {weight: 1.0}]->(home),
+  (b)-[:LINKS {weight: 1.0}]->(home),
+  (c)-[:LINKS {weight: 1.0}]->(home),
+  (d)-[:LINKS {weight: 1.0}]->(home),
+  (links)-[:LINKS {weight: 0.8}]->(home),
+  (links)-[:LINKS {weight: 0.05}]->(a),
+  (links)-[:LINKS {weight: 0.05}]->(b),
+  (links)-[:LINKS {weight: 0.05}]->(c),
+  (links)-[:LINKS {weight: 0.05}]->(d);
+----
+
+This graph represents eight pages, linking to one another.
+Each relationship has a property called `weight`, which describes the importance of the relationship.
+
+include::../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'Page',
+  'LINKS',
+  {
+    relationshipProperties: 'weight'
+  }
+)
+----
+
+
+[[algorithms-page-rank-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.articleRank.write.estimate('myGraph', {
+  writeProperty: 'centrality',
+  maxIterations: 20
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 8         | 14                | 696     | 696     | "696 Bytes"
+|===
+--
+
+
+[[algorithms-article-rank-centrality-examples-stream]]
+=== Stream
+
+:stream-details: For example, we can order the results to find the nodes with the highest Eigenvector score.
+include::../shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.articleRank.stream('myGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 1.6630046092073039
+| "About"   | 0.669785439070462
+| "Links"   | 0.669785439070462
+| "Product" | 0.669785439070462
+| "Site A"  | 0.29731716846827266
+| "Site B"  | 0.29731716846827266
+| "Site C"  | 0.29731716846827266
+| "Site D"  | 0.29731716846827266
+|===
+--
+
+The above query is running the algorithm in `stream` mode as `unweighted`.
+Below, one can find an example for <<algorithms-article-rank-centrality-examples-weighted, weighted graphs>>.
+
+
+[[algorithms-article-rank-centrality-examples-stats]]
+=== Stats
+
+:stats-details: For example Eigenvector stats returns centrality histogram which can be used to monitor the distribution of centrality scores across all computed nodes.
+:stats-syntax: algorithms-article-rank-centrality-syntax
+include::../shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and return statistics about the centrality scores.
+[source, cypher, role=noplay]
+----
+CALL gds.articleRank.stats('myGraph')
+YIELD centralityDistribution
+RETURN centralityDistribution.max AS max
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| max
+| 1.6630077362060547
+|===
+--
+
+
+[[algorithms-article-rank-centrality-examples-mutate]]
+=== Mutate
+
+include::../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.articleRank.mutate('myGraph', {
+  mutateProperty: 'centrality'
+})
+YIELD nodePropertiesWritten, ranIterations
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| nodePropertiesWritten | ranIterations
+| 8                     | 20
+|===
+--
+
+
+[[algorithms-article-rank-centrality-examples-write]]
+=== Write
+
+include::../shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.articleRank.write('myGraph', {
+  writeProperty: 'centrality'
+})
+YIELD nodePropertiesWritten, ranIterations
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| nodePropertiesWritten | ranIterations
+| 8                     | 20
+|===
+--
+
+
+[[algorithms-article-rank-centrality-examples-weighted]]
+=== Weighted
+
+By default, the algorithm considers the relationships of the graph to be unweighted.
+To change this behaviour, we can use the `relationshipWeightProperty` configuration parameter.
+If the parameter is set, the associated property value is used as relationship weight.
+In the `weighted` case, the previous score of a node sent to its neighbors is multiplied by the normalized relationship weight.
+Note, that negative relationship weights are ignored during the computation.
+
+In the following example, we use the `weight` property of the input graph as relationship weight property.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode using relationship weights:
+[source, cypher, role=noplay]
+----
+CALL gds.articleRank.stream('myGraph', {
+  relationshipWeightProperty: 'weight'
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 0.9967881778831038
+| "Product" | 0.47350093601943055
+| "About"   | 0.25783364533981024
+| "Links"   | 0.25783364533981024
+| "Site A"  | 0.1569732107200472
+| "Site B"  | 0.1569732107200472
+| "Site C"  | 0.1569732107200472
+| "Site D"  | 0.1569732107200472
+|===
+--
+
+As in the unweighted example, the "Home" node has the highest score.
+In contrast, the "Product" now has the second highest instead of the fourth highest score.
+
+NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted`, however, all the algorithm modes support the `relationshipWeightProperty` configuration parameter.
+
+
+[[algorithms-article-rank-centrality-examples-tolerance]]
+=== Tolerance
+
+The `tolerance` configuration parameter denotes the minimum change in scores between iterations.
+If all scores change less than the configured tolerance, the iteration is aborted and considered converged.
+Note, that setting a higher tolerance leads to earlier convergence, but also to less accurate centrality scores.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode using a high `tolerance` value:
+[source, cypher, role=noplay]
+----
+CALL gds.articleRank.stream('myGraph', {
+  tolerance: 0.1
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 0.8818733739463573
+| "About"   | 0.4261656092095172
+| "Links"   | 0.4261656092095172
+| "Product" | 0.4261656092095172
+| "Site A"  | 0.21893241712938355
+| "Site B"  | 0.21893241712938355
+| "Site C"  | 0.21893241712938355
+| "Site D"  | 0.21893241712938355
+|===
+--
+
+We are using `tolerance: 0.1`, which leads to slightly different results compared to the <<algorithms-article-rank-centrality-examples-stream, stream example>>.
+However, the computation converges after four iterations, and we can already observe a trend in the resulting scores.
+
+
+[[algorithms-article-rank-examples-personalised]]
+=== Personalised Article Rank
+
+Personalized Article Rank is a variation of Article Rank which is biased towards a set of `sourceNodes`.
+By default, the power iteration starts with the same value for all nodes: `1 / |V|`.
+For a given set of source nodes `S`, the initial value of each source node is set to `1 / |S|` and to `0` for all remaining nodes.
+
+The following examples show how to run Eigenvector centrality centered around 'Site A' and 'Site B'.
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+MATCH (siteA:Page {name: 'Site A'}), (siteB:Page {name: 'Site B'})
+CALL gds.articleRank.stream('myGraph', {
+  maxIterations: 20,
+  sourceNodes: [siteA, siteB]
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 0.3639476164976639
+| "Site A"  | 0.17500411281021852
+| "Site B"  | 0.17500411281021852
+| "About"   | 0.11375083020989332
+| "Links"   | 0.11375083020989332
+| "Product" | 0.11375083020989332
+| "Site C"  | 0.0250041128102185
+| "Site D"  | 0.0250041128102185
+|===
+--
+
+Comparing these results to the ones from the <<algorithms-article-rank-centrality-examples-stream, stream example>> (which is not using `sourceNodes` configuration parameter) shows that the 'Site A' and `Site B` node  that we used in the `sourceNodes` list now scores second and third instead of fourth and fifth.
+
+
+[[algorithms-article-rank-examples-scaler]]
+=== Scaling centrality scores
+
+To normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
+A common scaler is the `L1Norm`, which normalizes each score to a value between 0 and 1.
+A description of all available scalers can be found in the documentation for the <<algorithms-scale-properties, `scaleProperties`>> procedure.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode and returns normalized results:
+[source, cypher, role=noplay]
+----
+CALL gds.articleRank.stream('myGraph', {
+  scaler: "L1Norm"
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 0.34206732020627306
+| "About"   | 0.13776973857289815
+| "Links"   | 0.13776973857289815
+| "Product" | 0.13776973857289815
+| "Site A"  | 0.06115586601875811
+| "Site B"  | 0.06115586601875811
+| "Site C"  | 0.06115586601875811
+| "Site D"  | 0.06115586601875811
+
+|===
+--
+
+Comparing the results with the <<algorithms-article-rank-centrality-examples-stream, stream example>>, we can see that the relative order of scores is the same.
