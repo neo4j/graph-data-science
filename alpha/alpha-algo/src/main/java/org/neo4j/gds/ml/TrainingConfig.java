@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 
 public interface TrainingConfig extends ConcurrencyConfig {
@@ -27,26 +28,31 @@ public interface TrainingConfig extends ConcurrencyConfig {
     int MAX_EPOCHS = 100;
 
     @Value.Default
+    @Configuration.IntegerRange(min = 1)
     default int batchSize() {
         return 100;
     }
 
     @Value.Default
+    @Configuration.IntegerRange(min = 1)
     default int minEpochs() {
         return 1;
     }
 
     @Value.Default
+    @Configuration.IntegerRange(min = 1)
     default int patience() {
         return 1;
     }
 
     @Value.Default
+    @Configuration.IntegerRange(min = 1)
     default int maxEpochs() {
         return MAX_EPOCHS;
     }
 
     @Value.Default
+    @Configuration.DoubleRange(min = 0)
     default double tolerance() {
         return 1e-3;
     }

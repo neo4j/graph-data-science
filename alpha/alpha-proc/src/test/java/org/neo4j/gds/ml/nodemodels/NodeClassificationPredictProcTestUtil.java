@@ -28,10 +28,13 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationTrain.MODEL_TYPE;
 
-public class NodeClassificationPredictProcTestUtil {
+public final class NodeClassificationPredictProcTestUtil {
+
+    private NodeClassificationPredictProcTestUtil() {}
 
     public static void addModelWithFeatures(String username, String modelName, List<String> properties) {
         var classIdMap = new LocalIdMap();
@@ -56,6 +59,7 @@ public class NodeClassificationPredictProcTestUtil {
                 .holdoutFraction(0.25)
                 .validationFolds(4)
                 .featureProperties(properties)
+                .addParam(Map.of("penalty", 1.0))
                 .build()
         );
         ModelCatalog.set(model);

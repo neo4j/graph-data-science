@@ -50,21 +50,21 @@ class LinkPredictionTrainTest {
     // Five cliques of size 2, 3, or 4
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     static String GRAPH =
-        "(a:N {z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-        "(b:N {z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-        "(c:N {z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-        "(d:N {z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
-        "(e:N {z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
-        "(f:N {z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
-        "(g:N {z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
-        "(h:N {z: 200, array: [-1.0,-2.0,3.0,4.0,5.0]}), " +
-        "(i:N {z: 200, array: [-1.0,-2.0,3.0,4.0,5.0]}), " +
-        "(j:N {z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
-        "(k:N {z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
-        "(l:N {z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
-        "(m:N {z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
-        "(n:N {z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
-        "(o:N {z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
+        "(a:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
+        "(b:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
+        "(c:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
+        "(d:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
+        "(e:N {noise: 42, z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
+        "(f:N {noise: 42, z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
+        "(g:N {noise: 42, z: 100, array: [-1.0,2.0,3.0,4.0,5.0]}), " +
+        "(h:N {noise: 42, z: 200, array: [-1.0,-2.0,3.0,4.0,5.0]}), " +
+        "(i:N {noise: 42, z: 200, array: [-1.0,-2.0,3.0,4.0,5.0]}), " +
+        "(j:N {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
+        "(k:N {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
+        "(l:N {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
+        "(m:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
+        "(n:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
+        "(o:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
 
         "(a)-[:TRAIN {label: 1}]->(b), " +
         "(a)-[:TEST {label: 1}]->(c), " +       // selected for test
@@ -122,17 +122,17 @@ class LinkPredictionTrainTest {
         double totalNegatives = maxNumberOfRelationships - totalPositives;
         var classRatio = totalNegatives / totalPositives;
 
-        var expectedWinner = Map.<String, Object>of("maxEpochs", 1000);
+        var expectedWinner = Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10);
         var config = ImmutableLinkPredictionTrainConfig.builder()
             .trainRelationshipType(RelationshipType.of("TRAIN"))
             .testRelationshipType(RelationshipType.of("TEST"))
-            .featureProperties(List.of("z"))
+            .featureProperties(List.of("z", "array"))
             .modelName("model")
-            .validationFolds(3)
-            .randomSeed(-1L)
+            .validationFolds(2)
+            .randomSeed(1337L)
             .negativeClassWeight(classRatio)
             .params(List.of(
-                Map.of("maxEpochs", 0),
+                Map.of("maxEpochs", 10, "penalty", 1000000),
                 expectedWinner
             )).build();
 
@@ -166,7 +166,7 @@ class LinkPredictionTrainTest {
         double totalNegatives = maxNumberOfRelationships - totalPositives;
         var classRatio = totalNegatives / totalPositives;
 
-        var expectedWinner = Map.<String, Object>of("maxEpochs", 1000);
+        var expectedWinner = Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10);
         var config = ImmutableLinkPredictionTrainConfig.builder()
             .trainRelationshipType(RelationshipType.of("TRAIN"))
             .testRelationshipType(RelationshipType.of("TEST"))
@@ -176,7 +176,7 @@ class LinkPredictionTrainTest {
             .randomSeed(-1L)
             .negativeClassWeight(classRatio)
             .params(List.of(
-                Map.of("maxEpochs", 0),
+                Map.of("maxEpochs", 10, "penalty", 1000000),
                 expectedWinner
             )).build();
 
@@ -217,7 +217,7 @@ class LinkPredictionTrainTest {
             .randomSeed(-1L)
             .negativeClassWeight(classRatio)
             .params(List.of(
-                Map.of("maxEpochs", 0),
+                Map.of("maxEpochs", 10, "penalty", 100000),
                 expectedWinner
             )).build();
 

@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -31,6 +33,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ValueClass
 @Configuration
@@ -55,6 +58,28 @@ public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePr
     String targetProperty();
 
     List<Map<String, Object>> params();
+
+    @Value.Derived
+    @Configuration.Ignore
+    default List<MultiClassNLRTrainConfig> paramsConfig() {
+        return params()
+            .stream()
+            .map(map ->
+                MultiClassNLRTrainConfig.of(
+                    featureProperties(),
+                    targetProperty(),
+                    concurrency(),
+                    map
+                )
+            ).collect(Collectors.toList());
+    }
+
+    @Value.Check
+    default void validateParametersAreNotEmpty() {
+        if (params().isEmpty()) {
+            throw new IllegalArgumentException("No model candidates (params) specified, we require at least one");
+        }
+    }
 
     static NodeClassificationTrainConfig of(
         Optional<String> graphName,

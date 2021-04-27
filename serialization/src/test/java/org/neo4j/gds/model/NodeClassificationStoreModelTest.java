@@ -24,8 +24,8 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
-import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRData;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.model.Model;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,6 +59,7 @@ class NodeClassificationStoreModelTest extends BaseStoreModelTest<MultiClassNLRD
             .targetProperty("t")
             .validationFolds(2)
             .holdoutFraction(0.19)
+            .addParam(Map.of("penalty", 1.0))
             .build();
 
         var modelData = MultiClassNLRData.builder()

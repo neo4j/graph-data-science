@@ -66,7 +66,9 @@ abstract class BaseStoreModelTest<DATA, CONFIG extends ModelConfig> {
 
         assertThat(storedModel.creator()).isEqualTo(model.creator());
         assertThat(storedModel.name()).isEqualTo(model.name());
-        assertThat(storedModel.trainConfig()).isEqualTo(model.trainConfig());
+        assertThat(storedModel.trainConfig())
+            .usingRecursiveComparison()
+            .isEqualTo(model.trainConfig());
         assertThat(storedModel.creationTime())
             .isCloseTo(model.creationTime(), new TemporalUnitWithinOffset(1, SECONDS));
         assertThat(storedModel.graphSchema()).isEqualTo(model.graphSchema());

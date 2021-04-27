@@ -32,15 +32,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.neo4j.gds.ml.nodemodels.metrics.MetricSpecificationTest.allValidMetricSpecifications;
 
-class NodeClassificationTrainConfigSerializerTest {
+class NodeClassificationTrainConfigTest {
 
     @ParameterizedTest
     @MethodSource("allValidMetricSpecificationsProxy")
     void shouldSerializeConfig(String metric) {
-        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 0);
+        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 1);
         Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
 
         var config = ImmutableNodeClassificationTrainConfig.builder()
@@ -80,7 +81,7 @@ class NodeClassificationTrainConfigSerializerTest {
 
     @Test
     void shouldSerializeConfigWithMultipleMetrics() {
-        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 0);
+        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 1);
 
         var config = ImmutableNodeClassificationTrainConfig.builder()
             .modelName("model")
@@ -104,7 +105,7 @@ class NodeClassificationTrainConfigSerializerTest {
 
     @Test
     void shouldDeserializeConfig() {
-        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 0);
+        Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 1);
         Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
 
         var config = ImmutableNodeClassificationTrainConfig.builder()
@@ -137,6 +138,39 @@ class NodeClassificationTrainConfigSerializerTest {
         assertThat(deserializedConfig.params()).containsExactly(model1, model2);
     }
 
+    @Test
+    void shouldValidateParamsMap() {
+        Map<String, Object> model1 = Map.of("penlty", 1, "maxEpochs", 1);
+
+        assertThatThrownBy(() ->
+            ImmutableNodeClassificationTrainConfig.builder()
+                .modelName("model")
+                .featureProperties(List.of("a", "b"))
+                .holdoutFraction(0.33)
+                .validationFolds(2)
+                .concurrency(1)
+                .randomSeed(19L)
+                .targetProperty("t")
+                .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
+                .params(List.of(model1))
+                .build())
+            .hasMessageContaining("No value specified for the mandatory configuration parameter `penalty` (a similar parameter exists: [penlty])");
+    }
+
+    @Test
+    void shouldNotAcceptEmptyModelCandidates() {
+        assertThatThrownBy(() ->
+            ImmutableNodeClassificationTrainConfig.builder()
+                .modelName("model")
+                .featureProperties(List.of("a", "b"))
+                .holdoutFraction(0.33)
+                .validationFolds(2)
+                .targetProperty("t")
+                .params(List.of())
+                .build())
+            .hasMessageContaining("No model candidates (params) specified, we require at least one");
+    }
+
     private Map<String, Object> protoToMap(String p) {
         try {
             return ObjectMapperSingleton.OBJECT_MAPPER.readValue(p, Map.class);
@@ -149,4 +183,6 @@ class NodeClassificationTrainConfigSerializerTest {
     static List<String> allValidMetricSpecificationsProxy() {
         return allValidMetricSpecifications();
     }
+
+
 }
