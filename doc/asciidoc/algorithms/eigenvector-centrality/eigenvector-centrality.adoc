@@ -1,0 +1,604 @@
+[[algorithms-eigenvector-centrality]]
+= Eigenvector Centrality
+:entity: node
+:result: score
+:algorithm: Eigenvector Centrality
+
+[abstract]
+--
+This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library.
+--
+
+
+[[algorithms-eigenvector-centrality-introduction]]
+== Introduction
+
+Eigenvector Centrality is an algorithm that measures the *transitive* influence of nodes.
+Relationships originating from high-scoring nodes contribute more to the score of a node than connections from low-scoring nodes.
+A high eigenvector score means that a node is connected to many nodes who themselves have high scores.
+
+The algorithm computes the eigenvector associated with the largest absolute eigenvalue.
+To compute that eigenvalue, the algorithm applies the https://en.wikipedia.org/wiki/Power_iteration[power iteration] approach.
+Within each iteration, the centrality score for each node is derived from the scores of its incoming neighbors.
+In the power iteration method, the eigenvector is L2-normalized after each iteration, leading to normalized results by default.
+
+The <<algorithms-page-rank, PageRank>> algorithm is a variant of Eigenvector Centrality with an additional jump probability.
+
+
+[[algorithms-eigenvector-centrality-considerations]]
+== Considerations
+
+There are some things to be aware of when using the Eigenvector centrality algorithm:
+
+* Centrality scores for nodes with no incoming relationships will converge to `0`.
+* Due to missing degree normalization, high-degree nodes have a very strong influence on their neighbors' score.
+
+
+[[algorithms-eigenvector-centrality-syntax]]
+== Syntax
+
+include::../shared/syntax-intro-named-graph.adoc[]
+
+.Eigenvector Centrality syntax per mode
+[.tabbed-example]
+====
+
+[.include-with-stream]
+======
+
+.Run Eigenvector Centrality in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  score: Float
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header"]
+|===
+| Name    | Type    | Description
+| nodeId  | Integer | Node ID.
+| score   | Float   | Eigenvector score.
+|===
+
+======
+
+[.include-with-stats]
+======
+
+.Run Eigenvector Centrality in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-mutate]
+======
+
+.Run Eigenvector Centrality in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten  | Integer   | The number of properties that were written to the in-memory graph.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-write]
+======
+
+.Run Eigenvector Centrality in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| createMillis           | Integer   | Milliseconds for creating the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the `centralityDistribution`.
+| writeMillis            | Integer   | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+====
+
+
+[[algorithms-eigenvector-centrality-syntax-anonymous]]
+=== Anonymous graphs
+
+include::../shared/syntax-anonymous-graphs.adoc[]
+
+.Run Eigenvector Centrality in write mode on an anonymous graph:
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.write(
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  centralityDistribution: Map,
+  configuration: Map
+----
+
+include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, see the <<algorithms-page-rank-syntax, write mode syntax above>>.
+
+
+[[algorithms-eigenvector-centrality-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: web network
+:image-file: page-rank-graph.svg
+include::../shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (home:Page {name:'Home'}),
+  (about:Page {name:'About'}),
+  (product:Page {name:'Product'}),
+  (links:Page {name:'Links'}),
+  (a:Page {name:'Site A'}),
+  (b:Page {name:'Site B'}),
+  (c:Page {name:'Site C'}),
+  (d:Page {name:'Site D'}),
+
+  (home)-[:LINKS {weight: 0.2}]->(about),
+  (home)-[:LINKS {weight: 0.2}]->(links),
+  (home)-[:LINKS {weight: 0.6}]->(product),
+  (about)-[:LINKS {weight: 1.0}]->(home),
+  (product)-[:LINKS {weight: 1.0}]->(home),
+  (a)-[:LINKS {weight: 1.0}]->(home),
+  (b)-[:LINKS {weight: 1.0}]->(home),
+  (c)-[:LINKS {weight: 1.0}]->(home),
+  (d)-[:LINKS {weight: 1.0}]->(home),
+  (links)-[:LINKS {weight: 0.8}]->(home),
+  (links)-[:LINKS {weight: 0.05}]->(a),
+  (links)-[:LINKS {weight: 0.05}]->(b),
+  (links)-[:LINKS {weight: 0.05}]->(c),
+  (links)-[:LINKS {weight: 0.05}]->(d);
+----
+
+This graph represents eight pages, linking to one another.
+Each relationship has a property called `weight`, which describes the importance of the relationship.
+
+include::../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+  'myGraph',
+  'Page',
+  'LINKS',
+  {
+    relationshipProperties: 'weight'
+  }
+)
+----
+
+
+[[algorithms-page-rank-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.write.estimate('myGraph', {
+  writeProperty: 'centrality',
+  maxIterations: 20
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 8         | 14                | 696     | 696     | "696 Bytes"
+|===
+--
+
+
+[[algorithms-eigenvector-centrality-examples-stream]]
+=== Stream
+
+:stream-details: For example, we can order the results to find the nodes with the highest Eigenvector score.
+include::../shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.stream('myGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 0.7465574981728249
+| "About"   | 0.33997520529777137
+| "Links"   | 0.33997520529777137
+| "Product" | 0.33997520529777137
+| "Site A"  | 0.15484062876886298
+| "Site B"  | 0.15484062876886298
+| "Site C"  | 0.15484062876886298
+| "Site D"  | 0.15484062876886298
+|===
+--
+
+The above query is running the algorithm in `stream` mode as `unweighted`.
+Below, one can find an example for <<algorithms-eigenvector-centrality-examples-weighted, weighted graphs>>.
+
+
+[[algorithms-eigenvector-centrality-examples-stats]]
+=== Stats
+
+:stats-details: For example Eigenvector stats returns centrality histogram which can be used to monitor the distribution of centrality scores across all computed nodes.
+:stats-syntax: algorithms-eigenvector-centrality-syntax
+include::../shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and return statistics about the centrality scores.
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.stats('myGraph', {
+  maxIterations: 20
+})
+YIELD centralityDistribution
+RETURN centralityDistribution.max AS max
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| max
+| 0.7465581893920898
+|===
+--
+
+
+[[algorithms-eigenvector-centrality-examples-mutate]]
+=== Mutate
+
+include::../shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.mutate('myGraph', {
+  maxIterations: 20,
+  mutateProperty: 'centrality'
+})
+YIELD nodePropertiesWritten, ranIterations
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| nodePropertiesWritten | ranIterations
+| 8                     | 20
+|===
+--
+
+
+[[algorithms-eigenvector-centrality-examples-write]]
+=== Write
+
+include::../shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.write('myGraph', {
+  maxIterations: 20,
+  writeProperty: 'centrality'
+})
+YIELD nodePropertiesWritten, ranIterations
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| nodePropertiesWritten | ranIterations
+| 8                     | 20
+|===
+--
+
+
+[[algorithms-eigenvector-centrality-examples-weighted]]
+=== Weighted
+
+By default, the algorithm considers the relationships of the graph to be unweighted.
+To change this behaviour, we can use the `relationshipWeightProperty` configuration parameter.
+If the parameter is set, the associated property value is used as relationship weight.
+In the `weighted` case, the previous score of a node sent to its neighbors is multiplied by the normalized relationship weight.
+Note, that negative relationship weights are ignored during the computation.
+
+In the following example, we use the `weight` property of the input graph as relationship weight property.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode using relationship weights:
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.stream('myGraph', {
+  maxIterations: 20,
+  relationshipWeightProperty: 'weight'
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 0.8328163407319487
+| "Product" | 0.5004775834976313
+| "About"   | 0.1668258611658771
+| "Links"   | 0.1668258611658771
+| "Site A"  | 0.008327591469710233
+| "Site B"  | 0.008327591469710233
+| "Site C"  | 0.008327591469710233
+| "Site D"  | 0.008327591469710233
+|===
+--
+
+As in the unweighted example, the "Home" node has the highest score.
+In contrast, the "Product" now has the second highest instead of the fourth highest score.
+
+NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted`, however, all the algorithm modes support the `relationshipWeightProperty` configuration parameter.
+
+
+[[algorithms-eigenvector-centrality-examples-tolerance]]
+=== Tolerance
+
+The `tolerance` configuration parameter denotes the minimum change in scores between iterations.
+If all scores change less than the configured tolerance, the iteration is aborted and considered converged.
+Note, that setting a higher tolerance leads to earlier convergence, but also to less accurate centrality scores.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode using a high `tolerance` value:
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.stream('myGraph', {
+  maxIterations: 20,
+  tolerance: 0.1
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 0.7108273818583551
+| "About"   | 0.3719400001993262
+| "Links"   | 0.3719400001993262
+| "Product" | 0.3719400001993262
+| "Site A"  | 0.14116155811301126
+| "Site B"  | 0.14116155811301126
+| "Site C"  | 0.14116155811301126
+| "Site D"  | 0.14116155811301126
+|===
+--
+
+We are using `tolerance: 0.1`, which leads to slightly different results compared to the <<algorithms-eigenvector-centrality-examples-stream, stream example>>.
+However, the computation converges after three iterations, and we can already observe a trend in the resulting scores.
+
+
+[[algorithms-eigenvector-centrality-examples-personalised]]
+=== Personalised Eigenvector Centrality
+
+Personalized Eigenvector Centrality is a variation of Eigenvector Centrality which is biased towards a set of `sourceNodes`.
+By default, the power iteration starts with the same value for all nodes: `1 / |V|`.
+For a given set of source nodes `S`, the initial value of each source node is set to `1 / |S|` and to `0` for all remaining nodes.
+
+The following examples show how to run Eigenvector centrality centered around 'Site A'.
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+MATCH (siteA:Page {name: 'Site A'}), (siteB:Page {name: 'Site B'})
+CALL gds.eigenvector.stream('myGraph', {
+  maxIterations: 20,
+  sourceNodes: [siteA, siteB]
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 0.7465645391567868
+| "About"   | 0.33997203172449453
+| "Links"   | 0.33997203172449453
+| "Product" | 0.33997203172449453
+| "Site A"  | 0.15483736775159632
+| "Site B"  | 0.15483736775159632
+| "Site C"  | 0.15483736775159632
+| "Site D"  | 0.15483736775159632
+|===
+--
+
+
+[[algorithms-page-rank-examples-scaler]]
+=== Scaling centrality scores
+
+Internally, centrality scores are scaled after each iteration using L2 normalization.
+As a consequence, the final values are already normalized.
+This behavior cannot be changed as it is part of the power iteration method.
+
+However, to normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
+A common scaler is the `L1Norm`, which normalizes each score to a value between 0 and 1.
+A description of all available scalers can be found in the documentation for the <<algorithms-scale-properties, `scaleProperties`>> procedure.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode and returns normalized results:
+[source, cypher, role=noplay]
+----
+CALL gds.eigenvector.stream('myGraph', {
+  scaler: "L1Norm"
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 0.31291106560043064
+| "About"   | 0.1424967320371402
+| "Links"   | 0.1424967320371402
+| "Product" | 0.1424967320371402
+| "Site A"  | 0.06489968457203725
+| "Site B"  | 0.06489968457203725
+| "Site C"  | 0.06489968457203725
+| "Site D"  | 0.06489968457203725
+|===
+--
+
+Comparing the results with the <<algorithms-eigenvector-centrality-examples-stream, stream example>>, we can see that the relative order of scores is the same.
