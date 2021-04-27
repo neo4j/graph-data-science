@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.config.SourceNodesConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.utils.StringJoining;
-import org.neo4j.graphdb.Node;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -149,9 +148,8 @@ public final class GraphStoreValidation {
             var nodeMapping = graphStore.nodes();
 
             var missingNodes = ((SourceNodesConfig) config).sourceNodes().stream()
-                .mapToLong(Node::getId)
                 .filter(nodeId -> nodeMapping.toMappedNodeId(nodeId) == NodeMapping.NOT_FOUND)
-                .mapToObj(Long::toString)
+                .map(Object::toString)
                 .collect(Collectors.toList());
 
             if (!missingNodes.isEmpty()) {

@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.SourceNodesConfig;
@@ -28,11 +31,21 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
 
 public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends SourceNodesConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
+
+    static Stream<Arguments> sourceNodesTypes() {
+        return Stream.of(
+            Arguments.of(List.of(1L, 0L)),
+            Arguments.of(List.of(new NodeEntity(null, 1), new NodeEntity(null, 0))),
+            Arguments.of(1L),
+            Arguments.of(new NodeEntity(null, 1))
+        );
+    };
 
     @Test
     default void testFailOnMissingSourceNodes() {
@@ -61,5 +74,52 @@ public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RE
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Source nodes do not exist in the in-memory graph")
                 .hasMessageContaining("['1337', '42']"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.SourceNodesConfigTest#sourceNodesTypes")
+    default void acceptSourceNodes(Object sourceNodes) {
+        var graphName = "loadedGraph";
+        runQuery(graphDb(), "CREATE (), (), ()");
+
+        var graphCreateConfig = withNameAndNodeProjections(
+            "",
+            graphName,
+            NodeProjections.ALL
+        );
+
+        var graphStore = graphLoader(graphCreateConfig).graphStore();
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+
+        var mapWrapper = CypherMapWrapper.create(MapUtil.map("sourceNodes", sourceNodes));
+        var config = createMinimalConfig(mapWrapper).toMap();
+
+        applyOnProcedure(proc -> proc.compute(graphName, config));
+    }
+
+    @Test
+    default void failOnStringBasedSourceNodes() {
+        var graphName = "loadedGraph";
+        runQuery(graphDb(), "CREATE (), (), ()");
+
+        var sourceNodes = List.of("0L", "1L");
+
+        var graphCreateConfig = withNameAndNodeProjections(
+            "",
+            graphName,
+            NodeProjections.ALL
+        );
+
+        var graphStore = graphLoader(graphCreateConfig).graphStore();
+        GraphStoreCatalog.set(graphCreateConfig, graphStore);
+
+        var mapWrapper = CypherMapWrapper.create(MapUtil.map("sourceNodes", sourceNodes));
+        var config = createMinimalConfig(mapWrapper).toMap();
+
+        applyOnProcedure(proc ->
+            assertThatThrownBy(() -> proc.compute(graphName, config))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Expected List of Nodes or Numbers for `sourceNodes`. Got String.")
+        );
     }
 }
