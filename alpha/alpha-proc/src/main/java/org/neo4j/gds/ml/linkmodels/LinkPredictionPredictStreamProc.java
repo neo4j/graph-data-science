@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
+import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
@@ -36,7 +35,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 
-public class LinkPredictionPredictStreamProc extends StreamProc<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictStreamProc.Result, LinkPredictionPredictStreamConfig> {
+public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictStreamConfig> {
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.stream", mode = Mode.READ)
     @Description("Predicts relationships for all node pairs based on a previously trained link prediction model")
@@ -86,13 +85,6 @@ public class LinkPredictionPredictStreamProc extends StreamProc<LinkPredictionPr
     @Override
     protected AlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictStreamConfig> algorithmFactory() {
         return new LinkPredictionPredictFactory<>();
-    }
-
-    @Override
-    protected Result streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
-    ) {
-        throw new UnsupportedOperationException("We create relationships bruh️️ 🕶️");
     }
 
     @SuppressWarnings("unused")
