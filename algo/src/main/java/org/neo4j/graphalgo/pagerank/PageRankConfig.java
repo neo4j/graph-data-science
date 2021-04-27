@@ -82,7 +82,7 @@ public interface PageRankConfig extends
     @Value.Default
     @Configuration.Ignore
     default Partitioning partitioning() {
-        return Partitioning.DEGREE;
+        return Partitioning.AUTO;
     }
 
     static PageRankConfig of(
