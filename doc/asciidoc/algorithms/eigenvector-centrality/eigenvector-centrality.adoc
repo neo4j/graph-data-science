@@ -13,11 +13,11 @@ This section describes the {algorithm} algorithm in the Neo4j Graph Data Science
 [[algorithms-eigenvector-centrality-introduction]]
 == Introduction
 
-Eigenvector Centrality is an algorithm that measures the *transitive* influence or connectivity of nodes.
-Relationships originating from high-scoring nodes contribute more to the score of a node than connections originating from low-scoring nodes.
+Eigenvector Centrality is an algorithm that measures the *transitive* influence of nodes.
+Relationships originating from high-scoring nodes contribute more to the score of a node than connections from low-scoring nodes.
 A high eigenvector score means that a node is connected to many nodes who themselves have high scores.
 
-The algorithm computes the eigenvector associated with the most dominant eigenvalue.
+The algorithm computes the eigenvector associated with the largest absolute eigenvalue.
 To compute that eigenvalue, the algorithm applies the https://en.wikipedia.org/wiki/Power_iteration[power iteration] approach.
 Within each iteration, the centrality score for each node is derived from the scores of its incoming neighbors.
 In the power iteration method, the eigenvector is L2-normalized after each iteration, leading to normalized results by default.
@@ -353,9 +353,7 @@ ORDER BY score DESC, name ASC
 --
 
 The above query is running the algorithm in `stream` mode as `unweighted`.
-Below, one can find an example for <<algorithms-page-rank-examples-weighted, weighted graphs>>.
-
-NOTE: While we are using the `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
+Below, one can find an example for <<algorithms-eigenvector-centrality-examples-weighted, weighted graphs>>.
 
 
 [[algorithms-eigenvector-centrality-examples-stats]]
@@ -478,7 +476,10 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
+As in the unweighted example, the "Home" node has the highest score.
+In contrast, the "Product" now has the second highest instead of the fourth highest score.
+
+NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted`, however, all the algorithm modes support the `relationshipWeightProperty` configuration parameter.
 
 
 [[algorithms-eigenvector-centrality-examples-tolerance]]
@@ -566,7 +567,7 @@ ORDER BY score DESC, name ASC
 
 Internally, centrality scores are scaled after each iteration using L2 normalization.
 As a consequence, the final values are already normalized.
-This behavior can not be changed as it is part of the power iteration method.
+This behavior cannot be changed as it is part of the power iteration method.
 
 However, to normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
 A common scaler is the `L1Norm`, which normalizes each score to a value between 0 and 1.
