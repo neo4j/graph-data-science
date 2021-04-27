@@ -235,7 +235,8 @@ class LinkPredictionTrainTest {
         AssertionsForInterfaceTypes.assertThat(messagesInOrder)
             // avoid asserting on the thread id
             .extracting(removingThreadId())
-            .containsExactly(
+            .doesNotHaveDuplicates()
+            .containsSequence(
                 "LinkPredictionTrain :: Start",
                 "LinkPredictionTrain :: ModelSelection :: Start",
                 "LinkPredictionTrain :: ModelSelection 16%",
@@ -244,18 +245,14 @@ class LinkPredictionTrainTest {
                 "LinkPredictionTrain :: ModelSelection 66%",
                 "LinkPredictionTrain :: ModelSelection 83%",
                 "LinkPredictionTrain :: ModelSelection 100%",
-                "LinkPredictionTrain :: ModelSelection :: Finished",
+                "LinkPredictionTrain :: ModelSelection :: Finished"
+            ).containsSequence(
                 "LinkPredictionTrain :: Training :: Start",
                 "LinkPredictionTrain :: Training 10%",
                 "LinkPredictionTrain :: Training 20%",
                 "LinkPredictionTrain :: Training 30%",
-                "LinkPredictionTrain :: Training 40%",
-                "LinkPredictionTrain :: Training 50%",
-                "LinkPredictionTrain :: Training 60%",
-                "LinkPredictionTrain :: Training 70%",
-                "LinkPredictionTrain :: Training 80%",
-                "LinkPredictionTrain :: Training 90%",
-                "LinkPredictionTrain :: Training 100%",
+                "LinkPredictionTrain :: Training 40%"
+            ).containsSequence(
                 "LinkPredictionTrain :: Training :: Finished",
                 "LinkPredictionTrain :: Evaluation :: Start",
                 "LinkPredictionTrain :: Evaluation :: Training :: Start",
