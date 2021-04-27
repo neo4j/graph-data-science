@@ -69,6 +69,13 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         this.progressLogger = progressLogger;
     }
 
+    @Override
+    public NodeClassificationTrain me() {
+        return this;
+    }
+
+    @Override
+    public void release() {}
 
     @Override
     public Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> compute() {
@@ -258,10 +265,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         return new NodeLogisticRegressionPredictor(modelData, config.featureProperties());
     }
 
-    private NodeLogisticRegressionData trainModel(
-        HugeLongArray trainSet,
-        Map<String, Object> modelParams
-    ) {
+    private NodeLogisticRegressionData trainModel(HugeLongArray trainSet, Map<String, Object> modelParams) {
         var nlrConfig = NodeLogisticRegressionTrainConfig.of(
             config.featureProperties(),
             config.targetProperty(),
@@ -295,16 +299,6 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
         targets.setAll(i -> targetNodeProperty.longValue(nodeIds.get(i)));
         return targets;
-    }
-
-    @Override
-    public NodeClassificationTrain me() {
-        return this;
-    }
-
-    @Override
-    public void release() {
-
     }
 
     @ValueClass
