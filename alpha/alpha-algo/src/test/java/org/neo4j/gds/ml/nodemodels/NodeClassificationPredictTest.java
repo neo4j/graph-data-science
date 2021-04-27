@@ -200,9 +200,10 @@ class NodeClassificationPredictTest {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(0);
         var featureProperties = List.of("a", "b");
+        var modelName = "model";
         var model = Model.of(
             "",
-            "model",
+            modelName,
             "",
             GraphSchema.empty(),
             MultiClassNLRData.builder()
@@ -213,7 +214,7 @@ class NodeClassificationPredictTest {
                 .build(),
             ImmutableNodeClassificationTrainConfig
                 .builder()
-                .modelName("model")
+                .modelName(modelName)
                 .targetProperty("foo")
                 .featureProperties(featureProperties)
                 .holdoutFraction(0.2)
@@ -222,11 +223,11 @@ class NodeClassificationPredictTest {
         );
         ModelCatalog.set(model);
 
-        var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory(TestProgressLogger.FACTORY).build(
+        var mcnlrPredict = new NodeClassificationPredictAlgorithmFactory<>(TestProgressLogger.FACTORY).build(
             graph,
             ImmutableNodeClassificationMutateConfig.builder()
                 .mutateProperty("foo")
-                .modelName("model")
+                .modelName(modelName)
                 .concurrency(2)
                 .batchSize(1)
                 .build(),
@@ -252,5 +253,6 @@ class NodeClassificationPredictTest {
                 "MultiClassNodeLogisticRegressionPredict 100%",
                 "MultiClassNodeLogisticRegressionPredict :: Finished"
             );
+        ModelCatalog.drop("", modelName);
     }
 }

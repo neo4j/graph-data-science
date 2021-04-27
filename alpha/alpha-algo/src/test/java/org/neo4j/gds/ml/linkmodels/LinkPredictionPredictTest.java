@@ -107,14 +107,15 @@ class LinkPredictionPredictTest {
             .linkFeatureCombiner(LinkFeatureCombiners.L2)
             .nodeFeatureDimension(numberOfNodeFeatures)
             .build();
+        var modelName = "model";
         ModelCatalog.set(Model.of(
             "",
-            "model",
+            modelName,
             LinkPredictionTrain.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
             LinkPredictionTrainConfig.builder()
-                .modelName("model")
+                .modelName(modelName)
                 .validationFolds(1)
                 .negativeClassWeight(1)
                 .trainRelationshipType(RelationshipType.of("IGNORED"))
@@ -122,7 +123,7 @@ class LinkPredictionPredictTest {
                 .build()
         ));
         var config = ImmutableLinkPredictionPredictMutateConfig.builder()
-            .modelName("model")
+            .modelName(modelName)
             .mutateRelationshipType("PREDICTED")
             .topN(10)
             .threshold(.5)
@@ -152,6 +153,7 @@ class LinkPredictionPredictTest {
                 "LinkPrediction 100%",
                 "LinkPrediction :: Finished"
             );
+        ModelCatalog.drop("", modelName);
     }
 
 }
