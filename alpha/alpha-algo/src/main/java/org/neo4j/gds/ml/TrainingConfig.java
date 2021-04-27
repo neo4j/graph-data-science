@@ -40,7 +40,7 @@ public interface TrainingConfig extends ConcurrencyConfig {
     }
 
     @Value.Default
-    @Configuration.IntegerRange(min = 0)
+    @Configuration.IntegerRange(min = 1)
     default int patience() {
         return 1;
     }
