@@ -429,10 +429,11 @@ CALL gds.alpha.ml.linkPrediction.train('myGraph', {
   validationFolds: 5,
   negativeClassWeight: 1.0 / 1.33,
   randomSeed: 2,
+  concurrency: 1,
   params: [
-    {penalty: 0.5, maxEpochs: 1000, tolerance: 1e-5},
-    {penalty: 1.0, maxEpochs: 1000, tolerance: 1e-5},
-    {penalty: 0.0, maxEpochs: 1000, tolerance: 1e-5}
+    {penalty: 0.5, maxEpochs: 1000},
+    {penalty: 1.0, maxEpochs: 1000},
+    {penalty: 0.0, maxEpochs: 1000}
   ]
 }) YIELD modelInfo
 RETURN
@@ -444,8 +445,8 @@ RETURN
 .Results
 [opts="header"]
 |===
-| winningModel                                    | trainGraphScore     | testGraphScore
-| {maxEpochs=1000, penalty=0.5, tolerance=1.0E-5} | 0.38525757517173825 | 0.46710171439292664
+| winningModel                  | trainGraphScore     | testGraphScore
+| {maxEpochs=1000, penalty=0.5} | 0.38525757517173825 | 0.46710171439292664
 |===
 --
 
