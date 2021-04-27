@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.List;
@@ -28,20 +29,20 @@ import java.util.List;
 @ValueClass
 @JsonSerialize
 @JsonDeserialize
-public interface MetricData {
+public interface MetricData<CONFIG extends TrainingConfig> {
 
 
     /**
      * Train metrics
      * @return the metric stats for each candidate model on the train set
      */
-    List<ModelStats> train();
+    List<ModelStats<CONFIG>> train();
 
     /**
      * Validation metrics
      * @return the metric stats for each candidate model on the validation set
      */
-    List<ModelStats> validation();
+    List<ModelStats<CONFIG>> validation();
 
     /**
      * Outer train metric
@@ -55,7 +56,7 @@ public interface MetricData {
      */
     double test();
 
-    static MetricData of(List<ModelStats> train, List<ModelStats> validation, double outerTrain, double test) {
+    static <CONFIG extends TrainingConfig> MetricData<CONFIG> of(List<ModelStats<CONFIG>> train, List<ModelStats<CONFIG>> validation, double outerTrain, double test) {
         return ImmutableMetricData.of(train, validation, outerTrain, test);
     }
 }

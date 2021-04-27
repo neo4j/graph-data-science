@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodemodels;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.model.Model;
 
@@ -47,8 +48,8 @@ public interface NodeClassificationModelInfo extends Model.Mappable {
      * for the selection metric.
      * @return
      */
-    Map<String, Object> bestParameters();
-    Map<Metric, MetricData> metrics();
+    MultiClassNLRTrainConfig bestParameters();
+    Map<Metric, MetricData<MultiClassNLRTrainConfig>> metrics();
 
     @Override
     default Map<String, Object> toMap() {
@@ -62,8 +63,8 @@ public interface NodeClassificationModelInfo extends Model.Mappable {
 
     static NodeClassificationModelInfo of(
         List<Long> classes,
-        Map<String, Object> bestParameters,
-        Map<Metric, MetricData> metrics
+        MultiClassNLRTrainConfig bestParameters,
+        Map<Metric, MetricData<MultiClassNLRTrainConfig>> metrics
     ) {
         return ImmutableNodeClassificationModelInfo.of(classes, bestParameters, metrics);
     }

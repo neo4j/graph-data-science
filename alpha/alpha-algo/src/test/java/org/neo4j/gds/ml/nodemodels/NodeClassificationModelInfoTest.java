@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.ImmutableMultiClassNLRTrainConfig;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,11 +36,14 @@ class NodeClassificationModelInfoTest {
     void shouldCreateMap() {
         var info = NodeClassificationModelInfo.of(
             List.of(),
-            Map.of(),
+            ImmutableMultiClassNLRTrainConfig.builder().penalty(1).targetProperty("t").build(),
             Map.of()
         );
+
+        HashMap<String, Object> expectedParams = getExpectedParameters();
+
         var expected = Map.of(
-            "bestParameters", Map.of(),
+            "bestParameters", expectedParams,
             "classes", List.of(),
             "metrics", Map.of()
         );
@@ -46,7 +52,7 @@ class NodeClassificationModelInfoTest {
 
     @Test
     void shouldCreateMapWithStats() {
-        Map<String, Object> params = Map.of("myParameter", "value");
+        var params = ImmutableMultiClassNLRTrainConfig.builder().penalty(1).targetProperty("t").build();
         var trainStats = ImmutableModelStats.of(params, 0.5, 0.0, 1.0);
         var validationStats = ImmutableModelStats.of(params, 0.4, 0.0, 0.8);
         var metricData = MetricData.of(List.of(trainStats), List.of(validationStats), 4.0, 4.1);
@@ -55,8 +61,11 @@ class NodeClassificationModelInfoTest {
             params,
             Map.of(AllClassMetric.F1_WEIGHTED, metricData)
         );
+
+        HashMap<String, Object> expectedParams = getExpectedParameters();
+
         var expected = Map.of(
-            "bestParameters", params,
+            "bestParameters", expectedParams,
             "classes", List.of(42, Long.MAX_VALUE),
             "metrics", Map.of(
                 "F1_WEIGHTED", Map.of(
@@ -66,13 +75,13 @@ class NodeClassificationModelInfoTest {
                         "avg", 0.5,
                         "max", 1.0,
                         "min", 0.0,
-                        "params", Map.of("myParameter", "value")
+                        "params", expectedParams
                     )),
                     "validation", List.of(Map.of(
                         "avg", 0.4,
                         "max", 0.8,
                         "min", 0.0,
-                        "params", Map.of("myParameter", "value")
+                        "params", expectedParams
                     ))
                 )
             )
@@ -80,4 +89,20 @@ class NodeClassificationModelInfoTest {
         assertThat(info.toMap()).containsExactlyInAnyOrderEntriesOf(expected);
     }
 
+    @NotNull
+    private HashMap<String, Object> getExpectedParameters() {
+        var expectedParams = new HashMap<String, Object>();
+        expectedParams.put("batchSize", 100);
+        expectedParams.put("concurrency", 4);
+        expectedParams.put("configKeys", List.of());
+        expectedParams.put("featureProperties", List.of());
+        expectedParams.put("maxEpochs", 100);
+        expectedParams.put("minEpochs", 1);
+        expectedParams.put("patience", 1);
+        expectedParams.put("penalty", 1.0);
+        expectedParams.put("sharedUpdater", false);
+        expectedParams.put("targetProperty", "t");
+        expectedParams.put("tolerance", 0.001);
+        return expectedParams;
+    }
 }

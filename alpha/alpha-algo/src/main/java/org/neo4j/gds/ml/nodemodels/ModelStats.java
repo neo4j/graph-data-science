@@ -21,15 +21,15 @@ package org.neo4j.gds.ml.nodemodels;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Comparator;
-import java.util.Map;
 
 @ValueClass
 @JsonSerialize
 @JsonDeserialize
-public interface ModelStats {
+public interface ModelStats<CONFIG extends TrainingConfig> {
     Comparator<ModelStats> COMPARE_AVERAGE =
         Comparator.comparingDouble(ModelStats::avg);
 
@@ -37,7 +37,7 @@ public interface ModelStats {
      * The input params representing a model candidate
      * @return
      */
-    Map<String, Object> params();
+    CONFIG params();
 
     /**
      * The average of the metric of the model candidate over (inner) folds

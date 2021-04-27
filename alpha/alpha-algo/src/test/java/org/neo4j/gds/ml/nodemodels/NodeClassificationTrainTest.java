@@ -84,7 +84,6 @@ class NodeClassificationTrainTest {
         Map<String, Object> model1 = Map.of("penalty", 1, "maxEpochs", 1);
         Map<String, Object> model2 = Map.of("penalty", 1, "maxEpochs", 10000, "tolerance", 1e-5);
 
-        Map<String, Object> expectedWinner = model2;
         var config = createConfig(
             List.of(model1, model2),
             "model",
@@ -92,6 +91,7 @@ class NodeClassificationTrainTest {
             metricSpecification,
             1L
         );
+        var expectedWinner = config.paramsConfig().stream().filter(c -> c.maxEpochs() == 10000).findFirst().get();
 
         var ncTrain = NodeClassificationTrain.create(
             graph,
@@ -107,7 +107,7 @@ class NodeClassificationTrainTest {
 
         assertThat(validationScores).hasSize(2);
         var actualWinnerParams = customInfo.bestParameters();
-        assertThat(actualWinnerParams).containsAllEntriesOf(expectedWinner);
+        assertThat(actualWinnerParams).isEqualTo(expectedWinner);
         double model1Score = validationScores.get(0).avg();
         double model2Score = validationScores.get(1).avg();
         assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));

@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
@@ -42,6 +41,9 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -149,9 +151,9 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     }
 
     private ModelSelectResult selectBestModel(List<NodeSplit> splits) {
-        for (int i = 0; i < config.params().size(); i++) {
+        var paramConfigCounter = 1;
+        for (var modelParams : config.paramsConfig()) {
             var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", i + 1, config.params().size());
-            var modelParams = config.params().get(i);
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
             for (int j = 0; j < splits.size(); j++) {
@@ -163,7 +165,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
                 progressLogger.logStart(candidateAndSplitMessage + " :: Train");
                 // The best upper bound we have for bounding progress is maxEpochs, so tell the user what that value is
-                int maxEpochs = ((Number) modelParams.getOrDefault("maxEpochs", TrainingConfig.MAX_EPOCHS)).intValue();
+                int maxEpochs = modelParams.maxEpochs();
                 progressLogger.logMessage(formatWithLocale(
                     candidateAndSplitMessage + " :: Train :: Max iterations: %s",
                     maxEpochs
@@ -243,7 +245,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         );
     }
 
-    private Map<Metric, MetricData> mergeMetricResults(
+    private Map<Metric, MetricData<MultiClassNLRTrainConfig>> mergeMetricResults(
         ModelSelectResult modelSelectResult,
         Map<Metric, Double> outerTrainMetrics,
         Map<Metric, Double> testMetrics
@@ -260,11 +262,17 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         ));
     }
 
+    private Map<Metric, List<ModelStats<MultiClassNLRTrainConfig>>> initStatsMap(Iterable<Metric> metrics) {
+        var statsMap = new HashMap<Metric, List<ModelStats<MultiClassNLRTrainConfig>>>();
+        metrics.forEach(metric -> statsMap.put(metric, new ArrayList<>()));
+        return statsMap;
+    }
+
     private Map<Metric, Double> computeMetrics(
         Multiset<Long> globalClassCounts,
         HugeLongArray evaluationSet,
         NodeLogisticRegressionData modelData,
-        List<Metric> metrics
+        Collection<Metric> metrics
     ) {
         var predictor = new NodeLogisticRegressionPredictor(modelData, config.featureProperties());
         var predictedClasses = HugeLongArray.newArray(evaluationSet.size(), allocationTracker);
@@ -291,14 +299,9 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         ));
     }
 
-    private NodeLogisticRegressionData trainModel(HugeLongArray trainSet, Map<String, Object> modelParams) {
-        var nlrConfig = NodeLogisticRegressionTrainConfig.of(
-            config.featureProperties(),
-            config.targetProperty(),
-            config.concurrency(),
-            modelParams
-        );
-        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressLogger);
+    private NodeLogisticRegressionData trainModel(HugeLongArray trainSet, MultiClassNLRTrainConfig nlrConfig
+    ) {
+        var train = new MultiClassNLRTrain(graph, trainSet, nlrConfig, progressLogger);
         return train.compute();
     }
 
@@ -312,9 +315,9 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
     @ValueClass
     interface ModelSelectResult {
-        Map<String, Object> bestParameters();
-        Map<Metric, List<ModelStats>> trainStats();
-        Map<Metric, List<ModelStats>> validationStats();
+        MultiClassNLRTrainConfig bestParameters();
+        Map<Metric, List<ModelStats<MultiClassNLRTrainConfig>>> trainStats();
+        Map<Metric, List<ModelStats<MultiClassNLRTrainConfig>>> validationStats();
 
         static ModelSelectResult of(
             Map<String, Object> bestConfig,
@@ -330,10 +333,10 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         private final Map<Metric, Double> min;
         private final Map<Metric, Double> max;
         private final Map<Metric, Double> sum;
-        private final Map<String, Object> modelParams;
+        private final MultiClassNLRTrainConfig modelParams;
         private final int numberOfSplits;
 
-        ModelStatsBuilder(Map<String, Object> modelParams, int numberOfSplits) {
+        ModelStatsBuilder(MultiClassNLRTrainConfig modelParams, int numberOfSplits) {
             this.modelParams = modelParams;
             this.numberOfSplits = numberOfSplits;
             this.min = new HashMap<>();
@@ -347,7 +350,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             sum.merge(metric, value, Double::sum);
         }
 
-        ModelStats build(Metric metric) {
+        ModelStats<MultiClassNLRTrainConfig> build(Metric metric) {
             return ImmutableModelStats.of(
                 modelParams,
                 sum.get(metric) / numberOfSplits,
