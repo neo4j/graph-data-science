@@ -375,10 +375,11 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-The above query is running the algorithm in `stream` mode as `unweighted`.
-Below is a <<algorithms-page-rank-examples-weighted, weighted example>>
+The above query is running the algorithm in `stream` mode as `unweighted` and the returned scores are not normalized.
+Below, one can find an example for <<algorithms-page-rank-examples-weighted, weighted graphs>>.
+Another <<algorithms-page-rank-examples-scaler, example>> shows the application of a scaler to normalize the final scores.
 
-NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
+NOTE: While we are using the `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
 
 [[algorithms-page-rank-examples-stats]]
 === Stats
@@ -584,9 +585,9 @@ ORDER BY score DESC, name ASC
 Compared to the results from the <<algorithms-page-rank-examples-stream, stream example>> which is using the default value of `dampingFactor` the score values are closer to each other when using `dampingFactor: 0.05`.
 Also, note that the nodes 'About', 'Link' and 'Product' now have the same score, while with the default value of `dampingFactor` the node 'Product' has higher score than the other two.
 
+
 [[algorithms-page-rank-examples-personalised]]
 === Personalised PageRank
-
 
 Personalized PageRank is a variation of PageRank which is biased towards a set of `sourceNodes`.
 This variant of PageRank is often used as part of https://www.r-bloggers.com/from-random-walks-to-personalized-pagerank/[recommender systems^].
@@ -625,3 +626,41 @@ ORDER BY score DESC, name ASC
 --
 
 Comparing these results to the ones from the <<algorithms-page-rank-examples-stream, stream example>> (which is not using `sourceNodes` configuration parameter) shows that the 'Site A' node  that we used in the `sourceNodes` list now scores second instead of fourth.
+
+
+[[algorithms-page-rank-examples-scaler]]
+=== Scaling centrality scores
+
+To normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
+A common scaler is the `L1Norm`, which normalizes each score to a value between 0 and 1.
+A description of all available scalers can be found in the documentation for the <<algorithms-scale-properties, `scaleProperties`>> procedure.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode and returns normalized results:
+[source, cypher, role=noplay]
+----
+CALL gds.pageRank.stream('myGraph', {
+  scaler: "L1Norm"
+})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | score
+| "Home"    | 0.4181682554824872
+| "About"   | 0.1370975954128506
+| "Links"   | 0.1370975954128506
+| "Product" | 0.1370975954128506
+| "Site A"  | 0.04263473956974027
+| "Site B"  | 0.04263473956974027
+| "Site C"  | 0.04263473956974027
+| "Site D"  | 0.04263473956974027
+|===
+--
+
+Comparing the results with the <<algorithms-page-rank-examples-stream, stream example>>, we can see that the relative order of scores is the same.
