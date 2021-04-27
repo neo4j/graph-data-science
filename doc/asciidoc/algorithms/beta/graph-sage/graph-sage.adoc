@@ -3,6 +3,7 @@
 = GraphSAGE
 :entity: node
 :result: embedding
+:modelType: GraphSAGE
 
 [abstract]
 --
