@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -31,6 +32,7 @@ import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.math.L2Norm;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
@@ -57,13 +59,14 @@ class LinkLogisticRegressionTrainTest {
 
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {
-        var config =
-            ImmutableLinkLogisticRegressionTrainConfig.builder()
-                .featureProperties(List.of("a", "b"))
-                .maxEpochs(100000)
-                .tolerance(1e-4)
-                .concurrency(1)
-                .build();
+        var config = new LinkLogisticRegressionTrainConfigImpl(
+            List.of("a", "b"),
+            CypherMapWrapper.create(Map.of(
+                "maxEpochs", 100000,
+                "tolerance", 1e-4,
+                "concurrency", 1
+            ))
+        );
 
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         trainSet.setAll(i -> i);
@@ -85,15 +88,16 @@ class LinkLogisticRegressionTrainTest {
 
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopperConcurrently() {
-        var config =
-            ImmutableLinkLogisticRegressionTrainConfig.builder()
-                .featureProperties(List.of("a", "b"))
-                .penalty(1.0)
-                .maxEpochs(1000000)
-                .concurrency(4)
-                .sharedUpdater(false)
-                .tolerance(1e-10)
-                .build();
+        var config = new LinkLogisticRegressionTrainConfigImpl(
+            List.of("a", "b"),
+            CypherMapWrapper.create(Map.of(
+                "penalty", 1.0,
+                "maxEpochs", 1000000,
+                "tolerance", 1e-10,
+                "concurrency", 4,
+                "sharedUpdater", false
+            ))
+        );
 
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         trainSet.setAll(i -> i);
@@ -120,14 +124,15 @@ class LinkLogisticRegressionTrainTest {
 
     @Test
     void usingPenaltyShouldGiveSmallerAbsoluteValueWeights() {
-        var config =
-            ImmutableLinkLogisticRegressionTrainConfig.builder()
-                .featureProperties(List.of("a", "b"))
-                .penalty(1)
-                .maxEpochs(100000)
-                .tolerance(1e-4)
-                .concurrency(1)
-                .build();
+        var config = new LinkLogisticRegressionTrainConfigImpl(
+            List.of("a", "b"),
+            CypherMapWrapper.create(Map.of(
+                "maxEpochs", 100000,
+                "tolerance", 1e-4,
+                "concurrency", 1,
+                "penalty", 1
+            ))
+        );
 
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         trainSet.setAll(i -> i);

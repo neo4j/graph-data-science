@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
@@ -147,8 +148,15 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "  params: [{penalty: 0.5, maxEpochs: 1}, {penalty: 2.0, maxEpochs: 100}] " +
             "})";
 
+        var params1 = LinkLogisticRegressionTrainConfig
+            .of(List.of("z"), 4, Map.of("penalty", 0.5, "maxEpochs", 1))
+            .toMap();
+        var params2 = LinkLogisticRegressionTrainConfig
+            .of(List.of("z"), 4, Map.of("penalty", 2.0, "maxEpochs", 100))
+            .toMap();
+
         var expectedModelInfo = Map.of(
-            "bestParameters", Map.of("penalty", 0.5, "maxEpochs", 1),
+            "bestParameters", params1,
             "metrics", Map.of(
                 "AUCPR", Map.of(
                     "outerTrain", 1.0,
@@ -158,13 +166,13 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
                             "avg", 1.0,
                             "max", 1.0,
                             "min", 1.0,
-                            "params", Map.of("penalty", 0.5, "maxEpochs", 1)
+                            "params", params1
                         ),
                         Map.of(
                             "avg", 1.0,
                             "max", 1.0,
                             "min", 1.0,
-                            "params", Map.of("penalty", 2.0, "maxEpochs", 100)
+                            "params", params2
                         )
                     ),
                     "validation", List.of(
@@ -172,13 +180,13 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
                             "avg", 1.0,
                             "max", 1.0,
                             "min", 1.0,
-                            "params", Map.of("penalty", 0.5, "maxEpochs", 1)
+                            "params", params1
                         ),
                         Map.of(
                             "avg", 1.0,
                             "max", 1.0,
                             "min", 1.0,
-                            "params", Map.of("penalty", 2.0, "maxEpochs", 100)
+                            "params", params2
                         )
                     )
                 )

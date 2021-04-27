@@ -20,10 +20,12 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.linkmodels.logisticregression.ImmutableLinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +37,7 @@ class LinkPredictionModelInfoTest {
 
     @Test
     void shouldCreateMapWithStats() {
-        var params = ImmutableLinkLogisticRegressionTrainConfig.builder().penalty(1).build();
+        LinkLogisticRegressionTrainConfig params = new LinkLogisticRegressionTrainConfigImpl(List.of(), CypherMapWrapper.empty().withNumber("penalty", 1));
         var trainStats = ImmutableModelStats.of(params, 0.5, 0.0, 1.0);
         var validationStats = ImmutableModelStats.of(params, 0.4, 0.0, 0.8);
         var metricData = MetricData.of(List.of(trainStats), List.of(validationStats), 4.0, 4.1);
@@ -47,7 +49,6 @@ class LinkPredictionModelInfoTest {
         var expectedParams = new HashMap<String, Object>();
         expectedParams.put("batchSize", 100);
         expectedParams.put("concurrency", 4);
-        expectedParams.put("configKeys", List.of());
         expectedParams.put("featureProperties", List.of());
         expectedParams.put("linkFeatureCombiner", "L2");
         expectedParams.put("maxEpochs", 100);

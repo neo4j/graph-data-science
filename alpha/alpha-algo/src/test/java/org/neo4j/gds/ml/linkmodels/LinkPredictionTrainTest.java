@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.linkmodels.logisticregression.ImmutableLinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
@@ -123,12 +124,10 @@ class LinkPredictionTrainTest {
         double totalNegatives = maxNumberOfRelationships - totalPositives;
         var classRatio = totalNegatives / totalPositives;
 
-        var expectedWinner = ImmutableLinkLogisticRegressionTrainConfig
-            .builder()
-            .maxEpochs(1000)
-            .minEpochs(10)
-            .addFeatureProperties("z", "array")
-            .build();
+        var expectedWinner = new LinkLogisticRegressionTrainConfigImpl(
+            List.of("z", "array"),
+            CypherMapWrapper.create(Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10))
+        );
 
         var config = ImmutableLinkPredictionTrainConfig.builder()
             .trainRelationshipType(RelationshipType.of("TRAIN"))
@@ -173,12 +172,10 @@ class LinkPredictionTrainTest {
         double totalNegatives = maxNumberOfRelationships - totalPositives;
         var classRatio = totalNegatives / totalPositives;
 
-        var expectedWinner = ImmutableLinkLogisticRegressionTrainConfig
-            .builder()
-            .maxEpochs(1000)
-            .minEpochs(10)
-            .addFeatureProperties("array")
-            .build();
+        var expectedWinner = new LinkLogisticRegressionTrainConfigImpl(
+            List.of("array"),
+            CypherMapWrapper.create(Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10))
+        );
 
         var config = ImmutableLinkPredictionTrainConfig.builder()
             .trainRelationshipType(RelationshipType.of("TRAIN"))

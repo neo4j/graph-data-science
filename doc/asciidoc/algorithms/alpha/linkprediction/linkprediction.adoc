@@ -437,7 +437,7 @@ CALL gds.alpha.ml.linkPrediction.train('myGraph', {
   ]
 }) YIELD modelInfo
 RETURN
-  modelInfo.bestParameters AS winningModel,
+  { maxEpochs: modelInfo.bestParameters.maxEpochs, penalty: modelInfo.bestParameters.penalty } AS winningModel,
   modelInfo.metrics.AUCPR.outerTrain AS trainGraphScore,
   modelInfo.metrics.AUCPR.test AS testGraphScore
 ----

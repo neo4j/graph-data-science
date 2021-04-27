@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.nodemodels.MetricData;
@@ -28,27 +26,24 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.model.Model;
 
 import java.util.Map;
-
-import static org.neo4j.gds.ml.util.ObjectMapperSingleton.OBJECT_MAPPER;
+import java.util.stream.Collectors;
 
 @ValueClass
-@JsonSerialize
-@JsonDeserialize
 public interface LinkPredictionModelInfo extends Model.Mappable {
 
-    @JsonSerialize
     LinkLogisticRegressionTrainConfig bestParameters();
 
     Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics();
 
     @Override
     default Map<String, Object> toMap() {
-        try {
-            String jsonString = OBJECT_MAPPER.writeValueAsString(this);
-            return OBJECT_MAPPER.readValue(jsonString, Map.class);
-        } catch (Throwable e) {
-            throw new IllegalStateException("Failed to serialize/deserialize NodeClassificationModelInfo.", e);
-        }
+        return Map.of(
+            "bestParameters", bestParameters().toMap(),
+            "metrics", metrics().entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey().name(),
+                entry -> entry.getValue().toMap()
+            ))
+        );
     }
 
     static LinkPredictionModelInfo of(
