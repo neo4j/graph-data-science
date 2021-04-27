@@ -35,7 +35,7 @@ public class NodeClassificationTrainAlgorithmFactory extends AbstractAlgorithmFa
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
-        return new NodeClassificationTrain(graph, configuration, tracker, progressLogger);
+        return NodeClassificationTrain.create(graph, configuration, tracker, progressLogger);
     }
 
     @Override

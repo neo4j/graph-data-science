@@ -95,7 +95,7 @@ class NodeClassificationEndToEndTest {
         var config = createConfig(List.of(model2), List.of("a", "b"), metric);
 
 
-        var ncTrain = new NodeClassificationTrain(trainGraph, config, AllocationTracker.empty(), NULL_LOGGER);
+        var ncTrain = NodeClassificationTrain.create(trainGraph, config, AllocationTracker.empty(), NULL_LOGGER);
 
         var modelBeforeSerialization = ncTrain.compute();
 

@@ -20,6 +20,8 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
@@ -33,6 +35,7 @@ import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -55,16 +58,56 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
     private final Graph graph;
     private final NodeClassificationTrainConfig config;
+    private final HugeLongArray targets;
+    private final Multiset<Long> classes;
     private final AllocationTracker allocationTracker;
+    private final List<Metric> metrics;
 
-    public NodeClassificationTrain(
+    public static NodeClassificationTrain create(
         Graph graph,
         NodeClassificationTrainConfig config,
         AllocationTracker allocationTracker,
         ProgressLogger progressLogger
     ) {
+        var targetNodeProperty = graph.nodeProperties(config.targetProperty());
+        var targetsAndClasses = computeGlobalTargetsAndClasses(targetNodeProperty, graph.nodeCount(), allocationTracker);
+        var targets = targetsAndClasses.getOne();
+        var classes = targetsAndClasses.getTwo();
+        var metrics = createMetrics(config, classes);
+        return new NodeClassificationTrain(graph, config, targets, classes, metrics, allocationTracker, progressLogger);
+    }
+
+    private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(NodeProperties targetNodeProperty, long nodeCount, AllocationTracker allocationTracker) {
+        var classes = new Multiset<Long>();
+        var targets = HugeLongArray.newArray(nodeCount, allocationTracker);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            targets.set(nodeId, targetNodeProperty.longValue(nodeId));
+            classes.add(targetNodeProperty.longValue(nodeId));
+        }
+        return Tuples.pair(targets, classes);
+    }
+
+    private static List<Metric> createMetrics(NodeClassificationTrainConfig config, Multiset<Long> globalClassCounts) {
+        return config.metrics()
+            .stream()
+            .flatMap(spec -> spec.createMetrics(globalClassCounts.keys()))
+            .collect(Collectors.toList());
+    }
+
+    private NodeClassificationTrain(
+        Graph graph,
+        NodeClassificationTrainConfig config,
+        HugeLongArray targets,
+        Multiset<Long> classes,
+        List<Metric> metrics,
+        AllocationTracker allocationTracker,
+        ProgressLogger progressLogger
+    ) {
         this.graph = graph;
         this.config = config;
+        this.targets = targets;
+        this.classes = classes;
+        this.metrics = metrics;
         this.allocationTracker = allocationTracker;
         this.progressLogger = progressLogger;
     }
@@ -79,10 +122,6 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
     @Override
     public Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> compute() {
-        var globalTargets = makeGlobalTargets();
-        var globalClassCounts = countClassesGlobally();
-        var metrics = createMetrics(globalClassCounts);
-
         // 1. Init and shuffle node ids
         progressLogger.logStart(":: Shuffle and Split");
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
@@ -94,7 +133,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         var outerSplit = outerSplitter.split(nodeIds, 1 - config.holdoutFraction());
 
         // 2b. Inner split: enumerate a number of train/validation splits of remaining
-        var splitter = new StratifiedKFoldSplitter(config.validationFolds(), outerSplit.trainSet(), globalTargets, config.randomSeed());
+        var splitter = new StratifiedKFoldSplitter(config.validationFolds(), outerSplit.trainSet(), targets, config.randomSeed());
         var splits = splitter.splits();
         progressLogger.logFinish(":: Shuffle and Split");
 
@@ -128,8 +167,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
                 // 4. evaluate each model candidate on the train and validation sets
                 progressLogger.logStart(candidateAndSplitMessage + " :: Evaluate");
                 progressLogger.reset(validationSet.size() + trainSet.size());
-                computeMetrics(globalClassCounts, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
-                computeMetrics(globalClassCounts, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
+                computeMetrics(classes, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
+                computeMetrics(classes, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
                 progressLogger.logFinish(candidateAndSplitMessage + " :: Evaluate");
             }
             // insert the candidates metrics into trainStats and validationStats
@@ -161,8 +200,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         // 7. evaluate it on the holdout set and outer training set
         progressLogger.logStart(":: Evaluate Selected Model");
         progressLogger.reset(outerSplit.testSet().size() + outerSplit.trainSet().size());
-        var testMetrics = computeMetrics(globalClassCounts, outerSplit.testSet(), winnerModelData, metrics);
-        var outerTrainMetrics = computeMetrics(globalClassCounts, outerSplit.trainSet(), winnerModelData, metrics);
+        var testMetrics = computeMetrics(classes, outerSplit.testSet(), winnerModelData, metrics);
+        var outerTrainMetrics = computeMetrics(classes, outerSplit.trainSet(), winnerModelData, metrics);
         progressLogger.logFinish(":: Evaluate Selected Model");
 
         // we are done with all metrics!
@@ -192,13 +231,6 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             config,
             modelInfo
         );
-    }
-
-    private List<Metric> createMetrics(Multiset<Long> globalClassCounts) {
-        return config.metrics()
-            .stream()
-            .flatMap(spec -> spec.createMetrics(globalClassCounts.keys()))
-            .collect(Collectors.toList());
     }
 
     private RandomDataGenerator getRandomDataGenerator() {
@@ -274,23 +306,6 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         );
         var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressLogger);
         return train.compute();
-    }
-
-    private Multiset<Long> countClassesGlobally() {
-        var globalClassCounts = new Multiset<Long>();
-        var targetNodeProperty = graph.nodeProperties(config.targetProperty());
-        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-            globalClassCounts.add(targetNodeProperty.longValue(nodeId));
-        }
-        return globalClassCounts;
-    }
-
-    private HugeLongArray makeGlobalTargets() {
-        var targets = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
-        var targetNodeProperty = graph.nodeProperties(config.targetProperty());
-
-        targets.setAll(targetNodeProperty::longValue);
-        return targets;
     }
 
     private HugeLongArray makeLocalTargets(HugeLongArray nodeIds) {

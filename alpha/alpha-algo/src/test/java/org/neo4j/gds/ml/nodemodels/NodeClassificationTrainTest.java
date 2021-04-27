@@ -93,7 +93,7 @@ class NodeClassificationTrainTest {
             1L
         );
 
-        var ncTrain = new NodeClassificationTrain(
+        var ncTrain = NodeClassificationTrain.create(
             graph,
             config,
             AllocationTracker.empty(),
@@ -137,7 +137,7 @@ class NodeClassificationTrainTest {
             metricSpecification,
             1337L
         );
-        var bananasTrain = new NodeClassificationTrain(
+        var bananasTrain = NodeClassificationTrain.create(
             graph,
             bananasConfig,
             AllocationTracker.empty(),
@@ -151,7 +151,7 @@ class NodeClassificationTrainTest {
             metricSpecification,
             42L
         );
-        var arrayPropertyTrain = new NodeClassificationTrain(
+        var arrayPropertyTrain = NodeClassificationTrain.create(
             graph,
             arrayPropertyConfig,
             AllocationTracker.empty(),
