@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
@@ -31,6 +33,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+@JsonSerialize
+@JsonDeserialize
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")

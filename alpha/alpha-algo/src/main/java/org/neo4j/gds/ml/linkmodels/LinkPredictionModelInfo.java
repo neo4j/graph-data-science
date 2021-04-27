@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -35,13 +36,10 @@ import static org.neo4j.gds.ml.util.ObjectMapperSingleton.OBJECT_MAPPER;
 @JsonDeserialize
 public interface LinkPredictionModelInfo extends Model.Mappable {
 
-    /**
-     * The parameters that yielded the best fold-averaged validation score
-     * for the selection metric.
-     * @return
-     */
-    Map<String, Object> bestParameters();
-    Map<LinkMetric, MetricData> metrics();
+    @JsonSerialize
+    LinkLogisticRegressionTrainConfig bestParameters();
+
+    Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics();
 
     @Override
     default Map<String, Object> toMap() {
@@ -54,10 +52,9 @@ public interface LinkPredictionModelInfo extends Model.Mappable {
     }
 
     static LinkPredictionModelInfo of(
-        Map<String, Object> bestParameters,
-        Map<LinkMetric, MetricData> metrics
+        LinkLogisticRegressionTrainConfig bestParameters,
+        Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> metrics
     ) {
         return ImmutableLinkPredictionModelInfo.of(bestParameters, metrics);
     }
-
 }

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.linkmodels.logisticregression.ImmutableLinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
@@ -122,7 +123,13 @@ class LinkPredictionTrainTest {
         double totalNegatives = maxNumberOfRelationships - totalPositives;
         var classRatio = totalNegatives / totalPositives;
 
-        var expectedWinner = Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10);
+        var expectedWinner = ImmutableLinkLogisticRegressionTrainConfig
+            .builder()
+            .maxEpochs(1000)
+            .minEpochs(10)
+            .addFeatureProperties("z", "array")
+            .build();
+
         var config = ImmutableLinkPredictionTrainConfig.builder()
             .trainRelationshipType(RelationshipType.of("TRAIN"))
             .testRelationshipType(RelationshipType.of("TEST"))
@@ -133,7 +140,7 @@ class LinkPredictionTrainTest {
             .negativeClassWeight(classRatio)
             .params(List.of(
                 Map.of("maxEpochs", 10, "penalty", 1000000),
-                expectedWinner
+                Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10)
             )).build();
 
         var linkPredictionTrain = new LinkPredictionTrain(
@@ -149,7 +156,7 @@ class LinkPredictionTrainTest {
 
         assertThat(validationScores).hasSize(2);
         var actualWinnerParams = customInfo.bestParameters();
-        assertThat(actualWinnerParams).containsAllEntriesOf(expectedWinner);
+        assertThat(actualWinnerParams).usingRecursiveComparison().isEqualTo(expectedWinner);
         double model1Score = validationScores.get(0).avg();
         double model2Score = validationScores.get(1).avg();
         assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
@@ -166,7 +173,13 @@ class LinkPredictionTrainTest {
         double totalNegatives = maxNumberOfRelationships - totalPositives;
         var classRatio = totalNegatives / totalPositives;
 
-        var expectedWinner = Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10);
+        var expectedWinner = ImmutableLinkLogisticRegressionTrainConfig
+            .builder()
+            .maxEpochs(1000)
+            .minEpochs(10)
+            .addFeatureProperties("array")
+            .build();
+
         var config = ImmutableLinkPredictionTrainConfig.builder()
             .trainRelationshipType(RelationshipType.of("TRAIN"))
             .testRelationshipType(RelationshipType.of("TEST"))
@@ -177,7 +190,7 @@ class LinkPredictionTrainTest {
             .negativeClassWeight(classRatio)
             .params(List.of(
                 Map.of("maxEpochs", 10, "penalty", 1000000),
-                expectedWinner
+                Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10)
             )).build();
 
         var linkPredictionTrain = new LinkPredictionTrain(
@@ -193,7 +206,7 @@ class LinkPredictionTrainTest {
 
         assertThat(validationScores).hasSize(2);
         var actualWinnerParams = customInfo.bestParameters();
-        assertThat(actualWinnerParams).containsAllEntriesOf(expectedWinner);
+        assertThat(actualWinnerParams).usingRecursiveComparison().isEqualTo(expectedWinner);
         double model1Score = validationScores.get(0).avg();
         double model2Score = validationScores.get(1).avg();
         assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));

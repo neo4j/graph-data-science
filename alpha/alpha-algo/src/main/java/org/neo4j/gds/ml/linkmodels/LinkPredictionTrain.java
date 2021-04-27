@@ -119,7 +119,7 @@ public class LinkPredictionTrain
         );
     }
 
-    private Map<LinkMetric, MetricData> mergeMetrics(
+    private Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> mergeMetrics(
         ModelSelectResult modelSelectResult,
         Map<LinkMetric, Double> outerTrainMetrics,
         Map<LinkMetric, Double> testMetrics
@@ -142,7 +142,7 @@ public class LinkPredictionTrain
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        config.params().forEach(modelParams -> {
+        config.paramConfigs().forEach(modelParams -> {
             var trainStatsBuilder = new ModelStatsBuilder(
                 modelParams,
                 config.validationFolds()
@@ -188,25 +188,25 @@ public class LinkPredictionTrain
 
     @ValueClass
     public interface ModelSelectResult {
-        Map<String, Object> bestParameters();
+        LinkLogisticRegressionTrainConfig bestParameters();
 
         // key is metric
-        Map<LinkMetric, List<ModelStats>> trainStats();
+        Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> trainStats();
         // key is metric
-        Map<LinkMetric, List<ModelStats>> validationStats();
+        Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> validationStats();
 
         static ModelSelectResult of(
-            Map<String, Object> bestConfig,
-            Map<LinkMetric, List<ModelStats>> trainStats,
-            Map<LinkMetric, List<ModelStats>> validationStats
+            LinkLogisticRegressionTrainConfig bestConfig,
+            Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> trainStats,
+            Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> validationStats
         ) {
             return ImmutableModelSelectResult.of(bestConfig, trainStats, validationStats);
         }
 
     }
 
-    private Map<LinkMetric, List<ModelStats>> initStatsMap() {
-        var statsMap = new HashMap<LinkMetric, List<ModelStats>>();
+    private Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> initStatsMap() {
+        var statsMap = new HashMap<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>>();
         statsMap.put(LinkMetric.AUCPR, new ArrayList<>());
         return statsMap;
     }
@@ -236,14 +236,9 @@ public class LinkPredictionTrain
 
     private LinkLogisticRegressionPredictor trainModel(
         HugeLongArray trainSet,
-        Map<String, Object> modelParams,
+        LinkLogisticRegressionTrainConfig llrConfig,
         ProgressLogger progressLogger
     ) {
-        var llrConfig = LinkLogisticRegressionTrainConfig.of(
-            config.featureProperties(),
-            config.concurrency(),
-            modelParams
-        );
         progressLogger.reset(llrConfig.maxEpochs());
         var llrTrain = new LinkLogisticRegressionTrain(
             trainGraph,
@@ -259,10 +254,10 @@ public class LinkPredictionTrain
         private final Map<LinkMetric, Double> min;
         private final Map<LinkMetric, Double> max;
         private final Map<LinkMetric, Double> sum;
-        private final Map<String, Object> modelParams;
+        private final LinkLogisticRegressionTrainConfig modelParams;
         private final int numberOfSplits;
 
-        ModelStatsBuilder(Map<String, Object> modelParams, int numberOfSplits) {
+        ModelStatsBuilder(LinkLogisticRegressionTrainConfig modelParams, int numberOfSplits) {
             this.modelParams = modelParams;
             this.numberOfSplits = numberOfSplits;
             this.min = new HashMap<>();
@@ -276,7 +271,7 @@ public class LinkPredictionTrain
             sum.merge(metric, value, Double::sum);
         }
 
-        ModelStats modelStats(LinkMetric metric) {
+        ModelStats<LinkLogisticRegressionTrainConfig> modelStats(LinkMetric metric) {
             return ImmutableModelStats.of(
                 modelParams,
                 sum.get(metric) / numberOfSplits,
