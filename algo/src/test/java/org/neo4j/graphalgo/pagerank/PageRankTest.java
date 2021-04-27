@@ -44,6 +44,7 @@ import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.pagerank.PageRankAlgorithmFactory.Mode;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -139,13 +140,15 @@ class PageRankTest {
         })
         void withSourceNodes(String sourceNodesString, String expectedPropertyKey) {
             // ids are converted to mapped ids within the algorithms
-            var sourceNodeIds = Arrays.stream(sourceNodesString.split(";")).mapToLong(graph::toOriginalNodeId);
+            var sourceNodeIds = Arrays.stream(sourceNodesString.split(";"))
+                .map(graph::toOriginalNodeId)
+                .collect(Collectors.toList());
 
-            var config = ImmutablePageRankStreamConfig.builder()
+            var config = ImmutablePageRankConfig.builder()
                 .maxIterations(41)
                 .tolerance(0)
                 .concurrency(1)
-                .sourceNodeIds(sourceNodeIds)
+                .sourceNodes(sourceNodeIds)
                 .build();
 
             var actual = runOnPregel(graph, config)

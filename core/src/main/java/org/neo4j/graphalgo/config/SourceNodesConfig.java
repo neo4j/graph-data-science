@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.config;
 
+import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphdb.Node;
 
@@ -30,6 +31,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface SourceNodesConfig {
 
+    @Value.Default
     @Configuration.ConvertWith("org.neo4j.graphalgo.config.SourceNodesConfig#parseNodeIds")
     default List<Long> sourceNodes() {
         return Collections.emptyList();
