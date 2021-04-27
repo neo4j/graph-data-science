@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -28,12 +27,9 @@ import org.neo4j.graphalgo.core.model.Model;
 
 import java.util.List;
 import java.util.Map;
-
-import static org.neo4j.gds.ml.util.ObjectMapperSingleton.OBJECT_MAPPER;
+import java.util.stream.Collectors;
 
 @ValueClass
-@JsonSerialize
-@JsonDeserialize
 public interface NodeClassificationModelInfo extends Model.Mappable {
 
     /**
@@ -52,13 +48,17 @@ public interface NodeClassificationModelInfo extends Model.Mappable {
     Map<Metric, MetricData<MultiClassNLRTrainConfig>> metrics();
 
     @Override
+    @Value.Auxiliary
+    @Value.Derived
     default Map<String, Object> toMap() {
-        try {
-            String jsonString = OBJECT_MAPPER.writeValueAsString(this);
-            return OBJECT_MAPPER.readValue(jsonString, Map.class);
-        } catch (Throwable e) {
-            throw new IllegalStateException("Failed to serialize/deserialize NodeClassificationModelInfo.", e);
-        }
+        return Map.of(
+            "bestParameters", bestParameters().toMap(),
+            "classes", classes(),
+            "metrics", metrics().entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey().toString(),
+                entry -> entry.getValue().toMap()
+            ))
+        );
     }
 
     static NodeClassificationModelInfo of(

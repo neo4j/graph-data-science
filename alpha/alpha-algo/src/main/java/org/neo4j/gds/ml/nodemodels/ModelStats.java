@@ -19,16 +19,14 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Comparator;
+import java.util.Map;
 
 @ValueClass
-@JsonSerialize
-@JsonDeserialize
 public interface ModelStats<CONFIG extends TrainingConfig> {
     Comparator<ModelStats> COMPARE_AVERAGE =
         Comparator.comparingDouble(ModelStats::avg);
@@ -54,4 +52,14 @@ public interface ModelStats<CONFIG extends TrainingConfig> {
      * @return
      */
     double max();
+
+    @Value.Derived
+    default Map<String, Object> toMap() {
+        return Map.of(
+            "avg", avg(),
+            "min", min(),
+            "max", max(),
+            "params", params().toMap()
+        );
+    }
 }

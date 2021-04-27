@@ -284,7 +284,7 @@ CALL gds.alpha.ml.nodeClassification.train('myGraph', {
   ]
 }) YIELD modelInfo
 RETURN
-  modelInfo.bestParameters AS winningModel,
+  {penalty: modelInfo.bestParameters.penalty} AS winningModel,
   modelInfo.metrics.F1_WEIGHTED.outerTrain AS trainGraphScore,
   modelInfo.metrics.F1_WEIGHTED.test AS testGraphScore
 ----

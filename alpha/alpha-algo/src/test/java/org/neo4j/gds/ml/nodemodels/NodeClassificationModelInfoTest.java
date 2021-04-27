@@ -66,7 +66,7 @@ class NodeClassificationModelInfoTest {
 
         var expected = Map.of(
             "bestParameters", expectedParams,
-            "classes", List.of(42, Long.MAX_VALUE),
+            "classes", List.of(42L, Long.MAX_VALUE),
             "metrics", Map.of(
                 "F1_WEIGHTED", Map.of(
                     "outerTrain", 4.0,
@@ -94,7 +94,6 @@ class NodeClassificationModelInfoTest {
         var expectedParams = new HashMap<String, Object>();
         expectedParams.put("batchSize", 100);
         expectedParams.put("concurrency", 4);
-        expectedParams.put("configKeys", List.of());
         expectedParams.put("featureProperties", List.of());
         expectedParams.put("maxEpochs", 100);
         expectedParams.put("minEpochs", 1);

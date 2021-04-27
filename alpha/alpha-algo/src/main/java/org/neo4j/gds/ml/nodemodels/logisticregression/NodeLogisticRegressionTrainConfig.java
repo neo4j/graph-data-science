@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
@@ -33,8 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@JsonSerialize
-@JsonDeserialize
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -56,6 +52,24 @@ public interface NodeLogisticRegressionTrainConfig extends FeaturePropertiesConf
     @Value.Parameter(false)
     default Collection<String> configKeys() {
         return Collections.emptyList();
+    }
+
+    @Configuration.Ignore
+    @Value.Derived
+    @Value.Auxiliary
+    default Map<String, Object> toMap() {
+        return Map.of(
+            "featureProperties", featureProperties(),
+            "penalty", penalty(),
+            "targetProperty", targetProperty(),
+            "batchSize", batchSize(),
+            "minEpochs", minEpochs(),
+            "patience" , patience(),
+            "maxEpochs", maxEpochs(),
+            "tolerance" , tolerance(),
+            "sharedUpdater", sharedUpdater(),
+            "concurrency", concurrency()
+        );
     }
 
     static NodeLogisticRegressionTrainConfig of(

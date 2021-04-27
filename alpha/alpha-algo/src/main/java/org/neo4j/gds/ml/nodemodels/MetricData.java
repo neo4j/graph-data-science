@@ -19,16 +19,15 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @ValueClass
-@JsonSerialize
-@JsonDeserialize
 public interface MetricData<CONFIG extends TrainingConfig> {
 
 
@@ -55,6 +54,16 @@ public interface MetricData<CONFIG extends TrainingConfig> {
      * @return the metric value for the winner model on test set (holdout)
      */
     double test();
+
+    @Value.Derived
+    default Map<String, Object> toMap() {
+        return Map.of(
+            "outerTrain", outerTrain(),
+            "test", test(),
+            "validation", validation().stream().map(ModelStats::toMap).collect(Collectors.toList()),
+            "train", train().stream().map(ModelStats::toMap).collect(Collectors.toList())
+        );
+    }
 
     static <CONFIG extends TrainingConfig> MetricData<CONFIG> of(List<ModelStats<CONFIG>> train, List<ModelStats<CONFIG>> validation, double outerTrain, double test) {
         return ImmutableMetricData.of(train, validation, outerTrain, test);

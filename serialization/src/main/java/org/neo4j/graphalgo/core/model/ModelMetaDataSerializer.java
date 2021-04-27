@@ -90,7 +90,7 @@ public final class ModelMetaDataSerializer {
 
     private static String serializeCustomInfo(Model.Mappable customInfo) {
         try {
-            return ObjectMapperSingleton.OBJECT_MAPPER.writeValueAsString(customInfo);
+            return ObjectMapperSingleton.OBJECT_MAPPER.writeValueAsString(customInfo.toMap());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
