@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.paged;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.utils.ArrayLayout;
 import org.neo4j.graphalgo.core.utils.AscendingLongComparator;
 import org.neo4j.graphalgo.core.utils.BitUtil;
@@ -36,7 +37,7 @@ import java.util.function.Consumer;
 
 public final class SparseLongArray {
 
-    public static final long NOT_FOUND = -1;
+    public static final long NOT_FOUND = NodeMapping.NOT_FOUND;
 
     public static final int BLOCK_SIZE = 64;
     public static final int SUPER_BLOCK_SIZE = BLOCK_SIZE * Long.SIZE;

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -33,7 +34,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public final class HugeSparseLongArray {
 
-    private static final long NOT_FOUND = -1L;
+    private static final long NOT_FOUND = NodeMapping.NOT_FOUND;
 
     private static final int PAGE_SHIFT = 12;
     private static final int PAGE_SIZE = 1 << PAGE_SHIFT;

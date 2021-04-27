@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
+import org.neo4j.graphalgo.SourceNodesConfigTest;
 import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
@@ -65,6 +66,7 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
     RelationshipWeightConfigTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     ToleranceConfigTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     MemoryEstimateTest<PageRankAlgorithm, CONFIG, PageRankResult>,
+    SourceNodesConfigTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     HeapControlTest<PageRankAlgorithm, CONFIG, PageRankResult> {
 
     static final double RESULT_ERROR = 1e-5;

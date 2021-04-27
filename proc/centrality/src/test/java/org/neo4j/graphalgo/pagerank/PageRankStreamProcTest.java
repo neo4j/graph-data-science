@@ -130,14 +130,12 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.graphalgo.pagerank.PageRankProcTest#graphVariations")
     void streamWithSourceNodes(ModeBuildStage queryBuilder, String testCaseName) {
-        var sourceNodes = allNodes();
+        var sourceNodes = allNodesWithLabel("Label1");
 
         String queryWithSourceNodes = queryBuilder
             .streamMode()
             .addPlaceholder("sourceNodes", "sources")
             .yields();
-
-        var actual = new HashMap<Long, Double>();
 
         assertCypherResult(queryWithSourceNodes, Map.of("sources", sourceNodes), expected);
     }

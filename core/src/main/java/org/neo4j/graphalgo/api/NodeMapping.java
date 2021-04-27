@@ -26,6 +26,8 @@ import java.util.Set;
 
 public interface NodeMapping extends IdMapping, NodeIterator, BatchNodeIterable {
 
+    long NOT_FOUND = -1;
+
     Set<NodeLabel> nodeLabels(long nodeId);
 
     void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer);

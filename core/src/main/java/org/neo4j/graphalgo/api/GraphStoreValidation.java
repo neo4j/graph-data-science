@@ -29,8 +29,10 @@ import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.graphalgo.config.SourceNodesConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.utils.StringJoining;
+import org.neo4j.graphdb.Node;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -139,6 +141,24 @@ public final class GraphStoreValidation {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Relationship type `%s` already exists in the in-memory graph.",
                     mutateRelationshipType
+                ));
+            }
+        }
+
+        if (config instanceof SourceNodesConfig) {
+            var nodeMapping = graphStore.nodes();
+
+            var missingNodes = ((SourceNodesConfig) config).sourceNodes().stream()
+                .mapToLong(Node::getId)
+                .filter(nodeId -> nodeMapping.toMappedNodeId(nodeId) == NodeMapping.NOT_FOUND)
+                .boxed()
+                .map(Object::toString)
+                .collect(Collectors.toList());
+
+            if (!missingNodes.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Source nodes do not exist in the in-memory graph: %s",
+                    StringJoining.join(missingNodes)
                 ));
             }
         }

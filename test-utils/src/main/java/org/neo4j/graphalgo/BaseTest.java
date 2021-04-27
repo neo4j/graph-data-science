@@ -46,6 +46,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ImpermanentDbmsExtension(configurationCallback = "configuration")
 @Neo4jGraphExtension
@@ -88,6 +89,12 @@ public abstract class BaseTest {
     protected List<Node> allNodes() {
         var sourceNodes = new ArrayList<Node>();
         runQueryWithRowConsumer("MATCH (n) RETURN n", row -> sourceNodes.add(row.getNode("n")));
+        return sourceNodes;
+    }
+
+    protected List<Node> allNodesWithLabel(String label) {
+        var sourceNodes = new ArrayList<Node>();
+        runQueryWithRowConsumer(formatWithLocale("MATCH (n:%s) RETURN n", label), row -> sourceNodes.add(row.getNode("n")));
         return sourceNodes;
     }
 
