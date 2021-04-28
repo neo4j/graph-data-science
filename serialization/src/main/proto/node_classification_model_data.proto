@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "tensors.proto";
+import "model.proto";
 
 option java_package = "org.neo4j.graphalgo.ml.model.proto";
 option java_outer_classname = "NodeClassificationProto";
@@ -12,4 +13,34 @@ message NodeClassificationModelData {
 
 message LocalIdMap {
   repeated int64 originalIds = 1;
+}
+
+message MultiClassNLRTrainConfig {
+  TrainingConfig trainingConfig = 1;
+
+  repeated string featureProperties = 2;
+  string targetProperty = 3;
+  double penalty = 4;
+}
+
+message MetricScores {
+  double avg = 1;
+  double max = 2;
+  double min = 3;
+  MultiClassNLRTrainConfig params = 4;
+}
+
+message InfoMetric {
+  double test = 1;
+  double outerTrain = 2;
+
+  repeated MetricScores train = 3;
+  repeated MetricScores validation = 4;
+}
+
+message NodeClassificationModelInfo {
+  MultiClassNLRTrainConfig bestParameters = 1;
+  repeated int32 classes = 2;
+
+  map<string, InfoMetric> metrics = 3;
 }

@@ -21,6 +21,16 @@ message ModelMetaData {
   string customInfo = 8;
 }
 
+message TrainingConfig {
+  int32 batchSize = 1;
+  int32 minEpochs = 2;
+  int32 maxEpochs = 3;
+  int32 patience = 4;
+  double tolerance = 5;
+  bool sharedUpdater = 6;
+  int32 concurrency = 7;
+}
+
 message ZonedDateTime {
   int64 seconds = 1;
   int32 nanos = 2;
