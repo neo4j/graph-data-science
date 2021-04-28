@@ -1,51 +1,39 @@
-[[algorithms-page-rank]]
-= PageRank
+[[algorithms-article-rank]]
+= Article Rank
 :entity: node
 :result: score
-:algorithm: PageRank
+:algorithm: Article Rank
 
 [abstract]
 --
-This section describes the PageRank algorithm in the Neo4j Graph Data Science library.
+This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library.
 --
 
 
-[[algorithms-page-rank-intro]]
+[[algorithms-article-rank-introduction]]
 == Introduction
 
-The PageRank algorithm measures the importance of each node within the graph, based on the number incoming relationships and the importance of the corresponding source nodes.
-The underlying assumption roughly speaking is that a page is only as important as the pages that link to it.
+ArticleRank is a variant of the <<algorithms-page-rank, Page Rank algorithm>>, which measures the *transitive* influence of nodes.
 
-PageRank is introduced in the original Google paper as a function that solves the following equation:
+Page Rank follows the assumption that relationships originating from low-degree nodes have a higher influence than relationships from high-degree nodes.
+Article Rank lowers the influence of low-degree nodes by lowering the scores being sent to their neighbors in each iteration.
 
-image::page-rank-formula.svg[align="center"]
+The Article Rank of a node _v_ at iteration _i_ is defined as:
+
+image::equations/articleRank.svg[]
 
 where,
 
-* we assume that a page _A_ has pages _T~1~_ to _T~n~_ which point to it.
-* _d_ is a damping factor which can be set between 0 (inclusive) and 1 (exclusive).
-It is usually set to 0.85.
-* _C(A)_ is defined as the number of links going out of page _A_.
+* _N~in~(v)_ denotes incoming neighbors and _N~out~(v)_ denotes outgoing neighbors of node _v_.
+* _d_ is a damping factor in _[0, 1]_.
+* _[overline]#N#~out~_ is the average out-degree
 
-This equation is used to iteratively update a candidate solution and arrive at an approximate solution to the same equation.
+For more information, see https://www.emeraldinsight.com/doi/abs/10.1108/00012530911005544[ArticleRank: a PageRank‐based alternative to numbers of citations for analysing citation networks^].
 
-For more information on this algorithm, see:
-
-* http://infolab.stanford.edu/~backrub/google.html[The original google paper^]
-* http://delab.csd.auth.gr/~dimitris/courses/ir_spring06/page_rank_computing/01531136.pdf[An Efficient Partition-Based Parallel PageRank Algorithm^]
-* https://arxiv.org/pdf/1407.5107.pdf[PageRank beyond the web^] for use cases
-
-[NOTE]
-====
-Running this algorithm requires sufficient memory availability.
-Before running this algorithm, we recommend that you read <<memory-estimation>>.
-====
-
-
-[[algorithms-page-rank-considerations]]
+[[algorithms-article-rank-considerations]]
 == Considerations
 
-There are some things to be aware of when using the PageRank algorithm:
+There are some things to be aware of when using the Article Rank algorithm:
 
 * If there are no relationships from within a group of pages to outside the group, then the group is considered a spider trap.
 * Rank sink can occur when a network of pages is forming an infinite cycle.
@@ -55,22 +43,23 @@ Changing the damping factor can help with all the considerations above.
 It can be interpreted as a probability of a web surfer to sometimes jump to a random page and therefore not getting stuck in sinks.
 
 
-[[algorithms-page-rank-syntax]]
+
+[[algorithms-article-rank-syntax]]
 == Syntax
 
 include::../shared/syntax-intro-named-graph.adoc[]
 
-.PageRank syntax per mode
+.Article Rank syntax per mode
 [.tabbed-example]
 ====
 
 [.include-with-stream]
 ======
 
-.Run PageRank in stream mode on a named graph.
+.Run Article Rank in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.stream(
+CALL gds.articleRank.stream(
   graphName: String,
   configuration: Map
 )
@@ -90,7 +79,7 @@ include::specific-configuration.adoc[]
 |===
 | Name    | Type    | Description
 | nodeId  | Integer | Node ID.
-| score   | Float   | PageRank score.
+| score   | Float   | Eigenvector score.
 |===
 
 ======
@@ -98,10 +87,10 @@ include::specific-configuration.adoc[]
 [.include-with-stats]
 ======
 
-.Run PageRank in stats mode on a named graph.
+.Run Article Rank in stats mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.stats(
+CALL gds.articleRank.stats(
   graphName: String,
   configuration: Map
 )
@@ -139,10 +128,10 @@ include::specific-configuration.adoc[]
 [.include-with-mutate]
 ======
 
-.Run PageRank in mutate mode on a named graph.
+.Run Article Rank in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.mutate(
+CALL gds.articleRank.mutate(
   graphName: String,
   configuration: Map
 )
@@ -184,10 +173,10 @@ include::specific-configuration.adoc[]
 [.include-with-write]
 ======
 
-.Run PageRank in write mode on a named graph.
+.Run Article Rank in write mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.write(
+CALL gds.articleRank.write(
   graphName: String,
   configuration: Map
 )
@@ -229,15 +218,15 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-page-rank-syntax-anonymous]]
+[[algorithms-article-rank-syntax-anonymous]]
 === Anonymous graphs
 
 include::../shared/syntax-anonymous-graphs.adoc[]
 
-.Run PageRank in write mode on an anonymous graph:
+.Run Article Rank in write mode on an anonymous graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.write(
+CALL gds.articleRank.write(
   configuration: Map
 )
 YIELD
@@ -258,7 +247,7 @@ include::specific-configuration.adoc[]
 The results are the same as for running write mode with a named graph, see the <<algorithms-page-rank-syntax, write mode syntax above>>.
 
 
-[[algorithms-page-rank-examples]]
+[[algorithms-article-rank-examples]]
 == Examples
 
 :algorithm-name: {algorithm}
@@ -325,10 +314,9 @@ include::../shared/examples-estimate-intro.adoc[]
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.write.estimate('myGraph', {
-  writeProperty: 'pageRank',
-  maxIterations: 20,
-  dampingFactor: 0.85
+CALL gds.articleRank.write.estimate('myGraph', {
+  writeProperty: 'centrality',
+  maxIterations: 20
 })
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 ----
@@ -342,10 +330,10 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 --
 
 
-[[algorithms-page-rank-examples-stream]]
+[[algorithms-article-rank-examples-stream]]
 === Stream
 
-:stream-details: For example, we can order the results to find the nodes with the highest PageRank score.
+:stream-details: For example, we can order the results to find the nodes with the highest Eigenvector score.
 include::../shared/examples-stream-intro.adoc[]
 
 [role=query-example]
@@ -353,7 +341,7 @@ include::../shared/examples-stream-intro.adoc[]
 .The following will run the algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.stream('myGraph')
+CALL gds.articleRank.stream('myGraph')
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC, name ASC
@@ -363,39 +351,34 @@ ORDER BY score DESC, name ASC
 [opts="header",cols="1,1"]
 |===
 | name      | score
-| "Home"    | 3.215681999884452
-| "About"   | 1.0542700552146722
-| "Links"   | 1.0542700552146722
-| "Product" | 1.0542700552146722
-| "Site A"  | 0.3278578964488539
-| "Site B"  | 0.3278578964488539
-| "Site C"  | 0.3278578964488539
-| "Site D"  | 0.3278578964488539
+| "Home"    | 1.6630046092073039
+| "About"   | 0.669785439070462
+| "Links"   | 0.669785439070462
+| "Product" | 0.669785439070462
+| "Site A"  | 0.29731716846827266
+| "Site B"  | 0.29731716846827266
+| "Site C"  | 0.29731716846827266
+| "Site D"  | 0.29731716846827266
 |===
 --
 
-The above query is running the algorithm in `stream` mode as `unweighted` and the returned scores are not normalized.
-Below, one can find an example for <<algorithms-page-rank-examples-weighted, weighted graphs>>.
-Another <<algorithms-page-rank-examples-scaler, example>> shows the application of a scaler to normalize the final scores.
+The above query is running the algorithm in `stream` mode as `unweighted`.
+Below, one can find an example for <<algorithms-article-rank-examples-weighted, weighted graphs>>.
 
-NOTE: While we are using the `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
 
-[[algorithms-page-rank-examples-stats]]
+[[algorithms-article-rank-examples-stats]]
 === Stats
 
-:stats-details: For example PageRank stats returns centrality histogram which can be used to monitor the distribution of PageRank score values across all computed nodes.
-:stats-syntax: algorithms-page-rank-syntax
+:stats-details: For example Eigenvector stats returns centrality histogram which can be used to monitor the distribution of centrality scores across all computed nodes.
+:stats-syntax: algorithms-article-rank-syntax
 include::../shared/examples-stats-intro.adoc[]
 
 [role=query-example]
 --
-.The following will run the algorithm and returns the result in form of statistical and measurement values
+.The following will run the algorithm and return statistics about the centrality scores.
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.stats('myGraph', {
-  maxIterations: 20,
-  dampingFactor: 0.85
-})
+CALL gds.articleRank.stats('myGraph')
 YIELD centralityDistribution
 RETURN centralityDistribution.max AS max
 ----
@@ -404,13 +387,12 @@ RETURN centralityDistribution.max AS max
 [opts="header",cols="1"]
 |===
 | max
-| 3.2156810760498047
+| 1.6630077362060547
 |===
 --
 
-The centrality histogram can be useful for inspecting the computed scores or perform normalizations.
 
-[[algorithms-page-rank-examples-mutate]]
+[[algorithms-article-rank-examples-mutate]]
 === Mutate
 
 include::../shared/examples-mutate-intro.adoc[]
@@ -420,10 +402,8 @@ include::../shared/examples-mutate-intro.adoc[]
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.mutate('myGraph', {
-  maxIterations: 20,
-  dampingFactor: 0.85,
-  mutateProperty: 'pagerank'
+CALL gds.articleRank.mutate('myGraph', {
+  mutateProperty: 'centrality'
 })
 YIELD nodePropertiesWritten, ranIterations
 ----
@@ -437,7 +417,7 @@ YIELD nodePropertiesWritten, ranIterations
 --
 
 
-[[algorithms-page-rank-examples-write]]
+[[algorithms-article-rank-examples-write]]
 === Write
 
 include::../shared/examples-write-intro.adoc[]
@@ -447,10 +427,8 @@ include::../shared/examples-write-intro.adoc[]
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.write('myGraph', {
-  maxIterations: 20,
-  dampingFactor: 0.85,
-  writeProperty: 'pagerank'
+CALL gds.articleRank.write('myGraph', {
+  writeProperty: 'centrality'
 })
 YIELD nodePropertiesWritten, ranIterations
 ----
@@ -464,22 +442,23 @@ YIELD nodePropertiesWritten, ranIterations
 --
 
 
-[[algorithms-page-rank-examples-weighted]]
+[[algorithms-article-rank-examples-weighted]]
 === Weighted
 
-By default, the algorithm is considering the relationships of the graph to be `unweighted`, to change this behaviour we can use configuration parameter called `relationshipWeightProperty`.
-In the `weighted` case, the previous score of a node send to its neighbors, is multiplied by the relationship weight and then divided by the sum of the weights of its outgoing relationships.
-If the value of the relationship property is negative it will be ignored during computation.
-Below is an example of running the algorithm using the relationship property.
+By default, the algorithm considers the relationships of the graph to be unweighted.
+To change this behaviour, we can use the `relationshipWeightProperty` configuration parameter.
+If the parameter is set, the associated property value is used as relationship weight.
+In the `weighted` case, the previous score of a node sent to its neighbors is multiplied by the normalized relationship weight.
+Note, that negative relationship weights are ignored during the computation.
+
+In the following example, we use the `weight` property of the input graph as relationship weight property.
 
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode using relationship weights:
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.stream('myGraph', {
-  maxIterations: 20,
-  dampingFactor: 0.85,
+CALL gds.articleRank.stream('myGraph', {
   relationshipWeightProperty: 'weight'
 })
 YIELD nodeId, score
@@ -491,34 +470,36 @@ ORDER BY score DESC, name ASC
 [opts="header",cols="1,1"]
 |===
 | name      | score
-| "Home"    | 3.53751028396339
-| "Product" | 1.9357838291651097
-| "About"   | 0.7452612763883698
-| "Links"   | 0.7452612763883698
-| "Site A"  | 0.18152677135466103
-| "Site B"  | 0.18152677135466103
-| "Site C"  | 0.18152677135466103
-| "Site D"  | 0.18152677135466103
+| "Home"    | 0.9967881778831038
+| "Product" | 0.47350093601943055
+| "About"   | 0.25783364533981024
+| "Links"   | 0.25783364533981024
+| "Site A"  | 0.1569732107200472
+| "Site B"  | 0.1569732107200472
+| "Site C"  | 0.1569732107200472
+| "Site D"  | 0.1569732107200472
 |===
 --
 
-NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
+As in the unweighted example, the "Home" node has the highest score.
+In contrast, the "Product" now has the second highest instead of the fourth highest score.
+
+NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted`, however, all the algorithm modes support the `relationshipWeightProperty` configuration parameter.
 
 
-[[algorithms-page-rank-examples-tolerance]]
+[[algorithms-article-rank-examples-tolerance]]
 === Tolerance
 
 The `tolerance` configuration parameter denotes the minimum change in scores between iterations.
-If all scores change less than the configured `tolerance` value the result stabilises, and the algorithm returns.
+If all scores change less than the configured tolerance, the iteration is aborted and considered converged.
+Note, that setting a higher tolerance leads to earlier convergence, but also to less accurate centrality scores.
 
 [role=query-example]
 --
-.The following will run the algorithm in `stream` mode using bigger `tolerance` value:
+.The following will run the algorithm in `stream` mode using a high `tolerance` value:
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.stream('myGraph', {
-  maxIterations: 20,
-  dampingFactor: 0.85,
+CALL gds.articleRank.stream('myGraph', {
   tolerance: 0.1
 })
 YIELD nodeId, score
@@ -530,79 +511,39 @@ ORDER BY score DESC, name ASC
 [opts="header",cols="1,1"]
 |===
 | name      | score
-| "Home"    | 1.5812450669583336
-| "About"   | 0.5980194356381945
-| "Links"   | 0.5980194356381945
-| "Product" | 0.5980194356381945
-| "Site A"  | 0.23374955154166668
-| "Site B"  | 0.23374955154166668
-| "Site C"  | 0.23374955154166668
-| "Site D"  | 0.23374955154166668
+| "Home"    | 0.8818733739463573
+| "About"   | 0.4261656092095172
+| "Links"   | 0.4261656092095172
+| "Product" | 0.4261656092095172
+| "Site A"  | 0.21893241712938355
+| "Site B"  | 0.21893241712938355
+| "Site C"  | 0.21893241712938355
+| "Site D"  | 0.21893241712938355
 |===
 --
 
-In this example we are using `tolerance: 0.1`, so the results are a bit different compared to the ones from <<algorithms-page-rank-examples-stream, stream example>> which is using the default value of `tolerance`.
-Note that the nodes 'About', 'Link' and 'Product' now have the same score, while with the default value of `tolerance` the node 'Product' has higher score than the other two.
+We are using `tolerance: 0.1`, which leads to slightly different results compared to the <<algorithms-article-rank-examples-stream, stream example>>.
+However, the computation converges after four iterations, and we can already observe a trend in the resulting scores.
 
 
-[[algorithms-page-rank-examples-damping]]
-=== Damping Factor
+[[algorithms-article-rank-examples-personalised]]
+=== Personalised Article Rank
 
-The damping factor configuration parameter accepts values between 0 (inclusive) and 1 (exclusive).
-If its value is too high then problems of sinks and spider traps may occur, and the values may oscillate so that the algorithm does not converge.
-If it's too low then all scores are pushed towards 1, and the result will not sufficiently reflect the structure of the graph.
+Personalized Article Rank is a variation of Article Rank which is biased towards a set of `sourceNodes`.
+By default, the power iteration starts with the same value for all nodes: `1 / |V|`.
+For a given set of source nodes `S`, the initial value of each source node is set to `1 / |S|` and to `0` for all remaining nodes.
 
-[role=query-example]
---
-.The following will run the algorithm in `stream` mode using smaller `dampingFactor` value:
-[source, cypher, role=noplay]
-----
-CALL gds.pageRank.stream('myGraph', {
-  maxIterations: 20,
-  dampingFactor: 0.05
-})
-YIELD nodeId, score
-RETURN gds.util.asNode(nodeId).name AS name, score
-ORDER BY score DESC, name ASC
-----
-
-.Results
-[opts="header",cols="1,1"]
-|===
-| name      | score
-| "Home"    | 1.2487309425844906
-| "About"   | 0.9708121818724536
-| "Links"   | 0.9708121818724536
-| "Product" | 0.9708121818724536
-| "Site A"  | 0.9597081216238426
-| "Site B"  | 0.9597081216238426
-| "Site C"  | 0.9597081216238426
-| "Site D"  | 0.9597081216238426
-|===
---
-
-Compared to the results from the <<algorithms-page-rank-examples-stream, stream example>> which is using the default value of `dampingFactor` the score values are closer to each other when using `dampingFactor: 0.05`.
-Also, note that the nodes 'About', 'Link' and 'Product' now have the same score, while with the default value of `dampingFactor` the node 'Product' has higher score than the other two.
-
-
-[[algorithms-page-rank-examples-personalised]]
-=== Personalised PageRank
-
-Personalized PageRank is a variation of PageRank which is biased towards a set of `sourceNodes`.
-This variant of PageRank is often used as part of https://www.r-bloggers.com/from-random-walks-to-personalized-pagerank/[recommender systems^].
-
-The following examples show how to run PageRank centered around 'Site A'.
+The following examples show how to run Eigenvector centrality centered around 'Site A' and 'Site B'.
 
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-MATCH (siteA:Page {name: 'Site A'})
-CALL gds.pageRank.stream('myGraph', {
+MATCH (siteA:Page {name: 'Site A'}), (siteB:Page {name: 'Site B'})
+CALL gds.articleRank.stream('myGraph', {
   maxIterations: 20,
-  dampingFactor: 0.85,
-  sourceNodes: [siteA]
+  sourceNodes: [siteA, siteB]
 })
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
@@ -613,21 +554,21 @@ ORDER BY score DESC, name ASC
 [opts="header",cols="1,1"]
 |===
 | name      | score
-| "Home"    | 0.39902290442518784
-| "Site A"  | 0.16890325301726694
-| "About"   | 0.11220151747374331
-| "Links"   | 0.11220151747374331
-| "Product" | 0.11220151747374331
-| "Site B"  | 0.01890325301726691
-| "Site C"  | 0.01890325301726691
-| "Site D"  | 0.01890325301726691
+| "Home"    | 0.3639476164976639
+| "Site A"  | 0.17500411281021852
+| "Site B"  | 0.17500411281021852
+| "About"   | 0.11375083020989332
+| "Links"   | 0.11375083020989332
+| "Product" | 0.11375083020989332
+| "Site C"  | 0.0250041128102185
+| "Site D"  | 0.0250041128102185
 |===
 --
 
-Comparing these results to the ones from the <<algorithms-page-rank-examples-stream, stream example>> (which is not using `sourceNodes` configuration parameter) shows that the 'Site A' node  that we used in the `sourceNodes` list now scores second instead of fourth.
+Comparing these results to the ones from the <<algorithms-article-rank-examples-stream, stream example>> (which is not using `sourceNodes` configuration parameter) shows the 'Site A' and `Site B` nodes we used in the `sourceNodes` list now score second and third instead of fourth and fifth.
 
 
-[[algorithms-page-rank-examples-scaler]]
+[[algorithms-article-rank-examples-scaler]]
 === Scaling centrality scores
 
 To normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
@@ -639,7 +580,7 @@ A description of all available scalers can be found in the documentation for the
 .The following will run the algorithm in `stream` mode and returns normalized results:
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.stream('myGraph', {
+CALL gds.articleRank.stream('myGraph', {
   scaler: "L1Norm"
 })
 YIELD nodeId, score
@@ -651,15 +592,16 @@ ORDER BY score DESC, name ASC
 [opts="header",cols="1,1"]
 |===
 | name      | score
-| "Home"    | 0.4181682554824872
-| "About"   | 0.1370975954128506
-| "Links"   | 0.1370975954128506
-| "Product" | 0.1370975954128506
-| "Site A"  | 0.04263473956974027
-| "Site B"  | 0.04263473956974027
-| "Site C"  | 0.04263473956974027
-| "Site D"  | 0.04263473956974027
+| "Home"    | 0.34206732020627306
+| "About"   | 0.13776973857289815
+| "Links"   | 0.13776973857289815
+| "Product" | 0.13776973857289815
+| "Site A"  | 0.06115586601875811
+| "Site B"  | 0.06115586601875811
+| "Site C"  | 0.06115586601875811
+| "Site D"  | 0.06115586601875811
+
 |===
 --
 
-Comparing the results with the <<algorithms-page-rank-examples-stream, stream example>>, we can see that the relative order of scores is the same.
+Comparing the results with the <<algorithms-article-rank-examples-stream, stream example>>, we can see that the relative order of scores is the same.
