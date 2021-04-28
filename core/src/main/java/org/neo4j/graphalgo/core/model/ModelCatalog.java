@@ -164,8 +164,8 @@ public final class ModelCatalog {
         publicModels.removeAllLoadedModels();
     }
 
-    public static void checkStorable(String username, String modelType) {
-        getUserCatalog(username).canStoreModel(modelType);
+    public static void checkStorable(String username, String modelName, String modelType) {
+        getUserCatalog(username).checkStorable(modelName, modelType);
     }
 
     private static UserCatalog getUserCatalog(String username) {
@@ -179,13 +179,7 @@ public final class ModelCatalog {
         private final Map<String, Model<?, ?>> userModels = new ConcurrentHashMap<>();
 
         public void set(Model<?, ?> model) {
-            canStoreModel(model.algoType());
-            if (exists(model.name())) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Model with name `%s` already exists",
-                    model.name()
-                ));
-            }
+            checkStorable(model.name(), model.algoType());
             userModels.put(model.name(), model);
         }
 
@@ -282,8 +276,28 @@ public final class ModelCatalog {
             return this;
         }
 
-        private boolean reachedModelsLimit(String modelType) {
-            return modelsPerType(modelType) == ALLOWED_MODELS_COUNT;
+        private void checkStorable(String modelName, String modelType) {
+            verifyModelNameIsUnique(modelName);
+            verifyModelsLimit(modelType);
+        }
+
+        private void verifyModelNameIsUnique(String model) {
+            if (exists(model)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Model with name `%s` already exists.",
+                    model
+                ));
+            }
+        }
+
+        private void verifyModelsLimit(String modelType) {
+            if (GdsEdition.instance().isOnCommunityEdition() && !canStoreModel(modelType)) {
+                throw new IllegalArgumentException(formatWithLocale("Community users can only store `%d` models in the catalog, see https://neo4j.com/docs/graph-data-science/", ALLOWED_MODELS_COUNT));
+            }
+        }
+
+        private boolean canStoreModel(String modelType) {
+            return modelsPerType(modelType) < ALLOWED_MODELS_COUNT;
         }
 
         private long modelsPerType(String modelType) {
@@ -291,12 +305,6 @@ public final class ModelCatalog {
                 .stream()
                 .filter(model -> model.algoType().equals(modelType))
                 .count();
-        }
-
-        private void canStoreModel(String modelType) {
-            if (GdsEdition.instance().isOnCommunityEdition() && reachedModelsLimit(modelType)) {
-                throw new IllegalArgumentException(formatWithLocale("Community users can only store `%d` models in the catalog, see https://neo4j.com/docs/graph-data-science/", ALLOWED_MODELS_COUNT));
-            }
         }
 
         private Model<?, ?> getUntyped(String modelName) {

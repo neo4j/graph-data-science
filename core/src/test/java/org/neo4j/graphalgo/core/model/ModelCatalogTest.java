@@ -214,6 +214,36 @@ class ModelCatalogTest {
     }
 
     @Test
+    void shouldThrowIfModelNameAlreadyExists() {
+        ModelCatalog.set(TEST_MODEL);
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.checkStorable(TEST_MODEL.creator(), TEST_MODEL.name(), TEST_MODEL.algoType())
+        );
+
+        assertEquals(
+            "Model with name `testModel` already exists.",
+            ex.getMessage()
+        );
+    }
+
+    @Test
+    void shouldThrowIfModelNameAlreadyExistsOnSet() {
+        ModelCatalog.set(TEST_MODEL);
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> ModelCatalog.set(TEST_MODEL)
+        );
+
+        assertEquals(
+            "Model with name `testModel` already exists.",
+            ex.getMessage()
+        );
+    }
+
+    @Test
     void checksIfModelExists() {
         ModelCatalog.set(TEST_MODEL);
 
@@ -373,7 +403,7 @@ class ModelCatalogTest {
                 () -> ModelCatalog.set(TEST_MODEL)
             );
 
-            assertEquals("Model with name `testModel` already exists", ex.getMessage());
+            assertEquals("Model with name `testModel` already exists.", ex.getMessage());
         }
     }
 

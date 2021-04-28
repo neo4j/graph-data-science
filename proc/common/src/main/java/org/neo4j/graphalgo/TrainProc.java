@@ -59,6 +59,10 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
             computationResult.graph().nodeCount(),
             computationResult.graph().relationshipCount()
         );
+    @Override
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TRAIN_CONFIG config) {
+        super.validateConfigsBeforeLoad(graphCreateConfig, config);
+        ModelCatalog.checkStorable(username(), config.modelName(), modelType());
     }
 
     @SuppressWarnings("unused")
