@@ -26,7 +26,10 @@ message NodeClassificationTrainConfig {
   double holdoutFraction = 6;
   int32 validationFolds = 7;
   string targetProperty = 8;
-  repeated string params = 9;
+
+  repeated string params = 9 [deprecated = true];
+
+  repeated MultiClassNLRTrainConfig paramConfigs = 10;
 }
 
 message MultiClassNLRTrainConfig {
@@ -53,8 +56,12 @@ message InfoMetric {
 }
 
 message NodeClassificationModelInfo {
-  MultiClassNLRTrainConfig bestParameters = 1;
-  repeated int32 classes = 2;
+  string name = 1;
 
-  map<string, InfoMetric> metrics = 3;
+  MultiClassNLRTrainConfig bestParameters = 2;
+  repeated int64 classes = 3;
+
+  map<string, InfoMetric> metrics = 4;
+
+  string type = 5;
 }

@@ -70,7 +70,7 @@ class NodeClassificationTrainConfigTest {
         assertThat(serializedConfig.getRandomSeed().getValue()).isEqualTo(19L);
         assertThat(serializedConfig.getMetricsList()).containsExactly(metric);
 
-        assertThat(serializedConfig.getParamsList()).hasSize(2);
+        assertThat(serializedConfig.getParamConfigsCount()).isEqualTo(2);
 
         var collect = serializedConfig.getParamsList()
             .stream()

@@ -19,8 +19,15 @@
  */
 package org.neo4j.graphalgo.config;
 
+import org.neo4j.gds.ml.TrainingConfig;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
+import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfigImpl;
 import org.neo4j.graphalgo.config.proto.CommonConfigProto;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.model.proto.ModelProto;
+import org.neo4j.graphalgo.ml.model.proto.NodeClassificationProto;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -81,5 +88,52 @@ public final class ConfigSerializers {
                     .build()
             ));
 
+    }
+
+    static ModelProto.TrainingConfig serializableTrainingConfig(TrainingConfig config) {
+        return ModelProto.TrainingConfig.newBuilder()
+            .setBatchSize(config.batchSize())
+            .setMinEpochs(config.minEpochs())
+            .setMaxEpochs(config.maxEpochs())
+            .setPatience(config.patience())
+            .setTolerance(config.tolerance())
+            .setSharedUpdater(config.sharedUpdater())
+            .setConcurrency(config.concurrency())
+            .build();
+    }
+
+    public static NodeClassificationProto.MultiClassNLRTrainConfig.Builder multiClassNLRTrainConfig(
+        MultiClassNLRTrainConfig config
+    ) {
+        return NodeClassificationProto.MultiClassNLRTrainConfig.newBuilder()
+            .addAllFeatureProperties(config.featureProperties())
+            .setTargetProperty(config.targetProperty())
+            .setPenalty(config.penalty())
+            .setTrainingConfig(serializableTrainingConfig(config));
+    }
+
+    public static MultiClassNLRTrainConfig multiClassNLRTrainConfig(NodeClassificationProto.MultiClassNLRTrainConfig protoConfig) {
+        var rawParams = multiClassNLRTrainConfigMap(protoConfig);
+
+        return new MultiClassNLRTrainConfigImpl(
+            protoConfig.getFeaturePropertiesList(),
+            protoConfig.getTargetProperty(),
+            CypherMapWrapper
+                .create(rawParams)
+        );
+    }
+
+    static Map<String, Object> multiClassNLRTrainConfigMap(NodeClassificationProto.MultiClassNLRTrainConfig protoConfig) {
+        var trainingConfig = protoConfig.getTrainingConfig();
+        return Map.of(
+            "penalty", protoConfig.getPenalty(),
+            "batchSize", trainingConfig.getBatchSize(),
+            "minEpochs", trainingConfig.getMinEpochs(),
+            "maxEpochs", trainingConfig.getMaxEpochs(),
+            "patience", trainingConfig.getPatience(),
+            "tolerance", trainingConfig.getTolerance(),
+            "sharedUpdater", trainingConfig.getSharedUpdater(),
+            "concurrency", trainingConfig.getConcurrency()
+        );
     }
 }
