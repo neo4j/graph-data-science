@@ -128,7 +128,7 @@ class GraphSageTrainConfigTest {
                 .build();
 
             assertThatIllegalArgumentException().isThrownBy(
-                () -> singleLabelConfig.validateAgainstGraphStore(store)
+                () -> singleLabelConfig.validateAgainstGraphStore(store.graphStore())
             ).withMessage("The following node properties are not present for each label in the graph: [doesnotexist]. Properties that exist for each label are [weight, age, height]");
         }
 
@@ -142,7 +142,7 @@ class GraphSageTrainConfigTest {
                 .build();
 
             assertThatIllegalArgumentException().isThrownBy(
-                () -> singleLabelConfig.validateAgainstGraphStore(store)
+                () -> singleLabelConfig.validateAgainstGraphStore(store.graphStore())
             ).withMessage("Each property set in `featureProperties` must exist for at least one label. Missing properties: [doesnotexist]");
         }
 
@@ -156,7 +156,7 @@ class GraphSageTrainConfigTest {
                 .build();
 
             assertThatNoException().isThrownBy(
-                () -> singleLabelConfig.validateAgainstGraphStore(store)
+                () -> singleLabelConfig.validateAgainstGraphStore(store.graphStore())
             );
 
             var multiLabelConfig = ImmutableGraphSageTrainConfig.builder()
@@ -169,7 +169,7 @@ class GraphSageTrainConfigTest {
                 .build();
 
             assertThatNoException().isThrownBy(
-                () -> multiLabelConfig.validateAgainstGraphStore(store)
+                () -> multiLabelConfig.validateAgainstGraphStore(store.graphStore())
             );
         }
     }

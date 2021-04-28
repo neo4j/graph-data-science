@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.procedure.Description;
@@ -60,10 +59,10 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
     }
 
     @Override
-    protected void validateConfigsAndGraphStore(
-        GraphStoreWithConfig graphStoreWithConfig, NodeClassificationTrainConfig config
+    protected void validateConfigsAfterLoad(
+        GraphStore graphStore, GraphCreateConfig graphCreateConfig, NodeClassificationTrainConfig config
     ) {
-        GraphStore graphStore = graphStoreWithConfig.graphStore();
+        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
         Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
         if (!graphStore.hasNodeProperty(filterLabels, config.targetProperty())) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -73,10 +72,7 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
                 StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
             ));
         }
-        GraphStoreValidation.validate(
-            graphStoreWithConfig,
-            config
-        );
+        GraphStoreValidation.validate(graphStore, config);
     }
 
     @Override

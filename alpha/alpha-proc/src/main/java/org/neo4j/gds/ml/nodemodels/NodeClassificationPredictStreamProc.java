@@ -24,11 +24,11 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResu
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.procedure.Description;
@@ -81,19 +81,17 @@ public class NodeClassificationPredictStreamProc
     }
 
     @Override
-    protected void validateConfigsAndGraphStore(
-        GraphStoreWithConfig graphStoreWithConfig, NodeClassificationStreamConfig config
+    protected void validateConfigsAfterLoad(
+        GraphStore graphStore, GraphCreateConfig graphCreateConfig, NodeClassificationStreamConfig config
     ) {
+        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
         var trainConfig = ModelCatalog.get(
             config.username(),
             config.modelName(),
             NodeLogisticRegressionData.class,
             NodeClassificationTrainConfig.class
         ).trainConfig();
-        GraphStoreValidation.validate(
-            graphStoreWithConfig,
-            trainConfig
-        );
+        GraphStoreValidation.validate(graphStore, trainConfig);
     }
 
     @Override

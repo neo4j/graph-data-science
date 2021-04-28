@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -77,17 +76,13 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     }
 
     @Override
-    protected void validateConfigsAndGraphStore(
-        GraphStoreWithConfig graphStoreWithConfig,
-        GraphSageTrainConfig config
+    protected void validateConfigsAfterLoad(
+        GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageTrainConfig config
     ) {
-        config.validateAgainstGraphStore(graphStoreWithConfig);
-    }
-
-    @Override
-    protected void validateGraphStore(GraphStore graphStore) {
+        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
         if (graphStore.relationshipCount() == 0) {
             throw new IllegalArgumentException("There should be at least one relationship in the graph.");
         }
+        config.validateAgainstGraphStore(graphStore);
     }
 }

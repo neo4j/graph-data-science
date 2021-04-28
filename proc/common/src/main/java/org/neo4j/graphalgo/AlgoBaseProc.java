@@ -166,9 +166,11 @@ public abstract class AlgoBaseProc<
         CONFIG config
     ) {}
 
-    protected void validateGraphStore(GraphStore graphStore) {}
-
-    protected void validateConfigsAndGraphStore(GraphStoreWithConfig graphStoreWithConfig, CONFIG config) {}
+    protected void validateConfigsAfterLoad(
+        GraphStore graphStore,
+        GraphCreateConfig graphCreateConfig,
+        CONFIG config
+    ) {}
 
     protected ComputationResult<ALGO, ALGO_RESULT, CONFIG> compute(
         Object graphNameOrConfig,
@@ -343,10 +345,9 @@ public abstract class AlgoBaseProc<
             throw new IllegalStateException("There must be either a graph name or an implicit create config");
         }
 
-        GraphStoreValidation.validate(graphCandidate, config);
         var graphStore = graphCandidate.graphStore();
-        validateGraphStore(graphStore);
-        validateConfigsAndGraphStore(graphCandidate, config);
+        GraphStoreValidation.validate(graphStore, config);
+        validateConfigsAfterLoad(graphStore, graphCandidate.config(), config);
         return graphStore;
     }
 

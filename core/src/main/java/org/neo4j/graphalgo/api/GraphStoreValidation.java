@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.config.SourceNodesConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.ArrayList;
@@ -42,9 +41,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class GraphStoreValidation {
 
-    public static <CONFIG extends AlgoBaseConfig> void validate(GraphStoreWithConfig graphStoreWithConfig, CONFIG config) {
-        GraphStore graphStore = graphStoreWithConfig.graphStore();
-
+    public static void validate(GraphStore graphStore, AlgoBaseConfig config) {
         Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
         if (config instanceof SeedConfig) {
             String seedProperty = ((SeedConfig) config).seedProperty();

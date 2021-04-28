@@ -25,6 +25,7 @@ import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BatchSizeConfig;
 import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
@@ -35,7 +36,6 @@ import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -199,8 +199,7 @@ public interface GraphSageTrainConfig extends
     }
 
     @Configuration.Ignore
-    default void validateAgainstGraphStore(GraphStoreWithConfig graphStoreWithConfig) {
-        var graphStore = graphStoreWithConfig.graphStore();
+    default void validateAgainstGraphStore(GraphStore graphStore) {
         var nodeLabels = this.nodeLabelIdentifiers(graphStore);
         var nodePropertyNames = this.featureProperties();
         if (!this.isMultiLabel()) {

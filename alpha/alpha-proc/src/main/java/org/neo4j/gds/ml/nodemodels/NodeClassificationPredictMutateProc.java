@@ -23,11 +23,11 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter.NodeProperty;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -66,9 +66,10 @@ public class NodeClassificationPredictMutateProc
     }
 
     @Override
-    protected void validateConfigsAndGraphStore(
-        GraphStoreWithConfig graphStoreWithConfig, NodeClassificationMutateConfig config
+    protected void validateConfigsAfterLoad(
+        GraphStore graphStore, GraphCreateConfig graphCreateConfig, NodeClassificationMutateConfig config
     ) {
+        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
         config.predictedProbabilityProperty().ifPresent(predictedProbabilityProperty -> {
             if (config.mutateProperty().equals(predictedProbabilityProperty)) {
                 throw new IllegalArgumentException(
@@ -88,10 +89,7 @@ public class NodeClassificationPredictMutateProc
             NodeLogisticRegressionData.class,
             NodeClassificationTrainConfig.class
         ).trainConfig();
-        GraphStoreValidation.validate(
-            graphStoreWithConfig,
-            trainConfig
-        );
+        GraphStoreValidation.validate(graphStore, trainConfig);
     }
 
     @Override

@@ -24,10 +24,10 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.WriteProc;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -63,12 +63,11 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    protected void validateConfigsAndGraphStore(
-        GraphStoreWithConfig graphStoreWithConfig,
-        GraphSageWriteConfig config
+    protected void validateConfigsAfterLoad(
+        GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageWriteConfig config
     ) {
-        GraphSageCompanion.validateTrainConfig(graphStoreWithConfig, config);
-        super.validateConfigsAndGraphStore(graphStoreWithConfig, config);
+        GraphSageCompanion.validateTrainConfig(graphStore, config);
+        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
     }
 
     @Override

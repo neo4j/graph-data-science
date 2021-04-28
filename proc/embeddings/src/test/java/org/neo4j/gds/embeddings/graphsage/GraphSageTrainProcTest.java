@@ -35,8 +35,6 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
-import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -281,11 +279,9 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         );
         var exception = assertThrows(
             IllegalArgumentException.class,
-            () -> proc.validateConfigsAndGraphStore(
-                GraphStoreWithConfig.of(
-                    GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
-                    GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName)
-                ),
+            () -> proc.validateConfigsAfterLoad(
+                GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
+                GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName),
                 config
             )
         );
@@ -307,11 +303,9 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         );
         var exception = assertThrows(
             IllegalArgumentException.class,
-            () -> proc.validateConfigsAndGraphStore(
-                ImmutableGraphStoreWithConfig.of(
-                    GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
-                    GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName)
-                ),
+            () -> proc.validateConfigsAfterLoad(
+                GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build().graphStore(),
+                GraphCreateFromStoreConfig.emptyWithName(getUsername(), graphName),
                 config
             )
         );

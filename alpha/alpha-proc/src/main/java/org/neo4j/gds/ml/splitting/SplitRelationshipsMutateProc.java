@@ -24,10 +24,10 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutateProc;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -130,22 +130,21 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     }
 
     @Override
-    protected void validateConfigsAndGraphStore(
-        GraphStoreWithConfig graphStoreWithConfig, SplitRelationshipsMutateConfig config
+    protected void validateConfigsAfterLoad(
+        GraphStore graphStore, GraphCreateConfig graphCreateConfig, SplitRelationshipsMutateConfig config
     ) {
-        validateTypeDoesNotExist(graphStoreWithConfig, config.holdoutRelationshipType());
-        validateTypeDoesNotExist(graphStoreWithConfig, config.remainingRelationshipType());
-        validateNonNegativeRelationshipTypesExist(graphStoreWithConfig, config);
+        validateTypeDoesNotExist(graphStore, config.holdoutRelationshipType());
+        validateTypeDoesNotExist(graphStore, config.remainingRelationshipType());
+        validateNonNegativeRelationshipTypesExist(graphStore, config);
 
-        super.validateConfigsAndGraphStore(graphStoreWithConfig, config);
+        super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
     }
 
     private void validateNonNegativeRelationshipTypesExist(
-        GraphStoreWithConfig graphStoreWithConfig,
+        GraphStore graphStore,
         SplitRelationshipsMutateConfig config
     ) {
         config.nonNegativeRelationshipTypes().forEach(relationshipType -> {
-            var graphStore = graphStoreWithConfig.graphStore();
             if (!graphStore.hasRelationshipType(RelationshipType.of(relationshipType))) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Relationship type `%s` does not exist in the in-memory graph.",
@@ -156,10 +155,9 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
     }
 
     private void validateTypeDoesNotExist(
-        GraphStoreWithConfig graphStoreWithConfig,
+        GraphStore graphStore,
         RelationshipType holdoutRelationshipType
     ) {
-        var graphStore = graphStoreWithConfig.graphStore();
         if (graphStore.hasRelationshipType(holdoutRelationshipType)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Relationship type `%s` already exists in the in-memory graph.",
