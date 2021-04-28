@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -263,5 +264,20 @@ class EigenvectorProcTest extends BaseProcTest {
             queryBuilder.yields("bytesMin", "bytesMax"),
             List.of(Map.of("bytesMin", 552L, "bytesMax", 552L))
         );
+    }
+
+    @Disabled
+    @Test
+    void failOnDampingFactor() {
+        String query = GdsCypher.call()
+            .explicitCreation(GRAPH_NAME)
+            .algo("eigenvector")
+            .streamMode()
+            .addParameter("dampingFactor", 0.5)
+            .yields();
+
+        assertThatThrownBy(() -> runQuery(query))
+            .hasRootCauseExactlyInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Unexpected configuration key: dampingFactor");
     }
 }
