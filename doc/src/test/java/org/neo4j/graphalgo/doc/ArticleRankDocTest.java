@@ -43,7 +43,7 @@ class ArticleRankDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/articlerank-centrality/articlerank-centrality.adoc";
+        return "algorithms/article-rank/article-rank.adoc";
     }
 }
 
