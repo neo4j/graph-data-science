@@ -57,11 +57,11 @@
                 <d:tocentry linkend="algorithms-page-rank">
                     <?dbhtml filename="algorithms/page-rank/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="algorithms-article-rank">
+                    <?dbhtml filename="algorithms/article-rank/index.html"?>
+                </d:tocentry>
                 <d:tocentry linkend="algorithms-eigenvector-centrality">
                     <?dbhtml filename="algorithms/eigenvector-centrality/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-article-rank-centrality">
-                    <?dbhtml filename="algorithms/article-rank/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="algorithms-betweenness-centrality">
                     <?dbhtml filename="algorithms/betweenness-centrality/index.html"?>

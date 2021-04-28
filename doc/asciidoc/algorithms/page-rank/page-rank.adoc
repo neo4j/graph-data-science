@@ -47,12 +47,11 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 
 There are some things to be aware of when using the PageRank algorithm:
 
-* If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
+* If there are no relationships from within a group of pages to outside the group, then the group is considered a spider trap.
 * Rank sink can occur when a network of pages is forming an infinite cycle.
-* Dead-ends occur when pages have no out-links.
-If a page contains a link to another page which has no out-links, the link would be known as a dangling link.
+* Dead-ends occur when pages have no outgoing relationship.
 
-Changing the value of damping factor can help with these considerations.
+Changing the damping factor can help with all the considerations above.
 It can be interpreted as a probability of a web surfer to sometimes jump to a random page and therefore not getting stuck in sinks.
 
 

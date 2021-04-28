@@ -1,4 +1,4 @@
-[[algorithms-article-rank-centrality]]
+[[algorithms-article-rank]]
 = Article Rank
 :entity: node
 :result: score
@@ -10,7 +10,7 @@ This section describes the {algorithm} algorithm in the Neo4j Graph Data Science
 --
 
 
-[[algorithms-article-rank-centrality-introduction]]
+[[algorithms-article-rank-introduction]]
 == Introduction
 
 ArticleRank is a variant of the <<algorithms-page-rank, Page Rank algorithm>>, which measures the *transitive* influence of nodes.
@@ -30,21 +30,21 @@ where,
 
 For more information, see https://www.emeraldinsight.com/doi/abs/10.1108/00012530911005544[ArticleRank: a PageRank‐based alternative to numbers of citations for analysing citation networks^].
 
-[[algorithms-article-rank-centrality-considerations]]
+[[algorithms-article-rank-considerations]]
 == Considerations
 
 There are some things to be aware of when using the Article Rank algorithm:
 
-* If there are no links from within a group of pages to outside of the group, then the group is considered a spider trap.
+* If there are no relationships from within a group of pages to outside the group, then the group is considered a spider trap.
 * Rank sink can occur when a network of pages is forming an infinite cycle.
-* Dead-ends occur when pages have no out-links.
+* Dead-ends occur when pages have no outgoing relationship.
 
-Changing the value of damping factor can help with these considerations.
+Changing the damping factor can help with all the considerations above.
 It can be interpreted as a probability of a web surfer to sometimes jump to a random page and therefore not getting stuck in sinks.
 
 
 
-[[algorithms-article-rank-centrality-syntax]]
+[[algorithms-article-rank-syntax]]
 == Syntax
 
 include::../shared/syntax-intro-named-graph.adoc[]
@@ -59,7 +59,7 @@ include::../shared/syntax-intro-named-graph.adoc[]
 .Run Article Rank in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.articlerank.stream(
+CALL gds.articleRank.stream(
   graphName: String,
   configuration: Map
 )
@@ -90,7 +90,7 @@ include::specific-configuration.adoc[]
 .Run Article Rank in stats mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.articlerank.stats(
+CALL gds.articleRank.stats(
   graphName: String,
   configuration: Map
 )
@@ -131,7 +131,7 @@ include::specific-configuration.adoc[]
 .Run Article Rank in mutate mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.articlerank.mutate(
+CALL gds.articleRank.mutate(
   graphName: String,
   configuration: Map
 )
@@ -176,7 +176,7 @@ include::specific-configuration.adoc[]
 .Run Article Rank in write mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.articlerank.write(
+CALL gds.articleRank.write(
   graphName: String,
   configuration: Map
 )
@@ -218,7 +218,7 @@ include::specific-configuration.adoc[]
 ====
 
 
-[[algorithms-article-rank-centrality-syntax-anonymous]]
+[[algorithms-article-rank-syntax-anonymous]]
 === Anonymous graphs
 
 include::../shared/syntax-anonymous-graphs.adoc[]
@@ -226,7 +226,7 @@ include::../shared/syntax-anonymous-graphs.adoc[]
 .Run Article Rank in write mode on an anonymous graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.articlerank.write(
+CALL gds.articleRank.write(
   configuration: Map
 )
 YIELD
@@ -247,7 +247,7 @@ include::specific-configuration.adoc[]
 The results are the same as for running write mode with a named graph, see the <<algorithms-page-rank-syntax, write mode syntax above>>.
 
 
-[[algorithms-article-rank-centrality-examples]]
+[[algorithms-article-rank-examples]]
 == Examples
 
 :algorithm-name: {algorithm}
@@ -330,7 +330,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 --
 
 
-[[algorithms-article-rank-centrality-examples-stream]]
+[[algorithms-article-rank-examples-stream]]
 === Stream
 
 :stream-details: For example, we can order the results to find the nodes with the highest Eigenvector score.
@@ -363,14 +363,14 @@ ORDER BY score DESC, name ASC
 --
 
 The above query is running the algorithm in `stream` mode as `unweighted`.
-Below, one can find an example for <<algorithms-article-rank-centrality-examples-weighted, weighted graphs>>.
+Below, one can find an example for <<algorithms-article-rank-examples-weighted, weighted graphs>>.
 
 
-[[algorithms-article-rank-centrality-examples-stats]]
+[[algorithms-article-rank-examples-stats]]
 === Stats
 
 :stats-details: For example Eigenvector stats returns centrality histogram which can be used to monitor the distribution of centrality scores across all computed nodes.
-:stats-syntax: algorithms-article-rank-centrality-syntax
+:stats-syntax: algorithms-article-rank-syntax
 include::../shared/examples-stats-intro.adoc[]
 
 [role=query-example]
@@ -392,7 +392,7 @@ RETURN centralityDistribution.max AS max
 --
 
 
-[[algorithms-article-rank-centrality-examples-mutate]]
+[[algorithms-article-rank-examples-mutate]]
 === Mutate
 
 include::../shared/examples-mutate-intro.adoc[]
@@ -417,7 +417,7 @@ YIELD nodePropertiesWritten, ranIterations
 --
 
 
-[[algorithms-article-rank-centrality-examples-write]]
+[[algorithms-article-rank-examples-write]]
 === Write
 
 include::../shared/examples-write-intro.adoc[]
@@ -442,7 +442,7 @@ YIELD nodePropertiesWritten, ranIterations
 --
 
 
-[[algorithms-article-rank-centrality-examples-weighted]]
+[[algorithms-article-rank-examples-weighted]]
 === Weighted
 
 By default, the algorithm considers the relationships of the graph to be unweighted.
@@ -487,7 +487,7 @@ In contrast, the "Product" now has the second highest instead of the fourth high
 NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted`, however, all the algorithm modes support the `relationshipWeightProperty` configuration parameter.
 
 
-[[algorithms-article-rank-centrality-examples-tolerance]]
+[[algorithms-article-rank-examples-tolerance]]
 === Tolerance
 
 The `tolerance` configuration parameter denotes the minimum change in scores between iterations.
@@ -522,7 +522,7 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-We are using `tolerance: 0.1`, which leads to slightly different results compared to the <<algorithms-article-rank-centrality-examples-stream, stream example>>.
+We are using `tolerance: 0.1`, which leads to slightly different results compared to the <<algorithms-article-rank-examples-stream, stream example>>.
 However, the computation converges after four iterations, and we can already observe a trend in the resulting scores.
 
 
@@ -565,7 +565,7 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-Comparing these results to the ones from the <<algorithms-article-rank-centrality-examples-stream, stream example>> (which is not using `sourceNodes` configuration parameter) shows that the 'Site A' and `Site B` node  that we used in the `sourceNodes` list now scores second and third instead of fourth and fifth.
+Comparing these results to the ones from the <<algorithms-article-rank-examples-stream, stream example>> (which is not using `sourceNodes` configuration parameter) shows the 'Site A' and `Site B` nodes we used in the `sourceNodes` list now score second and third instead of fourth and fifth.
 
 
 [[algorithms-article-rank-examples-scaler]]
@@ -604,4 +604,4 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-Comparing the results with the <<algorithms-article-rank-centrality-examples-stream, stream example>>, we can see that the relative order of scores is the same.
+Comparing the results with the <<algorithms-article-rank-examples-stream, stream example>>, we can see that the relative order of scores is the same.
