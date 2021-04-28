@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -50,12 +49,15 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var result = compute(
-            graphNameOrConfig,
-            configuration
+        return trainAndStoreModelWithResult(
+            graphNameOrConfig, configuration,
+            (model, result) -> new MLTrainResult(model, result.computeMillis())
         );
-        ModelCatalog.set(result.result());
-        return Stream.of(new MLTrainResult(result.result(), result.computeMillis()));
+    }
+
+    @Override
+    protected String modelType() {
+        return NodeClassificationTrain.MODEL_TYPE;
     }
 
     @Override

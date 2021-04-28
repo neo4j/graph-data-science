@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -49,12 +48,10 @@ public class LinkPredictionTrainProc extends
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var result = compute(
-            graphNameOrConfig,
-            configuration
+        return trainAndStoreModelWithResult(
+            graphNameOrConfig, configuration,
+            (model, result) -> new MLTrainResult(model, result.computeMillis())
         );
-        ModelCatalog.set(result.result());
-        return Stream.of(new MLTrainResult(result.result(), result.computeMillis()));
     }
 
     @Override
@@ -73,6 +70,11 @@ public class LinkPredictionTrainProc extends
             .relationshipTypes(List.of(trainType.name, testType.name))
             .relationshipWeightProperty(EdgeSplitter.RELATIONSHIP_PROPERTY)
             .build();
+    }
+
+    @Override
+    protected String modelType() {
+        return LinkPredictionTrain.MODEL_TYPE;
     }
 
     @Override

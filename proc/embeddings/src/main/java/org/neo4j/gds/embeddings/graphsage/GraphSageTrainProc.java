@@ -48,7 +48,15 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return train(compute(graphNameOrConfig, configuration), GraphSage.MODEL_TYPE);
+        return trainAndStoreModelWithResult(
+            graphNameOrConfig, configuration,
+            (model, result) -> new TrainResult(
+                model,
+                result.computeMillis(),
+                result.graph().nodeCount(),
+                result.graph().relationshipCount()
+            )
+        );
     }
 
     @Description(ESTIMATE_DESCRIPTION)
@@ -73,6 +81,11 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
     @Override
     protected AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
         return new GraphSageTrainAlgorithmFactory();
+    }
+
+    @Override
+    protected String modelType() {
+        return GraphSage.MODEL_TYPE;
     }
 
     @Override

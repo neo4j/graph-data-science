@@ -23,7 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
@@ -31,19 +33,24 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjections;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.logging.NullLog;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
@@ -51,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_TYPE_KEY;
@@ -312,6 +320,41 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertThat(exception).hasMessage(
             "The following node properties are not present for each label in the graph: [foo]. Properties that exist for each label are []"
         );
+    }
+
+    @Test
+    void shouldValidateModelBeforeTraining() {
+        var trainConfigParams = Map.of(
+            "modelName", GraphSageBaseProcTest.modelName,
+            "featureProperties", List.of("foo"),
+            "sudo", true
+        );
+        var config = GraphSageTrainConfig.of(
+            getUsername(), Optional.empty(), Optional.empty(),
+            CypherMapWrapper.create(trainConfigParams)
+        );
+        var model = Model.of(
+            getUsername(),
+            GraphSageBaseProcTest.modelName,
+            GraphSage.MODEL_TYPE,
+            GraphSchema.empty(),
+            42,
+            config
+        );
+        ModelCatalog.set(model);
+
+        var proc = new GraphSageTrainProc() {
+            @Override
+            protected AlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> algorithmFactory() {
+                return fail("Created the train algo factory with an invalid model, should have thrown that model already exists.");
+            }
+        };
+        proc.api = db;
+        proc.log = NullLog.getInstance();
+
+        assertThatThrownBy(() -> proc.train(GraphSageBaseProcTest.graphName, trainConfigParams))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Model with name `%s` already exists.", GraphSageBaseProcTest.modelName);
     }
 
     @Test

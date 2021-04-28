@@ -32,8 +32,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.config.ModelConfig.MODEL_NAME_KEY;
@@ -44,21 +46,23 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
     TRAIN_CONFIG extends ModelConfig & AlgoBaseConfig>
     extends AlgoBaseProc<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> {
 
-    protected Stream<TrainResult> train(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> computationResult, String modelType) {
-        ModelCatalog.checkStorable(username(), modelType);
-        Model<TRAIN_RESULT, TRAIN_CONFIG> result = computationResult.result();
+    protected abstract String modelType();
 
-        ModelCatalog.set(result);
-        return Stream.of(trainResult(computationResult));
+    protected <T> Stream<T> trainAndStoreModelWithResult(
+        Object graphNameOrConfig,
+        Map<String, Object> configuration,
+        BiFunction<
+            Model<TRAIN_RESULT, TRAIN_CONFIG>,
+            ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG>,
+            T> resultConstructor
+    ) {
+        var result = compute(graphNameOrConfig, configuration);
+        var model = Objects.requireNonNull(result.result());
+        ModelCatalog.checkStorable(username(), model.name(), model.algoType());
+        ModelCatalog.set(model);
+        return Stream.of(resultConstructor.apply(model, result));
     }
 
-    protected TrainResult trainResult(ComputationResult<ALGO, Model<TRAIN_RESULT, TRAIN_CONFIG>, TRAIN_CONFIG> computationResult) {
-        return new TrainResult(
-            computationResult.result(),
-            computationResult.computeMillis(),
-            computationResult.graph().nodeCount(),
-            computationResult.graph().relationshipCount()
-        );
     @Override
     protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TRAIN_CONFIG config) {
         super.validateConfigsBeforeLoad(graphCreateConfig, config);
