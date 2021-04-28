@@ -262,8 +262,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         ));
     }
 
-    private Map<Metric, List<ModelStats<MultiClassNLRTrainConfig>>> initStatsMap(Iterable<Metric> metrics) {
-        var statsMap = new HashMap<Metric, List<ModelStats<MultiClassNLRTrainConfig>>>();
+    private Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> initStatsMap(Iterable<Metric> metrics) {
+        var statsMap = new HashMap<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>>();
         metrics.forEach(metric -> statsMap.put(metric, new ArrayList<>()));
         return statsMap;
     }
@@ -299,9 +299,11 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         ));
     }
 
-    private NodeLogisticRegressionData trainModel(HugeLongArray trainSet, MultiClassNLRTrainConfig nlrConfig
+    private NodeLogisticRegressionData trainModel(
+        HugeLongArray trainSet,
+        NodeLogisticRegressionTrainConfig nlrConfig
     ) {
-        var train = new MultiClassNLRTrain(graph, trainSet, nlrConfig, progressLogger);
+        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressLogger);
         return train.compute();
     }
 
@@ -315,9 +317,9 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
     @ValueClass
     interface ModelSelectResult {
-        MultiClassNLRTrainConfig bestParameters();
-        Map<Metric, List<ModelStats<MultiClassNLRTrainConfig>>> trainStats();
-        Map<Metric, List<ModelStats<MultiClassNLRTrainConfig>>> validationStats();
+        NodeLogisticRegressionTrainConfig bestParameters();
+        Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> trainStats();
+        Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> validationStats();
 
         static ModelSelectResult of(
             Map<String, Object> bestConfig,
@@ -333,10 +335,10 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         private final Map<Metric, Double> min;
         private final Map<Metric, Double> max;
         private final Map<Metric, Double> sum;
-        private final MultiClassNLRTrainConfig modelParams;
+        private final NodeLogisticRegressionTrainConfig modelParams;
         private final int numberOfSplits;
 
-        ModelStatsBuilder(MultiClassNLRTrainConfig modelParams, int numberOfSplits) {
+        ModelStatsBuilder(NodeLogisticRegressionTrainConfig modelParams, int numberOfSplits) {
             this.modelParams = modelParams;
             this.numberOfSplits = numberOfSplits;
             this.min = new HashMap<>();
@@ -350,7 +352,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             sum.merge(metric, value, Double::sum);
         }
 
-        ModelStats<MultiClassNLRTrainConfig> build(Metric metric) {
+        ModelStats<NodeLogisticRegressionTrainConfig> build(Metric metric) {
             return ImmutableModelStats.of(
                 modelParams,
                 sum.get(metric) / numberOfSplits,

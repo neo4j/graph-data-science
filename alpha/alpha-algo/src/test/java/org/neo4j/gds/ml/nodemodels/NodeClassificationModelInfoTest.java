@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.ImmutableMultiClassNLRTrainConfig;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +36,7 @@ class NodeClassificationModelInfoTest {
     void shouldCreateMap() {
         var info = NodeClassificationModelInfo.of(
             List.of(),
-            ImmutableMultiClassNLRTrainConfig.builder().penalty(1).targetProperty("t").build(),
+            ImmutableNodeLogisticRegressionTrainConfig.builder().penalty(1).targetProperty("t").build(),
             Map.of()
         );
 
@@ -52,7 +52,7 @@ class NodeClassificationModelInfoTest {
 
     @Test
     void shouldCreateMapWithStats() {
-        var params = ImmutableMultiClassNLRTrainConfig.builder().penalty(1).targetProperty("t").build();
+        var params = ImmutableNodeLogisticRegressionTrainConfig.builder().penalty(1).targetProperty("t").build();
         var trainStats = ImmutableModelStats.of(params, 0.5, 0.0, 1.0);
         var validationStats = ImmutableModelStats.of(params, 0.4, 0.0, 0.8);
         var metricData = MetricData.of(List.of(trainStats), List.of(validationStats), 4.0, 4.1);

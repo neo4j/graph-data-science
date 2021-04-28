@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.model.Model;
 
@@ -44,8 +44,8 @@ public interface NodeClassificationModelInfo extends Model.Mappable {
      * for the selection metric.
      * @return
      */
-    MultiClassNLRTrainConfig bestParameters();
-    Map<Metric, MetricData<MultiClassNLRTrainConfig>> metrics();
+    NodeLogisticRegressionTrainConfig bestParameters();
+    Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metrics();
 
     @Override
     @Value.Auxiliary
@@ -63,8 +63,8 @@ public interface NodeClassificationModelInfo extends Model.Mappable {
 
     static NodeClassificationModelInfo of(
         List<Long> classes,
-        MultiClassNLRTrainConfig bestParameters,
-        Map<Metric, MetricData<MultiClassNLRTrainConfig>> metrics
+        NodeLogisticRegressionTrainConfig bestParameters,
+        Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metrics
     ) {
         return ImmutableNodeClassificationModelInfo.of(classes, bestParameters, metrics);
     }
