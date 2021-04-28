@@ -131,29 +131,24 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     @Override
     public void release() {}
 
-    private Pair<NodeSplit, List<NodeSplit>> shuffleAndSplit() {
-        // 1. Init and shuffle node ids
-        progressLogger.logStart(":: Shuffle and Split");
-        ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
-
-        // 2a. Outer split nodes into holdout + remaining
-        var outerSplitter = new FractionSplitter(allocationTracker);
-        var outerSplit = outerSplitter.split(nodeIds, 1 - config.holdoutFraction());
-
-        // 2b. Inner split: enumerate a number of train/validation splits of remaining
-        var splitter = new StratifiedKFoldSplitter(config.validationFolds(), outerSplit.trainSet(), targets, config.randomSeed());
-        var splits = splitter.splits();
-        progressLogger.logFinish(":: Shuffle and Split");
-        return Tuples.pair(outerSplit, splits);
-    }
-
     @Override
     public Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> compute() {
+        progressLogger.logStart(":: Shuffle and Split");
+        ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
+        var outerSplit = new FractionSplitter(allocationTracker).split(nodeIds, 1 - config.holdoutFraction());
+        var innerSplits = new StratifiedKFoldSplitter(config.validationFolds(), outerSplit.trainSet(), targets, config.randomSeed()).splits();
+        progressLogger.logFinish(":: Shuffle and Split");
 
-        var outerSplitAndSplits = shuffleAndSplit();
-        var outerSplit = outerSplitAndSplits.getOne();
-        var splits = outerSplitAndSplits.getTwo();
+        var modelSelectResult = selectBestModel(innerSplits);
+        var bestParameters = modelSelectResult.bestParameters();
+        var metricResults = evaluateBestModel(outerSplit, modelSelectResult, bestParameters);
 
+        var retrainedModelData = retrainBestModel(bestParameters);
+
+        return createModel(bestParameters, metricResults, retrainedModelData);
+    }
+
+    private ModelSelectResult selectBestModel(List<NodeSplit> splits) {
         for (int i = 0; i < config.params().size(); i++) {
             var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", i + 1, config.params().size());
             var modelParams = config.params().get(i);
@@ -166,7 +161,6 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
 
-                // 3. train each model candidate on the train sets
                 progressLogger.logStart(candidateAndSplitMessage + " :: Train");
                 // The best upper bound we have for bounding progress is maxEpochs, so tell the user what that value is
                 int maxEpochs = ((Number) modelParams.getOrDefault("maxEpochs", TrainingConfig.MAX_EPOCHS)).intValue();
@@ -178,14 +172,12 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
                 var modelData = trainModel(trainSet, modelParams);
                 progressLogger.logFinish(candidateAndSplitMessage + " :: Train");
 
-                // 4. evaluate each model candidate on the train and validation sets
                 progressLogger.logStart(candidateAndSplitMessage + " :: Evaluate");
                 progressLogger.reset(validationSet.size() + trainSet.size());
                 computeMetrics(classes, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
                 computeMetrics(classes, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
                 progressLogger.logFinish(candidateAndSplitMessage + " :: Evaluate");
             }
-            // insert the candidates metrics into trainStats and validationStats
             metrics.forEach(metric -> {
                 validationStats.add(metric, validationStatsBuilder.build(metric));
                 trainStats.add(metric, trainStatsBuilder.build(metric));
@@ -193,48 +185,53 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         }
 
         progressLogger.logStart(":: Select Model");
-        // 5. pick the best-scoring model candidate, according to the main metric
         var mainMetric = metrics.get(0);
-        var winner = validationStats.pickWinner(mainMetric);
+        var bestModelStats = validationStats.pickBestModelStats(mainMetric);
         progressLogger.logFinish(":: Select Model");
 
-        var bestConfig = winner.params();
-        int maxEpochs = ((Number) bestConfig.getOrDefault("maxEpochs", TrainingConfig.MAX_EPOCHS)).intValue();
-        var modelSelectResult = ModelSelectResult.of(bestConfig, trainStats, validationStats);
+        return ModelSelectResult.of(bestModelStats.params(), trainStats, validationStats);
+    }
 
-        var bestParameters = modelSelectResult.bestParameters();
-
-        // 6. train best model on remaining
+    private Map<Metric, MetricData> evaluateBestModel(
+        NodeSplit outerSplit,
+        ModelSelectResult modelSelectResult,
+        Map<String, Object> bestParameters
+    ) {
+        int maxEpochs = ((Number) bestParameters.getOrDefault("maxEpochs", TrainingConfig.MAX_EPOCHS)).intValue();
         progressLogger.logStart(":: Train Selected on Remainder");
         progressLogger.reset(maxEpochs);
-        NodeLogisticRegressionData winnerModelData = trainModel(outerSplit.trainSet(), bestParameters);
+        NodeLogisticRegressionData bestModelData = trainModel(outerSplit.trainSet(), bestParameters);
         progressLogger.logFinish(":: Train Selected on Remainder");
 
-        // 7. evaluate it on the holdout set and outer training set
         progressLogger.logStart(":: Evaluate Selected Model");
         progressLogger.reset(outerSplit.testSet().size() + outerSplit.trainSet().size());
-        var testMetrics = computeMetrics(classes, outerSplit.testSet(), winnerModelData, metrics);
-        var outerTrainMetrics = computeMetrics(classes, outerSplit.trainSet(), winnerModelData, metrics);
+        var testMetrics = computeMetrics(classes, outerSplit.testSet(), bestModelData, metrics);
+        var outerTrainMetrics = computeMetrics(classes, outerSplit.trainSet(), bestModelData, metrics);
         progressLogger.logFinish(":: Evaluate Selected Model");
 
-        // we are done with all metrics!
-        var metricResults = mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
+        return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
+    }
 
-        // 8. retrain that model on the full graph
+    private NodeLogisticRegressionData retrainBestModel(Map<String, Object> bestParameters) {
+        int maxEpochs = ((Number) bestParameters.getOrDefault("maxEpochs", TrainingConfig.MAX_EPOCHS)).intValue();
         progressLogger.logStart(":: Retrain Selected Model");
         progressLogger.reset(maxEpochs);
-        NodeLogisticRegressionData retrainedModelData = trainModel(nodeIds, bestParameters);
+        var retrainedModelData = trainModel(nodeIds, bestParameters);
         progressLogger.logFinish(":: Retrain Selected Model");
+        return retrainedModelData;
+    }
 
+    private Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> createModel(
+        Map<String, Object> bestParameters,
+        Map<Metric, MetricData> metricResults,
+        NodeLogisticRegressionData retrainedModelData
+    ) {
         var modelInfo = NodeClassificationModelInfo.of(
             retrainedModelData.classIdMap().originalIdsList(),
-            modelSelectResult.bestParameters(),
+            bestParameters,
             metricResults
         );
 
-        // 9. persist the winning model in the model catalog
-        //    the model catalog will also contain training metadata
-        //    such as min/max/avg scores of the input model candidate configs
         return Model.of(
             config.username(),
             config.modelName(),

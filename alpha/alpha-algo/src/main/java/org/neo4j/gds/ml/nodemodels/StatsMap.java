@@ -47,7 +47,7 @@ final class StatsMap {
         map.get(metric).add(modelStats);
     }
 
-    ModelStats pickWinner(Metric metric) {
+    ModelStats pickBestModelStats(Metric metric) {
         var modelStats = map.get(metric);
         return Collections.max(modelStats, COMPARE_AVERAGE);
     }
