@@ -63,6 +63,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -369,26 +370,33 @@ final class GenerateConfiguration {
             }
         }
 
-        CodeBlock validation = null;
-        var fieldAccessor = isTypeOf(Optional.class, definition.fieldType()) ?
-            definition.fieldName() + ".get()" :
-            definition.fieldName();
+        var fieldCodeBuilder = CodeBlock.builder().addStatement("this.$N = $L", definition.fieldName(), codeBlock);
+
+        Consumer<CodeBlock> validationConsumer = isTypeOf(Optional.class, definition.fieldType())
+            ? validatorCode -> fieldCodeBuilder.addStatement(
+                String.format(
+                    Locale.US,
+                    "%1$s.ifPresent(%1$s -> %2$s)",
+                    definition.fieldName(),
+                    validatorCode
+                ))
+            : fieldCodeBuilder::addStatement;
 
         if (definition.member().validatesIntegerRange()) {
             Configuration.IntegerRange range = definition
                 .member()
                 .method()
                 .getAnnotation(Configuration.IntegerRange.class);
-            validation = CodeBlock.of(
+            validationConsumer.accept(CodeBlock.of(
                 "$T.validateIntegerRange($S, $L, $L, $L, $L, $L)",
                 CypherMapWrapper.class,
                 definition.configKey(),
-                fieldAccessor,
+                definition.fieldName(),
                 elementUtils.getConstantExpression(range.min()),
                 elementUtils.getConstantExpression(range.max()),
                 elementUtils.getConstantExpression(range.minInclusive()),
                 elementUtils.getConstantExpression(range.maxInclusive())
-            );
+            ));
         }
 
         if (definition.member().validatesDoubleRange()) {
@@ -396,30 +404,22 @@ final class GenerateConfiguration {
                 .member()
                 .method()
                 .getAnnotation(Configuration.DoubleRange.class);
-            validation = CodeBlock.of(
+            validationConsumer.accept(CodeBlock.of(
                 "$T.validateDoubleRange($S, $L, $L, $L, $L, $L)",
                 CypherMapWrapper.class,
                 definition.configKey(),
-                fieldAccessor,
+                definition.fieldName(),
                 elementUtils.getConstantExpression(range.min()),
                 elementUtils.getConstantExpression(range.max()),
                 elementUtils.getConstantExpression(range.minInclusive()),
                 elementUtils.getConstantExpression(range.maxInclusive())
-            );
+            ));
         }
 
-        var finalCodeBlock = codeBlock;
-        var finalValidation = validation;
         catchAndPropagateIllegalArgumentError(
             constructor,
             errorsVarName,
-            (builder) -> {
-                builder.addStatement("this.$N = $L", definition.fieldName(), finalCodeBlock);
-                if (finalValidation != null) {
-                    builder.addStatement(finalValidation);
-                }
-                return builder;
-            }
+            (builder) -> builder.addCode(fieldCodeBuilder.build())
         );
     }
 
