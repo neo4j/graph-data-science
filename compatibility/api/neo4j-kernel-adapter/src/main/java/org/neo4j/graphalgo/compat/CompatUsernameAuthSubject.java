@@ -38,11 +38,6 @@ public abstract class CompatUsernameAuthSubject implements AuthSubject {
     }
 
     @Override
-    public void setPasswordChangeNoLongerRequired() {
-        authSubject.setPasswordChangeNoLongerRequired();
-    }
-
-    @Override
     public boolean hasUsername(String username) {
         return this.username.equals(username);
     }

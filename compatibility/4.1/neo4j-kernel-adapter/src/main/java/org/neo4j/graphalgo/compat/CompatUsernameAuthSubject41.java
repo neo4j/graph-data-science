@@ -28,6 +28,11 @@ final class CompatUsernameAuthSubject41 extends CompatUsernameAuthSubject {
     }
 
     @Override
+    public void setPasswordChangeNoLongerRequired() {
+        authSubject.setPasswordChangeNoLongerRequired();
+    }
+
+    @Override
     public void logout() {
         this.authSubject.logout();
     }
