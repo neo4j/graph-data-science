@@ -50,21 +50,8 @@ public interface LinkLogisticRegressionTrainConfig extends FeaturePropertiesConf
         return Collections.emptyList();
     }
 
-    @Configuration.Ignore
-    default Map<String, Object> toMap() {
-        return Map.of(
-            "featureProperties", featureProperties(),
-            "penalty", penalty(),
-            "linkFeatureCombiner", linkFeatureCombiner(),
-            "batchSize", batchSize(),
-            "minEpochs", minEpochs(),
-            "patience" , patience(),
-            "maxEpochs", maxEpochs(),
-            "tolerance" , tolerance(),
-            "sharedUpdater", sharedUpdater(),
-            "concurrency", concurrency()
-        );
-    }
+    @Configuration.ToMap
+    Map<String, Object> toMap();
 
     static LinkLogisticRegressionTrainConfig of(
         List<String> featureProperties,

@@ -21,8 +21,10 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.nodemodels.logisticregression.ImmutableNodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +38,7 @@ class NodeClassificationModelInfoTest {
     void shouldCreateMap() {
         var info = NodeClassificationModelInfo.of(
             List.of(),
-            ImmutableNodeLogisticRegressionTrainConfig.builder().penalty(1).targetProperty("t").build(),
+            new NodeLogisticRegressionTrainConfigImpl(List.of(), "t", CypherMapWrapper.create(Map.of("penalty", 1))),
             Map.of()
         );
 
@@ -52,13 +54,17 @@ class NodeClassificationModelInfoTest {
 
     @Test
     void shouldCreateMapWithStats() {
-        var params = ImmutableNodeLogisticRegressionTrainConfig.builder().penalty(1).targetProperty("t").build();
-        var trainStats = ImmutableModelStats.of(params, 0.5, 0.0, 1.0);
-        var validationStats = ImmutableModelStats.of(params, 0.4, 0.0, 0.8);
+        NodeLogisticRegressionTrainConfig trainConfig = new NodeLogisticRegressionTrainConfigImpl(
+            List.of(),
+            "t",
+            CypherMapWrapper.create(Map.of("penalty", 1))
+        );
+        var trainStats = ImmutableModelStats.of(trainConfig, 0.5, 0.0, 1.0);
+        var validationStats = ImmutableModelStats.of(trainConfig, 0.4, 0.0, 0.8);
         var metricData = MetricData.of(List.of(trainStats), List.of(validationStats), 4.0, 4.1);
         var info = NodeClassificationModelInfo.of(
             List.of(42L, Long.MAX_VALUE),
-            params,
+            trainConfig,
             Map.of(AllClassMetric.F1_WEIGHTED, metricData)
         );
 
@@ -94,13 +100,11 @@ class NodeClassificationModelInfoTest {
         var expectedParams = new HashMap<String, Object>();
         expectedParams.put("batchSize", 100);
         expectedParams.put("concurrency", 4);
-        expectedParams.put("featureProperties", List.of());
         expectedParams.put("maxEpochs", 100);
         expectedParams.put("minEpochs", 1);
         expectedParams.put("patience", 1);
         expectedParams.put("penalty", 1.0);
         expectedParams.put("sharedUpdater", false);
-        expectedParams.put("targetProperty", "t");
         expectedParams.put("tolerance", 0.001);
         return expectedParams;
     }

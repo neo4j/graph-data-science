@@ -27,7 +27,6 @@ import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,29 +36,17 @@ class LinkPredictionModelInfoTest {
 
     @Test
     void shouldCreateMapWithStats() {
-        LinkLogisticRegressionTrainConfig params = new LinkLogisticRegressionTrainConfigImpl(List.of(), CypherMapWrapper.empty().withNumber("penalty", 1));
-        var trainStats = ImmutableModelStats.of(params, 0.5, 0.0, 1.0);
-        var validationStats = ImmutableModelStats.of(params, 0.4, 0.0, 0.8);
+        LinkLogisticRegressionTrainConfig trainConfig = new LinkLogisticRegressionTrainConfigImpl(List.of(), CypherMapWrapper.empty().withNumber("penalty", 1));
+        var trainStats = ImmutableModelStats.of(trainConfig, 0.5, 0.0, 1.0);
+        var validationStats = ImmutableModelStats.of(trainConfig, 0.4, 0.0, 0.8);
         var metricData = MetricData.of(List.of(trainStats), List.of(validationStats), 4.0, 4.1);
         var info = LinkPredictionModelInfo.of(
-            params,
+            trainConfig,
             Map.of(LinkMetric.AUCPR, metricData)
         );
 
-        var expectedParams = new HashMap<String, Object>();
-        expectedParams.put("batchSize", 100);
-        expectedParams.put("concurrency", 4);
-        expectedParams.put("featureProperties", List.of());
-        expectedParams.put("linkFeatureCombiner", "L2");
-        expectedParams.put("maxEpochs", 100);
-        expectedParams.put("minEpochs", 1);
-        expectedParams.put("patience", 1);
-        expectedParams.put("penalty", 1.0);
-        expectedParams.put("sharedUpdater", false);
-        expectedParams.put("tolerance", 0.001);
-
         var expected = Map.of(
-            "bestParameters", expectedParams,
+            "bestParameters", trainConfig.toMap(),
             "metrics", Map.of(
                 "AUCPR", Map.of(
                     "outerTrain", 4.0,
@@ -68,13 +55,13 @@ class LinkPredictionModelInfoTest {
                         "avg", 0.5,
                         "max", 1.0,
                         "min", 0.0,
-                        "params", expectedParams
+                        "params", trainConfig.toMap()
                     )),
                     "validation", List.of(Map.of(
                         "avg", 0.4,
                         "max", 0.8,
                         "min", 0.0,
-                        "params", expectedParams
+                        "params", trainConfig.toMap()
                     ))
                 )
             )

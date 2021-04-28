@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -31,9 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 // This class is currently used internally in NodeClassification and is not
 // a procedure-level configuration. it is derived from a NodeClassificationTrainConfig
 public interface NodeLogisticRegressionTrainConfig extends FeaturePropertiesConfig, TrainingConfig {
@@ -47,30 +43,12 @@ public interface NodeLogisticRegressionTrainConfig extends FeaturePropertiesConf
     double penalty();
 
     @Configuration.CollectKeys
-    @Value.Auxiliary
-    @Value.Default
-    @Value.Parameter(false)
     default Collection<String> configKeys() {
         return Collections.emptyList();
     }
 
-    @Configuration.Ignore
-    @Value.Derived
-    @Value.Auxiliary
-    default Map<String, Object> toMap() {
-        return Map.of(
-            "featureProperties", featureProperties(),
-            "penalty", penalty(),
-            "targetProperty", targetProperty(),
-            "batchSize", batchSize(),
-            "minEpochs", minEpochs(),
-            "patience" , patience(),
-            "maxEpochs", maxEpochs(),
-            "tolerance" , tolerance(),
-            "sharedUpdater", sharedUpdater(),
-            "concurrency", concurrency()
-        );
-    }
+    @Configuration.ToMap
+    Map<String, Object> toMap();
 
     static NodeLogisticRegressionTrainConfig of(
         List<String> featureProperties,

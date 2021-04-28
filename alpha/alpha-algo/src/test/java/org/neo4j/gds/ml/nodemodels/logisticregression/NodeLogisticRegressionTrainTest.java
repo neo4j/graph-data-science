@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -31,6 +32,7 @@ import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.math.L2Norm;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
@@ -54,12 +56,14 @@ class NodeLogisticRegressionTrainTest {
 
     @Test
     void shouldHandleLargeValuedFeatures() {
-        var config = ImmutableNodeLogisticRegressionTrainConfig.builder()
-            .featureProperties(List.of("a", "x"))
-            .targetProperty("t")
-            .penalty(NO_PENALTY)
-            .concurrency(1)
-            .build();
+        var config = new NodeLogisticRegressionTrainConfigImpl(
+            List.of("a", "x"),
+            "t",
+            CypherMapWrapper.create(Map.of(
+                "penalty", NO_PENALTY,
+                "concurrency", 1
+            ))
+        );
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
@@ -83,14 +87,16 @@ class NodeLogisticRegressionTrainTest {
 
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {
-        var config = ImmutableNodeLogisticRegressionTrainConfig.builder()
-            .featureProperties(List.of("a", "b"))
-            .targetProperty("t")
-            .penalty(NO_PENALTY)
-            .maxEpochs(100000)
-            .concurrency(1)
-            .tolerance(1e-4)
-            .build();
+        var config = new NodeLogisticRegressionTrainConfigImpl(
+            List.of("a", "b"),
+            "t",
+            CypherMapWrapper.create(Map.of(
+                "penalty", NO_PENALTY,
+                "concurrency", 1,
+                "maxEpochs", 100000,
+                "tolerance", 1e-4
+            ))
+        );
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
@@ -122,15 +128,17 @@ class NodeLogisticRegressionTrainTest {
 
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopperConcurrently() {
-        var config = ImmutableNodeLogisticRegressionTrainConfig.builder()
-            .featureProperties(List.of("a", "b"))
-            .targetProperty("t")
-            .penalty(1.0)
-            .maxEpochs(1000000)
-            .concurrency(4)
-            .sharedUpdater(false)
-            .tolerance(1e-10)
-            .build();
+        var config = new NodeLogisticRegressionTrainConfigImpl(
+            List.of("a", "b"),
+            "t",
+            CypherMapWrapper.create(Map.of(
+                "penalty", 1.0,
+                "concurrency", 4,
+                "maxEpochs", 1000000,
+                "tolerance", 1e-10,
+                "sharedUpdater", false
+            ))
+        );
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
