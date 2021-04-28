@@ -63,7 +63,7 @@ public class LocalClusteringCoefficientStatsProc extends StatsProc<LocalClusteri
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStatsConfig config) {
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStatsConfig config) {
         validateIsUndirectedGraph(graphCreateConfig, config);
         warnOnGraphWithParallelRelationships(graphCreateConfig, config, log);
     }

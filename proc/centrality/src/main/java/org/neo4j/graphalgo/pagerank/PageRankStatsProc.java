@@ -71,8 +71,8 @@ public class PageRankStatsProc extends StatsProc<PageRankAlgorithm, PageRankResu
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankStatsConfig config) {
-        super.validateConfigs(graphCreateConfig, config);
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, PageRankStatsConfig config) {
+        super.validateConfigsBeforeLoad(graphCreateConfig, config);
         PageRankProc.validateAlgoConfig(config, log);
     }
 

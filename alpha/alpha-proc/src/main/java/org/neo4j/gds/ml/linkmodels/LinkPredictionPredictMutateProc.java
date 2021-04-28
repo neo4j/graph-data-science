@@ -57,7 +57,7 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
     }
 
     @Override
-    protected void validateConfigs(
+    protected void validateConfigsBeforeLoad(
         GraphCreateConfig graphCreateConfig, LinkPredictionPredictMutateConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);

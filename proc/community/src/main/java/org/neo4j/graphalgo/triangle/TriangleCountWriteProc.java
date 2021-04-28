@@ -60,7 +60,7 @@ public class TriangleCountWriteProc extends WriteProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected void validateConfigs(
+    protected void validateConfigsBeforeLoad(
         GraphCreateConfig graphCreateConfig, TriangleCountWriteConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);

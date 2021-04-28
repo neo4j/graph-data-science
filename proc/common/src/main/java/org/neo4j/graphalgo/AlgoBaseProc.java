@@ -161,7 +161,10 @@ public abstract class AlgoBaseProc<
         return createGraph(getOrCreateGraphStore(configAndName), configAndName.getOne());
     }
 
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, CONFIG config) { }
+    protected void validateConfigsBeforeLoad(
+        GraphCreateConfig graphCreateConfig,
+        CONFIG config
+    ) {}
 
     protected void validateGraphStore(GraphStore graphStore) {}
 
@@ -327,8 +330,11 @@ public abstract class AlgoBaseProc<
 
         if (maybeGraphName.isPresent()) {
             graphCandidate = GraphStoreCatalog.get(username(), databaseId(), maybeGraphName.get());
+            validateConfigsBeforeLoad(graphCandidate.config(), config);
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
+            validateConfigsBeforeLoad(createConfig, config);
+
             GraphLoader loader = newLoader(createConfig, AllocationTracker.empty());
             GraphStore graphStore = loader.graphStore();
 
@@ -338,7 +344,6 @@ public abstract class AlgoBaseProc<
         }
 
         GraphStoreValidation.validate(graphCandidate, config);
-        validateConfigs(graphCandidate.config(), config);
         var graphStore = graphCandidate.graphStore();
         validateGraphStore(graphStore);
         validateConfigsAndGraphStore(graphCandidate, config);

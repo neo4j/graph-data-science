@@ -62,7 +62,7 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected void validateConfigs(
+    protected void validateConfigsBeforeLoad(
         GraphCreateConfig graphCreateConfig, TriangleCountStreamConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);

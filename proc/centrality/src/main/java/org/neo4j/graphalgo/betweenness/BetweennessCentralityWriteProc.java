@@ -73,7 +73,7 @@ public class BetweennessCentralityWriteProc extends WriteProc<BetweennessCentral
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, BetweennessCentralityWriteConfig config) {
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, BetweennessCentralityWriteConfig config) {
         validateOrientationCombinations(graphCreateConfig, config);
     }
 

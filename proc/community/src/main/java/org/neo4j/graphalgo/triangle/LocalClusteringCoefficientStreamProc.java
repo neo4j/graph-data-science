@@ -88,7 +88,7 @@ public class LocalClusteringCoefficientStreamProc
     }
 
     @Override
-    protected void validateConfigs(
+    protected void validateConfigsBeforeLoad(
         GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientStreamConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);

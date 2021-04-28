@@ -83,7 +83,7 @@ public class LocalClusteringCoefficientWriteProc extends WriteProc<LocalClusteri
     }
 
     @Override
-    protected void validateConfigs(
+    protected void validateConfigsBeforeLoad(
         GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientWriteConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);

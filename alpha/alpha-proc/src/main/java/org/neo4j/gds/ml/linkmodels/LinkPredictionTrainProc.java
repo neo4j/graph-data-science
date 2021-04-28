@@ -76,10 +76,11 @@ public class LinkPredictionTrainProc extends
     }
 
     @Override
-    protected void validateConfigs(
+    protected void validateConfigsBeforeLoad(
         GraphCreateConfig graphCreateConfig,
         LinkPredictionTrainConfig config
     ) {
+        super.validateConfigsBeforeLoad(graphCreateConfig, config);
         validateIsUndirectedGraph(graphCreateConfig, config);
 
         if (config.params().isEmpty()) {

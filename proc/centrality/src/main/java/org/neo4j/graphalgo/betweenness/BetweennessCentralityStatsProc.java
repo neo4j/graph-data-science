@@ -73,7 +73,7 @@ public class BetweennessCentralityStatsProc extends StatsProc<BetweennessCentral
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, BetweennessCentralityStatsConfig config) {
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, BetweennessCentralityStatsConfig config) {
         validateOrientationCombinations(graphCreateConfig, config);
     }
 

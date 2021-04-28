@@ -69,8 +69,8 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankStreamConfig config) {
-        super.validateConfigs(graphCreateConfig, config);
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, PageRankStreamConfig config) {
+        super.validateConfigsBeforeLoad(graphCreateConfig, config);
         PageRankProc.validateAlgoConfig(config, log);
     }
 

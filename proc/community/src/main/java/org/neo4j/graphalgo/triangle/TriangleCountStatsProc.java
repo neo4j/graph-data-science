@@ -59,7 +59,7 @@ public class TriangleCountStatsProc extends StatsProc<IntersectingTriangleCount,
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, TriangleCountStatsConfig config) {
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TriangleCountStatsConfig config) {
         validateIsUndirectedGraph(graphCreateConfig, config);
     }
 

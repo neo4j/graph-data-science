@@ -82,7 +82,7 @@ public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<Loc
     }
 
     @Override
-    protected void validateConfigs(
+    protected void validateConfigsBeforeLoad(
         GraphCreateConfig graphCreateConfig, LocalClusteringCoefficientMutateConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);

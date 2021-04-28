@@ -86,7 +86,7 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, BetweennessCentralityStreamConfig config) {
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, BetweennessCentralityStreamConfig config) {
         validateOrientationCombinations(graphCreateConfig, config);
     }
 

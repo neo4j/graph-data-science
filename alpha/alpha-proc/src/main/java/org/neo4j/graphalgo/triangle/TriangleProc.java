@@ -44,7 +44,7 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
     private static final String DESCRIPTION = "Triangles streams the nodeIds of each triangle in the graph.";
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, TriangleCountBaseConfig config) {
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TriangleCountBaseConfig config) {
         validateIsUndirectedGraph(graphCreateConfig, config);
     }
 

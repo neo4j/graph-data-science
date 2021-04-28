@@ -91,8 +91,8 @@ public class ArticleRankMutateProc extends MutatePropertyProc<PageRankAlgorithm,
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankMutateConfig config) {
-        super.validateConfigs(graphCreateConfig, config);
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, PageRankMutateConfig config) {
+        super.validateConfigsBeforeLoad(graphCreateConfig, config);
         PageRankProc.validateAlgoConfig(config, log);
     }
 }

@@ -81,8 +81,8 @@ public class ArticleRankWriteProc extends WriteProc<PageRankAlgorithm, PageRankR
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, PageRankWriteConfig config) {
-        super.validateConfigs(graphCreateConfig, config);
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, PageRankWriteConfig config) {
+        super.validateConfigsBeforeLoad(graphCreateConfig, config);
         PageRankProc.validateAlgoConfig(config, log);
     }
 

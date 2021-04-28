@@ -59,7 +59,7 @@ public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTria
     }
 
     @Override
-    protected void validateConfigs(GraphCreateConfig graphCreateConfig, TriangleCountMutateConfig config) {
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, TriangleCountMutateConfig config) {
         validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
