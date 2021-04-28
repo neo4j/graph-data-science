@@ -1,10 +1,10 @@
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                                                                             | Type    | Default   | Optional | Description
-| <<common-configuration-max-iterations,maxIterations>>                            | Integer | 20        | yes      | The maximum number of iterations of Eigenvector Centrality to run.
-| <<common-configuration-tolerance,tolerance>>                                     | Float   | 0.0000001 | yes      | Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable and the algorithm returns.
-| <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String  | null      | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
-| sourceNodes                                                                      | List    | []        | yes      | A set of nodes to use for computing Personalized Eigenvector Centrality.
-| scaler                                                                           | String  | None      | yes      | The name of the scaler applied for the final scores. Supported values are `None`, `MinMax`, `Max`, `Mean`, `Log`, `L1Norm`, `L2Norm` and `StdScore`.
+| Name                                                                             | Type                     | Default   | Optional | Description
+| <<common-configuration-max-iterations,maxIterations>>                            | Integer                  | 20        | yes      | The maximum number of iterations of Eigenvector Centrality to run.
+| <<common-configuration-tolerance,tolerance>>                                     | Float                    | 0.0000001 | yes      | Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable and the algorithm returns.
+| <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String                   | null      | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
+| sourceNodes                                                                      | List or Node or Number   | []        | yes      | The nodes or node ids to use for computing Personalized Page Rank.
+| scaler                                                                           | String                   | None      | yes      | The name of the scaler applied for the final scores. Supported values are `None`, `MinMax`, `Max`, `Mean`, `Log`, `L1Norm`, `L2Norm` and `StdScore`.
 |===
