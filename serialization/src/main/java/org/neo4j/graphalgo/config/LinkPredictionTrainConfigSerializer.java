@@ -23,6 +23,7 @@ import org.neo4j.gds.TrainConfigSerializer;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.util.ObjectMapperSingleton;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.config.proto.CommonConfigProto;
 import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public final class LinkPredictionTrainConfigSerializer implements TrainConfigSer
 
     public TrainConfigsProto.LinkPredictionTrainConfig toSerializable(LinkPredictionTrainConfig trainConfig) {
         var builder = TrainConfigsProto.LinkPredictionTrainConfig.newBuilder();
-        var randomSeedBuilder = TrainConfigsProto.RandomSeed
+        var randomSeedBuilder = CommonConfigProto.RandomSeed
             .newBuilder()
             .setPresent(trainConfig.randomSeed().isPresent());
         trainConfig.randomSeed().ifPresent(randomSeedBuilder::setValue);

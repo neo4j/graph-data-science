@@ -49,3 +49,8 @@ message FeaturePropertiesConfigProto {
   repeated string featureProperties = 1;
   bool propertiesMustExistForEachNodeLabel = 2;
 }
+
+message RandomSeed {
+  int64 value = 1;
+  bool present = 2;
+}

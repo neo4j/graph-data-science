@@ -20,10 +20,11 @@
 package org.neo4j.graphalgo.config;
 
 import org.neo4j.gds.TrainConfigSerializer;
-import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.util.ObjectMapperSingleton;
-import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
+import org.neo4j.graphalgo.config.proto.CommonConfigProto;
+import org.neo4j.graphalgo.ml.model.proto.NodeClassificationProto;
 
 import java.util.List;
 import java.util.Map;
@@ -32,12 +33,12 @@ import java.util.stream.Collectors;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableFeaturePropertiesConfig;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableModelConfig;
 
-public final class NodeClassificationTrainConfigSerializer implements TrainConfigSerializer<NodeClassificationTrainConfig, TrainConfigsProto.NodeClassificationTrainConfig> {
+public final class NodeClassificationTrainConfigSerializer implements TrainConfigSerializer<NodeClassificationTrainConfig, NodeClassificationProto.NodeClassificationTrainConfig> {
 
     public NodeClassificationTrainConfigSerializer() {}
 
-    public TrainConfigsProto.NodeClassificationTrainConfig toSerializable(NodeClassificationTrainConfig trainConfig) {
-        var builder = TrainConfigsProto.NodeClassificationTrainConfig.newBuilder();
+    public NodeClassificationProto.NodeClassificationTrainConfig toSerializable(NodeClassificationTrainConfig trainConfig) {
+        var builder = NodeClassificationProto.NodeClassificationTrainConfig.newBuilder();
 
         builder
             .setModelConfig(serializableModelConfig(trainConfig))
@@ -46,7 +47,7 @@ public final class NodeClassificationTrainConfigSerializer implements TrainConfi
             .setValidationFolds(trainConfig.validationFolds())
             .setTargetProperty(trainConfig.targetProperty());
 
-        var randomSeedBuilder = TrainConfigsProto.RandomSeed
+        var randomSeedBuilder = CommonConfigProto.RandomSeed
             .newBuilder()
             .setPresent(trainConfig.randomSeed().isPresent());
         trainConfig.randomSeed().ifPresent(randomSeedBuilder::setValue);
@@ -69,7 +70,7 @@ public final class NodeClassificationTrainConfigSerializer implements TrainConfi
         return builder.build();
     }
 
-    public NodeClassificationTrainConfig fromSerializable(TrainConfigsProto.NodeClassificationTrainConfig serializedTrainConfig) {
+    public NodeClassificationTrainConfig fromSerializable(NodeClassificationProto.NodeClassificationTrainConfig serializedTrainConfig) {
         var builder = NodeClassificationTrainConfig.builder();
 
         builder
@@ -102,8 +103,8 @@ public final class NodeClassificationTrainConfigSerializer implements TrainConfi
     }
 
     @Override
-    public Class<TrainConfigsProto.NodeClassificationTrainConfig> serializableClass() {
-        return TrainConfigsProto.NodeClassificationTrainConfig.class;
+    public Class<NodeClassificationProto.NodeClassificationTrainConfig> serializableClass() {
+        return NodeClassificationProto.NodeClassificationTrainConfig.class;
     }
 
     private Map<String, Object> protoToMap(String p) {
