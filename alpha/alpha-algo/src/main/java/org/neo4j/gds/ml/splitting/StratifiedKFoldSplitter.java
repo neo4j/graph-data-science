@@ -31,6 +31,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
+
 /**
  * Splits an HugeLongArray of nodes into <code>k</code> NodeSplits, each of which contains a
  * train set and a test set. Logically, the nodes are first divided into <code>k</code> nearly equal sized
@@ -51,11 +53,7 @@ public class StratifiedKFoldSplitter {
         this.ids = ids;
         this.targets = targets;
         this.allocationTracker = AllocationTracker.empty();
-        this.random = randomSeed.map(seed -> {
-            var randomDataGenerator = new RandomDataGenerator();
-            randomDataGenerator.reSeed(seed);
-            return randomDataGenerator;
-        }).orElseGet(RandomDataGenerator::new);
+        this.random = createRandomDataGenerator(randomSeed);
     }
 
     public List<NodeSplit> splits() {

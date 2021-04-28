@@ -22,6 +22,8 @@ package org.neo4j.gds.ml.util;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
+import java.util.Optional;
+
 public final class ShuffleUtil {
 
     public static void shuffleHugeLongArray(HugeLongArray data, RandomDataGenerator random) {
@@ -31,6 +33,12 @@ public final class ShuffleUtil {
             data.set(swapWith, data.get(offset));
             data.set(offset, tempValue);
         }
+    }
+
+    public static RandomDataGenerator createRandomDataGenerator(Optional<Long> randomSeed) {
+        var random = new RandomDataGenerator();
+        randomSeed.ifPresent(random::reSeed);
+        return random;
     }
 
     private ShuffleUtil() {}

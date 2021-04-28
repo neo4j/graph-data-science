@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.batch.BatchQueue;
-import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrain;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
+import org.neo4j.gds.ml.splitting.NodeSplit;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.neo4j.graphalgo.Algorithm;
@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
+import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig>> {
@@ -60,8 +61,11 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     private final NodeClassificationTrainConfig config;
     private final HugeLongArray targets;
     private final Multiset<Long> classes;
+    private final HugeLongArray nodeIds;
     private final AllocationTracker allocationTracker;
     private final List<Metric> metrics;
+    private final Map<Metric, List<ModelStats>> trainStats;
+    private final Map<Metric, List<ModelStats>> validationStats;
 
     public static NodeClassificationTrain create(
         Graph graph,
@@ -74,7 +78,11 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         var targets = targetsAndClasses.getOne();
         var classes = targetsAndClasses.getTwo();
         var metrics = createMetrics(config, classes);
-        return new NodeClassificationTrain(graph, config, targets, classes, metrics, allocationTracker, progressLogger);
+        var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
+        nodeIds.setAll(i -> i);
+        var trainStats = initStatsMap(metrics);
+        var validationStats = initStatsMap(metrics);
+        return new NodeClassificationTrain(graph, config, targets, classes, metrics, nodeIds, trainStats, validationStats, allocationTracker, progressLogger);
     }
 
     private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(NodeProperties targetNodeProperty, long nodeCount, AllocationTracker allocationTracker) {
@@ -94,12 +102,21 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             .collect(Collectors.toList());
     }
 
+    private static Map<Metric, List<ModelStats>> initStatsMap(List<Metric> metrics) {
+        var statsMap = new HashMap<Metric, List<ModelStats>>();
+        metrics.forEach(metric -> statsMap.put(metric, new ArrayList<>()));
+        return statsMap;
+    }
+
     private NodeClassificationTrain(
         Graph graph,
         NodeClassificationTrainConfig config,
         HugeLongArray targets,
         Multiset<Long> classes,
         List<Metric> metrics,
+        HugeLongArray nodeIds,
+        Map<Metric, List<ModelStats>> trainStats,
+        Map<Metric, List<ModelStats>> validationStats,
         AllocationTracker allocationTracker,
         ProgressLogger progressLogger
     ) {
@@ -108,6 +125,9 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         this.targets = targets;
         this.classes = classes;
         this.metrics = metrics;
+        this.nodeIds = nodeIds;
+        this.trainStats = trainStats;
+        this.validationStats = validationStats;
         this.allocationTracker = allocationTracker;
         this.progressLogger = progressLogger;
     }
@@ -120,13 +140,10 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     @Override
     public void release() {}
 
-    @Override
-    public Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> compute() {
+    private Pair<NodeSplit, List<NodeSplit>> shuffleAndSplit() {
         // 1. Init and shuffle node ids
         progressLogger.logStart(":: Shuffle and Split");
-        var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
-        nodeIds.setAll(i -> i);
-        ShuffleUtil.shuffleHugeLongArray(nodeIds, getRandomDataGenerator());
+        ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
 
         // 2a. Outer split nodes into holdout + remaining
         var outerSplitter = new FractionSplitter(allocationTracker);
@@ -136,9 +153,15 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         var splitter = new StratifiedKFoldSplitter(config.validationFolds(), outerSplit.trainSet(), targets, config.randomSeed());
         var splits = splitter.splits();
         progressLogger.logFinish(":: Shuffle and Split");
+        return Tuples.pair(outerSplit, splits);
+    }
 
-        var trainStats = initStatsMap(metrics);
-        var validationStats = initStatsMap(metrics);
+    @Override
+    public Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> compute() {
+
+        var outerSplitAndSplits = shuffleAndSplit();
+        var outerSplit = outerSplitAndSplits.getOne();
+        var splits = outerSplitAndSplits.getTwo();
 
         for (int i = 0; i < config.params().size(); i++) {
             var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", i + 1, config.params().size());
@@ -233,12 +256,6 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         );
     }
 
-    private RandomDataGenerator getRandomDataGenerator() {
-        var random = new RandomDataGenerator();
-        config.randomSeed().ifPresent(random::reSeed);
-        return random;
-    }
-
     private Map<Metric, MetricData> mergeMetricResults(
         ModelSelectResult modelSelectResult,
         Map<Metric, Double> outerTrainMetrics,
@@ -256,20 +273,13 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         ));
     }
 
-    private Map<Metric, List<ModelStats>> initStatsMap(List<Metric> metrics) {
-        var statsMap = new HashMap<Metric, List<ModelStats>>();
-        metrics.forEach(metric -> statsMap.put(metric, new ArrayList<>()));
-        return statsMap;
-    }
-
     private Map<Metric, Double> computeMetrics(
         Multiset<Long> globalClassCounts,
         HugeLongArray evaluationSet,
         NodeLogisticRegressionData modelData,
         List<Metric> metrics
     ) {
-        var localTargets = makeLocalTargets(evaluationSet);
-
+        var predictor = new NodeLogisticRegressionPredictor(modelData, config.featureProperties());
         var predictedClasses = HugeLongArray.newArray(evaluationSet.size(), allocationTracker);
 
         // consume from queue which contains local nodeIds, i.e. indices into evaluationSet
@@ -277,7 +287,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         var consumer = new NodeClassificationPredictConsumer(
             graph,
             evaluationSet::get,
-            predictor(modelData),
+            predictor,
             null,
             predictedClasses,
             config.featureProperties(),
@@ -287,14 +297,11 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         var queue = new BatchQueue(evaluationSet.size());
         queue.parallelConsume(consumer, config.concurrency());
 
+        var localTargets = makeLocalTargets(evaluationSet);
         return metrics.stream().collect(Collectors.toMap(
             metric -> metric,
             metric -> metric.compute(localTargets, predictedClasses, globalClassCounts)
         ));
-    }
-
-    private NodeLogisticRegressionPredictor predictor(NodeLogisticRegressionData modelData) {
-        return new NodeLogisticRegressionPredictor(modelData, config.featureProperties());
     }
 
     private NodeLogisticRegressionData trainModel(HugeLongArray trainSet, Map<String, Object> modelParams) {

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.neo4j.gds.ml.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
@@ -49,6 +48,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
+import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
 
 public class LinkPredictionTrain
@@ -80,7 +80,7 @@ public class LinkPredictionTrain
         // init and shuffle node ids
         var nodeIds = HugeLongArray.newArray(trainGraph.nodeCount(), allocationTracker);
         nodeIds.setAll(i -> i);
-        ShuffleUtil.shuffleHugeLongArray(nodeIds, getRandomDataGenerator());
+        ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
 
         progressLogger.startSubTask("ModelSelection");
         var modelSelectResult = modelSelect(nodeIds);
@@ -117,12 +117,6 @@ public class LinkPredictionTrain
                 metrics
             )
         );
-    }
-
-    private RandomDataGenerator getRandomDataGenerator() {
-        var random = new RandomDataGenerator();
-        config.randomSeed().ifPresent(random::reSeed);
-        return random;
     }
 
     private Map<LinkMetric, MetricData> mergeMetrics(
