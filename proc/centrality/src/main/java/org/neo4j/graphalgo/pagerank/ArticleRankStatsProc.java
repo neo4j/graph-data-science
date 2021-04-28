@@ -39,11 +39,7 @@ public class ArticleRankStatsProc extends PageRankStatsProc {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStatsConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return stats(computationResult);
+        return super.stats(graphNameOrConfig, configuration);
     }
 
     @Override
@@ -53,7 +49,7 @@ public class ArticleRankStatsProc extends PageRankStatsProc {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphNameOrConfig, configuration);
+        return super.computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

@@ -41,11 +41,7 @@ public class ArticleRankStreamProc extends PageRankStreamProc {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStreamConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return stream(computationResult);
+        return super.stream(graphNameOrConfig, configuration);
     }
 
     @Override
@@ -55,7 +51,7 @@ public class ArticleRankStreamProc extends PageRankStreamProc {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphNameOrConfig, configuration);
+        return super.computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

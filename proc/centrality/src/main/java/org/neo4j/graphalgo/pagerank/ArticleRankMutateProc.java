@@ -40,11 +40,7 @@ public class ArticleRankMutateProc extends PageRankMutateProc {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankMutateConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return mutate(computationResult);
+        return super.mutate(graphNameOrConfig, configuration);
     }
 
     @Override
@@ -54,7 +50,7 @@ public class ArticleRankMutateProc extends PageRankMutateProc {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphNameOrConfig, configuration);
+        return super.computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

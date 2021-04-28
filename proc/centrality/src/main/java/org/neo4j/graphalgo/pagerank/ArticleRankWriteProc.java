@@ -41,11 +41,7 @@ public class ArticleRankWriteProc extends PageRankWriteProc {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankWriteConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(computationResult);
+        return super.write(graphNameOrConfig, configuration);
     }
 
     @Override
@@ -55,7 +51,7 @@ public class ArticleRankWriteProc extends PageRankWriteProc {
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphNameOrConfig, configuration);
+        return super.computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
