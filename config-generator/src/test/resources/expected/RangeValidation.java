@@ -35,21 +35,22 @@ public final class RangeValidationConfig implements RangeValidation {
     public RangeValidationConfig(@NotNull CypherMapWrapper config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
-            this.integerWithinRange = CypherMapWrapper.validateIntegerRange(
+            this.integerWithinRange = config.requireInt("integerWithinRange")
+            CypherMapWrapper.validateIntegerRange(
                 "integerWithinRange",
-                config.requireInt("integerWithinRange"),
+                integerWithinRange,
                 21,
                 42,
                 false,
-                true
-            );
+                true);
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
         try {
-            this.doubleWithinRange = CypherMapWrapper.validateDoubleRange(
+            this.doubleWithinRange = config.requireDouble("doubleWithinRange");
+            CypherMapWrapper.validateDoubleRange(
                 "doubleWithinRange",
-                config.requireDouble("doubleWithinRange"),
+                doubleWithinRange,
                 21.0,
                 42.0,
                 false,
@@ -65,7 +66,8 @@ public final class RangeValidationConfig implements RangeValidation {
                 String combinedErrorMsg = errors
                     .stream()
                     .map(IllegalArgumentException::getMessage)
-                    .collect(Collectors.joining(System.lineSeparator() + "\t\t\t\t",
+                    .collect(Collectors.joining(
+                        System.lineSeparator() + "\t\t\t\t",
                         "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
                         ""
                     ));

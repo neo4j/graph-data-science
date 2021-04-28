@@ -369,16 +369,21 @@ final class GenerateConfiguration {
             }
         }
 
+        CodeBlock validation = null;
+        var fieldAccessor = isTypeOf(Optional.class, definition.fieldType()) ?
+            definition.fieldName() + ".get()" :
+            definition.fieldName();
+
         if (definition.member().validatesIntegerRange()) {
             Configuration.IntegerRange range = definition
                 .member()
                 .method()
                 .getAnnotation(Configuration.IntegerRange.class);
-            codeBlock = CodeBlock.of(
+            validation = CodeBlock.of(
                 "$T.validateIntegerRange($S, $L, $L, $L, $L, $L)",
                 CypherMapWrapper.class,
                 definition.configKey(),
-                codeBlock,
+                fieldAccessor,
                 elementUtils.getConstantExpression(range.min()),
                 elementUtils.getConstantExpression(range.max()),
                 elementUtils.getConstantExpression(range.minInclusive()),
@@ -391,11 +396,11 @@ final class GenerateConfiguration {
                 .member()
                 .method()
                 .getAnnotation(Configuration.DoubleRange.class);
-            codeBlock = CodeBlock.of(
+            validation = CodeBlock.of(
                 "$T.validateDoubleRange($S, $L, $L, $L, $L, $L)",
                 CypherMapWrapper.class,
                 definition.configKey(),
-                codeBlock,
+                fieldAccessor,
                 elementUtils.getConstantExpression(range.min()),
                 elementUtils.getConstantExpression(range.max()),
                 elementUtils.getConstantExpression(range.minInclusive()),
@@ -403,11 +408,18 @@ final class GenerateConfiguration {
             );
         }
 
-        CodeBlock finalCodeBlock = codeBlock;
+        var finalCodeBlock = codeBlock;
+        var finalValidation = validation;
         catchAndPropagateIllegalArgumentError(
             constructor,
             errorsVarName,
-            (builder) -> builder.addStatement("this.$N = $L", definition.fieldName(), finalCodeBlock)
+            (builder) -> {
+                builder.addStatement("this.$N = $L", definition.fieldName(), finalCodeBlock);
+                if (finalValidation != null) {
+                    builder.addStatement(finalValidation);
+                }
+                return builder;
+            }
         );
     }
 
