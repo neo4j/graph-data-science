@@ -42,14 +42,11 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -64,8 +61,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     private final HugeLongArray nodeIds;
     private final AllocationTracker allocationTracker;
     private final List<Metric> metrics;
-    private final Map<Metric, List<ModelStats>> trainStats;
-    private final Map<Metric, List<ModelStats>> validationStats;
+    private final StatsMap trainStats;
+    private final StatsMap validationStats;
 
     public static NodeClassificationTrain create(
         Graph graph,
@@ -80,8 +77,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         var metrics = createMetrics(config, classes);
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
         nodeIds.setAll(i -> i);
-        var trainStats = initStatsMap(metrics);
-        var validationStats = initStatsMap(metrics);
+        var trainStats = StatsMap.create(metrics);
+        var validationStats = StatsMap.create(metrics);
         return new NodeClassificationTrain(graph, config, targets, classes, metrics, nodeIds, trainStats, validationStats, allocationTracker, progressLogger);
     }
 
@@ -102,12 +99,6 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             .collect(Collectors.toList());
     }
 
-    private static Map<Metric, List<ModelStats>> initStatsMap(List<Metric> metrics) {
-        var statsMap = new HashMap<Metric, List<ModelStats>>();
-        metrics.forEach(metric -> statsMap.put(metric, new ArrayList<>()));
-        return statsMap;
-    }
-
     private NodeClassificationTrain(
         Graph graph,
         NodeClassificationTrainConfig config,
@@ -115,8 +106,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         Multiset<Long> classes,
         List<Metric> metrics,
         HugeLongArray nodeIds,
-        Map<Metric, List<ModelStats>> trainStats,
-        Map<Metric, List<ModelStats>> validationStats,
+        StatsMap trainStats,
+        StatsMap validationStats,
         AllocationTracker allocationTracker,
         ProgressLogger progressLogger
     ) {
@@ -196,16 +187,15 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             }
             // insert the candidates metrics into trainStats and validationStats
             metrics.forEach(metric -> {
-                validationStats.get(metric).add(validationStatsBuilder.build(metric));
-                trainStats.get(metric).add(trainStatsBuilder.build(metric));
+                validationStats.add(metric, validationStatsBuilder.build(metric));
+                trainStats.add(metric, trainStatsBuilder.build(metric));
             });
         }
 
         progressLogger.logStart(":: Select Model");
         // 5. pick the best-scoring model candidate, according to the main metric
         var mainMetric = metrics.get(0);
-        var modelStats = validationStats.get(mainMetric);
-        var winner = Collections.max(modelStats, COMPARE_AVERAGE);
+        var winner = validationStats.pickWinner(mainMetric);
         progressLogger.logFinish(":: Select Model");
 
         var bestConfig = winner.params();
@@ -331,10 +321,10 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
         static ModelSelectResult of(
             Map<String, Object> bestConfig,
-            Map<Metric, List<ModelStats>> trainStats,
-            Map<Metric, List<ModelStats>> validationStats
+            StatsMap trainStats,
+            StatsMap validationStats
         ) {
-            return ImmutableModelSelectResult.of(bestConfig, trainStats, validationStats);
+            return ImmutableModelSelectResult.of(bestConfig, trainStats.getRawMap(), validationStats.getRawMap());
         }
 
     }
