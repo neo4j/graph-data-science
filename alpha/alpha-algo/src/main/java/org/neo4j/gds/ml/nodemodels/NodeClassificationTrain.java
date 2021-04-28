@@ -57,7 +57,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     private final Graph graph;
     private final NodeClassificationTrainConfig config;
     private final HugeLongArray targets;
-    private final Multiset<Long> classes;
+    private final Multiset<Long> classCounts;
     private final HugeLongArray nodeIds;
     private final AllocationTracker allocationTracker;
     private final List<Metric> metrics;
@@ -73,23 +73,23 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var targetsAndClasses = computeGlobalTargetsAndClasses(targetNodeProperty, graph.nodeCount(), allocationTracker);
         var targets = targetsAndClasses.getOne();
-        var classes = targetsAndClasses.getTwo();
-        var metrics = createMetrics(config, classes);
+        var classCounts = targetsAndClasses.getTwo();
+        var metrics = createMetrics(config, classCounts);
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), allocationTracker);
         nodeIds.setAll(i -> i);
         var trainStats = StatsMap.create(metrics);
         var validationStats = StatsMap.create(metrics);
-        return new NodeClassificationTrain(graph, config, targets, classes, metrics, nodeIds, trainStats, validationStats, allocationTracker, progressLogger);
+        return new NodeClassificationTrain(graph, config, targets, classCounts, metrics, nodeIds, trainStats, validationStats, allocationTracker, progressLogger);
     }
 
     private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(NodeProperties targetNodeProperty, long nodeCount, AllocationTracker allocationTracker) {
-        var classes = new Multiset<Long>();
+        var classCounts = new Multiset<Long>();
         var targets = HugeLongArray.newArray(nodeCount, allocationTracker);
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             targets.set(nodeId, targetNodeProperty.longValue(nodeId));
-            classes.add(targetNodeProperty.longValue(nodeId));
+            classCounts.add(targetNodeProperty.longValue(nodeId));
         }
-        return Tuples.pair(targets, classes);
+        return Tuples.pair(targets, classCounts);
     }
 
     private static List<Metric> createMetrics(NodeClassificationTrainConfig config, Multiset<Long> globalClassCounts) {
@@ -103,7 +103,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         Graph graph,
         NodeClassificationTrainConfig config,
         HugeLongArray targets,
-        Multiset<Long> classes,
+        Multiset<Long> classCounts,
         List<Metric> metrics,
         HugeLongArray nodeIds,
         StatsMap trainStats,
@@ -114,7 +114,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         this.graph = graph;
         this.config = config;
         this.targets = targets;
-        this.classes = classes;
+        this.classCounts = classCounts;
         this.metrics = metrics;
         this.nodeIds = nodeIds;
         this.trainStats = trainStats;
@@ -174,8 +174,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
                 progressLogger.logStart(candidateAndSplitMessage + " :: Evaluate");
                 progressLogger.reset(validationSet.size() + trainSet.size());
-                computeMetrics(classes, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
-                computeMetrics(classes, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
+                computeMetrics(classCounts, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
+                computeMetrics(classCounts, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
                 progressLogger.logFinish(candidateAndSplitMessage + " :: Evaluate");
             }
             metrics.forEach(metric -> {
@@ -205,8 +205,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
         progressLogger.logStart(":: Evaluate Selected Model");
         progressLogger.reset(outerSplit.testSet().size() + outerSplit.trainSet().size());
-        var testMetrics = computeMetrics(classes, outerSplit.testSet(), bestModelData, metrics);
-        var outerTrainMetrics = computeMetrics(classes, outerSplit.trainSet(), bestModelData, metrics);
+        var testMetrics = computeMetrics(classCounts, outerSplit.testSet(), bestModelData, metrics);
+        var outerTrainMetrics = computeMetrics(classCounts, outerSplit.trainSet(), bestModelData, metrics);
         progressLogger.logFinish(":: Evaluate Selected Model");
 
         return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
