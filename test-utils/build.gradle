@@ -20,6 +20,7 @@ dependencies {
             [group: 'org.assertj',             name: 'assertj-core',            version: ver.'assertj'],
             [group: 'org.jetbrains',           name: 'annotations',             version: ver.'jetbrains-annotations'],
             [group: 'org.neo4j',               name: 'neo4j',                   version: ver.'neo4j'],
+            [group: 'org.neo4j',               name: 'neo4j-cypher-dsl',        version: ver.'cypher-dsl'],
             [group: 'org.mockito',             name: 'mockito-junit-jupiter',   version: ver.'mockito'],
             [group: 'org.hamcrest',            name: 'hamcrest-library',        version: ver.'hamcrest'],
             [group: 'com.github.s1ck',         name: 'gdl',                     version: ver.'gdl'],
@@ -35,5 +36,4 @@ dependencies {
         exclude group:'org.junit.vintage', module: 'junit-vintage-engine'
     }
     implementation(group: 'junit', name: 'junit', version: ver.'junit4')
-    implementation group: 'org.neo4j', name: 'neo4j-cypher-dsl', version: ver.'cypher-dsl'
 }

@@ -39,6 +39,8 @@ import static java.util.Map.entry;
 import static org.hamcrest.core.Is.isA;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.neo4j.cypherdsl.core.Cypher.call;
+import static org.neo4j.cypherdsl.core.Cypher.literalOf;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphDropProcTest extends BaseProcTest {
@@ -230,8 +232,7 @@ class GraphDropProcTest extends BaseProcTest {
     @MethodSource("org.neo4j.graphalgo.catalog.GraphCreateProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
-            "CALL gds.graph.drop($graphName)",
-            Map.of("graphName", invalidName),
+            call("gds.graph.drop").withArgs(literalOf(invalidName)).build().getCypher(),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
     }
