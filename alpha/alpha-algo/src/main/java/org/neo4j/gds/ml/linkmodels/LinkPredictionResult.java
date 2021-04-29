@@ -22,13 +22,18 @@ package org.neo4j.gds.ml.linkmodels;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.queue.BoundedLongLongPriorityQueue;
+import org.neo4j.graphalgo.core.write.ImmutableRelationship;
+import org.neo4j.graphalgo.core.write.RelationshipStreamExporter;
+import org.neo4j.graphalgo.core.write.RelationshipStreaming;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 import java.util.Iterator;
 import java.util.PrimitiveIterator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class LinkPredictionResult {
+public class LinkPredictionResult implements RelationshipStreaming {
 
     static MemoryEstimation memoryEstimation(int topN) {
         return MemoryEstimations.builder(LinkPredictionResult.class)
@@ -71,5 +76,20 @@ public class LinkPredictionResult {
         };
 
         return StreamSupport.stream(iterable.spliterator(), true);
+    }
+
+    @Override
+    public Stream<RelationshipStreamExporter.Relationship> relationshipStream() {
+        var natural = stream().map(link -> ImmutableRelationship.of(
+            link.sourceId(),
+            link.targetId(),
+            new Value[]{Values.doubleValue(link.probability())}
+        ));
+        var reverse = stream().map(link -> ImmutableRelationship.of(
+            link.targetId(),
+            link.sourceId(),
+            new Value[]{Values.doubleValue(link.probability())}
+        ));
+        return Stream.concat(natural, reverse).sequential();
     }
 }
