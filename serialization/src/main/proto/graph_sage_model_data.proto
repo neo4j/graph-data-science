@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "tensors.proto";
-import "model.proto";
 import "graph_sage_common.proto";
 
 option java_package = "org.neo4j.graphalgo.core.model.proto";
