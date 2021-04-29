@@ -491,7 +491,7 @@ class PageRankTest {
                 .maxIterations(10)
                 .tolerance(0.1)
                 .concurrency(1)
-                .sourceNodeIds(LongStream.of(idFunction.of("d")))
+                .addSourceNode(idFunction.of("d"))
                 .build();
 
             var actual = runOnPregel(graph, config, Mode.EIGENVECTOR)
