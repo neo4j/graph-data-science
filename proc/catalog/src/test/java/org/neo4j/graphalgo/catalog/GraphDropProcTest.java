@@ -34,12 +34,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
+import static java.util.Map.entry;
 import static org.hamcrest.core.Is.isA;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphDropProcTest extends BaseProcTest {
@@ -63,72 +61,72 @@ class GraphDropProcTest extends BaseProcTest {
 
     @Test
     void dropGraphFromCatalog() {
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
+        runQuery("CALL gds.graph.create($name, 'A', 'REL')", Map.of("name", GRAPH_NAME));
 
         assertCypherResult(
             "CALL gds.graph.exists($graphName)",
-            map("graphName", GRAPH_NAME),
-            singletonList(
-                map("graphName", GRAPH_NAME, "exists", true)
+            Map.of("graphName", GRAPH_NAME),
+            List.of(
+                Map.of("graphName", GRAPH_NAME, "exists", true)
             )
         );
 
         assertCypherResult(
             "CALL gds.graph.drop($graphName)",
-            map("graphName", GRAPH_NAME),
-            singletonList(
-                map(
-                    "graphName", GRAPH_NAME,
-                    "nodeProjection", map(
-                        "A", map(
+            Map.of("graphName", GRAPH_NAME),
+            List.of(
+                Map.ofEntries(
+                    entry("graphName", GRAPH_NAME),
+                    entry("nodeProjection", Map.of(
+                        "A", Map.of(
                             "label", "A",
-                            "properties", emptyMap()
+                            "properties", Map.of()
                         )
-                    ),
-                    "relationshipProjection", map(
-                        "REL", map(
+                    )),
+                    entry("relationshipProjection", Map.of(
+                        "REL", Map.of(
                             "type", "REL",
                             "orientation", "NATURAL",
                             "aggregation", "DEFAULT",
-                            "properties", emptyMap()
+                            "properties", Map.of()
                         )
-                    ),
-                    "nodeQuery", null,
-                    "relationshipQuery", null,
-                    "nodeFilter", null,
-                    "relationshipFilter", null,
-                    "nodeCount", 2L,
-                    "relationshipCount", 1L,
-                    "creationTime", isA(ZonedDateTime.class),
-                    "modificationTime", isA(ZonedDateTime.class),
-                    "memoryUsage", "",
-                    "sizeInBytes", -1L,
-                    "schema", map(
-                        "nodes", map("A", emptyMap()),
-                        "relationships", map("REL", emptyMap())
-                    ),
-                    "density", new Condition<>(Double::isFinite, "a finite double"),
-                    "database", db.databaseName()
+                    )),
+                    entry("nodeQuery", nullValue()),
+                    entry("relationshipQuery", nullValue()),
+                    entry("nodeFilter", nullValue()),
+                    entry("relationshipFilter", nullValue()),
+                    entry("nodeCount", 2L),
+                    entry("relationshipCount", 1L),
+                    entry("creationTime", isA(ZonedDateTime.class)),
+                    entry("modificationTime", isA(ZonedDateTime.class)),
+                    entry("memoryUsage", ""),
+                    entry("sizeInBytes", -1L),
+                    entry("schema", Map.of(
+                        "nodes", Map.of("A", Map.of()),
+                        "relationships", Map.of("REL", Map.of())
+                    )),
+                    entry("density", new Condition<>(Double::isFinite, "a finite double")),
+                    entry("database", db.databaseName())
                 )
             )
         );
 
         assertCypherResult(
             "CALL gds.graph.exists($graphName)",
-            map("graphName", GRAPH_NAME),
-            singletonList(
-                map("graphName", GRAPH_NAME, "exists", false)
+            Map.of("graphName", GRAPH_NAME),
+            List.of(
+                Map.of("graphName", GRAPH_NAME, "exists", false)
             )
         );
     }
 
     @Test
     void shouldNotReturnDegreeDistribution() {
-        runQuery("CALL gds.graph.create($name, 'A', 'REL')", map("name", GRAPH_NAME));
+        runQuery("CALL gds.graph.create($name, 'A', 'REL')", Map.of("name", GRAPH_NAME));
 
         runQueryWithResultConsumer(
             "CALL gds.graph.drop($graphName)",
-            map("graphName", GRAPH_NAME),
+            Map.of("graphName", GRAPH_NAME),
             result -> assertFalse(
                 result.columns().contains("degreeDistribution"),
                 "The result should not contain `degreeDistribution` field"
@@ -148,7 +146,7 @@ class GraphDropProcTest extends BaseProcTest {
             ", (a)-[:X { weight: 1.0 }]->(:A {id: 2,  weight: 1.0, partition: 1})" +
             ", (b)-[:Y { weight: 42.0 }]->(:B {id: 10, weight: 1.0, partition: 1})";
 
-        runQuery(testGraph, emptyMap());
+        runQuery(testGraph);
 
         String query = GdsCypher.call()
             .withAnyLabel()
@@ -159,26 +157,27 @@ class GraphDropProcTest extends BaseProcTest {
 
         runQuery(query);
 
-        List<Map<String, Object>> expectedGraphInfo = singletonList(
-            map("nodeCount", 4L, "relationshipCount", 2L, "graphName", GRAPH_NAME)
+        List<Map<String, Object>> expectedGraphInfo = List.of(
+            Map.of("nodeCount", 4L, "relationshipCount", 2L, "graphName", GRAPH_NAME)
         );
 
         assertCypherResult(
             "CALL gds.graph.list($name) YIELD nodeCount, relationshipCount, graphName",
-            singletonMap("name", GRAPH_NAME),
+            Map.of("name", GRAPH_NAME),
             expectedGraphInfo
         );
 
-        assertCypherResult("CALL gds.graph.drop($name) YIELD nodeCount, relationshipCount, graphName",
-            singletonMap("name", GRAPH_NAME),
+        assertCypherResult(
+            "CALL gds.graph.drop($name) YIELD nodeCount, relationshipCount, graphName",
+            Map.of("name", GRAPH_NAME),
             expectedGraphInfo
         );
 
         assertCypherResult(
             "CALL gds.graph.exists($graphName)",
-            map("graphName", GRAPH_NAME),
-            singletonList(
-                map("graphName", GRAPH_NAME, "exists", false)
+            Map.of("graphName", GRAPH_NAME),
+            List.of(
+                Map.of("graphName", GRAPH_NAME, "exists", false)
             )
         );
     }
@@ -187,15 +186,15 @@ class GraphDropProcTest extends BaseProcTest {
     void considerFailIfMissingFlag() {
         assertCypherResult(
             "CALL gds.graph.exists($graphName)",
-            map("graphName", GRAPH_NAME),
-            singletonList(
-                map("graphName", GRAPH_NAME, "exists", false)
+            Map.of("graphName", GRAPH_NAME),
+            List.of(
+                Map.of("graphName", GRAPH_NAME, "exists", false)
             )
         );
 
         assertCypherResult(
             "CALL gds.graph.drop($graphName, false)",
-            map("graphName", GRAPH_NAME, "failIfMissing", false),
+            Map.of("graphName", GRAPH_NAME, "failIfMissing", false),
             Collections.emptyList()
         );
     }
@@ -204,23 +203,23 @@ class GraphDropProcTest extends BaseProcTest {
     void failsOnNonExistingGraph() {
         assertCypherResult(
             "CALL gds.graph.exists($graphName)",
-            map("graphName", GRAPH_NAME),
-            singletonList(
-                map("graphName", GRAPH_NAME, "exists", false)
+            Map.of("graphName", GRAPH_NAME),
+            List.of(
+                Map.of("graphName", GRAPH_NAME, "exists", false)
             )
         );
 
         assertError(
             "CALL gds.graph.drop($graphName)",
-            map("graphName", GRAPH_NAME),
+            Map.of("graphName", GRAPH_NAME),
             formatWithLocale("Graph with name `%s` does not exist on database `neo4j`.", GRAPH_NAME)
         );
 
         assertCypherResult(
             "CALL gds.graph.exists($graphName)",
-            map("graphName", GRAPH_NAME),
-            singletonList(
-                map("graphName", GRAPH_NAME, "exists", false)
+            Map.of("graphName", GRAPH_NAME),
+            List.of(
+                Map.of("graphName", GRAPH_NAME, "exists", false)
             )
         );
     }
@@ -230,7 +229,7 @@ class GraphDropProcTest extends BaseProcTest {
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
             "CALL gds.graph.drop($graphName)",
-            map("graphName", invalidName),
+            Map.of("graphName", invalidName),
             formatWithLocale("`graphName` can not be null or blank, but it was `%s`", invalidName)
         );
     }
