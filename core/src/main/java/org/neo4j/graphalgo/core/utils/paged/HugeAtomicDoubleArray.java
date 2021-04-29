@@ -114,8 +114,8 @@ public abstract class HugeAtomicDoubleArray {
      * @param expect the expected value
      * @param update the new value
      * @return the result that is the witness value,
-     *         which will be the same as the expected value if successful
-     *         or the new current value if unsuccessful.
+     *     which will be the same as the expected value if successful
+     *     or the new current value if unsuccessful.
      */
     public abstract double compareAndExchange(long index, double expect, double update);
 
@@ -255,11 +255,14 @@ public abstract class HugeAtomicDoubleArray {
 
         @Override
         public double getAndReplace(long index, double value) {
-            double prev;
-            do {
-                prev = (double) ARRAY_HANDLE.getVolatile(page, (int) index);
-            } while (!ARRAY_HANDLE.weakCompareAndSet(page, (int) index, prev, value));
-            return prev;
+            double prev = (double) ARRAY_HANDLE.getAcquire(page, (int) index);
+            while (true) {
+                double current = (double) ARRAY_HANDLE.compareAndExchangeRelease(page, (int) index, prev, value);
+                if (Double.compare(current, prev) == 0) {
+                    return current;
+                }
+                prev = current;
+            }
         }
 
         @Override
@@ -362,11 +365,14 @@ public abstract class HugeAtomicDoubleArray {
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
             double[] page = pages[pageIndex];
-            double prev;
-            do {
-                prev = (double) ARRAY_HANDLE.getVolatile(page, indexInPage);
-            } while (!ARRAY_HANDLE.compareAndSet(page, indexInPage, prev, value));
-            return prev;
+            double prev = (double) ARRAY_HANDLE.getAcquire(page, indexInPage);
+            while (true) {
+                double current = (double) ARRAY_HANDLE.compareAndExchangeRelease(page, indexInPage, prev, value);
+                if (Double.compare(current, prev) == 0) {
+                    return current;
+                }
+                prev = current;
+            }
         }
 
         @Override
