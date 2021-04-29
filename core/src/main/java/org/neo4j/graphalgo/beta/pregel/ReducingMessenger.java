@@ -42,6 +42,8 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
     private HugeAtomicDoubleArray receiveArray;
 
     ReducingMessenger(Graph graph, PregelConfig config, Reducer reducer, AllocationTracker tracker) {
+        assert !Double.isNaN(reducer.identity()): "identity element must not be NaN";
+
         this.graph = graph;
         this.config = config;
         this.reducer = reducer;
