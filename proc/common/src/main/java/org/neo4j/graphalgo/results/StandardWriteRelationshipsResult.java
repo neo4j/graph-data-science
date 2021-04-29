@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths;
+package org.neo4j.graphalgo.results;
 
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
-import org.neo4j.graphalgo.results.StandardWriteResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class WriteResult extends StandardWriteResult {
+public final class StandardWriteRelationshipsResult extends StandardWriteResult {
 
     public final long relationshipsWritten;
 
-    WriteResult(
+    public StandardWriteRelationshipsResult(
         long createMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -41,11 +40,11 @@ public final class WriteResult extends StandardWriteResult {
         this.relationshipsWritten = relationshipsWritten;
     }
 
-    public static class Builder extends AbstractResultBuilder<WriteResult> {
+    public static class Builder extends AbstractResultBuilder<StandardWriteRelationshipsResult> {
 
         @Override
-        public WriteResult build() {
-            return new WriteResult(
+        public StandardWriteRelationshipsResult build() {
+            return new StandardWriteRelationshipsResult(
                 createMillis,
                 computeMillis,
                 0L,

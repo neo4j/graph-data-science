@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.config.WriteRelationshipConfig;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.ImmutableRelationship;
 import org.neo4j.graphalgo.core.write.RelationshipStreamExporter;
+import org.neo4j.graphalgo.results.StandardWriteRelationshipsResult;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -40,17 +41,17 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, DijkstraResult>, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig & WritePathOptionsConfig>
     extends AlgoBaseProc<ALGO, DijkstraResult, CONFIG> {
 
-    protected Stream<WriteResult> write(ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
+    protected Stream<StandardWriteRelationshipsResult> write(ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
         return runWithExceptionLogging("Write relationships failed", () -> {
             var config = computationResult.config();
 
-            var resultBuilder = new WriteResult.Builder()
+            var resultBuilder = new StandardWriteRelationshipsResult.Builder()
                 .withCreateMillis(computationResult.createMillis())
                 .withComputeMillis(computationResult.computeMillis())
                 .withConfig(config);
 
             if (computationResult.isGraphEmpty()) {
-                return Stream.of(new WriteResult(computationResult.createMillis(), 0L, 0L, 0L, 0L, config.toMap()));
+                return Stream.of(new StandardWriteRelationshipsResult(computationResult.createMillis(), 0L, 0L, 0L, 0L, config.toMap()));
             }
 
             var algorithm = computationResult.algorithm();
