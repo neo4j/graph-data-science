@@ -252,24 +252,6 @@ class NodeClassificationTrainTest {
             .allMatch(s -> s.startsWith(factory.taskName()));
     }
 
-    @Test
-    void shouldEstimate() {
-        Map<String, Object> model1 = Map.of("penalty", 1, "maxIterations", 0);
-        Map<String, Object> model2 = Map.of("penalty", 1, "maxIterations", 10000, "tolerance", 1e-5);
-        var metricSpecification = MetricSpecification.parse("F1(class=*)");
-        var config = createConfig(
-            List.of(model1, model2),
-            "model",
-            List.of("a", "b"),
-            metricSpecification,
-            1L
-        );
-//        NodeClassificationTrain.metrics(config).forEach(System.out::println);
-        var estimation = NodeClassificationTrain.estimate(config).estimate(GraphDimensions.of(1_000_000_000L), 1);
-        System.out.println(estimation.render());
-        fail("TODO");
-    }
-
     private NodeClassificationTrainConfig createConfig(
         Iterable<Map<String, Object>> modelCandidates,
         String modelName,
