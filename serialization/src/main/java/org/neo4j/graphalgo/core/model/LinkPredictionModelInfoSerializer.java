@@ -20,29 +20,25 @@
 package org.neo4j.graphalgo.core.model;
 
 import org.neo4j.gds.ModelInfoSerializer;
+import org.neo4j.gds.ml.linkmodels.ImmutableLinkPredictionModelInfo;
+import org.neo4j.gds.ml.linkmodels.LinkPredictionModelInfo;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.nodemodels.ImmutableMetricData;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
-import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
-import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.graphalgo.ml.model.proto.CommonML;
 
-import static org.neo4j.graphalgo.config.ConfigSerializers.multiClassNLRTrainConfig;
+import static org.neo4j.graphalgo.config.ConfigSerializers.linkLogisticRegressionTrainConfig;
 
-public final class NodeClassificationModelInfoSerializer implements ModelInfoSerializer<NodeClassificationModelInfo, CommonML.NodeClassificationModelInfo> {
+public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer<LinkPredictionModelInfo, CommonML.LinkPredictionModelInfo> {
+    @Override
+    public CommonML.LinkPredictionModelInfo toSerializable(LinkPredictionModelInfo linkPredictionModelInfo) {
+        var builder = CommonML.LinkPredictionModelInfo.newBuilder().setBestParameters(linkLogisticRegressionTrainConfig(linkPredictionModelInfo.bestParameters()));
 
-    public NodeClassificationModelInfoSerializer() {}
-
-    public CommonML.NodeClassificationModelInfo toSerializable(NodeClassificationModelInfo modelInfo) {
-        var builder = CommonML.NodeClassificationModelInfo.newBuilder()
-            .addAllClasses(modelInfo.classes())
-            .setBestParameters(multiClassNLRTrainConfig(modelInfo.bestParameters()));
-
-
-        modelInfo.metrics().forEach(((metric, metricData) -> {
+        linkPredictionModelInfo.metrics().forEach(((metric, metricData) -> {
             var metricName = metric.name();
+
 
             var infoMetricBuilder = CommonML.InfoMetric.newBuilder()
                 .setTest(metricData.test())
@@ -59,44 +55,39 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
             builder.putMetrics(metricName, infoMetricBuilder.build());
         }));
 
-
         return builder.build();
     }
 
-    public NodeClassificationModelInfo fromSerializable(CommonML.NodeClassificationModelInfo protoModelInfo) {
-        var builder = ImmutableNodeClassificationModelInfo.builder()
-            .classes(protoModelInfo.getClassesList())
-            .bestParameters(multiClassNLRTrainConfig(protoModelInfo.getBestParameters()));
+    @Override
+    public LinkPredictionModelInfo fromSerializable(CommonML.LinkPredictionModelInfo linkPredictionModelInfo) {
+        var builder = ImmutableLinkPredictionModelInfo.builder()
+            .bestParameters(linkLogisticRegressionTrainConfig(linkPredictionModelInfo.getBestParameters()));
 
-        protoModelInfo.getMetricsMap().forEach((protoMetric, protoMetricData) -> {
-            var metric = MetricSpecification
-                .parse(protoMetric)
-                .createMetrics(protoModelInfo.getClassesList())
-                .findFirst()
-                .get();
+        linkPredictionModelInfo.getMetricsMap().forEach((protoMetric, protoMetricData) -> {
+            var metric = LinkMetric.valueOf(protoMetric);
 
-            var metricDataBuilder = ImmutableMetricData.<MultiClassNLRTrainConfig>builder()
+            var metricDataBuilder = ImmutableMetricData.<LinkLogisticRegressionTrainConfig>builder()
                 .test(protoMetricData.getTest())
                 .outerTrain(protoMetricData.getOuterTrain());
 
             protoMetricData.getTrainList().forEach(protoTrain -> {
                 metricDataBuilder.addTrain(
-                    ImmutableModelStats.<MultiClassNLRTrainConfig>builder()
+                    ImmutableModelStats.<LinkLogisticRegressionTrainConfig>builder()
                         .avg(protoTrain.getAvg())
                         .min(protoTrain.getMin())
                         .max(protoTrain.getMax())
-                        .params(multiClassNLRTrainConfig(protoTrain.getNodeClassificationParams()))
+                        .params(linkLogisticRegressionTrainConfig(protoTrain.getLinkPredictionParams()))
                         .build()
                 );
             });
 
             protoMetricData.getValidationList().forEach(protoTrain -> {
                 metricDataBuilder.addValidation(
-                    ImmutableModelStats.<MultiClassNLRTrainConfig>builder()
+                    ImmutableModelStats.<LinkLogisticRegressionTrainConfig>builder()
                         .avg(protoTrain.getAvg())
                         .min(protoTrain.getMin())
                         .max(protoTrain.getMax())
-                        .params(multiClassNLRTrainConfig(protoTrain.getNodeClassificationParams()))
+                        .params(linkLogisticRegressionTrainConfig(protoTrain.getLinkPredictionParams()))
                         .build()
                 );
             });
@@ -111,15 +102,15 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
     }
 
     @Override
-    public Class<CommonML.NodeClassificationModelInfo> serializableClass() {
-        return CommonML.NodeClassificationModelInfo.class;
+    public Class<CommonML.LinkPredictionModelInfo> serializableClass() {
+        return CommonML.LinkPredictionModelInfo.class;
     }
 
-    private CommonML.MetricScores.Builder buildMetricScores(ModelStats<MultiClassNLRTrainConfig> datum) {
+    private CommonML.MetricScores.Builder buildMetricScores(ModelStats<LinkLogisticRegressionTrainConfig> datum) {
         return CommonML.MetricScores.newBuilder()
             .setAvg(datum.avg())
             .setMax(datum.max())
             .setMin(datum.min())
-            .setNodeClassificationParams(multiClassNLRTrainConfig(datum.params()));
+            .setLinkPredictionParams(linkLogisticRegressionTrainConfig(datum.params()));
     }
 }
