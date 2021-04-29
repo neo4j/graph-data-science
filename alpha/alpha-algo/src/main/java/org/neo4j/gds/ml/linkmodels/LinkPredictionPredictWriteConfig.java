@@ -40,6 +40,13 @@ public interface LinkPredictionPredictWriteConfig extends LinkPredictionPredictB
         return "probability";
     }
 
+    @Value.Derived
+    @Configuration.Key(WRITE_CONCURRENCY_KEY)
+    @Configuration.Ignore
+    default int writeConcurrency() {
+        return concurrency();
+    }
+
     static LinkPredictionPredictWriteConfig of(
         String username,
         Optional<String> graphName,
