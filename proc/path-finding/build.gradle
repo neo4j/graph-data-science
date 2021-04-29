@@ -1,25 +1,17 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Procedures'
+description = 'Neo4j Graph Data Science :: Procedures :: Path Finding'
 dependencies {
     annotationProcessor project(':annotations')
 
     annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
 
     api project(':proc-common')
-    api project(':alpha-proc')
-    api project(':proc-embeddings')
-    api project(':proc-similarity')
-    api project(':proc-centrality')
-    api project(':proc-community')
-    api project(':proc-path-finding')
-    api project(':proc-beta')
-    api project(':proc-catalog')
-    api project(':proc-misc')
 
     implementation(
-        project(':neo4j-adapter')
+            project(':neo4j-adapter')
     )
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'

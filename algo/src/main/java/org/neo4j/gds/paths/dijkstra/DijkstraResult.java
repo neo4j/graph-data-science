@@ -17,31 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.doc;
+package org.neo4j.gds.paths.dijkstra;
 
-import org.neo4j.gds.paths.sourcetarget.ShortestPathYensMutateProc;
-import org.neo4j.gds.paths.sourcetarget.ShortestPathYensStreamProc;
-import org.neo4j.gds.paths.sourcetarget.ShortestPathYensWriteProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.paths.PathResult;
+import org.neo4j.graphalgo.annotation.ValueClass;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-class YensDocTest extends DocTestBase {
+@ValueClass
+public interface DijkstraResult {
 
-    @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
-            ShortestPathYensStreamProc.class,
-            ShortestPathYensWriteProc.class,
-            ShortestPathYensMutateProc.class,
-            GraphCreateProc.class
-        );
+    Stream<PathResult> paths();
+
+    @TestOnly
+    default Set<PathResult> pathSet() {
+        return paths().collect(Collectors.toSet());
     }
-
-    @Override
-    String adocFile() {
-        return "algorithms/beta/shortest-path/yens.adoc";
-    }
-
 }

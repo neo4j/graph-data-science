@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathAStarMutateProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathAStarStreamProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathAStarWriteProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathAStarMutateProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathAStarStreamProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathAStarWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
 import java.util.Arrays;

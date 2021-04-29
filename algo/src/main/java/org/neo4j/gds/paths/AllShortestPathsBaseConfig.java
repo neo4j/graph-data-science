@@ -17,31 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.doc;
+package org.neo4j.gds.paths;
 
-import org.neo4j.gds.paths.sourcetarget.ShortestPathYensMutateProc;
-import org.neo4j.gds.paths.sourcetarget.ShortestPathYensStreamProc;
-import org.neo4j.gds.paths.sourcetarget.ShortestPathYensWriteProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
-import java.util.Arrays;
-import java.util.List;
+public interface AllShortestPathsBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, TrackRelationshipsConfig {
 
-class YensDocTest extends DocTestBase {
-
-    @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
-            ShortestPathYensStreamProc.class,
-            ShortestPathYensWriteProc.class,
-            ShortestPathYensMutateProc.class,
-            GraphCreateProc.class
-        );
-    }
-
-    @Override
-    String adocFile() {
-        return "algorithms/beta/shortest-path/yens.adoc";
-    }
-
+    long sourceNode();
 }

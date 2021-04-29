@@ -17,31 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.doc;
+package org.neo4j.gds.paths;
 
-import org.neo4j.gds.paths.sourcetarget.ShortestPathYensMutateProc;
-import org.neo4j.gds.paths.sourcetarget.ShortestPathYensStreamProc;
-import org.neo4j.gds.paths.sourcetarget.ShortestPathYensWriteProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.ValueClass;
 
-import java.util.Arrays;
-import java.util.List;
+@ValueClass
+public interface PathResult {
 
-class YensDocTest extends DocTestBase {
+    PathResult EMPTY = ImmutablePathResult.builder()
+        .index(-1)
+        .sourceNode(-1)
+        .targetNode(-1)
+        .nodeIds(-1)
+        .relationshipIds(-1)
+        .costs(0)
+        .build();
 
-    @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
-            ShortestPathYensStreamProc.class,
-            ShortestPathYensWriteProc.class,
-            ShortestPathYensMutateProc.class,
-            GraphCreateProc.class
-        );
+    long index();
+
+    long sourceNode();
+
+    long targetNode();
+
+    @Value.Derived
+    default double totalCost() {
+        return costs()[costs().length - 1];
     }
 
-    @Override
-    String adocFile() {
-        return "algorithms/beta/shortest-path/yens.adoc";
-    }
+    long[] nodeIds();
 
+    long[] relationshipIds();
+
+    double[] costs();
 }

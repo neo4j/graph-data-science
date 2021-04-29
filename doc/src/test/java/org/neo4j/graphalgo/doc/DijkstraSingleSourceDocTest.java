@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraMutateProc;
-import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraStreamProc;
-import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraWriteProc;
+import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraMutateProc;
+import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraStreamProc;
+import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
 import java.util.Arrays;
