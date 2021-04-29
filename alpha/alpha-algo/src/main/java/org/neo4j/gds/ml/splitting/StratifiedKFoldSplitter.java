@@ -54,7 +54,7 @@ public class StratifiedKFoldSplitter {
         return MemoryEstimations.setup("", (dimensions) ->  {
             long nodeCount = (long) (dimensions.nodeCount() * trainFraction);
             var builder = MemoryEstimations.builder(StratifiedKFoldSplitter.class);
-            int baseBucketSize = (int) nodeCount / k;
+            long baseBucketSize = nodeCount / k;
             for (int fold = 0; fold < k; fold++) {
                 var testSize = fold < nodeCount % k ? baseBucketSize + 1 : baseBucketSize;
                 var test = HugeLongArray.memoryEstimation(testSize);
