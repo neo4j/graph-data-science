@@ -67,7 +67,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         ParallelUtil.parallelForEachNode(
             graph,
             config.concurrency(),
-            nodeId -> sendArray.set(nodeId, reducer.emptyValue())
+            nodeId -> sendArray.set(nodeId, reducer.identity())
         );
     }
 
@@ -75,7 +75,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
     public void sendTo(long targetNodeId, double message) {
         sendArray.update(
             targetNodeId,
-            current -> reducer.reduce(reducer.isEmptyValue(current) ? reducer.identity() : current, message)
+            current -> reducer.reduce(current, message)
         );
     }
 
@@ -91,7 +91,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         boolean isInitialIteration
     ) {
         var message = receiveArray.getAndReplace(nodeId, reducer.identity());
-        messageIterator.init(message, !reducer.isEmptyValue(message));
+        messageIterator.init(message, message != reducer.identity());
     }
 
     @Override

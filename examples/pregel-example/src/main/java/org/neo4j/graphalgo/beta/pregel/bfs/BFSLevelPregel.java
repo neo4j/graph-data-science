@@ -71,22 +71,12 @@ public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
         return Optional.of(new Reducer() {
             @Override
             public double identity() {
-                return Double.NaN;
+                return -1;
             }
 
             @Override
             public double reduce(double current, double message) {
                 return message;
-            }
-
-            @Override
-            public double emptyValue() {
-                return Double.NaN;
-            }
-
-            @Override
-            public boolean isEmptyValue(double value) {
-                return Double.isNaN(value);
             }
         });
     }

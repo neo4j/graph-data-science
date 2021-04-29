@@ -31,16 +31,6 @@ public interface Reducer {
      */
     double reduce(double current, double message);
 
-    /**
-     * The empty value is used when a node did not receive any messages.
-     */
-    double emptyValue();
-
-    /**
-     * Checks if the given value is the empty value.
-     */
-    boolean isEmptyValue(double value);
-
     class Sum implements Reducer {
 
         @Override
@@ -53,15 +43,6 @@ public interface Reducer {
             return current + message;
         }
 
-        @Override
-        public double emptyValue() {
-            return Double.NaN;
-        }
-
-        @Override
-        public boolean isEmptyValue(double value) {
-            return Double.isNaN(value);
-        }
     }
 
     class Min implements Reducer {
@@ -74,16 +55,6 @@ public interface Reducer {
         @Override
         public double reduce(double current, double message) {
             return Math.min(current, message);
-        }
-
-        @Override
-        public double emptyValue() {
-            return Double.NaN;
-        }
-
-        @Override
-        public boolean isEmptyValue(double value) {
-            return Double.isNaN(value);
         }
     }
 
@@ -98,16 +69,6 @@ public interface Reducer {
         public double reduce(double current, double message) {
             return Math.max(current, message);
         }
-
-        @Override
-        public double emptyValue() {
-            return Double.NaN;
-        }
-
-        @Override
-        public boolean isEmptyValue(double value) {
-            return Double.isNaN(value);
-        }
     }
 
     class Count implements Reducer {
@@ -120,16 +81,6 @@ public interface Reducer {
         @Override
         public double reduce(double current, double message) {
             return current + 1;
-        }
-
-        @Override
-        public double emptyValue() {
-            return Double.NaN;
-        }
-
-        @Override
-        public boolean isEmptyValue(double value) {
-            return Double.isNaN(value);
         }
     }
 }

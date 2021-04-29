@@ -92,7 +92,10 @@ public final class PageRankComputation implements PregelComputation<PageRankConf
         }
 
         if (delta > tolerance || context.isInitialSuperstep()) {
-            context.sendToNeighbors(delta / degreeFunction.applyAsDouble(context.nodeId()));
+            var degree = degreeFunction.applyAsDouble(context.nodeId());
+            if (degree > 0) {
+                context.sendToNeighbors(delta / degree);
+            }
         } else {
             context.voteToHalt();
         }

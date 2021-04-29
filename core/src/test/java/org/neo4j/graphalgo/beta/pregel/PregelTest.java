@@ -166,9 +166,6 @@ class PregelTest {
                 "TestPregelComputation :: Iteration 2/2 :: Master Compute :: Finished",
                 "TestPregelComputation :: Iteration 2/2 :: Finished"
             );
-
-
-
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {
