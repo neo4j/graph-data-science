@@ -151,8 +151,7 @@ public final class GraphStoreValidation {
             var missingNodes = ((SourceNodesConfig) config).sourceNodes().stream()
                 .mapToLong(Node::getId)
                 .filter(nodeId -> nodeMapping.toMappedNodeId(nodeId) == NodeMapping.NOT_FOUND)
-                .boxed()
-                .map(Object::toString)
+                .mapToObj(Long::toString)
                 .collect(Collectors.toList());
 
             if (!missingNodes.isEmpty()) {
