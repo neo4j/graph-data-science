@@ -3,6 +3,7 @@
 :entity: relationship
 :result: relationships
 :algorithm: Link Prediction
+:modelType: Link Prediction
 
 
 [abstract]
@@ -15,6 +16,7 @@ This section describes the Link Prediction Model in the Neo4j Graph Data Science
 == Introduction
 
 Link prediction is a common machine learning task applied to graphs: training a model to learn, between pairs of nodes in a graph, where relationships should exist.
+The predicted links are undirected.
 You can think of this as building a model to predict missing relationships in your dataset or relationships that are likely to form in the future.
 Neo4j GDS trains supervised machine learning models based on the relationships and node properties in your graph to predict the existence - and probability - of relationships.
 
@@ -245,6 +247,36 @@ The structure of `modelInfo` is:
 ----
 ======
 
+[.include-with-stream]
+======
+.Run Link Prediction in stream mode on a named graph:
+[source]
+----
+CALL gds.alpha.ml.linkPrediction.predict.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  node1: Integer,
+  node2: Integer,
+  probability: Float
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name        | Type    | Description
+| node1       | Integer | Node ID of the first node.
+| node2       | Integer | Node ID of the second node.
+| probability | Float   | Predicted probability of a link between the nodes.
+|===
+======
 
 [.include-with-mutate]
 ======
@@ -454,6 +486,48 @@ Here we can observe that the model candidate with penalty 0.5 performed the best
 On the test graph, the model scored much lower at about 35%.
 This indicates that the model reacted fairly well to the train graph, but did not generalise very well to unseen data.
 In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
+
+
+[[algorithms-ml-linkprediction-examples-stream]]
+=== Stream
+
+In the `stream` execution mode, the algorithm returns the top predicted relationships.
+This allows us to inspect the results directly or post-process them in Cypher without any side effects.
+
+For more details on the `stream` mode in general, see <<running-algos-stream>>.
+
+[role=query-example, group=lp]
+--
+[source, cypher]
+----
+CALL gds.alpha.ml.linkPrediction.predict.stream('myGraph', {
+  relationshipTypes: ['KNOWS'],
+  modelName: 'lp-numberOfPosts-model',
+  topN: 5,
+  threshold: 0.45
+}) YIELD node1, node2, probability
+MATCH (n), (m)
+WHERE id(n) = node1 AND id(m) = node2
+RETURN
+  n.name AS name1,
+  m.name AS name2,
+  probability
+----
+
+.Results
+[opts="header"]
+|===
+| name1   | name2     | probability
+| "Karin" | "Greg"    | 0.4991363247445545
+| "Karin" | "Mark"    | 0.49896977670628373
+| "Mark"  | "Greg"    | 0.49869219716877955
+| "Will"  | "Veselin" | 0.49869219716877955
+| "Alice" | "Mark"    | 0.49719328593255546
+|===
+--
+
+We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+Note that the predicted link between the Karin and Greg nodes does not reflect any particular direction between them.
 
 
 [[algorithms-ml-linkprediction-examples-mutate]]

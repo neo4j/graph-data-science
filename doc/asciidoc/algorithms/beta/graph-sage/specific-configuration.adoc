@@ -2,6 +2,5 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                 | Type          | Default   | Optional | Description
-| modelName            | String        | n/a       | no       | The name of a GraphSage model in the model catalog.
 | batchSize            | Integer       | 100       | yes      | The number of nodes per batch.
 |===

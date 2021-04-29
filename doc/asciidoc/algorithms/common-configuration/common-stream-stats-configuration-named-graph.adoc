@@ -2,6 +2,11 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                                                          | Type     | Default | Optional | Description
+
+ifeval::["{modelType}" != ""]
+| modelName                                                     | String   | n/a     | no       | The name of a {modelType} model in the model catalog.
+endif::[]
+
 | <<common-configuration-node-labels,nodeLabels>>               | String[] | ['*']   | yes      | Filter the named graph using the given node labels.
 | <<common-configuration-relationship-types,relationshipTypes>> | String[] | ['*']   | yes      | Filter the named graph using the given relationship types.
 | <<common-configuration-concurrency,concurrency>>              | Integer  | 4       | yes      | The number of concurrent threads used for running the algorithm.

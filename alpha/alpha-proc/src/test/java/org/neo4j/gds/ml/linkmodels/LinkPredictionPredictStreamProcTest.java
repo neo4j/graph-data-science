@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -41,12 +40,9 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.isA;
-import static org.hamcrest.number.OrderingComparison.greaterThan;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
 
-class LinkPredictionPredictMutateProcTest extends BaseProcTest {
+class LinkPredictionPredictStreamProcTest extends BaseProcTest {
 
     private static final String GRAPH =
         "CREATE " +
@@ -68,7 +64,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(LinkPredictionPredictMutateProc.class, GraphStreamRelationshipPropertiesProc.class, GraphCreateProc.class);
+        registerProcedures(LinkPredictionPredictStreamProc.class, GraphCreateProc.class);
         runQuery(GRAPH);
 
         runQuery(createQuery("g", UNDIRECTED));
@@ -97,24 +93,26 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
         addModel("model", graphStore.schema());
 
         var query =
-            "CALL gds.alpha.ml.linkPrediction.predict.mutate('g', { " +
-            "  mutateRelationshipType: 'PREDICTED', " +
+            "CALL gds.alpha.ml.linkPrediction.predict.stream('g', { " +
             "  modelName: 'model', " +
             "  threshold: 0.5, " +
-            "  topN: 9" +
-            "})";
+            "  topN: 10" +
+            "}) YIELD node1, node2, probability" +
+            " RETURN node1, node2, probability" +
+            " ORDER BY probability DESC, node1, node2";
 
-        assertCypherResult(query, List.of(Map.of(
-            "createMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            "mutateMillis", greaterThan(-1L),
-            "postProcessingMillis", 0L,
-            // we are writing undirected rels so we get 2x topN
-            "relationshipsWritten", 18L,
-            "configuration", isA(Map.class)
-        )));
-
-        assertTrue(graphStore.hasRelationshipProperty(List.of(RelationshipType.of("PREDICTED")), "probability"));
+        assertCypherResult(query, List.of(
+            Map.of("node1", 0L, "node2", 12L, "probability", 0.5646362918030292),
+            Map.of("node1", 0L, "node2", 13L, "probability", 0.5646362918030292),
+            Map.of("node1", 0L, "node2", 14L, "probability", 0.5646362918030292),
+            Map.of("node1", 1L, "node2", 12L, "probability", 0.5646362918030292),
+            Map.of("node1", 1L, "node2", 13L, "probability", 0.5646362918030292),
+            Map.of("node1", 1L, "node2", 14L, "probability", 0.5646362918030292),
+            Map.of("node1", 2L, "node2", 12L, "probability", 0.5646362918030292),
+            Map.of("node1", 2L, "node2", 13L, "probability", 0.5646362918030292),
+            Map.of("node1", 2L, "node2", 14L, "probability", 0.5646362918030292),
+            Map.of("node1", 0L, "node2", 10L, "probability", 0.5473576181430894)
+        ));
     }
 
     @Test
@@ -124,8 +122,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
         addModel("model", GraphSchema.empty());
 
         var trainQuery =
-            "CALL gds.alpha.ml.linkPrediction.predict.mutate('g2', { " +
-            "  mutateRelationshipType: 'PREDICTED', " +
+            "CALL gds.alpha.ml.linkPrediction.predict.stream('g2', { " +
             "  modelName: 'model', " +
             "  threshold: 0.5, " +
             "  topN: 9" +
@@ -145,14 +142,14 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
                 .builder()
                 .weights(
                     new Weights<>(new Matrix(
-                        new double[]{-0.0016811290857949518, 7.441367814815001E-4}, 1, 2)
+                        new double[]{0.000001, 0.1}, 1, 2)
                     )
                 )
                 .linkFeatureCombiner(LinkFeatureCombiners.L2)
                 .nodeFeatureDimension(2)
                 .build(),
             ImmutableLinkPredictionTrainConfig.builder()
-                .modelName("model")
+                .modelName(modelName)
                 .validationFolds(1)
                 .trainRelationshipType(RelationshipType.ALL_RELATIONSHIPS)
                 .testRelationshipType(RelationshipType.ALL_RELATIONSHIPS)

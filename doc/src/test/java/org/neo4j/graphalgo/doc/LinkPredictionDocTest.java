@@ -20,12 +20,14 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictMutateProc;
+import org.neo4j.gds.ml.linkmodels.LinkPredictionPredictStreamProc;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionTrainProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphWriteRelationshipProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,10 +38,12 @@ class LinkPredictionDocTest extends DocTestBase {
     List<Class<?>> procedures() {
         return Arrays.asList(
             LinkPredictionTrainProc.class,
+            LinkPredictionPredictStreamProc.class,
             LinkPredictionPredictMutateProc.class,
             SplitRelationshipsMutateProc.class,
             GraphCreateProc.class,
-            GraphWriteRelationshipProc.class
+            GraphWriteRelationshipProc.class,
+            AsNodeFunc.class
         );
     }
 

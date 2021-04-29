@@ -22,36 +22,23 @@ package org.neo4j.gds.ml.linkmodels;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.MutatePropertyConfig;
-import org.neo4j.graphalgo.config.MutateRelationshipConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-
-import java.util.Optional;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.config.ModelConfig;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LinkPredictionPredictMutateConfig extends LinkPredictionPredictBaseConfig, MutateRelationshipConfig, MutatePropertyConfig {
+public interface LinkPredictionPredictBaseConfig extends AlgoBaseConfig, ModelConfig {
+
+    @Configuration.IntegerRange(min = 1)
+    int topN();
+
+    @Configuration.DoubleRange(min = 0, max = 1)
+    double threshold();
 
     @Value.Default
-    @Override
-    default String mutateProperty() {
-        return "probability";
-    }
-
-    static LinkPredictionPredictMutateConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    ) {
-        return new LinkPredictionPredictMutateConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            username,
-            config
-        );
+    default int batchSize() {
+        return 100;
     }
 
 }

@@ -3,6 +3,7 @@
 :entity: node
 :result: property
 :algorithm: Node Classification
+:modelType: Node Classification
 
 
 [abstract]
