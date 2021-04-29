@@ -68,6 +68,7 @@ abstract class BaseStoreModelTest<DATA, CONFIG extends ModelConfig> {
         assertThat(storedModel.name()).isEqualTo(model.name());
         assertThat(storedModel.trainConfig())
             .usingRecursiveComparison()
+            .ignoringFields("params")
             .isEqualTo(model.trainConfig());
         assertThat(storedModel.creationTime())
             .isCloseTo(model.creationTime(), new TemporalUnitWithinOffset(1, SECONDS));

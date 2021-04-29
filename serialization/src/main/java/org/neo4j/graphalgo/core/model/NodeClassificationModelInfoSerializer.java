@@ -26,7 +26,7 @@ import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.graphalgo.ml.model.proto.CommonML;
 
 import static org.neo4j.graphalgo.config.ConfigSerializers.multiClassNLRTrainConfig;
@@ -75,13 +75,13 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
                 .findFirst()
                 .get();
 
-            var metricDataBuilder = ImmutableMetricData.<MultiClassNLRTrainConfig>builder()
+            var metricDataBuilder = ImmutableMetricData.<NodeLogisticRegressionTrainConfig>builder()
                 .test(protoMetricData.getTest())
                 .outerTrain(protoMetricData.getOuterTrain());
 
             protoMetricData.getTrainList().forEach(protoTrain -> {
                 metricDataBuilder.addTrain(
-                    ImmutableModelStats.<MultiClassNLRTrainConfig>builder()
+                    ImmutableModelStats.<NodeLogisticRegressionTrainConfig>builder()
                         .avg(protoTrain.getAvg())
                         .min(protoTrain.getMin())
                         .max(protoTrain.getMax())
@@ -92,7 +92,7 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
 
             protoMetricData.getValidationList().forEach(protoTrain -> {
                 metricDataBuilder.addValidation(
-                    ImmutableModelStats.<MultiClassNLRTrainConfig>builder()
+                    ImmutableModelStats.<NodeLogisticRegressionTrainConfig>builder()
                         .avg(protoTrain.getAvg())
                         .min(protoTrain.getMin())
                         .max(protoTrain.getMax())
@@ -115,7 +115,7 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
         return CommonML.NodeClassificationModelInfo.class;
     }
 
-    private CommonML.MetricScores.Builder buildMetricScores(ModelStats<MultiClassNLRTrainConfig> datum) {
+    private CommonML.MetricScores.Builder buildMetricScores(ModelStats<NodeLogisticRegressionTrainConfig> datum) {
         return CommonML.MetricScores.newBuilder()
             .setAvg(datum.avg())
             .setMax(datum.max())

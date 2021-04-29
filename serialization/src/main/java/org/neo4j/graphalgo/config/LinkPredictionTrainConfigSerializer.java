@@ -21,15 +21,12 @@ package org.neo4j.graphalgo.config;
 
 import org.neo4j.gds.TrainConfigSerializer;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionTrainConfig;
-import org.neo4j.gds.ml.util.ObjectMapperSingleton;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.proto.CommonConfigProto;
 import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import static org.neo4j.graphalgo.config.ConfigSerializers.linkLogisticRegressionTrainConfig;
+import static org.neo4j.graphalgo.config.ConfigSerializers.linkLogisticRegressionTrainConfigMap;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableFeaturePropertiesConfig;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableModelConfig;
 
@@ -53,13 +50,8 @@ public final class LinkPredictionTrainConfigSerializer implements TrainConfigSer
             .setTestRelationshipType(trainConfig.testRelationshipType().name())
             .setRandomSeed(randomSeedBuilder);
 
-        trainConfig.params().forEach(paramsMap -> {
-            try {
-                var p = ObjectMapperSingleton.OBJECT_MAPPER.writeValueAsString(paramsMap);
-                builder.addParams(p);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        trainConfig.paramConfigs().forEach(config -> {
+            builder.addParamConfigs(linkLogisticRegressionTrainConfig(config));
         });
 
         return builder.build();
@@ -81,12 +73,9 @@ public final class LinkPredictionTrainConfigSerializer implements TrainConfigSer
             builder.randomSeed(randomSeed.getValue());
         }
 
-        List<Map<String, Object>> params = serializedTrainConfig
-            .getParamsList()
-            .stream()
-            .map(this::protoToMap)
-            .collect(Collectors.toList());
-        builder.params(params);
+        serializedTrainConfig.getParamConfigsList().forEach(paramConfig -> {
+            builder.addParam(linkLogisticRegressionTrainConfigMap(paramConfig));
+        });
 
         return builder.build();
     }
@@ -94,13 +83,5 @@ public final class LinkPredictionTrainConfigSerializer implements TrainConfigSer
     @Override
     public Class<TrainConfigsProto.LinkPredictionTrainConfig> serializableClass() {
         return TrainConfigsProto.LinkPredictionTrainConfig.class;
-    }
-
-    private Map<String, Object> protoToMap(String p) {
-        try {
-            return ObjectMapperSingleton.OBJECT_MAPPER.readValue(p, Map.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

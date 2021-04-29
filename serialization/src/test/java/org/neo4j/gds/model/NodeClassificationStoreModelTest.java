@@ -23,12 +23,18 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
+import org.neo4j.gds.ml.nodemodels.MetricData;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.Model;
 
 import java.io.IOException;
@@ -52,11 +58,13 @@ class NodeClassificationStoreModelTest extends BaseStoreModelTest<NodeLogisticRe
 
     @Override
     Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> model() {
+        var featureProperties = List.of("a", "b");
+        var targetProperty = "t";
         var trainConfig = NodeClassificationTrainConfig.builder()
             .modelName(MODEL)
             .metrics(List.of(MetricSpecification.parse(AllClassMetric.ACCURACY.name())))
-            .featureProperties(List.of("a", "b"))
-            .targetProperty("t")
+            .featureProperties(featureProperties)
+            .targetProperty(targetProperty)
             .validationFolds(2)
             .holdoutFraction(0.19)
             .addParam(Map.of("penalty", 1.0))
@@ -67,13 +75,30 @@ class NodeClassificationStoreModelTest extends BaseStoreModelTest<NodeLogisticRe
             .classIdMap(new LocalIdMap())
             .build();
 
+        var params = new NodeLogisticRegressionTrainConfigImpl(
+            featureProperties,
+            targetProperty,
+            CypherMapWrapper.create(Map.of("penalty", 1))
+        );
+
+        var trainStats = ImmutableModelStats.<NodeLogisticRegressionTrainConfig>of(params, 0.5, 0.0, 1.0);
+        var validationStats = ImmutableModelStats.<NodeLogisticRegressionTrainConfig>of(params, 0.4, 0.0, 0.8);
+        var metricData = MetricData.of(List.of(trainStats), List.of(validationStats), 4.0, 4.1);
+
+        var info = NodeClassificationModelInfo.of(
+            List.of(1L, 2L),
+            params,
+            Map.of(AllClassMetric.F1_WEIGHTED, metricData)
+        );
+
         return Model.of(
             USER,
             MODEL,
             NodeClassificationTrain.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
-            trainConfig
+            trainConfig,
+            info
         );
     }
 }

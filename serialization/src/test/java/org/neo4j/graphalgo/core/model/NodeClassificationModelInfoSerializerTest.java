@@ -23,8 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.ImmutableMultiClassNLRTrainConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -36,13 +38,14 @@ class NodeClassificationModelInfoSerializerTest {
     @Test
     void shouldSerializeModelInfo() {
 
-        var params = ImmutableMultiClassNLRTrainConfig.builder()
-            .penalty(1)
-            .targetProperty("t")
-            .build();
+        var params = new NodeLogisticRegressionTrainConfigImpl(
+            List.of("a"),
+            "t",
+            CypherMapWrapper.create(Map.of("penalty", 1))
+        );
 
-        var trainStats = ImmutableModelStats.of(params, 0.5, 0.0, 1.0);
-        var validationStats = ImmutableModelStats.of(params, 0.4, 0.0, 0.8);
+        var trainStats = ImmutableModelStats.<NodeLogisticRegressionTrainConfig>of(params, 0.5, 0.0, 1.0);
+        var validationStats = ImmutableModelStats.<NodeLogisticRegressionTrainConfig>of(params, 0.4, 0.0, 0.8);
         var metricData = MetricData.of(List.of(trainStats), List.of(validationStats), 4.0, 4.1);
 
         var info = NodeClassificationModelInfo.of(

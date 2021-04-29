@@ -22,6 +22,7 @@ package org.neo4j.gds.model;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.model.storage.ModelFileReader;
 import org.neo4j.gds.model.storage.ModelFileWriter;
+import org.neo4j.gds.model.storage.ModelInfoSerializerFactory;
 import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
@@ -164,7 +165,10 @@ public class StoredModel implements Model<Object, ModelConfig> {
 
     @Override
     public Mappable customInfo() {
-        return Mappable.EMPTY;
+        return ModelSupport.onValidAlgoType(
+            algoType(),
+            () -> ModelInfoSerializerFactory.modelInfoSerializer(algoType()).fromSerializable(metaData.getCustomInfo())
+        );
     }
 
     @Override

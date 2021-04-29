@@ -98,16 +98,13 @@ class LinkPredictionSerializerIntegrationTest {
         assertThat(deserializedModel)
             .usingRecursiveComparison()
             .ignoringFields(
-                "customInfo",
+                "params",
+                "trainConfig.params",
                 "graphSchema.nodeSchema.properties.defaultValue.defaultValue",
                 "graphSchema.relationshipSchema.properties.defaultValue.defaultValue",
                 "stored"
             )
             .isEqualTo(modelBeforeSerialization);
-
-        assertThat(deserializedModel.customInfo().toMap())
-            .containsExactlyInAnyOrderEntriesOf(modelBeforeSerialization.customInfo().toMap());
-
     }
 
     private LinkPredictionTrainConfig createConfig(

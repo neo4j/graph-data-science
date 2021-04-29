@@ -22,8 +22,8 @@ package org.neo4j.graphalgo.config;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfigImpl;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
-import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfigImpl;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
 import org.neo4j.graphalgo.config.proto.CommonConfigProto;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
@@ -93,7 +93,7 @@ public final class ConfigSerializers {
     }
 
     public static CommonML.MultiClassNLRTrainConfig.Builder multiClassNLRTrainConfig(
-        MultiClassNLRTrainConfig config
+        NodeLogisticRegressionTrainConfig config
     ) {
         return CommonML.MultiClassNLRTrainConfig.newBuilder()
             .addAllFeatureProperties(config.featureProperties())
@@ -102,10 +102,10 @@ public final class ConfigSerializers {
             .setTrainingConfig(serializableTrainingConfig(config));
     }
 
-    public static MultiClassNLRTrainConfig multiClassNLRTrainConfig(CommonML.MultiClassNLRTrainConfig protoConfig) {
+    public static NodeLogisticRegressionTrainConfig multiClassNLRTrainConfig(CommonML.MultiClassNLRTrainConfig protoConfig) {
         var rawParams = multiClassNLRTrainConfigMap(protoConfig);
 
-        return new MultiClassNLRTrainConfigImpl(
+        return new NodeLogisticRegressionTrainConfigImpl(
             protoConfig.getFeaturePropertiesList(),
             protoConfig.getTargetProperty(),
             CypherMapWrapper
