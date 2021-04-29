@@ -353,8 +353,14 @@ final class HugeAtomicLongArrayTest {
         }
     }
 
+    @FunctionalInterface
+    interface HalaFunction {
+
+        void apply(HugeAtomicLongArray a);
+    }
+
     @Test
-    void testAdder() {
+    void testUpdateParallel() {
         int incsPerThread = 10_000;
         int ncpu = Runtime.getRuntime().availableProcessors();
         int maxThreads = ncpu * 2;
@@ -364,7 +370,7 @@ final class HugeAtomicLongArrayTest {
             testArray(1, aa -> {
                 for (int i = 1; i <= maxThreads; i <<= 1) {
                     aa.set(0, 0);
-                    casTest(i, incsPerThread, aa, pool);
+                    casTest(i, incsPerThread, aa, pool, a -> a.update(0, x -> x + 1));
                 }
             });
         } finally {
@@ -373,10 +379,36 @@ final class HugeAtomicLongArrayTest {
         }
     }
 
-    private static void casTest(int nthreads, int incs, HugeAtomicLongArray a, Executor pool) {
+    @Test
+    void testGetAndAddParallel() {
+        int incsPerThread = 10_000;
+        int ncpu = Runtime.getRuntime().availableProcessors();
+        int maxThreads = ncpu * 2;
+        ExecutorService pool = Executors.newCachedThreadPool();
+
+        try {
+            testArray(1, aa -> {
+                for (int i = 1; i <= maxThreads; i <<= 1) {
+                    aa.set(0, 0);
+                    casTest(i, incsPerThread, aa, pool, a -> a.getAndAdd(0, 1));
+                }
+            });
+        } finally {
+            pool.shutdown();
+            LockSupport.parkNanos(MILLISECONDS.toNanos(100));
+        }
+    }
+
+    private static void casTest(
+        int nthreads,
+        int incs,
+        HugeAtomicLongArray a,
+        Executor pool,
+        HalaFunction arrayFn
+    ) {
         Phaser phaser = new Phaser(nthreads + 1);
         for (int i = 0; i < nthreads; ++i) {
-            pool.execute(new CasTask(a, phaser, incs));
+            pool.execute(new CasTask(a, phaser, incs, arrayFn));
         }
         phaser.arriveAndAwaitAdvance();
         phaser.arriveAndAwaitAdvance();
@@ -389,18 +421,20 @@ final class HugeAtomicLongArrayTest {
         final Phaser phaser;
         final int incs;
         volatile long result;
+        final HalaFunction arrayFn;
 
-        CasTask(HugeAtomicLongArray adder, Phaser phaser, int incs) {
+        CasTask(HugeAtomicLongArray adder, Phaser phaser, int incs, HalaFunction arrayFn) {
             this.adder = adder;
             this.phaser = phaser;
             this.incs = incs;
+            this.arrayFn = arrayFn;
         }
 
         public void run() {
             phaser.arriveAndAwaitAdvance();
             HugeAtomicLongArray a = adder;
             for (int i = 0; i < incs; ++i) {
-                a.update(0, x -> x + 1);
+                arrayFn.apply(a);
             }
             result = a.get(0);
             phaser.arrive();

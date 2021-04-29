@@ -283,12 +283,15 @@ public abstract class HugeAtomicLongArray {
 
         @Override
         public long getAndAdd(long index, long delta) {
-            long prev, next;
-            do {
-                prev = (long) ARRAY_HANDLE.getVolatile(page, (int) index);
-                next = prev + delta;
-            } while (!ARRAY_HANDLE.compareAndSet(page, (int) index, prev, next));
-            return prev;
+            long prev = (long) ARRAY_HANDLE.getAcquire(page, (int) index);
+            while (true) {
+                long next = prev + delta;
+                long current = (long) ARRAY_HANDLE.compareAndExchangeRelease(page, (int) index, prev, next);
+                if (prev == current) {
+                    return prev;
+                }
+                prev = current;
+            }
         }
 
         @Override
