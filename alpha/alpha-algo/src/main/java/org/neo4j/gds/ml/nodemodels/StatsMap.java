@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 
 import java.util.ArrayList;
@@ -31,28 +32,28 @@ import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 
 final class StatsMap {
 
-    private final Map<Metric, List<ModelStats>> map;
+    private final Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> map;
 
     static StatsMap create(List<Metric> metrics) {
-        Map<Metric, List<ModelStats>> map = new HashMap<>();
+        Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> map = new HashMap<>();
         metrics.forEach(metric -> map.put(metric, new ArrayList<>()));
         return new StatsMap(map);
     }
 
-    private StatsMap(Map<Metric, List<ModelStats>> map) {
+    private StatsMap(Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> map) {
         this.map = map;
     }
 
-    void add(Metric metric, ModelStats modelStats) {
+    void add(Metric metric, ModelStats<NodeLogisticRegressionTrainConfig> modelStats) {
         map.get(metric).add(modelStats);
     }
 
-    ModelStats pickBestModelStats(Metric metric) {
+    ModelStats<NodeLogisticRegressionTrainConfig> pickBestModelStats(Metric metric) {
         var modelStats = map.get(metric);
         return Collections.max(modelStats, COMPARE_AVERAGE);
     }
 
-    Map<Metric, List<ModelStats>> getRawMap() {
+    Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> getMap() {
         return map;
     }
 }

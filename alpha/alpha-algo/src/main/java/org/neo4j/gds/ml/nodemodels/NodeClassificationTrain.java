@@ -43,7 +43,6 @@ import org.openjdk.jol.util.Multiset;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -153,7 +152,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     private ModelSelectResult selectBestModel(List<NodeSplit> splits) {
         var paramConfigCounter = 1;
         for (var modelParams : config.paramsConfig()) {
-            var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", i + 1, config.params().size());
+            var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", paramConfigCounter++, config.params().size());
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
             for (int j = 0; j < splits.size(); j++) {
@@ -194,12 +193,12 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         return ModelSelectResult.of(bestModelStats.params(), trainStats, validationStats);
     }
 
-    private Map<Metric, MetricData> evaluateBestModel(
+    private Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> evaluateBestModel(
         NodeSplit outerSplit,
         ModelSelectResult modelSelectResult,
-        Map<String, Object> bestParameters
+        NodeLogisticRegressionTrainConfig bestParameters
     ) {
-        int maxEpochs = ((Number) bestParameters.getOrDefault("maxEpochs", TrainingConfig.MAX_EPOCHS)).intValue();
+        int maxEpochs = bestParameters.maxEpochs();
         progressLogger.logStart(":: Train Selected on Remainder");
         progressLogger.reset(maxEpochs);
         NodeLogisticRegressionData bestModelData = trainModel(outerSplit.trainSet(), bestParameters);
@@ -214,8 +213,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
     }
 
-    private NodeLogisticRegressionData retrainBestModel(Map<String, Object> bestParameters) {
-        int maxEpochs = ((Number) bestParameters.getOrDefault("maxEpochs", TrainingConfig.MAX_EPOCHS)).intValue();
+    private NodeLogisticRegressionData retrainBestModel(NodeLogisticRegressionTrainConfig bestParameters) {
+        int maxEpochs = bestParameters.maxEpochs();
         progressLogger.logStart(":: Retrain Selected Model");
         progressLogger.reset(maxEpochs);
         var retrainedModelData = trainModel(nodeIds, bestParameters);
@@ -224,8 +223,8 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
     }
 
     private Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> createModel(
-        Map<String, Object> bestParameters,
-        Map<Metric, MetricData> metricResults,
+        NodeLogisticRegressionTrainConfig bestParameters,
+        Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> metricResults,
         NodeLogisticRegressionData retrainedModelData
     ) {
         var modelInfo = NodeClassificationModelInfo.of(
@@ -245,7 +244,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         );
     }
 
-    private Map<Metric, MetricData<MultiClassNLRTrainConfig>> mergeMetricResults(
+    private Map<Metric, MetricData<NodeLogisticRegressionTrainConfig>> mergeMetricResults(
         ModelSelectResult modelSelectResult,
         Map<Metric, Double> outerTrainMetrics,
         Map<Metric, Double> testMetrics
@@ -322,11 +321,11 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> validationStats();
 
         static ModelSelectResult of(
-            Map<String, Object> bestConfig,
+            NodeLogisticRegressionTrainConfig bestConfig,
             StatsMap trainStats,
             StatsMap validationStats
         ) {
-            return ImmutableModelSelectResult.of(bestConfig, trainStats.getRawMap(), validationStats.getRawMap());
+            return ImmutableModelSelectResult.of(bestConfig, trainStats.getMap(), validationStats.getMap());
         }
 
     }
