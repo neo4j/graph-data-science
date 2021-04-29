@@ -103,25 +103,6 @@ class MemoryEstimationsTest {
     }
 
     @Test
-    public void shouldEstimateMemoryBatches() throws Exception {
-        var nodeCount = 1_000_000;
-        var batchSize = 117;
-        int numberOfBatches = nodeCount/ batchSize;
-
-        MemoryEstimation memoryEstimation = MemoryEstimations.builder()
-            .fixed("some constant overhead (42)", 42)
-            .perNode("some overhead per node (23*1_000_000=21MiB)", MemoryEstimations.builder().fixed("node overhead", 23).build())
-            .perThread("some overhead per thread (7*87=609)", 87)
-            .perThread("overhead batched (7*117*5=4095)", numberOfThreads -> numberOfThreads * batchSize * 5L) // hver runnable allokerer 5 bytes for hver knude i batch
-            .fixed("lad os sige vi gemmer 38 resultat-bytes for hver batch (38*1_000_000/ batchsize = 317KiB)", 38*numberOfBatches)
-            .build();
-
-        System.out.println(memoryEstimation.estimate(GraphDimensions.of(1_000_000), 7).render());
-
-        fail("TODO");
-    }
-
-    @Test
     void testPerGraphDimension() {
         MemoryEstimation memoryEstimation = MemoryEstimations.builder()
                 .perGraphDimension("foo", (graphDimensions, concurrency) -> MemoryRange.of(graphDimensions.nodeCount() * 42))
