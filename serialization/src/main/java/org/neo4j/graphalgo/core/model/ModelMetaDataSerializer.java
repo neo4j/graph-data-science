@@ -20,7 +20,8 @@
 package org.neo4j.graphalgo.core.model;
 
 import com.google.protobuf.Any;
-import org.neo4j.gds.ml.util.ObjectMapperSingleton;
+import com.google.protobuf.InvalidProtocolBufferException;
+import org.neo4j.gds.model.storage.ModelInfoSerializerFactory;
 import org.neo4j.gds.model.storage.TrainConfigSerializerFactory;
 import org.neo4j.graphalgo.api.schema.SchemaDeserializer;
 import org.neo4j.graphalgo.api.schema.SchemaSerializer;
@@ -29,7 +30,6 @@ import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.IOException;
-import java.util.Map;
 
 public final class ModelMetaDataSerializer {
 
@@ -38,6 +38,7 @@ public final class ModelMetaDataSerializer {
     public static ModelProto.ModelMetaData toSerializable(Model<?, ?> model) throws IOException {
         var builder = ModelProto.ModelMetaData.newBuilder();
         serializableTrainConfig(model, builder);
+        serializeCustomInfo(model, builder);
         return builder
             .setCreator(model.creator())
             .addAllSharedWith(model.sharedWith())
@@ -45,7 +46,6 @@ public final class ModelMetaDataSerializer {
             .setAlgoType(model.algoType())
             .setGraphSchema(SchemaSerializer.serializableGraphSchema(model.graphSchema()))
             .setCreationTime(ZonedDateTimeSerializer.toSerializable(model.creationTime()))
-            .setCustomInfo(serializeCustomInfo(model.customInfo()))
             .build();
     }
 
@@ -59,7 +59,7 @@ public final class ModelMetaDataSerializer {
             .algoType(protoModelMetaData.getAlgoType())
             .graphSchema(SchemaDeserializer.graphSchema(protoModelMetaData.getGraphSchema()))
             .trainConfig(trainConfig(protoModelMetaData))
-            .customInfo(deserializeCustomInfo(protoModelMetaData.getCustomInfo()))
+            .customInfo(deserializeCustomInfo(protoModelMetaData))
             .stored(true)
             .creationTime(ZonedDateTimeSerializer.fromSerializable(protoModelMetaData.getCreationTime()));
     }
@@ -82,23 +82,29 @@ public final class ModelMetaDataSerializer {
         builder.setTrainConfig(Any.pack(serializable));
     }
 
-    private static <CONFIG extends ModelConfig & BaseConfig> CONFIG trainConfig(ModelProto.ModelMetaData protoModelMetaData) {
+    private static <CONFIG extends ModelConfig & BaseConfig> CONFIG trainConfig(
+        ModelProto.ModelMetaData protoModelMetaData
+    ) {
         var modelConfigSerializer =
             TrainConfigSerializerFactory.trainConfigSerializer(protoModelMetaData.getAlgoType());
         return (CONFIG) modelConfigSerializer.fromSerializable(protoModelMetaData.getTrainConfig());
     }
 
-    private static String serializeCustomInfo(Model.Mappable customInfo) {
-        try {
-            return ObjectMapperSingleton.OBJECT_MAPPER.writeValueAsString(customInfo.toMap());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    private static void serializeCustomInfo(Model<?, ?> model, ModelProto.ModelMetaData.Builder builder) {
+        var serializable = ModelInfoSerializerFactory
+            .modelInfoSerializer(model.algoType())
+            .toSerializable(model.customInfo());
+        builder.setCustomInfo(Any.pack(serializable));
     }
-    private static Model.Mappable deserializeCustomInfo(String customInfo) {
+
+    private static Model.Mappable deserializeCustomInfo(ModelProto.ModelMetaData protoModelMetaData) {
         try {
-            return new Model.SerializableMappable(ObjectMapperSingleton.OBJECT_MAPPER.readValue(customInfo, Map.class));
-        } catch (Exception e) {
+            var serializable = ModelInfoSerializerFactory
+                .modelInfoSerializer(protoModelMetaData.getAlgoType());
+            var customInfo = protoModelMetaData.getCustomInfo();
+            var unpacked = customInfo.unpack(serializable.serializableClass());
+            return serializable.fromSerializable(unpacked);
+        } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }
     }
