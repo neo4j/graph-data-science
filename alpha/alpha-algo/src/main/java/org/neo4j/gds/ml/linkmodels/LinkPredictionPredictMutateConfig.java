@@ -40,11 +40,6 @@ public interface LinkPredictionPredictMutateConfig extends LinkPredictionPredict
         return "probability";
     }
 
-    @Value.Default
-    default int batchSize() {
-        return 100;
-    }
-
     static LinkPredictionPredictMutateConfig of(
         String username,
         Optional<String> graphName,
