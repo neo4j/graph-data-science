@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core;
 
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.core.ConfigKeyValidation.StringAndScore;
 
@@ -238,7 +239,7 @@ public final class CypherMapWrapper {
         return value;
     }
 
-    public static String failOnBlank(String key, String value) {
+    public static @NotNull String failOnBlank(String key, @Nullable String value) {
         if (value == null || value.trim().isEmpty()) {
             throw blankValueFor(key, value);
         }

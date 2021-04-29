@@ -19,12 +19,14 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 public abstract class CatalogProc extends BaseProc {
 
-    void validateGraphName(String graphName) {
-        CypherMapWrapper.failOnBlank("graphName", graphName);
+    @NotNull String validateGraphName(@Nullable String graphName) {
+        return CypherMapWrapper.failOnBlank("graphName", graphName);
     }
 }

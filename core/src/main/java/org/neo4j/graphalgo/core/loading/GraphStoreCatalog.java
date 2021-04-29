@@ -46,6 +46,10 @@ public final class GraphStoreCatalog {
         return getUserCatalog(username).get(UserCatalog.UserCatalogKey.of(databaseId, graphName));
     }
 
+    public static GraphStoreWithConfig get(String username, String databaseName, String graphName) {
+        return getUserCatalog(username).get(UserCatalog.UserCatalogKey.of(databaseName, graphName));
+    }
+
     public static void set(GraphCreateConfig config, GraphStore graphStore) {
         graphStore.canRelease(false);
         userCatalogs.compute(config.username(), (user, userCatalog) -> {
