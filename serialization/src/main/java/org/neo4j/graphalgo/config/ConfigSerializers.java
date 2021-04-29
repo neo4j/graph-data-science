@@ -20,12 +20,14 @@
 package org.neo4j.graphalgo.config;
 
 import org.neo4j.gds.ml.TrainingConfig;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfig;
 import org.neo4j.gds.ml.nodemodels.multiclasslogisticregression.MultiClassNLRTrainConfigImpl;
 import org.neo4j.graphalgo.config.proto.CommonConfigProto;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
-import org.neo4j.graphalgo.ml.model.proto.NodeClassificationProto;
+import org.neo4j.graphalgo.ml.model.proto.CommonML;
 
 import java.util.Map;
 import java.util.Optional;
@@ -90,29 +92,17 @@ public final class ConfigSerializers {
 
     }
 
-    static ModelProto.TrainingConfig serializableTrainingConfig(TrainingConfig config) {
-        return ModelProto.TrainingConfig.newBuilder()
-            .setBatchSize(config.batchSize())
-            .setMinEpochs(config.minEpochs())
-            .setMaxEpochs(config.maxEpochs())
-            .setPatience(config.patience())
-            .setTolerance(config.tolerance())
-            .setSharedUpdater(config.sharedUpdater())
-            .setConcurrency(config.concurrency())
-            .build();
-    }
-
-    public static NodeClassificationProto.MultiClassNLRTrainConfig.Builder multiClassNLRTrainConfig(
+    public static CommonML.MultiClassNLRTrainConfig.Builder multiClassNLRTrainConfig(
         MultiClassNLRTrainConfig config
     ) {
-        return NodeClassificationProto.MultiClassNLRTrainConfig.newBuilder()
+        return CommonML.MultiClassNLRTrainConfig.newBuilder()
             .addAllFeatureProperties(config.featureProperties())
             .setTargetProperty(config.targetProperty())
             .setPenalty(config.penalty())
             .setTrainingConfig(serializableTrainingConfig(config));
     }
 
-    public static MultiClassNLRTrainConfig multiClassNLRTrainConfig(NodeClassificationProto.MultiClassNLRTrainConfig protoConfig) {
+    public static MultiClassNLRTrainConfig multiClassNLRTrainConfig(CommonML.MultiClassNLRTrainConfig protoConfig) {
         var rawParams = multiClassNLRTrainConfigMap(protoConfig);
 
         return new MultiClassNLRTrainConfigImpl(
@@ -123,7 +113,7 @@ public final class ConfigSerializers {
         );
     }
 
-    static Map<String, Object> multiClassNLRTrainConfigMap(NodeClassificationProto.MultiClassNLRTrainConfig protoConfig) {
+    static Map<String, Object> multiClassNLRTrainConfigMap(CommonML.MultiClassNLRTrainConfig protoConfig) {
         var trainingConfig = protoConfig.getTrainingConfig();
         return Map.of(
             "penalty", protoConfig.getPenalty(),
@@ -135,5 +125,51 @@ public final class ConfigSerializers {
             "sharedUpdater", trainingConfig.getSharedUpdater(),
             "concurrency", trainingConfig.getConcurrency()
         );
+    }
+
+    public static CommonML.LinkLogisticRegressionTrainConfig.Builder linkLogisticRegressionTrainConfig(
+        LinkLogisticRegressionTrainConfig config
+    ) {
+        return CommonML.LinkLogisticRegressionTrainConfig.newBuilder()
+            .addAllFeatureProperties(config.featureProperties())
+            .setPenalty(config.penalty())
+            .setLinkFeatureCombiner(config.linkFeatureCombiner())
+            .setTrainingConfig(serializableTrainingConfig(config));
+    }
+
+    public static LinkLogisticRegressionTrainConfig linkLogisticRegressionTrainConfig(CommonML.LinkLogisticRegressionTrainConfig protoConfig) {
+        var rawParams = linkLogisticRegressionTrainConfigMap(protoConfig);
+
+        return new LinkLogisticRegressionTrainConfigImpl(
+            protoConfig.getFeaturePropertiesList(),
+            CypherMapWrapper.create(rawParams)
+        );
+    }
+
+    static Map<String, Object> linkLogisticRegressionTrainConfigMap(CommonML.LinkLogisticRegressionTrainConfig protoConfig) {
+        var trainingConfig = protoConfig.getTrainingConfig();
+        return Map.of(
+            "penalty", protoConfig.getPenalty(),
+            "linkFeatureCombiner", protoConfig.getLinkFeatureCombiner(),
+            "batchSize", trainingConfig.getBatchSize(),
+            "minEpochs", trainingConfig.getMinEpochs(),
+            "maxEpochs", trainingConfig.getMaxEpochs(),
+            "patience", trainingConfig.getPatience(),
+            "tolerance", trainingConfig.getTolerance(),
+            "sharedUpdater", trainingConfig.getSharedUpdater(),
+            "concurrency", trainingConfig.getConcurrency()
+        );
+    }
+
+    private static ModelProto.TrainingConfig serializableTrainingConfig(TrainingConfig config) {
+        return ModelProto.TrainingConfig.newBuilder()
+            .setBatchSize(config.batchSize())
+            .setMinEpochs(config.minEpochs())
+            .setMaxEpochs(config.maxEpochs())
+            .setPatience(config.patience())
+            .setTolerance(config.tolerance())
+            .setSharedUpdater(config.sharedUpdater())
+            .setConcurrency(config.concurrency())
+            .build();
     }
 }
