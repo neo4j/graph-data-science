@@ -1,4 +1,4 @@
-include::../../shared/syntax-anonymous-graphs.adoc[]
+include::../shared/syntax-anonymous-graphs.adoc[]
 
 .Run {algorithm} in write mode on an anonymous graph:
 [source, cypher, role=noplay, subs="quotes,attributes+"]
@@ -16,7 +16,7 @@ YIELD
   configuration: Map
 ----
 
-include::../../common-configuration/common-write-configuration-anonymous-graph.adoc[]
+include::../common-configuration/common-write-configuration-anonymous-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]

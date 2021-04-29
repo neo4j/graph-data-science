@@ -1,4 +1,4 @@
-include::../../shared/syntax-intro-named-graph.adoc[]
+include::../shared/syntax-intro-named-graph.adoc[]
 
 .{algorithm} syntax per mode
 [.tabbed-example]
@@ -24,9 +24,9 @@ YIELD
   path: Path
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -84,9 +84,9 @@ YIELD
   configuration: Map
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -144,9 +144,9 @@ YIELD
   configuration: Map
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-write-configuration-named-graph.adoc[]
+include::../common-configuration/common-write-configuration-named-graph.adoc[]
 
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]

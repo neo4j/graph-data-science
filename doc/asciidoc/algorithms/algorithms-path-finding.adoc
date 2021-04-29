@@ -9,7 +9,7 @@ This chapter provides explanations and examples for each of the path finding alg
 Path finding algorithms find the shortest path between two or more nodes or evaluate the availability and quality of paths.
 The Neo4j GDS library includes the following path finding algorithms, grouped by quality tier:
 
-* Beta
+* Production-quality
 ** <<algorithms-dijkstra-source-target, Dijkstra Source-Target>>
 ** <<algorithms-dijkstra-single-source, Dijkstra Single-Source>>
 ** <<algorithms-astar, A*>>
@@ -22,13 +22,13 @@ The Neo4j GDS library includes the following path finding algorithms, grouped by
 ** <<algorithms-bfs, Breadth First Search>>
 ** <<algorithms-dfs, Depth First Search>>
 
-include::beta/shortest-path/dijkstra-source-target.adoc[leveloffset=+1]
+include::shortest-path/dijkstra-source-target.adoc[leveloffset=+1]
 
-include::beta/shortest-path/dijkstra-single-source.adoc[leveloffset=+1]
+include::shortest-path/dijkstra-single-source.adoc[leveloffset=+1]
 
-include::beta/shortest-path/astar.adoc[leveloffset=+1]
+include::shortest-path/astar.adoc[leveloffset=+1]
 
-include::beta/shortest-path/yens.adoc[leveloffset=+1]
+include::shortest-path/yens.adoc[leveloffset=+1]
 
 include::alpha/alpha-minimum-weight-spanning-tree.adoc[leveloffset=+1]
 

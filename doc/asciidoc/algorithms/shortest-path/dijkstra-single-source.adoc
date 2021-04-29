@@ -1,55 +1,49 @@
-[[algorithms-yens]]
-= Yen's algorithm
+[[algorithms-dijkstra-single-source]]
+= Dijkstra Single-Source
 :entity: source-target-pair
 :result: shortest path
-:algorithm: Yen's
-:source-target: true
-:procedure-name: pass:q[gds.shortestPath.yens]
+:algorithm: Dijkstra
+:source-target: false
+:procedure-name: pass:q[gds.allShortestPaths.dijkstra]
 
 [abstract]
 --
-This section describes the Yen's Shortest Path algorithm in the Neo4j Graph Data Science library.
+This section describes the Dijkstra Shortest Path algorithm in the Neo4j Graph Data Science library.
 --
 
 
-[[algorithms-yens-intro]]
+[[algorithms-dijkstra-single-source-intro]]
 == Introduction
 
-Yen's Shortest Path algorithm computes a number of shortest paths between two nodes.
-The algorithm is often referred to as Yen's k-Shortest Path algorithm, where k is the number of shortest paths to compute.
+The Dijkstra Shortest Path algorithm computes the shortest path between nodes.
 The algorithm supports weighted graphs with positive relationship weights.
-It also respects parallel relationships between the same two nodes when computing multiple shortest paths.
+The Dijkstra Single-Source algorithm computes the shortest paths between a source node and all nodes reachable from that node.
+To compute the shortest path between a source and a target node, <<algorithms-dijkstra-source-target, Dijkstra Source-Target>> can be used.
 
-For `k = 1`, the algorithm behaves exactly like <<algorithms-dijkstra-source-target, Dijkstra's shortest path algorithm>> and returns the shortest path.
-For `k = 2`, the algorithm returns the shortest path and the second shortest path between the same source and target node.
-Generally, for `k = n`, the algorithm computes at most `n` paths which are discovered in the order of their total cost.
-
-The GDS implementation is based on the https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/[original description].
-For the actual path computation, Yen's algorithm uses <<algorithms-dijkstra-source-target, Dijkstra's shortest path algorithm>>.
-The algorithm makes sure that an already discovered shortest path will not be traversed again.
-
+The GDS implementation is based on the http://www-m3.ma.tum.de/twiki/pub/MN0506/WebHome/dijkstra.pdf[original description] and uses a binary heap as priority queue.
+The implementation is also used for the <<algorithms-astar, A*>> and <<algorithms-yens, Yen's>> algorithms.
 The algorithm implementation is executed using a single thread.
 Altering the concurrency configuration has no effect.
 
-[[algorithms-yens-syntax]]
+
+[[algorithms-dijkstra-single-source-syntax]]
 == Syntax
 
 include::path-syntax.adoc[]
 
-
-[[algorithms-yens-syntax-anonymous]]
+[[algorithms-dijkstra-source-target-syntax-anonymous]]
 === Anonymous graphs
 
 include::path-anonymous-graph.adoc[]
 
 
-[[algorithms-yens-examples]]
+[[algorithms-dijkstra-single-source-examples]]
 == Examples
 
 :algorithm-name: {algorithm}
 :graph-description: transport network
 :image-file: dijkstra.svg
-include::../../shared/examples-intro.adoc[]
+include::../shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
@@ -75,7 +69,7 @@ This graph builds a transportation network with roads between locations.
 Like in the real world, the roads in the graph have different lengths.
 These lengths are represented by the `cost` relationship property.
 
-include::../../shared/examples-named-native-note.adoc[]
+include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-create-query]
@@ -93,22 +87,20 @@ CALL gds.graph.create(
 In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.
 
 
-[[algorithms-yens-examples-memory-estimation]]
+[[algorithms-dijkstra-single-source-examples-memory-estimation]]
 === Memory Estimation
 
 :mode: write
-include::../../shared/examples-estimate-intro.adoc[]
+include::../shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm in write mode:
 [source, cypher, role=noplay]
 ----
-MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
-CALL gds.shortestPath.yens.write.estimate('myGraph', {
+MATCH (source:Location {name: 'A'})
+CALL gds.allShortestPaths.dijkstra.write.estimate('myGraph', {
     sourceNode: id(source),
-    targetNode: id(target),
-    k: 3,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH'
 })
@@ -120,27 +112,25 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 6         | 9                 | 1008     | 1008     | "1008 Bytes"
+| 6         | 9                 | 696      | 696      | "696 Bytes"
 |===
 --
 
 
-[[algorithms-yens-examples-stream]]
+[[algorithms-dijkstra-single-source-examples-stream]]
 === Stream
 
 :!stream-details:
-include::../../shared/examples-stream-intro.adoc[]
+include::../shared/examples-stream-intro.adoc[]]
 
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
-CALL gds.shortestPath.yens.stream('myGraph', {
+MATCH (source:Location {name: 'A'})
+CALL gds.allShortestPaths.dijkstra.stream('myGraph', {
     sourceNode: id(source),
-    targetNode: id(target),
-    k: 3,
     relationshipWeightProperty: 'cost'
 })
 YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs
@@ -158,19 +148,21 @@ ORDER BY index
 [opts="header"]
 |===
 | index | sourceNodeName | targetNodeName | totalCost | nodeNames         | costs
-| 0     | "A"            | "F"            | 160.0     | [A, B, D, E, F] | [0.0, 50.0, 90.0, 120.0, 160.0]
-| 1     | "A"            | "F"            | 160.0     | [A, C, D, E, F] | [0.0, 50.0, 90.0, 120.0, 160.0]
-| 2     | "A"            | "F"            | 170.0     | [A, B, D, F]    | [0.0, 50.0, 90.0, 170.0]
+| 0     | "A"            | "A"            | 0.0       | [A]             | [0.0]
+| 1     | "A"            | "B"            | 50.0      | [A, B]          | [0.0, 50.0]
+| 2     | "A"            | "C"            | 50.0      | [A, C]          | [0.0, 50.0]
+| 3     | "A"            | "D"            | 90.0      | [A, B, D]       | [0.0, 50.0, 90.0]
+| 4     | "A"            | "E"            | 120.0     | [A, B, D, E]    | [0.0, 50.0, 90.0, 120.0]
+| 5     | "A"            | "F"            | 160.0     | [A, B, D, E, F] | [0.0, 50.0, 90.0, 120.0, 160.0]
 |===
 --
 
-The result shows the three shortest paths between node `A` and node `F`.
-The first two paths have the same total cost, however the first one traversed from `A` to `D` via the `B` node, while the second traversed via the `C` node.
-The third path has a higher total cost as it goes directly from `D` to `F` using the relationship with a cost of `80`, whereas the detour via `E` for the first two paths costs `70`.
-This can be verified in the <<algorithms-yens-examples, example graph>>.
+The result shows the total cost of the shortest path between node `A` and all other reachable nodes in the graph.
+It also shows ordered lists of node ids that were traversed to find the shortest paths as well as the accumulated costs of the visited nodes.
+This can be verified in the <<algorithms-dijkstra-single-source-examples, example graph>>.
 
 
-[[algorithms-yens-examples-mutate]]
+[[algorithms-dijkstra-single-source-examples-mutate]]
 === Mutate
 
 include::path-examples-mutate-intro.adoc[]
@@ -180,11 +172,9 @@ include::path-examples-mutate-intro.adoc[]
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
-MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
-CALL gds.shortestPath.yens.mutate('myGraph', {
+MATCH (source:Location {name: 'A'})
+CALL gds.allShortestPaths.dijkstra.mutate('myGraph', {
     sourceNode: id(source),
-    targetNode: id(target),
-    k: 3,
     relationshipWeightProperty: 'cost',
     mutateRelationshipType: 'PATH'
 })
@@ -196,15 +186,15 @@ RETURN relationshipsWritten
 [opts="header"]
 |===
 | relationshipsWritten
-| 3
+| 6
 |===
 --
 
-After executing the above query, the in-memory graph will be updated with a new relationship of type `PATH`.
-The new relationship will store a single property `totalCost`.
+After executing the above query, the in-memory graph will be updated with new relationships of type `PATH`.
+The new relationships will store a single property `totalCost`.
 
 
-[[algorithms-yens-examples-write]]
+[[algorithms-dijkstra-single-source-examples-write]]
 === Write
 
 include::path-examples-write-intro.adoc[]
@@ -214,11 +204,9 @@ include::path-examples-write-intro.adoc[]
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
-MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
-CALL gds.shortestPath.yens.write('myGraph', {
+MATCH (source:Location {name: 'A'})
+CALL gds.allShortestPaths.dijkstra.write('myGraph', {
     sourceNode: id(source),
-    targetNode: id(target),
-    k: 3,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH',
     writeNodeIds: true,
@@ -232,9 +220,9 @@ RETURN relationshipsWritten
 [opts="header"]
 |===
 | relationshipsWritten
-| 3
+| 6
 |===
 --
 
-The above query will write a single relationship of type `PATH` back to Neo4j.
-The relationship stores three properties describing the path: `totalCost`, `nodeIds` and `costs`.
+The above query will write 6 relationships of type `PATH` back to Neo4j.
+The relationships store three properties describing the path: `totalCost`, `nodeIds` and `costs`.
