@@ -72,11 +72,32 @@ class NodeClassificationTrainConfigTest {
 
         assertThat(serializedConfig.getParamConfigsCount()).isEqualTo(2);
 
-        var collect = serializedConfig.getParamsList()
+        var collect = serializedConfig
+            .getParamConfigsList()
             .stream()
-            .map(this::protoToMap)
+            .map(ConfigSerializers::multiClassNLRTrainConfigMap)
             .collect(Collectors.toList());
-        assertThat(collect).containsExactly(model1, model2);
+        var expectedModel1 = Map.<String, Object>of(
+            "batchSize", 100,
+            "concurrency", 1,
+            "maxEpochs", 1,
+            "minEpochs", 1,
+            "patience", 1,
+            "penalty", 1.0,
+            "sharedUpdater", false,
+            "tolerance", 0.001
+        );
+        var expectedModel2 = Map.<String, Object>of(
+            "batchSize", 100,
+            "concurrency", 1,
+            "maxEpochs", 10000,
+            "minEpochs", 1,
+            "patience", 1,
+            "penalty", 1.0,
+            "sharedUpdater", false,
+            "tolerance", 1.0E-5
+        );
+        assertThat(collect).containsExactly(expectedModel1, expectedModel2);
     }
 
     @Test
@@ -135,7 +156,27 @@ class NodeClassificationTrainConfigTest {
         assertThat(deserializedConfig.targetProperty()).isEqualTo("t");
         assertThat(deserializedConfig.metrics()).isEqualTo(MetricSpecification.parse(allValidMetricSpecifications()));
 
-        assertThat(deserializedConfig.params()).containsExactly(model1, model2);
+        var expectedModel1 = Map.<String, Object>of(
+            "batchSize", 100,
+            "concurrency", 1,
+            "maxEpochs", 1,
+            "minEpochs", 1,
+            "patience", 1,
+            "penalty", 1.0,
+            "sharedUpdater", false,
+            "tolerance", 0.001
+        );
+        var expectedModel2 = Map.<String, Object>of(
+            "batchSize", 100,
+            "concurrency", 1,
+            "maxEpochs", 10000,
+            "minEpochs", 1,
+            "patience", 1,
+            "penalty", 1.0,
+            "sharedUpdater", false,
+            "tolerance", 1.0E-5
+        );
+        assertThat(deserializedConfig.params()).containsExactly(expectedModel1, expectedModel2);
     }
 
     @Test

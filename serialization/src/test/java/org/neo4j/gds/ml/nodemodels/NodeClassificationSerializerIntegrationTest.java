@@ -83,16 +83,12 @@ class NodeClassificationSerializerIntegrationTest {
         assertThat(deserializedModel)
             .usingRecursiveComparison()
             .ignoringFields(
-                "customInfo",
+                "trainConfig.params",
                 "data.classIdMap",
                 "graphSchema.nodeSchema.properties.defaultValue.defaultValue",
                 "stored"
             )
             .isEqualTo(modelBeforeSerialization);
-
-// TODO: This should be fixed by replacing the Jackson based serialization of the model info with proto buff
-//        assertThat(deserializedModel.customInfo().toMap())
-//            .containsExactlyInAnyOrderEntriesOf(modelBeforeSerialization.customInfo().toMap());
 
     }
 

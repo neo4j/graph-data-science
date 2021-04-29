@@ -22,14 +22,13 @@ package org.neo4j.graphalgo.config;
 import org.neo4j.gds.TrainConfigSerializer;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.util.ObjectMapperSingleton;
 import org.neo4j.graphalgo.config.proto.CommonConfigProto;
 import org.neo4j.graphalgo.ml.model.proto.NodeClassificationProto;
 
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.config.ConfigSerializers.multiClassNLRTrainConfig;
+import static org.neo4j.graphalgo.config.ConfigSerializers.multiClassNLRTrainConfigMap;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableFeaturePropertiesConfig;
 import static org.neo4j.graphalgo.config.ConfigSerializers.serializableModelConfig;
 
@@ -58,13 +57,9 @@ public final class NodeClassificationTrainConfigSerializer implements TrainConfi
             .map(MetricSpecification::asString)
             .forEach(builder::addMetrics);
 
-        trainConfig.params().forEach(paramsMap -> {
-            try {
-                var p = ObjectMapperSingleton.OBJECT_MAPPER.writeValueAsString(paramsMap);
-                builder.addParams(p);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        trainConfig.paramsConfig().forEach(config -> {
+            var trainingConfig = multiClassNLRTrainConfig(config);
+            builder.addParamConfigs(trainingConfig);
         });
 
         return builder.build();
@@ -92,12 +87,9 @@ public final class NodeClassificationTrainConfigSerializer implements TrainConfi
             .collect(Collectors.toList());
         builder.metrics(metrics);
 
-        List<Map<String, Object>> params = serializedTrainConfig
-            .getParamsList()
-            .stream()
-            .map(this::protoToMap)
-            .collect(Collectors.toList());
-        builder.params(params);
+        serializedTrainConfig.getParamConfigsList().forEach(paramConfig -> {
+            builder.addParam(multiClassNLRTrainConfigMap(paramConfig));
+        });
 
         return builder.build();
     }
@@ -105,13 +97,5 @@ public final class NodeClassificationTrainConfigSerializer implements TrainConfi
     @Override
     public Class<NodeClassificationProto.NodeClassificationTrainConfig> serializableClass() {
         return NodeClassificationProto.NodeClassificationTrainConfig.class;
-    }
-
-    private Map<String, Object> protoToMap(String p) {
-        try {
-            return ObjectMapperSingleton.OBJECT_MAPPER.readValue(p, Map.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

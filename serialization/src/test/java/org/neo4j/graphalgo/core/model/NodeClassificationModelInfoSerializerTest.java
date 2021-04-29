@@ -51,9 +51,10 @@ class NodeClassificationModelInfoSerializerTest {
             Map.of(AllClassMetric.F1_WEIGHTED, metricData)
         );
 
-        var serializableInfo = NodeClassificationModelInfoSerializer.toSerializable(info);
+        var serializer = new NodeClassificationModelInfoSerializer();
+        var serializableInfo = serializer.toSerializable(info);
 
-        var fromSerializable = NodeClassificationModelInfoSerializer.fromSerializable(serializableInfo);
+        var fromSerializable = serializer.fromSerializable(serializableInfo);
 
         assertThat(fromSerializable)
             .usingRecursiveComparison()
