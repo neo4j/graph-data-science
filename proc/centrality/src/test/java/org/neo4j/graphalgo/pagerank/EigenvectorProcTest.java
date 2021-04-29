@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -266,7 +265,6 @@ class EigenvectorProcTest extends BaseProcTest {
         );
     }
 
-    @Disabled
     @Test
     void failOnDampingFactor() {
         String query = GdsCypher.call()
