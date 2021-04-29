@@ -43,12 +43,12 @@ class NodeLogisticRegressionDataTest {
             .memoryUsage();
 
         var overheadForOneClassIdMap = 24 + 16 + 32;
-        var overheadForOneWeigths = 32 + 24 + 16;
-        var overheadForOneMLNLRData = 16 + overheadForOneClassIdMap + overheadForOneWeigths;
+        var overheadForOneWeigths = 16;
+        var overheadForOneNLRData = 16 + overheadForOneClassIdMap + overheadForOneWeigths;
 
         // scaling number of classes scales memory usage linearly, modulo overhead
-        assertThat(_08_05.max).isEqualTo(2 * _04_05.max - overheadForOneMLNLRData);
-        assertThat(_08_10.max).isEqualTo(2 * _04_10.max - overheadForOneMLNLRData);
+        assertThat(_08_05.max).isEqualTo(2 * _04_05.max - overheadForOneNLRData);
+        assertThat(_08_10.max).isEqualTo(2 * _04_10.max - overheadForOneNLRData);
 
         var _04_20 = NodeLogisticRegressionData.memoryEstimation(4, 20)
             .estimate(dimensions, 1)
@@ -62,8 +62,8 @@ class NodeLogisticRegressionDataTest {
         // * 4: the number of classes
         // * 8: size per stored value in the weights matrix
         // => the size of the change based on varying the number of features
-        assertThat(_04_05.max).isEqualTo(400);
-        assertThat(_04_10.max).isEqualTo(400 + 5 * 4 * 8); // five is the number of added features
+        assertThat(_04_05.max).isEqualTo(344);
+        assertThat(_04_10.max).isEqualTo(344 + 5 * 4 * 8); // five is the number of added features
         assertThat(_04_10.max).isEqualTo(_04_05.max + 5 * 4 * 8);
         assertThat(_08_10.max).isEqualTo(_08_05.max + 5 * 8 * 8);
         assertThat(_04_20.max).isEqualTo(_04_05.max + 15 * 4 * 8);

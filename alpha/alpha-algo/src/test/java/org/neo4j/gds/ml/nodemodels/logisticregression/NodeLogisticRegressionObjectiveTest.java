@@ -75,11 +75,39 @@ class NodeLogisticRegressionObjectiveTest {
     @Test
     void shouldEstimateMemoryUsage() {
         var memoryUsageInBytes = NodeLogisticRegressionObjective.sizeOfBatchInBytes(100, 10, 10);
-        var memoryUsageOfMakeTargets = 8 * 100 * 1 + 16; // 8 bytes for a double * batchSize * 1 for the single target property + 16 for the double array
-        var memoryUsageOfApplyingL2NormSquared = 8 + 16; // 8 bytes for a double + 16 for the double array
-        var memoryUsageOfPredictor = 24304; // black box, not from this class
-        assertThat(memoryUsageOfMakeTargets).isEqualTo(NodeLogisticRegressionObjective.costOfMakeTargets(100));
-        assertThat(memoryUsageInBytes).isEqualTo(memoryUsageOfPredictor + memoryUsageOfMakeTargets + memoryUsageOfApplyingL2NormSquared);
+
+        var weightGradient = 8 * 10 * 10 + 16;      // 8 bytes for a double * numberOfClasses * numberOfFeatures + 16 for the double array
+        var makeTargets = 8 * 100 * 1 + 16;         // 8 bytes for a double * batchSize * 1 for the single target property + 16 for the double array
+        var weightedFeatures = 8 * 100 * 10 + 16;   // 8 bytes for a double * batchSize * numberOfClasses + 16 for the double array
+        var softMax = 8 * 100 * 10 + 16;            // 8 bytes for a double * batchSize * numberOfClasses + 16 for the double array
+        var unpenalizedLoss = 24;                   // 8 bytes for a double + 16 for the double array
+        var l2norm = 8 + 16;                        // 8 bytes for a double + 16 for the double array
+        var constantScale = 8 + 16;                 // 8 bytes for a souble + 16 for the double array
+        var elementSum = 8 + 16;                    // 8 bytes for a souble + 16 for the double array
+        var predictor = 24304;                      // black box, not from this class
+
+        var trainEpoch = makeTargets +
+                         weightedFeatures +
+                         softMax +
+                         2 * unpenalizedLoss +
+                         2 * l2norm +
+                         2 * constantScale +
+                         2 * elementSum +
+                         predictor;
+
+        var evaluateLoss = makeTargets +
+                           weightedFeatures +
+                           softMax +
+                           unpenalizedLoss +
+                           l2norm +
+                           constantScale +
+                           elementSum +
+                           predictor;
+
+        var expected = trainEpoch + evaluateLoss + weightGradient;
+        ;
+        assertThat(makeTargets).isEqualTo(NodeLogisticRegressionObjective.costOfMakeTargets(100));
+        assertThat(memoryUsageInBytes).isEqualTo(expected);
     }
 
 }
