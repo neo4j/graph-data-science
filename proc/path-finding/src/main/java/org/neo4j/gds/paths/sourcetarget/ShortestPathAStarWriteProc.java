@@ -42,7 +42,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class ShortestPathAStarWriteProc extends ShortestPathWriteProc<AStar, ShortestPathAStarWriteConfig> {
 
-    @Procedure(name = "gds.beta.shortestPath.astar.write", mode = WRITE)
+    @Procedure(name = "gds.shortestPath.astar.write", mode = WRITE)
     @Description(ASTAR_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -51,7 +51,7 @@ public class ShortestPathAStarWriteProc extends ShortestPathWriteProc<AStar, Sho
         return write(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(name = "gds.beta.shortestPath.astar.write.estimate", mode = READ)
+    @Procedure(name = "gds.shortestPath.astar.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> writeEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

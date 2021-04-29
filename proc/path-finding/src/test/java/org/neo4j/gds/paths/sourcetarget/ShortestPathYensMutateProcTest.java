@@ -134,7 +134,7 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
 
         var query = GdsCypher.call()
             .explicitCreation(GRAPH_NAME)
-            .algo("gds.beta.shortestPath.yens")
+            .algo("gds.shortestPath.yens")
             .mutateMode()
             .addParameter("sourceNode", config.sourceNode())
             .addParameter("targetNode", config.targetNode())

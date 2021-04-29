@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathAStarStreamProc extends ShortestPathStreamProc<AStar, ShortestPathAStarStreamConfig> {
 
-    @Procedure(name = "gds.beta.shortestPath.astar.stream", mode = READ)
+    @Procedure(name = "gds.shortestPath.astar.stream", mode = READ)
     @Description(ASTAR_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -50,7 +50,7 @@ public class ShortestPathAStarStreamProc extends ShortestPathStreamProc<AStar, S
         return stream(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(name = "gds.beta.shortestPath.astar.stream.estimate", mode = READ)
+    @Procedure(name = "gds.shortestPath.astar.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> streamEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

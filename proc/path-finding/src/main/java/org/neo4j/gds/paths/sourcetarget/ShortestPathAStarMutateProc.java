@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathAStarMutateProc extends ShortestPathMutateProc<AStar, ShortestPathAStarMutateConfig> {
 
-    @Procedure(name = "gds.beta.shortestPath.astar.mutate", mode = READ)
+    @Procedure(name = "gds.shortestPath.astar.mutate", mode = READ)
     @Description(ASTAR_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -50,7 +50,7 @@ public class ShortestPathAStarMutateProc extends ShortestPathMutateProc<AStar, S
         return mutate(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(name = "gds.beta.shortestPath.astar.mutate.estimate", mode = READ)
+    @Procedure(name = "gds.shortestPath.astar.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> mutateEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

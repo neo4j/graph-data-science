@@ -4,7 +4,7 @@
 :result: shortest path
 :algorithm: Dijkstra
 :source-target: false
-:procedure-name: pass:q[gds.beta.allShortestPaths.dijkstra]
+:procedure-name: pass:q[gds.allShortestPaths.dijkstra]
 
 [abstract]
 --
@@ -99,7 +99,7 @@ include::../../shared/examples-estimate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'})
-CALL gds.beta.allShortestPaths.dijkstra.write.estimate('myGraph', {
+CALL gds.allShortestPaths.dijkstra.write.estimate('myGraph', {
     sourceNode: id(source),
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH'
@@ -129,7 +129,7 @@ include::../../shared/examples-stream-intro.adoc[]]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'})
-CALL gds.beta.allShortestPaths.dijkstra.stream('myGraph', {
+CALL gds.allShortestPaths.dijkstra.stream('myGraph', {
     sourceNode: id(source),
     relationshipWeightProperty: 'cost'
 })
@@ -173,7 +173,7 @@ include::path-examples-mutate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'})
-CALL gds.beta.allShortestPaths.dijkstra.mutate('myGraph', {
+CALL gds.allShortestPaths.dijkstra.mutate('myGraph', {
     sourceNode: id(source),
     relationshipWeightProperty: 'cost',
     mutateRelationshipType: 'PATH'
@@ -205,7 +205,7 @@ include::path-examples-write-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'})
-CALL gds.beta.allShortestPaths.dijkstra.write('myGraph', {
+CALL gds.allShortestPaths.dijkstra.write('myGraph', {
     sourceNode: id(source),
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH',

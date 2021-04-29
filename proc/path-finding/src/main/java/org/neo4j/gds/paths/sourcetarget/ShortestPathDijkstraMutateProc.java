@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathDijkstraMutateProc extends ShortestPathMutateProc<Dijkstra, ShortestPathDijkstraMutateConfig> {
 
-    @Procedure(name = "gds.beta.shortestPath.dijkstra.mutate", mode = READ)
+    @Procedure(name = "gds.shortestPath.dijkstra.mutate", mode = READ)
     @Description(DIJKSTRA_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -50,7 +50,7 @@ public class ShortestPathDijkstraMutateProc extends ShortestPathMutateProc<Dijks
         return mutate(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(name = "gds.beta.shortestPath.dijkstra.mutate.estimate", mode = READ)
+    @Procedure(name = "gds.shortestPath.dijkstra.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> mutateEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

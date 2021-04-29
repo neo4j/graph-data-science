@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathYensStreamProc extends ShortestPathStreamProc<Yens, ShortestPathYensStreamConfig> {
 
-    @Procedure(name = "gds.beta.shortestPath.yens.stream", mode = READ)
+    @Procedure(name = "gds.shortestPath.yens.stream", mode = READ)
     @Description(YENS_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -50,7 +50,7 @@ public class ShortestPathYensStreamProc extends ShortestPathStreamProc<Yens, Sho
         return stream(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(name = "gds.beta.shortestPath.yens.stream.estimate", mode = READ)
+    @Procedure(name = "gds.shortestPath.yens.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> streamEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

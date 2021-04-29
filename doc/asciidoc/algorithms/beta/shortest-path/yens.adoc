@@ -4,7 +4,7 @@
 :result: shortest path
 :algorithm: Yen's
 :source-target: true
-:procedure-name: pass:q[gds.beta.shortestPath.yens]
+:procedure-name: pass:q[gds.shortestPath.yens]
 
 [abstract]
 --
@@ -105,7 +105,7 @@ include::../../shared/examples-estimate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
-CALL gds.beta.shortestPath.yens.write.estimate('myGraph', {
+CALL gds.shortestPath.yens.write.estimate('myGraph', {
     sourceNode: id(source),
     targetNode: id(target),
     k: 3,
@@ -137,7 +137,7 @@ include::../../shared/examples-stream-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
-CALL gds.beta.shortestPath.yens.stream('myGraph', {
+CALL gds.shortestPath.yens.stream('myGraph', {
     sourceNode: id(source),
     targetNode: id(target),
     k: 3,
@@ -181,7 +181,7 @@ include::path-examples-mutate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
-CALL gds.beta.shortestPath.yens.mutate('myGraph', {
+CALL gds.shortestPath.yens.mutate('myGraph', {
     sourceNode: id(source),
     targetNode: id(target),
     k: 3,
@@ -215,7 +215,7 @@ include::path-examples-write-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
-CALL gds.beta.shortestPath.yens.write('myGraph', {
+CALL gds.shortestPath.yens.write('myGraph', {
     sourceNode: id(source),
     targetNode: id(target),
     k: 3,

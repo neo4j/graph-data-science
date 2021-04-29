@@ -123,8 +123,8 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.node2vec.write",
         "gds.beta.node2vec.write.estimate",
 
-        "gds.beta.allShortestPaths.dijkstra.stream",
-        "gds.beta.allShortestPaths.dijkstra.stream.estimate",
+        "gds.allShortestPaths.dijkstra.stream",
+        "gds.allShortestPaths.dijkstra.stream.estimate",
 
         "gds.beta.graphSage.mutate",
         "gds.beta.graphSage.mutate.estimate",
@@ -178,11 +178,11 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.modularityOptimization.write",
         "gds.beta.modularityOptimization.write.estimate",
 
-        "gds.beta.shortestPath.dijkstra.stream",
-        "gds.beta.shortestPath.dijkstra.stream.estimate",
+        "gds.shortestPath.dijkstra.stream",
+        "gds.shortestPath.dijkstra.stream.estimate",
 
-        "gds.beta.shortestPath.yens.stream",
-        "gds.beta.shortestPath.yens.stream.estimate",
+        "gds.shortestPath.yens.stream",
+        "gds.shortestPath.yens.stream.estimate",
 
         "gds.betweenness.mutate",
         "gds.betweenness.mutate.estimate",

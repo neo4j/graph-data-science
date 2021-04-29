@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathDijkstraStreamProc extends ShortestPathStreamProc<Dijkstra, ShortestPathDijkstraStreamConfig> {
 
-    @Procedure(name = "gds.beta.shortestPath.dijkstra.stream", mode = READ)
+    @Procedure(name = "gds.shortestPath.dijkstra.stream", mode = READ)
     @Description(DIJKSTRA_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -50,7 +50,7 @@ public class ShortestPathDijkstraStreamProc extends ShortestPathStreamProc<Dijks
         return stream(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(name = "gds.beta.shortestPath.dijkstra.stream.estimate", mode = READ)
+    @Procedure(name = "gds.shortestPath.dijkstra.stream.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> streamEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

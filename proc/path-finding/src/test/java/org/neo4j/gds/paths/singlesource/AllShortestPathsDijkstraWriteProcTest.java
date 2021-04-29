@@ -72,7 +72,7 @@ class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProc
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
         var query = GdsCypher.call().explicitCreation("graph")
-            .algo("gds.beta.allShortestPaths.dijkstra")
+            .algo("gds.allShortestPaths.dijkstra")
             .writeMode()
             .addParameter("sourceNode", config.sourceNode())
             .addParameter("relationshipWeightProperty", "cost")
@@ -108,7 +108,7 @@ class AllShortestPathsDijkstraWriteProcTest extends AllShortestPathsDijkstraProc
         var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
 
         var query = GdsCypher.call().explicitCreation("graph")
-            .algo("gds.beta.allShortestPaths.dijkstra")
+            .algo("gds.allShortestPaths.dijkstra")
             .writeMode()
             .addParameter("sourceNode", config.sourceNode())
             .addParameter("relationshipWeightProperty", relationshipWeightProperty)

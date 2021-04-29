@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathYensMutateProc extends ShortestPathMutateProc<Yens, ShortestPathYensMutateConfig> {
 
-    @Procedure(name = "gds.beta.shortestPath.yens.mutate", mode = READ)
+    @Procedure(name = "gds.shortestPath.yens.mutate", mode = READ)
     @Description(YENS_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -50,7 +50,7 @@ public class ShortestPathYensMutateProc extends ShortestPathMutateProc<Yens, Sho
         return mutate(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(name = "gds.beta.shortestPath.yens.mutate.estimate", mode = READ)
+    @Procedure(name = "gds.shortestPath.yens.mutate.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> mutateEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

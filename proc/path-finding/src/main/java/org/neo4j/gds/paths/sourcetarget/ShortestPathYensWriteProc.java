@@ -42,7 +42,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class ShortestPathYensWriteProc extends ShortestPathWriteProc<Yens, ShortestPathYensWriteConfig> {
 
-    @Procedure(name = "gds.beta.shortestPath.yens.write", mode = WRITE)
+    @Procedure(name = "gds.shortestPath.yens.write", mode = WRITE)
     @Description(YENS_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -51,7 +51,7 @@ public class ShortestPathYensWriteProc extends ShortestPathWriteProc<Yens, Short
         return write(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(name = "gds.beta.shortestPath.yens.write.estimate", mode = READ)
+    @Procedure(name = "gds.shortestPath.yens.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> writeEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

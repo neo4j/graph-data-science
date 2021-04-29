@@ -42,7 +42,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dijkstra, AllShortestPathsDijkstraWriteConfig> {
 
-    @Procedure(name = "gds.beta.allShortestPaths.dijkstra.write", mode = WRITE)
+    @Procedure(name = "gds.allShortestPaths.dijkstra.write", mode = WRITE)
     @Description(DIJKSTRA_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
@@ -51,7 +51,7 @@ public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dij
         return write(compute(graphNameOrConfig, configuration));
     }
 
-    @Procedure(name = "gds.beta.allShortestPaths.dijkstra.write.estimate", mode = READ)
+    @Procedure(name = "gds.allShortestPaths.dijkstra.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> writeEstimate(
         @Name(value = "graphName") Object graphNameOrConfig,

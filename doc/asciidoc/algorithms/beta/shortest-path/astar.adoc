@@ -4,7 +4,7 @@
 :result: shortest path
 :algorithm: A*
 :source-target: true
-:procedure-name: pass:q[gds.beta.shortestPath.astar]
+:procedure-name: pass:q[gds.shortestPath.astar]
 
 [abstract]
 --
@@ -119,7 +119,7 @@ include::../../shared/examples-estimate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
-CALL gds.beta.shortestPath.astar.write.estimate('myGraph', {
+CALL gds.shortestPath.astar.write.estimate('myGraph', {
     sourceNode: id(source),
     targetNode: id(target),
     latitudeProperty: 'latitude',
@@ -151,7 +151,7 @@ include::../../shared/examples-stream-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
-CALL gds.beta.shortestPath.astar.stream('myGraph', {
+CALL gds.shortestPath.astar.stream('myGraph', {
     sourceNode: id(source),
     targetNode: id(target),
     latitudeProperty: 'latitude',
@@ -193,7 +193,7 @@ include::path-examples-mutate-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
-CALL gds.beta.shortestPath.astar.mutate('myGraph', {
+CALL gds.shortestPath.astar.mutate('myGraph', {
     sourceNode: id(source),
     targetNode: id(target),
     latitudeProperty: 'latitude',
@@ -228,7 +228,7 @@ include::path-examples-write-intro.adoc[]
 [source, cypher, role=noplay]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
-CALL gds.beta.shortestPath.astar.write('myGraph', {
+CALL gds.shortestPath.astar.write('myGraph', {
     sourceNode: id(source),
     targetNode: id(target),
     latitudeProperty: 'latitude',
