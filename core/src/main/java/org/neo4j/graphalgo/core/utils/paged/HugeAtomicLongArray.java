@@ -308,11 +308,15 @@ public abstract class HugeAtomicLongArray {
 
         @Override
         public void update(long index, LongUnaryOperator updateFunction) {
-            long prev, next;
-            do {
-                prev = (long) ARRAY_HANDLE.getVolatile(page, (int) index);
-                next = updateFunction.applyAsLong(prev);
-            } while (!ARRAY_HANDLE.weakCompareAndSet(page, (int) index, prev, next));
+            long prev = (long) ARRAY_HANDLE.getAcquire(page, (int) index);
+            while (true) {
+                long next = updateFunction.applyAsLong(prev);
+                long current = (long) ARRAY_HANDLE.compareAndExchangeRelease(page, (int) index, prev, next);
+                if (prev == current) {
+                    return;
+                }
+                prev = current;
+            }
         }
 
         @Override
@@ -425,11 +429,15 @@ public abstract class HugeAtomicLongArray {
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
             long[] page = pages[pageIndex];
-            long prev, next;
-            do {
-                prev = (long) ARRAY_HANDLE.getVolatile(page, indexInPage);
-                next = updateFunction.applyAsLong(prev);
-            } while (!ARRAY_HANDLE.compareAndSet(page, indexInPage, prev, next));
+            long prev = (long) ARRAY_HANDLE.getAcquire(page, indexInPage);
+            while (true) {
+                long next = updateFunction.applyAsLong(prev);
+                long current = (long) ARRAY_HANDLE.compareAndExchangeRelease(page, indexInPage, prev, next);
+                if (prev == current) {
+                    return;
+                }
+                prev = current;
+            }
         }
 
         @Override

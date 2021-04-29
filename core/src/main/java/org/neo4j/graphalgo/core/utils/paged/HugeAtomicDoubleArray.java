@@ -274,11 +274,15 @@ public abstract class HugeAtomicDoubleArray {
 
         @Override
         public void update(long index, DoubleUnaryOperator updateFunction) {
-            double prev, next;
-            do {
-                prev = (double) ARRAY_HANDLE.getVolatile(page, (int) index);
-                next = updateFunction.applyAsDouble(prev);
-            } while (!ARRAY_HANDLE.weakCompareAndSet(page, (int) index, prev, next));
+            double prev = (double) ARRAY_HANDLE.getAcquire(page, (int) index);
+            while (true) {
+                double next = updateFunction.applyAsDouble(prev);
+                double current = (double) ARRAY_HANDLE.compareAndExchangeRelease(page, (int) index, prev, next);
+                if (Double.compare(prev, current) == 0) {
+                    return;
+                }
+                prev = current;
+            }
         }
 
         @Override
@@ -384,11 +388,15 @@ public abstract class HugeAtomicDoubleArray {
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
             double[] page = pages[pageIndex];
-            double prev, next;
-            do {
-                prev = (double) ARRAY_HANDLE.getVolatile(page, indexInPage);
-                next = updateFunction.applyAsDouble(prev);
-            } while (!ARRAY_HANDLE.compareAndSet(page, indexInPage, prev, next));
+            double prev = (double) ARRAY_HANDLE.getAcquire(page, indexInPage);
+            while (true) {
+                double next = updateFunction.applyAsDouble(prev);
+                double current = (double) ARRAY_HANDLE.compareAndExchangeRelease(page, indexInPage, prev, next);
+                if (Double.compare(current, prev) == 0) {
+                    return;
+                }
+                prev = current;
+            }
         }
 
         @Override
