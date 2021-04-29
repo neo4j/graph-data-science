@@ -37,6 +37,7 @@ public class MetricSpecificationTest {
         var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.getClass()).isEqualTo(F1Score.class);
         assertThat(metric.toString()).isEqualTo("F1_class_42");
+        assertThat(metric.name()).isEqualTo("F1(class=42)");
         assertThat(metricSpecification.asString()).isEqualTo("F1(class=42)");
     }
 
@@ -71,8 +72,10 @@ public class MetricSpecificationTest {
         List<Metric> metrics = metricSpecification.createMetrics(List.of(42L, -1337L)).collect(Collectors.toList());
         assertThat(metrics.get(0).getClass()).isEqualTo(F1Score.class);
         assertThat(metrics.get(0).toString()).isEqualTo("F1_class_42");
+        assertThat(metrics.get(0).name()).isEqualTo("F1(class=42)");
         assertThat(metrics.get(1).getClass()).isEqualTo(F1Score.class);
         assertThat(metrics.get(1).toString()).isEqualTo("F1_class_-1337");
+        assertThat(metrics.get(1).name()).isEqualTo("F1(class=-1337)");
     }
 
     @ParameterizedTest

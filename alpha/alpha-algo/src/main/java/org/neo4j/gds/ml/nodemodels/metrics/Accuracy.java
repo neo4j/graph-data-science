@@ -88,4 +88,9 @@ public class Accuracy implements Metric {
     public String toString() {
         return formatWithLocale("%s_class_%d", NAME, positiveTarget);
     }
+
+    @Override
+    public String name() {
+        return formatWithLocale("%s(class=%d)", NAME, positiveTarget);
+    }
 }
