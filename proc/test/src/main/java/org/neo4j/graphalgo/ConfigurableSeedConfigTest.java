@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
@@ -80,10 +81,11 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<ALGORITH
         List<PropertyMapping> nodeProperties = Stream.of("a", "b", "c").map(PropertyMapping::of)
             .collect(Collectors.toList());
 
-        GraphCreateFromStoreConfig graphCreateConfig = withNameAndNodeProjections(
+        GraphCreateFromStoreConfig graphCreateConfig = ImmutableGraphCreateFromStoreConfig.of(
             "",
             graphName,
-            NodeProjections.single(NodeLabel.of("A"), NodeProjection.of("A", PropertyMappings.of(nodeProperties)))
+            NodeProjections.single(NodeLabel.of("A"), NodeProjection.of("A", PropertyMappings.of(nodeProperties))),
+            allRelationshipsProjection()
         );
 
         GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
@@ -108,7 +110,11 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<ALGORITH
     @Test
     default void shouldFailWithInvalidSeedProperty() {
         String loadedGraphName = "loadedGraph";
-        GraphCreateConfig graphCreateConfig = emptyWithNameNative("", loadedGraphName);
+        GraphCreateConfig graphCreateConfig = withNameAndRelationshipProjections(
+            "",
+            loadedGraphName,
+            allRelationshipsProjection()
+        );
 
         applyOnProcedure((proc) -> {
             GraphStore graphStore = graphLoader(graphCreateConfig).graphStore();
@@ -140,5 +146,11 @@ public interface ConfigurableSeedConfigTest<ALGORITHM extends Algorithm<ALGORITH
 
     default String seedPropertyKeyOverride() {
         return "seedProperty";
+    }
+
+    private RelationshipProjections allRelationshipsProjection() {
+        return this instanceof OnlyUndirectedTest<?, ?, ?>
+            ? RelationshipProjections.ALL_UNDIRECTED
+            : RelationshipProjections.ALL;
     }
 }

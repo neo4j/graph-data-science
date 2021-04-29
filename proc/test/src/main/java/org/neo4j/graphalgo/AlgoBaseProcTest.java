@@ -53,6 +53,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -65,6 +66,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.neo4j.graphalgo.AbstractRelationshipProjection.ORIENTATION_KEY;
+import static org.neo4j.graphalgo.AbstractRelationshipProjection.TYPE_KEY;
 import static org.neo4j.graphalgo.BaseProcTest.anonymousGraphConfig;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
@@ -105,7 +108,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     default boolean supportsImplicitGraphCreate() {
         return true;
     }
-    
+
     GraphDatabaseAPI graphDb();
 
     default NamedDatabaseId namedDatabaseId() {
@@ -449,7 +452,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
             getWriteAndStreamProcedures(proc)
                 .forEach(method -> {
                     String missingRelType = "___THIS_REL_TYPE_SHOULD_NOT_EXIST___";
-                    Map<String, Object> tempConfig = MapUtil.map(RELATIONSHIP_PROJECTION_KEY, Collections.singletonList(missingRelType));
+                    Map<String, Object> tempConfig = Map.of(RELATIONSHIP_PROJECTION_KEY, relationshipProjectionForType(missingRelType));
 
                     Map<String, Object> configMap = createMinimalImplicitConfig(CypherMapWrapper.create(tempConfig)).toMap();
 
@@ -466,6 +469,12 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                         ));
                 });
         });
+    }
+
+    private Object relationshipProjectionForType(String type) {
+        return this instanceof OnlyUndirectedTest<?, ?, ?>
+            ? Map.of(type, Map.of(TYPE_KEY, type, ORIENTATION_KEY, Orientation.UNDIRECTED.name()))
+            : List.of(type);
     }
 
     @Test
