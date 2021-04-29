@@ -33,6 +33,7 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static java.util.Map.entry;
 import static org.hamcrest.core.Is.isA;
@@ -51,6 +52,7 @@ class GraphDropProcTest extends BaseProcTest {
             GraphExistsProc.class,
             GraphDropProc.class
         );
+        registerFunctions(GraphExistsFunc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -234,4 +236,99 @@ class GraphDropProcTest extends BaseProcTest {
         );
     }
 
+    @Test
+    void dropsMultipleGraphsGraphFromCatalogWithListAsArgument() {
+        var createQuery = "CALL gds.graph.create($name, '*', '*')";
+        runQuery(createQuery, Map.of("name", "g1"));
+        runQuery(createQuery, Map.of("name", "g2"));
+
+        assertCypherResult(
+            "CALL gds.graph.drop(['g1', 'g2']) YIELD graphName RETURN graphName",
+            Map.of(),
+            List.of(
+                Map.of("graphName", "g1"),
+                Map.of("graphName", "g2")
+            )
+        );
+
+        var existsQuery = "RETURN gds.graph.exists($graphName) AS exists";
+        assertCypherResult(
+            existsQuery, Map.of("graphName", "g1"),
+            List.of(Map.of("exists", false))
+        );
+        assertCypherResult(
+            existsQuery, Map.of("graphName", "g2"),
+            List.of(Map.of("exists", false))
+        );
+    }
+
+    @Test
+    void requiresAllGraphsToExistBeforeAnyOneIsDropped() {
+        var createQuery = "CALL gds.graph.create($name, '*', '*')";
+        var existsQuery = "RETURN gds.graph.exists($graphName) AS exists";
+
+        runQuery(createQuery, Map.of("name", "g1"));
+
+        assertCypherResult(
+            existsQuery, Map.of("graphName", "g2"),
+            List.of(Map.of("exists", false))
+        );
+
+        assertError(
+            "CALL gds.graph.drop(['g1', 'g2'])",
+            "Graph with name `g2` does not exist on database `neo4j`."
+        );
+
+        assertCypherResult(
+            existsQuery, Map.of("graphName", "g1"),
+            List.of(Map.of("exists", true))
+        );
+    }
+
+    @Test
+    void droppingMultipleGraphsAcceptsTheFailIfMissingFlag() {
+        var createQuery = "CALL gds.graph.create($name, '*', '*')";
+        runQuery(createQuery, Map.of("name", "g1"));
+
+        assertCypherResult(
+            "CALL gds.graph.drop(['g1', 'g2'], false) YIELD graphName RETURN graphName",
+            List.of(
+                Map.of("graphName", "g1")
+            )
+        );
+
+        var existsQuery = "RETURN gds.graph.exists($graphName) AS exists";
+        assertCypherResult(
+            existsQuery, Map.of("graphName", "g1"),
+            List.of(Map.of("exists", false))
+        );
+        assertCypherResult(
+            existsQuery, Map.of("graphName", "g2"),
+            List.of(Map.of("exists", false))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidInputTypeValues")
+    void failOnNonStringOrListInput(Object invalidInput) {
+        assertError(
+            call("gds.graph.drop").withArgs(literalOf(invalidInput)).build().getCypher(),
+            formatWithLocale(
+                "Type mismatch: expected String but was %s",
+                invalidInput.getClass().getSimpleName()
+            )
+        );
+
+        assertError(
+            call("gds.graph.drop").withArgs(literalOf(List.of(invalidInput))).build().getCypher(),
+            formatWithLocale(
+                "Type mismatch at index 0: expected String but was %s",
+                invalidInput.getClass().getSimpleName()
+            )
+        );
+    }
+
+    static Stream<Object> invalidInputTypeValues() {
+        return Stream.of(true, false, 42L, 13.37D);
+    }
 }
