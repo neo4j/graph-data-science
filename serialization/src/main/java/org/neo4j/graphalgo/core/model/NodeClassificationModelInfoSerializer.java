@@ -23,11 +23,13 @@ import org.neo4j.gds.ModelInfoSerializer;
 import org.neo4j.gds.ml.nodemodels.ImmutableMetricData;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationModelInfo;
-import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
+import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.graphalgo.ml.model.proto.CommonML;
+
+import java.util.function.BiConsumer;
 
 import static org.neo4j.graphalgo.config.ConfigSerializers.multiClassNLRTrainConfig;
 
@@ -41,24 +43,12 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
             .setBestParameters(multiClassNLRTrainConfig(modelInfo.bestParameters()));
 
 
-        modelInfo.metrics().forEach(((metric, metricData) -> {
-            var metricName = metric.name();
-
-            var infoMetricBuilder = CommonML.InfoMetric.newBuilder()
-                .setTest(metricData.test())
-                .setOuterTrain(metricData.outerTrain());
-
-            metricData.train().forEach(datum -> {
-                infoMetricBuilder.addTrain(buildMetricScores(datum));
-            });
-
-            metricData.validation().forEach(datum -> {
-                infoMetricBuilder.addValidation(buildMetricScores(datum));
-            });
-
-            builder.putMetrics(metricName, infoMetricBuilder.build());
-        }));
-
+        ModelInfoSerializer.serializeMetrics(
+            modelInfo.metrics(),
+            Metric::name,
+            (paramsBuilder, modelStats) -> paramsBuilder.setNodeClassificationParams(multiClassNLRTrainConfig(modelStats.params())),
+            builder::putMetrics
+        );
 
         return builder.build();
     }
@@ -79,27 +69,19 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
                 .test(protoMetricData.getTest())
                 .outerTrain(protoMetricData.getOuterTrain());
 
-            protoMetricData.getTrainList().forEach(protoTrain -> {
-                metricDataBuilder.addTrain(
-                    ImmutableModelStats.<NodeLogisticRegressionTrainConfig>builder()
-                        .avg(protoTrain.getAvg())
-                        .min(protoTrain.getMin())
-                        .max(protoTrain.getMax())
-                        .params(multiClassNLRTrainConfig(protoTrain.getNodeClassificationParams()))
-                        .build()
-                );
-            });
+            BiConsumer<ImmutableModelStats.Builder<NodeLogisticRegressionTrainConfig>, CommonML.MetricScores> metricScoresBiConsumer =
+                (modelStatsBuilder, protoMetricScores) -> modelStatsBuilder.params(multiClassNLRTrainConfig(
+                    protoMetricScores.getNodeClassificationParams()));
 
-            protoMetricData.getValidationList().forEach(protoTrain -> {
-                metricDataBuilder.addValidation(
-                    ImmutableModelStats.<NodeLogisticRegressionTrainConfig>builder()
-                        .avg(protoTrain.getAvg())
-                        .min(protoTrain.getMin())
-                        .max(protoTrain.getMax())
-                        .params(multiClassNLRTrainConfig(protoTrain.getNodeClassificationParams()))
-                        .build()
-                );
-            });
+            ModelInfoSerializer.deserializeMetricStores(
+                protoMetricData.getTrainList(),
+                metricDataBuilder::addTrain,
+                metricScoresBiConsumer);
+
+            ModelInfoSerializer.deserializeMetricStores(
+                protoMetricData.getValidationList(),
+                metricDataBuilder::addValidation,
+                metricScoresBiConsumer);
 
             builder.putMetric(
                 metric,
@@ -113,13 +95,5 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
     @Override
     public Class<CommonML.NodeClassificationModelInfo> serializableClass() {
         return CommonML.NodeClassificationModelInfo.class;
-    }
-
-    private CommonML.MetricScores.Builder buildMetricScores(ModelStats<NodeLogisticRegressionTrainConfig> datum) {
-        return CommonML.MetricScores.newBuilder()
-            .setAvg(datum.avg())
-            .setMax(datum.max())
-            .setMin(datum.min())
-            .setNodeClassificationParams(multiClassNLRTrainConfig(datum.params()));
     }
 }

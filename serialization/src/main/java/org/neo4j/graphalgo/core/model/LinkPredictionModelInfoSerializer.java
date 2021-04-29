@@ -26,34 +26,24 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrai
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.nodemodels.ImmutableMetricData;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
-import org.neo4j.gds.ml.nodemodels.ModelStats;
 import org.neo4j.graphalgo.ml.model.proto.CommonML;
+
+import java.util.function.BiConsumer;
 
 import static org.neo4j.graphalgo.config.ConfigSerializers.linkLogisticRegressionTrainConfig;
 
 public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer<LinkPredictionModelInfo, CommonML.LinkPredictionModelInfo> {
     @Override
     public CommonML.LinkPredictionModelInfo toSerializable(LinkPredictionModelInfo linkPredictionModelInfo) {
-        var builder = CommonML.LinkPredictionModelInfo.newBuilder().setBestParameters(linkLogisticRegressionTrainConfig(linkPredictionModelInfo.bestParameters()));
+        var builder = CommonML.LinkPredictionModelInfo.newBuilder()
+            .setBestParameters(linkLogisticRegressionTrainConfig(linkPredictionModelInfo.bestParameters()));
 
-        linkPredictionModelInfo.metrics().forEach(((metric, metricData) -> {
-            var metricName = metric.name();
-
-
-            var infoMetricBuilder = CommonML.InfoMetric.newBuilder()
-                .setTest(metricData.test())
-                .setOuterTrain(metricData.outerTrain());
-
-            metricData.train().forEach(datum -> {
-                infoMetricBuilder.addTrain(buildMetricScores(datum));
-            });
-
-            metricData.validation().forEach(datum -> {
-                infoMetricBuilder.addValidation(buildMetricScores(datum));
-            });
-
-            builder.putMetrics(metricName, infoMetricBuilder.build());
-        }));
+        ModelInfoSerializer.serializeMetrics(
+            linkPredictionModelInfo.metrics(),
+            Enum::name,
+            (paramsBuilder, modelStats) -> paramsBuilder.setLinkPredictionParams(linkLogisticRegressionTrainConfig(modelStats.params())),
+            builder::putMetrics
+        );
 
         return builder.build();
     }
@@ -70,27 +60,20 @@ public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer<Li
                 .test(protoMetricData.getTest())
                 .outerTrain(protoMetricData.getOuterTrain());
 
-            protoMetricData.getTrainList().forEach(protoTrain -> {
-                metricDataBuilder.addTrain(
-                    ImmutableModelStats.<LinkLogisticRegressionTrainConfig>builder()
-                        .avg(protoTrain.getAvg())
-                        .min(protoTrain.getMin())
-                        .max(protoTrain.getMax())
-                        .params(linkLogisticRegressionTrainConfig(protoTrain.getLinkPredictionParams()))
-                        .build()
-                );
-            });
+            BiConsumer<ImmutableModelStats.Builder<LinkLogisticRegressionTrainConfig>, CommonML.MetricScores> metricScoresBiConsumer =
+                (modelStatsBuilder, protoMetricScores) -> modelStatsBuilder.params(linkLogisticRegressionTrainConfig(
+                    protoMetricScores.getLinkPredictionParams()));
 
-            protoMetricData.getValidationList().forEach(protoTrain -> {
-                metricDataBuilder.addValidation(
-                    ImmutableModelStats.<LinkLogisticRegressionTrainConfig>builder()
-                        .avg(protoTrain.getAvg())
-                        .min(protoTrain.getMin())
-                        .max(protoTrain.getMax())
-                        .params(linkLogisticRegressionTrainConfig(protoTrain.getLinkPredictionParams()))
-                        .build()
-                );
-            });
+            ModelInfoSerializer.deserializeMetricStores(
+                protoMetricData.getTrainList(),
+                metricDataBuilder::addTrain,
+                metricScoresBiConsumer);
+
+            ModelInfoSerializer.deserializeMetricStores(
+                protoMetricData.getValidationList(),
+                metricDataBuilder::addValidation,
+                metricScoresBiConsumer);
+
 
             builder.putMetric(
                 metric,
@@ -104,13 +87,5 @@ public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer<Li
     @Override
     public Class<CommonML.LinkPredictionModelInfo> serializableClass() {
         return CommonML.LinkPredictionModelInfo.class;
-    }
-
-    private CommonML.MetricScores.Builder buildMetricScores(ModelStats<LinkLogisticRegressionTrainConfig> datum) {
-        return CommonML.MetricScores.newBuilder()
-            .setAvg(datum.avg())
-            .setMax(datum.max())
-            .setMin(datum.min())
-            .setLinkPredictionParams(linkLogisticRegressionTrainConfig(datum.params()));
     }
 }
