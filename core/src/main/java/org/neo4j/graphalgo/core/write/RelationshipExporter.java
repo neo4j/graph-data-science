@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Write;
+import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
@@ -160,6 +161,8 @@ public final class RelationshipExporter extends StatementApi {
             terminationFlag.assertRunning();
             long end = start + length;
             Write ops = stmt.dataWrite();
+
+
             RelationshipWithPropertyConsumer writeConsumer = new WriteConsumer(
                 graph,
                 ops,
@@ -183,7 +186,6 @@ public final class RelationshipExporter extends StatementApi {
     }
 
     private static class WriteConsumer implements RelationshipWithPropertyConsumer {
-
         private final IdMapping idMapping;
         private final Write ops;
         private final RelationshipPropertyTranslator propertyTranslator;
@@ -205,6 +207,7 @@ public final class RelationshipExporter extends StatementApi {
             this.relTypeToken = relTypeToken;
             this.propertyToken = propertyToken;
             this.progressLogger = progressLogger;
+
         }
 
         @Override
@@ -216,18 +219,22 @@ public final class RelationshipExporter extends StatementApi {
                     idMapping.toOriginalNodeId(targetNodeId)
                 );
                 progressLogger.logProgress();
-                if (!Double.isNaN(property)) {
-                    ops.relationshipSetProperty(
-                        relId,
-                        propertyToken,
-                        propertyTranslator.toValue(property)
-                    );
-                }
+                exportProperty(property, relId);
             } catch (Exception e) {
                 throwIfUnchecked(e);
                 throw new RuntimeException(e);
             }
             return true;
+        }
+
+        void exportProperty(double property, long relId) throws EntityNotFoundException {
+            if (!Double.isNaN(property) && propertyToken >= 0) {
+                ops.relationshipSetProperty(
+                    relId,
+                    propertyToken,
+                    propertyTranslator.toValue(property)
+                );
+            }
         }
     }
 }

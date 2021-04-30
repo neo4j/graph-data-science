@@ -121,7 +121,20 @@ class RelationshipExporterTest extends BaseTest {
             Collections.emptyMap(),
             row -> assertEquals(0L, row.getNumber("keyCount").longValue())
         );
+    }
 
+    @Test
+    void exportRelationshipsExcludePresentProperties() {
+        RelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
+        exporter.write("FOOBAR");
+        validateWrittenGraphWithoutProperties();
+
+        runQueryWithRowConsumer(
+            db,
+            "MATCH ()-[r:FOOBAR]->() RETURN sum(size(keys(r))) AS keyCount",
+            Collections.emptyMap(),
+            row -> assertEquals(0L, row.getNumber("keyCount").longValue())
+        );
     }
 
     @Test
