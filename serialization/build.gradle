@@ -7,8 +7,13 @@ description = 'Neo4j Graph Data Science :: Serialization'
 protobuf {
     // Configure the protoc executable
     protoc {
-        // Download from repositories
-        artifact = "com.google.protobuf:protoc:${ver.'protobuf'}"
+        if (project.hasProperty("localProtoc")) {
+            // use local installation of protoc
+            path = project.property("localProtoc");
+        } else {
+            // Download from repositories
+            artifact = "com.google.protobuf:protoc:${ver.'protobuf'}"
+        }
         generatedFilesBaseDir = "$buildDir/generated-protos"
     }
 }
