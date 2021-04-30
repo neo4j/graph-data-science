@@ -186,12 +186,18 @@ public final class RelationshipExporter extends StatementApi {
     }
 
     private static class WriteConsumer implements RelationshipWithPropertyConsumer {
+        @FunctionalInterface
+        interface RelationshipWriteBehavior {
+            void apply(long sourceNodeId, long targetNodeId, double property) throws EntityNotFoundException;
+        }
+
         private final IdMapping idMapping;
         private final Write ops;
         private final RelationshipPropertyTranslator propertyTranslator;
         private final int relTypeToken;
         private final int propertyToken;
         private final ProgressLogger progressLogger;
+        private final RelationshipWriteBehavior relationshipWriteBehavior;
 
         WriteConsumer(
             IdMapping idMapping,
@@ -207,28 +213,45 @@ public final class RelationshipExporter extends StatementApi {
             this.relTypeToken = relTypeToken;
             this.propertyToken = propertyToken;
             this.progressLogger = progressLogger;
-
+            if (propertyToken == NO_SUCH_PROPERTY_KEY) {
+                relationshipWriteBehavior = this::writeWithoutProperty;
+            } else {
+                relationshipWriteBehavior = this::writeWithProperty;
+            }
         }
 
         @Override
         public boolean accept(long sourceNodeId, long targetNodeId, double property) {
             try {
-                long relId = ops.relationshipCreate(
-                    idMapping.toOriginalNodeId(sourceNodeId),
-                    relTypeToken,
-                    idMapping.toOriginalNodeId(targetNodeId)
-                );
-                progressLogger.logProgress();
-                exportProperty(property, relId);
+                relationshipWriteBehavior.apply(sourceNodeId, targetNodeId, property);
+                return true;
             } catch (Exception e) {
                 throwIfUnchecked(e);
                 throw new RuntimeException(e);
             }
-            return true;
         }
 
-        void exportProperty(double property, long relId) throws EntityNotFoundException {
-            if (!Double.isNaN(property) && propertyToken >= 0) {
+        private void writeWithoutProperty(long sourceNodeId, long targetNodeId, double property) throws EntityNotFoundException {
+            writeRelationship(sourceNodeId, targetNodeId);
+            progressLogger.logProgress();
+        }
+
+        private void writeWithProperty(long sourceNodeId, long targetNodeId, double property) throws EntityNotFoundException {
+            long relId = writeRelationship(sourceNodeId, targetNodeId);
+            exportProperty(property, relId);
+            progressLogger.logProgress();
+        }
+
+        private long writeRelationship(long sourceNodeId, long targetNodeId) throws EntityNotFoundException {
+            return ops.relationshipCreate(
+                idMapping.toOriginalNodeId(sourceNodeId),
+                relTypeToken,
+                idMapping.toOriginalNodeId(targetNodeId)
+            );
+        }
+
+        private void exportProperty(double property, long relId) throws EntityNotFoundException {
+            if (!Double.isNaN(property)) {
                 ops.relationshipSetProperty(
                     relId,
                     propertyToken,
