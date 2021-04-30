@@ -46,18 +46,18 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
 
     @Override
     protected CompositeAdjacencyCursor cursor(long nodeId, int unusedDegree, CompositeAdjacencyCursor reuse) {
-        var adjacencyCursors = new ArrayList<AdjacencyCursor>(compositeAdjacencyList.adjacencyLists().size());
-        var cursors = reuse.cursors();
-        var emptyCursors = empty.cursors();
+        var adjacencyCursors = new ArrayList<AdjacencyCursor>(compositeAdjacencyList.size());
+        var cursorsIter = reuse.cursors().iterator();
 
         compositeAdjacencyList.forEachOffset(
             nodeId,
-            (list, index, offset, degree, hasAdjacency) -> adjacencyCursors.add(
-                index,
-                hasAdjacency
-                    ? cursors.get(index).initializedTo(offset, degree)
-                    : emptyCursors.get(index)
-            )
+            (list, offset, degree) -> {
+                var cursor = cursorsIter.next();
+                if (offset != 0) {
+                    cursor.init(offset, degree);
+                }
+                adjacencyCursors.add(cursor);
+            }
         );
         return new CompositeAdjacencyCursor(adjacencyCursors);
     }
@@ -81,7 +81,7 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
             var topology = ((UnionGraph) graph).relationshipTopology();
             return new UnionGraphIntersect(
                 graph::degree,
-                topology.list(),
+                topology,
                 config.maxDegree()
             );
         }

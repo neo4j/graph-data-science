@@ -19,20 +19,22 @@
  */
 package org.neo4j.graphalgo.core.compress;
 
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
+import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
-import java.io.Closeable;
-
-public interface CompressedTopology extends Closeable {
-
-    AdjacencyDegrees adjacencyDegrees();
-
-    AdjacencyOffsets adjacencyOffsets();
-
-    AdjacencyList adjacencyList();
+@DataClass
+public abstract class AbstractPropertiesContainer implements CompressedProperties {
 
     @Override
-    void close();
+    public abstract AdjacencyOffsets adjacencyOffsets();
+
+    @Override
+    public abstract AdjacencyList adjacencyList();
+
+    @Override
+    public void close() {
+        adjacencyOffsets().close();
+        adjacencyList().close();
+    }
 }

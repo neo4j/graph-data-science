@@ -22,22 +22,25 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.PropertyCursor;
-import org.neo4j.graphalgo.api.Relationships;
+import org.neo4j.graphalgo.core.compress.CompressedProperties;
+import org.neo4j.graphalgo.core.compress.CompressedTopology;
 
 public class CSRCompositeRelationshipIterator implements CompositeRelationshipIterator {
 
-    private final Relationships.Topology topology;
+    public static final CompressedProperties[] EMPTY_PROPERTIES = new CompressedProperties[0];
+
+    private final CompressedTopology topology;
     private final String[] propertyKeys;
-    private final Relationships.Properties[] properties;
+    private final CompressedProperties[] properties;
     private final double[] propertyBuffer;
 
     private final AdjacencyCursor topologyCursor;
     private final PropertyCursor[] propertyCursors;
 
     public CSRCompositeRelationshipIterator(
-        Relationships.Topology topology,
+        CompressedTopology topology,
         String[] propertyKeys,
-        Relationships.Properties[] properties
+        CompressedProperties[] properties
     ) {
         var propertyCount = propertyKeys.length;
 
@@ -48,36 +51,36 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
         this.properties = properties;
 
         this.propertyBuffer = new double[propertyCount];
-        this.topologyCursor = topology.list().rawDecompressingCursor();
+        this.topologyCursor = topology.adjacencyList().rawDecompressingCursor();
 
         this.propertyCursors = new PropertyCursor[propertyCount];
         for (int i = 0; i < propertyCount; i++) {
-            this.propertyCursors[i] = properties[i].list().rawCursor();
+            this.propertyCursors[i] = properties[i].adjacencyList().rawCursor();
         }
     }
 
     @Override
     public int degree(long nodeId) {
-        return topology.degrees().degree(nodeId);
+        return topology.adjacencyDegrees().degree(nodeId);
     }
 
     @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
-        var offset = topology.offsets().get(nodeId);
+        var offset = topology.adjacencyOffsets().get(nodeId);
 
         if (offset == 0L) {
             return;
         }
 
         // init adjacency cursor
-        var degree = topology.degrees().degree(nodeId);
+        var degree = topology.adjacencyDegrees().degree(nodeId);
         var adjacencyCursor = topologyCursor.initializedTo(offset, degree);
 
 
         var propertyCount = propertyKeys.length;
 
         for (int propertyIdx = 0; propertyIdx < propertyCount; propertyIdx++) {
-            var propertyOffset = properties[propertyIdx].offsets().get(nodeId);
+            var propertyOffset = properties[propertyIdx].adjacencyOffsets().get(nodeId);
             propertyCursors[propertyIdx].init(propertyOffset, degree);
         }
 

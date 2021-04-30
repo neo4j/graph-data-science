@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
+import org.neo4j.graphalgo.core.compress.CompressedTopology;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 
 public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
@@ -70,8 +71,13 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
         public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
             assert graph instanceof HugeGraph;
             var hugeGraph = (HugeGraph) graph;
-            var topology = hugeGraph.relationshipTopology();
-            return new HugeGraphIntersect(topology.degrees(), topology.list(), topology.offsets(), config.maxDegree());
+            var topology = hugeGraph.relationshipTopology().compressed();
+            return new HugeGraphIntersect(
+                topology.adjacencyDegrees(),
+                topology.adjacencyList(),
+                topology.adjacencyOffsets(),
+                config.maxDegree()
+            );
         }
     }
 }

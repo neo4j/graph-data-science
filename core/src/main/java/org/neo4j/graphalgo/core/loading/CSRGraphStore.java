@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.ProcedureConstants;
+import org.neo4j.graphalgo.core.compress.CompressedProperties;
 import org.neo4j.graphalgo.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
@@ -418,17 +419,17 @@ public class CSRGraphStore implements GraphStore {
             ));
         }
 
-        var topology = relationships.get(relationshipType);
+        var topology = relationships.get(relationshipType).compressed();
 
         var relationshipPropertyStore = relationshipProperties.get(relationshipType);
-
         var properties = propertyKeys.isEmpty()
-            ? new Relationships.Properties[0]
+            ? CSRCompositeRelationshipIterator.EMPTY_PROPERTIES
             : propertyKeys
                 .stream()
                 .map(relationshipPropertyStore::get)
                 .map(RelationshipProperty::values)
-                .toArray(Relationships.Properties[]::new);
+                .map(Relationships.Properties::compressed)
+                .toArray(CompressedProperties[]::new);
 
         return new CSRCompositeRelationshipIterator(
             topology,
@@ -448,9 +449,9 @@ public class CSRGraphStore implements GraphStore {
         if (this.nodes instanceof AutoCloseable) {
             closeables.accept((AutoCloseable) this.nodes);
         }
-        this.relationships.values().forEach(rel -> closeables.add(rel.list()).add(rel.offsets()).add(rel.degrees()));
+        this.relationships.values().forEach(rel -> closeables.add(rel.compressed()));
         this.relationshipProperties.forEach((propertyName, properties) ->
-            properties.values().forEach(prop -> closeables.add(prop.values().list()).add(prop.values().offsets()))
+            properties.values().forEach(prop -> closeables.add(prop.values().compressed()))
         );
 
         var errorWhileClosing = closeables.build().distinct().flatMap(closeable -> {

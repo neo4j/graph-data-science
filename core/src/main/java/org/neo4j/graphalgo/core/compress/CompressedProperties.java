@@ -22,9 +22,14 @@ package org.neo4j.graphalgo.core.compress;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
-public interface CompressedProperties {
+import java.io.Closeable;
+
+public interface CompressedProperties extends Closeable {
 
     AdjacencyOffsets adjacencyOffsets();
 
     AdjacencyList adjacencyList();
+
+    @Override
+    void close();
 }

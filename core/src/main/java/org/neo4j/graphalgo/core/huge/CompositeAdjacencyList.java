@@ -20,10 +20,9 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.PropertyCursor;
+import org.neo4j.graphalgo.core.compress.CompressedTopology;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,22 +30,14 @@ import java.util.stream.Collectors;
 
 public class CompositeAdjacencyList implements AdjacencyList {
 
-    private final List<AdjacencyDegrees> adjacencyDegrees;
-    private final List<AdjacencyList> adjacencyLists;
-    private final List<AdjacencyOffsets> adjacencyOffsets;
+    private final List<CompressedTopology> adjacencies;
 
-    CompositeAdjacencyList(
-        List<AdjacencyDegrees> adjacencyDegrees,
-        List<AdjacencyList> adjacencyLists,
-        List<AdjacencyOffsets> adjacencyOffsets
-    ) {
-        this.adjacencyDegrees = adjacencyDegrees;
-        this.adjacencyLists = adjacencyLists;
-        this.adjacencyOffsets = adjacencyOffsets;
+    CompositeAdjacencyList(List<CompressedTopology> adjacencies) {
+        this.adjacencies = adjacencies;
     }
 
-    public List<AdjacencyList> adjacencyLists() {
-        return adjacencyLists;
+    public int size() {
+        return adjacencies.size();
     }
 
     @Override
@@ -61,17 +52,17 @@ public class CompositeAdjacencyList implements AdjacencyList {
 
     @Override
     public CompositeAdjacencyCursor rawDecompressingCursor() {
-        List<AdjacencyCursor> adjacencyCursors = adjacencyLists
+        List<AdjacencyCursor> adjacencyCursors = adjacencies
             .stream()
-            .map(AdjacencyList::rawDecompressingCursor)
+            .map(adj -> adj.adjacencyList().rawDecompressingCursor())
             .collect(Collectors.toList());
         return new CompositeAdjacencyCursor(adjacencyCursors);
     }
 
     @Override
     public CompositeAdjacencyCursor decompressingCursor(long nodeId, int unusedDegree) {
-        var adjacencyCursors = new ArrayList<AdjacencyCursor>(adjacencyLists.size());
-        forEachOffset(nodeId, (adjacencyList, index, offset, degree, hasAdjacency) -> {
+        var adjacencyCursors = new ArrayList<AdjacencyCursor>(adjacencies.size());
+        forEachOffset(nodeId, (adjacencyList, offset, degree) -> {
             var cursor = adjacencyList.rawDecompressingCursor();
             if (offset != 0) {
                 cursor.init(offset, degree);
@@ -83,19 +74,19 @@ public class CompositeAdjacencyList implements AdjacencyList {
 
     @Override
     public void close() {
-        adjacencyLists.forEach(AdjacencyList::close);
+        adjacencies.forEach(CompressedTopology::close);
     }
 
     public void forEachOffset(long nodeId, CompositeIndexedOffsetOperator func) {
-        for (int i = 0; i < adjacencyLists.size(); i++) {
-            long offset = adjacencyOffsets.get(i).get(nodeId);
-            int degree = adjacencyDegrees.get(i).degree(nodeId);
-            func.apply(adjacencyLists.get(i), i, offset, degree, offset != 0);
+        for (var adjacency : adjacencies) {
+            long offset = adjacency.adjacencyOffsets().get(nodeId);
+            int degree = adjacency.adjacencyDegrees().degree(nodeId);
+            func.apply(adjacency.adjacencyList(), offset, degree);
         }
     }
 
     @FunctionalInterface
     public interface CompositeIndexedOffsetOperator {
-        void apply(AdjacencyList list, int index, long offset, int degree, boolean hasAdjacency);
+        void apply(AdjacencyList list, long offset, int degree);
     }
 }

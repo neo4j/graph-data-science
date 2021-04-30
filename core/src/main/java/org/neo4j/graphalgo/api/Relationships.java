@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.api;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.compress.CompressedProperties;
+import org.neo4j.graphalgo.core.compress.CompressedTopology;
 
 import java.util.Optional;
 
@@ -38,18 +40,13 @@ public interface Relationships {
         long relationshipCount,
         Orientation orientation,
         boolean isMultiGraph,
-        AdjacencyDegrees adjacencyDegrees,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets
+        CompressedTopology compressedTopology
     ) {
         return of(
             relationshipCount,
             orientation,
             isMultiGraph,
-            adjacencyDegrees,
-            adjacencyList,
-            adjacencyOffsets,
-            null,
+            compressedTopology,
             null,
             DOUBLE_DEFAULT_FALLBACK
         );
@@ -59,27 +56,20 @@ public interface Relationships {
         long relationshipCount,
         Orientation orientation,
         boolean isMultiGraph,
-        AdjacencyDegrees adjacencyDegrees,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets,
-        @Nullable AdjacencyList properties,
-        @Nullable AdjacencyOffsets propertyOffsets,
+        CompressedTopology compressedTopology,
+        @Nullable CompressedProperties compressedProperties,
         double defaultPropertyValue
     ) {
         Topology topology = ImmutableTopology.of(
-            adjacencyDegrees,
-            adjacencyList,
-            adjacencyOffsets,
+            compressedTopology,
             relationshipCount,
             orientation,
             isMultiGraph
         );
 
-        Optional<Properties> maybePropertyCSR = properties != null && propertyOffsets != null
+        Optional<Properties> maybePropertyCSR = compressedProperties != null
             ? Optional.of(ImmutableProperties.of(
-                adjacencyDegrees,
-                properties,
-                propertyOffsets,
+                compressedProperties,
                 relationshipCount,
                 orientation,
                 isMultiGraph,
@@ -91,11 +81,7 @@ public interface Relationships {
 
     @ValueClass
     interface Topology {
-        AdjacencyDegrees degrees();
-
-        AdjacencyList list();
-
-        AdjacencyOffsets offsets();
+        CompressedTopology compressed();
 
         long elementCount();
 
@@ -105,8 +91,15 @@ public interface Relationships {
     }
 
     @ValueClass
-    @SuppressWarnings("immutables:subtype")
-    interface Properties extends Topology {
+    interface Properties {
+        CompressedProperties compressed();
+
+        long elementCount();
+
+        Orientation orientation();
+
+        boolean isMultiGraph();
+
         double defaultPropertyValue();
     }
 }

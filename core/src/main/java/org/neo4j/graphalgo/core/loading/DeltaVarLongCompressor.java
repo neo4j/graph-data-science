@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.AdjacencyDegrees;
-import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressor;
@@ -29,8 +28,8 @@ import org.neo4j.graphalgo.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.graphalgo.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.graphalgo.core.compress.ImmutableAdjacencyListsWithProperties;
 import org.neo4j.graphalgo.core.compress.LongArrayBuffer;
-import org.neo4j.graphalgo.core.compress.CompressedProperties;
-import org.neo4j.graphalgo.core.compress.CompressedTopology;
+import org.neo4j.graphalgo.core.compress.PropertiesContainer;
+import org.neo4j.graphalgo.core.compress.TopologyContainer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -153,15 +152,14 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
             var builder = ImmutableAdjacencyListsWithProperties
                 .builder()
-                .adjacency(new DvlCompressionResult(
+                .adjacency(TopologyContainer.of(
                     adjacencyDegrees,
                     adjacencyOffsets,
                     adjacencyBuilder.build()
                 ));
 
             for (int i = 0; i < propertyBuilders.length; i++) {
-                var compressedProps = new DvlCompressionResult(
-                    adjacencyDegrees,
+                var compressedProps = PropertiesContainer.of(
                     offsetPagesIntoOffsets(propertyOffsets[i]),
                     propertyBuilders[i].build()
                 );
@@ -321,36 +319,5 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             .put(properties, 0, degree);
         slice.bytesWritten(requiredBytes);
         return slice.address();
-    }
-
-    private static final class DvlCompressionResult implements CompressedTopology, CompressedProperties {
-        final AdjacencyDegrees degrees;
-        final AdjacencyOffsets offsets;
-        final AdjacencyList adjacency;
-
-        private DvlCompressionResult(
-            AdjacencyDegrees degrees,
-            AdjacencyOffsets offsets,
-            AdjacencyList adjacency
-        ) {
-            this.degrees = degrees;
-            this.offsets = offsets;
-            this.adjacency = adjacency;
-        }
-
-        @Override
-        public AdjacencyDegrees adjacencyDegrees() {
-            return degrees;
-        }
-
-        @Override
-        public AdjacencyOffsets adjacencyOffsets() {
-            return offsets;
-        }
-
-        @Override
-        public AdjacencyList adjacencyList() {
-            return adjacency;
-        }
     }
 }
