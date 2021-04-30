@@ -61,7 +61,7 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     }
 
     @Override
-    protected void validateConfigs(
+    protected void validateConfigsBeforeLoad(
         GraphCreateConfig graphCreateConfig, LinkPredictionPredictStreamConfig config
     ) {
         validateIsUndirectedGraph(graphCreateConfig, config);
