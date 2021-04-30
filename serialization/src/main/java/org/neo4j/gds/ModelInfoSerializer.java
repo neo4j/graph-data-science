@@ -37,17 +37,19 @@ import java.util.function.Function;
 
 public interface ModelInfoSerializer<MODEL_INFO extends Model.Mappable, PROTO_MODEL_INFO extends GeneratedMessageV3> {
     PROTO_MODEL_INFO toSerializable(MODEL_INFO modelInfo);
+
     MODEL_INFO fromSerializable(PROTO_MODEL_INFO protoModelInfo);
-    default MODEL_INFO fromSerializable(Any protoTrainConfig) {
+
+    Class<PROTO_MODEL_INFO> serializableClass();
+
+    default MODEL_INFO fromSerializable(Any protoModelInfo) {
         try {
-            var unpacked = protoTrainConfig.unpack(serializableClass());
+            var unpacked = protoModelInfo.unpack(serializableClass());
             return fromSerializable(unpacked);
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }
     }
-
-    Class<PROTO_MODEL_INFO> serializableClass();
 
     static <M, C extends TrainingConfig> void serializeMetrics(
         Map<M, MetricData<C>> metrics,
@@ -57,7 +59,6 @@ public interface ModelInfoSerializer<MODEL_INFO extends Model.Mappable, PROTO_MO
     ) {
         metrics.forEach(((metric, metricData) -> {
             var metricName = metricNameFunction.apply(metric);
-
 
             var infoMetricBuilder = CommonML.InfoMetric.newBuilder()
                 .setTest(metricData.test())
@@ -83,7 +84,10 @@ public interface ModelInfoSerializer<MODEL_INFO extends Model.Mappable, PROTO_MO
         metricScores.forEach(protoTrain -> modelStatsConsumer.accept(deserializeModelStats(protoTrain, paramsConsumer)));
     }
 
-    static <C extends TrainingConfig> ModelStats<C> deserializeModelStats(CommonML.MetricScores protoTrain, BiConsumer<ImmutableModelStats.Builder<C>, CommonML.MetricScores> paramsConsumer) {
+    static <C extends TrainingConfig> ModelStats<C> deserializeModelStats(
+        CommonML.MetricScores protoTrain,
+        BiConsumer<ImmutableModelStats.Builder<C>, CommonML.MetricScores> paramsConsumer
+    ) {
         var builder = ImmutableModelStats.<C>builder()
             .avg(protoTrain.getAvg())
             .min(protoTrain.getMin())
