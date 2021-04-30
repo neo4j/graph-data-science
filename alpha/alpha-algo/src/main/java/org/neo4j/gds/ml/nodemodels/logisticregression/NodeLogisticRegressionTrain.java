@@ -47,11 +47,11 @@ public class NodeLogisticRegressionTrain {
         return MemoryEstimations.builder(NodeLogisticRegressionTrain.class)
             .add("model data", NodeLogisticRegressionData.memoryEstimation(numberOfClasses, numberOfFeatures))
             .add("training", Training.memoryEstimation(numberOfFeatures, numberOfClasses, sharedUpdater, CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA))
-            .perThread("batches", sizeInBytesOfLossComputationPerBatch(batchSize, numberOfFeatures, numberOfClasses))
+            .perThread("computation graph", sizeInBytesOfComputationGraph(batchSize, numberOfFeatures, numberOfClasses))
             .build();
     }
 
-    private static long sizeInBytesOfLossComputationPerBatch(int batchSize, int numberOfFeatures, int numberOfClasses) {
+    private static long sizeInBytesOfComputationGraph(int batchSize, int numberOfFeatures, int numberOfClasses) {
         return NodeLogisticRegressionObjective.sizeOfBatchInBytes(batchSize, numberOfFeatures, numberOfClasses);
     }
 
