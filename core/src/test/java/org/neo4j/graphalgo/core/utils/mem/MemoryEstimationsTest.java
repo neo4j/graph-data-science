@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -137,6 +138,23 @@ class MemoryEstimationsTest {
         assertEquals(
                 MemoryRange.of(100 * 100),
                 memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+    }
+
+    @Test
+    void shouldPickBiggestMemoryUser() {
+        MemoryEstimation maxEstimator = MemoryEstimations.builder()
+            .max(
+                MemoryEstimations.builder().perNode("node storer", nodeCount -> nodeCount).build(),
+                MemoryEstimations.builder().perThread("paralleliser", threadCount -> threadCount).build()
+            )
+            .build();
+
+        assertThat(biggestMemoryUser(maxEstimator.estimate(GraphDimensions.of(1000), 1))).isEqualTo("node storer");
+        assertThat(biggestMemoryUser(maxEstimator.estimate(GraphDimensions.of(1), 16))).isEqualTo("paralleliser");
+    }
+
+    private String biggestMemoryUser(MemoryTree maxEstimate) {
+        return maxEstimate.components().iterator().next().components().iterator().next().description();
     }
 
     // Note that the memory consumption will be aligned (see BitUtil.align)
