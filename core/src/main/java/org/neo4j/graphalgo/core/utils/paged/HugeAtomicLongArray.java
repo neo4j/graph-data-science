@@ -398,12 +398,16 @@ public abstract class HugeAtomicLongArray {
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
             long[] page = pages[pageIndex];
-            long prev, next;
-            do {
-                prev = (long) ARRAY_HANDLE.getVolatile(page, indexInPage);
-                next = prev + delta;
-            } while (!ARRAY_HANDLE.compareAndSet(page, indexInPage, prev, next));
-            return prev;
+            long prev = (long) ARRAY_HANDLE.getAcquire(page, indexInPage);
+
+            while (true) {
+                long next = prev + delta;
+                long current = (long) ARRAY_HANDLE.compareAndExchangeRelease(page, (int) index, prev, next);
+                if (prev == current) {
+                    return prev;
+                }
+                prev = current;
+            }
         }
 
         @Override
