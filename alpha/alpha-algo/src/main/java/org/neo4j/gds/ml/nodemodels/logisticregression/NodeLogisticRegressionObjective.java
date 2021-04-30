@@ -37,6 +37,8 @@ import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
+import static java.lang.Math.max;
+
 public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRegressionData> {
 
     private final String targetProperty;
@@ -85,7 +87,7 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
             1 * elementSum +
             sizeOfPredictionsVariableInBytes;
 
-        return sizeOfComputationGraphForTrainEpoch + sizeOfComputationGraphForEvaluateLoss;
+        return max(sizeOfComputationGraphForTrainEpoch, sizeOfComputationGraphForEvaluateLoss);
     }
 
     @SuppressWarnings("SameParameterValue")
