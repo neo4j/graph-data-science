@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
@@ -85,7 +84,7 @@ public abstract class SimilarityWriteProc<
                                 DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
                                 exporter.write(
                                     writeRelationshipType,
-                                    Optional.of(writeProperty),
+                                    writeProperty,
                                     (node1, node2, similarity) -> {
                                         histogram.recordValue(similarity);
                                         return true;

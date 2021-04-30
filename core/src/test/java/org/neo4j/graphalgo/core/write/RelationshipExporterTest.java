@@ -141,7 +141,7 @@ class RelationshipExporterTest extends BaseTest {
     void exportRelationshipsWithAfterWriteConsumer() {
         RelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
         MutableInt count = new MutableInt();
-        exporter.write("FOOBAR", Optional.of("weight"), (sourceNodeId, targetNodeId, property) -> {
+        exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
             count.increment();
             return true;
         });
@@ -153,7 +153,7 @@ class RelationshipExporterTest extends BaseTest {
     void exportRelationshipsWithAfterWriteConsumerAndNoProperties() {
         RelationshipExporter exporter = setupExportTest(/* includeProperties */ false);
         MutableInt count = new MutableInt();
-        exporter.write("FOOBAR", Optional.of("weight"), (sourceNodeId, targetNodeId, property) -> {
+        exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
             count.increment();
             return true;
         });

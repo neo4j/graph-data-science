@@ -101,11 +101,16 @@ public class GraphWriteRelationshipProc extends CatalogProc {
             }
         }
 
-        builder
+        var exporter = builder
             .withLog(log)
             .parallel(Pools.DEFAULT, config.writeConcurrency())
-            .build()
-            .write(config.relationshipType(), config.relationshipProperty());
+            .build();
+
+        if (config.relationshipProperty().isPresent()) {
+            exporter.write(config.relationshipType(), config.relationshipProperty().get());
+        } else {
+            exporter.write(config.relationshipType());
+        }
 
         return graphStore.relationshipCount(RelationshipType.of(config.relationshipType()));
     }

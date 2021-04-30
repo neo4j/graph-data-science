@@ -35,7 +35,6 @@ import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.values.storable.Values;
 
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import static org.neo4j.graphalgo.core.concurrency.Pools.DEFAULT_SINGLE_THREAD_POOL;
@@ -117,35 +116,42 @@ public final class RelationshipExporter extends StatementApi {
     }
 
     public void write(String relationshipType) {
-        write(relationshipType, Optional.empty(), null);
+        var relationshipToken = getOrCreateRelationshipToken(relationshipType);
+        write(relationshipToken, NO_SUCH_PROPERTY_KEY, null);
+    }
+
+    public void write(String relationshipType, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer) {
+        var relationshipToken = getOrCreateRelationshipToken(relationshipType);
+        write(relationshipToken, NO_SUCH_PROPERTY_KEY, afterWriteConsumer);
     }
 
     public void write(String relationshipType, String propertyKey) {
-        write(relationshipType, Optional.of(propertyKey), null);
-    }
-
-    public void write(String relationshipType, Optional<String> maybePropertyKey) {
-        write(relationshipType, maybePropertyKey, null);
+        var relationshipTypeToken = getOrCreateRelationshipToken(relationshipType);
+        var propertyKeyToken = getOrCreatePropertyToken(propertyKey);
+        write(relationshipTypeToken, propertyKeyToken, null);
     }
 
     public void write(
         String relationshipType,
-        Optional<String> maybePropertyKey,
+        String propertyKey,
         @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
     ) {
-        final int relationshipToken = getOrCreateRelationshipToken(relationshipType);
-        final int propertyKeyToken = maybePropertyKey.map(this::getOrCreatePropertyToken).orElse(NO_SUCH_PROPERTY_KEY);
+        var relationshipTypeToken = getOrCreateRelationshipToken(relationshipType);
+        var propertyKeyToken = getOrCreatePropertyToken(propertyKey);
+        write(relationshipTypeToken, propertyKeyToken, afterWriteConsumer);
+    }
 
+    private void write(int relationshipTypeToken, int propertyKeyToken, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer) {
         progressLogger.logStart();
         // We use MIN_BATCH_SIZE since writing relationships
         // is performed batch-wise, but single-threaded.
         PartitionUtils.degreePartition(graph, MIN_BATCH_SIZE, partition -> createBatchRunnable(
-                relationshipToken,
-                propertyKeyToken,
-                partition.startNode(),
-                partition.nodeCount(),
-                afterWriteConsumer
-            ))
+            relationshipTypeToken,
+            propertyKeyToken,
+            partition.startNode(),
+            partition.nodeCount(),
+            afterWriteConsumer
+        ))
             .forEach(runnable -> ParallelUtil.run(runnable, executorService));
         progressLogger.logFinish();
     }
