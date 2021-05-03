@@ -53,6 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictProcTestUtil.addModelWithFeatures;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
@@ -114,6 +115,20 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Wri
             "createMillis", greaterThan(-1L),
             "configuration", isA(Map.class)
         )));
+    }
+
+    @Test
+    void shouldEstimateMemory() {
+        var query = GdsCypher
+            .call()
+            .explicitCreation("g")
+            .algo("gds.alpha.ml.nodeClassification.predict")
+            .estimationMode(GdsCypher.ExecutionModes.WRITE)
+            .addParameter("writeProperty", "class")
+            .addParameter("modelName", MODEL_NAME)
+            .yields();
+
+        assertDoesNotThrow(() -> runQuery(query));
     }
 
     @Override
