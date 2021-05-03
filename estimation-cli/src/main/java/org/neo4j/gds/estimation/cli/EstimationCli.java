@@ -416,6 +416,7 @@ public class EstimationCli implements Runnable {
 
     private static final List<String> PACKAGES_TO_SCAN = List.of(
         "org.neo4j.graphalgo",
+        "org.neo4j.gds.paths",
         "org.neo4j.gds.embeddings"
     );
 
