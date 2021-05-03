@@ -79,16 +79,12 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
         var messages = new Messages(messageIterator);
 
         var nodeBatch = nodeBatch();
-        long batchStart = nodeBatch.startNode();
-        long batchEnd = batchStart + nodeBatch.nodeCount();
-
         var computation = computation();
         var initContext = initContext();
         var computeContext = computeContext();
         var voteBits = voteBits();
 
-        for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
-
+        nodeBatch.consume(nodeId -> {
             if (computeContext.isInitialSuperstep()) {
                 initContext.setNodeId(nodeId);
                 computation.init(initContext);
@@ -101,7 +97,7 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
                 computeContext.setNodeId(nodeId);
                 computation.compute(computeContext, messages);
             }
-        }
+        });
         progressLogger().logProgress(nodeBatch.nodeCount());
     }
 
