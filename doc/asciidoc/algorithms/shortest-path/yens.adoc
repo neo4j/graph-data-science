@@ -106,8 +106,8 @@ include::../shared/examples-estimate-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.yens.write.estimate('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     k: 3,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH'
@@ -138,8 +138,8 @@ include::../shared/examples-stream-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.yens.stream('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     k: 3,
     relationshipWeightProperty: 'cost'
 })
@@ -182,8 +182,8 @@ include::path-examples-mutate-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.yens.mutate('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     k: 3,
     relationshipWeightProperty: 'cost',
     mutateRelationshipType: 'PATH'
@@ -216,8 +216,8 @@ include::path-examples-write-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.yens.write('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     k: 3,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH',

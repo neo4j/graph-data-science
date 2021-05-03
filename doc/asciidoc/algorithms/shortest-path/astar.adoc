@@ -120,8 +120,8 @@ include::../shared/examples-estimate-intro.adoc[]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.shortestPath.astar.write.estimate('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     latitudeProperty: 'latitude',
     longitudeProperty: 'longitude',
     writeRelationshipType: 'PATH'
@@ -152,8 +152,8 @@ include::../shared/examples-stream-intro.adoc[]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.shortestPath.astar.stream('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     latitudeProperty: 'latitude',
     longitudeProperty: 'longitude',
     relationshipWeightProperty: 'distance'
@@ -194,8 +194,8 @@ include::path-examples-mutate-intro.adoc[]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.shortestPath.astar.mutate('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     latitudeProperty: 'latitude',
     longitudeProperty: 'longitude',
     relationshipWeightProperty: 'distance',
@@ -229,8 +229,8 @@ include::path-examples-write-intro.adoc[]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.shortestPath.astar.write('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     latitudeProperty: 'latitude',
     longitudeProperty: 'longitude',
     relationshipWeightProperty: 'distance',

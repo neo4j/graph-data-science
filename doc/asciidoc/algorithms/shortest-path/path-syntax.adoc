@@ -32,9 +32,9 @@ include::../common-configuration/common-stream-stats-configuration-named-graph.a
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name              | Type    | Default | Optional | Description
-| sourceNode        | Integer | n/a     | no       | The Neo4j node id of the source node.
+| sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
 ifeval::["{source-target}" == "true"]
-| targetNode        | Integer | n/a     | no       | The Neo4j node id of the source node.
+| targetNode        | Integer | n/a     | no       | The Neo4j target node or node id.
 endif::[]
 ifeval::["{algorithm}" == "A*"]
 | latitudeProperty  | Float   | n/a     | no       | The node property that stores the latitude value.
@@ -92,9 +92,9 @@ include::../common-configuration/common-mutate-configuration-named-graph.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name              | Type    | Default | Optional | Description
-| sourceNode        | Integer | n/a     | no       | The Neo4j node id of the source node.
+| sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
 ifeval::["{source-target}" == "true"]
-| targetNode        | Integer | n/a     | no       | The Neo4j node id of the source node.
+| targetNode        | Integer | n/a     | no       | The Neo4j target node or node id.
 endif::[]
 ifeval::["{algorithm}" == "A*"]
 | latitudeProperty  | Float   | n/a     | no       | The node property that stores the latitude value.
@@ -152,9 +152,9 @@ include::../common-configuration/common-write-configuration-named-graph.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name              | Type    | Default | Optional | Description
-| sourceNode        | Integer | n/a     | no       | The Neo4j node id of the source node.
+| sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
 ifeval::["{source-target}" == "true"]
-| targetNode        | Integer | n/a     | no       | The Neo4j node id of the source node.
+| targetNode        | Integer | n/a     | no       | The Neo4j target node or node id.
 endif::[]
 ifeval::["{algorithm}" == "A*"]
 | latitudeProperty  | Float   | n/a     | no       | The node property that stores the latitude value.

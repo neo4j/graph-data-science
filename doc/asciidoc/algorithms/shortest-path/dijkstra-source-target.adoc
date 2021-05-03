@@ -100,8 +100,8 @@ include::../shared/examples-estimate-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.write.estimate('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH'
 })
@@ -131,8 +131,8 @@ include::../shared/examples-stream-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.stream('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     relationshipWeightProperty: 'cost'
 })
 YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs
@@ -171,8 +171,8 @@ include::path-examples-mutate-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.mutate('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     relationshipWeightProperty: 'cost',
     mutateRelationshipType: 'PATH'
 })
@@ -204,8 +204,8 @@ include::path-examples-write-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.write('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH',
     writeNodeIds: true,
