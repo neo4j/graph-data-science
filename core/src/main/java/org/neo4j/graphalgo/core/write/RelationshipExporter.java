@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphalgo.utils.StatementApi;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -148,8 +149,7 @@ public final class RelationshipExporter extends StatementApi {
         PartitionUtils.degreePartition(graph, MIN_BATCH_SIZE, partition -> createBatchRunnable(
             relationshipTypeToken,
             propertyKeyToken,
-            partition.startNode(),
-            partition.nodeCount(),
+            partition,
             afterWriteConsumer
         ))
             .forEach(runnable -> ParallelUtil.run(runnable, executorService));
@@ -159,13 +159,11 @@ public final class RelationshipExporter extends StatementApi {
     private Runnable createBatchRunnable(
         int relationshipToken,
         int propertyToken,
-        long start,
-        long length,
+        Partition partition,
         @Nullable RelationshipWithPropertyConsumer afterWrite
     ) {
         return () -> acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
-            long end = start + length;
             Write ops = stmt.dataWrite();
 
 
@@ -181,13 +179,15 @@ public final class RelationshipExporter extends StatementApi {
                 writeConsumer = writeConsumer.andThen(afterWrite);
             }
             RelationshipIterator relationshipIterator = graph.concurrentCopy();
-            for (long currentNode = start; currentNode < end; currentNode++) {
-                relationshipIterator.forEachRelationship(currentNode, Double.NaN, writeConsumer);
+            RelationshipWithPropertyConsumer finalWriteConsumer = writeConsumer;
+            var startNode = partition.startNode();
+            partition.consume(nodeId -> {
+                relationshipIterator.forEachRelationship(nodeId, Double.NaN, finalWriteConsumer);
 
-                if ((currentNode - start) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
+                if ((nodeId - startNode) % TerminationFlag.RUN_CHECK_NODE_COUNT == 0) {
                     terminationFlag.assertRunning();
                 }
-            }
+            });
         });
     }
 
