@@ -60,7 +60,6 @@ class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPa
             .addParameter("targetNode", config.targetNode())
             .addParameter("k", config.k())
             .addParameter("relationshipWeightProperty", "cost")
-            .addParameter("path", true)
             .yields();
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {

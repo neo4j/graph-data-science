@@ -50,7 +50,6 @@ class AStarTest {
 
     static ImmutableShortestPathAStarStreamConfig.Builder defaultSourceTargetConfigBuilder() {
         return ImmutableShortestPathAStarStreamConfig.builder()
-            .path(true)
             .latitudeProperty("latitude")
             .longitudeProperty("longitude")
             .concurrency(1);

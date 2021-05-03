@@ -58,13 +58,11 @@ final class DijkstraTest {
 
     static ImmutableShortestPathDijkstraStreamConfig.Builder defaultSourceTargetConfigBuilder() {
         return ImmutableShortestPathDijkstraStreamConfig.builder()
-            .path(true)
             .concurrency(1);
     }
 
     static ImmutableAllShortestPathsDijkstraStreamConfig.Builder defaultSingleSourceConfigBuilder() {
         return ImmutableAllShortestPathsDijkstraStreamConfig.builder()
-            .path(true)
             .concurrency(1);
     }
 

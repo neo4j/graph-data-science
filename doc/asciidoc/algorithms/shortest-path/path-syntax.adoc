@@ -43,7 +43,6 @@ endif::[]
 ifeval::["{algorithm}" == "Yen's"]
 | k                 | Integer | 1       | yes      | The number of shortest paths to compute between source and target node.
 endif::[]
-| path              | Boolean | false   | yes      | Iff true, the result contains a Cypher Path object.
 |===
 
 .Results

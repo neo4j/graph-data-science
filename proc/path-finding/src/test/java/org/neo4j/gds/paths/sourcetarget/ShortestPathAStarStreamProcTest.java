@@ -65,7 +65,6 @@ class ShortestPathAStarStreamProcTest extends ShortestPathAStarProcTest<Shortest
             .addParameter(LATITUDE_PROPERTY_KEY, config.latitudeProperty())
             .addParameter(LONGITUDE_PROPERTY_KEY, config.longitudeProperty())
             .addParameter("relationshipWeightProperty", "cost")
-            .addParameter("path", true)
             .yields();
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {

@@ -28,9 +28,11 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
+
 public abstract class ShortestPathStreamProc<
     ALGO extends Algorithm<ALGO, DijkstraResult>,
-    CONFIG extends AlgoBaseConfig & ReturnsPathConfig> extends StreamProc<ALGO, DijkstraResult, StreamResult, CONFIG> {
+    CONFIG extends AlgoBaseConfig> extends StreamProc<ALGO, DijkstraResult, StreamResult, CONFIG> {
 
     @Override
     protected StreamResult streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties) {
@@ -48,11 +50,15 @@ public abstract class ShortestPathStreamProc<
                 return Stream.empty();
             }
 
+            var shouldReturnPath = callContext
+                .outputFields()
+                .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
+
             var resultBuilder = new StreamResult.Builder(graph, transaction.internalTransaction());
             return computationResult
                 .result()
                 .paths()
-                .map(path -> resultBuilder.build(path, config.path()));
+                .map(path -> resultBuilder.build(path, shouldReturnPath));
         });
     }
 }

@@ -61,7 +61,6 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
             .addParameter("sourceNode", config.sourceNode())
             .addParameter("targetNode", config.targetNode())
             .addParameter("relationshipWeightProperty", "cost")
-            .addParameter("path", true)
             .yields();
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
