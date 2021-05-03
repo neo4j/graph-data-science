@@ -58,7 +58,7 @@ public interface MetricSpecification {
         return MemoryEstimations.builder()
             .rangePerNode("metrics", __ -> {
                 var sizeOfRepresentativeMetric = sizeOf(new F1Score(1));
-                return MemoryRange.of(2 * sizeOfRepresentativeMetric, numberOfClasses * sizeOfRepresentativeMetric);
+                return MemoryRange.of(1 * sizeOfRepresentativeMetric, numberOfClasses * sizeOfRepresentativeMetric);
             })
             .build();
     }
