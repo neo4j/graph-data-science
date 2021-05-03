@@ -20,6 +20,7 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 
@@ -32,14 +33,29 @@ public final class RangeValidationConfig implements RangeValidation {
 
     private double doubleWithinRange;
 
+    private Optional<Double> maybeDoubleWithinRange;
+
     public RangeValidationConfig(@NotNull CypherMapWrapper config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
-            this.integerWithinRange = CypherMapWrapper.validateIntegerRange(
+            this.integerWithinRange = config.requireInt("integerWithinRange")
+            CypherMapWrapper.validateIntegerRange(
                 "integerWithinRange",
-                config.requireInt("integerWithinRange"),
+                integerWithinRange,
                 21,
                 42,
+                false,
+                true);
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.doubleWithinRange = config.requireDouble("doubleWithinRange");
+            CypherMapWrapper.validateDoubleRange(
+                "doubleWithinRange",
+                doubleWithinRange,
+                21.0,
+                42.0,
                 false,
                 true
             );
@@ -47,13 +63,16 @@ public final class RangeValidationConfig implements RangeValidation {
             errors.add(e);
         }
         try {
-            this.doubleWithinRange = CypherMapWrapper.validateDoubleRange(
-                "doubleWithinRange",
-                config.requireDouble("doubleWithinRange"),
-                21.0,
-                42.0,
-                false,
-                true
+            this.maybeDoubleWithinRange = CypherMapWrapper.failOnNull("maybeDoubleWithinRange", config.getOptional("maybeDoubleWithinRange", Double.class));
+            maybeDoubleWithinRange.ifPresent(maybeDoubleWithinRange ->
+                org.neo4j.graphalgo.core.CypherMapWrapper.validateDoubleRange(
+                    "maybeDoubleWithinRange",
+                    maybeDoubleWithinRange,
+                    21.0,
+                    42.0,
+                    false,
+                    true
+                )
             );
         } catch (IllegalArgumentException e) {
             errors.add(e);
@@ -65,7 +84,8 @@ public final class RangeValidationConfig implements RangeValidation {
                 String combinedErrorMsg = errors
                     .stream()
                     .map(IllegalArgumentException::getMessage)
-                    .collect(Collectors.joining(System.lineSeparator() + "\t\t\t\t",
+                    .collect(Collectors.joining(
+                        System.lineSeparator() + "\t\t\t\t",
                         "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
                         ""
                     ));
@@ -84,5 +104,10 @@ public final class RangeValidationConfig implements RangeValidation {
     @Override
     public double doubleWithinRange() {
         return this.doubleWithinRange;
+    }
+
+    @Override
+    public Optional<Double> maybeDoubleWithinRange() {
+        return this.maybeDoubleWithinRange;
     }
 }

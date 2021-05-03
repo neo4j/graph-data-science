@@ -20,12 +20,15 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.pagerank.PageRankProc.EIGENVECTOR_DESCRIPTION;
@@ -55,6 +58,20 @@ public class EigenvectorStatsProc extends PageRankStatsProc {
 
     @Override
     protected AlgorithmFactory<PageRankAlgorithm, PageRankStatsConfig> algorithmFactory() {
-        return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
+        return new PageRankAlgorithmFactory<PageRankStatsConfig>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
+    }
+
+    @Override
+    protected PageRankStatsConfig newConfig(
+        String username,
+        Optional<String> graphName,
+        Optional<GraphCreateConfig> maybeImplicitCreate,
+        CypherMapWrapper config
+    ) {
+        if (config.containsKey("dampingFactor")) {
+            throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
+        }
+
+        return super.newConfig(username, graphName, maybeImplicitCreate, config);
     }
 }

@@ -20,79 +20,42 @@
 package org.neo4j.graphalgo.pagerank;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.WriteProc;
-import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.pagerank.PageRankProc.PAGE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class ArticleRankWriteProc extends WriteProc<PageRankAlgorithm, PageRankResult, PageRankWriteProc.WriteResult, PageRankWriteConfig> {
+public class ArticleRankWriteProc extends PageRankWriteProc {
 
+    @Override
     @Procedure(value = "gds.articleRank.write", mode = WRITE)
     @Description(PAGE_RANK_DESCRIPTION)
     public Stream<PageRankWriteProc.WriteResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankWriteConfig> computationResult = compute(
-            graphNameOrConfig,
-            configuration
-        );
-        return write(computationResult);
+        return super.write(graphNameOrConfig, configuration);
     }
 
+    @Override
     @Procedure(value = "gds.articleRank.write.estimate", mode = READ)
     @Description(ESTIMATE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return computeEstimate(graphNameOrConfig, configuration);
-    }
-
-    @Override
-    protected NodeProperties nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, PageRankWriteConfig> computationResult) {
-        return PageRankProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected AbstractResultBuilder<PageRankWriteProc.WriteResult> resultBuilder(ComputationResult<PageRankAlgorithm, PageRankResult, PageRankWriteConfig> computeResult) {
-        return PageRankProc.resultBuilder(
-            new PageRankWriteProc.WriteResult.Builder(callContext, computeResult.config().concurrency()),
-            computeResult
-        );
+        return super.computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
     protected AlgorithmFactory<PageRankAlgorithm, PageRankWriteConfig> algorithmFactory() {
         return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
-    }
-
-    @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, PageRankWriteConfig config) {
-        super.validateConfigsBeforeLoad(graphCreateConfig, config);
-        PageRankProc.validateAlgoConfig(config, log);
-    }
-
-    @Override
-    protected PageRankWriteConfig newConfig(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
-    ) {
-        return PageRankWriteConfig.of(username, graphName, maybeImplicitCreate, config);
     }
 }
