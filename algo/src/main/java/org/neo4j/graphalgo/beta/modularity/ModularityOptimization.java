@@ -271,7 +271,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         public void run() {
             var cumulativeWeight = new MutableDouble();
 
-            for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
+            partition.consume(nodeId -> {
                 if (!isSeeded) {
                     currentCommunities.set(nodeId, nodeId);
                 }
@@ -291,7 +291,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 cumulativeNodeWeights.set(nodeId, cumulativeWeight.doubleValue());
 
                 localSum += cumulativeWeight.doubleValue();
-            }
+            });
         }
 
         double localSum() {

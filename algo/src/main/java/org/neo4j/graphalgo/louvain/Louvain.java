@@ -334,14 +334,13 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
 
         @Override
         public void run() {
-            long endNodeId = partition.startNode() + partition.nodeCount();
-            for (long nodeId = partition.startNode(); nodeId < endNodeId; nodeId++) {
+            partition.consume(nodeId -> {
                 long communityId = modularityOptimization.getCommunityId(nodeId);
                 relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
                     relationshipsBuilder.add(communityId, modularityOptimization.getCommunityId(target), property);
                     return true;
                 });
-            }
+            });
         }
     }
 }

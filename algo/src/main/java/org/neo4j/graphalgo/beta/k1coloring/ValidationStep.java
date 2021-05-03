@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 
 final class ValidationStep implements Runnable {
 
@@ -30,8 +31,7 @@ final class ValidationStep implements Runnable {
     private final HugeLongArray colors;
     private final BitSet currentNodesToColor;
     private final BitSet nextNodesToColor;
-    private final long offset;
-    private final long batchEnd;
+    private final Partition partition;
     private final ProgressLogger progressLogger;
 
     ValidationStep(
@@ -39,23 +39,20 @@ final class ValidationStep implements Runnable {
         HugeLongArray colors,
         BitSet currentNodesToColor,
         BitSet nextNodesToColor,
-        long nodeCount,
-        long offset,
-        long batchSize,
+        Partition partition,
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.colors = colors;
         this.currentNodesToColor = currentNodesToColor;
         this.nextNodesToColor = nextNodesToColor;
-        this.offset = offset;
-        this.batchEnd = Math.min(offset + batchSize, nodeCount);
+        this.partition = partition;
         this.progressLogger = progressLogger;
     }
 
     @Override
     public void run() {
-        for (long nodeId = offset; nodeId < batchEnd; nodeId++) {
+        partition.consume(nodeId -> {
             if (currentNodesToColor.get(nodeId)) {
                 graph.forEachRelationship(nodeId, (source, target) -> {
                     if (
@@ -72,6 +69,6 @@ final class ValidationStep implements Runnable {
 
                 progressLogger.logProgress();
             }
-        }
+        });
     }
 }

@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 
 public final class ColoringStep implements Runnable {
 
@@ -32,25 +33,21 @@ public final class ColoringStep implements Runnable {
     private final HugeLongArray colors;
     private final BitSet nodesToColor;
     private final BitSet forbiddenColors;
-    private final long offset;
+    private final Partition partition;
     private final ProgressLogger progressLogger;
-    private final long batchEnd;
     private final long[] resetMask;
 
     public ColoringStep(
         RelationshipIterator graph,
         HugeLongArray colors,
         BitSet nodesToColor,
-        long nodeCount,
-        long offset,
-        long batchSize,
+        Partition partition,
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.colors = colors;
         this.nodesToColor = nodesToColor;
-        this.offset = offset;
-        this.batchEnd = Math.min(offset + batchSize, nodeCount);
+        this.partition = partition;
         this.forbiddenColors = new BitSet(INITIAL_FORBIDDEN_COLORS);
         this.resetMask = new long[INITIAL_FORBIDDEN_COLORS];
         this.progressLogger = progressLogger;
@@ -58,7 +55,7 @@ public final class ColoringStep implements Runnable {
 
     @Override
     public void run() {
-        for (long nodeId = offset; nodeId < batchEnd; nodeId++) {
+        partition.consume(nodeId -> {
             if (nodesToColor.get(nodeId)) {
                 resetForbiddenColors();
 
@@ -78,7 +75,7 @@ public final class ColoringStep implements Runnable {
 
                 progressLogger.logProgress();
             }
-        }
+        });
     }
 
     private void resetForbiddenColors() {
