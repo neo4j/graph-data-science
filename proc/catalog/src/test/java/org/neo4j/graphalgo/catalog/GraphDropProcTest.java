@@ -287,6 +287,26 @@ class GraphDropProcTest extends BaseProcTest {
     }
 
     @Test
+    void failsWithAllMissingGraphsInOneCall() {
+        var existsQuery = "RETURN gds.graph.exists($graphName) AS exists";
+
+        assertCypherResult(
+            existsQuery, Map.of("graphName", "g1"),
+            List.of(Map.of("exists", false))
+        );
+
+        assertCypherResult(
+            existsQuery, Map.of("graphName", "g2"),
+            List.of(Map.of("exists", false))
+        );
+
+        assertError(
+            "CALL gds.graph.drop(['g1', 'g2', 'g3'])",
+            "The graphs `g1`, `g2`, and `g3` do not exist on database `neo4j`."
+        );
+    }
+
+    @Test
     void droppingMultipleGraphsAcceptsTheFailIfMissingFlag() {
         var createQuery = "CALL gds.graph.create($name, '*', '*')";
         runQuery(createQuery, Map.of("name", "g1"));

@@ -28,6 +28,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -67,8 +69,17 @@ public class GraphDropProc extends CatalogProc {
         var username = username();
 
         if (failIfMissing) {
-            for (String name : graphNames) {
-                GraphStoreCatalog.get(username, databaseName, name);
+            var missingGraphs = graphNames.stream().flatMap(name -> {
+                try {
+                    // get the graph to check if it exists
+                    GraphStoreCatalog.get(username, databaseName, name);
+                    return Stream.empty();
+                } catch (NoSuchElementException missing) {
+                    return Stream.of(new MissingGraph(name, missing));
+                }
+            }).collect(Collectors.toList());
+            if (!missingGraphs.isEmpty()) {
+                throw missingGraphs(missingGraphs, databaseName);
             }
         }
 
@@ -97,5 +108,38 @@ public class GraphDropProc extends CatalogProc {
             index >= 0 ? (" at index " + index) : "",
             invalid.getClass().getSimpleName()
         ));
+    }
+
+    private NoSuchElementException missingGraphs(List<MissingGraph> missingGraphs, String dbName) {
+        if (missingGraphs.size() == 1) {
+            return missingGraphs.get(0).exception;
+        }
+
+        var message = new StringBuilder("The graphs");
+        for (int i = 0; i < missingGraphs.size() - 1; i++) {
+            message.append(" `").append(missingGraphs.get(i).name).append("`,");
+        }
+        message
+            .append(" and `")
+            .append(missingGraphs.get(missingGraphs.size() - 1).name)
+            .append("` do not exist on database `")
+            .append(dbName)
+            .append("`.");
+
+        var exception = new NoSuchElementException(message.toString());
+        for (var missingGraph : missingGraphs) {
+            exception.addSuppressed(missingGraph.exception);
+        }
+        return exception;
+    }
+
+    private static final class MissingGraph {
+        private final String name;
+        private final NoSuchElementException exception;
+
+        private MissingGraph(String name, NoSuchElementException exception) {
+            this.name = name;
+            this.exception = exception;
+        }
     }
 }
