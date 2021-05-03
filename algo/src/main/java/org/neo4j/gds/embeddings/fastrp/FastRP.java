@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ml.features.FeatureConsumer;
 import org.neo4j.gds.ml.features.FeatureExtraction;
@@ -330,7 +331,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         public void run() {
             // this value currently doesnt matter because of reseeding below
             var random = new HighQualityRandom(randomSeed);
-            for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
+            partition.consume( nodeId -> {
                 int degree = graph.degree(nodeId);
                 float scaling = degree == 0
                     ? 1.0f
@@ -341,7 +342,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                 float[] randomVector = computeRandomVector(nodeId, random, entryValue);
                 embeddingB.set(nodeId, randomVector);
                 embeddingA.set(nodeId, new float[embeddingDimension]);
-            }
+            });
             progressLogger.logProgress(partition.nodeCount());
         }
 
@@ -410,8 +411,8 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
         @Override
         public void run() {
-            long degrees = 0;
-            for (long nodeId = partition.startNode(); nodeId < partition.startNode() + partition.nodeCount(); nodeId++) {
+            MutableLong degrees = new MutableLong(0);
+            partition.consume(nodeId -> {
                 float[] embedding = embeddings.get(nodeId);
                 float[] currentEmbedding = localCurrent.get(nodeId);
                 Arrays.fill(currentEmbedding, 0.0f);
@@ -438,9 +439,9 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
                 // Update the result embedding
                 updateEmbeddings(iterationWeight, embedding, currentEmbedding);
-                degrees += degree;
-            }
-            progressLogger.logProgress(degrees);
+                degrees.add(degree);
+            });
+            progressLogger.logProgress(degrees.longValue());
         }
     }
 
