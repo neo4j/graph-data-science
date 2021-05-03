@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage.ddl4j.functions;
 
-import org.eclipse.collections.api.tuple.Pair;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
@@ -37,10 +36,6 @@ public class L2NormSquared extends SingleParentVariable<Scalar> {
 
     public static long sizeInBytesOfApply() {
         return sizeOfDoubleArray(1);
-    }
-
-    public static long sizeInBytesOfGradient(Pair<Integer, Integer> parentDimensions) {
-        return Matrix.sizeInBytes(parentDimensions.getOne(), parentDimensions.getTwo());
     }
 
     @Override

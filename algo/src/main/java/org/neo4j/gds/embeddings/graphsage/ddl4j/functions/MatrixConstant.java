@@ -24,7 +24,6 @@ import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
 import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.List;
 
@@ -37,8 +36,8 @@ public class MatrixConstant extends AbstractVariable<Matrix> {
         this.data = new Matrix(elements, rows, cols);
     }
 
-    public static long sizeInBytes(long rows, long columns) {
-        return MemoryUsage.sizeOfDoubleArray(rows * columns);
+    public static long sizeInBytes(int rows, int columns) {
+        return Matrix.sizeInBytes(rows, columns);
     }
 
     @Override

@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.extension.Inject;
 import java.util.List;
 
 import static java.lang.Math.log;
+import static java.lang.Math.max;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
@@ -82,8 +83,8 @@ class NodeLogisticRegressionObjectiveTest {
         var softMax = 8 * 100 * 10 + 16;            // 8 bytes for a double * batchSize * numberOfClasses + 16 for the double array
         var unpenalizedLoss = 24;                   // 8 bytes for a double + 16 for the double array
         var l2norm = 8 + 16;                        // 8 bytes for a double + 16 for the double array
-        var constantScale = 8 + 16;                 // 8 bytes for a souble + 16 for the double array
-        var elementSum = 8 + 16;                    // 8 bytes for a souble + 16 for the double array
+        var constantScale = 8 + 16;                 // 8 bytes for a double + 16 for the double array
+        var elementSum = 8 + 16;                    // 8 bytes for a double + 16 for the double array
         var predictor = 24304;                      // black box, not from this class
 
         var trainEpoch = makeTargets +
@@ -104,8 +105,7 @@ class NodeLogisticRegressionObjectiveTest {
                            elementSum +
                            predictor;
 
-        var expected = trainEpoch + evaluateLoss + weightGradient;
-        ;
+        var expected = max(trainEpoch + weightGradient, evaluateLoss);
         assertThat(makeTargets).isEqualTo(NodeLogisticRegressionObjective.costOfMakeTargets(100));
         assertThat(memoryUsageInBytes).isEqualTo(expected);
     }

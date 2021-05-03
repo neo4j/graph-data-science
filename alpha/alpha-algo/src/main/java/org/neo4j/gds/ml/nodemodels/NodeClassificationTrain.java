@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
@@ -46,14 +47,15 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, Model<NodeLogisticRegressionData, NodeClassificationTrainConfig>> {
@@ -78,27 +80,69 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             .getAsInt();
         var fudgedClassCount = 1000;
         var fudgedFeatureCount = 500;
+        var holdoutFraction = config.holdoutFraction();
+        var validationFolds = config.validationFolds();
+
+        var modelSelection = modelTrainAndEvaluateMemoryUsage(
+            maxBatchSize,
+            fudgedClassCount,
+            fudgedFeatureCount,
+            (nodeCount) -> (long) (nodeCount * holdoutFraction * (validationFolds - 1) / validationFolds)
+        );
+        var bestModelEvaluation = modelTrainAndEvaluateMemoryUsage(
+            maxBatchSize,
+            fudgedClassCount,
+            fudgedFeatureCount,
+            (nodeCount) -> (long) (nodeCount * holdoutFraction)
+        );
+        // Final step is to retrain the best model with the entire node set.
+        // Training memory is independent of node set size so we can skip that last estimation.
         return MemoryEstimations.builder()
             .perNode("global targets", HugeLongArray::memoryEstimation)
-            // there are between two and nodeCount classes, each is a long
-            // TODO: class counts could be it's own tree to also capture the multiset itself
             .rangePerNode("global class counts", __ -> MemoryRange.of(2 * 8, fudgedClassCount * 8))
             .add("metrics", MetricSpecification.memoryEstimation(fudgedClassCount))
             .perNode("node IDs", HugeLongArray::memoryEstimation)
-            .add("outer split", FractionSplitter.estimate(1 - config.holdoutFraction()))
-            .add("inner split", StratifiedKFoldSplitter.memoryEstimation(config.validationFolds(), 1 - config.holdoutFraction()))
+            .add("outer split", FractionSplitter.estimate(1 - holdoutFraction))
+            .add("inner split", StratifiedKFoldSplitter.memoryEstimation(validationFolds, 1 - holdoutFraction))
             .add("stats map train", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
             .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
-            // TODO: Do we need to estimate the ModelStats and ModelStatsBuilder thingies?
-            .add(
-                "training",
-                NodeLogisticRegressionTrain.memoryEstimation(
-                    fudgedClassCount,
-                    fudgedFeatureCount,
-                    maxBatchSize,
-                    TrainingConfig.DEFAULT_SHARED_UPDATER
-                )
-            )
+            .max(modelSelection, bestModelEvaluation)
+            .build();
+    }
+
+    @NotNull
+    private static MemoryEstimation modelTrainAndEvaluateMemoryUsage(
+        int maxBatchSize,
+        int fudgedClassCount,
+        int fudgedFeatureCount,
+        LongUnaryOperator nodeSetSize
+    ) {
+        MemoryEstimation training = NodeLogisticRegressionTrain.memoryEstimation(
+            fudgedClassCount,
+            fudgedFeatureCount,
+            maxBatchSize,
+            TrainingConfig.DEFAULT_SHARED_UPDATER
+        );
+
+        MemoryEstimation metricsComputation = MemoryEstimations.builder("computing metrics")
+            .perNode("local targets", (nodeCount) -> {
+                var sizeOfLargePartOfAFold = nodeSetSize.applyAsLong(nodeCount);
+                return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
+            })
+            .perNode("predicted classes", (nodeCount) -> {
+                var sizeOfLargePartOfAFold = nodeSetSize.applyAsLong(nodeCount);
+                return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
+            })
+            .fixed("probabilities", sizeOfDoubleArray(fudgedClassCount))
+            .fixed("predictions variable", NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(
+                BatchQueue.DEFAULT_BATCH_SIZE,
+                fudgedFeatureCount,
+                fudgedClassCount
+            ))
+            .build();
+
+        return MemoryEstimations.builder("model selection")
+            .max(training, metricsComputation)
             .build();
     }
 
@@ -298,10 +342,12 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         ));
     }
 
-    private Map<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>> initStatsMap(Iterable<Metric> metrics) {
-        var statsMap = new HashMap<Metric, List<ModelStats<NodeLogisticRegressionTrainConfig>>>();
-        metrics.forEach(metric -> statsMap.put(metric, new ArrayList<>()));
-        return statsMap;
+    private NodeLogisticRegressionData trainModel(
+        HugeLongArray trainSet,
+        NodeLogisticRegressionTrainConfig nlrConfig
+    ) {
+        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressLogger);
+        return train.compute();
     }
 
     private Map<Metric, Double> computeMetrics(
@@ -333,14 +379,6 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             metric -> metric,
             metric -> metric.compute(localTargets, predictedClasses, globalClassCounts)
         ));
-    }
-
-    private NodeLogisticRegressionData trainModel(
-        HugeLongArray trainSet,
-        NodeLogisticRegressionTrainConfig nlrConfig
-    ) {
-        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressLogger);
-        return train.compute();
     }
 
     private HugeLongArray makeLocalTargets(HugeLongArray nodeIds) {

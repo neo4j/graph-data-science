@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class BatchQueue {
-    static final int DEFAULT_BATCH_SIZE = 100;
+    public static final int DEFAULT_BATCH_SIZE = 100;
     protected final long nodeCount;
     protected final int batchSize;
     long currentBatch;

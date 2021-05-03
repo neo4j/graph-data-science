@@ -67,7 +67,7 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
             numberOfClasses
         );
 
-        long sizeOfComputationGraphForTrainEpoch = batchLocalWeightGradient +
+        long sizeOfComputationGraphForTrainEpoch =
             1 * targets +
             1 * weightedFeatures + // gradient
             1 * softMax +          // gradient
@@ -75,9 +75,10 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
             2 * l2norm +           // data and gradient
             2 * constantScale +    // data and gradient
             2 * elementSum +       // data and gradient
-            sizeOfPredictionsVariableInBytes;
+            sizeOfPredictionsVariableInBytes +
+            batchLocalWeightGradient;
 
-        var sizeOfComputationGraphForEvaluateLoss = batchLocalWeightGradient +
+        var sizeOfComputationGraphForEvaluateLoss =
             1 * targets +
             1 * weightedFeatures + // gradient
             1 * softMax +          // gradient
