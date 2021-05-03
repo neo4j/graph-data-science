@@ -151,21 +151,21 @@ class K1ColoringTest {
         long nodeCount = 100_000L;
         int concurrency = 1;
 
-        assertMemoryEstimation(nodeCount, concurrency, 825264);
+        assertMemoryEstimation(nodeCount, concurrency, 825248);
     }
 
     @Test
     void shouldComputeMemoryEstimation4Threads() {
         long nodeCount = 100_000L;
         int concurrency = 4;
-        assertMemoryEstimation(nodeCount, concurrency, 863064);
+        assertMemoryEstimation(nodeCount, concurrency, 863000);
     }
 
     @Test
     void shouldComputeMemoryEstimation42Threads() {
         long nodeCount = 100_000L;
         int concurrency = 42;
-        assertMemoryEstimation(nodeCount, concurrency, 1341864);
+        assertMemoryEstimation(nodeCount, concurrency, 1341192);
     }
 
     @Test
