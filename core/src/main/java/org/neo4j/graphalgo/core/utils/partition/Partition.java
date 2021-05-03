@@ -32,13 +32,10 @@ public interface Partition {
 
     long nodeCount();
 
-    default boolean fits(int otherPartitionsCount) {
-        return MAX_NODE_COUNT - otherPartitionsCount >= nodeCount();
-    }
-
     default void consume(LongConsumer consumer) {
-        long endNode = startNode() + nodeCount();
-        for (long id = startNode(); id < endNode; id++) {
+        var startNode = startNode();
+        long endNode = startNode + nodeCount();
+        for (long id = startNode; id < endNode; id++) {
             consumer.accept(id);
         }
     }
