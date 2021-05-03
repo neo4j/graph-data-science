@@ -77,12 +77,9 @@ public final class CentralityStatistics {
 
         @Override
         public void run() {
-            long startId = partition.startNode();
-            long endId = partition.startNode() + partition.nodeCount();
-
-            for (long id = startId; id < endId; id++) {
+            partition.consume(id -> {
                 histogram.recordValue(centralityFunction.applyAsDouble(id));
-            }
+            });
         }
     }
 }

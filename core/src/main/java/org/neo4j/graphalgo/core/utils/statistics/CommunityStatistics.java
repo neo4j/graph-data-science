@@ -252,14 +252,11 @@ public final class CommunityStatistics {
 
         @Override
         public void run() {
-            long startId = partition.startNode();
-            long endId = partition.startNode() + partition.nodeCount();
-
-            for (long id = startId; id < endId; id++) {
+            partition.consume(id -> {
                 if (communitySizes.get(id) != EMPTY_COMMUNITY) {
                     count++;
                 }
-            }
+            });
         }
 
         public long count() {
@@ -285,16 +282,13 @@ public final class CommunityStatistics {
 
         @Override
         public void run() {
-            long startId = partition.startNode();
-            long endId = partition.startNode() + partition.nodeCount();
-
-            for (long id = startId; id < endId; id++) {
+            partition.consume(id -> {
                 long communitySize = communitySizes.get(id);
                 if (communitySize != EMPTY_COMMUNITY) {
                     count++;
                     histogram.recordValue(communitySize);
                 }
-            }
+            });
         }
     }
 
