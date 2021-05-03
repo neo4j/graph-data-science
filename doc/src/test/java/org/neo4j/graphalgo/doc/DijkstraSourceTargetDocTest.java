@@ -41,7 +41,7 @@ class DijkstraSourceTargetDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/beta/shortest-path/dijkstra-source-target.adoc";
+        return "algorithms/shortest-path/dijkstra-source-target.adoc";
     }
 
 }

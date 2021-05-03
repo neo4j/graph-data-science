@@ -41,7 +41,7 @@ class DijkstraSingleSourceDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/beta/shortest-path/dijkstra-single-source.adoc";
+        return "algorithms/shortest-path/dijkstra-single-source.adoc";
     }
 
 }

@@ -41,7 +41,7 @@ class AStarDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/beta/shortest-path/astar.adoc";
+        return "algorithms/shortest-path/astar.adoc";
     }
 
 }

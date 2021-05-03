@@ -41,7 +41,7 @@ class YensDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/beta/shortest-path/yens.adoc";
+        return "algorithms/shortest-path/yens.adoc";
     }
 
 }
