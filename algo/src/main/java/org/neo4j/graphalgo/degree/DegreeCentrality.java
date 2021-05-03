@@ -98,8 +98,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
         private final HugeDoubleArray result;
         private final RelationshipIterator relationshipIterator;
-        private final long startNodeId;
-        private final long endNodeId;
+        private final Partition partition;
 
         WeightedDegreeTask(
             RelationshipIterator relationshipIterator,
@@ -108,13 +107,12 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         ) {
             this.relationshipIterator = relationshipIterator;
             this.result = result;
-            this.startNodeId = partition.startNode();
-            this.endNodeId = partition.startNode() + partition.nodeCount();
+            this.partition = partition;
         }
 
         @Override
         public void run() {
-            for (long nodeId = startNodeId; nodeId < endNodeId && running(); nodeId++) {
+            partition.consume(nodeId -> {
                 MutableDouble nodeWeight = new MutableDouble(0.0D);
                 relationshipIterator.forEachRelationship(nodeId, DEFAULT_WEIGHT, (sourceNodeId, targetNodeId, weight) -> {
                     if (weight > 0.0D) {
@@ -123,8 +121,8 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                     return true;
                 });
                 result.set(nodeId, nodeWeight.doubleValue());
-            }
-            getProgressLogger().logProgress(endNodeId - startNodeId);
+            });
+            getProgressLogger().logProgress(partition.nodeCount());
         }
     }
 }
