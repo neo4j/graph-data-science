@@ -107,6 +107,7 @@ class RandomWalkProcTest extends BaseProcTest {
             .addParameter("start", "Fred")
             .addParameter("steps", 2)
             .addParameter("walks", 5)
+            .addParameter("path", true)
             .yields();
 
         // TODO: make this test predictable (i.e. set random seed)
