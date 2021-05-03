@@ -31,10 +31,11 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.assertj.core.util.Arrays.asList;
 
 class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPathYensStreamConfig> {
 
@@ -67,12 +68,9 @@ class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPa
             var path1 = PathFactory.create(tx, -4, ids1, costs1, RelationshipType.withName("PATH_1"), StreamResult.COST_PROPERTY_NAME);
             var path2 = PathFactory.create(tx, -7, ids2, costs2, RelationshipType.withName("PATH_2"), StreamResult.COST_PROPERTY_NAME);
             var expected = List.of(
-                Map.of("index", 0L, "sourceNode", idC, "targetNode", idH, "totalCost", 5.0D, "costs", Arrays.asList(costs0), "nodeIds", Arrays
-                    .asList(ids0), "path", path0),
-                Map.of("index", 1L, "sourceNode", idC, "targetNode", idH, "totalCost", 7.0D, "costs", Arrays.asList(costs1), "nodeIds", Arrays
-                    .asList(ids1), "path", path1),
-                Map.of("index", 2L, "sourceNode", idC, "targetNode", idH, "totalCost", 8.0D, "costs", Arrays.asList(costs2), "nodeIds", Arrays
-                    .asList(ids2), "path", path2)
+                Map.of("index", 0L, "sourceNode", idC, "targetNode", idH, "totalCost", 5.0D, "costs", asList(costs0), "nodeIds", asList(ids0), "path", path0),
+                Map.of("index", 1L, "sourceNode", idC, "targetNode", idH, "totalCost", 7.0D, "costs", asList(costs1), "nodeIds", asList(ids1), "path", path1),
+                Map.of("index", 2L, "sourceNode", idC, "targetNode", idH, "totalCost", 8.0D, "costs", asList(costs2), "nodeIds", asList(ids2), "path", path2)
             );
 
             assertCypherResult(query, expected);

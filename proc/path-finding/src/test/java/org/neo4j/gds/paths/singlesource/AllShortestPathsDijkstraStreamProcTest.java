@@ -31,10 +31,11 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.assertj.core.util.Arrays.asList;
 
 class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraProcTest<AllShortestPathsDijkstraStreamConfig> {
 
@@ -69,12 +70,12 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
             var path4 = PathFactory.create(tx, -5, ids4, costs4, RelationshipType.withName("PATH_4"), StreamResult.COST_PROPERTY_NAME);
             var path5 = PathFactory.create(tx, -8, ids5, costs5, RelationshipType.withName("PATH_5"), StreamResult.COST_PROPERTY_NAME);
             var expected = List.of(
-                Map.of("index", 0L, "sourceNode", idA, "targetNode", idA, "totalCost", 0.0D, "costs", Collections.singletonList(costs0), "nodeIds", Collections.singletonList(ids0), "path", path0),
-                Map.of("index", 1L, "sourceNode", idA, "targetNode", idC, "totalCost", 2.0D, "costs", Collections.singletonList(costs1), "nodeIds", Collections.singletonList(ids1), "path", path1),
-                Map.of("index", 2L, "sourceNode", idA, "targetNode", idB, "totalCost", 4.0D, "costs", Collections.singletonList(costs2), "nodeIds", Collections.singletonList(ids2), "path", path2),
-                Map.of("index", 3L, "sourceNode", idA, "targetNode", idE, "totalCost", 5.0D, "costs", Collections.singletonList(costs3), "nodeIds", Collections.singletonList(ids3), "path", path3),
-                Map.of("index", 4L, "sourceNode", idA, "targetNode", idD, "totalCost", 9.0D, "costs", Collections.singletonList(costs4), "nodeIds", Collections.singletonList(ids4), "path", path4),
-                Map.of("index", 5L, "sourceNode", idA, "targetNode", idF, "totalCost", 20.0D, "costs", Collections.singletonList(costs5), "nodeIds", Collections.singletonList(ids5), "path", path5)
+                Map.of("index", 0L, "sourceNode", idA, "targetNode", idA, "totalCost", 0.0D, "costs", asList(costs0), "nodeIds", asList(ids0), "path", path0),
+                Map.of("index", 1L, "sourceNode", idA, "targetNode", idC, "totalCost", 2.0D, "costs", asList(costs1), "nodeIds", asList(ids1), "path", path1),
+                Map.of("index", 2L, "sourceNode", idA, "targetNode", idB, "totalCost", 4.0D, "costs", asList(costs2), "nodeIds", asList(ids2), "path", path2),
+                Map.of("index", 3L, "sourceNode", idA, "targetNode", idE, "totalCost", 5.0D, "costs", asList(costs3), "nodeIds", asList(ids3), "path", path3),
+                Map.of("index", 4L, "sourceNode", idA, "targetNode", idD, "totalCost", 9.0D, "costs", asList(costs4), "nodeIds", asList(ids4), "path", path4),
+                Map.of("index", 5L, "sourceNode", idA, "targetNode", idF, "totalCost", 20.0D, "costs", asList(costs5), "nodeIds", asList(ids5), "path", path5)
             );
             assertCypherResult(query, expected);
         });
