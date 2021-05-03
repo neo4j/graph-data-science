@@ -91,22 +91,17 @@ public interface SelectionStrategy {
             AtomicInteger maxDegree = new AtomicInteger(0);
 
             var tasks = partitions.stream()
-                .map(partition -> (Runnable) () -> {
-                    var fromNode = partition.startNode();
-                    var toNode = partition.startNode() + partition.nodeCount();
-
-                    for (long nodeId = fromNode; nodeId < toNode; nodeId++) {
-                        int degree = graph.degree(nodeId);
-                        int current = maxDegree.get();
-                        while (degree > current) {
-                            int newCurrent = maxDegree.compareAndExchange(current, degree);
-                            if (newCurrent == current) {
-                                break;
-                            }
-                            current = newCurrent;
+                .map(partition -> (Runnable) () -> partition.consume(nodeId -> {
+                    int degree = graph.degree(nodeId);
+                    int current = maxDegree.get();
+                    while (degree > current) {
+                        int newCurrent = maxDegree.compareAndExchange(current, degree);
+                        if (newCurrent == current) {
+                            break;
                         }
+                        current = newCurrent;
                     }
-                }).collect(Collectors.toList());
+                })).collect(Collectors.toList());
 
             ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
 
