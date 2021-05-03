@@ -74,10 +74,10 @@ class ShortestPathConfigTest {
             .hasMessageContaining("Expected a node or a node id for `targetNode`. Got Boolean");
     }
 
-    private static final class TestNode implements Node {
+    static final class TestNode implements Node {
         private final long id;
 
-        private TestNode(long id) {this.id = id;}
+        TestNode(long id) {this.id = id;}
 
         @Override
         public void delete() {
