@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NodeClassificationTrainProcTest extends BaseProcTest {
@@ -302,6 +303,20 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .hasMessageContaining("patiences (Did you mean [patience]?)")
             .hasMessageContaining("tollerance (Did you mean [tolerance]?)")
             .hasMessageContaining("shareUpdaters (Did you mean [sharedUpdater]?)");
+    }
+
+    @Test
+    void shouldEstimateMemory() {
+        var query = " CALL gds.alpha.ml.nodeClassification.train.estimate('g', {" +
+                    "   modelName: 'model'," +
+                    "   targetProperty: 't'," +
+                    "   metrics: ['PRECISION(class=0)', 'RECALL(class=0)', 'ACCURACY(class=0)', 'F1(class=0)']," +
+                    "   holdoutFraction: 0.2," +
+                    "   validationFolds: 5," +
+                    "   randomSeed: 42," +
+                    "   params: [{penalty: 1.0}]" +
+                    " })";
+        assertDoesNotThrow(() -> runQuery(query));
     }
 
     public String createQuery() {

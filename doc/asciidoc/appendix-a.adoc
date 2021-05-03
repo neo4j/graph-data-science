@@ -363,11 +363,12 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.ml.linkPrediction.predict.mutate`
 | `gds.alpha.ml.linkPrediction.predict.stream`
 | `gds.alpha.ml.linkPrediction.train`
-.4+<.^| Node Classification
+.5+<.^| Node Classification
 | `gds.alpha.ml.nodeClassification.predict.mutate`
 | `gds.alpha.ml.nodeClassification.predict.stream`
 | `gds.alpha.ml.nodeClassification.predict.write`
 | `gds.alpha.ml.nodeClassification.train`
+| `gds.alpha.ml.nodeClassification.train.estimate`
 .1+<.^| Split Relationships
 | `gds.alpha.ml.splitRelationships.mutate`
 .1+<.^| Triangle Finding

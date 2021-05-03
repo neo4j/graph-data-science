@@ -95,6 +95,7 @@ class AlphaListProcTest extends BaseProcTest {
         "gds.alpha.ml.ann.write",
         "gds.alpha.ml.ann.stream",
         "gds.alpha.ml.nodeClassification.train",
+        "gds.alpha.ml.nodeClassification.train.estimate",
         "gds.alpha.ml.splitRelationships.mutate",
         "gds.alpha.influenceMaximization.greedy.stream",
         "gds.alpha.influenceMaximization.celf.stream"

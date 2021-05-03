@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -53,6 +54,15 @@ public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTra
             graphNameOrConfig, configuration,
             (model, result) -> new MLTrainResult(model, result.computeMillis())
         );
+    }
+
+    @Procedure(name = "gds.alpha.ml.nodeClassification.train.estimate", mode = Mode.READ)
+    @Description("Trains a node classification model")
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
