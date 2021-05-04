@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,10 +27,15 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphdb.RelationshipType;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.paths.PathFactory.DEFAULT_RELATIONSHIP_OFFSET;
 
 class PathFactoryTest extends BaseProcTest {
+
+    @AfterEach
+    void resetIds() {
+        PathFactory.RelationshipIds.set(0);
+    }
 
     @Nested
     class SingleNode {
@@ -48,7 +54,6 @@ class PathFactoryTest extends BaseProcTest {
             GraphDatabaseApiProxy.runInTransaction(db, tx -> {
                 var path = PathFactory.create(
                     tx,
-                    DEFAULT_RELATIONSHIP_OFFSET,
                     nodeIds,
                     costs,
                     RelationshipType.withName("REL"),
@@ -82,7 +87,6 @@ class PathFactoryTest extends BaseProcTest {
             GraphDatabaseApiProxy.runInTransaction(db, tx -> {
                 var path = PathFactory.create(
                     tx,
-                    DEFAULT_RELATIONSHIP_OFFSET,
                     nodeIds,
                     costs,
                     RelationshipType.withName("REL"),
@@ -98,6 +102,23 @@ class PathFactoryTest extends BaseProcTest {
                     assertEquals(expectedCost, actualCost, 1E-4);
                 });
             });
+        }
+    }
+
+    @Nested
+    class RelationshipIds {
+        @Test
+        void shouldGenerateConsecutiveIds() {
+            for (int i = 0; i > -10; i--) {
+                assertThat(PathFactory.RelationshipIds.next()).isEqualTo(i);
+            }
+        }
+
+        @Test
+        void shouldResetOnOverflow() {
+            PathFactory.RelationshipIds.set(Long.MIN_VALUE);
+            assertThat(PathFactory.RelationshipIds.next()).isEqualTo(Long.MIN_VALUE);
+            assertThat(PathFactory.RelationshipIds.next()).isEqualTo(0);
         }
     }
 }

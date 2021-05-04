@@ -71,12 +71,10 @@ public final class StreamResult {
     }
 
     public static class Builder {
-        private long relationshipIdOffset;
         private final IdMapping idMapping;
         private final Transaction transaction;
 
         public Builder(IdMapping idMapping, Transaction transaction) {
-            this.relationshipIdOffset = -1L;
             this.idMapping = idMapping;
             this.transaction = transaction;
         }
@@ -97,13 +95,11 @@ public final class StreamResult {
             if (createCypherPath) {
                 path = create(
                     transaction,
-                    relationshipIdOffset,
                     nodeIds,
                     costs,
                     relationshipType,
                     COST_PROPERTY_NAME
                 );
-                relationshipIdOffset -= path.length();
             }
 
             return new StreamResult(

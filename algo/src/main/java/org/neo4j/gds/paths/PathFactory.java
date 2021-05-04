@@ -19,20 +19,20 @@
  */
 package org.neo4j.gds.paths;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.impl.util.PathImpl;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 
-public final class PathFactory {
+import java.util.concurrent.atomic.AtomicLong;
 
-    public static final long DEFAULT_RELATIONSHIP_OFFSET = -1L;
+public final class PathFactory {
 
     private PathFactory() {}
 
     public static Path create(
         Transaction tx,
-        long relationshipIdOffset,
         long[] nodeIds,
         double[] costs,
         RelationshipType relationshipType,
@@ -46,7 +46,7 @@ public final class PathFactory {
             long targetNodeId = nodeIds[i + 1];
 
             var relationship = new VirtualRelationship(
-                relationshipIdOffset--,
+                RelationshipIds.next(),
                 tx.getNodeById(sourceNodeId),
                 tx.getNodeById(targetNodeId),
                 relationshipType
@@ -57,5 +57,28 @@ public final class PathFactory {
         }
 
         return pathBuilder.build();
+    }
+
+    static final class RelationshipIds {
+
+        static final AtomicLong ids = new AtomicLong(0);
+
+        static long next() {
+            var nextId = ids.getAndDecrement();
+
+            if (nextId > 0) {
+                ids.compareAndSet(nextId - 1, 0);
+                return ids.getAndDecrement();
+            }
+
+            return nextId;
+        }
+
+        @TestOnly
+        static void set(long value) {
+            ids.set(value);
+        }
+
+        private RelationshipIds() {}
     }
 }
