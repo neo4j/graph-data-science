@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
+import org.neo4j.gds.core.ml.ComputationContext;
 import org.neo4j.gds.ml.batch.LazyBatch;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;

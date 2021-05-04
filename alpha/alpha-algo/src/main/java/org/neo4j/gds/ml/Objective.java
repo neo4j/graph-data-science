@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.ml;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.core.ml.Variable;
+import org.neo4j.gds.core.ml.functions.Weights;
+import org.neo4j.gds.core.ml.tensor.Scalar;
+import org.neo4j.gds.core.ml.tensor.Tensor;
 import org.neo4j.gds.ml.batch.Batch;
 
 import java.util.List;

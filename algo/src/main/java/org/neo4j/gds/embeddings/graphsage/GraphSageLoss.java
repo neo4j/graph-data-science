@@ -19,19 +19,20 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.SingleParentVariable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.core.ml.ComputationContext;
+import org.neo4j.gds.core.ml.Dimensions;
+import org.neo4j.gds.core.ml.RelationshipWeights;
+import org.neo4j.gds.core.ml.Variable;
+import org.neo4j.gds.core.ml.functions.Sigmoid;
+import org.neo4j.gds.core.ml.functions.SingleParentVariable;
+import org.neo4j.gds.core.ml.tensor.Matrix;
+import org.neo4j.gds.core.ml.tensor.Scalar;
+import org.neo4j.gds.core.ml.tensor.Tensor;
 
 import java.util.stream.IntStream;
 
-import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.COLUMNS_INDEX;
-import static org.neo4j.gds.embeddings.graphsage.ddl4j.Dimensions.ROWS_INDEX;
+import static org.neo4j.gds.core.ml.Dimensions.COLUMNS_INDEX;
+import static org.neo4j.gds.core.ml.Dimensions.ROWS_INDEX;
 
 public class GraphSageLoss extends SingleParentVariable<Scalar> {
 

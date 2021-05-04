@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.core.ml.Variable;
+import org.neo4j.gds.core.ml.functions.MatrixConstant;
+import org.neo4j.gds.core.ml.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 

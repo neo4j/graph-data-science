@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
+import org.neo4j.gds.core.ml.functions.Weights;
+import org.neo4j.gds.core.ml.tensor.Matrix;
+import org.neo4j.gds.core.ml.tensor.Vector;
 
 import java.util.concurrent.ThreadLocalRandom;
 

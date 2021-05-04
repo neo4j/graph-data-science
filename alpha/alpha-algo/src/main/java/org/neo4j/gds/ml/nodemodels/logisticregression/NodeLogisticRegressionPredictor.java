@@ -20,12 +20,12 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Softmax;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.core.ml.ComputationContext;
+import org.neo4j.gds.core.ml.Variable;
+import org.neo4j.gds.core.ml.functions.MatrixConstant;
+import org.neo4j.gds.core.ml.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.core.ml.functions.Softmax;
+import org.neo4j.gds.core.ml.tensor.Matrix;
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.features.BiasFeature;

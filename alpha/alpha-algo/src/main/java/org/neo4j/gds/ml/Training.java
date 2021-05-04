@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
+import org.neo4j.gds.core.ml.ComputationContext;
+import org.neo4j.gds.core.ml.Variable;
+import org.neo4j.gds.core.ml.tensor.Scalar;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.batch.BatchQueue;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;

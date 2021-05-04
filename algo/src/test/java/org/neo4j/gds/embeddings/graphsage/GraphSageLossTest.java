@@ -19,18 +19,19 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.FiniteDifferenceTest;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.GraphSageBaseTest;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.core.ml.ComputationContext;
+import org.neo4j.gds.core.ml.FiniteDifferenceTest;
+import org.neo4j.gds.core.ml.Variable;
+import org.neo4j.gds.core.ml.functions.MatrixConstant;
+import org.neo4j.gds.core.ml.functions.Weights;
+import org.neo4j.gds.core.ml.tensor.Matrix;
+import org.neo4j.gds.core.ml.tensor.Scalar;
+import org.neo4j.gds.core.ml.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
@@ -44,9 +45,16 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.neo4j.gds.embeddings.graphsage.RelationshipWeights.UNWEIGHTED;
+import static org.neo4j.gds.core.ml.RelationshipWeights.UNWEIGHTED;
 
-class GraphSageLossTest extends GraphSageBaseTest implements FiniteDifferenceTest {
+class GraphSageLossTest implements FiniteDifferenceTest {
+
+    protected ComputationContext ctx;
+
+    @BeforeEach
+    protected void setup() {
+        ctx = new ComputationContext();
+    }
 
     @ParameterizedTest
     @CsvSource({

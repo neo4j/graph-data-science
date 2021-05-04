@@ -9,9 +9,10 @@ dependencies {
 
     compileOnly project(':algo')
 
-    api project(':alpha-core')
+    api(project(':alpha-core'))
     api group: 'org.eclipse.collections', name: 'eclipse-collections',  version: ver.'eclipse-collections'
 
+    implementation(project(':core-ml'))
     implementation group: 'org.roaringbitmap',  name: 'RoaringBitmap', version: ver.'RoaringBitmap'
     implementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
 

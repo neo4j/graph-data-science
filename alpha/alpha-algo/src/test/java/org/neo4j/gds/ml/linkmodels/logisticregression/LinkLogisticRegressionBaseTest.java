@@ -21,10 +21,10 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.core.ml.ComputationContext;
+import org.neo4j.gds.core.ml.functions.MatrixConstant;
+import org.neo4j.gds.core.ml.functions.Weights;
+import org.neo4j.gds.core.ml.tensor.Matrix;
 import org.neo4j.gds.ml.batch.LazyBatch;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;

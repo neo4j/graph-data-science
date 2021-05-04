@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.subgraph.LocalIdMap;
+import org.neo4j.gds.core.ml.functions.Weights;
+import org.neo4j.gds.core.ml.subgraph.LocalIdMap;
+import org.neo4j.gds.core.ml.tensor.Matrix;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;

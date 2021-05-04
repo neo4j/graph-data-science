@@ -20,16 +20,16 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ConstantScale;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ElementSum;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.L2NormSquared;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.LogisticLoss;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
+import org.neo4j.gds.core.ml.Variable;
+import org.neo4j.gds.core.ml.functions.ConstantScale;
+import org.neo4j.gds.core.ml.functions.ElementSum;
+import org.neo4j.gds.core.ml.functions.L2NormSquared;
+import org.neo4j.gds.core.ml.functions.LogisticLoss;
+import org.neo4j.gds.core.ml.functions.MatrixConstant;
+import org.neo4j.gds.core.ml.functions.Weights;
+import org.neo4j.gds.core.ml.tensor.Matrix;
+import org.neo4j.gds.core.ml.tensor.Scalar;
+import org.neo4j.gds.core.ml.tensor.Tensor;
 import org.neo4j.gds.ml.Objective;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;

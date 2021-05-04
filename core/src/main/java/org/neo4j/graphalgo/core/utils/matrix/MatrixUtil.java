@@ -64,5 +64,9 @@ public final class MatrixUtil {
         }
     }
 
+//    public static DMatrix1Row wrap(Tensor t) {
+//
+//    }
+
     private MatrixUtil() {}
 }

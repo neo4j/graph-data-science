@@ -20,12 +20,13 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.core.ml.NeighborhoodFunction;
+import org.neo4j.gds.core.ml.Variable;
+import org.neo4j.gds.core.ml.functions.NormalizeRows;
+import org.neo4j.gds.core.ml.subgraph.SubGraph;
+import org.neo4j.gds.core.ml.tensor.Matrix;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelFeatureExtractors;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.NormalizeRows;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.subgraph.SubGraph;
 import org.neo4j.gds.ml.features.BiasFeature;
 import org.neo4j.gds.ml.features.DegreeFeatureExtractor;
 import org.neo4j.gds.ml.features.FeatureExtraction;

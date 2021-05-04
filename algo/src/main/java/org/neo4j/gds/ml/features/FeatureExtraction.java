@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.features;
 
+import org.neo4j.gds.core.ml.functions.MatrixConstant;
 import org.neo4j.gds.embeddings.EmbeddingUtils;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;

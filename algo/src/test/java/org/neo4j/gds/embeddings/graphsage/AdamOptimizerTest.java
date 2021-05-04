@@ -20,13 +20,13 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.ComputationContext;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.ConstantScale;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixSum;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.helper.L2Norm;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.core.ml.ComputationContext;
+import org.neo4j.gds.core.ml.Variable;
+import org.neo4j.gds.core.ml.functions.ConstantScale;
+import org.neo4j.gds.core.ml.functions.MatrixSum;
+import org.neo4j.gds.core.ml.functions.Weights;
+import org.neo4j.gds.core.ml.helper.L2Norm;
+import org.neo4j.gds.core.ml.tensor.Matrix;
 
 import java.util.List;
 
@@ -66,9 +66,9 @@ class AdamOptimizerTest {
             Variable<Matrix> difference = new MatrixSum(List.of(
                 weights, new ConstantScale<>(expectedOptimum, -1)
             ));
-            L2Norm lossFunction = new L2Norm(difference);
+            var lossFunction = new L2Norm(difference);
 
-            double newLoss = ctx.forward(lossFunction).dataAt(0);
+            double newLoss = ctx.forward(lossFunction).value();
             double d = oldLoss - newLoss;
             if (Math.abs(d) < 1e-8) break;
 

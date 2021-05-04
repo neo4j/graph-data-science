@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.core.ml.functions.Weights;
+import org.neo4j.gds.core.ml.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Weights;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;

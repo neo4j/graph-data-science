@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.ddl4j.tensor;
 
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Scalar;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Vector;
+import org.neo4j.gds.core.ml.tensor.Matrix;
+import org.neo4j.gds.core.ml.tensor.Scalar;
+import org.neo4j.gds.core.ml.tensor.Vector;
 import org.neo4j.graphalgo.core.model.proto.TensorProto;
 import org.neo4j.graphalgo.utils.ProtoUtils;
 

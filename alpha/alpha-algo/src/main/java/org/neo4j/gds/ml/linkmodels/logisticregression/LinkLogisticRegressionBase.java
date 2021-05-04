@@ -20,11 +20,11 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.Variable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixConstant;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.functions.Sigmoid;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.core.ml.Variable;
+import org.neo4j.gds.core.ml.functions.MatrixConstant;
+import org.neo4j.gds.core.ml.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.core.ml.functions.Sigmoid;
+import org.neo4j.gds.core.ml.tensor.Matrix;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.features.FeatureConsumer;
 import org.neo4j.gds.ml.features.FeatureExtraction;

@@ -2,6 +2,9 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Algorithms'
 
+// TODO find out why this is needed
+evaluationDependsOn(':core-ml')
+
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')
@@ -14,7 +17,8 @@ dependencies {
     api(project(':algo-common'))
 
     implementation(
-        project(":annotations")
+        project(":annotations"),
+        project(":core-ml")
     )
 
     compileOnly group: 'org.jetbrains',          name: 'annotations',        version: ver.'jetbrains-annotations'
@@ -25,6 +29,7 @@ dependencies {
     }
 
     testImplementation project(':test-utils')
+    testCompile project(':core-ml').sourceSets.test.output
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'

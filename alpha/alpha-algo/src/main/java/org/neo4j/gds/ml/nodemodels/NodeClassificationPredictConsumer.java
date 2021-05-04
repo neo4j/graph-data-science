@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.embeddings.graphsage.ddl4j.tensor.Matrix;
+import org.neo4j.gds.core.ml.tensor.Matrix;
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.gds.ml.batch.Batch;
 import org.neo4j.gds.ml.batch.BatchTransformer;
