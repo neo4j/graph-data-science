@@ -224,6 +224,7 @@ class LinkPredictionTrainTest {
             .featureProperties(List.of("array"))
             .modelName("model")
             .validationFolds(3)
+            .concurrency(1)
             .randomSeed(-1L)
             .negativeClassWeight(classRatio)
             .params(List.of(
