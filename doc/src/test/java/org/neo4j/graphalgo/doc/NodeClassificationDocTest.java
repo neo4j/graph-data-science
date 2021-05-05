@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictStreamProc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictWriteProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;
@@ -32,7 +34,9 @@ class NodeClassificationDocTest extends DocTestBase {
     List<Class<?>> procedures() {
         return List.of(
             NodeClassificationTrainProc.class,
+            NodeClassificationPredictStreamProc.class,
             NodeClassificationPredictMutateProc.class,
+            NodeClassificationPredictWriteProc.class,
             GraphCreateProc.class,
             GraphStreamNodePropertiesProc.class
         );

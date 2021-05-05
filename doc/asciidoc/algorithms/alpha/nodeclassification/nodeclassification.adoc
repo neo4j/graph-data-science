@@ -1,7 +1,7 @@
 [[algorithms-ml-nodeclassification]]
 = Node Classification
 :entity: node
-:result: property
+:result: predicted property
 :algorithm: Node Classification
 :modelType: Node Classification
 
@@ -169,6 +169,35 @@ The structure of `modelInfo` is:
 ----
 ======
 
+[.include-with-stream]
+======
+.Run Node Classification in stream mode on a named graph:
+[source]
+----
+CALL gds.alpha.ml.nodeClassification.predict.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer,
+  predictedClass: Integer,
+  predictedProbabilities: List[Float]
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type        | Description
+| nodeId                 | Integer     | Node ID.
+| predictedClass         | Integer     | Predicted class for this node.
+| predictedProbabilities | List[Float] | Probabilities for all classes, for this node.
+|===
+======
 
 [.include-with-mutate]
 ======
@@ -205,7 +234,44 @@ include::specific-configuration.adoc[]
 | configuration         | Map     | Configuration used for running the algorithm.
 |===
 ======
+
+[.include-with-write]
+======
+.Run Node Classification in write mode on a named graph:
+[source]
+----
+CALL gds.alpha.ml.nodeClassification.predict.write(
+  graphName: String,
+  configuration: Map
+) YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| createMillis          | Integer | Milliseconds for creating the graph.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer | Milliseconds for computing the global metrics.
+| writeMillis           | Integer | Milliseconds for writing result back to Neo4j.
+| nodePropertiesWritten | Integer | Number of relationships created.
+| configuration         | Map     | Configuration used for running the algorithm.
+|===
+======
 ====
+
 
 [[algorithms-ml-nodeclassification-examples]]
 == Examples
@@ -257,6 +323,45 @@ CALL gds.graph.create('myGraph', {
 In the following examples we will demonstrate using the Node Classification model on this graph.
 
 
+[[algorithms-ml-nodeclassification-examples-memory-estimation]]
+=== Memory Estimation
+:mode: train
+
+include::../../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.nodeClassification.train.estimate('myGraph', {
+  nodeLabels: ['House'],
+  modelName: 'nc-model',
+  featureProperties: ['sizePerStory'],
+  targetProperty: 'class',
+  randomSeed: 2,
+  holdoutFraction: 0.2,
+  validationFolds: 5,
+  metrics: [ 'F1_WEIGHTED' ],
+  params: [
+    {penalty: 0.0625},
+    {penalty: 0.5},
+    {penalty: 1.0},
+    {penalty: 4.0}
+  ]
+})
+YIELD bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| bytesMin  | bytesMax  | requiredMemory
+| 130858816 | 130890776 | +"[124 MiB ... 124 MiB]"+
+|===
+--
+
+
 [[algorithms-ml-nodeclassification-examples-train]]
 === Train
 
@@ -293,7 +398,7 @@ RETURN
 .Results
 [opts="header"]
 |===
-| winningModel	   | trainGraphScore   | testGraphScore
+| winningModel     | trainGraphScore   | testGraphScore
 | {penalty=0.0625} | 0.999999990909091 | 0.6363636286363638
 |===
 --
@@ -304,8 +409,54 @@ This indicates that the model reacted very well to the train graph, and was able
 In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
 
 
+[[algorithms-ml-nodeclassification-examples-stream]]
+=== Stream
+
+include::../../shared/examples-stream-intro.adoc[]
+
+In this example we will show how to use a trained model to predict the class of a node in your in-memory graph.
+In addition to the predicted class, we will also produce the probability for each class in another node property.
+In order to do this, we must first have an already trained model registered in the Model Catalog.
+We will use the model which we trained in the <<algorithms-ml-nodeclassification-examples-train-query, train example>> which we gave the name `'nc-model'`.
+
+[role=query-example, group=stream]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.nodeClassification.predict.stream('myGraph', {
+  nodeLabels: ['House', 'UnknownHouse'],
+  modelName: 'nc-model'
+}) YIELD nodeId, predictedClass, predictedProbabilities
+WITH gds.util.asNode(nodeId) AS houseNode, predictedClass, predictedProbabilities
+WHERE houseNode:UnkownHouse
+RETURN houseNode.color AS classifiedHouse, predictedClass, predictedProbabilities
+  ORDER BY classifiedHouse
+----
+
+.Results
+[opts="header"]
+|===
+| classifiedHouse | predictedClass | predictedProbabilities
+| "Pink"          |              0 | [0.9866455686217779, 0.01311656378786989, 2.3786759035214687E-4]
+| "Tan"           |              1 | [0.01749164563726576, 0.9824922482993587, 1.610606337562594E-5]
+| "Yellow"        |              2 | [0.0385634113659007, 0.16350471177895198, 0.7979318768551473]
+|===
+--
+
+As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
+This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
+Additionally, we see that the model is confident in these predictions, as the highest class probability is >75% in all cases.
+
+
 [[algorithms-ml-nodeclassification-examples-mutate]]
 === Mutate
+
+The `mutate` execution mode updates the named graph with a new node property containing the predicted class for that node.
+The name of the new property is specified using the mandatory configuration parameter `mutateProperty`.
+The result is a single summary row including information about timings and how many properties were written.
+The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
+
+For more details on the `mutate` mode in general, see <<running-algos-mutate>>.
 
 In this example we will show how to use a trained model to predict the class of a node in your in-memory graph.
 In addition to the predicted class, we will also produce the probability for each class in another node property.
@@ -319,8 +470,8 @@ We will use the model which we trained in the <<algorithms-ml-nodeclassification
 CALL gds.alpha.ml.nodeClassification.predict.mutate('myGraph', {
   nodeLabels: ['House', 'UnknownHouse'],
   modelName: 'nc-model',
-  mutateProperty: 'predicted_class',
-  predictedProbabilityProperty: 'predicted_probability'
+  mutateProperty: 'predictedClass',
+  predictedProbabilityProperty: 'predictedProbabilities'
 }) YIELD nodePropertiesWritten
 ----
 
@@ -340,7 +491,7 @@ In order to analyse our predicted classes we stream the properties from the in-m
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.streamNodeProperties(
-  'myGraph', ['predicted_probability', 'predicted_class'], ['UnknownHouse']
+  'myGraph', ['predictedProbabilities', 'predictedClass'], ['UnknownHouse']
 ) YIELD nodeId, nodeProperty, propertyValue
 RETURN gds.util.asNode(nodeId).color AS classifiedHouse, nodeProperty, propertyValue
   ORDER BY classifiedHouse, nodeProperty
@@ -349,15 +500,77 @@ RETURN gds.util.asNode(nodeId).color AS classifiedHouse, nodeProperty, propertyV
 .Results
 [opts="header"]
 |===
-| classifiedHouse   | nodeProperty            | propertyValue
-| "Pink"	        | "predicted_class"	      | 0
-| "Pink"	        | "predicted_probability" | [0.9866455686217779, 0.01311656378786989, 2.3786759035214687E-4]
-| "Tan"	            | "predicted_class"	      | 1
-| "Tan"	            | "predicted_probability" |	[0.01749164563726576, 0.9824922482993587, 1.610606337562594E-5]
-| "Yellow"	        | "predicted_class"	      | 2
-| "Yellow"	        | "predicted_probability" | [0.0385634113659007, 0.16350471177895198, 0.7979318768551473]
+| classifiedHouse | nodeProperty             | propertyValue
+| "Pink"          | "predictedClass"         | 0
+| "Pink"          | "predictedProbabilities" | [0.9866455686217779, 0.01311656378786989, 2.3786759035214687E-4]
+| "Tan"           | "predictedClass"         | 1
+| "Tan"           | "predictedProbabilities" | [0.01749164563726576, 0.9824922482993587, 1.610606337562594E-5]
+| "Yellow"        | "predictedClass"         | 2
+| "Yellow"        | "predictedProbabilities" | [0.0385634113659007, 0.16350471177895198, 0.7979318768551473]
 |===
 --
+
+As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
+This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
+Additionally, we see that the model is confident in these predictions, as the highest class probability is >75% in all cases.
+
+
+[[algorithms-ml-nodeclassification-examples-write]]
+=== Write
+
+The `write` execution mode writes the predicted property for each node as a property to the Neo4j database.
+The name of the new property is specified using the mandatory configuration parameter `writeProperty`.
+The result is a single summary row including information about timings and how many properties were written.
+The `write` mode enables directly persisting the results to the database.
+
+For more details on the `write` mode in general, see <<running-algos-write>>.
+
+In this example we will show how to use a trained model to predict the class of a node in your in-memory graph.
+In addition to the predicted class, we will also produce the probability for each class in another node property.
+In order to do this, we must first have an already trained model registered in the Model Catalog.
+We will use the model which we trained in the <<algorithms-ml-nodeclassification-examples-train-query, train example>> which we gave the name `'nc-model'`.
+
+[role=query-example, group=write]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.nodeClassification.predict.write('myGraph', {
+  nodeLabels: ['House', 'UnknownHouse'],
+  modelName: 'nc-model',
+  writeProperty: 'predictedClass',
+  predictedProbabilityProperty: 'predictedProbabilities'
+}) YIELD nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten
+| 28
+|===
+--
+
+Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 14 nodes.
+In order to analyse our predicted classes we stream the properties from the in-memory graph:
+
+[role=query-example, no-result=true, group=write]
+--
+[source, cypher, role=noplay]
+----
+MATCH (house:UnknownHouse)
+RETURN house.color AS classifiedHouse, house.predictedClass AS predictedClass, house.predictedProbabilities AS predictedProbabilities
+----
+
+.Results
+[opts="header"]
+|===
+| classifiedHouse | predictedClass | predictedProbabilities
+| "Pink"          |              0 | [0.9866455686217779, 0.01311656378786989, 2.3786759035214687E-4]
+| "Tan"           |              1 | [0.01749164563726576, 0.9824922482993587, 1.610606337562594E-5]
+| "Yellow"        |              2 | [0.0385634113659007, 0.16350471177895198, 0.7979318768551473]
+|===
+--
+
 
 As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
 This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
