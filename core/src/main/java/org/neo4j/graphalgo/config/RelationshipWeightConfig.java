@@ -30,4 +30,10 @@ public interface RelationshipWeightConfig {
     default @Nullable String relationshipWeightProperty() {
         return null;
     }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default boolean hasRelationshipWeightProperty() {
+        return relationshipWeightProperty() != null;
+    }
 }
