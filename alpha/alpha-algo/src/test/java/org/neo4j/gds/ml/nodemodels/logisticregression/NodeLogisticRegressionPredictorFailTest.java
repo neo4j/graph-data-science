@@ -19,17 +19,14 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.core.batch.LazyBatch;
+import org.neo4j.gds.ml.core.features.FeatureExtractionBaseTest;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.batch.LazyBatch;
-import org.neo4j.gds.ml.core.features.FeatureExtractionBaseTest;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class NodeLogisticRegressionPredictorFailTest extends FeatureExtractionBaseTest {
 
@@ -42,16 +39,5 @@ public class NodeLogisticRegressionPredictorFailTest extends FeatureExtractionBa
         var predictor = new NodeLogisticRegressionPredictor(modelData, featureProperties);
         var batch = new LazyBatch(0, 4, 4);
         predictor.predict(graph, batch);
-    }
-
-    @Test
-    public void shouldEstimateMemoryUsage() {
-        var memoryUsageInBytes = NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(100, 10, 10);
-
-        int memoryUsageOfFeatureExtractors = 240; // 24 bytes * number of features
-        int memoryUsageOfFeatureMatrix = 8032; // 8 bytes * batch size * number of features + 32
-        int memoryUsageOfMatrixMultiplication = 8000; // 8 bytes per double * batchSize * numberOfClasses
-        int memoryUsageOfSoftMax = memoryUsageOfMatrixMultiplication; // computed over the matrix multiplication, it requires an equally-sized matrix
-        assertThat(memoryUsageInBytes).isEqualTo(memoryUsageOfFeatureExtractors + memoryUsageOfFeatureMatrix + memoryUsageOfFeatureMatrix + memoryUsageOfSoftMax);
     }
 }
