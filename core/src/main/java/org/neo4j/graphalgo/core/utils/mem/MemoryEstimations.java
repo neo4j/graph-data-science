@@ -54,6 +54,14 @@ public final class MemoryEstimations {
         return NULL_ESTIMATION;
     }
 
+    public static MemoryEstimation maxEstimation(MemoryEstimation one, MemoryEstimation theOther) {
+        return new MaxEstimation(one, theOther);
+    }
+
+    public static MemoryEstimation delegateEstimation(MemoryEstimation delegate, String description) {
+        return new DelegateEstimation(delegate, description);
+    }
+
     /**
      * Creates a {@link MemoryEstimation} for the fields of the given class.
      *
@@ -516,6 +524,16 @@ public final class MemoryEstimations {
             return this;
         }
 
+        /**
+         * Adds the biggest of several {@link MemoryEstimation} as a sub-component to the builder.
+         *
+         * Handy for when you do not not know ahead of time which one is going to result in the largest memory usage high-water mark
+         */
+        public Builder max(List<MemoryEstimation> components) {
+            components.add(new MaxEstimation(components));
+            return this;
+        }
+
         public MemoryEstimation build() {
             return of(description, components);
         }
@@ -658,21 +676,27 @@ final class DelegateEstimation extends BaseEstimation {
 }
 
 final class MaxEstimation extends BaseEstimation {
-    private final MemoryEstimation one;
-    private final MemoryEstimation theOther;
+    private final List<MemoryEstimation> components;
 
-    MaxEstimation(MemoryEstimation one, MemoryEstimation theOther) {
+    public MaxEstimation(MemoryEstimation one, MemoryEstimation theOther) {
         super("max of " + one.description() + " and " + theOther.description());
-        this.one = one;
-        this.theOther = theOther;
+        this.components = List.of(one, theOther);
+    }
+
+    MaxEstimation(List<MemoryEstimation> components) {
+        super("max");
+        this.components = components;
     }
 
     @Override
     public MemoryTree estimate(GraphDimensions dimensions, int concurrency) {
-        MemoryTree oneMemoryTree = one.estimate(dimensions, concurrency);
-        MemoryTree theOtherMemoryTree = theOther.estimate(dimensions, concurrency);
-
-        return oneMemoryTree.memoryUsage().max > theOtherMemoryTree.memoryUsage().max ? oneMemoryTree : theOtherMemoryTree;
+        return new CompositeMaxTree(
+            description(),
+            components
+                .stream()
+                .map(component -> component.estimate(dimensions, concurrency))
+                .collect(Collectors.toList())
+        );
     }
 }
 
@@ -753,6 +777,29 @@ final class CompositeTree extends BaseTree {
         return components.stream()
                 .map(MemoryTree::memoryUsage)
                 .reduce(MemoryRange.empty(), MemoryRange::add);
+    }
+}
+
+final class CompositeMaxTree extends BaseTree {
+    private final Collection<MemoryTree> components;
+
+    CompositeMaxTree(
+        final String description,
+        final Collection<MemoryTree> components) {
+        super(description);
+        this.components = components;
+    }
+
+    @Override
+    public Collection<MemoryTree> components() {
+        return components;
+    }
+
+    @Override
+    public MemoryRange memoryUsage() {
+        return components.stream()
+            .map(MemoryTree::memoryUsage)
+            .reduce(MemoryRange.empty(), MemoryRange::max);
     }
 }
 

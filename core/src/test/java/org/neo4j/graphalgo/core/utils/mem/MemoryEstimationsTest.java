@@ -144,8 +144,8 @@ class MemoryEstimationsTest {
     void shouldPickBiggestMemoryUser() {
         MemoryEstimation maxEstimator = MemoryEstimations.builder()
             .max(
-                MemoryEstimations.builder().perNode("node storer", nodeCount -> nodeCount).build(),
-                MemoryEstimations.builder().perThread("paralleliser", threadCount -> threadCount).build()
+                MemoryEstimations.builder("node storer").perNode("node storer", nodeCount -> nodeCount).build(),
+                MemoryEstimations.builder("paralleliser").perThread("paralleliser", threadCount -> threadCount).build()
             )
             .build();
 
@@ -154,7 +154,14 @@ class MemoryEstimationsTest {
     }
 
     private String biggestMemoryUser(MemoryTree maxEstimate) {
-        return maxEstimate.components().iterator().next().components().iterator().next().description();
+        var iterator = maxEstimate.components().iterator().next().components().iterator();
+        var c1 = iterator.next();
+        var c2 = iterator.next();
+        if (c1.memoryUsage().max < c2.memoryUsage().max) {
+            return c2.description();
+        } else {
+            return c1.description();
+        }
     }
 
     // Note that the memory consumption will be aligned (see BitUtil.align)

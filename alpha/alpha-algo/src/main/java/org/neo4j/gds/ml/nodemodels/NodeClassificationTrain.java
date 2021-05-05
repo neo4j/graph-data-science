@@ -55,6 +55,8 @@ import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.delegateEstimation;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -89,12 +91,16 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             fudgedFeatureCount,
             (nodeCount) -> (long) (nodeCount * holdoutFraction * (validationFolds - 1) / validationFolds)
         );
-        var bestModelEvaluation = modelTrainAndEvaluateMemoryUsage(
-            maxBatchSize,
-            fudgedClassCount,
-            fudgedFeatureCount,
-            (nodeCount) -> (long) (nodeCount * holdoutFraction)
+        var bestModelEvaluation = delegateEstimation(
+            modelTrainAndEvaluateMemoryUsage(
+                maxBatchSize,
+                fudgedClassCount,
+                fudgedFeatureCount,
+                (nodeCount) -> (long) (nodeCount * holdoutFraction)
+            ),
+            "best model evaluation"
         );
+        var maxOfModelSelectionAndBestModelEvaluation = maxEstimation(modelSelection, bestModelEvaluation);
         // Final step is to retrain the best model with the entire node set.
         // Training memory is independent of node set size so we can skip that last estimation.
         return MemoryEstimations.builder()
@@ -106,7 +112,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             .add("inner split", StratifiedKFoldSplitter.memoryEstimation(validationFolds, 1 - holdoutFraction))
             .add("stats map train", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
             .add("stats map validation", StatsMap.memoryEstimation(config.metrics().size(), config.params().size()))
-            .max(modelSelection, bestModelEvaluation)
+            .add("max of model selection and best model evaluation", maxOfModelSelectionAndBestModelEvaluation)
             .build();
     }
 
