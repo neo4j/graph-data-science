@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
+import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,6 +42,14 @@ public final class SignedProbabilities {
     private final boolean isTree;
     private long positiveCount;
     private long negativeCount;
+
+    public static long estimateMemory(GraphDimensions dimensions, RelationshipType relationshipType, double relationshipFraction) {
+        var relationshipCount = dimensions.relationshipCounts().get(relationshipType) * relationshipFraction;
+        return MemoryUsage.sizeOfInstance(SignedProbabilities.class) +
+               MemoryUsage.sizeOfInstance(Optional.class) +
+               MemoryUsage.sizeOfInstance(ArrayList.class) +
+               MemoryUsage.sizeOfInstance(Double.class) * ((long) relationshipCount);
+    }
 
     private SignedProbabilities(Optional<TreeSet<Double>> tree, Optional<List<Double>> list, boolean isTree) {
         this.tree = tree;
