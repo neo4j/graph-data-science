@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeMultiLabelFeatures;
@@ -43,16 +44,20 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
 
     private final Graph graph;
     private final GraphSageTrainConfig config;
+    private final ExecutorService executor;
     private final AllocationTracker tracker;
 
     public MultiLabelGraphSageTrain(
+
         Graph graph,
         GraphSageTrainConfig config,
+        ExecutorService executor,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.config = config;
+        this.executor = executor;
         this.progressLogger = progressLogger;
         this.tracker = tracker;
     }
@@ -65,6 +70,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
         var multiLabelFeatureFunction = new MultiLabelFeatureFunction(weightsByLabel, projectedFeatureDimension);
         var trainer = new GraphSageModelTrainer(
             config,
+            executor,
             progressLogger,
             multiLabelFeatureFunction,
             multiLabelFeatureFunction.weightsByLabel().values()

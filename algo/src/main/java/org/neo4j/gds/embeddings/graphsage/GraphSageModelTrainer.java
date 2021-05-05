@@ -31,7 +31,6 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
@@ -46,6 +45,7 @@ import java.util.Map;
 import java.util.OptionalLong;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -71,16 +71,18 @@ public class GraphSageModelTrainer {
     private final Function<Graph, List<LayerConfig>> layerConfigsFunction;
     private final FeatureFunction featureFunction;
     private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
+    private final ExecutorService executor;
     private final ProgressLogger progressLogger;
     private double degreeProbabilityNormalizer;
     private final int batchSize;
 
-    public GraphSageModelTrainer(GraphSageTrainConfig config, ProgressLogger progressLogger) {
-        this(config, progressLogger, new SingleLabelFeatureFunction(), Collections.emptyList());
+    public GraphSageModelTrainer(GraphSageTrainConfig config, ExecutorService executor, ProgressLogger progressLogger) {
+        this(config, executor, progressLogger, new SingleLabelFeatureFunction(), Collections.emptyList());
     }
 
     public GraphSageModelTrainer(
         GraphSageTrainConfig config,
+        ExecutorService executor,
         ProgressLogger progressLogger,
         FeatureFunction featureFunction,
         Collection<Weights<? extends Tensor<?>>> labelProjectionWeights
@@ -96,6 +98,7 @@ public class GraphSageModelTrainer {
         this.maxSearchDepth = config.searchDepth();
         this.featureFunction = featureFunction;
         this.labelProjectionWeights = labelProjectionWeights;
+        this.executor = executor;
         this.progressLogger = progressLogger;
 
         this.useWeights = config.relationshipWeightProperty() != null;
@@ -158,7 +161,7 @@ public class GraphSageModelTrainer {
             )
         );
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+        ParallelUtil.run(tasks, executor);
     }
 
     private void trainOnBatch(
@@ -231,7 +234,7 @@ public class GraphSageModelTrainer {
             }
         );
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+        ParallelUtil.run(tasks, executor);
 
         double lossValue = doubleAdder.doubleValue();
         progressLogger.getLog().debug("Loss after epoch %s: %s", epoch, lossValue);

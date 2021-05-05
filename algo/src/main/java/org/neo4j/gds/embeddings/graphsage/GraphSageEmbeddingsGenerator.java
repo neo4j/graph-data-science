@@ -24,7 +24,6 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -32,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 
@@ -41,6 +41,7 @@ public class GraphSageEmbeddingsGenerator {
     private final int concurrency;
     private final boolean isWeighted;
     private final FeatureFunction featureFunction;
+    private final ExecutorService executor;
     private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
 
@@ -49,18 +50,8 @@ public class GraphSageEmbeddingsGenerator {
         int batchSize,
         int concurrency,
         boolean isWeighted,
-        ProgressLogger progressLogger,
-        AllocationTracker tracker
-    ) {
-        this(layers, batchSize, concurrency, isWeighted, new SingleLabelFeatureFunction(), progressLogger, tracker);
-    }
-
-    public GraphSageEmbeddingsGenerator(
-        Layer[] layers,
-        int batchSize,
-        int concurrency,
-        boolean isWeighted,
         FeatureFunction featureFunction,
+        ExecutorService executor,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
@@ -69,6 +60,7 @@ public class GraphSageEmbeddingsGenerator {
         this.concurrency = concurrency;
         this.isWeighted = isWeighted;
         this.featureFunction = featureFunction;
+        this.executor = executor;
         this.progressLogger = progressLogger;
         this.tracker = tracker;
     }
@@ -92,7 +84,7 @@ public class GraphSageEmbeddingsGenerator {
             partition -> createEmbeddings(graph, partition, features, result)
         );
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+        ParallelUtil.run(tasks, executor);
 
         progressLogger.logFinish();
 

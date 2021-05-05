@@ -24,6 +24,7 @@ import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -59,8 +60,8 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
         ProgressLogger progressLogger
     ) {
         return configuration.isMultiLabel()
-        ? new MultiLabelGraphSageTrain(graph, configuration, progressLogger, tracker)
-        : new SingleLabelGraphSageTrain(graph, configuration, progressLogger, tracker);
+        ? new MultiLabelGraphSageTrain(graph, configuration, Pools.DEFAULT, progressLogger, tracker)
+        : new SingleLabelGraphSageTrain(graph, configuration, Pools.DEFAULT, progressLogger, tracker);
     }
 
     @Override

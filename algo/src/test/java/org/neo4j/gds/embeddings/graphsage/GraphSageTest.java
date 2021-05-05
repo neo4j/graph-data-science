@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.config.RandomGraphGeneratorConfig;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -122,7 +123,7 @@ class GraphSageTest {
         SingleLabelGraphSageTrain trainAlgo = new SingleLabelGraphSageTrain(
             orphanGraph,
             trainConfig,
-            ProgressLogger.NULL_LOGGER,
+            Pools.DEFAULT, ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
         var model = trainAlgo.compute();
@@ -152,7 +153,7 @@ class GraphSageTest {
             .concurrency(1)
             .build();
 
-        var modelTrainer = new GraphSageModelTrainer(trainConfig, ProgressLogger.NULL_LOGGER);
+        var modelTrainer = new GraphSageModelTrainer(trainConfig, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
         var layers = modelTrainer.train(graph, features).layers();
         var model = Model.of(
             "",
@@ -194,7 +195,7 @@ class GraphSageTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var modelTrainer = new GraphSageModelTrainer(trainConfig, ProgressLogger.NULL_LOGGER);
+        var modelTrainer = new GraphSageModelTrainer(trainConfig, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
         var layers = modelTrainer.train(graph, features).layers();
         var model = Model.of(
             "",

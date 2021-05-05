@@ -31,6 +31,8 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import java.util.concurrent.ExecutorService;
+
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingleLabelFeatures;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeMultiLabelFeatures;
 
@@ -41,18 +43,21 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
     private final Graph graph;
     private final GraphSageBaseConfig config;
     private final Model<ModelData, GraphSageTrainConfig> model;
+    private final ExecutorService executor;
     private final AllocationTracker tracker;
 
     public GraphSage(
         Graph graph,
         GraphSageBaseConfig config,
         Model<ModelData, GraphSageTrainConfig> model,
+        ExecutorService executor,
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.config = config;
         this.model = model;
+        this.executor = executor;
         this.tracker = tracker;
         this.progressLogger = progressLogger;
     }
@@ -66,6 +71,7 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
             config.concurrency(),
             model.trainConfig().isWeighted(),
             model.data().featureFunction(),
+            executor,
             progressLogger,
             tracker
         );

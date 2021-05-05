@@ -26,6 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
@@ -119,7 +120,7 @@ class GraphSageSingleLabelSerializationTest {
             graph,
             streamConfig,
             model,
-            AllocationTracker.empty(),
+            Pools.DEFAULT, AllocationTracker.empty(),
             ProgressLogger.NULL_LOGGER
         ).compute();
     }
@@ -133,7 +134,7 @@ class GraphSageSingleLabelSerializationTest {
         SingleLabelGraphSageTrain trainAlgo = new SingleLabelGraphSageTrain(
             graph,
             trainConfig,
-            ProgressLogger.NULL_LOGGER,
+            Pools.DEFAULT, ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
 

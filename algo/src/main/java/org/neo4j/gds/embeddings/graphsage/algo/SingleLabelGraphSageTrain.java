@@ -27,29 +27,34 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import java.util.concurrent.ExecutorService;
+
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingleLabelFeatures;
 
 public class SingleLabelGraphSageTrain extends GraphSageTrain {
 
     private final Graph graph;
     private final GraphSageTrainConfig config;
+    private final ExecutorService executor;
     private final AllocationTracker tracker;
 
     public SingleLabelGraphSageTrain(
         Graph graph,
         GraphSageTrainConfig config,
+        ExecutorService executor,
         ProgressLogger progressLogger,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.config = config;
+        this.executor = executor;
         this.progressLogger = progressLogger;
         this.tracker = tracker;
     }
 
     @Override
     public Model<ModelData, GraphSageTrainConfig> compute() {
-        var graphSageModel = new GraphSageModelTrainer(config, progressLogger);
+        var graphSageModel = new GraphSageModelTrainer(config, executor, progressLogger);
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(
             graph,

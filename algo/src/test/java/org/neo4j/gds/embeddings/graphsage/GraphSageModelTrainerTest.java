@@ -32,6 +32,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -103,7 +104,7 @@ class GraphSageModelTrainerTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelTrainer(config, ProgressLogger.NULL_LOGGER);
+        var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
 
@@ -134,7 +135,7 @@ class GraphSageModelTrainerTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelTrainer(config, ProgressLogger.NULL_LOGGER);
+        var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
         Layer[] layers = result.layers();
@@ -215,7 +216,7 @@ class GraphSageModelTrainerTest {
             .modelName("model")
             .build();
 
-        var trainer = new GraphSageModelTrainer(config, ProgressLogger.NULL_LOGGER);
+        var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
 
         trainer.train(arrayGraph, arrayFeatures);
     }
