@@ -66,9 +66,9 @@ public final class PathFactory {
         static long next() {
             var nextId = ids.getAndDecrement();
 
-            if (nextId > 0) {
+            while (nextId > 0) {
                 ids.compareAndSet(nextId - 1, 0);
-                return ids.getAndDecrement();
+                nextId = ids.getAndDecrement();
             }
 
             return nextId;
