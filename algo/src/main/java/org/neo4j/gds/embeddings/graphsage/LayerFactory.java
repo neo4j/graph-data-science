@@ -44,42 +44,41 @@ public final class LayerFactory {
             activationFunction.weightInitBound(rows, cols)
         );
 
-        if (layerConfig.aggregatorType() == Aggregator.AggregatorType.MEAN) {
-            return new MeanAggregatingLayer(
-                weights,
-                layerConfig.sampleSize(),
-                activationFunction
-            );
+        switch (layerConfig.aggregatorType()) {
+            case MEAN:
+                return new MeanAggregatingLayer(
+                    weights,
+                    layerConfig.sampleSize(),
+                    activationFunction
+                );
+            case POOL:
+                Weights<Matrix> poolWeights = weights;
+
+                Weights<Matrix> selfWeights = generateWeights(
+                    rows,
+                    cols,
+                    activationFunction.weightInitBound(rows, cols)
+                );
+
+                Weights<Matrix> neighborsWeights = generateWeights(
+                    rows,
+                    rows,
+                    activationFunction.weightInitBound(rows, rows)
+                );
+
+                Weights<Vector> bias = new Weights<>(Vector.fill(0D, rows));
+
+                return new MaxPoolAggregatingLayer(
+                    layerConfig.sampleSize(),
+                    poolWeights,
+                    selfWeights,
+                    neighborsWeights,
+                    bias,
+                    activationFunction
+                );
+            default:
+                throw new RuntimeException(formatWithLocale("Aggregator: %s is unknown", layerConfig.aggregatorType()));
         }
-
-        if (layerConfig.aggregatorType() == Aggregator.AggregatorType.POOL) {
-            Weights<Matrix> poolWeights = weights;
-
-            Weights<Matrix> selfWeights = generateWeights(
-                rows,
-                cols,
-                activationFunction.weightInitBound(rows, cols)
-            );
-
-            Weights<Matrix> neighborsWeights = generateWeights(
-                rows,
-                rows,
-                activationFunction.weightInitBound(rows, rows)
-            );
-
-            Weights<Vector> bias = new Weights<>(Vector.fill(0D, rows));
-
-            return new MaxPoolAggregatingLayer(
-                layerConfig.sampleSize(),
-                poolWeights,
-                selfWeights,
-                neighborsWeights,
-                bias,
-                activationFunction
-            );
-        }
-
-        throw new RuntimeException(formatWithLocale("Aggregator: %s is unknown", layerConfig.aggregatorType()));
     }
 
     public static Weights<Matrix> generateWeights(int rows, int cols, double weightBound) {

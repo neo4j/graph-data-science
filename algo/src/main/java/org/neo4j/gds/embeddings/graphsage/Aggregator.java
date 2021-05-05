@@ -88,8 +88,8 @@ public interface Aggregator {
             }
         };
 
-        public static AggregatorType of(String activationFunction) {
-            return valueOf(toUpperCaseWithLocale(activationFunction));
+        public static AggregatorType of(String aggregatorType) {
+            return valueOf(toUpperCaseWithLocale(aggregatorType));
         }
 
         public static AggregatorType parse(Object object) {
