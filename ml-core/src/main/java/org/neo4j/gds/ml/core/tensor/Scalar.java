@@ -21,7 +21,13 @@ package org.neo4j.gds.ml.core.tensor;
 
 import org.neo4j.gds.ml.core.Dimensions;
 
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
+
 public class Scalar extends Tensor<Scalar> {
+
+    public static long sizeInBytes() {
+        return sizeOfDoubleArray(1);
+    }
 
     public Scalar(double value) {
         super(new double[] {value}, Dimensions.scalar());

@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -90,6 +91,18 @@ class LinkLogisticRegressionPredictorTest {
         var result = predictor.predictedProbability(graph, idFunction.of(sourceNode), idFunction.of(targetNode));
 
         assertThat(result).isCloseTo(expectedResult, Offset.offset(1e-10));
+    }
+
+    @Test
+    public void shouldEstimateMemoryUsage() {
+        var memoryUsageInBytes = LinkLogisticRegressionPredictor.sizeOfBatchInBytes(100, 10);
+
+        int memoryUsageOfFeatureExtractors = 240; // 24 bytes * number of features
+        int memoryUsageOfFeatureMatrix = 8016; // 8 bytes * batch size * number of features + 16
+        int memoryUsageOfMatrixMultiplication = 816; // 8 bytes per double * batchSize + 16
+        int memoryUsageOfSigmoid = 816; // 8 bytes per double * batchSize + 16
+        // total 9888
+        assertThat(memoryUsageInBytes).isEqualTo(memoryUsageOfFeatureExtractors + memoryUsageOfFeatureMatrix + memoryUsageOfMatrixMultiplication + memoryUsageOfSigmoid);
     }
 
     private static class SumCombiner implements LinkFeatureCombiner {

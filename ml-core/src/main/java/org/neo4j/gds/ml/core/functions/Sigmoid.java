@@ -21,12 +21,17 @@ package org.neo4j.gds.ml.core.functions;
 
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 public class Sigmoid<T extends Tensor<T>> extends SingleParentVariable<T> {
 
     public Sigmoid(Variable<T> parent) {
         super(parent, parent.dimensions());
+    }
+
+    public static long sizeInBytes(int rows, int cols) {
+        return Matrix.sizeInBytes(rows, cols);
     }
 
     @Override

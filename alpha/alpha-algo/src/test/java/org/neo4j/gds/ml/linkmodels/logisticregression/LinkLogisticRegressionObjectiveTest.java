@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.core.functions.Sigmoid.sigmoid;
 
 @GdlExtension
@@ -106,4 +107,33 @@ class LinkLogisticRegressionObjectiveTest {
         var expectedPenalty = Math.pow(0.2, 2) + Math.pow(0.3, 2);
         Assertions.assertThat(lossValue).isCloseTo(expectedPenalty + expectedTotalCEL/4, Offset.offset(1e-7));
     }
+
+    @Test
+    void shouldEstimateMemoryUsage() {
+        var memoryUsageInBytes = LinkLogisticRegressionObjective.sizeOfBatchInBytes(100, 10);
+
+        var weightGradient = 8 * 10 + 16;           // 8 bytes for a double * numberOfFeatures + 16 for the double array
+        var makeTargets = 8 * 100 + 16;             // 8 bytes for a double * batchSize + 16 for the double array
+        var weightedFeatures = 8 * 100 + 16;        // 8 bytes for a double * batchSize + 16 for the double array
+        var softMax = 8 * 100 + 16;                 // 8 bytes for a double * batchSize + 16 for the double array
+        var unpenalizedLoss = 24;                   // 8 bytes for a double + 16 for the double array
+        var l2norm = 24;                            // 8 bytes for a double + 16 for the double array
+        var constantScale = 24;                     // 8 bytes for a double + 16 for the double array
+        var elementSum = 24;                        // 8 bytes for a double + 16 for the double array
+        var predictor = 9888;                       // from LinkLogisticRegressionPredictorTest
+
+        var trainEpoch = makeTargets +
+                         weightedFeatures +
+                         softMax +
+                         2 * unpenalizedLoss +
+                         2 * l2norm +
+                         2 * constantScale +
+                         2 * elementSum +
+                         predictor;
+
+        var expected = trainEpoch + weightGradient;
+        assertThat(makeTargets).isEqualTo(LinkLogisticRegressionObjective.costOfMakeTargets(100));
+        assertThat(memoryUsageInBytes).isEqualTo(expected);
+    }
+
 }
