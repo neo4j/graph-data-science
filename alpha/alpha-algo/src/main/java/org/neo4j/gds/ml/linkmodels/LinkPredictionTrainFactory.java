@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 
 public class LinkPredictionTrainFactory extends AbstractAlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> {
 
@@ -60,6 +60,8 @@ public class LinkPredictionTrainFactory extends AbstractAlgorithmFactory<LinkPre
 
     @Override
     public MemoryEstimation memoryEstimation(LinkPredictionTrainConfig configuration) {
-        throw new MemoryEstimationNotImplementedException();
+        return MemoryEstimations.builder(LinkPredictionTrain.class)
+            .add("algorithm", LinkPredictionTrainEstimation.estimate(configuration))
+            .build();
     }
 }
