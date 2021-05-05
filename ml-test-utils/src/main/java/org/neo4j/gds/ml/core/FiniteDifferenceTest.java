@@ -19,19 +19,19 @@
  */
 package org.neo4j.gds.ml.core;
 
-import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.Variable;
+import org.assertj.core.data.Offset;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public interface FiniteDifferenceTest {
+
+    String FAIL_MESSAGE = "AutoGrad and FiniteDifference gradients differ for coordinate %s more than the tolerance";
+
     default double tolerance() {
         return 1E-5;
     }
@@ -55,12 +55,9 @@ public interface FiniteDifferenceTest {
                 ComputationContext ctx2 = new ComputationContext();
                 double f1 = ctx2.forward(loss).value();
                 assertThat(partialDerivative).isNotNaN();
-                assertEquals(
-                    (f1 - f0) / epsilon(),
-                    partialDerivative,
-                    tolerance(),
-                    formatWithLocale("AutoGrad and FiniteDifference gradients differ for coordinate %s more than the tolerance", i)
-                );
+                assertThat((f1 - f0) / epsilon())
+                    .withFailMessage(FAIL_MESSAGE, i)
+                    .isEqualTo(partialDerivative, Offset.offset(tolerance()));
             }
         }
     }
