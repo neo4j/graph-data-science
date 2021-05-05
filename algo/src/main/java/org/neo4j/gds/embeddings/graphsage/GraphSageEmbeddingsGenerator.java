@@ -23,18 +23,21 @@ import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Arrays;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
-import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 
 public class GraphSageEmbeddingsGenerator {
     private final Layer[] layers;
-    private final BatchProvider batchProvider;
+    private final int batchSize;
     private final int concurrency;
     private final boolean isWeighted;
     private final FeatureFunction featureFunction;
@@ -62,7 +65,7 @@ public class GraphSageEmbeddingsGenerator {
         AllocationTracker tracker
     ) {
         this.layers = layers;
-        this.batchProvider = new BatchProvider(batchSize);
+        this.batchSize = batchSize;
         this.concurrency = concurrency;
         this.isWeighted = isWeighted;
         this.featureFunction = featureFunction;
@@ -81,28 +84,54 @@ public class GraphSageEmbeddingsGenerator {
         );
 
         progressLogger.logStart();
-        parallelStreamConsume(
-            batchProvider.stream(graph),
-            concurrency,
-            batches -> batches.forEach(batch -> {
-                ComputationContext ctx = new ComputationContext();
-                Variable<Matrix> embeddingVariable = embeddings(graph, isWeighted, batch, features, layers, featureFunction);
-                int cols = embeddingVariable.dimension(1);
-                double[] embeddings = ctx.forward(embeddingVariable).data();
 
-                for (int nodeIndex = 0; nodeIndex < batch.length; nodeIndex++) {
-                    double[] nodeEmbedding = Arrays.copyOfRange(
-                        embeddings,
-                        nodeIndex * cols,
-                        (nodeIndex + 1) * cols
-                    );
-                    result.set(batch[nodeIndex], nodeEmbedding);
-                }
-                progressLogger.logProgress();
-            })
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            graph.nodeCount(),
+            batchSize,
+            partition -> createEmbeddings(graph, partition, features, result)
         );
+
+        ParallelUtil.run(tasks, Pools.DEFAULT);
+
         progressLogger.logFinish();
 
         return result;
+    }
+
+    private Runnable createEmbeddings(
+        Graph graph,
+        Partition partition,
+        HugeObjectArray<double[]> features,
+        HugeObjectArray<double[]> result
+    ) {
+        return () -> {
+            ComputationContext ctx = new ComputationContext();
+            Variable<Matrix> embeddingVariable = embeddings(
+                graph,
+                isWeighted,
+                partition.stream().toArray(),
+                features,
+                layers,
+                featureFunction
+            );
+            int cols = embeddingVariable.dimension(1);
+            double[] embeddings = ctx.forward(embeddingVariable).data();
+
+            var partitionStartNodeId = partition.startNode();
+            var partitionNodeCount = partition.nodeCount();
+            for (int nodeIndex = 0; nodeIndex < partitionNodeCount; nodeIndex++) {
+                // TODO: Try to avoid `Arrays.copyOfRange`
+                double[] nodeEmbedding = Arrays.copyOfRange(
+                    embeddings,
+                    nodeIndex * cols,
+                    (nodeIndex + 1) * cols
+                );
+
+                result.set(nodeIndex + partitionStartNodeId, nodeEmbedding);
+            }
+
+            progressLogger.logProgress();
+        };
     }
 }

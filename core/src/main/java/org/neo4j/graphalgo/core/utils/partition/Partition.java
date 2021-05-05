@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.utils.partition;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.function.LongConsumer;
+import java.util.stream.LongStream;
 
 @ValueClass
 public interface Partition {
@@ -43,4 +44,9 @@ public interface Partition {
     static Partition of(long startNode, long nodeCount) {
         return ImmutablePartition.of(startNode, nodeCount);
     }
+
+    default LongStream stream() {
+        var start = startNode();
+        return LongStream.range(start, start + nodeCount());
+    };
 }

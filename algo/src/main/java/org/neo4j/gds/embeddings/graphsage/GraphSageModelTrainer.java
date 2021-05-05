@@ -19,19 +19,23 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.PassthroughVariable;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,12 +52,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
-import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
+import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelTrainer {
@@ -72,6 +74,7 @@ public class GraphSageModelTrainer {
     private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
     private final ProgressLogger progressLogger;
     private double degreeProbabilityNormalizer;
+    private final int batchSize;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ProgressLogger progressLogger) {
         this(config, progressLogger, new SingleLabelFeatureFunction(), Collections.emptyList());
@@ -84,7 +87,8 @@ public class GraphSageModelTrainer {
         Collection<Weights<? extends Tensor<?>>> labelProjectionWeights
     ) {
         this.layerConfigsFunction = graph -> config.layerConfigs(firstLayerColumns(config, graph));
-        this.batchProvider = new BatchProvider(config.batchSize());
+        this.batchSize = config.batchSize();
+        this.batchProvider = new BatchProvider(batchSize);
         this.learningRate = config.learningRate();
         this.tolerance = config.tolerance();
         this.negativeSampleWeight = config.negativeSampleWeight();
@@ -141,22 +145,26 @@ public class GraphSageModelTrainer {
         AdamOptimizer updater = new AdamOptimizer(weights, learningRate);
 
         AtomicInteger batchCounter = new AtomicInteger(0);
-        parallelStreamConsume(
-            batchProvider.stream(graph),
+
+        var tasks = PartitionUtils.rangePartition(
             concurrency,
-            batches -> batches.forEach(batch -> trainOnBatch(
-                batch,
+            graph.nodeCount(),
+            batchSize,
+            partition -> (Runnable) () -> trainOnBatch(
+                partition,
                 graph,
                 features,
                 updater,
                 epoch,
                 batchCounter.incrementAndGet()
-            ))
+            )
         );
+
+        ParallelUtil.run(tasks, Pools.DEFAULT);
     }
 
     private void trainOnBatch(
-        long[] batch,
+        Partition batch,
         Graph graph,
         HugeObjectArray<double[]> features,
         AdamOptimizer updater,
@@ -210,30 +218,38 @@ public class GraphSageModelTrainer {
     private double evaluateLoss(
         Graph graph,
         HugeObjectArray<double[]> features,
-        BatchProvider batchProvider,
         int epoch
     ) {
         DoubleAdder doubleAdder = new DoubleAdder();
-        parallelStreamConsume(
-            batchProvider.stream(graph),
+
+
+        var tasks = PartitionUtils.rangePartition(
             concurrency,
-            batches -> batches.forEach(batch -> {
+            graph.nodeCount(),
+            batchSize,
+            partition -> (Runnable) () -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable<Scalar> loss = lossFunction(batch, graph, features);
+                Variable<Scalar> loss = lossFunction(partition, graph, features);
                 doubleAdder.add(ctx.forward(loss).value());
-            })
+            }
         );
+
+        ParallelUtil.run(tasks, Pools.DEFAULT);
+
         double lossValue = doubleAdder.doubleValue();
         progressLogger.getLog().debug("Loss after epoch %s: %s", epoch, lossValue);
         return lossValue;
     }
 
-    private Variable<Scalar> lossFunction(long[] batch, Graph graph, HugeObjectArray<double[]> features) {
-        long[] totalBatch = LongStream
-            .concat(Arrays.stream(batch), LongStream.concat(
+    private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features) {
+        var totalBatch = LongStream.concat(
+            batch.stream(),
+            LongStream.concat(
                 neighborBatch(graph, batch),
-                negativeBatch(graph, batch.length)
-            )).toArray();
+                negativeBatch(graph, batch.nodeCount())
+            )
+        ).toArray();
+
         Variable<Matrix> embeddingVariable = embeddings(graph, useWeights, totalBatch, features, this.layers, featureFunction);
 
         Variable<Scalar> lossFunction = new GraphSageLoss(
@@ -246,8 +262,9 @@ public class GraphSageModelTrainer {
         return new PassthroughVariable<>(lossFunction);
     }
 
-    private LongStream neighborBatch(Graph graph, long[] batch) {
-        return Arrays.stream(batch).map(nodeId -> {
+    private LongStream neighborBatch(Graph graph, Partition batch) {
+        var neighborBatchBuilder = LongStream.builder();
+        batch.consume(nodeId -> {
             int searchDepth = ThreadLocalRandom.current().nextInt(maxSearchDepth) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
@@ -261,14 +278,16 @@ public class GraphSageModelTrainer {
                 }
                 searchDepth--;
             }
-            return currentNode.get();
+            neighborBatchBuilder.add(currentNode.get());
         });
+
+        return neighborBatchBuilder.build();
     }
 
-    private LongStream negativeBatch(Graph graph, int batchSize) {
+    private LongStream negativeBatch(Graph graph, long batchSize) {
         Random rand = new Random(layers[0].randomState());
-        return IntStream.range(0, batchSize)
-            .mapToLong(ignore -> {
+        return LongStream.range(0, batchSize)
+            .map(ignore -> {
                 double randomValue = rand.nextDouble();
                 double cumulativeProbability = 0;
 

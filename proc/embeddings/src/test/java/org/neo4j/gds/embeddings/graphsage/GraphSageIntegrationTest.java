@@ -84,6 +84,7 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
             .algo("gds.beta.graphSage")
             .streamMode()
             .addParameter("concurrency", 1)
+            .addParameter("batchSize", 5)
             .addParameter("modelName", modelName)
             .yields();
 

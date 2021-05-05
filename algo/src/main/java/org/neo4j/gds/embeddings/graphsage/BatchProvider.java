@@ -21,8 +21,8 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 public class BatchProvider {
@@ -32,11 +32,11 @@ public class BatchProvider {
         this.batchSize = batchSize;
     }
 
-    public Stream<long[]> stream(Graph graph) {
+    public Stream<Partition> stream(Graph graph) {
         return LazyBatchCollection.of(
             graph.nodeCount(),
             batchSize,
-            (start, length) -> LongStream.range(start, start + length).toArray()
+            Partition::of
         ).stream();
     }
 }
