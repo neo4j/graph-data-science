@@ -32,7 +32,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class WeightedNeighborhoodSamplerTest {
+class NeighborhoodSamplerTest {
 
     @GdlGraph
     private static final String GRAPH =
@@ -52,7 +52,7 @@ class WeightedNeighborhoodSamplerTest {
     @Test
     void shouldSampleSubsetOfNeighbors() {
 
-        NeighborhoodSampler sampler = new WeightedNeighborhoodSampler(0L);
+        NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
         int numberOfSamples = 3;
         List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
 
@@ -78,7 +78,7 @@ class WeightedNeighborhoodSamplerTest {
 
     @Test
     void shouldSampleAllNeighborsWhenNumberOfSamplesAreGreater() {
-        NeighborhoodSampler sampler = new WeightedNeighborhoodSampler(0L);
+        NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
         int numberOfSamples = 19;
         List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
 
@@ -102,7 +102,7 @@ class WeightedNeighborhoodSamplerTest {
         @Test
         void shouldSampleSubsetOfNeighbors() {
 
-            NeighborhoodSampler sampler = new WeightedNeighborhoodSampler(0L);
+            NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
             int numberOfSamples = 3;
             List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
 

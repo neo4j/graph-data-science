@@ -50,7 +50,7 @@ public class MaxPoolAggregatingLayer implements Layer {
         this.bias = bias;
 
         this.sampleSize = sampleSize;
-        this.sampler = new WeightedNeighborhoodSampler(randomState);
+        this.sampler = new NeighborhoodSampler(randomState);
 
         this.activationFunction = activationFunction;
     }

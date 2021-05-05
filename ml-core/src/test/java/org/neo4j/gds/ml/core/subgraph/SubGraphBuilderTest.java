@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.core.subgraph;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
@@ -59,13 +60,11 @@ class SubGraphBuilderTest {
     @Inject
     private Graph graph;
 
-    private UniformNeighborhoodSampler sampler;
     private NeighborhoodFunction neighborhoodFunction;
 
     @BeforeEach
     void setup() {
-        sampler = new UniformNeighborhoodSampler(0L);
-        neighborhoodFunction = (graph, nodeId) -> sampler.sample(graph, nodeId, 100);
+        neighborhoodFunction = (graph, nodeId) -> new NeighborhoodSampler(0L).sample(graph, nodeId, 100);
     }
 
     @Test
