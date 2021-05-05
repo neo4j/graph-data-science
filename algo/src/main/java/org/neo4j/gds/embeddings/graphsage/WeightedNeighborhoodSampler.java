@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.eclipse.collections.api.tuple.primitive.DoubleDoublePair;
-import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import org.neo4j.gds.ml.core.RelationshipWeights;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 
@@ -46,9 +45,44 @@ public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
         AtomicLong remainingToConsider = new AtomicLong(graph.degree(nodeId));
         List<Long> neighbors = new ArrayList<>();
 
-        DoubleDoublePair minMax = minMax(graph, nodeId);
-        double min = minMax.getOne();
-        double max = minMax.getTwo();
+        var minMax = minMax(graph, nodeId);
+        double min = minMax.min();
+        double max = minMax.max();
+
+        if (min == max) {
+            graph.concurrentCopy().forEachRelationship(
+                nodeId,
+                (source, target) -> {
+                    if (remainingToSample.get() == 0 || remainingToConsider.get() == 0) {
+                        return false;
+                    }
+                    double probability = randomDouble(source, target, graph.nodeCount());
+                    if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.get()) {
+                        neighbors.add(target);
+                        remainingToSample.decrementAndGet();
+                    }
+                    return true;
+                }
+            );
+        } else {
+            graph.concurrentCopy().forEachRelationship(
+                nodeId,
+                RelationshipWeights.DEFAULT_VALUE,
+                (source, target, weight) -> {
+                    if (remainingToSample.get() == 0 || remainingToConsider.get() == 0) {
+                        return false;
+                    }
+
+                    double probability = (1.0 - Math.pow((weight - min) / (max - min), beta));
+
+                    if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.get()) {
+                        neighbors.add(target);
+                        remainingToSample.decrementAndGet();
+                    }
+                    return true;
+                }
+            );
+        }
 
         graph.concurrentCopy().forEachRelationship(
             nodeId,
@@ -88,9 +122,14 @@ public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
         this.randomSeed = ThreadLocalRandom.current().nextLong();
     }
 
-    private DoubleDoublePair minMax(Graph graph, long nodeId) {
+    private MinMax minMax(Graph graph, long nodeId) {
         var maxQ = BoundedLongPriorityQueue.max(1);
         var minQ = BoundedLongPriorityQueue.min(1);
+
+        if(!graph.hasRelationshipProperty()) {
+            return MinMax.of(0D, 0D);
+        }
+
         graph.concurrentCopy().forEachRelationship(
             nodeId,
             RelationshipWeights.DEFAULT_VALUE,
@@ -104,6 +143,16 @@ public class WeightedNeighborhoodSampler implements NeighborhoodSampler {
         var min = minQ.priorities().max().orElse(0D);
         var max = maxQ.priorities().min().orElse(0D);
 
-        return PrimitiveTuples.pair(min, max);
+        return MinMax.of(min, max);
+    }
+
+    @ValueClass
+    interface MinMax {
+        double min();
+        double max();
+
+        static MinMax of(double min, double max) {
+            return ImmutableMinMax.of(min, max);
+        }
     }
 }

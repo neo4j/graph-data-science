@@ -22,8 +22,6 @@ package org.neo4j.gds.ml.core.subgraph;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
-import org.neo4j.gds.embeddings.graphsage.UniformNeighborhoodSampler;
-import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;

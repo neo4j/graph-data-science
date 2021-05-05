@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class MaxPoolAggregatingLayer implements Layer {
 
-    private final UniformNeighborhoodSampler sampler;
+    private final NeighborhoodSampler sampler;
     private final long sampleSize;
     private final Weights<Matrix> poolWeights;
     private final Weights<Matrix> selfWeights;
@@ -50,7 +50,7 @@ public class MaxPoolAggregatingLayer implements Layer {
         this.bias = bias;
 
         this.sampleSize = sampleSize;
-        this.sampler = new UniformNeighborhoodSampler(randomState);
+        this.sampler = new WeightedNeighborhoodSampler(randomState);
 
         this.activationFunction = activationFunction;
     }
