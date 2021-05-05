@@ -17,21 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.features;
+package org.neo4j.gds.core.ml.batch;
 
-public interface FeatureConsumer {
-    void acceptScalar(long nodeOffset, int offset, double value);
-    void acceptArray(long nodeOffset, int offset, double[] values);
-
-    FeatureConsumer NOOP = new FeatureConsumer() {
-        @Override
-        public void acceptScalar(long nodeOffset, int offset, double value) {
-
-        }
-
-        @Override
-        public void acceptArray(long nodeOffset, int offset, double[] values) {
-
-        }
-    };
+public interface Batch {
+    Iterable<Long> nodeIds();
+    int size();
 }

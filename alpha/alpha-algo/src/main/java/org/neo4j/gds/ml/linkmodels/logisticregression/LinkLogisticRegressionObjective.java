@@ -31,7 +31,7 @@ import org.neo4j.gds.core.ml.tensor.Matrix;
 import org.neo4j.gds.core.ml.tensor.Scalar;
 import org.neo4j.gds.core.ml.tensor.Tensor;
 import org.neo4j.gds.ml.Objective;
-import org.neo4j.gds.ml.batch.Batch;
+import org.neo4j.gds.core.ml.batch.Batch;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.graphalgo.api.Graph;
 

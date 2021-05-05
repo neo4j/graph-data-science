@@ -17,19 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.features;
+package org.neo4j.gds.core.ml.batch;
 
-import org.neo4j.graphalgo.api.Graph;
+import java.util.List;
 
-public class DegreeFeatureExtractor implements ScalarFeatureExtractor {
-    private final Graph graph;
+public class ListBatch implements Batch {
+    private final List<Long> ids;
 
-    public DegreeFeatureExtractor(Graph graph) {
-        this.graph = graph;
+    public ListBatch(List<Long> ids) {
+        this.ids = ids;
     }
 
     @Override
-    public double extract(long nodeId) {
-        return graph.degree(nodeId);
+    public Iterable<Long> nodeIds() {
+        return ids;
+    }
+
+    @Override
+    public int size() {
+        return ids.size();
     }
 }

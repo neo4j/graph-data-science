@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.features;
+package org.neo4j.gds.core.ml.features;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.ml.ComputationContext;
 import org.neo4j.gds.core.ml.functions.MatrixConstant;
-import org.neo4j.gds.ml.batch.LazyBatch;
+import org.neo4j.gds.core.ml.batch.LazyBatch;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;

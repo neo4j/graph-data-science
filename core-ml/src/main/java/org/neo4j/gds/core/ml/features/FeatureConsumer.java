@@ -17,24 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.features;
+package org.neo4j.gds.core.ml.features;
 
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+public interface FeatureConsumer {
+    void acceptScalar(long nodeOffset, int offset, double value);
+    void acceptArray(long nodeOffset, int offset, double[] values);
 
-public class HugeObjectArrayFeatureConsumer implements FeatureConsumer {
-    private final HugeObjectArray<double[]> features;
+    FeatureConsumer NOOP = new FeatureConsumer() {
+        @Override
+        public void acceptScalar(long nodeOffset, int offset, double value) {
 
-    public HugeObjectArrayFeatureConsumer(HugeObjectArray<double[]> features) {
-        this.features = features;
-    }
+        }
 
-    @Override
-    public void acceptScalar(long nodeOffset, int offset, double value) {
-        features.get(nodeOffset)[offset] = value;
-    }
+        @Override
+        public void acceptArray(long nodeOffset, int offset, double[] values) {
 
-    @Override
-    public void acceptArray(long nodeOffset, int offset, double[] values) {
-        System.arraycopy(values, 0, features.get(nodeOffset), offset, values.length);
-    }
+        }
+    };
 }

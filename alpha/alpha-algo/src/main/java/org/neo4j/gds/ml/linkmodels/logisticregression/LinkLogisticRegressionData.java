@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.core.ml.functions.Weights;
 import org.neo4j.gds.core.ml.tensor.Matrix;
 import org.neo4j.gds.ml.LinkFeatureCombiner;
-import org.neo4j.gds.ml.features.FeatureExtraction;
+import org.neo4j.gds.core.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 

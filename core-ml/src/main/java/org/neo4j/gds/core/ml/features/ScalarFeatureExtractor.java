@@ -17,24 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.batch;
+package org.neo4j.gds.core.ml.features;
 
-import java.util.List;
-
-public class ListBatch implements Batch {
-    private final List<Long> ids;
-
-    public ListBatch(List<Long> ids) {
-        this.ids = ids;
-    }
-
+public interface ScalarFeatureExtractor extends FeatureExtractor {
     @Override
-    public Iterable<Long> nodeIds() {
-        return ids;
+    default int dimension() {
+       return 1;
     }
 
-    @Override
-    public int size() {
-        return ids.size();
-    }
+    double extract(long nodeId);
 }

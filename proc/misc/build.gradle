@@ -27,6 +27,7 @@ dependencies {
     testAnnotationProcessor project(':annotations')
 
     testImplementation project(':proc-test')
+    testImplementation project(':core-ml')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'

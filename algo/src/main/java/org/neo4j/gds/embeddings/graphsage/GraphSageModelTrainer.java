@@ -27,7 +27,7 @@ import org.neo4j.gds.core.ml.tensor.Matrix;
 import org.neo4j.gds.core.ml.tensor.Scalar;
 import org.neo4j.gds.core.ml.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.ml.features.FeatureExtraction;
+import org.neo4j.gds.core.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;

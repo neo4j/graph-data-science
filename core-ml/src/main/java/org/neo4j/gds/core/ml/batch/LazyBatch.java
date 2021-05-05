@@ -17,35 +17,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.batch;
+package org.neo4j.gds.core.ml.batch;
 
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicLong;
 
-public class MappedBatch implements Batch {
-    private final Batch delegate;
-    private final BatchTransformer batchTransformer;
+public class LazyBatch implements Batch {
+    private final long startId;
+    private final long endId;
+    private final int size;
 
-    public MappedBatch(Batch delegate, BatchTransformer batchTransformer) {
-        this.delegate = delegate;
-        this.batchTransformer = batchTransformer;
+    public LazyBatch(long startId, int batchSize, long nodeCount) {
+        this.startId = startId;
+        this.endId = Math.min(nodeCount, startId + batchSize);
+        this.size = (int) (this.endId - this.startId);
     }
 
     @Override
     public Iterable<Long> nodeIds() {
-        if (batchTransformer == BatchTransformer.IDENTITY) {
-            return delegate.nodeIds();
-        }
         return () -> {
-            var originalIterator = delegate.nodeIds().iterator();
+            AtomicLong current = new AtomicLong(startId);
             return new Iterator<>() {
                 @Override
                 public boolean hasNext() {
-                    return originalIterator.hasNext();
+                    return current.get() < endId;
                 }
 
                 @Override
                 public Long next() {
-                    return batchTransformer.apply(originalIterator.next());
+                    return current.getAndIncrement();
                 }
             };
         };
@@ -53,6 +53,6 @@ public class MappedBatch implements Batch {
 
     @Override
     public int size() {
-        return delegate.size();
+        return size;
     }
 }

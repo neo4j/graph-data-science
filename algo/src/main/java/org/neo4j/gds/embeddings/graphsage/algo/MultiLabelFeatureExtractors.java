@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.ml.features.FeatureExtractor;
+import org.neo4j.gds.core.ml.features.FeatureExtractor;
 import org.neo4j.graphalgo.NodeLabel;
 
 import java.util.List;

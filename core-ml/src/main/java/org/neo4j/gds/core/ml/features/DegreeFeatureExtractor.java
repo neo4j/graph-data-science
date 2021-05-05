@@ -17,22 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.features;
+package org.neo4j.gds.core.ml.features;
 
-import org.neo4j.gds.embeddings.EmbeddingUtils;
 import org.neo4j.graphalgo.api.Graph;
 
-public class ScalarPropertyExtractor implements ScalarFeatureExtractor {
+public class DegreeFeatureExtractor implements ScalarFeatureExtractor {
     private final Graph graph;
-    private final String propertyKey;
 
-    ScalarPropertyExtractor(Graph graph, String propertyKey) {
+    public DegreeFeatureExtractor(Graph graph) {
         this.graph = graph;
-        this.propertyKey = propertyKey;
     }
 
     @Override
     public double extract(long nodeId) {
-        return EmbeddingUtils.getCheckedDoubleNodeProperty(graph, propertyKey, nodeId);
+        return graph.degree(nodeId);
     }
 }

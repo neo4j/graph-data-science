@@ -17,29 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.features;
+package org.neo4j.gds.core.ml.batch;
 
-import org.neo4j.gds.embeddings.EmbeddingUtils;
-import org.neo4j.graphalgo.api.Graph;
+@FunctionalInterface
+public interface BatchTransformer {
+    long apply(long index);
 
-public class ArrayPropertyExtractor implements ArrayFeatureExtractor {
-    private final int dimension;
-    private final Graph graph;
-    private final String propertyKey;
-
-    ArrayPropertyExtractor(int dimension, Graph graph, String propertyKey) {
-        this.dimension = dimension;
-        this.graph = graph;
-        this.propertyKey = propertyKey;
-    }
-
-    @Override
-    public int dimension() {
-        return dimension;
-    }
-
-    @Override
-    public double[] extract(long nodeId) {
-        return EmbeddingUtils.getCheckedDoubleArrayNodeProperty(graph, propertyKey, nodeId, dimension);
-    }
+    BatchTransformer IDENTITY = index -> index;
 }

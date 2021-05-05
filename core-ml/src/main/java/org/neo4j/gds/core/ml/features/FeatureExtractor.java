@@ -17,13 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.features;
+package org.neo4j.gds.core.ml.features;
 
-public interface ScalarFeatureExtractor extends FeatureExtractor {
-    @Override
-    default int dimension() {
-       return 1;
-    }
-
-    double extract(long nodeId);
+public interface FeatureExtractor {
+    int dimension();
 }

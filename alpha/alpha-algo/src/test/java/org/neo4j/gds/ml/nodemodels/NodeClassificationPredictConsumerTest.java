@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.batch.BatchTransformer;
-import org.neo4j.gds.ml.batch.ListBatch;
+import org.neo4j.gds.core.ml.batch.BatchTransformer;
+import org.neo4j.gds.core.ml.batch.ListBatch;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.graphalgo.NodeLabel;

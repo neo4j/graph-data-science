@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml;
 
-import org.neo4j.gds.ml.batch.Batch;
+import org.neo4j.gds.core.ml.batch.Batch;
 import org.neo4j.graphalgo.api.Graph;
 
 public interface Predictor<RESULT, DATA> {

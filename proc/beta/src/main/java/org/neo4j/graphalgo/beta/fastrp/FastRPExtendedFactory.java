@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.beta.fastrp;
 
 import org.neo4j.gds.embeddings.fastrp.FastRP;
-import org.neo4j.gds.ml.features.FeatureExtraction;
+import org.neo4j.gds.core.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;

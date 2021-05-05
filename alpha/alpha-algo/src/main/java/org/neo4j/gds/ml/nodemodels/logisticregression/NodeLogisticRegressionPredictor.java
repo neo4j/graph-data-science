@@ -27,16 +27,16 @@ import org.neo4j.gds.core.ml.functions.MatrixMultiplyWithTransposedSecondOperand
 import org.neo4j.gds.core.ml.functions.Softmax;
 import org.neo4j.gds.core.ml.tensor.Matrix;
 import org.neo4j.gds.ml.Predictor;
-import org.neo4j.gds.ml.batch.Batch;
-import org.neo4j.gds.ml.features.BiasFeature;
-import org.neo4j.gds.ml.features.FeatureExtraction;
-import org.neo4j.gds.ml.features.FeatureExtractor;
+import org.neo4j.gds.core.ml.batch.Batch;
+import org.neo4j.gds.core.ml.features.BiasFeature;
+import org.neo4j.gds.core.ml.features.FeatureExtraction;
+import org.neo4j.gds.core.ml.features.FeatureExtractor;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.neo4j.gds.ml.features.FeatureExtraction.extract;
+import static org.neo4j.gds.core.ml.features.FeatureExtraction.extract;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public class NodeLogisticRegressionPredictor implements Predictor<Matrix, NodeLogisticRegressionData> {

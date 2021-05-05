@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.ml.batch.BatchQueue;
+import org.neo4j.gds.core.ml.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
 
-import static org.neo4j.gds.ml.batch.BatchTransformer.IDENTITY;
+import static org.neo4j.gds.core.ml.batch.BatchTransformer.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, NodeLogisticRegressionResult> {
 

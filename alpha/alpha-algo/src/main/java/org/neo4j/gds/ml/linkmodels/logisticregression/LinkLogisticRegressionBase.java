@@ -25,9 +25,9 @@ import org.neo4j.gds.core.ml.functions.MatrixConstant;
 import org.neo4j.gds.core.ml.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.core.ml.functions.Sigmoid;
 import org.neo4j.gds.core.ml.tensor.Matrix;
-import org.neo4j.gds.ml.batch.Batch;
-import org.neo4j.gds.ml.features.FeatureConsumer;
-import org.neo4j.gds.ml.features.FeatureExtraction;
+import org.neo4j.gds.core.ml.batch.Batch;
+import org.neo4j.gds.core.ml.features.FeatureConsumer;
+import org.neo4j.gds.core.ml.features.FeatureExtraction;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
