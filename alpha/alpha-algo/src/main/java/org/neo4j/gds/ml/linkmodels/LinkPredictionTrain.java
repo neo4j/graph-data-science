@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.ArrayList;
@@ -190,9 +191,7 @@ public class LinkPredictionTrain
     public interface ModelSelectResult {
         LinkLogisticRegressionTrainConfig bestParameters();
 
-        // key is metric
         Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> trainStats();
-        // key is metric
         Map<LinkMetric, List<ModelStats<LinkLogisticRegressionTrainConfig>>> validationStats();
 
         static ModelSelectResult of(
@@ -250,12 +249,16 @@ public class LinkPredictionTrain
         return llrTrain.compute();
     }
 
-    private static class ModelStatsBuilder {
+    static class ModelStatsBuilder {
         private final Map<LinkMetric, Double> min;
         private final Map<LinkMetric, Double> max;
         private final Map<LinkMetric, Double> sum;
         private final LinkLogisticRegressionTrainConfig modelParams;
         private final int numberOfSplits;
+
+        static long sizeInBytes() {
+            return 3 * MemoryUsage.sizeOfInstance(HashMap.class) + 8;
+        }
 
         ModelStatsBuilder(LinkLogisticRegressionTrainConfig modelParams, int numberOfSplits) {
             this.modelParams = modelParams;
