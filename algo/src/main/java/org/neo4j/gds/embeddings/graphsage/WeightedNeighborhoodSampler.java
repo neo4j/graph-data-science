@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.eclipse.collections.api.tuple.primitive.DoubleDoublePair;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
-import org.neo4j.gds.core.ml.RelationshipWeights;
+import org.neo4j.gds.ml.core.RelationshipWeights;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 

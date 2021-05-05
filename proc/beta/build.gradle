@@ -11,7 +11,7 @@ dependencies {
 
     implementation(
         project(':neo4j-adapter'),
-        project(':core-ml')
+        project(':ml-core')
     )
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'

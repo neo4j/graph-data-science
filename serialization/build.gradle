@@ -35,7 +35,7 @@ dependencies {
     implementation group: 'com.esotericsoftware', name: 'kryo', version: ver.'kryo'
 
     implementation project(':core')
-    implementation project(':core-ml')
+    implementation project(':ml-core')
     implementation project(':algo')
     implementation project(':alpha-algo')
     testCompile project(':alpha-algo').sourceSets.test.output

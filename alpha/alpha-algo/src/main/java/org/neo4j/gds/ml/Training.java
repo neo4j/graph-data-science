@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.ml;
 
-import org.neo4j.gds.core.ml.ComputationContext;
-import org.neo4j.gds.core.ml.Variable;
-import org.neo4j.gds.core.ml.tensor.Scalar;
-import org.neo4j.gds.core.ml.batch.Batch;
-import org.neo4j.gds.core.ml.batch.BatchQueue;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;

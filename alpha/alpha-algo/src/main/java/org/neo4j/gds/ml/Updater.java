@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml;
 
-import org.neo4j.gds.core.ml.ComputationContext;
-import org.neo4j.gds.core.ml.functions.Weights;
-import org.neo4j.gds.core.ml.tensor.Tensor;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.AdamOptimizer;
 
 import java.util.List;

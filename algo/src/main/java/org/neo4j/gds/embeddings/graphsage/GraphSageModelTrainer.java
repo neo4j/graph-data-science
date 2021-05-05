@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.core.ml.ComputationContext;
-import org.neo4j.gds.core.ml.Variable;
-import org.neo4j.gds.core.ml.functions.PassthroughVariable;
-import org.neo4j.gds.core.ml.functions.Weights;
-import org.neo4j.gds.core.ml.tensor.Matrix;
-import org.neo4j.gds.core.ml.tensor.Scalar;
-import org.neo4j.gds.core.ml.tensor.Tensor;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.PassthroughVariable;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.core.ml.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.core.ml.RelationshipWeights.UNWEIGHTED;
+import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;

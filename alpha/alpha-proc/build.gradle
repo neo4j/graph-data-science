@@ -22,7 +22,7 @@ dependencies {
     }
 
     testImplementation project(':test-utils')
-    testImplementation project(':core-ml')
+    testImplementation project(':ml-core')
     testImplementation project(':proc-test')
     testImplementation project(':proc-embeddings')
     testImplementation project(':proc-common')

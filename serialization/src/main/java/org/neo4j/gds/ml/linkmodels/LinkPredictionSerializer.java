@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import com.google.protobuf.Parser;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
-import org.neo4j.gds.core.ml.functions.Weights;
+import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;

@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.core.ml.Variable;
-import org.neo4j.gds.core.ml.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.core.ml.functions.MultiMean;
-import org.neo4j.gds.core.ml.functions.WeightedMultiMean;
-import org.neo4j.gds.core.ml.functions.Weights;
-import org.neo4j.gds.core.ml.subgraph.SubGraph;
-import org.neo4j.gds.core.ml.tensor.Matrix;
-import org.neo4j.gds.core.ml.tensor.Tensor;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.ml.core.functions.MultiMean;
+import org.neo4j.gds.ml.core.functions.WeightedMultiMean;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.subgraph.SubGraph;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 import java.util.function.Function;

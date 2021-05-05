@@ -21,9 +21,9 @@ package org.neo4j.gds.embeddings.ddl4j.tensor;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.ml.tensor.Matrix;
-import org.neo4j.gds.core.ml.tensor.Scalar;
-import org.neo4j.gds.core.ml.tensor.Vector;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.graphalgo.core.model.proto.TensorProto;
 
 import java.io.ByteArrayOutputStream;

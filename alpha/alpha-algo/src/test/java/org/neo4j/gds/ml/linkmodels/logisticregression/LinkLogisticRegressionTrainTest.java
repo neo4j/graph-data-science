@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.core.ml.Dimensions.COLUMNS_INDEX;
-import static org.neo4j.gds.core.ml.Dimensions.ROWS_INDEX;
+import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
+import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
 
 @GdlExtension
 class LinkLogisticRegressionTrainTest {

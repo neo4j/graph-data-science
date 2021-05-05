@@ -24,14 +24,14 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.core.ml.ComputationContext;
-import org.neo4j.gds.core.ml.FiniteDifferenceTest;
-import org.neo4j.gds.core.ml.Variable;
-import org.neo4j.gds.core.ml.functions.MatrixConstant;
-import org.neo4j.gds.core.ml.functions.Weights;
-import org.neo4j.gds.core.ml.tensor.Matrix;
-import org.neo4j.gds.core.ml.tensor.Scalar;
-import org.neo4j.gds.core.ml.tensor.Tensor;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.FiniteDifferenceTest;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.MatrixConstant;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
@@ -45,7 +45,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.neo4j.gds.core.ml.RelationshipWeights.UNWEIGHTED;
+import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
 
 class GraphSageLossTest implements FiniteDifferenceTest {
 

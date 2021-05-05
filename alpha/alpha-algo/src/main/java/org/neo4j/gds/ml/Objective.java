@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.ml;
 
-import org.neo4j.gds.core.ml.Variable;
-import org.neo4j.gds.core.ml.functions.Weights;
-import org.neo4j.gds.core.ml.tensor.Scalar;
-import org.neo4j.gds.core.ml.tensor.Tensor;
-import org.neo4j.gds.core.ml.batch.Batch;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.batch.Batch;
 
 import java.util.List;
 

@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.core.ml.ComputationContext;
-import org.neo4j.gds.core.ml.Variable;
-import org.neo4j.gds.core.ml.tensor.Matrix;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

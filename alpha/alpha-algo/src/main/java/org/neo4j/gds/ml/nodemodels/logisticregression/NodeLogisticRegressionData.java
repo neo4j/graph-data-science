@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.neo4j.gds.core.ml.functions.Weights;
-import org.neo4j.gds.core.ml.subgraph.LocalIdMap;
-import org.neo4j.gds.core.ml.tensor.Matrix;
-import org.neo4j.gds.core.ml.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;

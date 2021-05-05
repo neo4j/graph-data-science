@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.core.ml.Variable;
-import org.neo4j.gds.core.ml.functions.Relu;
-import org.neo4j.gds.core.ml.functions.Sigmoid;
-import org.neo4j.gds.core.ml.tensor.Matrix;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.Relu;
+import org.neo4j.gds.ml.core.functions.Sigmoid;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.Locale;
 import java.util.function.Function;

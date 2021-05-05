@@ -20,13 +20,13 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.ml.ComputationContext;
-import org.neo4j.gds.core.ml.Variable;
-import org.neo4j.gds.core.ml.functions.ConstantScale;
-import org.neo4j.gds.core.ml.functions.MatrixSum;
-import org.neo4j.gds.core.ml.functions.Weights;
-import org.neo4j.gds.core.ml.helper.L2Norm;
-import org.neo4j.gds.core.ml.tensor.Matrix;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.ConstantScale;
+import org.neo4j.gds.ml.core.functions.MatrixSum;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.helper.L2Norm;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.List;
 

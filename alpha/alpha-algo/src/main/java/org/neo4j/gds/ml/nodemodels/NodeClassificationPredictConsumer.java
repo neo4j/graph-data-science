@@ -20,11 +20,11 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.ml.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.Predictor;
-import org.neo4j.gds.core.ml.batch.Batch;
-import org.neo4j.gds.core.ml.batch.BatchTransformer;
-import org.neo4j.gds.core.ml.batch.MappedBatch;
+import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.core.batch.BatchTransformer;
+import org.neo4j.gds.ml.core.batch.MappedBatch;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;

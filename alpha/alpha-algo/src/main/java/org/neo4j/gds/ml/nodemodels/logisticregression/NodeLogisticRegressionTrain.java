@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.ml.Training;
-import org.neo4j.gds.core.ml.batch.BatchQueue;
-import org.neo4j.gds.core.ml.batch.HugeBatchQueue;
+import org.neo4j.gds.ml.core.batch.BatchQueue;
+import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;

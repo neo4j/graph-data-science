@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.ml.batch.HugeBatchQueue;
+import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;

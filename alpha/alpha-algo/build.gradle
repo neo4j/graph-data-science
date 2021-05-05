@@ -12,7 +12,7 @@ dependencies {
     api project(':alpha-core')
     api group: 'org.eclipse.collections', name: 'eclipse-collections',  version: ver.'eclipse-collections'
 
-    implementation(project(':core-ml'))
+    implementation(project(':ml-core'))
     implementation group: 'org.roaringbitmap',  name: 'RoaringBitmap', version: ver.'RoaringBitmap'
     implementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
 
@@ -29,7 +29,7 @@ dependencies {
     testImplementation project(':test-utils')
     testImplementation project(':algo')
     testCompile project(':algo').sourceSets.test.output
-    testCompile project(':core-ml').sourceSets.test.output
+    testCompile project(':ml-core').sourceSets.test.output
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 }

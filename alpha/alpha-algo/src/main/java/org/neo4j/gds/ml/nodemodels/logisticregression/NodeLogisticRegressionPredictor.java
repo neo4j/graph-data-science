@@ -20,23 +20,23 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.gds.core.ml.ComputationContext;
-import org.neo4j.gds.core.ml.Variable;
-import org.neo4j.gds.core.ml.functions.MatrixConstant;
-import org.neo4j.gds.core.ml.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.core.ml.functions.Softmax;
-import org.neo4j.gds.core.ml.tensor.Matrix;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.MatrixConstant;
+import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.ml.core.functions.Softmax;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.Predictor;
-import org.neo4j.gds.core.ml.batch.Batch;
-import org.neo4j.gds.core.ml.features.BiasFeature;
-import org.neo4j.gds.core.ml.features.FeatureExtraction;
-import org.neo4j.gds.core.ml.features.FeatureExtractor;
+import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.core.features.BiasFeature;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.neo4j.gds.core.ml.features.FeatureExtraction.extract;
+import static org.neo4j.gds.ml.core.features.FeatureExtraction.extract;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public class NodeLogisticRegressionPredictor implements Predictor<Matrix, NodeLogisticRegressionData> {

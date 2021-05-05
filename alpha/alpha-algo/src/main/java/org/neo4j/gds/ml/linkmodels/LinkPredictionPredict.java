@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.gds.core.ml.batch.Batch;
-import org.neo4j.gds.core.ml.batch.BatchQueue;
+import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;

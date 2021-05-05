@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.core.ml.Variable;
-import org.neo4j.gds.core.ml.functions.ElementwiseMax;
-import org.neo4j.gds.core.ml.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.core.ml.functions.MatrixSum;
-import org.neo4j.gds.core.ml.functions.MatrixVectorSum;
-import org.neo4j.gds.core.ml.functions.Slice;
-import org.neo4j.gds.core.ml.functions.WeightedElementwiseMax;
-import org.neo4j.gds.core.ml.functions.Weights;
-import org.neo4j.gds.core.ml.subgraph.SubGraph;
-import org.neo4j.gds.core.ml.tensor.Matrix;
-import org.neo4j.gds.core.ml.tensor.Tensor;
-import org.neo4j.gds.core.ml.tensor.Vector;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.ElementwiseMax;
+import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.ml.core.functions.MatrixSum;
+import org.neo4j.gds.ml.core.functions.MatrixVectorSum;
+import org.neo4j.gds.ml.core.functions.Slice;
+import org.neo4j.gds.ml.core.functions.WeightedElementwiseMax;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.subgraph.SubGraph;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 import java.util.function.Function;
