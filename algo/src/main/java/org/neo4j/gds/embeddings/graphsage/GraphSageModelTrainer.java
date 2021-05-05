@@ -183,7 +183,7 @@ public class GraphSageModelTrainer {
 
             ComputationContext localCtx = new ComputationContext();
 
-            newLoss = localCtx.forward(lossFunction).dataAt(0);
+            newLoss = localCtx.forward(lossFunction).value();
             double lossDiff = Math.abs((oldLoss - newLoss) / oldLoss);
 
             if (lossDiff < tolerance) {
@@ -220,7 +220,7 @@ public class GraphSageModelTrainer {
             batches -> batches.forEach(batch -> {
                 ComputationContext ctx = new ComputationContext();
                 Variable<Scalar> loss = lossFunction(batch, graph, features);
-                doubleAdder.add(ctx.forward(loss).dataAt(0));
+                doubleAdder.add(ctx.forward(loss).value());
             })
         );
         double lossValue = doubleAdder.doubleValue();

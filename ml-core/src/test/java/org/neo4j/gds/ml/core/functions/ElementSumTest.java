@@ -26,7 +26,6 @@ import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.helper.Constant;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
@@ -42,8 +41,8 @@ class ElementSumTest implements FiniteDifferenceTest {
         assertThat(add.dimensions()).containsExactly(Dimensions.scalar());
 
         ComputationContext ctx = new ComputationContext();
-        Tensor<?> forward = ctx.forward(add);
-        assertThat(forward.dataAt(0)).isCloseTo(4.2, Offset.offset(1e-8));
+        var forward = ctx.forward(add);
+        assertThat(forward.value()).isCloseTo(4.2, Offset.offset(1e-8));
         assertThat(forward.dimensions()).containsExactly(Dimensions.scalar());
     }
 

@@ -40,6 +40,8 @@ public class L2Norm extends SingleParentVariable<Scalar> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        return ctx.data(parent).scalarMultiply(ctx.gradient(this).dataAt(0) / ctx.data(this).dataAt(0));
+        var gradientValue = ctx.gradient(this).value();
+        var dataValue = ctx.data(this).value();
+        return ctx.data(parent).scalarMultiply(gradientValue / dataValue);
     }
 }

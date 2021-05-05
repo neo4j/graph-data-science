@@ -56,7 +56,7 @@ class GradientTest {
         assertNull(ctx.gradient(add), "Gradient should be null after forward");
 
         assertArrayEquals(Dimensions.scalar(), sum.dimensions());
-        assertEquals(45D, ctx.data(sum).dataAt(0));
+        assertEquals(45D, ctx.data(sum).value());
         assertArrayEquals(new int[]{5, 1}, ctx.data(add).dimensions());
 
         assertArrayEquals(ArrayUtil.fill(9D, 5), ctx.data(add).data());

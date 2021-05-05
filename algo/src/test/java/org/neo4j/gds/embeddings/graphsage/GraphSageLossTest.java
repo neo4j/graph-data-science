@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,6 @@ import org.neo4j.gds.ml.core.functions.MatrixConstant;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
@@ -43,12 +43,12 @@ import org.neo4j.graphalgo.extension.Inject;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
 
 class GraphSageLossTest implements FiniteDifferenceTest {
 
+    private static final Offset<Double> LOSS_TOLERANCE = Offset.offset(1e-10);
     protected ComputationContext ctx;
 
     @BeforeEach
@@ -77,10 +77,9 @@ class GraphSageLossTest implements FiniteDifferenceTest {
 
         Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, new long[]{0, 1, 2}, negativeSamplingFactor);
 
-        Tensor<?> lossData = ctx.forward(lossVar);
-        assertNotNull(lossData);
+        var lossData = ctx.forward(lossVar);
 
-        assertEquals(expectedLoss, lossData.dataAt(0));
+        assertThat(lossData.value()).isEqualTo(expectedLoss, LOSS_TOLERANCE);
     }
 
     @ParameterizedTest
@@ -110,9 +109,9 @@ class GraphSageLossTest implements FiniteDifferenceTest {
 
         Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, new long[]{0, 1, 2, 3, 4, 5, 6, 7, 8}, negativeSamplingFactor);
 
-        Tensor<?> lossData = ctx.forward(lossVar);
-        assertNotNull(lossData);
-        assertEquals(expectedLoss, lossData.dataAt(0), 1e-10);
+        var lossData = ctx.forward(lossVar);
+
+        assertThat(lossData.value()).isEqualTo(expectedLoss, LOSS_TOLERANCE);
     }
 
     @Test
@@ -181,10 +180,9 @@ class GraphSageLossTest implements FiniteDifferenceTest {
 
             Variable<Scalar> lossVar = new GraphSageLoss(graph::relationshipProperty, combinedEmbeddings, new long[]{0, 1, 2}, Q);
 
-            Tensor<?> lossData = ctx.forward(lossVar);
-            assertNotNull(lossData);
+            var lossData = ctx.forward(lossVar);
 
-            assertEquals(expectedLoss, lossData.dataAt(0));
+            assertThat(lossData.value()).isEqualTo(expectedLoss, LOSS_TOLERANCE);
         }
 
         @ParameterizedTest
@@ -216,10 +214,9 @@ class GraphSageLossTest implements FiniteDifferenceTest {
             );
             Variable<Scalar> lossVar = new GraphSageLoss(filteredGraph::relationshipProperty, combinedEmbeddings, new long[]{0, 1, 0, 0, 1, 0}, Q);
 
-            Tensor<?> lossData = ctx.forward(lossVar);
-            assertNotNull(lossData);
+            var lossData = ctx.forward(lossVar);
 
-            assertEquals(expectedLoss, lossData.dataAt(0));
+            assertThat(lossData.value()).isEqualTo(expectedLoss, LOSS_TOLERANCE);
 
             finiteDifferenceShouldApproximateGradient(
                 combinedEmbeddings,

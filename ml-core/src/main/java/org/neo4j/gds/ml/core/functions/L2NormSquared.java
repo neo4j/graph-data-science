@@ -67,6 +67,6 @@ public class L2NormSquared extends SingleParentVariable<Scalar> {
             data.setDataAt(row * cols + biasColumnIndex, 0);
         }
 
-        return data.scalarMultiply(2 * ctx.gradient(this).dataAt(0));
+        return data.scalarMultiply(2 * ctx.gradient(this).value());
     }
 }
