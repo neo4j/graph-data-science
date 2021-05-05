@@ -46,7 +46,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
             builder.perNode("predicted probabilities", (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfDoubleArray(classCount)));
         }
         builder.perNode("predicted classes", HugeLongArray::memoryEstimation);
-        builder.fixed("prediction variable", NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount));
+        builder.fixed("computation graph", NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount));
         return builder.build();
     }
 
