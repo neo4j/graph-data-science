@@ -33,12 +33,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
 import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 
 public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictStreamConfig> {
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.stream", mode = Mode.READ)
-    @Description("Predicts relationships for all node pairs based on a previously trained link prediction model")
+    @Description(DESCRIPTION)
     public Stream<Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -61,9 +62,7 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(
-        GraphCreateConfig graphCreateConfig, LinkPredictionPredictStreamConfig config
-    ) {
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, LinkPredictionPredictStreamConfig config) {
         validateIsUndirectedGraph(graphCreateConfig, config);
     }
 

@@ -95,13 +95,16 @@ class LinkPredictionPredictWriteProcTest extends BaseProcTest {
             .graphStore();
         addModel("model", graphStore.schema());
 
-        var query =
-            "CALL gds.alpha.ml.linkPrediction.predict.write('g', { " +
-            "  writeRelationshipType: 'PREDICTED', " +
-            "  modelName: 'model', " +
-            "  threshold: 0.5, " +
-            "  topN: 10" +
-            "})";
+        var query = GdsCypher
+            .call()
+            .explicitCreation("g")
+            .algo("gds.alpha.ml.linkPrediction.predict")
+            .writeMode()
+            .addParameter("writeRelationshipType", "PREDICTED")
+            .addParameter("modelName", "model")
+            .addParameter("threshold", 0.5)
+            .addParameter("topN", 10)
+            .yields();
 
         assertCypherResult(query, List.of(Map.of(
             "createMillis", greaterThan(-1L),
@@ -147,15 +150,18 @@ class LinkPredictionPredictWriteProcTest extends BaseProcTest {
 
         addModel("model", GraphSchema.empty());
 
-        var trainQuery =
-            "CALL gds.alpha.ml.linkPrediction.predict.write('g2', { " +
-            "  writeRelationshipType: 'PREDICTED', " +
-            "  modelName: 'model', " +
-            "  threshold: 0.5, " +
-            "  topN: 10" +
-            "})";
+        var query = GdsCypher
+            .call()
+            .explicitCreation("g2")
+            .algo("gds.alpha.ml.linkPrediction.predict")
+            .writeMode()
+            .addParameter("writeRelationshipType", "PREDICTED")
+            .addParameter("modelName", "model")
+            .addParameter("threshold", 0.5)
+            .addParameter("topN", 10)
+            .yields();
 
-        assertError(trainQuery, "Procedure requires relationship projections to be UNDIRECTED.");
+        assertError(query, "Procedure requires relationship projections to be UNDIRECTED.");
     }
 
     private void addModel(String modelName, GraphSchema graphSchema) {

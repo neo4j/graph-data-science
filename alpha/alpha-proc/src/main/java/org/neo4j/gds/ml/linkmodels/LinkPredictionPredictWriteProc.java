@@ -34,18 +34,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
 import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 
 public class LinkPredictionPredictWriteProc extends WriteRelationshipsProc<LinkPredictionPredict, LinkPredictionResult, StandardWriteRelationshipsResult, LinkPredictionPredictWriteConfig> {
 
     @Procedure(name = "gds.alpha.ml.linkPrediction.predict.write", mode = Mode.READ)
-    @Description("Predicts relationships for all node pairs based on a previously trained link prediction model")
+    @Description(DESCRIPTION)
     public Stream<StandardWriteRelationshipsResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var result = compute(graphNameOrConfig, configuration);
-        return write(result);
+        return write(compute(graphNameOrConfig, configuration));
     }
 
     @Override
