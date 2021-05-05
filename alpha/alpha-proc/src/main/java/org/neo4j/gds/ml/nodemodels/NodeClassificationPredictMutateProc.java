@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter.NodeProperty;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -56,6 +57,15 @@ public class NodeClassificationPredictMutateProc
     ) {
         var result = compute(graphNameOrConfig, configuration);
         return mutate(result);
+    }
+
+    @Procedure(name = "gds.alpha.ml.nodeClassification.predict.mutate.estimate", mode = Mode.READ)
+    @Description("Predicts classes for all nodes based on a previously trained model")
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

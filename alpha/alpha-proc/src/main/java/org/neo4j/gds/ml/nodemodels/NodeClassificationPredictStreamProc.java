@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -55,6 +56,15 @@ public class NodeClassificationPredictStreamProc
     ) {
         var result = compute(graphNameOrConfig, configuration);
         return stream(result);
+    }
+
+    @Procedure(name = "gds.alpha.ml.nodeClassification.predict.stream.estimate", mode = Mode.READ)
+    @Description("Predicts classes for all nodes based on a previously trained model")
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

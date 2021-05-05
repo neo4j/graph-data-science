@@ -134,7 +134,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
                 return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
             })
             .fixed("probabilities", sizeOfDoubleArray(fudgedClassCount))
-            .fixed("predictions variable", NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(
+            .fixed("computation graph", NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(
                 BatchQueue.DEFAULT_BATCH_SIZE,
                 fudgedFeatureCount,
                 fudgedClassCount

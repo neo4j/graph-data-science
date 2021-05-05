@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 
 public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassificationPredictConfig> extends AbstractAlgorithmFactory<NodeClassificationPredict, CONFIG> {
 
@@ -74,7 +73,21 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
 
     @Override
     public MemoryEstimation memoryEstimation(NodeClassificationPredictConfig configuration) {
-        throw new MemoryEstimationNotImplementedException();
+
+        var fudgedFeatureCount = 500;
+
+        var classCount = ModelCatalog
+            .get(configuration.username(),
+                configuration.modelName(),
+                NodeLogisticRegressionData.class,
+                NodeClassificationTrainConfig.class
+            )
+            .data()
+            .classIdMap()
+            .originalIds()
+            .length;
+
+        return NodeClassificationPredict.memoryEstimation(configuration.includePredictedProbabilities(), configuration.batchSize(), fudgedFeatureCount, classCount);
     }
 
     @TestOnly

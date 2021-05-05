@@ -29,9 +29,11 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -43,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Percentage.withPercentage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
@@ -256,5 +259,84 @@ class NodeClassificationPredictTest {
                 "NodeLogisticRegressionPredict :: Finished"
             );
         ModelCatalog.drop("", modelName);
+    }
+
+    @Test
+    void shouldEstimateMemory() {
+        var batchSize = 10;
+        var featureCount = 50;
+        var classCount = 10;
+        var produceProbabilities = false;
+        var nodeCount = 1000;
+        var concurrency = 1;
+
+        // instance overhead
+        var instance = 48L;
+        // one thousand longs, plus overhead of a HugeLongArray
+        var predictedClasses = 8 * 1000 + 40;
+        // The predictions variable is tested elsewhere
+        var predictionsVariable = NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount);
+
+        var expected = instance + predictedClasses + predictionsVariable;
+
+        var estimate = NodeClassificationPredict.memoryEstimation(produceProbabilities, batchSize, featureCount, classCount)
+            .estimate(GraphDimensions.of(nodeCount), concurrency);
+        assertThat(estimate.memoryUsage()).isEqualTo(MemoryRange.of(expected));
+    }
+
+    @Test
+    void memoryEstimationShouldScaleWithNodeCountWhenProbabilitiesAreRecorded() {
+        var batchSize = 1000;
+        var featureCount = 500;
+        var classCount = 100;
+        var produceProbabilities = true;
+
+        var smallGraphNodeCount = 1_000_000;
+        var smallToLargeFactor = 1000;
+
+        var estimation = NodeClassificationPredict.memoryEstimation(
+            produceProbabilities,
+            batchSize,
+            featureCount,
+            classCount
+        );
+
+        var smallishGraphEstimation = estimation
+            .estimate(GraphDimensions.of(smallGraphNodeCount), 1);
+        var largishGraphEstimation = estimation
+            .estimate(GraphDimensions.of(smallToLargeFactor * smallGraphNodeCount), 1);
+
+        var smallGraphMax = smallishGraphEstimation.memoryUsage().max;
+        var smallGraphMin = smallishGraphEstimation.memoryUsage().min;
+        assertThat(smallGraphMax).isEqualTo(smallGraphMin);
+
+        var largishGraphMax = largishGraphEstimation.memoryUsage().max;
+        assertThat(largishGraphMax).isCloseTo(smallToLargeFactor * smallGraphMax, withPercentage(1));
+    }
+
+    @Test
+    void memoryEstimationShouldBeIndifferentToConcurrency() {
+        var batchSize = 1000;
+        var featureCount = 500;
+        var classCount = 100;
+        var produceProbabilities = false;
+
+        var nodeCount = 1_000_000;
+        var lessConcurrency = 1;
+        var moreConcurrency = 4;
+
+        var estimation = NodeClassificationPredict.memoryEstimation(produceProbabilities, batchSize, featureCount, classCount);
+
+        var lessConcurrencyEstimate = estimation
+            .estimate(GraphDimensions.of(nodeCount), lessConcurrency);
+        var moreConcurrencyEstimate = estimation
+            .estimate(GraphDimensions.of(nodeCount), moreConcurrency);
+
+        var lessConcurrencyMax = lessConcurrencyEstimate.memoryUsage().max;
+        var lessConcurrencyMin = lessConcurrencyEstimate.memoryUsage().min;
+        assertThat(lessConcurrencyMax).isEqualTo(lessConcurrencyMin);
+
+        var moreConcurrentcyMax = moreConcurrencyEstimate.memoryUsage().max;
+        assertThat(moreConcurrentcyMax).isEqualTo(lessConcurrencyMax);
     }
 }

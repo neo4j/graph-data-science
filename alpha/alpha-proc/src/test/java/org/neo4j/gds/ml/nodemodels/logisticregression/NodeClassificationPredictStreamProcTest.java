@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationPredictProcTestUtil.addModelWithFeatures;
 
 class NodeClassificationPredictStreamProcTest extends BaseProcTest {
@@ -162,4 +163,18 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
         assertError(query, "The feature properties ['c'] are not present");
     }
 
+    @Test
+    void shouldEstimateMemory() {
+        addModelWithFeatures(getUsername(), MODEL_NAME, List.of("a", "b"));
+
+        var query = GdsCypher
+            .call()
+            .explicitCreation("g")
+            .algo("gds.alpha.ml.nodeClassification.predict")
+            .estimationMode(GdsCypher.ExecutionModes.STREAM)
+            .addParameter("modelName", MODEL_NAME)
+            .yields();
+
+        assertDoesNotThrow(() -> runQuery(query));
+    }
 }

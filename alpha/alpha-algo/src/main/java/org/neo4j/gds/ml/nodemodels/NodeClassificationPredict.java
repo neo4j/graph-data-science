@@ -28,14 +28,27 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
 
 import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict, NodeLogisticRegressionResult> {
+
+    static MemoryEstimation memoryEstimation(boolean produceProbabilities, int batchSize, int featureCount, int classCount) {
+        var builder = MemoryEstimations.builder(NodeClassificationPredict.class);
+        if (produceProbabilities) {
+            builder.perNode("predicted probabilities", (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfDoubleArray(classCount)));
+        }
+        builder.perNode("predicted classes", HugeLongArray::memoryEstimation);
+        builder.fixed("computation graph", NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount));
+        return builder.build();
+    }
 
     private final NodeLogisticRegressionPredictor predictor;
     private final Graph graph;

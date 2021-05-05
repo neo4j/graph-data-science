@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -50,6 +51,15 @@ public class NodeClassificationPredictWriteProc
     ) {
         var result = compute(graphNameOrConfig, configuration);
         return write(result);
+    }
+
+    @Procedure(name = "gds.alpha.ml.nodeClassification.predict.write.estimate", mode = WRITE)
+    @Description("Predicts classes for all nodes based on a previously trained model")
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
