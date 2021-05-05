@@ -26,11 +26,21 @@ import org.neo4j.gds.ml.LinkFeatureCombiner;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.List;
 
 @ValueClass
 public interface LinkLogisticRegressionData {
+
+    static MemoryEstimation memoryEstimation(int numberOfFeatures) {
+        return MemoryEstimations.builder()
+            .fixed("instance", MemoryUsage.sizeOfInstance(ImmutableLinkLogisticRegressionData.class))
+            .fixed("weights", Weights.sizeInBytes(1, numberOfFeatures))
+            .build();
+    }
 
     Weights<Matrix> weights();
 
