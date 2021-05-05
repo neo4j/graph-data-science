@@ -102,7 +102,7 @@ final class DegreeCentralityTest {
                 Arguments.of(
                     false,
                     Orientation.REVERSE,
-                    Map.of("a", 0.0D, "b", 4.0D, "c", 1.0D, "d", 1.0D, "e", 1.0D, "f", 1.0D)
+                    Map.of("a", 1.0D, "b", 4.0D, "c", 1.0D, "d", 1.0D, "e", 1.0D, "f", 1.0D)
                 )
             ),
             () -> Stream.of(Arguments.of(1), Arguments.of(4)));

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.degree;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
@@ -28,10 +29,13 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrality.DegreeFunction> {
 
@@ -65,10 +69,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         progressLogger.logStart();
 
         DegreeFunction result;
-        if (config.relationshipWeightProperty() == null) {
-            result = graph::degree;
-            progressLogger.logProgress(graph.nodeCount());
-        } else {
+        if (config.hasRelationshipWeightProperty()) {
             var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
             var degreeBatchSize = BitUtil.ceilDiv(graph.relationshipCount(), config.concurrency());
             var tasks = PartitionUtils.degreePartition(
@@ -78,6 +79,33 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
             );
             ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
             result = degrees::get;
+        } else {
+            switch (config.orientation()) {
+                case NATURAL:
+                    result = graph::degree;
+                    progressLogger.logProgress(graph.nodeCount());
+                    break;
+                case REVERSE:
+                    var degrees = HugeIntArray.newArray(graph.nodeCount(), tracker);
+
+                    graph.forEachNode(node -> {
+                        graph.forEachRelationship(node, (sourceNodeId, targetNodeId) -> {
+                            degrees.addTo(targetNodeId, 1);
+                            return true;
+                        });
+                        return true;
+                    });
+
+                    result = degrees::get;
+                    break;
+                case UNDIRECTED:
+                    throw new NotImplementedException();
+                default:
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Orientation %s is not supported",
+                        config.orientation()
+                    ));
+            }
         }
 
         progressLogger.logFinish();
