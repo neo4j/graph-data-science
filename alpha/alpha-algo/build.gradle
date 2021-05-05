@@ -9,7 +9,7 @@ dependencies {
 
     compileOnly project(':algo')
 
-    api(project(':alpha-core'))
+    api project(':alpha-core')
     api group: 'org.eclipse.collections', name: 'eclipse-collections',  version: ver.'eclipse-collections'
 
     implementation(project(':core-ml'))

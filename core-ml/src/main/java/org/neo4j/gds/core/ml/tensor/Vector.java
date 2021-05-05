@@ -22,6 +22,7 @@ package org.neo4j.gds.core.ml.tensor;
 import org.neo4j.gds.core.ml.Dimensions;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
+import static org.neo4j.gds.core.ml.Dimensions.ROWS_INDEX;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Vector extends Tensor<Vector> {
@@ -61,6 +62,6 @@ public class Vector extends Tensor<Vector> {
     }
 
     private int length() {
-        return dimensions[Dimensions.ROWS_INDEX];
+        return dimensions[ROWS_INDEX];
     }
 }
