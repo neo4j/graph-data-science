@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.degree;
 
+import org.immutables.value.Value;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
@@ -27,4 +29,11 @@ import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 @ValueClass
 @Configuration
 public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeightConfig {
+
+    @Value.Default
+    @Configuration.ConvertWith("org.neo4j.graphalgo.Orientation#parse")
+    default Orientation orientation() {
+        return Orientation.NATURAL;
+    }
+
 }

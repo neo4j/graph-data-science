@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
@@ -81,17 +82,27 @@ final class DegreeCentralityTest {
     static Stream<Arguments> degreeCentralityParameters() {
         return TestSupport.crossArguments(
             () -> Stream.of(
+                // Orientation NATURAL
                 Arguments.of(
                     true,
+                    Orientation.NATURAL,
                     Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
                 ),
                 Arguments.of(
                     true,
+                    Orientation.NATURAL,
                     Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
                 ),
                 Arguments.of(
                     false,
+                    Orientation.NATURAL,
                     Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D)
+                ),
+                // Orientation REVERSE
+                Arguments.of(
+                    false,
+                    Orientation.REVERSE,
+                    Map.of("a", 0.0D, "b", 4.0D, "c", 1.0D, "d", 1.0D, "e", 1.0D, "f", 1.0D)
                 )
             ),
             () -> Stream.of(Arguments.of(1), Arguments.of(4)));
@@ -99,12 +110,15 @@ final class DegreeCentralityTest {
 
     @ParameterizedTest
     @MethodSource("degreeCentralityParameters")
-    void shouldComputeCorrectResults(boolean weighted, Map<String, Double> expected, int concurrency) {
-        var configBuilder = ImmutableDegreeCentralityConfig.builder();
+    void shouldComputeCorrectResults(boolean weighted, Orientation orientation, Map<String, Double> expected, int concurrency) {
+        var configBuilder = ImmutableDegreeCentralityConfig.builder()
+            .concurrency(concurrency)
+            .orientation(orientation);
+
         if (weighted) {
             configBuilder.relationshipWeightProperty("weight");
         }
-        configBuilder.concurrency(concurrency);
+
         var config = configBuilder.build();
 
         var degreeCentrality = new DegreeCentrality(
