@@ -58,6 +58,10 @@ public final class MemoryEstimations {
         return new MaxEstimation(one, theOther);
     }
 
+    public static MemoryEstimation maxEstimation(List<MemoryEstimation> components) {
+        return new MaxEstimation(components);
+    }
+
     public static MemoryEstimation delegateEstimation(MemoryEstimation delegate, String description) {
         return new DelegateEstimation(delegate, description);
     }
@@ -530,7 +534,7 @@ public final class MemoryEstimations {
          * Handy for when you do not not know ahead of time which one is going to result in the largest memory usage high-water mark
          */
         public Builder max(List<MemoryEstimation> components) {
-            components.add(new MaxEstimation(components));
+            this.components.add(new MaxEstimation(components));
             return this;
         }
 
