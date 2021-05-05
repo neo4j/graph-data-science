@@ -61,7 +61,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class GraphSageModelTrainer {
     private Layer[] layers;
     private final boolean useWeights;
-    private final BatchProvider batchProvider;
     private final double learningRate;
     private final double tolerance;
     private final int negativeSampleWeight;
@@ -88,7 +87,6 @@ public class GraphSageModelTrainer {
     ) {
         this.layerConfigsFunction = graph -> config.layerConfigs(firstLayerColumns(config, graph));
         this.batchSize = config.batchSize();
-        this.batchProvider = new BatchProvider(batchSize);
         this.learningRate = config.learningRate();
         this.tolerance = config.tolerance();
         this.negativeSampleWeight = config.negativeSampleWeight();
@@ -116,14 +114,14 @@ public class GraphSageModelTrainer {
             .mapToDouble(nodeId -> Math.pow(graph.degree(nodeId), 0.75))
             .sum();
 
-        double initialLoss = evaluateLoss(graph, features, batchProvider, -1);
+        double initialLoss = evaluateLoss(graph, features, -1);
         double previousLoss = initialLoss;
         for (int epoch = 0; epoch < epochs; epoch++) {
             var epochMessage = ":: Epoch " + (epoch + 1);
             progressLogger.logStart(epochMessage);
 
             trainEpoch(graph, features, epoch);
-            double newLoss = evaluateLoss(graph, features, batchProvider, epoch);
+            double newLoss = evaluateLoss(graph, features, epoch);
             epochLosses.put(
                 formatWithLocale("Epoch: %d", epoch),
                 newLoss
@@ -221,7 +219,6 @@ public class GraphSageModelTrainer {
         int epoch
     ) {
         DoubleAdder doubleAdder = new DoubleAdder();
-
 
         var tasks = PartitionUtils.rangePartition(
             concurrency,
