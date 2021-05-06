@@ -44,9 +44,10 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public class LinkPredictionTrainEstimation {
 
+    static int FUDGED_MIN_NODE_FEATURES = 500;
+
     static MemoryEstimation estimate(LinkPredictionTrainConfig config) {
-        var fudgedMinNodeFeatures = 500;
-        var nodeFeatureDimension = Math.max(config.featureProperties().size(), fudgedMinNodeFeatures);
+        var nodeFeatureDimension = Math.max(config.featureProperties().size(), FUDGED_MIN_NODE_FEATURES);
         // this is a max because we take the pessimistic stance and use the most expensive model
         // it stays in memory for the compute metric phases
         var modelDataEstimation = maxEstimation("max over models",
