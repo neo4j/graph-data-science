@@ -20,11 +20,15 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import com.carrotsearch.hppc.LongLongHashMap;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -159,6 +163,34 @@ class NeighborhoodSamplerTest {
         var sample = sampler.sample(graph, 0, 2).toArray();
 
         assertThat(sample).containsExactly(1, 1);
+    }
+
+    // TODO transform this into a benchmark
+    @Test
+    void sampleAHighDegreeNode() {
+        var graph = RandomGraphGenerator.builder().nodeCount(1000)
+            .averageDegree(5)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .seed(42L)
+            .build().generate();
+
+        var nodeWithMaxDegree = new MutableLong();
+        var maxDegree = new MutableInt(-1);
+
+        graph.forEachNode(nodeId -> {
+            var degree = graph.degree(nodeId);
+            if (degree > maxDegree.intValue()) {
+                maxDegree.setValue(degree);
+                nodeWithMaxDegree.setValue(nodeId);
+            }
+            return true;
+        });
+
+        NeighborhoodSampler sampler = new NeighborhoodSampler(42);
+        var numberOfSamples = 1;
+        var sample = sampler.sample(graph, nodeWithMaxDegree.longValue(), numberOfSamples);
+
+        assertThat(sample).hasSize(numberOfSamples);
     }
 
     @Nested
