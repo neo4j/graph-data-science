@@ -120,7 +120,8 @@ class GraphSageSingleLabelSerializationTest {
             graph,
             streamConfig,
             model,
-            Pools.DEFAULT, AllocationTracker.empty(),
+            Pools.DEFAULT,
+            AllocationTracker.empty(),
             ProgressLogger.NULL_LOGGER
         ).compute();
     }
@@ -134,7 +135,8 @@ class GraphSageSingleLabelSerializationTest {
         SingleLabelGraphSageTrain trainAlgo = new SingleLabelGraphSageTrain(
             graph,
             trainConfig,
-            Pools.DEFAULT, ProgressLogger.NULL_LOGGER,
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
 

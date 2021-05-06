@@ -26,12 +26,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
-import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -108,7 +108,8 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
             config,
-            Pools.DEFAULT, ProgressLogger.NULL_LOGGER,
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
         // should not fail
@@ -121,7 +122,8 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
             config,
-            Pools.DEFAULT, ProgressLogger.NULL_LOGGER,
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
         // should not fail
@@ -139,7 +141,8 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
             config,
-            Pools.DEFAULT, ProgressLogger.NULL_LOGGER,
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
         // should not fail
@@ -166,7 +169,8 @@ class MultiLabelGraphSageTrainTest {
         var graphSageTrain = new MultiLabelGraphSageTrain(
             graph,
             graphSageTrainConfig,
-            Pools.DEFAULT, ProgressLogger.NULL_LOGGER,
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
 
@@ -208,7 +212,8 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             unequalGraph,
             config,
-            Pools.DEFAULT, ProgressLogger.NULL_LOGGER,
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
 
@@ -231,7 +236,8 @@ class MultiLabelGraphSageTrainTest {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
             config,
-            Pools.DEFAULT, ProgressLogger.NULL_LOGGER,
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
         assertThatExceptionOfType(IllegalArgumentException.class)

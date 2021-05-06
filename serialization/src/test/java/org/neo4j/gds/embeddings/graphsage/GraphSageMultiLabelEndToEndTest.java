@@ -103,7 +103,8 @@ class GraphSageMultiLabelEndToEndTest {
             graph,
             streamConfig,
             model,
-            Pools.DEFAULT, AllocationTracker.empty(),
+            Pools.DEFAULT,
+            AllocationTracker.empty(),
             ProgressLogger.NULL_LOGGER
         ).compute();
     }
@@ -120,7 +121,8 @@ class GraphSageMultiLabelEndToEndTest {
         var trainAlgo = new MultiLabelGraphSageTrain(
             graph,
             trainConfig,
-            Pools.DEFAULT, ProgressLogger.NULL_LOGGER,
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
 

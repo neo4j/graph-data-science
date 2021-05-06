@@ -151,8 +151,8 @@ public class GraphSageModelTrainer {
             concurrency,
             graph.nodeCount(),
             batchSize,
-            partition -> (Runnable) () -> trainOnBatch(
-                partition,
+            batch -> (Runnable) () -> trainOnBatch(
+                batch,
                 graph,
                 features,
                 updater,
@@ -227,9 +227,9 @@ public class GraphSageModelTrainer {
             concurrency,
             graph.nodeCount(),
             batchSize,
-            partition -> (Runnable) () -> {
+            batch -> (Runnable) () -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable<Scalar> loss = lossFunction(partition, graph, features);
+                Variable<Scalar> loss = lossFunction(batch, graph, features);
                 doubleAdder.add(ctx.forward(loss).value());
             }
         );

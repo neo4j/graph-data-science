@@ -123,7 +123,8 @@ class GraphSageTest {
         SingleLabelGraphSageTrain trainAlgo = new SingleLabelGraphSageTrain(
             orphanGraph,
             trainConfig,
-            Pools.DEFAULT, ProgressLogger.NULL_LOGGER,
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         );
         var model = trainAlgo.compute();
