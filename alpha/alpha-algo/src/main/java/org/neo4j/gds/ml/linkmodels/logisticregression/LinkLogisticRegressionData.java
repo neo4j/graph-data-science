@@ -36,7 +36,7 @@ import java.util.List;
 public interface LinkLogisticRegressionData {
 
     static MemoryEstimation memoryEstimation(int numberOfFeatures) {
-        return MemoryEstimations.builder()
+        return MemoryEstimations.builder("model data")
             .fixed("instance", MemoryUsage.sizeOfInstance(ImmutableLinkLogisticRegressionData.class))
             .fixed("weights", Weights.sizeInBytes(1, numberOfFeatures))
             .build();

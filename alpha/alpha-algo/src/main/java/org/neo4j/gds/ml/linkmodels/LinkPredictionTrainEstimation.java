@@ -49,7 +49,7 @@ public class LinkPredictionTrainEstimation {
         var nodeFeatureDimension = Math.max(config.featureProperties().size(), fudgedMinNodeFeatures);
         // this is a max because we take the pessimistic stance and use the most expensive model
         // it stays in memory for the compute metric phases
-        var modelDataEstimation = maxEstimation(
+        var modelDataEstimation = maxEstimation("max over models",
             config.paramConfigs()
                 .stream()
                 .map(llrConfig -> LinkLogisticRegressionData.memoryEstimation(getFeatureDimension(
@@ -58,7 +58,7 @@ public class LinkPredictionTrainEstimation {
                 )))
                 .collect(Collectors.toList())
         );
-        return MemoryEstimations.builder()
+        return MemoryEstimations.builder(LinkPredictionTrain.class)
             .perNode("node IDs", HugeLongArray::memoryEstimation)
             .max(List.of(
                 estimateModelSelection(config, nodeFeatureDimension),
@@ -72,33 +72,33 @@ public class LinkPredictionTrainEstimation {
     }
 
     private static MemoryEstimation estimateModelSelection(LinkPredictionTrainConfig config, int nodeFeatureDimension) {
-        var maxOverParams = maxEstimation(config.paramConfigs()
+        var maxOverParams = maxEstimation("max over models", config.paramConfigs()
             .stream()
             .map(llrConfig -> {
-                var folds = (double) config.validationFolds();
-                return MemoryEstimations.builder()
-                    .fixed("stats map builder train", LinkPredictionTrain.ModelStatsBuilder.sizeInBytes())
-                    .fixed("stats map builder validation", LinkPredictionTrain.ModelStatsBuilder.sizeInBytes())
-                    .max(List.of(
-                        estimateTrainModel(llrConfig, nodeFeatureDimension),
-                        estimateComputeMetric(config.trainRelationshipType(), (folds - 1) / folds)
-                    ))
-                    .build();
-            })
-            .collect(Collectors.toList())
+                    var folds = (double) config.validationFolds();
+                    return MemoryEstimations.builder("train and evaluate model")
+                        .fixed("stats map builder train", LinkPredictionTrain.ModelStatsBuilder.sizeInBytes())
+                        .fixed("stats map builder validation", LinkPredictionTrain.ModelStatsBuilder.sizeInBytes())
+                        .max(
+                            estimateTrainModel(llrConfig, nodeFeatureDimension),
+                            estimateComputeMetric(config.trainRelationshipType(), (folds - 1) / folds)
+                        ).build();
+                }
+            ).collect(Collectors.toList())
         );
-        return MemoryEstimations.builder()
+        return MemoryEstimations.builder("model selection")
             .add("split", StratifiedKFoldSplitter.memoryEstimation(config.validationFolds(), 1.0))
-            .add("stats map train", estimateStatsMap(config.params().size()))
-            .add("stats map validation", estimateStatsMap(config.params().size()))
+            .add(estimateStatsMap(config.params().size(), "stats map train"))
+            .add(estimateStatsMap(config.params().size(), "stats map validation"))
             .add(maxOverParams)
             .build();
     }
 
-    private static MemoryEstimation estimateStatsMap(int numberOfParams) {
+    private static MemoryEstimation estimateStatsMap(int numberOfParams, String description) {
         var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
         var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfParams;
-        return MemoryEstimations.builder(HashMap.class)
+        return MemoryEstimations.builder(description)
+            .fixed("hash map", sizeOfInstance(HashMap.class))
             .fixed("array list", sizeOfInstance(ArrayList.class))
             .fixed("model stats", sizeOfAllModelStatsInBytes)
             .build();
@@ -106,18 +106,16 @@ public class LinkPredictionTrainEstimation {
 
     private static MemoryEstimation estimateTrainModelOnEntireGraph(LinkPredictionTrainConfig config, int nodeFeatureDimension) {
         return MemoryEstimations.builder("train model on entire graph")
-            .add(maxEstimation(
-                config.paramConfigs()
-                    .stream()
-                    .map(llrConfig -> estimateTrainModel(llrConfig, nodeFeatureDimension))
-                    .collect(Collectors.toList())
-                )
+            .max("max over models", config.paramConfigs()
+                .stream()
+                .map(llrConfig -> estimateTrainModel(llrConfig, nodeFeatureDimension))
+                .collect(Collectors.toList())
             ).build();
     }
 
     private static MemoryEstimation estimateComputeTrainMetricPeak(LinkPredictionTrainConfig config, MemoryEstimation modelDataEstimation) {
         return MemoryEstimations.builder("compute train metrics")
-            .add("model data", modelDataEstimation)
+            .add(modelDataEstimation)
             .add(estimateComputeMetric(config.trainRelationshipType(), 1.0))
             .build();
     }
@@ -131,7 +129,7 @@ public class LinkPredictionTrainEstimation {
 
     private static MemoryEstimation estimateTrainModel(LinkLogisticRegressionTrainConfig llrConfig, int nodeFeatureDimension) {
         int featureDimension = getFeatureDimension(llrConfig, nodeFeatureDimension);
-        return MemoryEstimations.builder()
+        return MemoryEstimations.builder("train model")
             .add("model data", LinkLogisticRegressionData.memoryEstimation(featureDimension))
             .add("update weights", Training.memoryEstimation(featureDimension, 1, llrConfig.sharedUpdater(), 1))
             .perThread("computation graph", LinkLogisticRegressionObjective.sizeOfBatchInBytes(llrConfig.batchSize(), featureDimension))
@@ -144,7 +142,7 @@ public class LinkPredictionTrainEstimation {
     }
 
     private static MemoryEstimation estimateComputeMetric(RelationshipType relationshipType, double relationshipFraction) {
-        return MemoryEstimations.builder()
+        return MemoryEstimations.builder("compute metrics")
             .perGraphDimension(
                 "signedProbabilities",
                 ((dimensions, integer) -> MemoryRange.of(SignedProbabilities.estimateMemory(dimensions,

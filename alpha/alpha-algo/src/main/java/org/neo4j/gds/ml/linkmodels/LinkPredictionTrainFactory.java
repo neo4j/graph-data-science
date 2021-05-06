@@ -60,8 +60,6 @@ public class LinkPredictionTrainFactory extends AbstractAlgorithmFactory<LinkPre
 
     @Override
     public MemoryEstimation memoryEstimation(LinkPredictionTrainConfig configuration) {
-        return MemoryEstimations.builder(LinkPredictionTrain.class)
-            .add("algorithm", LinkPredictionTrainEstimation.estimate(configuration))
-            .build();
+        return LinkPredictionTrainEstimation.estimate(configuration);
     }
 }
