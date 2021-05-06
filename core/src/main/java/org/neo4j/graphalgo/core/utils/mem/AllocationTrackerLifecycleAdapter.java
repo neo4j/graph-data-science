@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.mem;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
@@ -41,12 +40,12 @@ public class AllocationTrackerLifecycleAdapter extends LifecycleAdapter {
         globalProcedures.registerComponent(AllocationTracker.class, AllocationTrackerLifecycleAdapter::allocationTracker, true);
     }
 
-    static AllocationTracker allocationTracker(Context ctx) {
-        Optional<KernelTransaction> kernelTransaction = Optional.ofNullable(ctx.internalTransactionOrNull())
-            .map(InternalTransaction::kernelTransaction);
-        return kernelTransaction
-            .map(tx -> AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.memoryTracker(tx))))
-            .orElse(AllocationTracker.create());
+    private static AllocationTracker allocationTracker(Context ctx) {
+        return Optional.ofNullable(ctx.internalTransactionOrNull())
+            .map(InternalTransaction::kernelTransaction)
+            .map(Neo4jProxy::memoryTrackerProxy)
+            .map(AllocationTracker::create)
+            .orElseGet(AllocationTracker::create);
     }
 
 }

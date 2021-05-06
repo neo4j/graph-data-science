@@ -21,14 +21,11 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.LongSet;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.internal.kernel.api.CursorFactory;
-import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
@@ -140,10 +137,6 @@ public final class NodesScanner extends StatementAction implements RecordScanner
 
     @Override
     public void accept(KernelTransaction transaction) {
-        Read read = transaction.dataRead();
-        CursorFactory cursors = transaction.cursors();
-        var cursorTracer = transaction.pageCursorTracer();
-        var memoryTracker = Neo4jProxy.memoryTracker(transaction);
         try (StoreScanner.ScanCursor<NodeReference> cursor = scanner.getCursor(transaction)) {
             NodesBatchBuffer batches = new NodesBatchBufferBuilder()
                 .nodeLabelIds(labels)
@@ -155,10 +148,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
                 terminationFlag.assertRunning();
                 long imported = importer.importNodes(
                     batches,
-                    read,
-                    cursors,
-                    cursorTracer,
-                    memoryTracker,
+                    transaction,
                     nodePropertyImporter
                 );
                 int batchImportedNodes = RawValues.getHead(imported);

@@ -25,10 +25,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.internal.kernel.api.CursorFactory;
-import org.neo4j.internal.kernel.api.Read;
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
-import org.neo4j.memory.MemoryTracker;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.values.storable.Value;
 
 import java.util.Collections;
@@ -65,10 +62,7 @@ public class NodeImporter {
 
     public long importNodes(
         NodesBatchBuffer buffer,
-        Read read,
-        CursorFactory cursors,
-        PageCursorTracer cursorTracer,
-        MemoryTracker memoryTracker,
+        KernelTransaction kernelTransaction,
         @Nullable NativeNodePropertyImporter propertyImporter
     ) {
         return importNodes(buffer, (nodeReference, labelIds, propertiesReference, internalId) -> {
@@ -78,10 +72,7 @@ public class NodeImporter {
                     nodeReference,
                     labelIds,
                     propertiesReference,
-                    cursors,
-                    read,
-                    cursorTracer,
-                    memoryTracker
+                    kernelTransaction
                 );
             } else {
                 return 0;

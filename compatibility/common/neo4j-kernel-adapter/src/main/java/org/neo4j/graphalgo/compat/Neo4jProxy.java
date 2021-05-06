@@ -36,7 +36,6 @@ import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
-import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -59,21 +58,17 @@ import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.store.RecordStore;
-import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.kernel.impl.store.record.RecordLoad;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
-import org.neo4j.memory.MemoryTracker;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
@@ -105,7 +100,13 @@ public final class Neo4jProxy {
             .findFirst()
             .orElseThrow(() -> new LinkageError("Could not load the " + Neo4jProxy.class + " implementation for " + neo4jVersion));
         IMPL = neo4jProxyFactory.load();
-        var log = LogBuilders.outputStreamLog( System.out, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+        var log = LogBuilders.outputStreamLog(
+            System.out,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty()
+        );
         log.info("Loaded compatibility layer: %s", IMPL.getClass());
         log.info("Loaded version: %s", neo4jVersion);
     }
@@ -129,31 +130,19 @@ public final class Neo4jProxy {
         return IMPL.usernameAuthSubject(username, authSubject);
     }
 
-    public static <RECORD extends AbstractBaseRecord> void read(
-        RecordFormat<RECORD> recordFormat,
-        RECORD record,
-        PageCursor cursor,
-        RecordLoad mode,
-        int recordSize,
-        int recordsPerPage
-    ) throws IOException {
-        IMPL.read(recordFormat, record, cursor, mode, recordSize, recordsPerPage);
-    }
-
     public static long getHighestPossibleIdInUse(
         RecordStore<? extends AbstractBaseRecord> recordStore,
-        PageCursorTracer pageCursorTracer
+        KernelTransaction kernelTransaction
     ) {
-        return IMPL.getHighestPossibleIdInUse(recordStore, pageCursorTracer);
+        return IMPL.getHighestPossibleIdInUse(recordStore, kernelTransaction);
     }
 
     public static PageCursor pageFileIO(
         PagedFile pagedFile,
         long pageId,
-        int pageFileFlags,
-        PageCursorTracer pageCursorTracer
+        int pageFileFlags
     ) throws IOException {
-        return IMPL.pageFileIO(pagedFile, pageId, pageFileFlags, pageCursorTracer);
+        return IMPL.pageFileIO(pagedFile, pageId, pageFileFlags);
     }
 
     public static PagedFile pageCacheMap(
@@ -171,38 +160,24 @@ public final class Neo4jProxy {
         return IMPL.pagedFile(pagedFile);
     }
 
-    public static PropertyCursor allocatePropertyCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer,
-        MemoryTracker memoryTracker
-    ) {
-        return IMPL.allocatePropertyCursor(cursorFactory, cursorTracer, memoryTracker);
+    public static PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
+        return IMPL.allocatePropertyCursor(kernelTransaction);
     }
 
-    public static NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer) {
-        return IMPL.allocateNodeCursor(cursorFactory, cursorTracer);
+    public static NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction) {
+        return IMPL.allocateNodeCursor(kernelTransaction);
     }
 
-    public static RelationshipScanCursor allocateRelationshipScanCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer
-    ) {
-        return IMPL.allocateRelationshipScanCursor(cursorFactory, cursorTracer);
+    public static RelationshipScanCursor allocateRelationshipScanCursor(KernelTransaction kernelTransaction) {
+        return IMPL.allocateRelationshipScanCursor(kernelTransaction);
     }
 
-    public static NodeLabelIndexCursor allocateNodeLabelIndexCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer
-    ) {
-        return IMPL.allocateNodeLabelIndexCursor(cursorFactory, cursorTracer);
+    public static NodeLabelIndexCursor allocateNodeLabelIndexCursor(KernelTransaction kernelTransaction) {
+        return IMPL.allocateNodeLabelIndexCursor(kernelTransaction);
     }
 
-    public static NodeValueIndexCursor allocateNodeValueIndexCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer,
-        MemoryTracker memoryTracker
-    ) {
-        return IMPL.allocateNodeValueIndexCursor(cursorFactory, cursorTracer, memoryTracker);
+    public static NodeValueIndexCursor allocateNodeValueIndexCursor(KernelTransaction kernelTransaction) {
+        return IMPL.allocateNodeValueIndexCursor(kernelTransaction);
     }
 
     public static long relationshipsReference(NodeCursor nodeCursor) {
@@ -260,21 +235,18 @@ public final class Neo4jProxy {
         return IMPL.newChunkedLongArray(numberArrayFactory, size, defaultValue);
     }
 
-    public static MemoryTracker memoryTracker(KernelTransaction kernelTransaction) {
-        return kernelTransaction == null ? emptyMemoryTracker() : IMPL.memoryTracker(kernelTransaction);
+    public static MemoryTrackerProxy memoryTrackerProxy(KernelTransaction kernelTransaction) {
+        return IMPL.memoryTrackerProxy(kernelTransaction);
     }
 
-    public static MemoryTracker emptyMemoryTracker() {
+    @TestOnly
+    public static MemoryTrackerProxy emptyMemoryTrackerProxy() {
         return IMPL.emptyMemoryTracker();
     }
 
     @TestOnly
-    public static MemoryTracker limitedMemoryTracker(long limitInBytes, long grabSizeInBytes) {
+    public static MemoryTrackerProxy limitedMemoryTrackerProxy(long limitInBytes, long grabSizeInBytes) {
         return IMPL.limitedMemoryTracker(limitInBytes, grabSizeInBytes);
-    }
-
-    public static MemoryTrackerProxy memoryTrackerProxy(MemoryTracker memoryTracker) {
-        return IMPL.memoryTrackerProxy(memoryTracker);
     }
 
     public static LogService logProviderForStoreAndRegister(
@@ -429,7 +401,11 @@ public final class Neo4jProxy {
         );
     }
 
-    public static <T> ThrowingFunction<Context,T, ProcedureException> lookupComponentProvider(GlobalProcedures registry, Class<T> cls, boolean safe) {
+    public static <T> ThrowingFunction<Context, T, ProcedureException> lookupComponentProvider(
+        GlobalProcedures registry,
+        Class<T> cls,
+        boolean safe
+    ) {
         return IMPL.lookupComponentProvider(registry, cls, safe);
     }
 

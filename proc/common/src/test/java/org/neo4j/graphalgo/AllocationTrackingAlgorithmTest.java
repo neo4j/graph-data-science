@@ -63,8 +63,7 @@ public class AllocationTrackingAlgorithmTest extends AlgoTestBase {
                 AllocationTracker tracker;
                 try (Transaction tx = db.beginTx()) {
                     var ktx = ((InternalTransaction) tx).kernelTransaction();
-                    var memoryTracker = Neo4jProxy.memoryTracker(ktx);
-                    var memoryTrackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+                    var memoryTrackerProxy = Neo4jProxy.memoryTrackerProxy(ktx);
                     tracker = AllocationTracker.create(memoryTrackerProxy);
                     algorithm = new TestAlgorithm(graph, tracker, MEMORY_LIMIT);
                     tx.commit();

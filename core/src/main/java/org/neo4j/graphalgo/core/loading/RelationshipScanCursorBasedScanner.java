@@ -42,7 +42,7 @@ public final class RelationshipScanCursorBasedScanner extends AbstractCursorBase
 
     @Override
     RelationshipScanCursor entityCursor(KernelTransaction transaction) {
-        return Neo4jProxy.allocateRelationshipScanCursor(transaction.cursors(), transaction.pageCursorTracer());
+        return Neo4jProxy.allocateRelationshipScanCursor(transaction);
     }
 
     @Override

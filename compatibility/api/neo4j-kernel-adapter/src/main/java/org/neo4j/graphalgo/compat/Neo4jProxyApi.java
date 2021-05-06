@@ -35,7 +35,6 @@ import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
-import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -58,21 +57,17 @@ import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.store.RecordStore;
-import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.kernel.impl.store.record.RecordLoad;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
-import org.neo4j.memory.MemoryTracker;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
@@ -97,25 +92,15 @@ public interface Neo4jProxyApi {
 
     AuthSubject usernameAuthSubject(String username, AuthSubject authSubject);
 
-    <RECORD extends AbstractBaseRecord> void read(
-        RecordFormat<RECORD> recordFormat,
-        RECORD record,
-        PageCursor cursor,
-        RecordLoad mode,
-        int recordSize,
-        int recordsPerPage
-    ) throws IOException;
-
     long getHighestPossibleIdInUse(
         RecordStore<? extends AbstractBaseRecord> recordStore,
-        PageCursorTracer pageCursorTracer
+        KernelTransaction kernelTransaction
     );
 
     PageCursor pageFileIO(
         PagedFile pagedFile,
         long pageId,
-        int pageFileFlags,
-        PageCursorTracer pageCursorTracer
+        int pageFileFlags
     ) throws IOException;
 
     PagedFile pageCacheMap(
@@ -128,23 +113,15 @@ public interface Neo4jProxyApi {
 
     Path pagedFile(PagedFile pagedFile);
 
-    PropertyCursor allocatePropertyCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer,
-        MemoryTracker memoryTracker
-    );
+    PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction);
 
-    NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer);
+    NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction);
 
-    RelationshipScanCursor allocateRelationshipScanCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer);
+    RelationshipScanCursor allocateRelationshipScanCursor(KernelTransaction kernelTransaction);
 
-    NodeLabelIndexCursor allocateNodeLabelIndexCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer);
+    NodeLabelIndexCursor allocateNodeLabelIndexCursor(KernelTransaction kernelTransaction);
 
-    NodeValueIndexCursor allocateNodeValueIndexCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer,
-        MemoryTracker memoryTracker
-    );
+    NodeValueIndexCursor allocateNodeValueIndexCursor(KernelTransaction kernelTransaction);
 
     long relationshipsReference(NodeCursor nodeCursor);
 
@@ -183,14 +160,13 @@ public interface Neo4jProxyApi {
 
     LongArray newChunkedLongArray(NumberArrayFactory numberArrayFactory, int size, long defaultValue);
 
-    MemoryTracker memoryTracker(KernelTransaction kernelTransaction);
-
-    MemoryTracker emptyMemoryTracker();
+    MemoryTrackerProxy memoryTrackerProxy(KernelTransaction kernelTransaction);
 
     @TestOnly
-    MemoryTracker limitedMemoryTracker(long limitInBytes, long grabSizeInBytes);
+    MemoryTrackerProxy emptyMemoryTracker();
 
-    MemoryTrackerProxy memoryTrackerProxy(MemoryTracker memoryTracker);
+    @TestOnly
+    MemoryTrackerProxy limitedMemoryTracker(long limitInBytes, long grabSizeInBytes);
 
     LogService logProviderForStoreAndRegister(
         Path storeLogPath,
@@ -276,5 +252,9 @@ public interface Neo4jProxyApi {
         boolean allowExpiredCredentials
     );
 
-    <T> ThrowingFunction<Context,T, ProcedureException> lookupComponentProvider(GlobalProcedures registry, Class<T> cls, boolean safe);
+    <T> ThrowingFunction<Context, T, ProcedureException> lookupComponentProvider(
+        GlobalProcedures registry,
+        Class<T> cls,
+        boolean safe
+    );
 }

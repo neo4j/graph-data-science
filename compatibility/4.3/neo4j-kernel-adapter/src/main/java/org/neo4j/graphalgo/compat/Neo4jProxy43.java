@@ -42,7 +42,6 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
-import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -66,18 +65,16 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 import org.neo4j.kernel.impl.store.RecordStore;
-import org.neo4j.kernel.impl.store.format.RecordFormat;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.kernel.impl.store.record.RecordLoad;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.Level;
@@ -91,7 +88,6 @@ import org.neo4j.logging.log4j.LogConfig;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.LocalMemoryTracker;
 import org.neo4j.memory.MemoryPools;
-import org.neo4j.memory.MemoryTracker;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
@@ -136,33 +132,16 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
     }
 
     @Override
-    public <RECORD extends AbstractBaseRecord> void read(
-        RecordFormat<RECORD> recordFormat,
-        RECORD record,
-        PageCursor cursor,
-        RecordLoad mode,
-        int recordSize,
-        int recordsPerPage
-    ) throws IOException {
-        recordFormat.read(record, cursor, mode, recordSize, recordsPerPage);
-    }
-
-    @Override
     public long getHighestPossibleIdInUse(
         RecordStore<? extends AbstractBaseRecord> recordStore,
-        PageCursorTracer pageCursorTracer
+        KernelTransaction kernelTransaction
     ) {
-        return recordStore.getHighestPossibleIdInUse(pageCursorTracer);
+        return recordStore.getHighestPossibleIdInUse(kernelTransaction.cursorContext());
     }
 
     @Override
-    public PageCursor pageFileIO(
-        PagedFile pagedFile,
-        long pageId,
-        int pageFileFlags,
-        PageCursorTracer pageCursorTracer
-    ) throws IOException {
-        return pagedFile.io(pageId, pageFileFlags, pageCursorTracer);
+    public PageCursor pageFileIO(PagedFile pagedFile, long pageId, int pageFileFlags) throws IOException {
+        return pagedFile.io(pageId, pageFileFlags, CursorContext.NULL);
     }
 
     @Override
@@ -182,32 +161,32 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
     }
 
     @Override
-    public PropertyCursor allocatePropertyCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer, MemoryTracker memoryTracker) {
-        return cursorFactory.allocatePropertyCursor(cursorTracer, memoryTracker);
+    public PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction
+            .cursors()
+            .allocatePropertyCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
     }
 
     @Override
-    public NodeCursor allocateNodeCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateNodeCursor(cursorTracer);
+    public NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction.cursors().allocateNodeCursor(kernelTransaction.cursorContext());
     }
 
     @Override
-    public RelationshipScanCursor allocateRelationshipScanCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateRelationshipScanCursor(cursorTracer);
+    public RelationshipScanCursor allocateRelationshipScanCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction.cursors().allocateRelationshipScanCursor(kernelTransaction.cursorContext());
     }
 
     @Override
-    public NodeLabelIndexCursor allocateNodeLabelIndexCursor(CursorFactory cursorFactory, PageCursorTracer cursorTracer ) {
-        return cursorFactory.allocateNodeLabelIndexCursor(cursorTracer);
+    public NodeLabelIndexCursor allocateNodeLabelIndexCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction.cursors().allocateNodeLabelIndexCursor(kernelTransaction.cursorContext());
     }
 
     @Override
-    public NodeValueIndexCursor allocateNodeValueIndexCursor(
-        CursorFactory cursorFactory,
-        PageCursorTracer cursorTracer,
-        MemoryTracker memoryTracker
-    ) {
-        return cursorFactory.allocateNodeValueIndexCursor(cursorTracer, memoryTracker);
+    public NodeValueIndexCursor allocateNodeValueIndexCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction
+            .cursors()
+            .allocateNodeValueIndexCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
     }
 
     @Override
@@ -279,23 +258,23 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
     }
 
     @Override
-    public MemoryTracker memoryTracker(KernelTransaction kernelTransaction) {
-        return kernelTransaction.memoryTracker();
+    public MemoryTrackerProxy memoryTrackerProxy(KernelTransaction kernelTransaction) {
+        return MemoryTrackerProxy43.of(kernelTransaction.memoryTracker());
     }
 
     @Override
-    public MemoryTracker emptyMemoryTracker() {
-        return EmptyMemoryTracker.INSTANCE;
+    public MemoryTrackerProxy emptyMemoryTracker() {
+        return MemoryTrackerProxy43.of(EmptyMemoryTracker.INSTANCE);
     }
 
     @Override
-    public MemoryTracker limitedMemoryTracker(long limitInBytes, long grabSizeInBytes) {
-        return new LocalMemoryTracker(MemoryPools.NO_TRACKING, limitInBytes, grabSizeInBytes, "setting");
-    }
-
-    @Override
-    public MemoryTrackerProxy memoryTrackerProxy(MemoryTracker memoryTracker) {
-        return MemoryTrackerProxy43.of(memoryTracker);
+    public MemoryTrackerProxy limitedMemoryTracker(long limitInBytes, long grabSizeInBytes) {
+        return MemoryTrackerProxy43.of(new LocalMemoryTracker(
+            MemoryPools.NO_TRACKING,
+            limitInBytes,
+            grabSizeInBytes,
+            "setting"
+        ));
     }
 
     @Override
@@ -412,7 +391,8 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
             //noinspection unchecked
             return (Setting<Boolean>) onlineBackupEnabled;
         } catch (Throwable e) {
-            throw new IllegalStateException("The online_backup_enabled setting requires Neo4j Enterprise Edition to be available.");
+            throw new IllegalStateException(
+                "The online_backup_enabled setting requires Neo4j Enterprise Edition to be available.");
         }
     }
 
@@ -530,7 +510,11 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
 
         @Override
         public Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) throws IOException {
-            return delegate.calculateEstimates(propertySizeCalculator::calculateSize);
+            return delegate.calculateEstimates((values, kernelTransaction) -> propertySizeCalculator.calculateSize(
+                values,
+                kernelTransaction.cursorContext(),
+                kernelTransaction.memoryTracker()
+            ));
         }
     }
 }

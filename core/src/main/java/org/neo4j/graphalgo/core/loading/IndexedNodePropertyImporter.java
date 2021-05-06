@@ -148,11 +148,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
     @Override
     public void accept(KernelTransaction ktx) throws Exception {
         var read = ktx.dataRead();
-        try (var indexCursor = Neo4jProxy.allocateNodeValueIndexCursor(
-            ktx.cursors(),
-            ktx.pageCursorTracer(),
-            Neo4jProxy.memoryTracker(ktx)
-        )) {
+        try (var indexCursor = Neo4jProxy.allocateNodeValueIndexCursor(ktx)) {
             var propertyIds = index.schema().getPropertyIds();
             var propertyOffset = ArrayUtil.linearSearchIndex(propertyIds, propertyIds.length, propertyId);
             // if the looked for propertyId is not there we return

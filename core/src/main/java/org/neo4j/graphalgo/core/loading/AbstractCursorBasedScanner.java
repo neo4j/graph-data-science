@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.Scan;
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.impl.store.RecordStore;
@@ -126,7 +125,7 @@ abstract class AbstractCursorBasedScanner<
     // global cursor pool to return this one to
     private final ThreadLocal<StoreScanner.ScanCursor<Reference>> cursors;
 
-    private final PageCursorTracer pageCursorTracer;
+    private final KernelTransaction kernelTransaction;
     private final Scan<EntityCursor> entityCursorScan;
 
     private final Store store;
@@ -140,8 +139,7 @@ abstract class AbstractCursorBasedScanner<
         this.transaction = transaction.fork();
         this.prefetchSize = prefetchSize;
         // get is OK here, since we are forking a new transaction
-        var kernelTransaction = this.transaction.topLevelKernelTransaction().get();
-        this.pageCursorTracer = kernelTransaction.pageCursorTracer();
+        this.kernelTransaction = this.transaction.topLevelKernelTransaction().get();
         this.entityCursorScan = entityCursorScan(kernelTransaction, attachment);
         this.cursors = new ThreadLocal<>();
         this.recordSize = recordSize;
@@ -175,7 +173,7 @@ abstract class AbstractCursorBasedScanner<
 
     @Override
     public final long storeSize() {
-        long recordsInUse = 1L + Neo4jProxy.getHighestPossibleIdInUse(store, pageCursorTracer);
+        long recordsInUse = 1L + Neo4jProxy.getHighestPossibleIdInUse(store, kernelTransaction);
         long idsInPages = ((recordsInUse + (recordsPerPage - 1L)) / recordsPerPage) * recordsPerPage;
         return idsInPages * (long) recordSize;
     }

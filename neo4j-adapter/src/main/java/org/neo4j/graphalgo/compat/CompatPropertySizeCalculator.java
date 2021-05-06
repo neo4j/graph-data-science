@@ -19,10 +19,9 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
-import org.neo4j.memory.MemoryTracker;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.values.storable.Value;
 
 public interface CompatPropertySizeCalculator {
-    int calculateSize(Value[] values, PageCursorTracer cursorTracer, MemoryTracker memoryTracker);
+    int calculateSize(Value[] values, KernelTransaction kernelTransaction);
 }

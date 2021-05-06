@@ -44,7 +44,7 @@ final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeRe
 
     @Override
     NodeLabelIndexCursor entityCursor(KernelTransaction transaction) {
-        return Neo4jProxy.allocateNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer());
+        return Neo4jProxy.allocateNodeLabelIndexCursor(transaction);
     }
 
     @Override
@@ -59,7 +59,7 @@ final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeRe
         return new NodeLabelIndexReference(
             cursor,
             transaction.dataRead(),
-            Neo4jProxy.allocateNodeCursor(transaction.cursors(), transaction.pageCursorTracer()),
+            Neo4jProxy.allocateNodeCursor(transaction),
             labelId
         );
     }

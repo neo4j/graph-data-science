@@ -88,8 +88,7 @@ class AllocationTrackerTest {
 
     @Test
     void shouldUseInMemoryTrackerWhenFeatureIsToggledOff() {
-        var memoryTracker = Neo4jProxy.limitedMemoryTracker(42, GRAB_SIZE_1KB);
-        var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+        var trackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(42, GRAB_SIZE_1KB);
         var allocationTracker = AllocationTracker.create(trackerProxy);
         assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
     }
@@ -98,8 +97,7 @@ class AllocationTrackerTest {
     @DisableForNeo4jVersion(value = Neo4jVersion.V_4_0, message = "There is no KernelTracker in 4.0")
     void shouldUseKernelTrackerWhenFeatureIsToggledOn() {
         USE_KERNEL_TRACKER.enableAndRun(() -> {
-            var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
-            var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+            var trackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(1337, GRAB_SIZE_1KB);
             var allocationTracker = AllocationTracker.create(trackerProxy);
             assertThat(allocationTracker).isExactlyInstanceOf(KernelAllocationTracker.class);
         });
@@ -109,8 +107,7 @@ class AllocationTrackerTest {
     @EnableForNeo4jVersion(value = Neo4jVersion.V_4_0, message = "There is no KernelTracker in 4.0")
     void shouldIgnoreFeatureToggleOn40() {
         USE_KERNEL_TRACKER.enableAndRun(() -> {
-            var memoryTracker = Neo4jProxy.limitedMemoryTracker(1337, GRAB_SIZE_1KB);
-            var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+            var trackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(1337, GRAB_SIZE_1KB);
             var allocationTracker = AllocationTracker.create(trackerProxy);
             assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
         });
@@ -121,8 +118,7 @@ class AllocationTrackerTest {
     void shouldTerminateTransactionWhenOverallocating() {
         USE_KERNEL_TRACKER.enableAndRun(
             () -> {
-                var memoryTracker = Neo4jProxy.limitedMemoryTracker(42, GRAB_SIZE_1KB);
-                var trackerProxy = Neo4jProxy.memoryTrackerProxy(memoryTracker);
+                var trackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(42, GRAB_SIZE_1KB);
                 var allocationTracker = AllocationTracker.create(trackerProxy);
                 allocationTracker.add(42);
                 assertEquals(42L, allocationTracker.trackedBytes());
@@ -142,17 +138,14 @@ class AllocationTrackerTest {
             Stream.of(AllocationTracker.empty()),
             GraphDatabaseApiProxy.neo4jVersion() == Neo4jVersion.V_4_0
                 ? Stream.empty()
-                : Stream.of(AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.emptyMemoryTracker())))
+                : Stream.of(AllocationTracker.create(Neo4jProxy.emptyMemoryTrackerProxy()))
         );
     }
 
     static Stream<AllocationTracker> allocationTrackers() {
         return Stream.of(
             AllocationTracker.create(),
-            AllocationTracker.create(Neo4jProxy.memoryTrackerProxy(Neo4jProxy.limitedMemoryTracker(
-                Long.MAX_VALUE,
-                GRAB_SIZE_1KB
-            )))
+            AllocationTracker.create(Neo4jProxy.limitedMemoryTrackerProxy(Long.MAX_VALUE, GRAB_SIZE_1KB))
         );
     }
 }

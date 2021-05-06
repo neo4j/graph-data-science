@@ -126,7 +126,7 @@ public class RandomWalkProc extends AlgoBaseProc<RandomWalk, Stream<long[]>, Ran
             String label = start.toString();
             int labelId = transaction.tokenRead().nodeLabel(label);
             int countWithLabel = Math.toIntExact(transaction.dataRead().countsForNodeWithoutTxState(labelId));
-            NodeLabelIndexCursor cursor = Neo4jProxy.allocateNodeLabelIndexCursor(transaction.cursors(), transaction.pageCursorTracer());
+            NodeLabelIndexCursor cursor = Neo4jProxy.allocateNodeLabelIndexCursor(transaction);
 
             Neo4jProxy.nodeLabelScan(transaction.dataRead(), labelId, cursor);
             cursor.next();

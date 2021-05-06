@@ -24,11 +24,8 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.internal.kernel.api.CursorFactory;
 import org.neo4j.internal.kernel.api.PropertyCursor;
-import org.neo4j.internal.kernel.api.Read;
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
-import org.neo4j.memory.MemoryTracker;
+import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
 
@@ -171,16 +168,12 @@ public class RelationshipImporter {
         return adjacencyBuilder.flushTasks();
     }
 
-    PropertyReader storeBackedPropertiesReader(
-        CursorFactory cursors,
-        Read read,
-        PageCursorTracer cursorTracer,
-        MemoryTracker memoryTracker
-    ) {
+    PropertyReader storeBackedPropertiesReader(KernelTransaction kernelTransaction) {
         return (batch, batchLength, relationshipProperties, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
             long[][] properties = new long[relationshipProperties.length][batchLength / BATCH_ENTRY_SIZE];
             if (atLeastOnePropertyToLoad) {
-                try (PropertyCursor pc = Neo4jProxy.allocatePropertyCursor(cursors, cursorTracer, memoryTracker)) {
+                try (PropertyCursor pc = Neo4jProxy.allocatePropertyCursor(kernelTransaction)) {
+                    var read = kernelTransaction.dataRead();
                     double[] relProps = new double[relationshipProperties.length];
                     for (int i = 0; i < batchLength; i += BATCH_ENTRY_SIZE) {
                         long relationshipReference = batch[RELATIONSHIP_REFERENCE_OFFSET + i];
