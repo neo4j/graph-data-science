@@ -178,6 +178,34 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.eigenvector.stream.estimate`
 | `gds.eigenvector.stats`
 | `gds.eigenvector.stats.estimate`
+.6+<.^| Shortest Path Dijkstra
+| `gds.shortestPath.dijkstra.stream`
+| `gds.shortestPath.dijkstra.stream.estimate`
+| `gds.shortestPath.dijkstra.write`
+| `gds.shortestPath.dijkstra.write.estimate`
+| `gds.shortestPath.dijkstra.mutate`
+| `gds.shortestPath.dijkstra.mutate.estimate`
+.6+<.^| All Shortest Paths Dijkstra
+| `gds.allShortestPaths.dijkstra.stream`
+| `gds.allShortestPaths.dijkstra.stream.estimate`
+| `gds.allShortestPaths.dijkstra.write`
+| `gds.allShortestPaths.dijkstra.write.estimate`
+| `gds.allShortestPaths.dijkstra.mutate`
+| `gds.allShortestPaths.dijkstra.mutate.estimate`
+.6+<.^| Shortest Paths Yens
+| `gds.shortestPath.yens.stream`
+| `gds.shortestPath.yens.stream.estimate`
+| `gds.shortestPath.yens.write`
+| `gds.shortestPath.yens.write.estimate`
+| `gds.shortestPath.yens.mutate`
+| `gds.shortestPath.yens.mutate.estimate`
+.6+<.^| Shortest Path AStar
+| `gds.shortestPath.astar.stream`
+| `gds.shortestPath.astar.stream.estimate`
+| `gds.shortestPath.astar.write`
+| `gds.shortestPath.astar.write.estimate`
+| `gds.shortestPath.astar.mutate`
+| `gds.shortestPath.astar.mutate.estimate`
 |===
 
 [[beta-tier]]
@@ -252,34 +280,6 @@ The following table lists all beta procedures in the GDS library:
 | `gds.beta.node2vec.stream.estimate`
 | `gds.beta.node2vec.write`
 | `gds.beta.node2vec.write`.estimate
-.6+<.^| Shortest Path Dijkstra
-| `gds.beta.shortestPath.dijkstra.stream`
-| `gds.beta.shortestPath.dijkstra.stream.estimate`
-| `gds.beta.shortestPath.dijkstra.write`
-| `gds.beta.shortestPath.dijkstra.write.estimate`
-| `gds.beta.shortestPath.dijkstra.mutate`
-| `gds.beta.shortestPath.dijkstra.mutate.estimate`
-.6+<.^| All Shortest Paths Dijkstra
-| `gds.beta.allShortestPaths.dijkstra.stream`
-| `gds.beta.allShortestPaths.dijkstra.stream.estimate`
-| `gds.beta.allShortestPaths.dijkstra.write`
-| `gds.beta.allShortestPaths.dijkstra.write.estimate`
-| `gds.beta.allShortestPaths.dijkstra.mutate`
-| `gds.beta.allShortestPaths.dijkstra.mutate.estimate`
-.6+<.^| Shortest Paths Yens
-| `gds.beta.shortestPath.yens.stream`
-| `gds.beta.shortestPath.yens.stream.estimate`
-| `gds.beta.shortestPath.yens.write`
-| `gds.beta.shortestPath.yens.write.estimate`
-| `gds.beta.shortestPath.yens.mutate`
-| `gds.beta.shortestPath.yens.mutate.estimate`
-.6+<.^| Shortest Path AStar
-| `gds.beta.shortestPath.astar.stream`
-| `gds.beta.shortestPath.astar.stream.estimate`
-| `gds.beta.shortestPath.astar.write`
-| `gds.beta.shortestPath.astar.write.estimate`
-| `gds.beta.shortestPath.astar.mutate`
-| `gds.beta.shortestPath.astar.mutate.estimate`
 |===
 
 [[alpha-tier]]

@@ -1,0 +1,227 @@
+[[algorithms-dijkstra-source-target]]
+= Dijkstra Source-Target
+:entity: source-target-pair
+:result: shortest path
+:algorithm: Dijkstra
+:source-target: true
+:procedure-name: pass:q[gds.shortestPath.dijkstra]
+
+[abstract]
+--
+This section describes the Dijkstra Shortest Path algorithm in the Neo4j Graph Data Science library.
+--
+
+
+[[algorithms-dijkstra-source-target-intro]]
+== Introduction
+
+The Dijkstra Shortest Path algorithm computes the shortest path between nodes.
+The algorithm supports weighted graphs with positive relationship weights.
+The Dijkstra Source-Target algorithm computes the shortest path between a source and a target node.
+To compute all paths from a source node to all reachable nodes, <<algorithms-dijkstra-single-source, Dijkstra Single-Source>> can be used.
+
+The GDS implementation is based on the http://www-m3.ma.tum.de/twiki/pub/MN0506/WebHome/dijkstra.pdf[original description] and uses a binary heap as priority queue.
+The implementation is also used for the <<algorithms-astar, A*>> and <<algorithms-yens, Yen's>> algorithms.
+The algorithm implementation is executed using a single thread.
+Altering the concurrency configuration has no effect.
+
+
+[[algorithms-dijkstra-source-target-syntax]]
+== Syntax
+
+include::path-syntax.adoc[]
+
+[[algorithms-dijkstra-single-source-syntax-anonymous]]
+=== Anonymous graphs
+
+include::path-anonymous-graph.adoc[]
+
+
+[[algorithms-dijkstra-source-target-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: transport network
+:image-file: dijkstra.svg
+include::../shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Location {name: 'A'}),
+       (b:Location {name: 'B'}),
+       (c:Location {name: 'C'}),
+       (d:Location {name: 'D'}),
+       (e:Location {name: 'E'}),
+       (f:Location {name: 'F'}),
+       (a)-[:ROAD {cost: 50}]->(b),
+       (a)-[:ROAD {cost: 50}]->(c),
+       (a)-[:ROAD {cost: 100}]->(d),
+       (b)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 80}]->(e),
+       (d)-[:ROAD {cost: 30}]->(e),
+       (d)-[:ROAD {cost: 80}]->(f),
+       (e)-[:ROAD {cost: 40}]->(f);
+----
+
+This graph builds a transportation network with roads between locations.
+Like in the real world, the roads in the graph have different lengths.
+These lengths are represented by the `cost` relationship property.
+
+include::../shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+    'myGraph',
+    'Location',
+    'ROAD',
+    {
+        relationshipProperties: 'cost'
+    }
+)
+----
+
+In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.
+
+
+[[algorithms-dijkstra-source-target-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::../shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
+CALL gds.shortestPath.dijkstra.write.estimate('myGraph', {
+    sourceNode: id(source),
+    targetNode: id(target),
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'PATH'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 9                 | 696      | 696      | "696 Bytes"
+|===
+--
+
+
+[[algorithms-dijkstra-source-target-examples-stream]]
+=== Stream
+
+:!stream-details:
+include::../shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
+CALL gds.shortestPath.dijkstra.stream('myGraph', {
+    sourceNode: id(source),
+    targetNode: id(target),
+    relationshipWeightProperty: 'cost'
+})
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs
+RETURN
+    index,
+    gds.util.asNode(sourceNode).name AS sourceNodeName,
+    gds.util.asNode(targetNode).name AS targetNodeName,
+    totalCost,
+    [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
+    costs
+ORDER BY index
+----
+
+.Results
+[opts="header"]
+|===
+| index | sourceNodeName | targetNodeName | totalCost | nodeNames       | costs
+| 0     | "A"            | "F"            | 160.0     | [A, B, D, E, F] | [0.0, 50.0, 90.0, 120.0, 160.0]
+|===
+--
+
+The result shows the total cost of the shortest path between node `A` and node `F`.
+It also shows an ordered list of node ids that were traversed to find the shortest path as well as the accumulated costs of the visited nodes.
+This can be verified in the <<algorithms-dijkstra-source-target-examples, example graph>>.
+
+
+[[algorithms-dijkstra-source-target-examples-mutate]]
+=== Mutate
+
+include::path-examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
+CALL gds.shortestPath.dijkstra.mutate('myGraph', {
+    sourceNode: id(source),
+    targetNode: id(target),
+    relationshipWeightProperty: 'cost',
+    mutateRelationshipType: 'PATH'
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 1
+|===
+--
+
+After executing the above query, the in-memory graph will be updated with a new relationship of type `PATH`.
+The new relationship will store a single property `totalCost`.
+
+
+[[algorithms-dijkstra-source-target-examples-write]]
+=== Write
+
+include::path-examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
+CALL gds.shortestPath.dijkstra.write('myGraph', {
+    sourceNode: id(source),
+    targetNode: id(target),
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'PATH',
+    writeNodeIds: true,
+    writeCosts: true
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 1
+|===
+--
+
+The above query will write a single relationship of type `PATH` back to Neo4j.
+The relationship stores three properties describing the path: `totalCost`, `nodeIds` and `costs`.

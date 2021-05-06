@@ -26,10 +26,10 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.graphalgo.ElementProjection;
 import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
@@ -299,33 +299,33 @@ public class EstimationCli implements Runnable {
             if (procedureName.equals("gds.nodeSimilarity.mutate.estimate") || procedureName.equals("gds.beta.knn.mutate.estimate")) {
                 actualConfig.put("mutateRelationshipType", "ESTIMATE_FAKE_MUTATE_RELATIONSHIP_PROPERTY");
             }
-            if (procedureName.startsWith("gds.beta.shortestPath.")) {
+            if (procedureName.startsWith("gds.shortestPath.")) {
                 actualConfig.put("sourceNode", 0L);
                 actualConfig.put("targetNode", 1L);
             }
-            if (procedureName.startsWith("gds.beta.shortestPath.yens.")) {
+            if (procedureName.startsWith("gds.shortestPath.yens.")) {
                 actualConfig.put("k", 3);
             }
-            if (procedureName.startsWith("gds.beta.shortestPath.astar.")) {
+            if (procedureName.startsWith("gds.shortestPath.astar.")) {
                 actualConfig.put(ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT");
                 actualConfig.put(ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON");
             }
-            if (procedureName.startsWith("gds.beta.shortestPath.") && procedureName.endsWith("write.estimate")) {
+            if (procedureName.startsWith("gds.shortestPath.") && procedureName.endsWith("write.estimate")) {
                 actualConfig.put(WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
                 actualConfig.remove(WRITE_PROPERTY_KEY);
             }
-            if (procedureName.startsWith("gds.beta.shortestPath.") && procedureName.endsWith("mutate.estimate")) {
+            if (procedureName.startsWith("gds.shortestPath.") && procedureName.endsWith("mutate.estimate")) {
                 actualConfig.put(MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
                 actualConfig.remove(MUTATE_PROPERTY_KEY);
             }
-            if (procedureName.startsWith("gds.beta.allShortestPaths.")) {
+            if (procedureName.startsWith("gds.allShortestPaths.")) {
                 actualConfig.put("sourceNode", 0L);
             }
-            if (procedureName.startsWith("gds.beta.allShortestPaths.") && procedureName.endsWith("write.estimate")) {
+            if (procedureName.startsWith("gds.allShortestPaths.") && procedureName.endsWith("write.estimate")) {
                 actualConfig.put(WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
                 actualConfig.remove(WRITE_PROPERTY_KEY);
             }
-            if (procedureName.startsWith("gds.beta.allShortestPaths.") && procedureName.endsWith("mutate.estimate")) {
+            if (procedureName.startsWith("gds.allShortestPaths.") && procedureName.endsWith("mutate.estimate")) {
                 actualConfig.put(MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
                 actualConfig.remove(MUTATE_PROPERTY_KEY);
             }
@@ -416,6 +416,7 @@ public class EstimationCli implements Runnable {
 
     private static final List<String> PACKAGES_TO_SCAN = List.of(
         "org.neo4j.graphalgo",
+        "org.neo4j.gds.paths",
         "org.neo4j.gds.embeddings"
     );
 

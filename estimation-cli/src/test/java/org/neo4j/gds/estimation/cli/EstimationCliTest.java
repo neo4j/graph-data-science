@@ -27,6 +27,19 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
+import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraMutateProc;
+import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraStreamProc;
+import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraWriteProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathAStarMutateProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathAStarStreamProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathAStarWriteProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraMutateProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraStreamProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraWriteProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathYensMutateProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathYensStreamProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathYensWriteProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedMutateProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedStatsProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedStreamProc;
@@ -41,19 +54,6 @@ import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.graphalgo.beta.node2vec.Node2VecMutateProc;
 import org.neo4j.graphalgo.beta.node2vec.Node2VecStreamProc;
 import org.neo4j.graphalgo.beta.node2vec.Node2VecWriteProc;
-import org.neo4j.graphalgo.beta.paths.astar.config.ShortestPathAStarBaseConfig;
-import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraMutateProc;
-import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraStreamProc;
-import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraWriteProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathAStarMutateProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathAStarStreamProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathAStarWriteProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraMutateProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraStreamProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraWriteProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensMutateProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensStreamProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensWriteProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityMutateProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
@@ -152,14 +152,14 @@ final class EstimationCliTest {
         "}";
 
     private static final List<String> PROCEDURES = List.of(
+        "gds.allShortestPaths.dijkstra.mutate.estimate",
+        "gds.allShortestPaths.dijkstra.stream.estimate",
+        "gds.allShortestPaths.dijkstra.write.estimate",
+
         "gds.articleRank.mutate.estimate",
         "gds.articleRank.stats.estimate",
         "gds.articleRank.stream.estimate",
         "gds.articleRank.write.estimate",
-
-        "gds.beta.allShortestPaths.dijkstra.mutate.estimate",
-        "gds.beta.allShortestPaths.dijkstra.stream.estimate",
-        "gds.beta.allShortestPaths.dijkstra.write.estimate",
 
         "gds.beta.fastRPExtended.mutate.estimate",
         "gds.beta.fastRPExtended.stats.estimate",
@@ -183,16 +183,6 @@ final class EstimationCliTest {
         "gds.beta.node2vec.mutate.estimate",
         "gds.beta.node2vec.stream.estimate",
         "gds.beta.node2vec.write.estimate",
-
-        "gds.beta.shortestPath.astar.mutate.estimate",
-        "gds.beta.shortestPath.astar.stream.estimate",
-        "gds.beta.shortestPath.astar.write.estimate",
-        "gds.beta.shortestPath.dijkstra.mutate.estimate",
-        "gds.beta.shortestPath.dijkstra.stream.estimate",
-        "gds.beta.shortestPath.dijkstra.write.estimate",
-        "gds.beta.shortestPath.yens.mutate.estimate",
-        "gds.beta.shortestPath.yens.stream.estimate",
-        "gds.beta.shortestPath.yens.write.estimate",
 
         "gds.betweenness.mutate.estimate",
         "gds.betweenness.stats.estimate",
@@ -241,6 +231,16 @@ final class EstimationCliTest {
         "gds.pageRank.stats.estimate",
         "gds.pageRank.stream.estimate",
         "gds.pageRank.write.estimate",
+
+        "gds.shortestPath.astar.mutate.estimate",
+        "gds.shortestPath.astar.stream.estimate",
+        "gds.shortestPath.astar.write.estimate",
+        "gds.shortestPath.dijkstra.mutate.estimate",
+        "gds.shortestPath.dijkstra.stream.estimate",
+        "gds.shortestPath.dijkstra.write.estimate",
+        "gds.shortestPath.yens.mutate.estimate",
+        "gds.shortestPath.yens.stream.estimate",
+        "gds.shortestPath.yens.write.estimate",
 
         "gds.triangleCount.mutate.estimate",
         "gds.triangleCount.stats.estimate",
@@ -505,10 +505,6 @@ final class EstimationCliTest {
 
     private static Stream<MemoryEstimateResult> allEstimations() {
         return Stream.of(
-            runEstimation(new ArticleRankMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new ArticleRankStatsProc()::estimateStats),
-            runEstimation(new ArticleRankStreamProc()::estimate),
-            runEstimation(new ArticleRankWriteProc()::estimate, "writeProperty", "foo"),
 
             runEstimation(new AllShortestPathsDijkstraStreamProc()::streamEstimate, "sourceNode", 0L),
             runEstimation(new AllShortestPathsDijkstraWriteProc()::writeEstimate,
@@ -519,6 +515,11 @@ final class EstimationCliTest {
                 "sourceNode", 0L,
                 MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
             ),
+
+            runEstimation(new ArticleRankMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new ArticleRankStatsProc()::estimateStats),
+            runEstimation(new ArticleRankStreamProc()::estimate),
+            runEstimation(new ArticleRankWriteProc()::estimate, "writeProperty", "foo"),
 
             runEstimation(
                 new FastRPExtendedMutateProc()::estimate,
@@ -583,52 +584,6 @@ final class EstimationCliTest {
             runEstimation(new Node2VecStreamProc()::estimate),
             runEstimation(new Node2VecWriteProc()::estimate, "writeProperty", "foo"),
 
-            runEstimation(new ShortestPathAStarStreamProc()::streamEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
-                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON"
-            ),
-            runEstimation(new ShortestPathAStarWriteProc()::writeEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
-                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
-                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathAStarMutateProc()::mutateEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
-                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
-                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-
-            runEstimation(new ShortestPathDijkstraStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L),
-            runEstimation(new ShortestPathDijkstraWriteProc()::writeEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathDijkstraMutateProc()::mutateEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathYensStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L, "k", 3),
-            runEstimation(new ShortestPathYensWriteProc()::writeEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                "k", 3,
-                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathYensMutateProc()::mutateEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                "k", 3,
-                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-
             runEstimation(new BetweennessCentralityMutateProc()::estimate, "mutateProperty", "foo"),
             runEstimation(new BetweennessCentralityStatsProc()::estimate),
             runEstimation(new BetweennessCentralityStreamProc()::estimate),
@@ -689,6 +644,52 @@ final class EstimationCliTest {
             runEstimation(new PageRankStatsProc()::estimateStats),
             runEstimation(new PageRankStreamProc()::estimate),
             runEstimation(new PageRankWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new ShortestPathAStarStreamProc()::streamEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON"
+            ),
+            runEstimation(new ShortestPathAStarWriteProc()::writeEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(new ShortestPathAStarMutateProc()::mutateEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
+                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+
+            runEstimation(new ShortestPathDijkstraStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L),
+            runEstimation(new ShortestPathDijkstraWriteProc()::writeEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(new ShortestPathDijkstraMutateProc()::mutateEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(new ShortestPathYensStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L, "k", 3),
+            runEstimation(new ShortestPathYensWriteProc()::writeEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                "k", 3,
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(new ShortestPathYensMutateProc()::mutateEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                "k", 3,
+                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
 
             runEstimation(new TriangleCountMutateProc()::estimate, "mutateProperty", "foo"),
             runEstimation(new TriangleCountStatsProc()::estimateStats),

@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensMutateProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensStreamProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensWriteProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathYensMutateProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathYensStreamProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathYensWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
 import java.util.Arrays;
@@ -41,7 +41,7 @@ class YensDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/beta/shortest-path/yens.adoc";
+        return "algorithms/shortest-path/yens.adoc";
     }
 
 }

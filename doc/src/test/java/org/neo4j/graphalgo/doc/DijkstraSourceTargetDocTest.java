@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraMutateProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraStreamProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraWriteProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraMutateProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraStreamProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 
 import java.util.Arrays;
@@ -41,7 +41,7 @@ class DijkstraSourceTargetDocTest extends DocTestBase {
 
     @Override
     String adocFile() {
-        return "algorithms/beta/shortest-path/dijkstra-source-target.adoc";
+        return "algorithms/shortest-path/dijkstra-source-target.adoc";
     }
 
 }

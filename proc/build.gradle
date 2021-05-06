@@ -13,6 +13,7 @@ dependencies {
     api project(':proc-similarity')
     api project(':proc-centrality')
     api project(':proc-community')
+    api project(':proc-path-finding')
     api project(':proc-beta')
     api project(':proc-catalog')
     api project(':proc-misc')

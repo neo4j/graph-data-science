@@ -29,6 +29,9 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageWriteProc;
+import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraStreamProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraStreamProc;
+import org.neo4j.gds.paths.sourcetarget.ShortestPathYensStreamProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedMutateProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedStatsProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedStreamProc;
@@ -44,9 +47,6 @@ import org.neo4j.graphalgo.beta.modularity.ModularityOptimizationWriteProc;
 import org.neo4j.graphalgo.beta.node2vec.Node2VecMutateProc;
 import org.neo4j.graphalgo.beta.node2vec.Node2VecStreamProc;
 import org.neo4j.graphalgo.beta.node2vec.Node2VecWriteProc;
-import org.neo4j.graphalgo.beta.paths.singlesource.AllShortestPathsDijkstraStreamProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathDijkstraStreamProc;
-import org.neo4j.graphalgo.beta.paths.sourcetarget.ShortestPathYensStreamProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityMutateProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
@@ -123,8 +123,8 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.node2vec.write",
         "gds.beta.node2vec.write.estimate",
 
-        "gds.beta.allShortestPaths.dijkstra.stream",
-        "gds.beta.allShortestPaths.dijkstra.stream.estimate",
+        "gds.allShortestPaths.dijkstra.stream",
+        "gds.allShortestPaths.dijkstra.stream.estimate",
 
         "gds.beta.graphSage.mutate",
         "gds.beta.graphSage.mutate.estimate",
@@ -178,11 +178,11 @@ class ListProcTest extends BaseProcTest {
         "gds.beta.modularityOptimization.write",
         "gds.beta.modularityOptimization.write.estimate",
 
-        "gds.beta.shortestPath.dijkstra.stream",
-        "gds.beta.shortestPath.dijkstra.stream.estimate",
+        "gds.shortestPath.dijkstra.stream",
+        "gds.shortestPath.dijkstra.stream.estimate",
 
-        "gds.beta.shortestPath.yens.stream",
-        "gds.beta.shortestPath.yens.stream.estimate",
+        "gds.shortestPath.yens.stream",
+        "gds.shortestPath.yens.stream.estimate",
 
         "gds.betweenness.mutate",
         "gds.betweenness.mutate.estimate",
