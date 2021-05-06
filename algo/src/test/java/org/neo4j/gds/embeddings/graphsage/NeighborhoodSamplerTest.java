@@ -19,13 +19,18 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import com.carrotsearch.hppc.LongLongHashMap;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+
+import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -83,6 +88,66 @@ class NeighborhoodSamplerTest {
         assertThat(sample)
             .isNotNull()
             .hasSize(4);
+    }
+
+    @Nested
+    class UniformSample {
+        @GdlGraph
+        private static final String GRAPH =
+            "(a)-[:R]->(b), " +
+            "(a)-[:R]->(c), " +
+            "(a)-[:R]->(d), " +
+            "(a)-[:R]->(e), " +
+            "(a)-[:R]->(f), " +
+            "(a)-[:R]->(g), " +
+            "(a)-[:R]->(h), " +
+            "(a)-[:R]->(i), " +
+            "(a)-[:R]->(j), " +
+            "(a)-[:R]->(k), " +
+            "(a)-[:R]->(l), " +
+            "(a)-[:R]->(m), " +
+            "(a)-[:R]->(n), " +
+            "(a)-[:R]->(o), " +
+            "(a)-[:R]->(p), " +
+            "(a)-[:R]->(q), " +
+            "(a)-[:R]->(r), " +
+            "(a)-[:R]->(s)";
+
+
+        @Test
+        void shouldSampleSubsetOfNeighbors() {
+            var random = new Random(42);
+            int numberOfSamples = 2;
+
+            var sampledNodes = new LongLongHashMap();
+
+            for (int i = 0; i < 20; i++) {
+                NeighborhoodSampler sampler = new NeighborhoodSampler(random.nextLong());
+                sampler.sample(graph, idFunction.of("a"), numberOfSamples)
+                    .forEach(nodeId -> sampledNodes.addTo(nodeId, 1));
+            }
+            
+            assertThat(sampledNodes)
+                .allSatisfy(entry -> assertThat(entry.value)
+                    .withFailMessage("Sampled node with id %d %d times", entry.key, entry.value)
+                    .isLessThan(10));
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = {0, 4, 17, 99})
+        void shouldSampleTheCorrectNumber(int numberOfSamples) {
+            var random = new Random(42);
+            var startNode = idFunction.of("a");
+
+            NeighborhoodSampler sampler = new NeighborhoodSampler(random.nextLong());
+            var sample = sampler.sample(graph, startNode, numberOfSamples);
+
+            var expectedSize = Math.min(graph.degree(startNode), numberOfSamples);
+
+            assertThat(sample)
+                .hasSize(expectedSize)
+                .doesNotHaveDuplicates();
+        }
     }
 
     @Nested
