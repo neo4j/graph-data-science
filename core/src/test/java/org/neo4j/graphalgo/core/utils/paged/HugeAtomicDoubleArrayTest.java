@@ -269,6 +269,20 @@ final class HugeAtomicDoubleArrayTest {
     }
 
     @Test
+    void shouldAddAndGet() {
+        testArray(10, array -> {
+            int index = integer(2, 8);
+            int value = integer(42, 1337);
+            int delta = integer(0, 42);
+
+            array.set(index, value);
+            array.getAndAdd(index, delta);
+
+            assertEquals(value + delta, array.get(index));
+        });
+    }
+
+    @Test
     void shouldReportSize() {
         int size = integer(10, 20);
         testArray(size, array -> assertEquals(size, array.size()));
@@ -296,8 +310,14 @@ final class HugeAtomicDoubleArrayTest {
         assertThrows(AssertionError.class, () -> HugeAtomicLongArray.memoryEstimation(-1L));
     }
 
+    @FunctionalInterface
+    interface HadaFunction {
+
+        void apply(HugeAtomicDoubleArray array);
+    }
+
     @Test
-    void testAdder() {
+    void testUpdateParallel() {
         int incsPerThread = 10_000;
         int ncpu = Runtime.getRuntime().availableProcessors();
         int maxThreads = ncpu * 2;
@@ -307,7 +327,7 @@ final class HugeAtomicDoubleArrayTest {
             testArray(1, array -> {
                 for (int i = 1; i <= maxThreads; i <<= 1) {
                     array.set(0, 0);
-                    casTest(i, incsPerThread, array, pool);
+                    casTest(i, incsPerThread, array, pool, a -> a.update(0, x -> x + 1));
                 }
             });
         } finally {
@@ -316,10 +336,30 @@ final class HugeAtomicDoubleArrayTest {
         }
     }
 
-    private static void casTest(int nthreads, int incs, HugeAtomicDoubleArray a, Executor pool) {
+    @Test
+    void testGetAndAddParallel() {
+        int incsPerThread = 10_000;
+        int ncpu = Runtime.getRuntime().availableProcessors();
+        int maxThreads = ncpu * 2;
+        ExecutorService pool = Executors.newCachedThreadPool();
+
+        try {
+            testArray(1, array -> {
+                for (int i = 1; i <= maxThreads; i <<= 1) {
+                    array.set(0, 0);
+                    casTest(i, incsPerThread, array, pool, a -> a.getAndAdd(0, 1));
+                }
+            });
+        } finally {
+            pool.shutdown();
+            LockSupport.parkNanos(MILLISECONDS.toNanos(100));
+        }
+    }
+
+    private static void casTest(int nthreads, int incs, HugeAtomicDoubleArray a, Executor pool, HadaFunction arrayFn) {
         Phaser phaser = new Phaser(nthreads + 1);
         for (int i = 0; i < nthreads; ++i) {
-            pool.execute(new CasTask(a, phaser, incs));
+            pool.execute(new CasTask(a, phaser, incs, arrayFn));
         }
         phaser.arriveAndAwaitAdvance();
         phaser.arriveAndAwaitAdvance();
@@ -331,19 +371,26 @@ final class HugeAtomicDoubleArrayTest {
         final HugeAtomicDoubleArray adder;
         final Phaser phaser;
         final int incs;
+        final HadaFunction arrayFn;
         volatile double result;
 
-        CasTask(HugeAtomicDoubleArray adder, Phaser phaser, int incs) {
+        CasTask(
+            HugeAtomicDoubleArray adder,
+            Phaser phaser,
+            int incs,
+            HadaFunction arrayFn
+        ) {
             this.adder = adder;
             this.phaser = phaser;
             this.incs = incs;
+            this.arrayFn = arrayFn;
         }
 
         public void run() {
             phaser.arriveAndAwaitAdvance();
             HugeAtomicDoubleArray array = adder;
             for (int i = 0; i < incs; ++i) {
-                array.update(0, x -> x + 1);
+                arrayFn.apply(array);
             }
             result = array.get(0);
             phaser.arrive();

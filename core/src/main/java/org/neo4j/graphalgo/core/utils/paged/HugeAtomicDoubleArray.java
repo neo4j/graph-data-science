@@ -47,6 +47,15 @@ public abstract class HugeAtomicDoubleArray {
     public abstract double get(long index);
 
     /**
+     * Atomically adds the given delta to the value at the given index.
+     *
+     * @param index the index
+     * @param delta the value to add
+     * @return the previous value at index
+     */
+    public abstract double getAndAdd(long index, double delta);
+
+    /**
      * Sets the double value at the given index to the given value.
      *
      * @throws ArrayIndexOutOfBoundsException if the index is not within {@link #size()}
@@ -249,6 +258,19 @@ public abstract class HugeAtomicDoubleArray {
         }
 
         @Override
+        public double getAndAdd(long index, double delta) {
+            double prev = (double) ARRAY_HANDLE.getAcquire(page, (int) index);
+            while (true) {
+                double next = prev + delta;
+                double current = (double) ARRAY_HANDLE.compareAndExchangeRelease(page, (int) index, prev, next);
+                if (Double.compare(prev, current) == 0) {
+                    return prev;
+                }
+                prev = current;
+            }
+        }
+
+        @Override
         public void set(long index, double value) {
             ARRAY_HANDLE.setVolatile(page, (int) index, value);
         }
@@ -351,6 +373,23 @@ public abstract class HugeAtomicDoubleArray {
             int pageIndex = pageIndex(index);
             int indexInPage = indexInPage(index);
             return (double) ARRAY_HANDLE.getVolatile(pages[pageIndex], indexInPage);
+        }
+
+        @Override
+        public double getAndAdd(long index, double delta) {
+            int pageIndex = pageIndex(index);
+            int indexInPage = indexInPage(index);
+            double[] page = pages[pageIndex];
+            double prev = (double) ARRAY_HANDLE.getAcquire(page, indexInPage);
+
+            while (true) {
+                double next = prev + delta;
+                double current = (double) ARRAY_HANDLE.compareAndExchangeRelease(page, (int) index, prev, next);
+                if (Double.compare(prev, current) == 0) {
+                    return prev;
+                }
+                prev = current;
+            }
         }
 
         @Override
