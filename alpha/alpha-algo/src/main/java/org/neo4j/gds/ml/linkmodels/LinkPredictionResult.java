@@ -90,6 +90,6 @@ public class LinkPredictionResult implements RelationshipStreaming {
             link.sourceId(),
             new Value[]{Values.doubleValue(link.probability())}
         ));
-        return Stream.concat(natural, reverse).sequential();
+        return Stream.concat(natural, reverse);
     }
 }
