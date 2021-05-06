@@ -83,9 +83,8 @@ public class SubGraph {
         Arrays.stream(nodeIds).forEach(nodeId -> {
             int internalId = nodeOffset.getAndIncrement();
             selfAdjacency[internalId] = idmap.toMapped(nodeId);
-            List<Long> nodeNeighbors = neighborhoodFunction.apply(graph, nodeId);
+            var nodeNeighbors = neighborhoodFunction.apply(graph, nodeId);
             int[] neighborInternalIds = nodeNeighbors
-                .stream()
                 .mapToInt(idmap::toMapped)
                 .toArray();
             adjacency[internalId] = neighborInternalIds;

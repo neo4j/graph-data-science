@@ -24,6 +24,7 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
+import java.util.stream.LongStream;
 
 public interface Layer {
     long sampleSize();
@@ -44,7 +45,7 @@ public interface Layer {
         return aggregator().weights();
     }
 
-    default List<Long> neighborhoodFunction(Graph graph, long nodeId) {
+    default LongStream neighborhoodFunction(Graph graph, long nodeId) {
         return sampler().sample(graph, nodeId, sampleSize());
     }
 }

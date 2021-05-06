@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.core;
 
 import org.neo4j.graphalgo.api.Graph;
 
-import java.util.List;
+import java.util.stream.LongStream;
 
 @FunctionalInterface
 public interface NeighborhoodFunction {
-    List<Long> apply(Graph graph, long nodeId);
+    LongStream apply(Graph graph, long nodeId);
 }

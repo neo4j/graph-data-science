@@ -27,8 +27,6 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
@@ -54,7 +52,7 @@ class NeighborhoodSamplerTest {
 
         NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
         int numberOfSamples = 3;
-        List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
+        var sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
 
         assertThat(sample)
             .isNotNull()
@@ -80,7 +78,7 @@ class NeighborhoodSamplerTest {
     void shouldSampleAllNeighborsWhenNumberOfSamplesAreGreater() {
         NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
         int numberOfSamples = 19;
-        List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
+        var sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
 
         assertThat(sample)
             .isNotNull()
@@ -104,7 +102,7 @@ class NeighborhoodSamplerTest {
 
             NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
             int numberOfSamples = 3;
-            List<Long> sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
+            var sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
 
             assertThat(sample)
                 .isNotNull()

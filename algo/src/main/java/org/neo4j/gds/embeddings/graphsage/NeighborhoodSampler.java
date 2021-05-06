@@ -24,12 +24,11 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.OptionalLong;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.LongStream;
 
 public class NeighborhoodSampler {
     private final double beta = 1D;
@@ -41,10 +40,10 @@ public class NeighborhoodSampler {
         this.random = new Random(randomSeed);
     }
 
-    public List<Long> sample(Graph graph, long nodeId, long numberOfSamples) {
+    public LongStream sample(Graph graph, long nodeId, long numberOfSamples) {
         AtomicLong remainingToSample = new AtomicLong(numberOfSamples);
         AtomicLong remainingToConsider = new AtomicLong(graph.degree(nodeId));
-        List<Long> neighbors = new ArrayList<>();
+        var neighbors = LongStream.builder();
 
         var minMax = minMax(graph, nodeId);
         double min = minMax.min();
@@ -105,7 +104,7 @@ public class NeighborhoodSampler {
             }
         );
 
-        return neighbors;
+        return neighbors.build();
     }
 
     private double randomDouble(long source, long target, long nodeCount) {
@@ -122,11 +121,7 @@ public class NeighborhoodSampler {
     }
 
     public OptionalLong sampleOne(Graph graph, long nodeId) {
-        List<Long> samples = sample(graph, nodeId, 1);
-        if (samples.size() < 1) {
-            return OptionalLong.empty();
-        }
-        return OptionalLong.of(samples.get(0));
+        return sample(graph, nodeId, 1).findFirst();
     }
 
     private MinMax minMax(Graph graph, long nodeId) {

@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -72,9 +71,7 @@ class WeightedElementwiseMaxTest extends ComputationContextBaseTest implements F
         };
         NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
             .streamRelationships(nodeId, 0.0D)
-            .mapToLong(RelationshipCursor::targetId)
-            .boxed()
-            .collect(Collectors.toList());
+            .mapToLong(RelationshipCursor::targetId);
         SubGraph subGraph = SubGraph.buildSubGraphs(ids, List.of(neighborhoodFunction), graph).get(0);
 
         double[] userEmbeddingsData = new double[] {
@@ -116,9 +113,7 @@ class WeightedElementwiseMaxTest extends ComputationContextBaseTest implements F
         };
         NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
             .streamRelationships(nodeId, 0.0D)
-            .mapToLong(RelationshipCursor::targetId)
-            .boxed()
-            .collect(Collectors.toList());
+            .mapToLong(RelationshipCursor::targetId);
         SubGraph subGraph = SubGraph.buildSubGraphs(ids, List.of(neighborhoodFunction), graph).get(0);
 
         double[] userEmbeddingsData = new double[] {
