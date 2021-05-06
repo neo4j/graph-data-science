@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.ml.core.RelationshipWeights;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
@@ -27,10 +28,10 @@ import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 import java.util.OptionalLong;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 
 public class NeighborhoodSampler {
+    // Influence of the weight for the probability
     private final double beta = 1D;
     private final Random random;
     private long randomSeed;
@@ -41,8 +42,8 @@ public class NeighborhoodSampler {
     }
 
     public LongStream sample(Graph graph, long nodeId, long numberOfSamples) {
-        AtomicLong remainingToSample = new AtomicLong(numberOfSamples);
-        AtomicLong remainingToConsider = new AtomicLong(graph.degree(nodeId));
+        var remainingToSample = new MutableLong(numberOfSamples);
+        var remainingToConsider = new MutableLong(graph.degree(nodeId));
         var neighbors = LongStream.builder();
 
         var minMax = minMax(graph, nodeId);
@@ -53,11 +54,12 @@ public class NeighborhoodSampler {
             graph.concurrentCopy().forEachRelationship(
                 nodeId,
                 (source, target) -> {
-                    if (remainingToSample.get() == 0 || remainingToConsider.get() == 0) {
+                    if (remainingToSample.longValue() == 0 || remainingToConsider.longValue() == 0) {
                         return false;
                     }
+
                     double probability = randomDouble(source, target, graph.nodeCount());
-                    if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.get()) {
+                    if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.longValue()) {
                         neighbors.add(target);
                         remainingToSample.decrementAndGet();
                     }
@@ -69,13 +71,12 @@ public class NeighborhoodSampler {
                 nodeId,
                 RelationshipWeights.DEFAULT_VALUE,
                 (source, target, weight) -> {
-                    if (remainingToSample.get() == 0 || remainingToConsider.get() == 0) {
+                    if (remainingToSample.longValue() == 0 || remainingToConsider.longValue() == 0) {
                         return false;
                     }
 
                     double probability = (1.0 - Math.pow((weight - min) / (max - min), beta));
-
-                    if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.get()) {
+                    if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.longValue()) {
                         neighbors.add(target);
                         remainingToSample.decrementAndGet();
                     }
@@ -88,7 +89,7 @@ public class NeighborhoodSampler {
             nodeId,
             RelationshipWeights.DEFAULT_VALUE,
             (source, target, weight) -> {
-                if (remainingToSample.get() == 0 || remainingToConsider.get() == 0) {
+                if (remainingToSample.longValue() == 0 || remainingToConsider.longValue() == 0) {
                     return false;
                 }
 
@@ -96,7 +97,7 @@ public class NeighborhoodSampler {
                     randomDouble(source, target, graph.nodeCount()) :
                     (1.0 - Math.pow((weight - min) / (max - min), beta));
 
-                if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.get()) {
+                if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.longValue()) {
                     neighbors.add(target);
                     remainingToSample.decrementAndGet();
                 }
