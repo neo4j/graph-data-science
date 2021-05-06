@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Random;
 
@@ -148,6 +149,16 @@ class NeighborhoodSamplerTest {
                 .hasSize(expectedSize)
                 .doesNotHaveDuplicates();
         }
+    }
+
+    @Test
+    void multiGraph() {
+        var graph = GdlFactory.of("(a)-->(b), (a)-->(b), (a)-->(b)").build().graphStore().getUnion();
+
+        NeighborhoodSampler sampler = new NeighborhoodSampler(42);
+        var sample = sampler.sample(graph, 0, 2).toArray();
+
+        assertThat(sample).containsExactly(1, 1);
     }
 
     @Nested
