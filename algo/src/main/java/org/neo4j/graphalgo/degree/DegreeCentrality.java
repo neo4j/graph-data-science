@@ -24,12 +24,12 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
+import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
@@ -89,11 +89,13 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                     var tasks = PartitionUtils.degreePartition(
                         graph,
                         degreeBatchSize,
-                        partition -> new WeightedIndegreeTask(
-                            graph.concurrentCopy(),
-                            degrees,
-                            partition,
-                            progressLogger
+                        partition -> new IndegreeTask(graph.concurrentCopy(), partition, progressLogger,
+                            (sourceNodeId, targetNodeId, weight) -> {
+                                if (weight > 0.0D) {
+                                    degrees.getAndAdd(targetNodeId, weight);
+                                }
+                                return true;
+                            }
                         )
                     );
                     ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
@@ -116,12 +118,17 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                     progressLogger.logProgress(graph.nodeCount());
                     break;
                 case REVERSE:
-                    var degrees = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
+                    var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
                     var degreeBatchSize = BitUtil.ceilDiv(graph.relationshipCount(), config.concurrency());
                     var tasks = PartitionUtils.degreePartition(
                         graph,
                         degreeBatchSize,
-                        partition -> new IndegreeTask(graph.concurrentCopy(), partition, degrees, progressLogger)
+                        partition -> new IndegreeTask(graph.concurrentCopy(), partition, progressLogger,
+                            (sourceNodeId, targetNodeId, weight) -> {
+                                degrees.getAndAdd(targetNodeId, 1);
+                                return true;
+                            }
+                        )
                     );
                     ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
                     result = degrees::get;
@@ -154,62 +161,24 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
         private final Graph graph;
         private final Partition partition;
-        private final HugeAtomicLongArray degrees;
         private final ProgressLogger progressLogger;
+        private final RelationshipWithPropertyConsumer consumer;
 
         IndegreeTask(
             Graph graph,
             Partition partition,
-            HugeAtomicLongArray degrees,
-            ProgressLogger progressLogger
+            ProgressLogger progressLogger,
+            RelationshipWithPropertyConsumer consumer
         ) {
             this.graph = graph;
             this.partition = partition;
-            this.degrees = degrees;
             this.progressLogger = progressLogger;
+            this.consumer = consumer;
         }
 
         @Override
         public void run() {
-            partition.consume(node -> {
-                graph.forEachRelationship(node, (sourceNodeId, targetNodeId) -> {
-                    degrees.getAndAdd(targetNodeId, 1);
-                    return true;
-                });
-            });
-            progressLogger.logProgress(partition.nodeCount());
-        }
-    }
-
-    private static class WeightedIndegreeTask implements Runnable {
-
-        private final Graph graph;
-        private final Partition partition;
-        private final HugeAtomicDoubleArray degrees;
-        private final ProgressLogger progressLogger;
-
-        WeightedIndegreeTask(
-            Graph graph,
-            HugeAtomicDoubleArray degrees,
-            Partition partition,
-            ProgressLogger progressLogger
-        ) {
-            this.graph = graph;
-            this.partition = partition;
-            this.degrees = degrees;
-            this.progressLogger = progressLogger;
-        }
-
-        @Override
-        public void run() {
-            partition.consume(node -> {
-                graph.forEachRelationship(node, DEFAULT_WEIGHT, (sourceNodeId, targetNodeId, weight) -> {
-                    if (weight > 0.0D) {
-                        degrees.getAndAdd(targetNodeId, weight);
-                    }
-                    return true;
-                });
-            });
+            partition.consume(node -> graph.forEachRelationship(node, DEFAULT_WEIGHT, consumer));
             progressLogger.logProgress(partition.nodeCount());
         }
     }
