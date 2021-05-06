@@ -47,8 +47,8 @@ public class SignedProbabilitiesTest {
             GraphDimensions
                 .builder()
                 .nodeCount(nodeCount)
-                .relationshipCounts(Map.of(
-                    foo, relationshipCount)).build(),
+                .relationshipCounts(Map.of(foo, relationshipCount))
+                .build(),
             foo,
             relationshipFraction
         );
