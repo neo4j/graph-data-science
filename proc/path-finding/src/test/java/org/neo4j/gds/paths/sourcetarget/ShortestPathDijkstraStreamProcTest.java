@@ -66,7 +66,6 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
             var expectedPath = PathFactory.create(
                 tx,
-                -1,
                 ids0,
                 costs0,
                 RelationshipType.withName(formatWithLocale("PATH_0")), StreamResult.COST_PROPERTY_NAME
