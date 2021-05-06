@@ -21,71 +21,83 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.ml.core.RelationshipWeights;
+import org.neo4j.gds.ml.core.batch.UniformReservoirSampler;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 
 import java.util.OptionalLong;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.LongStream;
 
 public class NeighborhoodSampler {
     // Influence of the weight for the probability
     private final double beta = 1D;
-    private final Random random;
     private long randomSeed;
 
     public NeighborhoodSampler(long randomSeed) {
         this.randomSeed = randomSeed;
-        this.random = new Random(randomSeed);
     }
 
     public LongStream sample(Graph graph, long nodeId, long numberOfSamples) {
-        var remainingToSample = new MutableLong(numberOfSamples);
-        var remainingToConsider = new MutableLong(graph.degree(nodeId));
-        var neighbors = LongStream.builder();
+        var degree = graph.degree(nodeId);
+
+        // Every neighbor needs to be sampled
+        if (degree <= numberOfSamples) {
+            return graph.concurrentCopy()
+                .streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE)
+                .mapToLong(RelationshipCursor::targetId);
+        }
 
         var minMax = minMax(graph, nodeId);
         double min = minMax.min();
         double max = minMax.max();
 
+        // If the weights are all the same trigger the unweighted case.
         if (min == max) {
-            graph.concurrentCopy().forEachRelationship(
-                nodeId,
-                (source, target) -> {
-                    if (remainingToSample.longValue() == 0 || remainingToConsider.longValue() == 0) {
-                        return false;
-                    }
-
-                    double probability = randomDouble(source, target, graph.nodeCount());
-                    if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.longValue()) {
-                        neighbors.add(target);
-                        remainingToSample.decrementAndGet();
-                    }
-                    return true;
-                }
+            var neighbours = graph
+                .concurrentCopy()
+                .streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE)
+                .mapToLong(RelationshipCursor::targetId);
+            return new UniformReservoirSampler(randomSeed).sample(
+                neighbours,
+                graph.degree(nodeId),
+                Math.toIntExact(numberOfSamples)
             );
         } else {
-            graph.concurrentCopy().forEachRelationship(
-                nodeId,
-                RelationshipWeights.DEFAULT_VALUE,
-                (source, target, weight) -> {
-                    if (remainingToSample.longValue() == 0 || remainingToConsider.longValue() == 0) {
-                        return false;
-                    }
-
-                    double probability = (1.0 - Math.pow((weight - min) / (max - min), beta));
-                    if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.longValue()) {
-                        neighbors.add(target);
-                        remainingToSample.decrementAndGet();
-                    }
-                    return true;
-                }
-            );
+            return sampleWeighted(graph.concurrentCopy(), nodeId, degree, numberOfSamples, min, max);
         }
+    }
 
-        graph.concurrentCopy().forEachRelationship(
+    long randomState() {
+        return this.randomSeed;
+    }
+
+    void generateNewRandomState() {
+        this.randomSeed = ThreadLocalRandom.current().nextLong();
+    }
+
+    OptionalLong sampleOne(Graph graph, long nodeId) {
+        return sample(graph, nodeId, 1).findFirst();
+    }
+
+    private LongStream sampleWeighted(
+        Graph graph,
+        long nodeId,
+        int degree,
+        long numberOfSamples,
+        double min,
+        double max
+    ) {
+
+        var remainingToSample = new MutableLong(numberOfSamples);
+        var remainingToConsider = new MutableLong(degree);
+        var neighbors = LongStream.builder();
+
+        double maxMinDiff = (max - min);
+
+        graph.forEachRelationship(
             nodeId,
             RelationshipWeights.DEFAULT_VALUE,
             (source, target, weight) -> {
@@ -93,10 +105,7 @@ public class NeighborhoodSampler {
                     return false;
                 }
 
-                double probability = (min == max) ?
-                    randomDouble(source, target, graph.nodeCount()) :
-                    (1.0 - Math.pow((weight - min) / (max - min), beta));
-
+                double probability = (1.0 - Math.pow((weight - min) / maxMinDiff, beta));
                 if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.longValue()) {
                     neighbors.add(target);
                     remainingToSample.decrementAndGet();
@@ -104,25 +113,7 @@ public class NeighborhoodSampler {
                 return true;
             }
         );
-
         return neighbors.build();
-    }
-
-    private double randomDouble(long source, long target, long nodeCount) {
-        random.setSeed(this.randomSeed + source + nodeCount * target);
-        return random.nextDouble();
-    }
-
-    public long randomState() {
-        return this.randomSeed;
-    }
-
-    public void generateNewRandomState() {
-        this.randomSeed = ThreadLocalRandom.current().nextLong();
-    }
-
-    public OptionalLong sampleOne(Graph graph, long nodeId) {
-        return sample(graph, nodeId, 1).findFirst();
     }
 
     private MinMax minMax(Graph graph, long nodeId) {
