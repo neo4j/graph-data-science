@@ -47,6 +47,10 @@ public interface GraphDimensions {
 
     long nodeCount();
 
+    static ImmutableGraphDimensions.Builder builder() {
+        return ImmutableGraphDimensions.builder();
+    }
+
     @Value.Default
     default long highestNeoId() {
         return nodeCount();
