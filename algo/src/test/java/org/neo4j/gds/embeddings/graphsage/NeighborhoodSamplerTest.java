@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Random;
@@ -42,57 +43,60 @@ import static org.assertj.core.api.Assertions.assertThat;
 @GdlExtension
 class NeighborhoodSamplerTest {
 
-    @GdlGraph
-    private static final String GRAPH =
-        "(x)-->(y)-->(z), " +
-        "(a)-->(b)-->(c), " +
-        "(x)-->(d)-->(e), " +
-        "(a)-->(f) , " +
-        "(a)-->(g), " +
-        "(a)-->(h)";
+    @Nested
+    class Unweighted {
+        @GdlGraph
+        private static final String GRAPH =
+            "(x)-->(y)-->(z), " +
+            "(a)-->(b)-->(c), " +
+            "(x)-->(d)-->(e), " +
+            "(a)-->(f) , " +
+            "(a)-->(g), " +
+            "(a)-->(h)";
 
-    @Inject
-    private Graph graph;
+        @Inject
+        private Graph graph;
 
-    @Inject
-    private IdFunction idFunction;
+        @Inject
+        private IdFunction idFunction;
 
-    @Test
-    void shouldSampleSubsetOfNeighbors() {
+        @Test
+        void shouldSampleSubsetOfNeighbors() {
 
-        NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
-        int numberOfSamples = 3;
-        var sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
+            NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
+            int numberOfSamples = 3;
+            var sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
 
-        assertThat(sample)
-            .isNotNull()
-            .hasSize(numberOfSamples)
-            .containsAnyOf(
-                idFunction.of("b"),
-                idFunction.of("f"),
-                idFunction.of("g"),
-                idFunction.of("h")
-            )
-            .doesNotContain( // does not contain negative neighbors
-                idFunction.of("x"),
-                idFunction.of("y"),
-                idFunction.of("z"),
-                idFunction.of("a"),
-                idFunction.of("c"),
-                idFunction.of("d"),
-                idFunction.of("e")
-            );
-    }
+            assertThat(sample)
+                .isNotNull()
+                .hasSize(numberOfSamples)
+                .containsAnyOf(
+                    idFunction.of("b"),
+                    idFunction.of("f"),
+                    idFunction.of("g"),
+                    idFunction.of("h")
+                )
+                .doesNotContain( // does not contain negative neighbors
+                    idFunction.of("x"),
+                    idFunction.of("y"),
+                    idFunction.of("z"),
+                    idFunction.of("a"),
+                    idFunction.of("c"),
+                    idFunction.of("d"),
+                    idFunction.of("e")
+                );
+        }
 
-    @Test
-    void shouldSampleAllNeighborsWhenNumberOfSamplesAreGreater() {
-        NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
-        int numberOfSamples = 19;
-        var sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
+        @Test
+        void shouldSampleAllNeighborsWhenNumberOfSamplesAreGreater() {
+            NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
+            int numberOfSamples = 19;
+            var sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
 
-        assertThat(sample)
-            .isNotNull()
-            .hasSize(4);
+            assertThat(sample)
+                .isNotNull()
+                .hasSize(4);
+        }
     }
 
     @Nested
@@ -118,6 +122,9 @@ class NeighborhoodSamplerTest {
             "(a)-[:R]->(r), " +
             "(a)-[:R]->(s)";
 
+        @Inject
+        TestGraph graph;
+
 
         @Test
         void shouldSampleSubsetOfNeighbors() {
@@ -128,7 +135,7 @@ class NeighborhoodSamplerTest {
 
             for (int i = 0; i < 20; i++) {
                 NeighborhoodSampler sampler = new NeighborhoodSampler(random.nextLong());
-                sampler.sample(graph, idFunction.of("a"), numberOfSamples)
+                sampler.sample(graph, graph.toMappedNodeId("a"), numberOfSamples)
                     .forEach(nodeId -> sampledNodes.addTo(nodeId, 1));
             }
             
@@ -142,7 +149,7 @@ class NeighborhoodSamplerTest {
         @ValueSource(ints = {0, 4, 17, 99})
         void shouldSampleTheCorrectNumber(int numberOfSamples) {
             var random = new Random(42);
-            var startNode = idFunction.of("a");
+            var startNode = graph.toMappedNodeId("a");
 
             NeighborhoodSampler sampler = new NeighborhoodSampler(random.nextLong());
             var sample = sampler.sample(graph, startNode, numberOfSamples);
@@ -153,6 +160,17 @@ class NeighborhoodSamplerTest {
                 .hasSize(expectedSize)
                 .doesNotHaveDuplicates();
         }
+
+        @Test
+        void multiGraph() {
+            var graph = GdlFactory.of("(a)-->(b), (a)-->(b), (a)-->(b)").build().graphStore().getUnion();
+
+            NeighborhoodSampler sampler = new NeighborhoodSampler(42);
+            var sample = sampler.sample(graph, 0, 2).toArray();
+
+            assertThat(sample).containsExactly(1, 1);
+        }
+
     }
 
     @Test
@@ -205,30 +223,33 @@ class NeighborhoodSamplerTest {
             "(a)-[:R { weight: 37.0 }]->(g), " +
             "(a)-[:R { weight: 5.0 }]->(h)";
 
+        @Inject
+        TestGraph graph;
+
         @Test
         void shouldSampleSubsetOfNeighbors() {
 
             NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
             int numberOfSamples = 3;
-            var sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
+            var sample = sampler.sample(graph, graph.toMappedNodeId("a"), numberOfSamples);
 
             assertThat(sample)
                 .isNotNull()
                 .hasSize(numberOfSamples)
                 .containsAnyOf(
-                    idFunction.of("b"),
-                    idFunction.of("f"),
-                    idFunction.of("g"),
-                    idFunction.of("h")
+                    graph.toMappedNodeId("b"),
+                    graph.toMappedNodeId("f"),
+                    graph.toMappedNodeId("g"),
+                    graph.toMappedNodeId("h")
                 )
                 .doesNotContain( // does not contain negative neighbors
-                    idFunction.of("x"),
-                    idFunction.of("y"),
-                    idFunction.of("z"),
-                    idFunction.of("a"),
-                    idFunction.of("c"),
-                    idFunction.of("d"),
-                    idFunction.of("e")
+                    graph.toMappedNodeId("x"),
+                    graph.toMappedNodeId("y"),
+                    graph.toMappedNodeId("z"),
+                    graph.toMappedNodeId("a"),
+                    graph.toMappedNodeId("c"),
+                    graph.toMappedNodeId("d"),
+                    graph.toMappedNodeId("e")
                 );
         }
     }
