@@ -126,7 +126,7 @@ class LinkPredictionTrainTest {
 
         var expectedWinner = new LinkLogisticRegressionTrainConfigImpl(
             List.of("z", "array"),
-            CypherMapWrapper.create(Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10))
+            CypherMapWrapper.create(Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10, "concurrency", 1))
         );
 
         var config = ImmutableLinkPredictionTrainConfig.builder()
@@ -138,8 +138,8 @@ class LinkPredictionTrainTest {
             .randomSeed(1337L)
             .negativeClassWeight(classRatio)
             .params(List.of(
-                Map.of("maxEpochs", 10, "penalty", 1000000),
-                Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10)
+                Map.of("maxEpochs", 10, "penalty", 1000000, "concurrency", 1),
+                Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10, "concurrency", 1)
             )).build();
 
         var linkPredictionTrain = new LinkPredictionTrain(
