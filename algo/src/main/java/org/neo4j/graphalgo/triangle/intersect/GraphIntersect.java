@@ -37,7 +37,6 @@ import static org.neo4j.graphalgo.api.AdjacencyCursor.NOT_FOUND;
 
 public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
 
-    protected CURSOR empty;
     private CURSOR cache;
     private CURSOR cacheA;
     private CURSOR cacheB;
