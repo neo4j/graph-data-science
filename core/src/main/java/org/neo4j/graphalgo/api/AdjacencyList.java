@@ -23,6 +23,8 @@ public interface AdjacencyList extends AutoCloseable {
 
     int degree(long node);
 
+    // new adjacency cursors
+
     default AdjacencyCursor adjacencyCursor(long node) {
         return adjacencyCursor(node, Double.NaN);
     }
@@ -37,25 +39,23 @@ public interface AdjacencyList extends AutoCloseable {
         return adjacencyCursor(node, fallbackValue);
     }
 
-    // Cursors
+    // new property cursors
 
-    PropertyCursor rawCursor();
-
-    default PropertyCursor cursor(long offset, int degree) {
-        return rawCursor().init(offset, degree);
+    default PropertyCursor propertyCursor(long node) {
+        return propertyCursor(node, Double.NaN);
     }
 
-    /**
-     * Returns a new, uninitialized delta cursor.
-     */
-    AdjacencyCursor rawDecompressingCursor();
+    PropertyCursor propertyCursor(long node, double fallbackValue);
 
-    /**
-     * Get a new cursor initialised on the given offset
-     */
-    default AdjacencyCursor decompressingCursor(long offset, int degree) {
-        return rawDecompressingCursor().initializedTo(offset, degree);
+    default PropertyCursor propertyCursor(PropertyCursor reuse, long node) {
+        return propertyCursor(reuse, node, Double.NaN);
     }
+
+    default PropertyCursor propertyCursor(PropertyCursor reuse, long node, double fallbackValue) {
+        return propertyCursor(node, fallbackValue);
+    }
+
+    // closeable
 
     @Override
     void close();

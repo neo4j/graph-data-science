@@ -44,7 +44,7 @@ class CompositeAdjacencyListTest {
     @Test
     void shouldIgnoreInputDegreeForCursor() {
         var adjacencyList = ((UnionGraph) graph).relationshipTopology();
-        var cursor = adjacencyList.decompressingCursor(0, -1);
+        var cursor = adjacencyList.adjacencyCursor(0);
         assertEquals(2, cursor.remaining());
     }
 }

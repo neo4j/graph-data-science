@@ -36,7 +36,6 @@ import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.core.compress.CompressedProperties;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -50,7 +49,6 @@ import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.Cursor;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
@@ -104,7 +102,7 @@ public class HugeGraph implements CSRGraph {
     protected AdjacencyList adjacency;
 
     protected final double defaultPropertyValue;
-    protected @Nullable CompressedProperties properties;
+    protected @Nullable AdjacencyList properties;
 
     private AdjacencyCursor cursorCache;
 
@@ -129,7 +127,7 @@ public class HugeGraph implements CSRGraph {
             topology.adjacencyList(),
             maybeProperties.isPresent(),
             maybeProperties.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
-            maybeProperties.map(Relationships.Properties::compressed).orElse(null),
+            maybeProperties.map(Relationships.Properties::propertiesList).orElse(null),
             topology.orientation(),
             topology.isMultiGraph(),
             tracker
@@ -144,7 +142,7 @@ public class HugeGraph implements CSRGraph {
         @NotNull AdjacencyList adjacency,
         boolean hasRelationshipProperty,
         double defaultPropertyValue,
-        @Nullable CompressedProperties properties,
+        @Nullable AdjacencyList properties,
         Orientation orientation,
         boolean isMultiGraph,
         AllocationTracker tracker
@@ -240,10 +238,7 @@ public class HugeGraph implements CSRGraph {
             return NO_PROPERTY_VALUE;
         }
 
-        long propertyOffset = properties.adjacencyOffsets().get(fromId);
-        int degree = adjacencyCursor.remaining();
-
-        var propertyCursor = properties.adjacencyList().cursor(propertyOffset, degree);
+        var propertyCursor = properties.propertyCursor(fromId, defaultPropertyValue);
 
         while (adjacencyCursor.hasNextVLong() && propertyCursor.hasNextLong() && adjacencyCursor.nextVLong() != toId) {
             propertyCursor.nextLong();
@@ -412,11 +407,7 @@ public class HugeGraph implements CSRGraph {
                 "Can not create property cursor on a graph without relationship property");
         }
 
-        long offset = properties.adjacencyOffsets().get(sourceNodeId);
-        if (offset == 0L) {
-            return Cursor.EMPTY;
-        }
-        return properties.adjacencyList().cursor(offset, properties.adjacencyList().degree(sourceNodeId));
+        return properties.propertyCursor(sourceNodeId, defaultPropertyValue);
     }
 
     @Override

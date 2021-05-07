@@ -23,15 +23,14 @@ import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.PropertyCursor;
-import org.neo4j.graphalgo.core.compress.CompressedProperties;
 
 public class CSRCompositeRelationshipIterator implements CompositeRelationshipIterator {
 
-    public static final CompressedProperties[] EMPTY_PROPERTIES = new CompressedProperties[0];
+    public static final AdjacencyList[] EMPTY_PROPERTIES = new AdjacencyList[0];
 
     private final AdjacencyList adjacencyList;
     private final String[] propertyKeys;
-    private final CompressedProperties[] properties;
+    private final AdjacencyList[] properties;
     private final double[] propertyBuffer;
 
     private AdjacencyCursor topologyCursor;
@@ -40,7 +39,7 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
     public CSRCompositeRelationshipIterator(
         AdjacencyList adjacencyList,
         String[] propertyKeys,
-        CompressedProperties[] properties
+        AdjacencyList[] properties
     ) {
         var propertyCount = propertyKeys.length;
 
@@ -55,7 +54,7 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
 
         this.propertyCursors = new PropertyCursor[propertyCount];
         for (int i = 0; i < propertyCount; i++) {
-            this.propertyCursors[i] = properties[i].adjacencyList().rawCursor();
+            this.propertyCursors[i] = PropertyCursor.empty();
         }
     }
 
@@ -73,12 +72,9 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
         }
 
         topologyCursor = adjacencyCursor;
-        var degree = adjacencyList.degree(nodeId);
-
         var propertyCount = propertyKeys.length;
         for (int propertyIdx = 0; propertyIdx < propertyCount; propertyIdx++) {
-            var propertyOffset = properties[propertyIdx].adjacencyOffsets().get(nodeId);
-            propertyCursors[propertyIdx].init(propertyOffset, degree);
+            propertyCursors[propertyIdx] = properties[propertyIdx].propertyCursor(nodeId);
         }
 
         while (adjacencyCursor.hasNextVLong()) {

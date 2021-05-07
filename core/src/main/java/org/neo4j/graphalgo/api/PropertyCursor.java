@@ -25,6 +25,10 @@ public interface PropertyCursor extends AutoCloseable {
      */
     PropertyCursor init(long index, int degree);
 
+    default boolean isEmpty() {
+        return false;
+    }
+
     /**
      * Return true iff there is at least one more target to decode.
      */
@@ -39,4 +43,36 @@ public interface PropertyCursor extends AutoCloseable {
 
     @Override
     void close();
+
+    static PropertyCursor empty() {
+        return EmptyPropertyCursor.INSTANCE;
+    }
+
+    enum EmptyPropertyCursor implements PropertyCursor {
+        INSTANCE;
+
+        @Override
+        public PropertyCursor init(long index, int degree) {
+            return INSTANCE;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public boolean hasNextLong() {
+            return false;
+        }
+
+        @Override
+        public long nextLong() {
+            return -1;
+        }
+
+        @Override
+        public void close() {
+        }
+    }
 }

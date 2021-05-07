@@ -48,12 +48,22 @@ public class CompositeAdjacencyList implements AdjacencyList {
     }
 
     @Override
+    public CompositeAdjacencyCursor adjacencyCursor(long node) {
+        return adjacencyCursor(node, Double.NaN);
+    }
+
+    @Override
     public CompositeAdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
         var cursors = new ArrayList<AdjacencyCursor>(adjacencyLists.size());
         for (var adjacency : adjacencyLists) {
             cursors.add(adjacency.adjacencyCursor(node, fallbackValue));
         }
         return new CompositeAdjacencyCursor(cursors);
+    }
+
+    @Override
+    public CompositeAdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node) {
+        return adjacencyCursor(reuse, node, Double.NaN);
     }
 
     @Override
@@ -75,23 +85,8 @@ public class CompositeAdjacencyList implements AdjacencyList {
     }
 
     @Override
-    public PropertyCursor rawCursor() {
-        throw new UnsupportedOperationException("CompositeAdjacencyList#rawCursor is not supported");
-    }
-
-    @Override
-    public PropertyCursor cursor(long offset, int degree) {
-        throw new UnsupportedOperationException("CompositeAdjacencyList#cursor is not supported");
-    }
-
-    @Override
-    public CompositeAdjacencyCursor rawDecompressingCursor() {
-        return adjacencyCursor(0, Double.NaN);
-    }
-
-    @Override
-    public CompositeAdjacencyCursor decompressingCursor(long nodeId, int unusedDegree) {
-        return adjacencyCursor(nodeId, Double.NaN);
+    public PropertyCursor propertyCursor(long node, double fallbackValue) {
+        throw new UnsupportedOperationException("CompositeAdjacencyList#propertyCursor is not supported");
     }
 
     @Override

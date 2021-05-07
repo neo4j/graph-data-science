@@ -143,6 +143,8 @@ public final class TransientAdjacencyList implements AdjacencyList {
         return degrees.degree(node);
     }
 
+    // Cursors
+
     @Override
     public AdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
         var offset = offsets.get(node);
@@ -163,21 +165,27 @@ public final class TransientAdjacencyList implements AdjacencyList {
         return adjacencyCursor(node, fallbackValue);
     }
 
-    // Cursors
-
     @Override
-    public Cursor rawCursor() {
-        return new Cursor(pages);
+    public PropertyCursor propertyCursor(long node, double fallbackValue) {
+        var offset = offsets.get(node);
+        if (offset == 0) {
+            return PropertyCursor.empty();
+        }
+        var degree = degrees.degree(node);
+        var cursor = new Cursor(pages);
+        cursor.init(offset, degree);
+        return cursor;
     }
 
     @Override
-    public AdjacencyCursor rawDecompressingCursor() {
-        return new DecompressingCursor(pages);
+    public PropertyCursor propertyCursor(PropertyCursor reuse, long node, double fallbackValue) {
+        if (reuse instanceof Cursor) {
+            return reuse.init(offsets.get(node), degrees.degree(node));
+        }
+        return propertyCursor(node, fallbackValue);
     }
 
-    public static final class Cursor extends MutableIntValue implements PropertyCursor {
-
-        static final Cursor EMPTY = new Cursor(new byte[0][]);
+    private static final class Cursor extends MutableIntValue implements PropertyCursor {
 
         private byte[][] pages;
 

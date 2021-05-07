@@ -29,5 +29,5 @@ public interface AdjacencyListsWithProperties {
 
     AdjacencyList adjacency();
 
-    List<CompressedProperties> properties();
+    List<AdjacencyList> properties();
 }

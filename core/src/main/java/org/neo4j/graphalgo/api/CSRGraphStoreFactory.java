@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.compress.CompressedProperties;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -102,7 +101,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
 
     private RelationshipPropertyStore constructRelationshipPropertyStore(
         RelationshipProjection projection,
-        Iterable<CompressedProperties> properties,
+        Iterable<AdjacencyList> properties,
         long relationshipCount
     ) {
         PropertyMappings propertyMappings = projection.properties();

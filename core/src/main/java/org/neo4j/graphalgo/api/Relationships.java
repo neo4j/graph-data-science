@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.api;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.compress.CompressedProperties;
 
 import java.util.Optional;
 
@@ -56,7 +55,7 @@ public interface Relationships {
         Orientation orientation,
         boolean isMultiGraph,
         AdjacencyList adjacencyList,
-        @Nullable CompressedProperties compressedProperties,
+        @Nullable AdjacencyList compressedProperties,
         double defaultPropertyValue
     ) {
         Topology topology = ImmutableTopology.of(
@@ -91,7 +90,7 @@ public interface Relationships {
 
     @ValueClass
     interface Properties {
-        CompressedProperties compressed();
+        AdjacencyList propertiesList();
 
         long elementCount();
 

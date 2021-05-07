@@ -22,12 +22,12 @@ package org.neo4j.graphalgo.core.huge;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.core.compress.CompressedProperties;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -214,7 +214,7 @@ class CSRCompositeRelationshipIteratorTest {
         var maybeProperties = graph.relationships().properties();
         assertThat(maybeProperties).isPresent();
         var property = maybeProperties.get();
-        var properties = new CompressedProperties[] { property.compressed() };
+        var properties = new AdjacencyList[] { property.propertiesList() };
 
         String[] propertyKeys = {"prop"};
         var iterator = new CSRCompositeRelationshipIterator(

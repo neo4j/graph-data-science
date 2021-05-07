@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.Graph;
@@ -40,7 +41,6 @@ import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.ProcedureConstants;
-import org.neo4j.graphalgo.core.compress.CompressedProperties;
 import org.neo4j.graphalgo.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
@@ -428,8 +428,8 @@ public class CSRGraphStore implements GraphStore {
                 .stream()
                 .map(relationshipPropertyStore::get)
                 .map(RelationshipProperty::values)
-                .map(Relationships.Properties::compressed)
-                .toArray(CompressedProperties[]::new);
+                .map(Relationships.Properties::propertiesList)
+                .toArray(AdjacencyList[]::new);
 
         return new CSRCompositeRelationshipIterator(
             adjacencyList,
@@ -451,7 +451,7 @@ public class CSRGraphStore implements GraphStore {
         }
         this.relationships.values().forEach(rel -> closeables.add(rel.adjacencyList()));
         this.relationshipProperties.forEach((propertyName, properties) ->
-            properties.values().forEach(prop -> closeables.add(prop.values().compressed()))
+            properties.values().forEach(prop -> closeables.add(prop.values().propertiesList()))
         );
 
         var errorWhileClosing = closeables.build().distinct().flatMap(closeable -> {

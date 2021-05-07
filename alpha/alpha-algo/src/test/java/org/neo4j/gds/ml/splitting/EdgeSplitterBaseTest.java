@@ -36,11 +36,7 @@ class EdgeSplitterBaseTest {
         long source,
         double... values
     ) {
-        var compressed = properties.compressed();
-        var cursor = compressed.adjacencyList().cursor(
-            compressed.adjacencyOffsets().get(source),
-            compressed.adjacencyList().degree(source)
-        );
+        var cursor = properties.propertiesList().propertyCursor(source);
         for (double property : values) {
             assertThat(Double.longBitsToDouble(cursor.nextLong())).isEqualTo(property);
         }
