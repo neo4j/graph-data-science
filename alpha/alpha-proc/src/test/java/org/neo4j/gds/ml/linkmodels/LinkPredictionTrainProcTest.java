@@ -39,6 +39,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
 
@@ -258,6 +259,20 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
             "})";
 
         assertError(query, "No model candidates (params) specified, we require at least one");
+    }
+
+    @Test
+    void shouldEstimateMemory() {
+        var query = " CALL gds.alpha.ml.linkPrediction.train.estimate('g', {" +
+                    "   modelName: 'model'," +
+                    "   validationFolds: 5," +
+                    "   randomSeed: 42," +
+                    "   negativeClassWeight: 1.0," +
+                    "   trainRelationshipType: 'TRAIN'," +
+                    "   testRelationshipType: 'TEST'," +
+                    "   params: [{penalty: 1.0}]" +
+                    " })";
+        assertDoesNotThrow(() -> runQuery(query));
     }
 
 }

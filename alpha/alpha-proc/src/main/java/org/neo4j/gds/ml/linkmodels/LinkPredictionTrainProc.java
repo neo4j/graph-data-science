@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.TrainProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -52,6 +53,15 @@ public class LinkPredictionTrainProc extends
             graphNameOrConfig, configuration,
             (model, result) -> new MLTrainResult(model, result.computeMillis())
         );
+    }
+
+    @Procedure(name = "gds.alpha.ml.linkPrediction.train.estimate", mode = Mode.READ)
+    @Description("Estimates memory for training a link prediction model")
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
