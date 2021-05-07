@@ -31,6 +31,7 @@ import java.util.stream.Stream;
  */
 public class WeightedUniformReservoirRSampler {
 
+    private static final double EPSILON = 1e-10;
     private final Random random;
 
     public WeightedUniformReservoirRSampler(long randomSeed) {
@@ -51,7 +52,7 @@ public class WeightedUniformReservoirRSampler {
 
         for (int i = 0; i < numberOfSamples; i++) {
             var rel = inputIterator.next();
-            var priority = Math.pow(random.nextDouble(), 1 / rel.property());
+            var priority = Math.pow(random.nextDouble(), 1 / rel.property() + EPSILON);
             reservoir.offer(rel.targetId(), priority);
         }
 
@@ -59,7 +60,7 @@ public class WeightedUniformReservoirRSampler {
 
         while (inputIterator.hasNext()) {
             var rel = inputIterator.next();
-            var priority = Math.pow(random.nextDouble(), 1 / rel.property());
+            var priority = Math.pow(random.nextDouble(), 1 / rel.property() + EPSILON);
             reservoir.offer(rel.targetId(), priority);
         }
 

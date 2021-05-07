@@ -103,4 +103,15 @@ class WeightedUniformRSamplerTest {
 
         assertThat(sample).containsExactly(1, 1);
     }
+
+    @Test
+    void zeroWeights() {
+        var input = LongStream.of(1, 1, 1)
+            .mapToObj(targetId -> ImmutableRelationshipCursor.of(0, targetId, 0D)).collect(Collectors.toList());
+
+        var sampler = new WeightedUniformReservoirRSampler(19L);
+        var samples = sampler.sample(input.stream(), 3, 2).toArray();
+
+        assertThat(samples).hasSize(2);
+    }
 }
