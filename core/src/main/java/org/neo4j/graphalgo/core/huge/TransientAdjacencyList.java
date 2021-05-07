@@ -162,7 +162,8 @@ public final class TransientAdjacencyList implements AdjacencyList {
     @Override
     public AdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node, double fallbackValue) {
         if (reuse instanceof DecompressingCursor) {
-            return reuse.initializedTo(offsets.get(node), degrees.degree(node));
+            reuse.init(offsets.get(node), degrees.degree(node));
+            return reuse;
         }
         return adjacencyCursor(node, fallbackValue);
     }
@@ -257,18 +258,6 @@ public final class TransientAdjacencyList implements AdjacencyList {
             dest.currentPosition = this.currentPosition;
             dest.maxTargets = this.maxTargets;
             return dest;
-        }
-
-        /**
-         * Copy iteration state from another cursor without changing {@code other}.
-         */
-        @Override
-        public void copyFrom(AdjacencyCursor other) {
-            assert(other instanceof DecompressingCursor);
-            var theOther = ((DecompressingCursor) other);
-            decompress.copyFrom(theOther.decompress);
-            currentPosition = theOther.currentPosition;
-            maxTargets = theOther.maxTargets;
         }
 
         @Override

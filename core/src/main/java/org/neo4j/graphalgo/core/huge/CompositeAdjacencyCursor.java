@@ -150,16 +150,6 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
     }
 
     @Override
-    public void copyFrom(AdjacencyCursor sourceCursor) {
-        assert(sourceCursor instanceof CompositeAdjacencyCursor);
-        var other = (CompositeAdjacencyCursor) sourceCursor;
-        List<AdjacencyCursor> otherCursors = other.cursors();
-        for (int i = 0; i < cursors.size(); i++) {
-            cursors.get(i).copyFrom(otherCursors.get(i));
-        }
-    }
-
-    @Override
     public void init(long index, int degree) {
         throw new UnsupportedOperationException(
             "CompositeAdjacencyCursor does not support init, use CompositeAdjacencyList.decompressingCursor instead.");

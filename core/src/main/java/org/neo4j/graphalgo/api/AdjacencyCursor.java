@@ -32,15 +32,6 @@ public interface AdjacencyCursor extends AutoCloseable {
     void init(long index, int degree);
 
     /**
-     * Initialize this cursor to point to the given {@code index}.
-     * Returns this to allow chaining.
-     */
-    default AdjacencyCursor initializedTo(long index, int degree) {
-        this.init(index, degree);
-        return this;
-    }
-
-    /**
      * Return how many targets can be decoded in total. This is equivalent to the degree.
      */
     int size();
@@ -103,8 +94,6 @@ public interface AdjacencyCursor extends AutoCloseable {
      */
     @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination);
 
-    void copyFrom(AdjacencyCursor sourceCursor);
-
     @Override
     void close();
 
@@ -162,10 +151,6 @@ public interface AdjacencyCursor extends AutoCloseable {
         @Override
         public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
             return INSTANCE;
-        }
-
-        @Override
-        public void copyFrom(AdjacencyCursor sourceCursor) {
         }
 
         @Override
