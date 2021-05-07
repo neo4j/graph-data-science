@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.compress.CompressedProperties;
-import org.neo4j.graphalgo.core.compress.CompressedTopology;
 
 import java.util.Optional;
 
@@ -40,13 +39,13 @@ public interface Relationships {
         long relationshipCount,
         Orientation orientation,
         boolean isMultiGraph,
-        CompressedTopology compressedTopology
+        AdjacencyList adjacencyList
     ) {
         return of(
             relationshipCount,
             orientation,
             isMultiGraph,
-            compressedTopology,
+            adjacencyList,
             null,
             DOUBLE_DEFAULT_FALLBACK
         );
@@ -56,12 +55,12 @@ public interface Relationships {
         long relationshipCount,
         Orientation orientation,
         boolean isMultiGraph,
-        CompressedTopology compressedTopology,
+        AdjacencyList adjacencyList,
         @Nullable CompressedProperties compressedProperties,
         double defaultPropertyValue
     ) {
         Topology topology = ImmutableTopology.of(
-            compressedTopology,
+            adjacencyList,
             relationshipCount,
             orientation,
             isMultiGraph
@@ -81,7 +80,7 @@ public interface Relationships {
 
     @ValueClass
     interface Topology {
-        CompressedTopology compressed();
+        AdjacencyList adjacencyList();
 
         long elementCount();
 

@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EdgeSplitterBaseTest {
     void assertRelExists(Relationships.Topology topology, long source, long... targets) {
-        var cursor = topology.compressed().adjacencyList().adjacencyCursor(source);
+        var cursor = topology.adjacencyList().adjacencyCursor(source);
         for (long target : targets) {
             assertThat(cursor.nextVLong()).isEqualTo(target);
         }

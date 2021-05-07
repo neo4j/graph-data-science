@@ -40,7 +40,6 @@ import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.compress.TopologyContainer;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyDegrees;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
@@ -153,11 +152,11 @@ class GraphStoreTest extends BaseTest {
             0L,
             Orientation.NATURAL,
             false,
-            TopologyContainer.of(new TransientAdjacencyList(
+            new TransientAdjacencyList(
                 new byte[0][0],
                 TransientAdjacencyDegrees.Factory.INSTANCE.newDegrees(HugeIntArray.of()),
                 TransientAdjacencyOffsets.Factory.INSTANCE.newOffsets(HugeLongArray.of())
-            )),
+            ),
             null,
             42.0
         );

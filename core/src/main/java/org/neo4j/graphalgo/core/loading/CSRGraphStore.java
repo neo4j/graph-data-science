@@ -419,7 +419,7 @@ public class CSRGraphStore implements GraphStore {
             ));
         }
 
-        var topology = relationships.get(relationshipType).compressed();
+        var adjacencyList = relationships.get(relationshipType).adjacencyList();
 
         var relationshipPropertyStore = relationshipProperties.get(relationshipType);
         var properties = propertyKeys.isEmpty()
@@ -432,7 +432,7 @@ public class CSRGraphStore implements GraphStore {
                 .toArray(CompressedProperties[]::new);
 
         return new CSRCompositeRelationshipIterator(
-            topology,
+            adjacencyList,
             propertyKeys.toArray(new String[0]),
             properties
         );
@@ -449,7 +449,7 @@ public class CSRGraphStore implements GraphStore {
         if (this.nodes instanceof AutoCloseable) {
             closeables.accept((AutoCloseable) this.nodes);
         }
-        this.relationships.values().forEach(rel -> closeables.add(rel.compressed()));
+        this.relationships.values().forEach(rel -> closeables.add(rel.adjacencyList()));
         this.relationshipProperties.forEach((propertyName, properties) ->
             properties.values().forEach(prop -> closeables.add(prop.values().compressed()))
         );

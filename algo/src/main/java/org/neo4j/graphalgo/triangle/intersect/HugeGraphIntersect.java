@@ -57,11 +57,8 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
         public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
             assert graph instanceof HugeGraph;
             var hugeGraph = (HugeGraph) graph;
-            var topology = hugeGraph.relationshipTopology().compressed();
-            return new HugeGraphIntersect(
-                topology.adjacencyList(),
-                config.maxDegree()
-            );
+            var topology = hugeGraph.relationshipTopology().adjacencyList();
+            return new HugeGraphIntersect(topology, config.maxDegree());
         }
     }
 }

@@ -260,7 +260,7 @@ class TransientAdjacencyListTest {
         }
         Relationships relationships = relationshipsBuilder.build();
         var mappedNodeId = idMap.toMappedNodeId(sourceNodeId);
-        var topology = relationships.topology().compressed();
-        return (TransientAdjacencyList.DecompressingCursor) topology.adjacencyList().adjacencyCursor(mappedNodeId);
+        var adjacencyList = relationships.topology().adjacencyList();
+        return (TransientAdjacencyList.DecompressingCursor) adjacencyList.adjacencyCursor(mappedNodeId);
     }
 }

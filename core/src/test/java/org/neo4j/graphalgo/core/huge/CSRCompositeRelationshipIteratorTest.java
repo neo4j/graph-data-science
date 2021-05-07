@@ -218,7 +218,7 @@ class CSRCompositeRelationshipIteratorTest {
 
         String[] propertyKeys = {"prop"};
         var iterator = new CSRCompositeRelationshipIterator(
-            graph.relationshipTopology().compressed(),
+            graph.relationshipTopology().adjacencyList(),
             propertyKeys,
             properties
         );

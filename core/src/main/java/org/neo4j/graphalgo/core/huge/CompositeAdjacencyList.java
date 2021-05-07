@@ -22,37 +22,36 @@ package org.neo4j.graphalgo.core.huge;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.PropertyCursor;
-import org.neo4j.graphalgo.core.compress.CompressedTopology;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CompositeAdjacencyList implements AdjacencyList {
 
-    private final List<CompressedTopology> adjacencies;
+    private final List<AdjacencyList> adjacencyLists;
 
-    CompositeAdjacencyList(List<CompressedTopology> adjacencies) {
-        this.adjacencies = adjacencies;
+    CompositeAdjacencyList(List<AdjacencyList> adjacencyLists) {
+        this.adjacencyLists = adjacencyLists;
     }
 
     public int size() {
-        return adjacencies.size();
+        return adjacencyLists.size();
     }
 
     @Override
     public int degree(long node) {
         long degree = 0;
-        for (var adjacency : adjacencies) {
-            degree += adjacency.adjacencyList().degree(node);
+        for (var adjacency : adjacencyLists) {
+            degree += adjacency.degree(node);
         }
         return Math.toIntExact(degree);
     }
 
     @Override
     public CompositeAdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
-        var cursors = new ArrayList<AdjacencyCursor>(adjacencies.size());
-        for (var adjacency : adjacencies) {
-            cursors.add(adjacency.adjacencyList().adjacencyCursor(node, fallbackValue));
+        var cursors = new ArrayList<AdjacencyCursor>(adjacencyLists.size());
+        for (var adjacency : adjacencyLists) {
+            cursors.add(adjacency.adjacencyCursor(node, fallbackValue));
         }
         return new CompositeAdjacencyCursor(cursors);
     }
@@ -65,7 +64,7 @@ public class CompositeAdjacencyList implements AdjacencyList {
             while (iter.hasNext()) {
                 var index = iter.nextIndex();
                 var cursor = iter.next();
-                var newCursor = adjacencies.get(index).adjacencyList().adjacencyCursor(cursor, node, fallbackValue);
+                var newCursor = adjacencyLists.get(index).adjacencyCursor(cursor, node, fallbackValue);
                 if (newCursor != cursor) {
                     iter.set(newCursor);
                 }
@@ -97,6 +96,6 @@ public class CompositeAdjacencyList implements AdjacencyList {
 
     @Override
     public void close() {
-        adjacencies.forEach(CompressedTopology::close);
+        adjacencyLists.forEach(AdjacencyList::close);
     }
 }

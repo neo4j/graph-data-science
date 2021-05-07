@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
@@ -36,7 +37,6 @@ import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.compress.CompressedProperties;
-import org.neo4j.graphalgo.core.compress.CompressedTopology;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -101,7 +101,7 @@ public class HugeGraph implements CSRGraph {
 
     protected final long relationshipCount;
 
-    protected CompressedTopology adjacency;
+    protected AdjacencyList adjacency;
 
     protected final double defaultPropertyValue;
     protected @Nullable CompressedProperties properties;
@@ -126,7 +126,7 @@ public class HugeGraph implements CSRGraph {
             schema,
             nodeProperties,
             topology.elementCount(),
-            topology.compressed(),
+            topology.adjacencyList(),
             maybeProperties.isPresent(),
             maybeProperties.map(Relationships.Properties::defaultPropertyValue).orElse(Double.NaN),
             maybeProperties.map(Relationships.Properties::compressed).orElse(null),
@@ -141,7 +141,7 @@ public class HugeGraph implements CSRGraph {
         GraphSchema schema,
         Map<String, NodeProperties> nodeProperties,
         long relationshipCount,
-        @NotNull CompressedTopology adjacency,
+        @NotNull AdjacencyList adjacency,
         boolean hasRelationshipProperty,
         double defaultPropertyValue,
         @Nullable CompressedProperties properties,
@@ -235,7 +235,7 @@ public class HugeGraph implements CSRGraph {
     private double findPropertyValue(long fromId, long toId) {
         var properties = Objects.requireNonNull(this.properties);
 
-        var adjacencyCursor = adjacency.adjacencyList().adjacencyCursor(fromId);
+        var adjacencyCursor = adjacency.adjacencyCursor(fromId);
         if (adjacencyCursor.isEmpty()) {
             return NO_PROPERTY_VALUE;
         }
@@ -318,7 +318,7 @@ public class HugeGraph implements CSRGraph {
 
     @Override
     public int degree(long node) {
-        return adjacency.adjacencyList().degree(node);
+        return adjacency.degree(node);
     }
 
     @Override
@@ -403,7 +403,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     private AdjacencyCursor adjacencyCursorForIteration(long sourceNodeId) {
-        return adjacency.adjacencyList().adjacencyCursor(cursorCache, sourceNodeId);
+        return adjacency.adjacencyCursor(cursorCache, sourceNodeId);
     }
 
     private PropertyCursor propertyCursorForIteration(long sourceNodeId) {
@@ -542,24 +542,6 @@ public class HugeGraph implements CSRGraph {
         public boolean accept(long s, long t) {
             if (count-- == 0) {
                 target = t;
-                return false;
-            }
-            return true;
-        }
-    }
-
-    public static class ExistsConsumer implements RelationshipConsumer {
-        private final long targetNodeId;
-        public boolean found = false;
-
-        public ExistsConsumer(long targetNodeId) {
-            this.targetNodeId = targetNodeId;
-        }
-
-        @Override
-        public boolean accept(long s, long t) {
-            if (t == targetNodeId) {
-                found = true;
                 return false;
             }
             return true;

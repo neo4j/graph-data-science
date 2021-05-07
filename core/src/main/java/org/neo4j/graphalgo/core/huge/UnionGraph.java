@@ -291,7 +291,7 @@ public final class UnionGraph implements CSRGraph {
             .map(CSRGraph::relationshipTopologies)
             .map(Map::values)
             .flatMap(Collection::stream)
-            .map(Relationships.Topology::compressed)
+            .map(Relationships.Topology::adjacencyList)
             .collect(Collectors.toList());
         return new CompositeAdjacencyList(adjacencies);
     }

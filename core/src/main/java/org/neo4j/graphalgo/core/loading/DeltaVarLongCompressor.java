@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.graphalgo.core.compress.ImmutableAdjacencyListsWithProperties;
 import org.neo4j.graphalgo.core.compress.LongArrayBuffer;
 import org.neo4j.graphalgo.core.compress.PropertiesContainer;
-import org.neo4j.graphalgo.core.compress.TopologyContainer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -152,7 +151,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
             var builder = ImmutableAdjacencyListsWithProperties
                 .builder()
-                .adjacency(TopologyContainer.of(adjacencyBuilder.build(adjacencyDegrees, adjacencyOffsets)));
+                .adjacency(adjacencyBuilder.build(adjacencyDegrees, adjacencyOffsets));
 
             for (int i = 0; i < propertyBuilders.length; i++) {
                 var offsets = offsetPagesIntoOffsets(propertyOffsets[i]);

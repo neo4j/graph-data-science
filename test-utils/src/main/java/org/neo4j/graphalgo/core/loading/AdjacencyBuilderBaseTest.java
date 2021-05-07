@@ -81,9 +81,7 @@ public abstract class AdjacencyBuilderBaseTest {
 
         adjacencyBuilder.flushTasks().forEach(Runnable::run);
 
-        var compressedTopology = globalBuilder.build().adjacency();
-
-        try (var adjacencyList = compressedTopology.adjacencyList()) {
+        try (var adjacencyList = globalBuilder.build().adjacency()) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
                 try (var cursor = adjacencyList.adjacencyCursor(nodeId)) {
                     while (cursor.hasNextVLong()) {

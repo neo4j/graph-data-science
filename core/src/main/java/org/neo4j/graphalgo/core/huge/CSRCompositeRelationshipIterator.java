@@ -20,16 +20,16 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.core.compress.CompressedProperties;
-import org.neo4j.graphalgo.core.compress.CompressedTopology;
 
 public class CSRCompositeRelationshipIterator implements CompositeRelationshipIterator {
 
     public static final CompressedProperties[] EMPTY_PROPERTIES = new CompressedProperties[0];
 
-    private final CompressedTopology topology;
+    private final AdjacencyList adjacencyList;
     private final String[] propertyKeys;
     private final CompressedProperties[] properties;
     private final double[] propertyBuffer;
@@ -38,7 +38,7 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
     private final PropertyCursor[] propertyCursors;
 
     public CSRCompositeRelationshipIterator(
-        CompressedTopology topology,
+        AdjacencyList adjacencyList,
         String[] propertyKeys,
         CompressedProperties[] properties
     ) {
@@ -46,7 +46,7 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
 
         assert properties.length == propertyCount;
 
-        this.topology = topology;
+        this.adjacencyList = adjacencyList;
         this.propertyKeys = propertyKeys;
         this.properties = properties;
 
@@ -61,19 +61,19 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
 
     @Override
     public int degree(long nodeId) {
-        return topology.adjacencyList().degree(nodeId);
+        return adjacencyList.degree(nodeId);
     }
 
     @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         // init adjacency cursor
-        var adjacencyCursor = topology.adjacencyList().adjacencyCursor(topologyCursor, nodeId);
+        var adjacencyCursor = adjacencyList.adjacencyCursor(topologyCursor, nodeId);
         if (adjacencyCursor.isEmpty()) {
             return;
         }
 
         topologyCursor = adjacencyCursor;
-        var degree = topology.adjacencyList().degree(nodeId);
+        var degree = adjacencyList.degree(nodeId);
 
         var propertyCount = propertyKeys.length;
         for (int propertyIdx = 0; propertyIdx < propertyCount; propertyIdx++) {
@@ -101,7 +101,7 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
     @Override
     public CompositeRelationshipIterator concurrentCopy() {
         return new CSRCompositeRelationshipIterator(
-            topology,
+            adjacencyList,
             propertyKeys,
             properties
         );
