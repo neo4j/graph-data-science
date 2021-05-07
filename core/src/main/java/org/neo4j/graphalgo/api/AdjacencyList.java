@@ -29,14 +29,13 @@ import org.jetbrains.annotations.Nullable;
  * One particular change could be that properties will be returned from {@link org.neo4j.graphalgo.api.AdjacencyCursor}s
  * instead from separate {@link org.neo4j.graphalgo.api.PropertyCursor}s.
  */
-public interface AdjacencyList extends AdjacencyDegrees, AutoCloseable {
+public interface AdjacencyList extends AutoCloseable {
 
     /**
      * Returns the degree of a node.
      *
      * Undefined behavior if the node does not exist.
      */
-    @Override
     int degree(long node);
 
     /**

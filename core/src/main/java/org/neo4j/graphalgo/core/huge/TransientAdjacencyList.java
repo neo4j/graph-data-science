@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
@@ -45,6 +46,16 @@ public final class TransientAdjacencyList implements AdjacencyList {
     public static final int PAGE_SHIFT = 18;
     public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
     public static final long PAGE_MASK = PAGE_SIZE - 1;
+
+    public static MemoryEstimation compressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
+        return MemoryEstimations.setup("", dimensions -> {
+            long nodeCount = dimensions.nodeCount();
+            long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
+            long relCount = undirected ? relCountForType * 2 : relCountForType;
+            long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
+            return TransientAdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
+        });
+    }
 
     public static MemoryEstimation compressedMemoryEstimation(long avgDegree, long nodeCount) {
         // Best case scenario:
@@ -72,29 +83,17 @@ public final class TransientAdjacencyList implements AdjacencyList {
         return MemoryEstimations
             .builder(TransientAdjacencyList.class)
             .fixed("pages", pagesMemoryRange)
+            .perNode("degrees", HugeIntArray::memoryEstimation)
+            .perNode("offsets", HugeLongArray::memoryEstimation)
             .build();
     }
 
+    @TestOnly
     public static MemoryEstimation compressedMemoryEstimation(boolean undirected) {
         return compressedMemoryEstimation(ALL_RELATIONSHIPS, undirected);
     }
 
-    public static MemoryEstimation compressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
-        return MemoryEstimations.setup("", dimensions -> {
-            long nodeCount = dimensions.nodeCount();
-            long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
-            long relCount = undirected ? relCountForType * 2 : relCountForType;
-            long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
-            return TransientAdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
-        });
-    }
-
-    public static MemoryEstimation uncompressedMemoryEstimation(boolean undirected) {
-        return uncompressedMemoryEstimation(ALL_RELATIONSHIPS, undirected);
-    }
-
     public static MemoryEstimation uncompressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
-
         return MemoryEstimations
             .builder(TransientAdjacencyList.class)
             .perGraphDimension("pages", (dimensions, concurrency) -> {
@@ -108,7 +107,21 @@ public final class TransientAdjacencyList implements AdjacencyList {
 
                 return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
             })
+            /*
+             NOTE: one might think to follow this with something like
+
+            .perNode("degrees", HugeIntArray::memoryEstimation)
+
+             This is the estimation for the property implementation which shares the actual
+             degree data with the adjacency list. We only need to count the reference, which is alreadya ccounted for.
+             */
+            .perNode("offsets", HugeLongArray::memoryEstimation)
             .build();
+    }
+
+    @TestOnly
+    public static MemoryEstimation uncompressedMemoryEstimation(boolean undirected) {
+        return uncompressedMemoryEstimation(ALL_RELATIONSHIPS, undirected);
     }
 
     /* test private */

@@ -33,6 +33,8 @@ import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import java.util.Arrays;
@@ -117,8 +119,9 @@ class TransientAdjacencyListTest {
 
     @Test
     void shouldComputeCompressedMemoryEstimationForSinglePage() {
+        var nodeCount = 100;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(100)
+            .nodeCount(nodeCount)
             .maxRelCount(100)
             .build();
 
@@ -131,10 +134,16 @@ class TransientAdjacencyListTest {
         int minPages = PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
         int maxPages = PageUtil.numPagesFor(worstCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
         long bytesPerPage = BitUtil.align(16 + 262144L, 8);
-        long minMemoryReqs = minPages * bytesPerPage + BitUtil.align(16 + minPages * 4, 8);
-        long maxMemoryReqs = maxPages * bytesPerPage + BitUtil.align(16 + maxPages * 4, 8);
+        long minAdjacencyPages = minPages * bytesPerPage + BitUtil.align(16 + minPages * 4, 8);
+        long maxAdjacencyPages = maxPages * bytesPerPage + BitUtil.align(16 + maxPages * 4, 8);
 
-        MemoryRange expected = MemoryRange.of(minMemoryReqs + classSize, maxMemoryReqs + classSize);
+        long degrees = HugeIntArray.memoryEstimation(nodeCount);
+        long offsets = HugeLongArray.memoryEstimation(nodeCount);
+
+        MemoryRange expected = MemoryRange.of(
+            classSize + minAdjacencyPages + degrees + offsets,
+            classSize + maxAdjacencyPages + degrees + offsets
+        );
 
         assertEquals(expected, memRec.memoryUsage());
     }
@@ -153,17 +162,20 @@ class TransientAdjacencyListTest {
 
         int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
         long bytesPerPage = BitUtil.align(16 + 262144L, 8);
-        long memoryReqs = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
+        long adjacencyPages = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
 
-        MemoryRange expected = MemoryRange.of(memoryReqs + classSize);
+        long offsets = HugeLongArray.memoryEstimation(100);
+
+        MemoryRange expected = MemoryRange.of(classSize + adjacencyPages + offsets);
 
         assertEquals(expected, memRec.memoryUsage());
     }
 
     @Test
     void shouldComputeCompressedMemoryEstimationForMultiplePage() {
+        var nodeCount = 100_000_000L;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(100_000_000L)
+            .nodeCount(nodeCount)
             .maxRelCount(100_000_000_000L)
             .build();
 
@@ -176,10 +188,16 @@ class TransientAdjacencyListTest {
         int minPages = PageUtil.numPagesFor(bestCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
         int maxPages = PageUtil.numPagesFor(worstCaseAdjacencySize, PAGE_SHIFT, PAGE_MASK);
         long bytesPerPage = BitUtil.align(16 + 262144L, 8);
-        long minMemoryReqs = minPages * bytesPerPage + BitUtil.align(16 + minPages * 4, 8);
-        long maxMemoryReqs = maxPages * bytesPerPage + BitUtil.align(16 + maxPages * 4, 8);
+        long minAdjacencyPages = minPages * bytesPerPage + BitUtil.align(16 + minPages * 4, 8);
+        long maxAdjacencyPages = maxPages * bytesPerPage + BitUtil.align(16 + maxPages * 4, 8);
 
-        MemoryRange expected = MemoryRange.of(minMemoryReqs + classSize, maxMemoryReqs + classSize);
+        long degrees = HugeIntArray.memoryEstimation(nodeCount);
+        long offsets = HugeLongArray.memoryEstimation(nodeCount);
+
+        MemoryRange expected = MemoryRange.of(
+            classSize + minAdjacencyPages + degrees + offsets,
+            classSize + maxAdjacencyPages + degrees + offsets
+        );
 
         assertEquals(expected, memRec.memoryUsage());
     }
@@ -195,13 +213,15 @@ class TransientAdjacencyListTest {
 
         long classSize = 24;
 
-        long uncompessedAdjacencySize = 800_400_000_000L;
+        long uncompressedAdjacencySize = 800_400_000_000L;
 
-        int pages = PageUtil.numPagesFor(uncompessedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
+        int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
         long bytesPerPage = BitUtil.align(16 + 262144L, 8);
-        long memoryReqs = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
+        long adjacencyPages = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
 
-        MemoryRange expected = MemoryRange.of(memoryReqs + classSize);
+        long offsets = HugeLongArray.memoryEstimation(100_000_000L);
+
+        MemoryRange expected = MemoryRange.of(classSize + adjacencyPages + offsets);
 
         assertEquals(expected, memRec.memoryUsage());
     }
