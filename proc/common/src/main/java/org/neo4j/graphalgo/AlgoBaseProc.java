@@ -51,7 +51,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.config.BaseConfig.SUDO_KEY;
@@ -291,7 +293,7 @@ public abstract class AlgoBaseProc<
 
             estimateDimensions = ImmutableGraphDimensions.builder()
                 .nodeCount(filteredGraph.nodeCount())
-                .relationshipCounts(Map.of(RelationshipType.ALL_RELATIONSHIPS, relCount))
+                .relationshipCounts(filteredGraphRelationshipCounts(config, graphStore, filteredGraph))
                 .maxRelCount(relCount)
                 .build();
         }
@@ -349,6 +351,25 @@ public abstract class AlgoBaseProc<
         GraphStoreValidation.validate(graphStore, config);
         validateConfigsAfterLoad(graphStore, graphCandidate.config(), config);
         return graphStore;
+    }
+
+    private Map<RelationshipType, Long> filteredGraphRelationshipCounts(
+        CONFIG config,
+        GraphStore graphStore,
+        Graph filteredGraph
+    ) {
+        var relCount = filteredGraph.relationshipCount();
+        return Stream.concat(config.internalRelationshipTypes(graphStore).stream(), Stream.of(RelationshipType.ALL_RELATIONSHIPS))
+            .distinct()
+            .collect(Collectors.toMap(
+                key -> key,
+                key -> key == RelationshipType.ALL_RELATIONSHIPS
+                    ? relCount
+                    : filteredGraph
+                        .relationshipTypeFilteredGraph(Set.of(key))
+                        .relationshipCount()
+                )
+            );
     }
 
     private void validateMemoryUsageIfImplemented(CONFIG config) {

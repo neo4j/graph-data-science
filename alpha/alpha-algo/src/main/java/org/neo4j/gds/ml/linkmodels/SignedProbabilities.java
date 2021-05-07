@@ -44,7 +44,9 @@ public final class SignedProbabilities {
     private long negativeCount;
 
     public static long estimateMemory(GraphDimensions dimensions, RelationshipType relationshipType, double relationshipFraction) {
-        var relationshipCount = dimensions.relationshipCounts().get(relationshipType) * relationshipFraction;
+        var relationshipCount = dimensions.relationshipCounts().containsKey(relationshipType)
+            ? dimensions.relationshipCounts().get(relationshipType) * relationshipFraction
+            : dimensions.maxRelCount() * relationshipFraction;
         return MemoryUsage.sizeOfInstance(SignedProbabilities.class) +
                MemoryUsage.sizeOfInstance(Optional.class) +
                MemoryUsage.sizeOfInstance(ArrayList.class) +
