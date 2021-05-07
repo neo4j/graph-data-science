@@ -13,6 +13,12 @@ This chapter contains details for functionality available in the Neo4j Graph Dat
 
 This is a procedure that can show the log entries of a long-running task or algorithm.
 
+[NOTE]
+====
+In order to use the Progress Logging feature, you must first enable it via Neo4j configuration,
+by setting `gds.progress_tracking_enabled=true` in the `neo4j.conf` configuration file of your Neo4j installation.
+====
+
 ==== Syntax
 
 .Getting the proggress of tasks:
