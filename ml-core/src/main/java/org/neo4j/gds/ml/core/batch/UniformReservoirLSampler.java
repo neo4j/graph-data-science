@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.LongStream;
 
-/**
+/*
  * L Algorithm for uniform sampling k elements from an input stream
  * https://richardstartin.github.io/posts/reservoir-sampling#algorithm-l
  *
