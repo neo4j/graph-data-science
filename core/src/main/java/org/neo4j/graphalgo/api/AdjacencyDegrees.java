@@ -19,10 +19,25 @@
  */
 package org.neo4j.graphalgo.api;
 
+import java.util.function.LongToIntFunction;
+
 public interface AdjacencyDegrees extends AutoCloseable {
 
     int degree(long node);
 
     @Override
     void close();
+
+    static AdjacencyDegrees from(LongToIntFunction degrees) {
+        return new AdjacencyDegrees() {
+            @Override
+            public int degree(long node) {
+                return degrees.applyAsInt(node);
+            }
+
+            @Override
+            public void close() {
+            }
+        };
+    }
 }

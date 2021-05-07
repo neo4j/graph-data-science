@@ -41,6 +41,33 @@ public class CompositeAdjacencyList implements AdjacencyList {
     }
 
     @Override
+    public int degree(long node) {
+        long degree = 0;
+        for (var adjacency : adjacencies) {
+            degree += adjacency.adjacencyDegrees().degree(node);
+        }
+        return Math.toIntExact(degree);
+    }
+
+    @Override
+    public AdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
+        var cursors = new ArrayList<AdjacencyCursor>();
+        for (var adjacency : adjacencies) {
+            var cursor = adjacency.adjacencyList().adjacencyCursor(node, fallbackValue);
+            if (!cursor.isEmpty()) {
+                cursors.add(cursor);
+            }
+        }
+        return cursors.isEmpty() ? AdjacencyCursor.empty() : new CompositeAdjacencyCursor(cursors);
+    }
+
+    @Override
+    public AdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node, double fallbackValue) {
+        // TODO: can we implement reuse?
+        return adjacencyCursor(node, fallbackValue);
+    }
+
+    @Override
     public PropertyCursor rawCursor() {
         throw new UnsupportedOperationException("CompositeAdjacencyList#rawCursor is not supported");
     }

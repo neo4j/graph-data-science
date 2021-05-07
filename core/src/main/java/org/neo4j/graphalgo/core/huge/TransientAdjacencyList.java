@@ -21,7 +21,9 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -41,8 +43,6 @@ public final class TransientAdjacencyList implements AdjacencyList {
     public static final int PAGE_SHIFT = 18;
     public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
     public static final long PAGE_MASK = PAGE_SIZE - 1;
-
-    private byte[][] pages;
 
     public static MemoryEstimation compressedMemoryEstimation(long avgDegree, long nodeCount) {
         // Best case scenario:
@@ -117,13 +117,48 @@ public final class TransientAdjacencyList implements AdjacencyList {
         return (firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
     }
 
-    public TransientAdjacencyList(byte[][] pages) {
+    private byte[][] pages;
+    private final AdjacencyDegrees degrees;
+    private final AdjacencyOffsets offsets;
+
+    public TransientAdjacencyList(
+        byte[][] pages,
+        AdjacencyDegrees degrees,
+        AdjacencyOffsets offsets
+    ) {
         this.pages = pages;
+        this.degrees = degrees;
+        this.offsets = offsets;
     }
 
     @Override
     public void close() {
         pages = null;
+        degrees.close();
+        offsets.close();
+    }
+
+    @Override
+    public int degree(long node) {
+        return degrees.degree(node);
+    }
+
+    @Override
+    public AdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
+        var offset = offsets.get(node);
+        if (offset == 0) {
+            return AdjacencyCursor.empty();
+        }
+        var degree = degrees.degree(node);
+        var cursor = new DecompressingCursor(pages);
+        cursor.init(offset, degree);
+        return cursor;
+    }
+
+    @Override
+    public AdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node, double fallbackValue) {
+        var offset = offsets.get(node);
+        return offset == 0 ? AdjacencyCursor.empty() : reuse.initializedTo(offset, degrees.degree(node));
     }
 
     // Cursors

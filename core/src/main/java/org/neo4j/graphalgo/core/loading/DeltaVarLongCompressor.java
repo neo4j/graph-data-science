@@ -155,13 +155,14 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
                 .adjacency(TopologyContainer.of(
                     adjacencyDegrees,
                     adjacencyOffsets,
-                    adjacencyBuilder.build()
+                    adjacencyBuilder.build(adjacencyDegrees, adjacencyOffsets)
                 ));
 
             for (int i = 0; i < propertyBuilders.length; i++) {
+                var offsets = offsetPagesIntoOffsets(propertyOffsets[i]);
                 var compressedProps = PropertiesContainer.of(
-                    offsetPagesIntoOffsets(propertyOffsets[i]),
-                    propertyBuilders[i].build()
+                    offsets,
+                    propertyBuilders[i].build(adjacencyDegrees, offsets)
                 );
                 builder.addProperty(compressedProps);
             }

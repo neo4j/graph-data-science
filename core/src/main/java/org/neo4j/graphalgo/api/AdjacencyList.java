@@ -21,6 +21,22 @@ package org.neo4j.graphalgo.api;
 
 public interface AdjacencyList extends AutoCloseable {
 
+    int degree(long node);
+
+    default AdjacencyCursor adjacencyCursor(long node) {
+        return adjacencyCursor(node, Double.NaN);
+    }
+
+    AdjacencyCursor adjacencyCursor(long node, double fallbackValue);
+
+    default AdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node) {
+        return adjacencyCursor(reuse, node, Double.NaN);
+    }
+
+    default AdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node, double fallbackValue) {
+        return adjacencyCursor(node, fallbackValue);
+    }
+
     // Cursors
 
     PropertyCursor rawCursor();

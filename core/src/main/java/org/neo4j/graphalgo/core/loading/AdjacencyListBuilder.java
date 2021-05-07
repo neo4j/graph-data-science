@@ -19,13 +19,15 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
 public interface AdjacencyListBuilder {
 
     AdjacencyListAllocator newAllocator();
 
-    AdjacencyList build();
+    AdjacencyList build(AdjacencyDegrees degrees, AdjacencyOffsets offsets);
 
     void flush();
 }

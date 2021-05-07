@@ -64,6 +64,10 @@ public interface AdjacencyCursor extends AutoCloseable {
      */
     int remaining();
 
+    default boolean isEmpty() {
+        return remaining() == 0;
+    }
+
     // DOCTODO: I think this documentation if either out of date or misleading.
     //  Either we skip all blocks and return -1 or we find a value that is strictly larger.
     /**
@@ -92,4 +96,64 @@ public interface AdjacencyCursor extends AutoCloseable {
 
     @Override
     void close();
+
+    static AdjacencyCursor empty() {
+        return EmptyAdjacencyCursor.INSTANCE;
+    }
+
+    enum EmptyAdjacencyCursor implements AdjacencyCursor {
+        INSTANCE;
+
+        @Override
+        public void init(long index, int degree) {
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public boolean hasNextVLong() {
+            return false;
+        }
+
+        @Override
+        public long nextVLong() {
+            return NOT_FOUND;
+        }
+
+        @Override
+        public long peekVLong() {
+            return NOT_FOUND;
+        }
+
+        @Override
+        public int remaining() {
+            return 0;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public long skipUntil(long nodeId) {
+            return NOT_FOUND;
+        }
+
+        @Override
+        public long advance(long nodeId) {
+            return NOT_FOUND;
+        }
+
+        @Override
+        public void copyFrom(AdjacencyCursor sourceCursor) {
+        }
+
+        @Override
+        public void close() {
+        }
+    }
 }
