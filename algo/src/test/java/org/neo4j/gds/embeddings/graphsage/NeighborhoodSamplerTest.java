@@ -20,18 +20,12 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import com.carrotsearch.hppc.LongLongHashMap;
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
@@ -55,43 +49,40 @@ class NeighborhoodSamplerTest {
             "(a)-->(h)";
 
         @Inject
-        private Graph graph;
-
-        @Inject
-        private IdFunction idFunction;
+        private TestGraph graph;
 
         @Test
         void shouldSampleSubsetOfNeighbors() {
 
             NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
             int numberOfSamples = 3;
-            var sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
+            var sample = sampler.sample(graph, graph.toMappedNodeId("a"), numberOfSamples);
 
-            assertThat(sample)
-                .isNotNull()
-                .hasSize(numberOfSamples)
-                .containsAnyOf(
-                    idFunction.of("b"),
-                    idFunction.of("f"),
-                    idFunction.of("g"),
-                    idFunction.of("h")
-                )
-                .doesNotContain( // does not contain negative neighbors
-                    idFunction.of("x"),
-                    idFunction.of("y"),
-                    idFunction.of("z"),
-                    idFunction.of("a"),
-                    idFunction.of("c"),
-                    idFunction.of("d"),
-                    idFunction.of("e")
-                );
-        }
+        assertThat(sample)
+            .isNotNull()
+            .hasSize(numberOfSamples)
+            .containsAnyOf(
+                graph.toMappedNodeId("b"),
+                graph.toMappedNodeId("f"),
+                graph.toMappedNodeId("g"),
+                graph.toMappedNodeId("h")
+            )
+            .doesNotContain( // does not contain negative neighbors
+                graph.toMappedNodeId("x"),
+                graph.toMappedNodeId("y"),
+                graph.toMappedNodeId("z"),
+                graph.toMappedNodeId("a"),
+                graph.toMappedNodeId("c"),
+                graph.toMappedNodeId("d"),
+                graph.toMappedNodeId("e")
+            );
+    }
 
         @Test
         void shouldSampleAllNeighborsWhenNumberOfSamplesAreGreater() {
             NeighborhoodSampler sampler = new NeighborhoodSampler(0L);
             int numberOfSamples = 19;
-            var sample = sampler.sample(graph, idFunction.of("a"), numberOfSamples);
+            var sample = sampler.sample(graph, graph.toMappedNodeId("a"), numberOfSamples);
 
             assertThat(sample)
                 .isNotNull()
@@ -181,34 +172,6 @@ class NeighborhoodSamplerTest {
         var sample = sampler.sample(graph, 0, 2).toArray();
 
         assertThat(sample).containsExactly(1, 1);
-    }
-
-    // TODO transform this into a benchmark
-    @Test
-    void sampleAHighDegreeNode() {
-        var graph = RandomGraphGenerator.builder().nodeCount(1000)
-            .averageDegree(5)
-            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-            .seed(42L)
-            .build().generate();
-
-        var nodeWithMaxDegree = new MutableLong();
-        var maxDegree = new MutableInt(-1);
-
-        graph.forEachNode(nodeId -> {
-            var degree = graph.degree(nodeId);
-            if (degree > maxDegree.intValue()) {
-                maxDegree.setValue(degree);
-                nodeWithMaxDegree.setValue(nodeId);
-            }
-            return true;
-        });
-
-        NeighborhoodSampler sampler = new NeighborhoodSampler(42);
-        var numberOfSamples = 1;
-        var sample = sampler.sample(graph, nodeWithMaxDegree.longValue(), numberOfSamples);
-
-        assertThat(sample).hasSize(numberOfSamples);
     }
 
     @Nested
