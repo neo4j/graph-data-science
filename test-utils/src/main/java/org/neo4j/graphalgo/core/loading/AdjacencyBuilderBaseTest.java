@@ -83,14 +83,9 @@ public abstract class AdjacencyBuilderBaseTest {
 
         var compressedTopology = globalBuilder.build().adjacency();
 
-        try (var adjacencyList = compressedTopology.adjacencyList();
-             var adjacencyDegrees = compressedTopology.adjacencyDegrees();
-             var adjacencyOffsets = compressedTopology.adjacencyOffsets()
-        ) {
+        try (var adjacencyList = compressedTopology.adjacencyList()) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-                int degree = adjacencyDegrees.degree(nodeId);
-                long offset = adjacencyOffsets.get(nodeId);
-                try (var cursor = adjacencyList.decompressingCursor(offset, degree)) {
+                try (var cursor = adjacencyList.adjacencyCursor(nodeId)) {
                     while (cursor.hasNextVLong()) {
                         long target = cursor.nextVLong();
                         assertEquals(relationships.remove(nodeId), target);

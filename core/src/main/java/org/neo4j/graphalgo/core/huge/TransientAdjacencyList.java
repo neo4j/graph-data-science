@@ -157,8 +157,10 @@ public final class TransientAdjacencyList implements AdjacencyList {
 
     @Override
     public AdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node, double fallbackValue) {
-        var offset = offsets.get(node);
-        return offset == 0 ? AdjacencyCursor.empty() : reuse.initializedTo(offset, degrees.degree(node));
+        if (reuse instanceof DecompressingCursor) {
+            return reuse.initializedTo(offsets.get(node), degrees.degree(node));
+        }
+        return adjacencyCursor(node, fallbackValue);
     }
 
     // Cursors

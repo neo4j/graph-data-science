@@ -34,7 +34,7 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
     private final CompressedProperties[] properties;
     private final double[] propertyBuffer;
 
-    private final AdjacencyCursor topologyCursor;
+    private AdjacencyCursor topologyCursor;
     private final PropertyCursor[] propertyCursors;
 
     public CSRCompositeRelationshipIterator(
@@ -51,7 +51,7 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
         this.properties = properties;
 
         this.propertyBuffer = new double[propertyCount];
-        this.topologyCursor = topology.adjacencyList().rawDecompressingCursor();
+        this.topologyCursor = AdjacencyCursor.empty();
 
         this.propertyCursors = new PropertyCursor[propertyCount];
         for (int i = 0; i < propertyCount; i++) {
@@ -61,24 +61,21 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
 
     @Override
     public int degree(long nodeId) {
-        return topology.adjacencyDegrees().degree(nodeId);
+        return topology.adjacencyList().degree(nodeId);
     }
 
     @Override
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
-        var offset = topology.adjacencyOffsets().get(nodeId);
-
-        if (offset == 0L) {
+        // init adjacency cursor
+        var adjacencyCursor = topology.adjacencyList().adjacencyCursor(topologyCursor, nodeId);
+        if (adjacencyCursor.isEmpty()) {
             return;
         }
 
-        // init adjacency cursor
-        var degree = topology.adjacencyDegrees().degree(nodeId);
-        var adjacencyCursor = topologyCursor.initializedTo(offset, degree);
-
+        topologyCursor = adjacencyCursor;
+        var degree = topology.adjacencyList().degree(nodeId);
 
         var propertyCount = propertyKeys.length;
-
         for (int propertyIdx = 0; propertyIdx < propertyCount; propertyIdx++) {
             var propertyOffset = properties[propertyIdx].adjacencyOffsets().get(nodeId);
             propertyCursors[propertyIdx].init(propertyOffset, degree);

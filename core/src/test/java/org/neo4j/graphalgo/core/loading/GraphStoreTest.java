@@ -156,7 +156,6 @@ class GraphStoreTest extends BaseTest {
             Orientation.NATURAL,
             false,
             TopologyContainer.of(
-                adjacencyDegrees,
                 adjacencyOffsets,
                 new TransientAdjacencyList(new byte[0][0], adjacencyDegrees, adjacencyOffsets)
             ),

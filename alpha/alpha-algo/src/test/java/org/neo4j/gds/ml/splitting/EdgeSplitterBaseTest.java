@@ -19,26 +19,27 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.Relationships;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EdgeSplitterBaseTest {
     void assertRelExists(Relationships.Topology topology, long source, long... targets) {
-        var cursor = topology.compressed().adjacencyList().decompressingCursor(
-            topology.compressed().adjacencyOffsets().get(source),
-            topology.compressed().adjacencyDegrees().degree(source)
-        );
+        var cursor = topology.compressed().adjacencyList().adjacencyCursor(source);
         for (long target : targets) {
             assertThat(cursor.nextVLong()).isEqualTo(target);
         }
     }
 
-    void assertRelProperties(Relationships.Properties properties, AdjacencyDegrees degrees, long source, double... values) {
-        var cursor = properties.compressed().adjacencyList().cursor(
-            properties.compressed().adjacencyOffsets().get(source),
-            degrees.degree(source)
+    void assertRelProperties(
+        Relationships.Properties properties,
+        long source,
+        double... values
+    ) {
+        var compressed = properties.compressed();
+        var cursor = compressed.adjacencyList().cursor(
+            compressed.adjacencyOffsets().get(source),
+            compressed.adjacencyList().degree(source)
         );
         for (double property : values) {
             assertThat(Double.longBitsToDouble(cursor.nextLong())).isEqualTo(property);

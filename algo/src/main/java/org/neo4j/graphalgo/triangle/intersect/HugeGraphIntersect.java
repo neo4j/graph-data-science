@@ -21,42 +21,28 @@ package org.neo4j.graphalgo.triangle.intersect;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
-import org.neo4j.graphalgo.core.compress.CompressedTopology;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 
 public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
 
-    private final AdjacencyDegrees degrees;
-    private final AdjacencyOffsets offsets;
+    private final AdjacencyList adjacencyList;
 
-    private HugeGraphIntersect(
-        AdjacencyDegrees degrees,
-        AdjacencyList adjacency,
-        AdjacencyOffsets offsets,
-        long maxDegree
-    ) {
-        super(adjacency::rawDecompressingCursor, maxDegree);
-        this.degrees = degrees;
-        this.offsets = offsets;
+    private HugeGraphIntersect(AdjacencyList adjacency, long maxDegree) {
+        super(AdjacencyCursor::empty, maxDegree);
+        this.adjacencyList = adjacency;
     }
 
     @Override
     public AdjacencyCursor cursor(long node, int degree, AdjacencyCursor reuse) {
-        final long offset = offsets.get(node);
-        if (offset == 0L) {
-            return empty;
-        }
-        return super.cursor(offset, degree, reuse);
+        return adjacencyList.adjacencyCursor(reuse, node);
     }
 
     @Override
     protected int degree(long node) {
-        return degrees.degree(node);
+        return adjacencyList.degree(node);
     }
 
     @ServiceProvider
@@ -73,9 +59,7 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
             var hugeGraph = (HugeGraph) graph;
             var topology = hugeGraph.relationshipTopology().compressed();
             return new HugeGraphIntersect(
-                topology.adjacencyDegrees(),
                 topology.adjacencyList(),
-                topology.adjacencyOffsets(),
                 config.maxDegree()
             );
         }

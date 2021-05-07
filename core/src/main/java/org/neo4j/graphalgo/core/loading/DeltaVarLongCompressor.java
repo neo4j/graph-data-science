@@ -153,7 +153,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             var builder = ImmutableAdjacencyListsWithProperties
                 .builder()
                 .adjacency(TopologyContainer.of(
-                    adjacencyDegrees,
                     adjacencyOffsets,
                     adjacencyBuilder.build(adjacencyDegrees, adjacencyOffsets)
                 ));

@@ -81,9 +81,8 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var selectedProperties = selectedRels.properties().get();
         assertEquals(2, selectedProperties.elementCount());
-        var degrees = selectedRels.topology().compressed().adjacencyDegrees();
-        assertRelProperties(selectedProperties, degrees, 3, POSITIVE);
-        assertRelProperties(selectedProperties, degrees, 2, NEGATIVE);
+        assertRelProperties(selectedProperties, 3, POSITIVE);
+        assertRelProperties(selectedProperties, 2, NEGATIVE);
     }
 
 
@@ -113,10 +112,9 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         });
         assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
             assertEquals(3L, p.elementCount());
-            var degrees = selectedRels.topology().compressed().adjacencyDegrees();
-            assertRelProperties(p, degrees, 3, POSITIVE);
-            assertRelProperties(p, degrees, 2, NEGATIVE);
-            assertRelProperties(p, degrees, 4, NEGATIVE);
+            assertRelProperties(p, 3, POSITIVE);
+            assertRelProperties(p, 2, NEGATIVE);
+            assertRelProperties(p, 4, NEGATIVE);
         });
     }
 

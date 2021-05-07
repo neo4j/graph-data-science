@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.compress.CompressedTopology;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CompositeAdjacencyList implements AdjacencyList {
 
@@ -44,26 +43,35 @@ public class CompositeAdjacencyList implements AdjacencyList {
     public int degree(long node) {
         long degree = 0;
         for (var adjacency : adjacencies) {
-            degree += adjacency.adjacencyDegrees().degree(node);
+            degree += adjacency.adjacencyList().degree(node);
         }
         return Math.toIntExact(degree);
     }
 
     @Override
-    public AdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
-        var cursors = new ArrayList<AdjacencyCursor>();
+    public CompositeAdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
+        var cursors = new ArrayList<AdjacencyCursor>(adjacencies.size());
         for (var adjacency : adjacencies) {
-            var cursor = adjacency.adjacencyList().adjacencyCursor(node, fallbackValue);
-            if (!cursor.isEmpty()) {
-                cursors.add(cursor);
-            }
+            cursors.add(adjacency.adjacencyList().adjacencyCursor(node, fallbackValue));
         }
-        return cursors.isEmpty() ? AdjacencyCursor.empty() : new CompositeAdjacencyCursor(cursors);
+        return new CompositeAdjacencyCursor(cursors);
     }
 
     @Override
-    public AdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node, double fallbackValue) {
-        // TODO: can we implement reuse?
+    public CompositeAdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node, double fallbackValue) {
+        if (reuse instanceof CompositeAdjacencyCursor) {
+            var compositeReuse = (CompositeAdjacencyCursor) reuse;
+            var iter = (compositeReuse).cursors().listIterator();
+            while (iter.hasNext()) {
+                var index = iter.nextIndex();
+                var cursor = iter.next();
+                var newCursor = adjacencies.get(index).adjacencyList().adjacencyCursor(cursor, node, fallbackValue);
+                if (newCursor != cursor) {
+                    iter.set(newCursor);
+                }
+            }
+            return compositeReuse;
+        }
         return adjacencyCursor(node, fallbackValue);
     }
 
@@ -79,41 +87,16 @@ public class CompositeAdjacencyList implements AdjacencyList {
 
     @Override
     public CompositeAdjacencyCursor rawDecompressingCursor() {
-        List<AdjacencyCursor> adjacencyCursors = adjacencies
-            .stream()
-            .map(adj -> adj.adjacencyList().rawDecompressingCursor())
-            .collect(Collectors.toList());
-        return new CompositeAdjacencyCursor(adjacencyCursors);
+        return adjacencyCursor(0, Double.NaN);
     }
 
     @Override
     public CompositeAdjacencyCursor decompressingCursor(long nodeId, int unusedDegree) {
-        var adjacencyCursors = new ArrayList<AdjacencyCursor>(adjacencies.size());
-        forEachOffset(nodeId, (adjacencyList, offset, degree) -> {
-            var cursor = adjacencyList.rawDecompressingCursor();
-            if (offset != 0) {
-                cursor.init(offset, degree);
-            }
-            adjacencyCursors.add(cursor);
-        });
-        return new CompositeAdjacencyCursor(adjacencyCursors);
+        return adjacencyCursor(nodeId, Double.NaN);
     }
 
     @Override
     public void close() {
         adjacencies.forEach(CompressedTopology::close);
-    }
-
-    public void forEachOffset(long nodeId, CompositeIndexedOffsetOperator func) {
-        for (var adjacency : adjacencies) {
-            long offset = adjacency.adjacencyOffsets().get(nodeId);
-            int degree = adjacency.adjacencyDegrees().degree(nodeId);
-            func.apply(adjacency.adjacencyList(), offset, degree);
-        }
-    }
-
-    @FunctionalInterface
-    public interface CompositeIndexedOffsetOperator {
-        void apply(AdjacencyList list, long offset, int degree);
     }
 }

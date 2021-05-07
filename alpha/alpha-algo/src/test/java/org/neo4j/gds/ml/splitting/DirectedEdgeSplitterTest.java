@@ -80,11 +80,10 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         });
         assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
             assertEquals(4L, p.elementCount());
-            var degrees = selectedRels.topology().compressed().adjacencyDegrees();
-            assertRelProperties(p, degrees, 4, NEGATIVE);
-            assertRelProperties(p, degrees, 5, NEGATIVE);
-            assertRelProperties(p, degrees, 0, POSITIVE);
-            assertRelProperties(p, degrees, 2, POSITIVE);
+            assertRelProperties(p, 4, NEGATIVE);
+            assertRelProperties(p, 5, NEGATIVE);
+            assertRelProperties(p, 0, POSITIVE);
+            assertRelProperties(p, 2, POSITIVE);
         });
     }
 
@@ -117,12 +116,11 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         });
         assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
             assertEquals(6L, p.elementCount());
-            var degrees = selectedRels.topology().compressed().adjacencyDegrees();
-            assertRelProperties(p, degrees, 0, POSITIVE, NEGATIVE);
-            assertRelProperties(p, degrees, 3, NEGATIVE);
-            assertRelProperties(p, degrees, 4, NEGATIVE);
-            assertRelProperties(p, degrees, 5, NEGATIVE);
-            assertRelProperties(p, degrees, 1, POSITIVE);
+            assertRelProperties(p, 0, POSITIVE, NEGATIVE);
+            assertRelProperties(p, 3, NEGATIVE);
+            assertRelProperties(p, 4, NEGATIVE);
+            assertRelProperties(p, 5, NEGATIVE);
+            assertRelProperties(p, 1, POSITIVE);
         });
     }
 

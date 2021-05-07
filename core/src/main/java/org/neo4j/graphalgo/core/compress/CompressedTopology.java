@@ -19,15 +19,12 @@
  */
 package org.neo4j.graphalgo.core.compress;
 
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
 import java.io.Closeable;
 
 public interface CompressedTopology extends Closeable {
-
-    AdjacencyDegrees adjacencyDegrees();
 
     AdjacencyOffsets adjacencyOffsets();
 

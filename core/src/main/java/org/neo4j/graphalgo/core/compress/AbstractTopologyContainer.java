@@ -21,15 +21,11 @@ package org.neo4j.graphalgo.core.compress;
 
 
 import org.neo4j.graphalgo.annotation.DataClass;
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
 @DataClass
 public abstract class AbstractTopologyContainer implements CompressedTopology {
-
-    @Override
-    public abstract AdjacencyDegrees adjacencyDegrees();
 
     @Override
     public abstract AdjacencyOffsets adjacencyOffsets();
@@ -39,7 +35,6 @@ public abstract class AbstractTopologyContainer implements CompressedTopology {
 
     @Override
     public void close() {
-        adjacencyDegrees().close();
         adjacencyOffsets().close();
         adjacencyList().close();
     }
