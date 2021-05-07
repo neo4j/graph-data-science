@@ -234,7 +234,7 @@ public class HugeGraph implements CSRGraph {
         var properties = Objects.requireNonNull(this.properties);
 
         var adjacencyCursor = adjacency.adjacencyCursor(fromId);
-        if (adjacencyCursor.isEmpty()) {
+        if (!adjacencyCursor.hasNextVLong()) {
             return NO_PROPERTY_VALUE;
         }
 

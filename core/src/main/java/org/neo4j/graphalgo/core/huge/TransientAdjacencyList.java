@@ -160,7 +160,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
     }
 
     @Override
-    public AdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node, double fallbackValue) {
+    public AdjacencyCursor adjacencyCursor(@Nullable AdjacencyCursor reuse, long node, double fallbackValue) {
         if (reuse instanceof DecompressingCursor) {
             reuse.init(offsets.get(node), degrees.degree(node));
             return reuse;

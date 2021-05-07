@@ -67,7 +67,7 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
     public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
         // init adjacency cursor
         var adjacencyCursor = adjacencyList.adjacencyCursor(topologyCursor, nodeId);
-        if (adjacencyCursor.isEmpty()) {
+        if (!adjacencyCursor.hasNextVLong()) {
             return;
         }
 

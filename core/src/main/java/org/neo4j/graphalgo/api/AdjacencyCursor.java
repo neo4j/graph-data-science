@@ -22,12 +22,23 @@ package org.neo4j.graphalgo.api;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Cursor iterating over the target ids of one adjacency list.
+ * A lot of the methods here are very low-level and break when looked at slightly askew.
+ * Better iteration methods and defined access patterns will be added under the continuation of
+ * Adjacency Compression III – Return of the Iterator
+ */
 public interface AdjacencyCursor extends AutoCloseable {
 
+    /**
+     * Special ID value that could be returned to indicate that no valid value can be produced
+     */
     long NOT_FOUND = -1;
 
     /**
      * Initialize this cursor to point to the given {@code index}.
+     * The correct value for the index in highly implementation specific.
+     * The better way get initialize a cursor is through {@link org.neo4j.graphalgo.api.AdjacencyList#adjacencyCursor(long)} or related.
      */
     void init(long index, int degree);
 
@@ -50,6 +61,8 @@ public interface AdjacencyCursor extends AutoCloseable {
 
     /**
      * Decode and peek the next target id. Does not progress the internal cursor unlike {@link #nextVLong()}.
+     *
+     * It is undefined behavior if this is called after {@link #hasNextVLong()} returns {@code false}.
      */
     long peekVLong();
 
@@ -57,10 +70,6 @@ public interface AdjacencyCursor extends AutoCloseable {
      * Return how many targets are still left to be decoded.
      */
     int remaining();
-
-    default boolean isEmpty() {
-        return remaining() == 0;
-    }
 
     // DOCTODO: I think this documentation if either out of date or misleading.
     //  Either we skip all blocks and return -1 or we find a value that is strictly larger.
@@ -86,17 +95,18 @@ public interface AdjacencyCursor extends AutoCloseable {
      * Create a shallow copy of this cursor.
      * Iteration state is copied and will advance independently from this cursor.
      * The underlying data might be shared between instances.
-     * If the provided {@code destination} argument is not null, it might be re-used
-     * instead of having to create a new instance.
+     * If the provided {@code destination} argument is not null, it might be re-used instead of having to create a new instance.
      * It is *not* guaranteed that the {@code destination} will be reused.
-     * If the {@code destination} is not if the same type than this cursor,
-     * the behavior of this method in undefined.
+     * If the {@code destination} is not if the same type than this cursor, the behavior of this method in undefined.
      */
     @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination);
 
     @Override
     void close();
 
+    /**
+     * Returns a cursor that is always empty.
+     */
     static AdjacencyCursor empty() {
         return EmptyAdjacencyCursor.INSTANCE;
     }
@@ -131,11 +141,6 @@ public interface AdjacencyCursor extends AutoCloseable {
         @Override
         public int remaining() {
             return 0;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return true;
         }
 
         @Override

@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.PropertyCursor;
@@ -62,12 +63,12 @@ public class CompositeAdjacencyList implements AdjacencyList {
     }
 
     @Override
-    public CompositeAdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node) {
+    public CompositeAdjacencyCursor adjacencyCursor(@Nullable AdjacencyCursor reuse, long node) {
         return adjacencyCursor(reuse, node, Double.NaN);
     }
 
     @Override
-    public CompositeAdjacencyCursor adjacencyCursor(AdjacencyCursor reuse, long node, double fallbackValue) {
+    public CompositeAdjacencyCursor adjacencyCursor(@Nullable AdjacencyCursor reuse, long node, double fallbackValue) {
         if (reuse instanceof CompositeAdjacencyCursor) {
             var compositeReuse = (CompositeAdjacencyCursor) reuse;
             var iter = (compositeReuse).cursors().listIterator();
