@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import com.carrotsearch.hppc.LongLongHashMap;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,6 +32,7 @@ import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -180,11 +182,17 @@ class NeighborhoodSamplerTest {
         @GdlGraph
         private static final String GRAPH =
             "(x)-[:R { weight: 8.0 }]->(y)-[:R { weight: 4.6 }]->(z), " +
-            "(a)-[:R { weight: 62.0 }]->(b)-[:R { weight: 4.6 }]->(c), " +
+            "(a)-[:R { weight: 1.0 }]->(b)-[:R { weight: 4.6 }]->(c), " +
             "(x)-[:R { weight: 3.0 }]->(d)-[:R { weight: 4.6 }]->(e), " +
-            "(a)-[:R { weight: 14.0 }]->(f), " +
-            "(a)-[:R { weight: 37.0 }]->(g), " +
-            "(a)-[:R { weight: 5.0 }]->(h)";
+            "(a)-[:R { weight: 99.0 }]->(f), " +
+            "(a)-[:R { weight: 99.0 }]->(g), " +
+            "(a)-[:R { weight: 1.0 }]->(g), " +
+            "(a)-[:R { weight: 1.0 }]->(g), " +
+            "(a)-[:R { weight: 1.0 }]->(b), " +
+            "(a)-[:R { weight: 99.0 }]->(h)";
+
+        @Inject
+        TestGraph graph;
 
         @Inject
         TestGraph graph;
@@ -214,6 +222,33 @@ class NeighborhoodSamplerTest {
                     graph.toMappedNodeId("d"),
                     graph.toMappedNodeId("e")
                 );
+        }
+
+        @Disabled
+        @Test
+        void shouldUniformSamplefNeighbors() {
+            var random = new Random(42);
+            int numberOfSamples = 1;
+
+            var sampledNodes = new LongLongHashMap();
+
+            var sampleTries = 1000;
+            for (int i = 0; i < sampleTries; i++) {
+                NeighborhoodSampler sampler = new NeighborhoodSampler(random.nextLong());
+                sampler.sample(graph, graph.toMappedNodeId("a"), numberOfSamples)
+                    .forEach(nodeId -> sampledNodes.addTo(nodeId, 1));
+            }
+
+            // f, g and h have an equal weight so they should be sampled equally
+            // we expect b to be sampled nearly never
+            // to avoid flaky tests we only test the extremes here
+            var highWeightNeighbors = Stream.of("f", "g","h");
+
+            highWeightNeighbors.forEach(name -> {
+                assertThat(sampledNodes.get(graph.toMappedNodeId(name)))
+                    .withFailMessage("Node %s considered to extreme: " + sampledNodes, name)
+                    .isNotEqualTo(0).isNotEqualTo(sampleTries);
+            });
         }
     }
 }
