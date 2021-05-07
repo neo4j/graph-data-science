@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
@@ -91,7 +90,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class HugeGraph implements CSRGraph {
 
     public static final double NO_PROPERTY_VALUE = Double.NaN;
-    private static final int NO_SUCH_NODE = 0;
 
     protected final NodeMapping idMapping;
     protected final AllocationTracker tracker;
@@ -235,18 +233,19 @@ public class HugeGraph implements CSRGraph {
     }
 
     private double findPropertyValue(long fromId, long toId) {
-        long relOffset = adjacency.adjacencyOffsets().get(fromId);
-        if (relOffset == NO_SUCH_NODE) {
+        var properties = Objects.requireNonNull(this.properties);
+
+        var adjacencyCursor = adjacency.adjacencyList().adjacencyCursor(fromId);
+        if (adjacencyCursor.isEmpty()) {
             return NO_PROPERTY_VALUE;
         }
-        var properties = Objects.requireNonNull(this.properties);
+
         long propertyOffset = properties.adjacencyOffsets().get(fromId);
+        int degree = adjacencyCursor.remaining();
 
-        int degree = adjacency.adjacencyList().degree(fromId);
-        AdjacencyCursor relDecompressingCursor = adjacency.adjacencyList().decompressingCursor(relOffset, degree);
-        PropertyCursor propertyCursor = properties.adjacencyList().cursor(propertyOffset, degree);
+        var propertyCursor = properties.adjacencyList().cursor(propertyOffset, degree);
 
-        while (relDecompressingCursor.hasNextVLong() && propertyCursor.hasNextLong() && relDecompressingCursor.nextVLong() != toId) {
+        while (adjacencyCursor.hasNextVLong() && propertyCursor.hasNextLong() && adjacencyCursor.nextVLong() != toId) {
             propertyCursor.nextLong();
         }
 

@@ -22,20 +22,15 @@ package org.neo4j.graphalgo.core.compress;
 
 import org.neo4j.graphalgo.annotation.DataClass;
 import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 
 @DataClass
 public abstract class AbstractTopologyContainer implements CompressedTopology {
-
-    @Override
-    public abstract AdjacencyOffsets adjacencyOffsets();
 
     @Override
     public abstract AdjacencyList adjacencyList();
 
     @Override
     public void close() {
-        adjacencyOffsets().close();
         adjacencyList().close();
     }
 }

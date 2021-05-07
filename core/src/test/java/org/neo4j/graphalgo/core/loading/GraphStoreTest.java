@@ -149,16 +149,15 @@ class GraphStoreTest extends BaseTest {
         ZonedDateTime nodePropertyTime = graphStore.modificationTime();
 
         // add relationships
-        var adjacencyDegrees = TransientAdjacencyDegrees.Factory.INSTANCE.newDegrees(HugeIntArray.of());
-        var adjacencyOffsets = TransientAdjacencyOffsets.Factory.INSTANCE.newOffsets(HugeLongArray.of());
         Relationships relationships = Relationships.of(
             0L,
             Orientation.NATURAL,
             false,
-            TopologyContainer.of(
-                adjacencyOffsets,
-                new TransientAdjacencyList(new byte[0][0], adjacencyDegrees, adjacencyOffsets)
-            ),
+            TopologyContainer.of(new TransientAdjacencyList(
+                new byte[0][0],
+                TransientAdjacencyDegrees.Factory.INSTANCE.newDegrees(HugeIntArray.of()),
+                TransientAdjacencyOffsets.Factory.INSTANCE.newOffsets(HugeLongArray.of())
+            )),
             null,
             42.0
         );
