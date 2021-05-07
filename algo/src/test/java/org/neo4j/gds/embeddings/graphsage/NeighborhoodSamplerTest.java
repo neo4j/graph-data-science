@@ -90,6 +90,16 @@ class NeighborhoodSamplerTest {
                 .isNotNull()
                 .hasSize(4);
         }
+
+        @Test
+        void multiGraph() {
+            var multiGraph = GdlFactory.of("(a)-->(b), (a)-->(b), (a)-->(b)").build().graphStore().getUnion();
+
+            NeighborhoodSampler sampler = new NeighborhoodSampler(42);
+            var sample = sampler.sample(multiGraph, 0, 2).toArray();
+
+            assertThat(sample).containsExactly(1, 1);
+        }
     }
 
     @Nested
@@ -153,27 +163,6 @@ class NeighborhoodSamplerTest {
                 .hasSize(expectedSize)
                 .doesNotHaveDuplicates();
         }
-
-        @Test
-        void multiGraph() {
-            var graph = GdlFactory.of("(a)-->(b), (a)-->(b), (a)-->(b)").build().graphStore().getUnion();
-
-            NeighborhoodSampler sampler = new NeighborhoodSampler(42);
-            var sample = sampler.sample(graph, 0, 2).toArray();
-
-            assertThat(sample).containsExactly(1, 1);
-        }
-
-    }
-
-    @Test
-    void multiGraph() {
-        var graph = GdlFactory.of("(a)-->(b), (a)-->(b), (a)-->(b)").build().graphStore().getUnion();
-
-        NeighborhoodSampler sampler = new NeighborhoodSampler(42);
-        var sample = sampler.sample(graph, 0, 2).toArray();
-
-        assertThat(sample).containsExactly(1, 1);
     }
 
     @Nested
@@ -190,9 +179,6 @@ class NeighborhoodSamplerTest {
             "(a)-[:R { weight: 1.0 }]->(g), " +
             "(a)-[:R { weight: 1.0 }]->(b), " +
             "(a)-[:R { weight: 99.0 }]->(h)";
-
-        @Inject
-        TestGraph graph;
 
         @Inject
         TestGraph graph;
