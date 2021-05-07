@@ -23,11 +23,16 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.LongStream;
 
-public class UniformReservoirSampler {
+/**
+ * L Algorithm for uniform sampling k elements from an input stream
+ * https://richardstartin.github.io/posts/reservoir-sampling#algorithm-l
+ *
+ */
+public class UniformReservoirLSampler {
 
     private final Random random;
 
-    public UniformReservoirSampler(long randomSeed) {
+    public UniformReservoirLSampler(long randomSeed) {
         this.random = new Random(randomSeed);
     }
 
@@ -48,15 +53,27 @@ public class UniformReservoirSampler {
             reservoir[i] = inputIterator.nextLong();
         }
 
-        for(int idx = numberOfSamples; inputIterator.hasNext(); idx++) {
-            var randomValue = random.nextInt(idx);
-            var inputValue = inputIterator.nextLong();
+        var nextIdxToSample = numberOfSamples - 1;
+        var w = Math.exp(Math.log(random.nextDouble())/numberOfSamples);
 
-            if (randomValue < numberOfSamples) {
-                reservoir[randomValue] = inputValue;
+        // compute first skip
+        nextIdxToSample += computeNumberOfSkips(w);
+        w *= Math.exp(Math.log(random.nextDouble()) / numberOfSamples);
+
+        for(int idx = numberOfSamples; inputIterator.hasNext(); idx++) {
+            var inputValue = inputIterator.nextLong();
+            if (idx == nextIdxToSample) {
+                reservoir[random.nextInt(numberOfSamples)] = inputValue;
+                // compute next value
+                nextIdxToSample += computeNumberOfSkips(w);
+                w *= Math.exp(Math.log(random.nextDouble()) / numberOfSamples);
             }
         }
 
         return Arrays.stream(reservoir);
+    }
+
+    private long computeNumberOfSkips(double w) {
+        return (long) (Math.log(random.nextDouble()) / Math.log(1 - w)) + 1;
     }
 }
