@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyProperties;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
@@ -102,7 +103,7 @@ public class HugeGraph implements CSRGraph {
     protected AdjacencyList adjacency;
 
     protected final double defaultPropertyValue;
-    protected @Nullable AdjacencyList properties;
+    protected @Nullable AdjacencyProperties properties;
 
     private AdjacencyCursor cursorCache;
 
@@ -142,7 +143,7 @@ public class HugeGraph implements CSRGraph {
         @NotNull AdjacencyList adjacency,
         boolean hasRelationshipProperty,
         double defaultPropertyValue,
-        @Nullable AdjacencyList properties,
+        @Nullable AdjacencyProperties properties,
         Orientation orientation,
         boolean isMultiGraph,
         AllocationTracker tracker

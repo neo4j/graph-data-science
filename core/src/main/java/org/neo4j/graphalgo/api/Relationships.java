@@ -55,7 +55,7 @@ public interface Relationships {
         Orientation orientation,
         boolean isMultiGraph,
         AdjacencyList adjacencyList,
-        @Nullable AdjacencyList propertiesList,
+        @Nullable AdjacencyProperties adjacencyProperties,
         double defaultPropertyValue
     ) {
         Topology topology = ImmutableTopology.of(
@@ -65,9 +65,9 @@ public interface Relationships {
             isMultiGraph
         );
 
-        Optional<Properties> maybePropertyCSR = propertiesList != null
+        Optional<Properties> maybePropertyCSR = adjacencyProperties != null
             ? Optional.of(ImmutableProperties.of(
-                propertiesList,
+                adjacencyProperties,
                 relationshipCount,
                 orientation,
                 isMultiGraph,
@@ -90,7 +90,7 @@ public interface Relationships {
 
     @ValueClass
     interface Properties {
-        AdjacencyList propertiesList();
+        AdjacencyProperties propertiesList();
 
         long elementCount();
 

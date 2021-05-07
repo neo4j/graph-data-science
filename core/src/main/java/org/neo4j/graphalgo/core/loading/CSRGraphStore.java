@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyProperties;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.Graph;
@@ -426,7 +426,7 @@ public class CSRGraphStore implements GraphStore {
                 .map(relationshipPropertyStore::get)
                 .map(RelationshipProperty::values)
                 .map(Relationships.Properties::propertiesList)
-                .toArray(AdjacencyList[]::new);
+                .toArray(AdjacencyProperties[]::new);
 
         return new CSRCompositeRelationshipIterator(
             adjacencyList,

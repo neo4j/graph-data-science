@@ -149,29 +149,6 @@ class TransientAdjacencyListTest {
     }
 
     @Test
-    void shouldComputeUncompressedMemoryEstimationForSinglePage() {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(100)
-            .maxRelCount(100)
-            .build();
-
-        MemoryTree memRec = TransientAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
-
-        long classSize = 24;
-        long uncompressedAdjacencySize = 1200;
-
-        int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-        long bytesPerPage = BitUtil.align(16 + 262144L, 8);
-        long adjacencyPages = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
-
-        long offsets = HugeLongArray.memoryEstimation(100);
-
-        MemoryRange expected = MemoryRange.of(classSize + adjacencyPages + offsets);
-
-        assertEquals(expected, memRec.memoryUsage());
-    }
-
-    @Test
     void shouldComputeCompressedMemoryEstimationForMultiplePage() {
         var nodeCount = 100_000_000L;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
@@ -198,30 +175,6 @@ class TransientAdjacencyListTest {
             classSize + minAdjacencyPages + degrees + offsets,
             classSize + maxAdjacencyPages + degrees + offsets
         );
-
-        assertEquals(expected, memRec.memoryUsage());
-    }
-
-    @Test
-    void shouldComputeUncompressedMemoryEstimationForMultiplePage() {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(100_000_000L)
-            .maxRelCount(100_000_000_000L)
-            .build();
-
-        MemoryTree memRec = TransientAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
-
-        long classSize = 24;
-
-        long uncompressedAdjacencySize = 800_400_000_000L;
-
-        int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-        long bytesPerPage = BitUtil.align(16 + 262144L, 8);
-        long adjacencyPages = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
-
-        long offsets = HugeLongArray.memoryEstimation(100_000_000L);
-
-        MemoryRange expected = MemoryRange.of(classSize + adjacencyPages + offsets);
 
         assertEquals(expected, memRec.memoryUsage());
     }

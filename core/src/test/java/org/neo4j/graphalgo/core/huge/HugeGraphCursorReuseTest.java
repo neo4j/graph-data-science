@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.ImmutableTopology;
-import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -106,11 +105,6 @@ class HugeGraphCursorReuseTest {
         public AdjacencyCursor rawAdjacencyCursor() {
             cursorInstanceCounter.increment();
             return new TestAdjacencyCursor();
-        }
-
-        @Override
-        public PropertyCursor propertyCursor(long node, double fallbackValue) {
-            return null;
         }
 
         @Override

@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * The adjacency list for a mono-partite graph with an optional single relationship property.
- * Provides access to the {@link #degree(long) degree}, the {@link #adjacencyCursor(long) target ids}, and {@link #propertyCursor(long) properties} for any given source node.
+ * Provides access to the {@link #degree(long) degree}, and the {@link #adjacencyCursor(long) target ids}.
  * The methods in here are not final and may be revised under the continuation of
  * Adjacency Compression III – Return of the Iterator
  * One particular change could be that properties will be returned from {@link org.neo4j.graphalgo.api.AdjacencyCursor}s
@@ -96,56 +96,6 @@ public interface AdjacencyList extends AutoCloseable {
      * NOTE: In order to use the returned cursor {@link AdjacencyCursor#init} must be called.
      */
     AdjacencyCursor rawAdjacencyCursor();
-
-    /**
-     * Create a new cursor for the properties of the relationships of a given {@code node}.
-     * The cursor is expected to produce property values.
-     *
-     * Undefined behavior if the node does not exist.
-     * Undefined behavior if this list does not have properties.
-     */
-    default PropertyCursor propertyCursor(long node) {
-        return propertyCursor(node, Double.NaN);
-    }
-
-    /**
-     * Create a new cursor for the properties of the relationships of a given {@code node}.
-     * If the cursor cannot produce property values, it will yield the provided {@code fallbackValue}.
-     *
-     * NOTE: Fallback behavior is not widely available and will be part of the next episode.
-     *
-     * Undefined behavior if the node does not exist.
-     */
-    PropertyCursor propertyCursor(long node, double fallbackValue);
-
-    /**
-     * Create a new cursor for the properties of the relationships of a given {@code node}.
-     * The cursor is expected to produce property values.
-     *
-     * The implementation might try to reuse the provided {@code reuse} cursor, if possible.
-     * That is not guaranteed, however, implementation may choose to ignore the reuse cursor for any reason.
-     *
-     * Undefined behavior if the node does not exist.
-     * Undefined behavior if this list does not have properties.
-     */
-    default PropertyCursor propertyCursor(PropertyCursor reuse, long node) {
-        return propertyCursor(reuse, node, Double.NaN);
-    }
-
-    /**
-     * Create a new cursor for the properties of the relationships of a given {@code node}.
-     * If the cursor cannot produce property values, it will yield the provided {@code fallbackValue}.
-     *
-     * NOTE: Fallback behavior is not widely available and will be part of the next episode.
-     *
-     * The implementation might try to reuse the provided {@code reuse} cursor, if possible.
-     * That is not guaranteed, however, implementation may choose to ignore the reuse cursor for any reason.
-     *
-     * Undefined behavior if the node does not exist.
-     */
-    default PropertyCursor propertyCursor(PropertyCursor reuse, long node, double fallbackValue) {
-        return propertyCursor(node, fallbackValue);
-    }
 
     @Override
     void close();

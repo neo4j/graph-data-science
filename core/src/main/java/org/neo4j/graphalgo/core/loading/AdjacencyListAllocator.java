@@ -23,7 +23,7 @@ public interface AdjacencyListAllocator extends AutoCloseable {
 
     void prepare();
 
-    AdjacencyListPageSlice allocate(int size);
+    long writeRawTargets(byte[] targets, int length);
 
     @Override
     void close();

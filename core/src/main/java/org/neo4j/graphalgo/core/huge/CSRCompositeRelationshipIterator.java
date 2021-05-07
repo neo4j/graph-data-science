@@ -21,16 +21,17 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyProperties;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.PropertyCursor;
 
 public class CSRCompositeRelationshipIterator implements CompositeRelationshipIterator {
 
-    public static final AdjacencyList[] EMPTY_PROPERTIES = new AdjacencyList[0];
+    public static final AdjacencyProperties[] EMPTY_PROPERTIES = new AdjacencyProperties[0];
 
     private final AdjacencyList adjacencyList;
     private final String[] propertyKeys;
-    private final AdjacencyList[] properties;
+    private final AdjacencyProperties[] properties;
     private final double[] propertyBuffer;
 
     private AdjacencyCursor topologyCursor;
@@ -39,7 +40,7 @@ public class CSRCompositeRelationshipIterator implements CompositeRelationshipIt
     public CSRCompositeRelationshipIterator(
         AdjacencyList adjacencyList,
         String[] propertyKeys,
-        AdjacencyList[] properties
+        AdjacencyProperties[] properties
     ) {
         var propertyCount = propertyKeys.length;
 
