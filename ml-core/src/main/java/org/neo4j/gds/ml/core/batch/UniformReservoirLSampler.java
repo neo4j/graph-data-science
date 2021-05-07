@@ -54,23 +54,28 @@ public class UniformReservoirLSampler {
         }
 
         var nextIdxToSample = numberOfSamples - 1;
-        var w = Math.exp(Math.log(random.nextDouble())/numberOfSamples);
+        // `w` in original Algorithm L
+        var skipFactor = computeSkipFactor(numberOfSamples);
 
         // compute first skip
-        nextIdxToSample += computeNumberOfSkips(w);
-        w *= Math.exp(Math.log(random.nextDouble()) / numberOfSamples);
+        nextIdxToSample += computeNumberOfSkips(skipFactor);
+        skipFactor *= computeSkipFactor(numberOfSamples);
 
         for(int idx = numberOfSamples; inputIterator.hasNext(); idx++) {
             var inputValue = inputIterator.nextLong();
             if (idx == nextIdxToSample) {
                 reservoir[random.nextInt(numberOfSamples)] = inputValue;
                 // compute next value
-                nextIdxToSample += computeNumberOfSkips(w);
-                w *= Math.exp(Math.log(random.nextDouble()) / numberOfSamples);
+                nextIdxToSample += computeNumberOfSkips(skipFactor);
+                skipFactor *= computeSkipFactor(numberOfSamples);
             }
         }
 
         return Arrays.stream(reservoir);
+    }
+
+    private double computeSkipFactor(int numberOfSamples) {
+        return Math.exp(Math.log(random.nextDouble()) / numberOfSamples);
     }
 
     private long computeNumberOfSkips(double w) {

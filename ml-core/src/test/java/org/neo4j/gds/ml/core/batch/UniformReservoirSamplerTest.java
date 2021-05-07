@@ -20,35 +20,38 @@
 package org.neo4j.gds.ml.core.batch;
 
 import com.carrotsearch.hppc.LongLongHashMap;
-import org.junit.jupiter.api.RepeatedTest;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.Arrays;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class UniformReservoirSamplerTest {
 
-    @RepeatedTest(1000)
+    @Test
     void shouldSampleSubsetOfNeighbors() {
-        int numberOfSamples = 2;
+        int numberOfSamples = 10;
 
         var sampled = new LongLongHashMap();
 
-        var sampler = new UniformReservoirSampler(19L);
-        for (int i = 0; i < 20; i++) {
-            var input = LongStream.range(0, 18);
-            sampler.sample(input, 18, numberOfSamples)
+        var sampler = new UniformReservoirLSampler(19L);
+        var input = LongStream.range(0, 100).toArray();
+
+        var numberOfSampling = 1000;
+        for (int i = 0; i < numberOfSampling; i++) {
+            sampler.sample(Arrays.stream(input), input.length, numberOfSamples)
                 .forEach(nodeId -> sampled.addTo(nodeId, 1));
         }
 
-        assertThat(sampled)
-            .isNotEmpty()
-            .allSatisfy(entry -> assertThat(entry.value)
-                .withFailMessage("Sampled node with id %d %d times", entry.key, entry.value)
-                .isLessThan(10));
+        assertThat(sampled.keys()).hasSize(input.length);
+
+        var avgTimesSamples = Arrays.stream(sampled.values().toArray()).summaryStatistics().getAverage();
+
+        assertThat(avgTimesSamples).isEqualTo(100.0D, Offset.offset(1D));
     }
 
     @ParameterizedTest
@@ -56,7 +59,7 @@ class UniformReservoirSamplerTest {
     void shouldSampleTheCorrectNumber(int numberOfSamples) {
         var input = LongStream.range(0, 18);
 
-        var sampler = new UniformReservoirSampler(19L);
+        var sampler = new UniformReservoirLSampler(19L);
         var sample = sampler.sample(input, 18, numberOfSamples);
 
         var expectedSize = Math.min(18, numberOfSamples);
@@ -70,7 +73,7 @@ class UniformReservoirSamplerTest {
     void duplicateElements() {
         var input = LongStream.of(1, 1, 1);
 
-        var sampler = new UniformReservoirSampler(19L);
+        var sampler = new UniformReservoirLSampler(19L);
         var sample = sampler.sample(input, 3,2).toArray();
 
         assertThat(sample).containsExactly(1, 1);

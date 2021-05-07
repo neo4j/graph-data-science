@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.ml.core.RelationshipWeights;
-import org.neo4j.gds.ml.core.batch.UniformReservoirSampler;
+import org.neo4j.gds.ml.core.batch.UniformReservoirLSampler;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipCursor;
@@ -60,7 +60,7 @@ public class NeighborhoodSampler {
                 .concurrentCopy()
                 .streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE)
                 .mapToLong(RelationshipCursor::targetId);
-            return new UniformReservoirSampler(randomSeed).sample(
+            return new UniformReservoirLSampler(randomSeed).sample(
                 neighbours,
                 graph.degree(nodeId),
                 Math.toIntExact(numberOfSamples)
