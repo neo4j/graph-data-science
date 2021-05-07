@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import com.carrotsearch.hppc.LongLongHashMap;
-import org.junit.jupiter.api.Disabled;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -60,24 +60,24 @@ class NeighborhoodSamplerTest {
             int numberOfSamples = 3;
             var sample = sampler.sample(graph, graph.toMappedNodeId("a"), numberOfSamples);
 
-        assertThat(sample)
-            .isNotNull()
-            .hasSize(numberOfSamples)
-            .containsAnyOf(
-                graph.toMappedNodeId("b"),
-                graph.toMappedNodeId("f"),
-                graph.toMappedNodeId("g"),
-                graph.toMappedNodeId("h")
-            )
-            .doesNotContain( // does not contain negative neighbors
-                graph.toMappedNodeId("x"),
-                graph.toMappedNodeId("y"),
-                graph.toMappedNodeId("z"),
-                graph.toMappedNodeId("a"),
-                graph.toMappedNodeId("c"),
-                graph.toMappedNodeId("d"),
-                graph.toMappedNodeId("e")
-            );
+            assertThat(sample)
+                .isNotNull()
+                .hasSize(numberOfSamples)
+                .containsAnyOf(
+                    graph.toMappedNodeId("b"),
+                    graph.toMappedNodeId("f"),
+                    graph.toMappedNodeId("g"),
+                    graph.toMappedNodeId("h")
+                )
+                .doesNotContain( // does not contain negative neighbors
+                    graph.toMappedNodeId("x"),
+                    graph.toMappedNodeId("y"),
+                    graph.toMappedNodeId("z"),
+                    graph.toMappedNodeId("a"),
+                    graph.toMappedNodeId("c"),
+                    graph.toMappedNodeId("d"),
+                    graph.toMappedNodeId("e")
+                );
     }
 
         @Test
@@ -210,11 +210,10 @@ class NeighborhoodSamplerTest {
                 );
         }
 
-        @Disabled
         @Test
-        void shouldUniformSamplefNeighbors() {
+        void shouldUniformSamplefHighWeightNeighbors() {
             var random = new Random(42);
-            int numberOfSamples = 1;
+            int numberOfSamples = 2;
 
             var sampledNodes = new LongLongHashMap();
 
@@ -231,9 +230,11 @@ class NeighborhoodSamplerTest {
             var highWeightNeighbors = Stream.of("f", "g","h");
 
             highWeightNeighbors.forEach(name -> {
-                assertThat(sampledNodes.get(graph.toMappedNodeId(name)))
-                    .withFailMessage("Node %s considered to extreme: " + sampledNodes, name)
-                    .isNotEqualTo(0).isNotEqualTo(sampleTries);
+                var sampleAmount = sampledNodes.get(graph.toMappedNodeId(name));
+                assertThat(sampleAmount)
+                    .withFailMessage("Node %s considered to extreme: %d", name, sampleAmount)
+                    // 1000x 2 samples -> 2000 samples / 3 (#high node-ids)
+                    .isCloseTo(666, Offset.offset(40L)).isNotEqualTo(sampleTries);
             });
         }
     }

@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.ml.core.RelationshipWeights;
 import org.neo4j.gds.ml.core.batch.UniformReservoirLSampler;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.ml.core.batch.WeightedUniformReservoirRSampler;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 
 import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
@@ -50,12 +48,13 @@ public class NeighborhoodSampler {
                 .mapToLong(RelationshipCursor::targetId);
         }
 
-        var minMax = minMax(graph, nodeId);
-        double min = minMax.min();
-        double max = minMax.max();
-
-        // If the weights are all the same trigger the unweighted case.
-        if (min == max) {
+        if (graph.hasRelationshipProperty()) {
+            return new WeightedUniformReservoirRSampler(randomSeed)
+                .sample(graph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
+                    degree,
+                    Math.toIntExact(numberOfSamples)
+                );
+        } else {
             var neighbours = graph
                 .concurrentCopy()
                 .streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE)
@@ -65,8 +64,6 @@ public class NeighborhoodSampler {
                 graph.degree(nodeId),
                 Math.toIntExact(numberOfSamples)
             );
-        } else {
-            return sampleWeighted(graph.concurrentCopy(), nodeId, degree, numberOfSamples, min, max);
         }
     }
 
@@ -80,73 +77,5 @@ public class NeighborhoodSampler {
 
     OptionalLong sampleOne(Graph graph, long nodeId) {
         return sample(graph, nodeId, 1).findFirst();
-    }
-
-    private LongStream sampleWeighted(
-        Graph graph,
-        long nodeId,
-        int degree,
-        long numberOfSamples,
-        double min,
-        double max
-    ) {
-
-        var remainingToSample = new MutableLong(numberOfSamples);
-        var remainingToConsider = new MutableLong(degree);
-        var neighbors = LongStream.builder();
-
-        double maxMinDiff = (max - min);
-
-        graph.forEachRelationship(
-            nodeId,
-            RelationshipWeights.DEFAULT_VALUE,
-            (source, target, weight) -> {
-                if (remainingToSample.longValue() == 0 || remainingToConsider.longValue() == 0) {
-                    return false;
-                }
-
-                double probability = (1.0 - Math.pow((weight - min) / maxMinDiff, beta));
-                if (remainingToConsider.getAndDecrement() * probability <= remainingToSample.longValue()) {
-                    neighbors.add(target);
-                    remainingToSample.decrementAndGet();
-                }
-                return true;
-            }
-        );
-        return neighbors.build();
-    }
-
-    private MinMax minMax(Graph graph, long nodeId) {
-        var maxQ = BoundedLongPriorityQueue.max(1);
-        var minQ = BoundedLongPriorityQueue.min(1);
-
-        if(!graph.hasRelationshipProperty()) {
-            return MinMax.of(0D, 0D);
-        }
-
-        graph.concurrentCopy().forEachRelationship(
-            nodeId,
-            RelationshipWeights.DEFAULT_VALUE,
-            (source, target, weight) -> {
-                maxQ.offer(target, weight);
-                minQ.offer(target, weight);
-                return true;
-            }
-        );
-
-        var min = minQ.priorities().max().orElse(0D);
-        var max = maxQ.priorities().min().orElse(0D);
-
-        return MinMax.of(min, max);
-    }
-
-    @ValueClass
-    interface MinMax {
-        double min();
-        double max();
-
-        static MinMax of(double min, double max) {
-            return ImmutableMinMax.of(min, max);
-        }
     }
 }
