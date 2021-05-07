@@ -19,25 +19,10 @@
  */
 package org.neo4j.graphalgo.api;
 
-import java.util.function.LongUnaryOperator;
-
 public interface AdjacencyOffsets extends AutoCloseable {
 
     long get(long index);
 
     @Override
     void close();
-
-    static AdjacencyOffsets from(LongUnaryOperator offsets) {
-        return new AdjacencyOffsets() {
-            @Override
-            public long get(long node) {
-                return offsets.applyAsLong(node);
-            }
-
-            @Override
-            public void close() {
-            }
-        };
-    }
 }

@@ -23,15 +23,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
@@ -120,14 +120,10 @@ public final class TransientAdjacencyList implements AdjacencyList {
     }
 
     private byte[][] pages;
-    private final AdjacencyDegrees degrees;
-    private final AdjacencyOffsets offsets;
+    private HugeIntArray degrees;
+    private HugeLongArray offsets;
 
-    public TransientAdjacencyList(
-        byte[][] pages,
-        AdjacencyDegrees degrees,
-        AdjacencyOffsets offsets
-    ) {
+    public TransientAdjacencyList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
@@ -136,13 +132,13 @@ public final class TransientAdjacencyList implements AdjacencyList {
     @Override
     public void close() {
         pages = null;
-        degrees.close();
-        offsets.close();
+        degrees = null;
+        offsets = null;
     }
 
     @Override
     public int degree(long node) {
-        return degrees.degree(node);
+        return degrees.get(node);
     }
 
     // Cursors
@@ -153,7 +149,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
         if (offset == 0) {
             return AdjacencyCursor.empty();
         }
-        var degree = degrees.degree(node);
+        var degree = degrees.get(node);
         var cursor = new DecompressingCursor(pages);
         cursor.init(offset, degree);
         return cursor;
@@ -162,7 +158,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
     @Override
     public AdjacencyCursor adjacencyCursor(@Nullable AdjacencyCursor reuse, long node, double fallbackValue) {
         if (reuse instanceof DecompressingCursor) {
-            reuse.init(offsets.get(node), degrees.degree(node));
+            reuse.init(offsets.get(node), degrees.get(node));
             return reuse;
         }
         return adjacencyCursor(node, fallbackValue);
@@ -174,7 +170,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
         if (offset == 0) {
             return PropertyCursor.empty();
         }
-        var degree = degrees.degree(node);
+        var degree = degrees.get(node);
         var cursor = new Cursor(pages);
         cursor.init(offset, degree);
         return cursor;
@@ -183,7 +179,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
     @Override
     public PropertyCursor propertyCursor(PropertyCursor reuse, long node, double fallbackValue) {
         if (reuse instanceof Cursor) {
-            return reuse.init(offsets.get(node), degrees.degree(node));
+            return reuse.init(offsets.get(node), degrees.get(node));
         }
         return propertyCursor(node, fallbackValue);
     }

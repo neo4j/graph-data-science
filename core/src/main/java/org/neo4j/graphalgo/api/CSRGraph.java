@@ -25,7 +25,7 @@ import java.util.Map;
 
 /**
  * A subtype of {@link Graph} which exposes datastructures specific to the csr graph representation
- * such as {@link AdjacencyList} and {@link AdjacencyOffsets}.
+ * such as {@link AdjacencyList}.
  */
 public interface CSRGraph extends Graph {
 

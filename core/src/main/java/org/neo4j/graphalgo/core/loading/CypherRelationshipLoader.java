@@ -38,8 +38,6 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyDegrees;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
@@ -268,8 +266,6 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
                 nodeMapping.nodeCount(),
                 projection,
                 TransientAdjacencyListBuilder.builderFactory(loadingContext.tracker()),
-                TransientAdjacencyDegrees.Factory.INSTANCE,
-                TransientAdjacencyOffsets.Factory.INSTANCE,
                 aggregationsWithDefault,
                 propertyKeyIds,
                 propertyDefaultValues,

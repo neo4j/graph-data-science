@@ -20,21 +20,11 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyDegrees;
-import org.neo4j.graphalgo.core.loading.AdjacencyDegreesFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 
 public final class TransientAdjacencyDegrees implements AdjacencyDegrees {
-
-    public enum Factory implements AdjacencyDegreesFactory {
-        INSTANCE;
-
-        @Override
-        public AdjacencyDegrees newDegrees(HugeIntArray degrees) {
-            return new TransientAdjacencyDegrees(degrees);
-        }
-    }
 
     private final HugeIntArray degrees;
 

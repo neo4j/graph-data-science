@@ -20,21 +20,11 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.neo4j.graphalgo.api.AdjacencyOffsets;
-import org.neo4j.graphalgo.core.loading.AdjacencyOffsetsFactory;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 public class TransientAdjacencyOffsets implements AdjacencyOffsets {
-
-    public enum Factory implements AdjacencyOffsetsFactory {
-        INSTANCE;
-
-        @Override
-        public AdjacencyOffsets newOffsets(HugeLongArray offsets) {
-            return new TransientAdjacencyOffsets(offsets);
-        }
-    }
 
     private final HugeLongArray offsets;
 

@@ -19,15 +19,15 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 public interface AdjacencyListBuilder {
 
     AdjacencyListAllocator newAllocator();
 
-    AdjacencyList build(AdjacencyDegrees degrees, AdjacencyOffsets offsets);
+    AdjacencyList build(HugeIntArray degrees, HugeLongArray offsets);
 
     void flush();
 }

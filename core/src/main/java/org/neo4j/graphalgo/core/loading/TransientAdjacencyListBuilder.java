@@ -19,10 +19,11 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
+import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import java.util.Arrays;
@@ -63,11 +64,13 @@ public final class TransientAdjacencyListBuilder implements AdjacencyListBuilder
         tracker.add(sizeOfObjectArray(0));
     }
 
+    @Override
     public Allocator newAllocator() {
         return new Allocator(this);
     }
 
-    public TransientAdjacencyList build(AdjacencyDegrees degrees, AdjacencyOffsets offsets) {
+    @Override
+    public AdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
         return new TransientAdjacencyList(pages, degrees, offsets);
     }
 

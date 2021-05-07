@@ -37,17 +37,11 @@ import static org.neo4j.graphalgo.core.loading.AdjacencyBuilder.IGNORE_VALUE;
 
 public abstract class AdjacencyBuilderBaseTest {
 
-    protected void testAdjacencyList(
-        AdjacencyListBuilderFactory listBuilderFactory,
-        AdjacencyDegreesFactory degreesFactory,
-        AdjacencyOffsetsFactory offsetsFactory
-    ) {
+    protected void testAdjacencyList(AdjacencyListBuilderFactory listBuilderFactory) {
         AdjacencyListWithPropertiesBuilder globalBuilder = AdjacencyListWithPropertiesBuilder.create(
             6,
             RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
             listBuilderFactory,
-            degreesFactory,
-            offsetsFactory,
             new Aggregation[]{Aggregation.NONE},
             new int[0],
             new double[0],

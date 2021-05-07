@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressor;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressorBlueprint;
@@ -39,18 +37,8 @@ import java.util.stream.Stream;
 
 public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
-    public static final class Factory implements AdjacencyCompressorFactory {
-
-        private final AdjacencyDegreesFactory adjacencyDegreesFactory;
-        private final AdjacencyOffsetsFactory adjacencyOffsetsFactory;
-
-        public Factory(
-            AdjacencyDegreesFactory adjacencyDegreesFactory,
-            AdjacencyOffsetsFactory adjacencyOffsetsFactory
-        ) {
-            this.adjacencyDegreesFactory = adjacencyDegreesFactory;
-            this.adjacencyOffsetsFactory = adjacencyOffsetsFactory;
-        }
+    public enum Factory implements AdjacencyCompressorFactory {
+        INSTANCE;
 
         @Override
         public AdjacencyCompressorBlueprint create(
@@ -64,8 +52,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             return new Blueprint(
                 adjacencyBuilder,
                 propertyBuilders,
-                adjacencyDegreesFactory,
-                adjacencyOffsetsFactory,
                 HugeIntArray.newArray(nodeCount, tracker),
                 HugeLongArray.newArray(nodeCount, tracker),
                 Stream
@@ -81,8 +67,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private static final class Blueprint implements AdjacencyCompressorBlueprint {
         private final AdjacencyListBuilder adjacencyBuilder;
         private final AdjacencyListBuilder[] propertyBuilders;
-        private final AdjacencyDegreesFactory adjacencyDegreesFactory;
-        private final AdjacencyOffsetsFactory adjacencyOffsetsFactory;
         private final HugeIntArray adjacencyDegrees;
         private final HugeLongArray adjacencyOffsets;
         private final HugeLongArray[] propertyOffsets;
@@ -92,8 +76,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         private Blueprint(
             AdjacencyListBuilder adjacencyBuilder,
             AdjacencyListBuilder[] propertyBuilders,
-            AdjacencyDegreesFactory adjacencyDegreesFactory,
-            AdjacencyOffsetsFactory adjacencyOffsetsFactory,
             HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
             HugeLongArray[] propertyOffsets,
@@ -102,8 +84,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         ) {
             this.adjacencyBuilder = adjacencyBuilder;
             this.propertyBuilders = propertyBuilders;
-            this.adjacencyDegreesFactory = adjacencyDegreesFactory;
-            this.adjacencyOffsetsFactory = adjacencyOffsetsFactory;
             this.adjacencyDegrees = adjacencyDegrees;
             this.adjacencyOffsets = adjacencyOffsets;
             this.propertyOffsets = propertyOffsets;
@@ -145,28 +125,16 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         @Override
         public AdjacencyListsWithProperties build() {
-            AdjacencyDegrees adjacencyDegrees = degreePagesIntoDegrees(this.adjacencyDegrees);
-            AdjacencyOffsets adjacencyOffsets = offsetPagesIntoOffsets(this.adjacencyOffsets);
-
             var builder = ImmutableAdjacencyListsWithProperties
                 .builder()
-                .adjacency(adjacencyBuilder.build(adjacencyDegrees, adjacencyOffsets));
+                .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets));
 
             for (int i = 0; i < propertyBuilders.length; i++) {
-                var offsets = offsetPagesIntoOffsets(propertyOffsets[i]);
-                var compressedProps = propertyBuilders[i].build(adjacencyDegrees, offsets);
-                builder.addProperty(compressedProps);
+                var properties = propertyBuilders[i].build(this.adjacencyDegrees, propertyOffsets[i]);
+                builder.addProperty(properties);
             }
 
             return builder.build();
-        }
-
-        private AdjacencyDegrees degreePagesIntoDegrees(HugeIntArray degrees) {
-            return adjacencyDegreesFactory.newDegrees(degrees);
-        }
-
-        private AdjacencyOffsets offsetPagesIntoOffsets(HugeLongArray offsets) {
-            return adjacencyOffsetsFactory.newOffsets(offsets);
         }
     }
 

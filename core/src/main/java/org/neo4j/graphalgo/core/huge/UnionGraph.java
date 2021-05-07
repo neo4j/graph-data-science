@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.huge;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -276,13 +275,6 @@ public final class UnionGraph implements CSRGraph {
         // we need to run a check across all relationships between the sub-graphs of the union
         // maybe we'll do that later; for now union never guarantees parallel-free
         return true;
-    }
-
-    @ValueClass
-    public interface UnionGraphTopology {
-        CompositeAdjacencyList list();
-
-        CompositeAdjacencyOffsets offsets();
     }
 
     public CompositeAdjacencyList relationshipTopology() {
