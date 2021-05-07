@@ -31,18 +31,28 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
     private final AdjacencyList adjacencyList;
 
     private HugeGraphIntersect(AdjacencyList adjacency, long maxDegree) {
-        super(AdjacencyCursor::empty, maxDegree);
+        super(maxDegree);
         this.adjacencyList = adjacency;
-    }
-
-    @Override
-    public AdjacencyCursor cursor(long node, int degree, AdjacencyCursor reuse) {
-        return adjacencyList.adjacencyCursor(reuse, node);
     }
 
     @Override
     protected int degree(long node) {
         return adjacencyList.degree(node);
+    }
+
+    @Override
+    protected AdjacencyCursor checkCursorInstance(AdjacencyCursor cursor) {
+        return cursor;
+    }
+
+    @Override
+    protected AdjacencyCursor newCursor(long node, int degree) {
+        return adjacencyList.adjacencyCursor(node);
+    }
+
+    @Override
+    protected AdjacencyCursor repositionCursor(AdjacencyCursor reuse, long node, int degree) {
+        return adjacencyList.adjacencyCursor(reuse, node);
     }
 
     @ServiceProvider

@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyDegrees;
@@ -244,6 +246,17 @@ public final class TransientAdjacencyList implements AdjacencyList {
                 degree
             );
             currentPosition = 0;
+        }
+
+        @Override
+        public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
+            var dest = destination instanceof DecompressingCursor
+                ? (DecompressingCursor) destination
+                : new DecompressingCursor(pages);
+            dest.decompress.copyFrom(this.decompress);
+            dest.currentPosition = this.currentPosition;
+            dest.maxTargets = this.maxTargets;
+            return dest;
         }
 
         /**

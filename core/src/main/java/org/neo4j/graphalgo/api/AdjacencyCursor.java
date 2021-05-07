@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 public interface AdjacencyCursor extends AutoCloseable {
 
     long NOT_FOUND = -1;
@@ -89,9 +92,17 @@ public interface AdjacencyCursor extends AutoCloseable {
     long advance(long nodeId);
 
     /**
-     * Copies internal states from {@code sourceCursor} into {@code this} cursor.
-     * If the types don't match, the behavior is undefined.
+     * Create a shallow copy of this cursor.
+     * Iteration state is copied and will advance independently from this cursor.
+     * The underlying data might be shared between instances.
+     * If the provided {@code destination} argument is not null, it might be re-used
+     * instead of having to create a new instance.
+     * It is *not* guaranteed that the {@code destination} will be reused.
+     * If the {@code destination} is not if the same type than this cursor,
+     * the behavior of this method in undefined.
      */
+    @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination);
+
     void copyFrom(AdjacencyCursor sourceCursor);
 
     @Override
@@ -146,6 +157,11 @@ public interface AdjacencyCursor extends AutoCloseable {
         @Override
         public long advance(long nodeId) {
             return NOT_FOUND;
+        }
+
+        @Override
+        public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
+            return INSTANCE;
         }
 
         @Override

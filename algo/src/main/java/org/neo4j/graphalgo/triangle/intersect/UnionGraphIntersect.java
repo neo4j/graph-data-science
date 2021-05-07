@@ -22,12 +22,13 @@ package org.neo4j.graphalgo.triangle.intersect;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.huge.CompositeAdjacencyCursor;
 import org.neo4j.graphalgo.core.huge.CompositeAdjacencyList;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 
 import java.util.function.LongToIntFunction;
 
-public final class UnionGraphIntersect extends GraphIntersect<AdjacencyCursor> {
+public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
 
     private final LongToIntFunction degreeFunction;
     private final CompositeAdjacencyList compositeAdjacencyList;
@@ -37,19 +38,29 @@ public final class UnionGraphIntersect extends GraphIntersect<AdjacencyCursor> {
         CompositeAdjacencyList compositeAdjacencyList,
         long maxDegree
     ) {
-        super(AdjacencyCursor::empty, maxDegree);
+        super(maxDegree);
         this.degreeFunction = degreeFunction;
         this.compositeAdjacencyList = compositeAdjacencyList;
     }
 
     @Override
-    protected AdjacencyCursor cursor(long nodeId, int unusedDegree, AdjacencyCursor reuse) {
-        return compositeAdjacencyList.adjacencyCursor(reuse, nodeId);
+    protected int degree(long nodeId) {
+        return degreeFunction.applyAsInt(nodeId);
     }
 
     @Override
-    protected int degree(long nodeId) {
-        return degreeFunction.applyAsInt(nodeId);
+    protected CompositeAdjacencyCursor checkCursorInstance(AdjacencyCursor cursor) {
+        return (CompositeAdjacencyCursor) cursor;
+    }
+
+    @Override
+    protected CompositeAdjacencyCursor newCursor(long node, int degree) {
+        return compositeAdjacencyList.adjacencyCursor(node);
+    }
+
+    @Override
+    protected CompositeAdjacencyCursor repositionCursor(CompositeAdjacencyCursor reuse, long node, int degree) {
+        return compositeAdjacencyList.adjacencyCursor(reuse, node);
     }
 
     @ServiceProvider
