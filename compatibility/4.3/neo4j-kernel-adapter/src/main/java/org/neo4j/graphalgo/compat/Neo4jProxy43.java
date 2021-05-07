@@ -32,6 +32,7 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.ImportLogic;
+import org.neo4j.internal.batchimport.IndexImporterFactory;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.cache.LongArray;
 import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
@@ -331,6 +332,7 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
             jobScheduler,
             badCollector,
             TransactionLogInitializer.getLogFilesInitializer(),
+            IndexImporterFactory.EMPTY,
             EmptyMemoryTracker.INSTANCE
         );
     }
