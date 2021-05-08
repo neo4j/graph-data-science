@@ -72,6 +72,11 @@ public class Matrix extends Tensor<Matrix> {
         return sum;
     }
 
+    @Override
+    public String toString() {
+        return formatWithLocale("Matrix(%d, %d)", rows(), cols());
+    }
+
     public int rows() {
         return dimensions[Dimensions.ROWS_INDEX];
     }

@@ -33,6 +33,9 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
         this.dimensions = dimensions;
     }
 
+    @Override
+    public abstract String toString();
+
     public abstract SELF zeros();
 
     public abstract SELF copy();

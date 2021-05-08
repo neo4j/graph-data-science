@@ -61,6 +61,11 @@ public class Vector extends Tensor<Vector> {
         return sum;
     }
 
+    @Override
+    public String toString() {
+        return formatWithLocale("Vector(%d)", length());
+    }
+
     public int length() {
         return dimensions[ROWS_INDEX];
     }
