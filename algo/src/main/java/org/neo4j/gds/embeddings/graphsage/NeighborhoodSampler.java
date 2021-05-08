@@ -31,7 +31,6 @@ import java.util.stream.LongStream;
 
 public class NeighborhoodSampler {
     // Influence of the weight for the probability
-    private final double beta = 1D;
     private long randomSeed;
 
     public NeighborhoodSampler(long randomSeed) {
