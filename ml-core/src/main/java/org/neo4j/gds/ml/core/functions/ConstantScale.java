@@ -26,6 +26,8 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public class ConstantScale<T extends Tensor<T>> extends AbstractVariable<T> {
     private final Variable<T> parent;
     private final double constant;
@@ -44,5 +46,15 @@ public class ConstantScale<T extends Tensor<T>> extends AbstractVariable<T> {
     @Override
     public T gradient(Variable<?> parent, ComputationContext ctx) {
         return (T) ctx.gradient(this).scalarMultiply(constant);
+    }
+
+    @Override
+    public String toString() {
+        return formatWithLocale(
+            "%s: scale by %s",
+            this.getClass().getSimpleName(),
+            Double.toString(constant),
+            requireGradient() ? "; requireGradient" : ""
+        );
     }
 }

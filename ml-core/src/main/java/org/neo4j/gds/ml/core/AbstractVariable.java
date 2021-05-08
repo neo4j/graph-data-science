@@ -23,6 +23,8 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public abstract class AbstractVariable<T extends Tensor<T>> implements Variable<T> {
     private final int[] dimensions;
     private final boolean requireGradient;
@@ -63,5 +65,15 @@ public abstract class AbstractVariable<T extends Tensor<T>> implements Variable<
 
     public static class NotAFunctionException extends RuntimeException {
 
+    }
+
+    @Override
+    public String toString() {
+        return formatWithLocale(
+            "%s: %s",
+            this.getClass().getSimpleName(),
+            Tensor.renderDimensions(dimensions),
+            requireGradient ? "; requireGradient" : ""
+        );
     }
 }

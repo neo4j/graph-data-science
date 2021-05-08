@@ -20,9 +20,17 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.functions.Weights;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class WeightsTest {
@@ -35,4 +43,17 @@ class WeightsTest {
         assertEquals(in, out);
     }
 
+    private static Stream<Arguments> renderSources() {
+        return Stream.of(
+            Arguments.of(new Scalar(0D), "Weights: 0.0" + System.lineSeparator()),
+            Arguments.of(new Vector(new double[]{0, 2, 4}), "Weights: Vector(3)" + System.lineSeparator()),
+            Arguments.of(new Matrix(new double[]{0, 2, 4, 2}, 2, 2), "Weights: Matrix(2, 2)" + System.lineSeparator())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("renderSources")
+    void render(Tensor data, String expected) {
+        assertThat(new Weights<>(data).render()).isEqualTo(expected);
+    }
 }

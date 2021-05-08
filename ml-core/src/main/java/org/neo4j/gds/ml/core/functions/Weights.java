@@ -27,6 +27,8 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public class Weights<T extends Tensor<T>> extends AbstractVariable<T> {
     private final T data;
 
@@ -62,4 +64,8 @@ public class Weights<T extends Tensor<T>> extends AbstractVariable<T> {
         return Matrix.sizeInBytes(rows, cols);
     }
 
+    @Override
+    public String toString() {
+        return formatWithLocale("Weights: " + data.toString());
+    }
 }

@@ -29,6 +29,8 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public class Constant<T extends Tensor<T>> extends AbstractVariable<T> {
     private final T data;
 
@@ -66,5 +68,10 @@ public class Constant<T extends Tensor<T>> extends AbstractVariable<T> {
     @Override
     public boolean requireGradient() {
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return formatWithLocale("Constant: " + data.toString());
     }
 }

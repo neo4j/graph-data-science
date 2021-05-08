@@ -35,4 +35,31 @@ public interface Variable<T extends Tensor<T>> {
     int[] dimensions();
 
     int dimension(int i);
+
+    /**
+     * Renders the variable into a human readable representation.
+     */
+    default String render() {
+        StringBuilder sb = new StringBuilder();
+        render(sb, this, 0);
+        return sb.toString();
+    }
+
+    static <T extends Tensor<T>> void render(
+        final StringBuilder sb,
+        final Variable<T> variable,
+        final int depth
+    ) {
+
+        sb.append("\t".repeat(Math.max(0, depth - 1)));
+
+        if (depth > 0) {
+            sb.append("|-- ");
+        }
+
+        sb.append(variable.toString());
+        sb.append(System.lineSeparator());
+
+        variable.parents().forEach(component -> render(sb, component, depth + 1));
+    }
 }

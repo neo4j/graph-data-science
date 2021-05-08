@@ -23,10 +23,13 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContextBaseTest;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.helper.Constant;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Scalar;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class ConstantScaleTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
@@ -48,6 +51,16 @@ class ConstantScaleTest extends ComputationContextBaseTest implements FiniteDiff
             matrix,
             new ElementSum(List.of(new ConstantScale<>(matrix, constant)))
         );
+    }
+
+    @Test
+    void render() {
+        var parent = new Constant<>(new Scalar(1));
+        assertThat(new ConstantScale<>(parent, 4).render()).isEqualTo(
+            "ConstantScale: scale by 4.0" +
+            System.lineSeparator() +
+            "|-- Constant: 1.0" +
+            System.lineSeparator());
     }
 
 }
