@@ -21,7 +21,8 @@ package org.neo4j.gds.ml.core.features;
 
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.functions.MatrixConstant;
+import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
@@ -62,7 +63,7 @@ public final class FeatureExtraction {
         }
     }
 
-    public static MatrixConstant extract(Batch batch, List<FeatureExtractor> extractors) {
+    public static Constant<Matrix> extract(Batch batch, List<FeatureExtractor> extractors) {
         int rows = batch.size();
         int cols = featureCount(extractors);
         double[] features = new double[rows * cols];
@@ -82,7 +83,7 @@ public final class FeatureExtraction {
             extract(nodeId, nodeOffset, extractors, featureConsumer);
             nodeOffset++;
         }
-        return new MatrixConstant(features, rows, cols);
+        return Constant.matrix(features, rows, cols);
     }
 
     public static HugeObjectArray<double[]> extract(

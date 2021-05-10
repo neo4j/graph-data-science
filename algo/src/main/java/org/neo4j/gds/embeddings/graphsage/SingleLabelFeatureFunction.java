@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.functions.MatrixConstant;
+import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -44,6 +44,6 @@ public class SingleLabelFeatureFunction implements FeatureFunction {
                 nodeOffset * dimension,
                 dimension
             ));
-        return new MatrixConstant(data, nodeIds.length, dimension);
+        return Constant.matrix(data, nodeIds.length, dimension);
     }
 }

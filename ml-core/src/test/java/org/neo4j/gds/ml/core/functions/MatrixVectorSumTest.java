@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.core.ComputationContextBaseTest;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.helper.Constant;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Vector;
@@ -43,7 +42,7 @@ class MatrixVectorSumTest extends ComputationContextBaseTest implements FiniteDi
 
     @Test
     void shouldBroadcastSum() {
-        MatrixConstant matrix = new MatrixConstant(new double[]{1, 2, 3, 4, 5, 7}, 2, 3);
+        var matrix = Constant.matrix(new double[]{1, 2, 3, 4, 5, 7}, 2, 3);
         Constant<Vector> vector = Constant.vector(new double[]{1, 1, 1});
 
         Variable<Matrix> broadcastSum = new MatrixVectorSum(matrix, vector);
@@ -65,7 +64,7 @@ class MatrixVectorSumTest extends ComputationContextBaseTest implements FiniteDi
     @ParameterizedTest (name = "Vector length: {1}; matrix columns: 3")
     @MethodSource("invalidVectors")
     void assertionErrorWhenVectorHasDifferentLengthThanMatrixColumns(Variable<Vector> vector, int vectorLength) {
-        MatrixConstant matrix = new MatrixConstant(new double[]{1, 2, 3, 4, 5, 7}, 2, 3);
+        var matrix = Constant.matrix(new double[]{1, 2, 3, 4, 5, 7}, 2, 3);
 
         AssertionError assertionError = assertThrows(AssertionError.class, () -> new MatrixVectorSum(matrix, vector));
 

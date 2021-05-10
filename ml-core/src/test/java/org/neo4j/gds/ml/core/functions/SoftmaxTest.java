@@ -34,7 +34,7 @@ class SoftmaxTest implements FiniteDifferenceTest {
     @Test
     void shouldNotOverflowIntoInfinity() {
         var ctx = new ComputationContext();
-        var parent = new MatrixConstant(new double[]{-745.1, -745.15, 709.7, 709.8}, 2, 2);
+        var parent = Constant.matrix(new double[]{-745.1, -745.15, 709.7, 709.8}, 2, 2);
         ctx.forward(parent);
 
         var softmax = new Softmax(parent);
@@ -48,7 +48,7 @@ class SoftmaxTest implements FiniteDifferenceTest {
     @Test
     void shouldApply() {
         var ctx = new ComputationContext();
-        var matrixConstant = new MatrixConstant(
+        var matrixConstant = Constant.matrix(
             new double[]{
                 0.6, 1.1, -1.5, 1.2, 3.2, -1.1,
                 13.37, 13.37, 13.37, 13.37, 13.37, 13.37,
@@ -91,7 +91,7 @@ class SoftmaxTest implements FiniteDifferenceTest {
     @Test
     void computesGradientCorrectly() {
 
-        var matrixConstant = new MatrixConstant(
+        var matrixConstant = Constant.matrix(
             new double[]{
                 13.37, 13.37, 13.37, 13.37, 13.37, 13.37
             },

@@ -20,19 +20,19 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.eclipse.collections.impl.tuple.Tuples;
+import org.neo4j.gds.ml.Objective;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ConstantScale;
 import org.neo4j.gds.ml.core.functions.CrossEntropyLoss;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
-import org.neo4j.gds.ml.core.functions.MatrixConstant;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.ml.Objective;
-import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
@@ -125,7 +125,7 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
         return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 
-    private MatrixConstant makeTargets(Batch batch) {
+    private Constant<Matrix> makeTargets(Batch batch) {
         Iterable<Long> nodeIds = batch.nodeIds();
         int numberOfNodes = batch.size();
         double[] targets = new double[numberOfNodes];
@@ -137,7 +137,7 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
             targets[nodeOffset] = localIdMap.toMapped((long) targetValue);
             nodeOffset++;
         }
-        return new MatrixConstant(targets, numberOfNodes, 1);
+        return Constant.matrix(targets, numberOfNodes, 1);
     }
 
     @Override

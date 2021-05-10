@@ -32,10 +32,10 @@ class LogisticLossTest implements FiniteDifferenceTest {
 
     @Test
     void shouldApplyCorrectly() {
-        MatrixConstant targets = new MatrixConstant(new double[]{1.0, 0.0}, 2, 1);
-        Weights<Matrix> weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0}, 1, 3));
-        MatrixConstant features = new MatrixConstant(new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71}, 2, 3);
-        Sigmoid<Matrix> predictions = new Sigmoid<>(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
+        var targets = Constant.matrix(new double[]{1.0, 0.0}, 2, 1);
+        var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0}, 1, 3));
+        var features =  Constant.matrix(new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71}, 2, 3);
+        var predictions = new Sigmoid<>(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
         var loss = new LogisticLoss(weights, predictions, features, targets);
         ComputationContext ctx = new ComputationContext();
         double lossValue = ctx.forward(loss).value();
@@ -46,10 +46,10 @@ class LogisticLossTest implements FiniteDifferenceTest {
 
     @Test
     void logisticLossApproximatesGradient() {
-        MatrixConstant targets = new MatrixConstant(new double[]{1.0, 0.0}, 2, 1);
-        Weights<Matrix> weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0}, 1, 3));
-        MatrixConstant features = new MatrixConstant(new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71}, 2, 3);
-        Sigmoid<Matrix> predictions = new Sigmoid<>(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
+        var targets =  Constant.matrix(new double[]{1.0, 0.0}, 2, 1);
+        var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0}, 1, 3));
+        var features =  Constant.matrix(new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71}, 2, 3);
+        var predictions = new Sigmoid<>(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
 
         var loss = new LogisticLoss(weights, predictions, features, targets);
         finiteDifferenceShouldApproximateGradient(weights, loss);

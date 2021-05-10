@@ -57,8 +57,8 @@ class MatrixMultiplyWithTransposedSecondOperandTest extends ComputationContextBa
             60, 27.4
         };
 
-        MatrixConstant A = new MatrixConstant(m1, 2, 3);
-        MatrixConstant B = new MatrixConstant(m2, 2, 3);
+        var A = Constant.matrix(m1, 2, 3);
+        var B = Constant.matrix(m2, 2, 3);
 
         Variable<Matrix> product = new MatrixMultiplyWithTransposedSecondOperand(A, B);
         double[] result = ctx.forward(product).data();

@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.functions.MatrixConstant;
+import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
@@ -66,7 +66,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
         "50, 24.239937336323717"
     })
     void shouldComputeLossBatchSizeOne(int negativeSamplingFactor, double expectedLoss) {
-        Variable<Matrix> combinedEmbeddings = new MatrixConstant(
+        Variable<Matrix> combinedEmbeddings = Constant.matrix(
             new double[]{
                 1.5, -1, 0.75,  // nodeId
                 1, -0.75, 0.7,  // positive nodeId
@@ -92,7 +92,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
         "50, 76.87999339630119"
     })
     void shouldComputeLoss(int negativeSamplingFactor, double expectedLoss) {
-        Variable<Matrix> combinedEmbeddings = new MatrixConstant(
+        Variable<Matrix> combinedEmbeddings = Constant.matrix(
             new double[]{
                 1.5, -1, 0.75,      // nodeId
                 0.5, -0.1, 0.7,     // nodeId
@@ -169,7 +169,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
             "50, 24.239937336323717"
         })
         void shouldComputeLossBatchSizeOne(int Q, double expectedLoss) {
-            Variable<Matrix> combinedEmbeddings = new MatrixConstant(
+            Variable<Matrix> combinedEmbeddings = Constant.matrix(
                 new double[]{
                     1.5, -1, 0.75,  // nodeId
                     1, -0.75, 0.7,  // positive nodeId

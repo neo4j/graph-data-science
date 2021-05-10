@@ -20,10 +20,10 @@
 package org.neo4j.gds.ml.core;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.MatrixSum;
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.helper.Constant;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 

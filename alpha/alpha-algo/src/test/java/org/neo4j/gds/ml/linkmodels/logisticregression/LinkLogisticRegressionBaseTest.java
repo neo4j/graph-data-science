@@ -22,10 +22,9 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.functions.MatrixConstant;
+import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -68,7 +67,7 @@ class LinkLogisticRegressionBaseTest {
         );
 
         var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
-        MatrixConstant features = base.features(graph, allNodesBatch);
+        var features = base.features(graph, allNodesBatch);
         var expectedFeatures = new double[]{
             0.49, 0.49, 1.0,
             4.00, 2.56, 1.0,

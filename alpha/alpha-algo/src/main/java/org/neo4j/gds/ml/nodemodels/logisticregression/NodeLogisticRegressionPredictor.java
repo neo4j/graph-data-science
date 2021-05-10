@@ -20,17 +20,18 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.eclipse.collections.impl.tuple.Tuples;
-import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.functions.MatrixConstant;
-import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.ml.core.functions.Softmax;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.Predictor;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.Dimensions;
+import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.features.BiasFeature;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
+import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.ml.core.functions.Softmax;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.ArrayList;
@@ -51,7 +52,7 @@ public class NodeLogisticRegressionPredictor implements Predictor<Matrix, NodeLo
         var resultCols = dimensionsOfSecondMatrix.getOne(); // transposed second operand means we get the rows
         return
             sizeOfFeatureExtractorsInBytes(numberOfFeatures) +
-            MatrixConstant.sizeInBytes(batchSize, numberOfFeatures) +
+            Constant.sizeInBytes(Dimensions.matrix(batchSize, numberOfFeatures)) +
             MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(dimensionsOfFirstMatrix, dimensionsOfSecondMatrix) +
             Softmax.sizeInBytes(resultRows, resultCols);
     }
@@ -78,12 +79,12 @@ public class NodeLogisticRegressionPredictor implements Predictor<Matrix, NodeLo
     }
 
     Variable<Matrix> predictionsVariable(Graph graph, Batch batch) {
-        MatrixConstant features = features(graph, batch);
+        var features = features(graph, batch);
         var weights = modelData.weights();
         return new Softmax(MatrixMultiplyWithTransposedSecondOperand.of(features, weights));
     }
 
-    private MatrixConstant features(Graph graph, Batch batch) {
+    private Constant<Matrix> features(Graph graph, Batch batch) {
         var featureExtractors = featureExtractors(graph);
         return extract(batch, featureExtractors);
     }

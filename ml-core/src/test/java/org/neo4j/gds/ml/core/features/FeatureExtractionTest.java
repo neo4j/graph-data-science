@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.core.features;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.functions.MatrixConstant;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -49,7 +48,7 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
     void shouldConcatenateFeatures() {
         var featureExtractors = FeatureExtraction.propertyExtractors(validGraph, List.of("a", "b"));
         var allNodesBatch = new LazyBatch(0, (int) validGraph.nodeCount(), validGraph.nodeCount());
-        MatrixConstant featuresMatrix = FeatureExtraction.extract(allNodesBatch, featureExtractors);
+        var featuresMatrix = FeatureExtraction.extract(allNodesBatch, featureExtractors);
         assertThat(featuresMatrix.dimensions()).containsExactly(4, 3);
         assertThat(new ComputationContext().forward(featuresMatrix).data()).contains(
             new double[]{ 2.0, 1.0, 1.2, 1.3, 1.0, 0.5, 0.0, 1.0, 2.8, 1.0, 1.0, 0.9 },
@@ -62,7 +61,7 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
         var allExtractors = new ArrayList<>(FeatureExtraction.propertyExtractors(validGraph, List.of("a", "b")));
         allExtractors.add(new BiasFeature());
         var allNodesBatch = new LazyBatch(0, (int) validGraph.nodeCount(), validGraph.nodeCount());
-        MatrixConstant featuresMatrix = FeatureExtraction.extract(allNodesBatch, allExtractors);
+        var featuresMatrix = FeatureExtraction.extract(allNodesBatch, allExtractors);
         assertThat(featuresMatrix.dimensions()).containsExactly(4, 4);
         assertThat(new ComputationContext().forward(featuresMatrix).data()).contains(
             new double[]{ 2.0, 1.0, 1.2, 1.0, 1.3, 1.0, 0.5, 1.0, 0.0, 1.0, 2.8, 1.0, 1.0, 1.0, 0.9, 1.0 },

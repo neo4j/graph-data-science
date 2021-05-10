@@ -59,7 +59,7 @@ class MultiMeanTest extends ComputationContextBaseTest implements FiniteDifferen
 
         int[] expectedDim = Dimensions.matrix(2, 2);
 
-        Variable<Matrix> data = new MatrixConstant(matrix, 4, 2);
+        Variable<Matrix> data = Constant.matrix(matrix, 4, 2);
         Variable<Matrix> mean = new MultiMean(data, adj, selfAdjacency);
 
         Tensor<?> result = ctx.forward(mean);

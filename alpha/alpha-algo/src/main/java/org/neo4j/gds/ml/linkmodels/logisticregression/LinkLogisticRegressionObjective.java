@@ -20,18 +20,18 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.ml.Objective;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ConstantScale;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
 import org.neo4j.gds.ml.core.functions.LogisticLoss;
-import org.neo4j.gds.ml.core.functions.MatrixConstant;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.ml.Objective;
-import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.graphalgo.api.Graph;
 
@@ -56,13 +56,13 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
 
     @Override
     public Variable<Scalar> loss(Batch batch, long trainSize) {
-        MatrixConstant features = features(graph, batch);
+        var features = features(graph, batch);
         Variable<Matrix> predictions = predictions(features);
         var relationshipCount = new MutableInt();
         batch.nodeIds().forEach(nodeId -> relationshipCount.add(graph.degree(nodeId)));
         var rows = relationshipCount.getValue();
         double[] targets = makeTargetsArray(batch, rows);
-        MatrixConstant targetVariable = new MatrixConstant(targets, rows, 1);
+        var targetVariable = Constant.matrix(targets, rows, 1);
         var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData.weights()), rows * penalty / trainSize);
         var unpenalizedLoss = new LogisticLoss(modelData.weights(), predictions, features, targetVariable);
         return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));

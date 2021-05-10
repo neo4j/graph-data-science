@@ -21,32 +21,50 @@ package org.neo4j.gds.ml.core.functions;
 
 import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
-public class MatrixConstant extends AbstractVariable<Matrix> {
+public class Constant<T extends Tensor<T>> extends AbstractVariable<T> {
+    private final T data;
 
-    private final Matrix data;
-
-    public MatrixConstant(double[] elements, int rows, int cols) {
-        super(List.of(), Dimensions.matrix(rows, cols));
-        this.data = new Matrix(elements, rows, cols);
+    public Constant(T data) {
+        super(List.of(), data.dimensions());
+        this.data = data;
     }
 
-    public static long sizeInBytes(int rows, int columns) {
-        return Matrix.sizeInBytes(rows, columns);
+    public static Constant<Scalar> scalar(double data) {
+        return new Constant<>(new Scalar(data));
+    }
+
+    public static Constant<Vector> vector(double[] data) {
+        return new Constant<>(new Vector(data));
+    }
+
+    public static Constant<Matrix> matrix(double[] data, int rows, int cols) {
+        return new Constant<>(new Matrix(data, rows, cols));
     }
 
     @Override
-    public Matrix apply(ComputationContext ctx) {
+    public T apply(ComputationContext ctx) {
         return data;
     }
 
     @Override
-    public Matrix gradient(Variable<?> parent, ComputationContext ctx) {
+    public T gradient(Variable<?> parent, ComputationContext ctx) {
         return data.zeros();
+    }
+
+    public static long sizeInBytes(int[] dimensions) {
+        return Tensor.sizeInBytes(dimensions);
+    }
+
+    @Override
+    public boolean requireGradient() {
+        return false;
     }
 }

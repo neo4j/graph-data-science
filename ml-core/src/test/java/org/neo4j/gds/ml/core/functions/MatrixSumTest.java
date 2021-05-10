@@ -21,8 +21,6 @@ package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.functions.MatrixConstant;
-import org.neo4j.gds.ml.core.functions.MatrixSum;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
@@ -34,7 +32,7 @@ class MatrixSumTest {
 
     @Test
     void adds() {
-        MatrixConstant operand = new MatrixConstant(new double[]{1.0, 2.0, 3.0, 4.0}, 2, 2);
+        var operand = Constant.matrix(new double[]{1.0, 2.0, 3.0, 4.0}, 2, 2);
         MatrixSum add = new MatrixSum(List.of(operand, operand, operand));
 
         assertArrayEquals(new int[]{2, 2}, add.dimensions());
@@ -47,8 +45,8 @@ class MatrixSumTest {
 
     @Test
     void validatesDimensions() {
-        MatrixConstant op1 = new MatrixConstant(new double[]{1.0, 2.0, 3.0, 4.0}, 2, 2);
-        MatrixConstant op2 = new MatrixConstant(new double[]{1.0, 2.0, 3.0, 4.0}, 1, 4);
+        var op1 = Constant.matrix(new double[]{1.0, 2.0, 3.0, 4.0}, 2, 2);
+        var op2 = Constant.matrix(new double[]{1.0, 2.0, 3.0, 4.0}, 1, 4);
 
         assertThrows(AssertionError.class, () -> new MatrixSum(List.of(op1, op2, op1)));
     }

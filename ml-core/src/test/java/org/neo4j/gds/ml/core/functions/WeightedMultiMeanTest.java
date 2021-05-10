@@ -83,7 +83,7 @@ class WeightedMultiMeanTest extends ComputationContextBaseTest implements Finite
             1, 1, 1 // d4
         };
 
-        MatrixConstant userEmbeddings = new MatrixConstant(userEmbeddingsData, 6, 3);
+        var userEmbeddings = Constant.matrix(userEmbeddingsData, 6, 3);
         ctx.forward(userEmbeddings);
         WeightedMultiMean weightedEmbeddings = new WeightedMultiMean(
             userEmbeddings,

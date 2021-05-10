@@ -31,8 +31,8 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
     @Test
     void shouldApplyCorrectly() {
         var ctx = new ComputationContext();
-        var targets = new MatrixConstant(new double[]{1.0, 2.0, 0.0}, 3, 1);
-        var predictions = new MatrixConstant(
+        var targets = Constant.matrix(new double[]{1.0, 2.0, 0.0}, 3, 1);
+        var predictions = Constant.matrix(
             new double[]{
                 0.35, 0.65, 0.0,
                 0.45, 0.45, 0.1,
@@ -56,7 +56,7 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
 
     @Test
     void shouldComputeGradientCorrectly() {
-        var targets = new MatrixConstant(new double[]{1.0, 2.0, 0.0}, 3, 1);
+        var targets = Constant.matrix(new double[]{1.0, 2.0, 0.0}, 3, 1);
         var predictions = new Weights<>(
             new Matrix(
                 new double[]{

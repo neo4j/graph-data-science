@@ -21,13 +21,13 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.functions.MatrixConstant;
-import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
-import org.neo4j.gds.ml.core.functions.Sigmoid;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.ml.core.functions.Sigmoid;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
@@ -43,11 +43,11 @@ public class LinkLogisticRegressionBase {
         this.featureProperties = featureProperties;
     }
 
-    protected Variable<Matrix> predictions(MatrixConstant features) {
+    protected Variable<Matrix> predictions(Constant<Matrix> features) {
         return new Sigmoid<>(MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights()));
     }
 
-    protected MatrixConstant features(Graph graph, Batch batch) {
+    protected Constant<Matrix> features(Graph graph, Batch batch) {
         var graphCopy = graph.concurrentCopy();
         // TODO: replace by MutableLong and throw an error saying reduce batchSize if larger than maxint
         var relationshipCount = new MutableInt();
@@ -65,7 +65,7 @@ public class LinkLogisticRegressionBase {
                 return true;
             });
         });
-        return new MatrixConstant(features, rows, cols);
+        return Constant.matrix(features, rows, cols);
     }
 
     protected double[] features(Graph graph, long sourceId, long targetId) {
