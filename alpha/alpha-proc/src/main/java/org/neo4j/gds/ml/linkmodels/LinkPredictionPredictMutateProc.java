@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -44,6 +45,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
 import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictMutateProc.MutateResult, LinkPredictionPredictMutateConfig> {
 
@@ -54,6 +56,15 @@ public class LinkPredictionPredictMutateProc extends MutateProc<LinkPredictionPr
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return mutate(compute(graphNameOrConfig, configuration));
+    }
+
+    @Procedure(name = "gds.alpha.ml.linkPrediction.predict.mutate.estimate", mode = READ)
+    @Description("Estimates memory for applying a linkPrediction model")
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override
