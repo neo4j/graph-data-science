@@ -30,7 +30,7 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 class AdamOptimizerTest {
 
@@ -78,7 +78,6 @@ class AdamOptimizerTest {
             adam.update(ctx);
         }
 
-        assertTrue(oldLoss < 1e-4, "oldLoss was : " + oldLoss);
+        assertThat(oldLoss).isLessThan(1e-4);
     }
-
 }

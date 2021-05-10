@@ -20,20 +20,20 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
-// Division, squaring and square-rooting is done elementwise.
+// Division, squaring and square-rooting is done element-wise.
+// Based on https://arxiv.org/pdf/1412.6980.pdf
 public class AdamOptimizer {
 
     private static final double CLIP_MAX = 5.0;
@@ -48,8 +48,8 @@ public class AdamOptimizer {
 
     private final List<Weights<? extends Tensor<?>>> variables;
 
-    private List<? extends Tensor<?>> momentumTerms;
-    private List<? extends Tensor<?>> velocityTerms;
+    private final List<Tensor<?>> momentumTerms;
+    private final List<Tensor<?>> velocityTerms;
 
     private int iteration = 0;
 
@@ -72,7 +72,7 @@ public class AdamOptimizer {
         this.variables = variables;
 
         momentumTerms = variables.stream().map(v -> v.data().zeros()).collect(Collectors.toList());
-        velocityTerms = List.copyOf(momentumTerms);
+        velocityTerms = new ArrayList<>(momentumTerms);
     }
 
     // TODO: probably doesnt have to be synchronized
@@ -80,55 +80,45 @@ public class AdamOptimizer {
         iteration += 1;
         variables.forEach(variable -> otherCtx.gradient(variable).mapInPlace(this::clip));
 
-        // m_t = beta_1*m_t + (1-beta_1)*g_t	#updates the moving averages of the gradient
-        momentumTerms = IntStream.range(0, variables.size())
-            .mapToObj(i -> {
-                Variable<?> variable = variables.get(i);
-                Tensor<?> momentumTerm = momentumTerms.get(i);
-                return castAndAdd(
-                    momentumTerm.scalarMultiply(beta_1),
-                    otherCtx.gradient(variable).scalarMultiply(1 - beta_1)
-                );
-            })
-            .collect(Collectors.toList());
+        // Updates the moving averages of the gradient
+        // m_t = beta_1 * m_t + (1 - beta_1) * g_t
+        for (int i = 0; i < variables.size(); i++) {
+            var variable = variables.get(i);
+            var momentumTerm = momentumTerms.get(i);
+            var newMomentum = castAndAdd(
+                momentumTerm.scalarMultiply(beta_1),
+                otherCtx.gradient(variable).scalarMultiply(1 - beta_1)
+            );
+            momentumTerms.set(i, newMomentum);
+        }
 
-        // v_t = beta_2*v_t + (1-beta_2)*(g_t*g_t)	#updates the moving averages of the squared gradient
-        velocityTerms = IntStream.range(0, variables.size())
-            .mapToObj(i -> {
-                Variable<?> variable = variables.get(i);
-                Tensor<?> velocityTerm = velocityTerms.get(i);
-                Tensor<?> gradient = otherCtx.gradient(variable);
-                Tensor<?> squaredGradient = gradient.elementwiseProduct(gradient);
-                return castAndAdd(
-                    velocityTerm.scalarMultiply(beta_2),
-                    squaredGradient.scalarMultiply(1 - beta_2)
-                );
-            })
-            .collect(Collectors.toList());
+        // Updates the moving averages of the squared gradient
+        // v_t = beta_2 * v_t + (1 - beta_2) * (g_t^2)
+        for (int i = 0; i < variables.size(); i++) {
+            var variable = variables.get(i);
+            var velocityTerm = velocityTerms.get(i);
+            var gradient = otherCtx.gradient(variable);
+            var squaredGradient = gradient.elementwiseProduct(gradient);
+            velocityTerms.set(i, castAndAdd(
+                velocityTerm.scalarMultiply(beta_2),
+                squaredGradient.scalarMultiply(1 - beta_2)
+            ));
+        }
 
-        // m_cap = m_t/(1-(beta_1**t))		#calculates the bias-corrected estimates
-        List<Tensor<?>> mCaps = momentumTerms.stream()
-            .map(mTerm -> mTerm.scalarMultiply(1d / (1 - Math.pow(beta_1, iteration))))
-            .collect(Collectors.toList());
+        for (int i = 0; i < variables.size(); i++) {
+            // m_cap = m_t / (1 - beta_1^t)		#calculates the bias-corrected estimates
+            var mCap = momentumTerms.get(i).scalarMultiply(1d / (1 - Math.pow(beta_1, iteration)));
 
-        // v_cap = v_t/(1-(beta_2**t))		#calculates the bias-corrected estimates
-        List<Tensor<?>> vCaps = velocityTerms.stream()
-            .map(vTerm -> vTerm.scalarMultiply(1d / (1 - Math.pow(beta_2, iteration))))
-            .collect(Collectors.toList());
+            // v_cap = v_t / (1 - beta_2^t)		#calculates the bias-corrected estimates
+            var vCap = velocityTerms.get(i).scalarMultiply(1d / (1 - Math.pow(beta_2, iteration)));
 
-        IntStream.range(0, variables.size())
-            .forEach(i -> {
-                Weights<? extends Tensor<?>> variable = variables.get(i);
-                Tensor<?> mCap = mCaps.get(i);
-                Tensor<?> vCap = vCaps.get(i);
-
-                // theta_0 = theta_0 - (alpha*m_cap)/(math.sqrt(v_cap)+epsilon)	#updates the parameters
-                Tensor<?> theta_0 = variable.data();
-                theta_0.addInPlace(mCap
-                    .scalarMultiply(-alpha)
-                    .elementwiseProduct(vCap.map(v -> 1 / (Math.sqrt(v) + epsilon)))
-                );
-            });
+            // theta_0 = theta_0 - (alpha * m_cap) / (math.sqrt(v_cap) + epsilon)	#updates the parameters
+            var theta_0 = variables.get(i).data();
+            theta_0.addInPlace(mCap
+                .scalarMultiply(-alpha)
+                .elementwiseProduct(vCap.map(v -> 1 / (Math.sqrt(v) + epsilon)))
+            );
+        }
     }
 
     // TODO: Try to retain type information and avoid these checks
