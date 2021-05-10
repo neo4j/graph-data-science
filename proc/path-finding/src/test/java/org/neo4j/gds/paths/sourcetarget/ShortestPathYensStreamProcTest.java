@@ -63,15 +63,16 @@ class ShortestPathYensStreamProcTest extends ShortestPathYensProcTest<ShortestPa
             .yields();
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
-            var path0 = PathFactory.create(tx, -1, ids0, costs0, RelationshipType.withName("PATH_0"), StreamResult.COST_PROPERTY_NAME);
-            var path1 = PathFactory.create(tx, -4, ids1, costs1, RelationshipType.withName("PATH_1"), StreamResult.COST_PROPERTY_NAME);
-            var path2 = PathFactory.create(tx, -7, ids2, costs2, RelationshipType.withName("PATH_2"), StreamResult.COST_PROPERTY_NAME);
+            PathFactory.RelationshipIds.set(0);
+            var path0 = PathFactory.create(tx, ids0, costs0, RelationshipType.withName("PATH_0"), StreamResult.COST_PROPERTY_NAME);
+            var path1 = PathFactory.create(tx, ids1, costs1, RelationshipType.withName("PATH_1"), StreamResult.COST_PROPERTY_NAME);
+            var path2 = PathFactory.create(tx, ids2, costs2, RelationshipType.withName("PATH_2"), StreamResult.COST_PROPERTY_NAME);
             var expected = List.of(
                 Map.of("index", 0L, "sourceNode", idC, "targetNode", idH, "totalCost", 5.0D, "costs", asList(costs0), "nodeIds", asList(ids0), "path", path0),
                 Map.of("index", 1L, "sourceNode", idC, "targetNode", idH, "totalCost", 7.0D, "costs", asList(costs1), "nodeIds", asList(ids1), "path", path1),
                 Map.of("index", 2L, "sourceNode", idC, "targetNode", idH, "totalCost", 8.0D, "costs", asList(costs2), "nodeIds", asList(ids2), "path", path2)
             );
-
+            PathFactory.RelationshipIds.set(0);
             assertCypherResult(query, expected);
         });
     }

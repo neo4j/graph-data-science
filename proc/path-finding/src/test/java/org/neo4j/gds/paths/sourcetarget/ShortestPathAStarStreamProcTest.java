@@ -68,9 +68,9 @@ class ShortestPathAStarStreamProcTest extends ShortestPathAStarProcTest<Shortest
             .yields();
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+            PathFactory.RelationshipIds.set(0);
             var expectedPath = PathFactory.create(
                 tx,
-                -1,
                 ids0,
                 costs0,
                 RelationshipType.withName(formatWithLocale("PATH_0")), StreamResult.COST_PROPERTY_NAME
@@ -84,7 +84,7 @@ class ShortestPathAStarStreamProcTest extends ShortestPathAStarProcTest<Shortest
                 "nodeIds", Arrays.stream(ids0).boxed().collect(Collectors.toList()),
                 "path", expectedPath
             );
-
+            PathFactory.RelationshipIds.set(0);
             assertCypherResult(query, List.of(expected));
         });
     }
