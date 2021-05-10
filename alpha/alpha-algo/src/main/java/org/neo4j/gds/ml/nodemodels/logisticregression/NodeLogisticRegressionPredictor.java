@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
-import org.eclipse.collections.impl.tuple.Tuples;
+import org.neo4j.gds.ml.Predictor;
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
@@ -46,10 +46,10 @@ public class NodeLogisticRegressionPredictor implements Predictor<Matrix, NodeLo
     private final List<String> featureProperties;
 
     public static long sizeOfPredictionsVariableInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
-        var dimensionsOfFirstMatrix = Tuples.pair(batchSize, numberOfFeatures);
-        var dimensionsOfSecondMatrix = Tuples.pair(numberOfClasses, numberOfFeatures);
-        var resultRows = dimensionsOfFirstMatrix.getOne();
-        var resultCols = dimensionsOfSecondMatrix.getOne(); // transposed second operand means we get the rows
+        var dimensionsOfFirstMatrix = new int[]{batchSize, numberOfFeatures};
+        var dimensionsOfSecondMatrix = new int[]{numberOfClasses, numberOfFeatures};
+        var resultRows = dimensionsOfFirstMatrix[0];
+        var resultCols = dimensionsOfSecondMatrix[0]; // transposed second operand means we get the rows
         return
             sizeOfFeatureExtractorsInBytes(numberOfFeatures) +
             Constant.sizeInBytes(Dimensions.matrix(batchSize, numberOfFeatures)) +

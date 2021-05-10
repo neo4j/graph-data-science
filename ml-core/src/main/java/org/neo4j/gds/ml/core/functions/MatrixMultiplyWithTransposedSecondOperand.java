@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
-import org.eclipse.collections.api.tuple.Pair;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
 import org.neo4j.gds.ml.core.AbstractVariable;
@@ -37,9 +36,9 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<Matrix> {
 
-    public static long sizeInBytes(Pair<Integer, Integer> dimensionsOfFirstMatrix, Pair<Integer, Integer> dimensionsOfSecondMatrix) {
-        var resultRows = dimensionsOfFirstMatrix.getOne();
-        var resultCols = dimensionsOfSecondMatrix.getOne(); // transposed second operand means we get the rows
+    public static long sizeInBytes(int[] dimensionsOfFirstMatrix, int[] dimensionsOfSecondMatrix) {
+        var resultRows = dimensionsOfFirstMatrix[0];
+        var resultCols = dimensionsOfSecondMatrix[0]; // transposed second operand means we get the rows
         return Matrix.sizeInBytes(resultRows, resultCols);
     }
 
