@@ -80,44 +80,42 @@ public class AdamOptimizer {
         iteration += 1;
         variables.forEach(variable -> otherCtx.gradient(variable).mapInPlace(this::clip));
 
-        // Updates the moving averages of the gradient
-        // m_t = beta_1 * m_t + (1 - beta_1) * g_t
         for (int i = 0; i < variables.size(); i++) {
             var variable = variables.get(i);
-            var momentumTerm = momentumTerms.get(i);
-            var newMomentum = castAndAdd(
-                momentumTerm.scalarMultiply(beta_1),
-                otherCtx.gradient(variable).scalarMultiply(1 - beta_1)
-            );
-            momentumTerms.set(i, newMomentum);
-        }
-
-        // Updates the moving averages of the squared gradient
-        // v_t = beta_2 * v_t + (1 - beta_2) * (g_t^2)
-        for (int i = 0; i < variables.size(); i++) {
-            var variable = variables.get(i);
-            var velocityTerm = velocityTerms.get(i);
             var gradient = otherCtx.gradient(variable);
+
+            // m_t = beta_1 * m_t + (1 - beta_1) * g_t
+            var momentumTerm = momentumTerms.get(i);
+            var updatedMomentumTerm = castAndAdd(
+                momentumTerm.scalarMultiply(beta_1),
+                gradient.scalarMultiply(1 - beta_1)
+            );
+
+            // v_t = beta_2 * v_t + (1 - beta_2) * (g_t^2)
+            var velocityTerm = velocityTerms.get(i);
             var squaredGradient = gradient.elementwiseProduct(gradient);
-            velocityTerms.set(i, castAndAdd(
+            var updatedVelocityTerm = castAndAdd(
                 velocityTerm.scalarMultiply(beta_2),
                 squaredGradient.scalarMultiply(1 - beta_2)
-            ));
-        }
+            );
 
-        for (int i = 0; i < variables.size(); i++) {
             // m_cap = m_t / (1 - beta_1^t)		#calculates the bias-corrected estimates
-            var mCap = momentumTerms.get(i).scalarMultiply(1d / (1 - Math.pow(beta_1, iteration)));
+            var mCap = updatedMomentumTerm.scalarMultiply(1d / (1 - Math.pow(beta_1, iteration)));
 
             // v_cap = v_t / (1 - beta_2^t)		#calculates the bias-corrected estimates
-            var vCap = velocityTerms.get(i).scalarMultiply(1d / (1 - Math.pow(beta_2, iteration)));
+            var vCap = updatedVelocityTerm.scalarMultiply(1d / (1 - Math.pow(beta_2, iteration)));
 
             // theta_0 = theta_0 - (alpha * m_cap) / (math.sqrt(v_cap) + epsilon)	#updates the parameters
-            var theta_0 = variables.get(i).data();
+            var theta_0 = variable.data();
             theta_0.addInPlace(mCap
                 .scalarMultiply(-alpha)
                 .elementwiseProduct(vCap.map(v -> 1 / (Math.sqrt(v) + epsilon)))
             );
+
+            // Updates the moving averages of the gradient
+            momentumTerms.set(i, updatedMomentumTerm);
+            // Updates the moving averages of the squared gradient
+            velocityTerms.set(i, updatedVelocityTerm);
         }
     }
 
