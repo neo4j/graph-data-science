@@ -24,6 +24,8 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.api.ImmutableRelationshipCursor;
+import org.neo4j.graphalgo.api.RelationshipCursor;
 
 import java.util.Arrays;
 import java.util.stream.LongStream;
@@ -49,9 +51,37 @@ class UniformReservoirLSamplerTest {
 
         assertThat(sampled.keys()).hasSize(input.length);
 
-        var avgTimesSamples = Arrays.stream(sampled.values().toArray()).summaryStatistics().getAverage();
+        var longSummaryStatistics = Arrays.stream(sampled.values().toArray()).summaryStatistics();
+        assertThat(longSummaryStatistics.getAverage()).isEqualTo(100.0D, Offset.offset(1D));
+        assertThat(longSummaryStatistics.getMin()).isCloseTo(80L, Offset.offset(5L));
+        assertThat(longSummaryStatistics.getMax()).isCloseTo(120L, Offset.offset(5L));
+    }
 
-        assertThat(avgTimesSamples).isEqualTo(100.0D, Offset.offset(1D));
+    @Test
+    void relationshipCursorStream() {
+        int numberOfSamples = 10;
+
+        var sampled = new LongLongHashMap();
+
+        var sampler = new UniformReservoirLSampler(19L);
+        var input = LongStream
+            .range(0, 100)
+            .mapToObj(targetId -> ImmutableRelationshipCursor.of(0, targetId, 0D))
+            .toArray(RelationshipCursor[]::new);
+
+        var numberOfSampling = 1000;
+        for (int i = 0; i < numberOfSampling; i++) {
+            sampler.sample(Arrays.stream(input), input.length, numberOfSamples)
+                .forEach(nodeId -> sampled.addTo(nodeId, 1));
+        }
+
+        assertThat(sampled.keys()).hasSize(input.length);
+
+        var longSummaryStatistics = Arrays.stream(sampled.values().toArray()).summaryStatistics();
+
+        assertThat(longSummaryStatistics.getAverage()).isEqualTo(100.0D, Offset.offset(1D));
+        assertThat(longSummaryStatistics.getMin()).isCloseTo(80L, Offset.offset(5L));
+        assertThat(longSummaryStatistics.getMax()).isCloseTo(120L, Offset.offset(5L));
     }
 
     @ParameterizedTest

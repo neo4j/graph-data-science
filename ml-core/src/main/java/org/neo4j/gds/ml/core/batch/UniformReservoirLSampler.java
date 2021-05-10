@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
+import org.neo4j.graphalgo.api.RelationshipCursor;
+
 import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 /*
  * L Algorithm for uniform sampling k elements from an input stream
@@ -34,6 +37,14 @@ public class UniformReservoirLSampler {
 
     public UniformReservoirLSampler(long randomSeed) {
         this.random = new Random(randomSeed);
+    }
+
+    public LongStream sample(Stream<RelationshipCursor> relationshipCursorStream, long inputSize, int numberOfSamples) {
+        return this.sample(
+            relationshipCursorStream.mapToLong(RelationshipCursor::targetId),
+            inputSize,
+            numberOfSamples
+        );
     }
 
     public LongStream sample(LongStream input, long inputSize, int numberOfSamples) {
@@ -61,7 +72,7 @@ public class UniformReservoirLSampler {
         nextIdxToSample += computeNumberOfSkips(skipFactor);
         skipFactor *= computeSkipFactor(numberOfSamples);
 
-        for(int idx = numberOfSamples; inputIterator.hasNext(); idx++) {
+        for (int idx = numberOfSamples; inputIterator.hasNext(); idx++) {
             var inputValue = inputIterator.nextLong();
             if (idx == nextIdxToSample) {
                 reservoir[random.nextInt(numberOfSamples)] = inputValue;

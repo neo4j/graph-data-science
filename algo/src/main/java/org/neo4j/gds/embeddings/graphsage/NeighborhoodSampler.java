@@ -40,26 +40,24 @@ public class NeighborhoodSampler {
     public LongStream sample(Graph graph, long nodeId, long numberOfSamples) {
         var degree = graph.degree(nodeId);
 
+        var concurrentCopyGraph = graph.concurrentCopy();
         // Every neighbor needs to be sampled
         if (degree <= numberOfSamples) {
-            return graph.concurrentCopy()
+            return concurrentCopyGraph
                 .streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE)
                 .mapToLong(RelationshipCursor::targetId);
         }
 
         if (graph.hasRelationshipProperty()) {
             return new WeightedUniformReservoirRSampler(randomSeed)
-                .sample(graph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
+                .sample(
+                    concurrentCopyGraph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
                     degree,
                     Math.toIntExact(numberOfSamples)
                 );
         } else {
-            var neighbours = graph
-                .concurrentCopy()
-                .streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE)
-                .mapToLong(RelationshipCursor::targetId);
             return new UniformReservoirLSampler(randomSeed).sample(
-                neighbours,
+                concurrentCopyGraph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
                 graph.degree(nodeId),
                 Math.toIntExact(numberOfSamples)
             );
