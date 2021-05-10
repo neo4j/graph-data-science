@@ -120,8 +120,8 @@ include::../shared/examples-estimate-intro.adoc[]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.shortestPath.astar.write.estimate('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     latitudeProperty: 'latitude',
     longitudeProperty: 'longitude',
     writeRelationshipType: 'PATH'
@@ -152,35 +152,37 @@ include::../shared/examples-stream-intro.adoc[]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.shortestPath.astar.stream('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     latitudeProperty: 'latitude',
     longitudeProperty: 'longitude',
     relationshipWeightProperty: 'distance'
 })
-YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
 RETURN
     index,
     gds.util.asNode(sourceNode).name AS sourceNodeName,
     gds.util.asNode(targetNode).name AS targetNodeName,
     totalCost,
     [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
-    costs
+    costs,
+    nodes(path) as path
 ORDER BY index
 ----
 
 .Results
 [opts="header"]
 |===
-| index | sourceNodeName | targetNodeName | totalCost | nodeNames                                        | costs
-| 0     | "Kings Cross"  | "Kentish Town" | 3.3       | [Kings Cross, Euston, Camden Town, Kentish Town] | [0.0, 0.7, 2.0, 3.3]
+| index | sourceNodeName | targetNodeName | totalCost | nodeNames                                        | costs                | path
+| 0     | "Kings Cross"  | "Kentish Town" | 3.3       | [Kings Cross, Euston, Camden Town, Kentish Town] | [0.0, 0.7, 2.0, 3.3] | [Node[0], Node[1], Node[2], Node[4]]
 |===
 --
 
 The result shows the total cost of the shortest path between node `King's Cross` and `Kentish Town` in the graph.
 It also shows ordered lists of node ids that were traversed to find the shortest paths as well as the accumulated costs of the visited nodes.
 This can be verified in the <<algorithms-astar-examples, example graph>>.
-
+Cypher Path objects can be returned by the `path` return field.
+The Path objects contain the node objects and virtual relationships which have a `cost` property.
 
 [[algorithms-astar-examples-mutate]]
 === Mutate
@@ -194,8 +196,8 @@ include::path-examples-mutate-intro.adoc[]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.shortestPath.astar.mutate('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     latitudeProperty: 'latitude',
     longitudeProperty: 'longitude',
     relationshipWeightProperty: 'distance',
@@ -229,8 +231,8 @@ include::path-examples-write-intro.adoc[]
 ----
 MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
 CALL gds.shortestPath.astar.write('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     latitudeProperty: 'latitude',
     longitudeProperty: 'longitude',
     relationshipWeightProperty: 'distance',

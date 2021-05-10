@@ -60,7 +60,6 @@ class YensTest {
 
     static ImmutableShortestPathYensStreamConfig.Builder defaultSourceTargetConfigBuilder() {
         return ImmutableShortestPathYensStreamConfig.builder()
-            .path(true)
             .concurrency(1);
     }
 

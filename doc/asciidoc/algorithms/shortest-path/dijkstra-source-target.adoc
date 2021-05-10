@@ -100,8 +100,8 @@ include::../shared/examples-estimate-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.write.estimate('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH'
 })
@@ -131,33 +131,35 @@ include::../shared/examples-stream-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.stream('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     relationshipWeightProperty: 'cost'
 })
-YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
 RETURN
     index,
     gds.util.asNode(sourceNode).name AS sourceNodeName,
     gds.util.asNode(targetNode).name AS targetNodeName,
     totalCost,
     [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
-    costs
+    costs,
+    nodes(path) as path
 ORDER BY index
 ----
 
 .Results
 [opts="header"]
 |===
-| index | sourceNodeName | targetNodeName | totalCost | nodeNames       | costs
-| 0     | "A"            | "F"            | 160.0     | [A, B, D, E, F] | [0.0, 50.0, 90.0, 120.0, 160.0]
+| index | sourceNodeName | targetNodeName | totalCost | nodeNames       | costs                             | path
+| 0     | "A"            | "F"            | 160.0     | [A, B, D, E, F] | [0.0, 50.0, 90.0, 120.0, 160.0]   | [Node[0], Node[1], Node[3], Node[4], Node[5]]
 |===
 --
 
 The result shows the total cost of the shortest path between node `A` and node `F`.
 It also shows an ordered list of node ids that were traversed to find the shortest path as well as the accumulated costs of the visited nodes.
 This can be verified in the <<algorithms-dijkstra-source-target-examples, example graph>>.
-
+Cypher Path objects can be returned by the `path` return field.
+The Path objects contain the node objects and virtual relationships which have a `cost` property.
 
 [[algorithms-dijkstra-source-target-examples-mutate]]
 === Mutate
@@ -171,8 +173,8 @@ include::path-examples-mutate-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.mutate('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     relationshipWeightProperty: 'cost',
     mutateRelationshipType: 'PATH'
 })
@@ -204,8 +206,8 @@ include::path-examples-write-intro.adoc[]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.write('myGraph', {
-    sourceNode: id(source),
-    targetNode: id(target),
+    sourceNode: source,
+    targetNode: target,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH',
     writeNodeIds: true,

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.yens.config;
 
-import org.neo4j.gds.paths.ReturnsPathConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -30,7 +29,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ShortestPathYensStreamConfig extends ShortestPathYensBaseConfig, ReturnsPathConfig {
+public interface ShortestPathYensStreamConfig extends ShortestPathYensBaseConfig {
 
     static ShortestPathYensStreamConfig of(
         String username,

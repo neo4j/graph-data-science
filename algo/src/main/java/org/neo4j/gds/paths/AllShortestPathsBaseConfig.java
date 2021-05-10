@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.paths;
 
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
 public interface AllShortestPathsBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, TrackRelationshipsConfig {
 
+    @Configuration.ConvertWith("org.neo4j.gds.paths.ShortestPathBaseConfig#parseSourceNodeId")
     long sourceNode();
 }

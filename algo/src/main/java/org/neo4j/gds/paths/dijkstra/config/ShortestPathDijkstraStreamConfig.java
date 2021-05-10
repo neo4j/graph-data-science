@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.dijkstra.config;
 
-import org.neo4j.gds.paths.ReturnsPathConfig;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
@@ -31,7 +30,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ShortestPathDijkstraStreamConfig extends ShortestPathBaseConfig, ReturnsPathConfig {
+public interface ShortestPathDijkstraStreamConfig extends ShortestPathBaseConfig {
 
     static ShortestPathDijkstraStreamConfig of(
         String username,

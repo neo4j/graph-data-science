@@ -58,7 +58,6 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
             .streamMode()
             .addParameter("sourceNode", config.sourceNode())
             .addParameter("relationshipWeightProperty", "cost")
-            .addParameter("path", true)
             .yields();
 
         //@formatter:off
