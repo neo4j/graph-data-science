@@ -59,7 +59,7 @@ public final class PathFactory {
         return pathBuilder.build();
     }
 
-    static final class RelationshipIds {
+    public static final class RelationshipIds {
 
         static final AtomicLong ids = new AtomicLong(0);
 
@@ -75,7 +75,7 @@ public final class PathFactory {
         }
 
         @TestOnly
-        static void set(long value) {
+        public static void set(long value) {
             ids.set(value);
         }
 

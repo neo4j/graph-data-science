@@ -62,6 +62,7 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
 
         //@formatter:off
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+            PathFactory.RelationshipIds.set(0);
             var path0 = PathFactory.create(tx, ids0, costs0, RelationshipType.withName("PATH_0"), StreamResult.COST_PROPERTY_NAME);
             var path1 = PathFactory.create(tx, ids1, costs1, RelationshipType.withName("PATH_1"), StreamResult.COST_PROPERTY_NAME);
             var path2 = PathFactory.create(tx, ids2, costs2, RelationshipType.withName("PATH_2"), StreamResult.COST_PROPERTY_NAME);
@@ -76,6 +77,7 @@ class AllShortestPathsDijkstraStreamProcTest extends AllShortestPathsDijkstraPro
                 Map.of("index", 4L, "sourceNode", idA, "targetNode", idD, "totalCost", 9.0D, "costs", asList(costs4), "nodeIds", asList(ids4), "path", path4),
                 Map.of("index", 5L, "sourceNode", idA, "targetNode", idF, "totalCost", 20.0D, "costs", asList(costs5), "nodeIds", asList(ids5), "path", path5)
             );
+            PathFactory.RelationshipIds.set(0);
             assertCypherResult(query, expected);
         });
         //@formatter:on
