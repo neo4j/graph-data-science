@@ -26,6 +26,7 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
@@ -33,9 +34,9 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 
 public class CrossEntropyLoss extends AbstractVariable<Scalar> {
     private final Variable<Matrix> predictions;
-    private final Variable<Matrix> targets;
+    private final Variable<Vector> targets;
 
-    public CrossEntropyLoss(Variable<Matrix> predictions, Variable<Matrix> targets) {
+    public CrossEntropyLoss(Variable<Matrix> predictions, Variable<Vector> targets) {
         super(List.of(predictions, targets), Dimensions.scalar());
         this.predictions = predictions;
         this.targets = targets;
@@ -47,8 +48,8 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
 
     @Override
     public Scalar apply(ComputationContext ctx) {
-        Matrix predictionsMatrix = ctx.data(predictions);
-        Matrix targetsVector = ctx.data(targets);
+        var predictionsMatrix = ctx.data(predictions);
+        var targetsVector = ctx.data(targets);
 
         double result = 0;
         for (int row = 0; row < targetsVector.totalSize(); row++) {
@@ -66,13 +67,13 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         if (parent == predictions) {
-            Matrix predictionsMatrix = ctx.data(predictions);
+            var predictionsMatrix = ctx.data(predictions);
             Matrix gradient = predictionsMatrix.zeros();
-            Matrix targetsColumnVector = ctx.data(targets);
+            var targetsVector = ctx.data(targets);
 
             var multiplier = -1.0 / gradient.rows();
             for (int row = 0; row < gradient.rows(); row++) {
-                var trueClass = (int) targetsColumnVector.dataAt(row);
+                var trueClass = (int) targetsVector.dataAt(row);
                 var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row * predictionsMatrix.cols() + trueClass);
                 if (predictedProbabilityForTrueClass > 0) {
                     gradient.setDataAt(

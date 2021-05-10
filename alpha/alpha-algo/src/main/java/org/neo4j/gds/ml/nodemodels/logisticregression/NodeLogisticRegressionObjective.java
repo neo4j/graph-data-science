@@ -33,6 +33,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
@@ -125,7 +126,7 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
         return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 
-    private Constant<Matrix> makeTargets(Batch batch) {
+    private Constant<Vector> makeTargets(Batch batch) {
         Iterable<Long> nodeIds = batch.nodeIds();
         int numberOfNodes = batch.size();
         double[] targets = new double[numberOfNodes];
@@ -137,7 +138,7 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
             targets[nodeOffset] = localIdMap.toMapped((long) targetValue);
             nodeOffset++;
         }
-        return Constant.matrix(targets, numberOfNodes, 1);
+        return Constant.vector(targets);
     }
 
     @Override
