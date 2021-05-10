@@ -27,10 +27,12 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /*
- * Weighted Reservoir Sampling based on Algorithm A-Res
+ * Weighted Reservoir Sampling based on Algorithm A-Res:
+ * https://en.wikipedia.org/wiki/Reservoir_sampling#Algorithm_A-Res
  */
 public class WeightedUniformReservoirRSampler {
 
+    // Used in the denominators in order to avoid division by zero.
     private static final double EPSILON = 1e-10;
     private final Random random;
 
@@ -51,19 +53,19 @@ public class WeightedUniformReservoirRSampler {
         var inputIterator = input.iterator();
 
         for (int i = 0; i < numberOfSamples; i++) {
-            var rel = inputIterator.next();
-            var priority = Math.pow(random.nextDouble(), 1 / rel.property() + EPSILON);
-            reservoir.offer(rel.targetId(), priority);
+            processRelationship(reservoir, inputIterator.next());
         }
 
-        double x = Math.log(random.nextDouble()) / Math.log(reservoir.elementAt(0));
-
         while (inputIterator.hasNext()) {
-            var rel = inputIterator.next();
-            var priority = Math.pow(random.nextDouble(), 1 / rel.property() + EPSILON);
-            reservoir.offer(rel.targetId(), priority);
+            processRelationship(reservoir, inputIterator.next());
         }
 
         return reservoir.elements();
+    }
+
+    private void processRelationship(BoundedLongPriorityQueue reservoir, RelationshipCursor relationshipCursor) {
+        // Higher weights should be more likely to be sampled
+        var priority = Math.pow(random.nextDouble(), 1 / relationshipCursor.property() + EPSILON);
+        reservoir.offer(relationshipCursor.targetId(), priority);
     }
 }

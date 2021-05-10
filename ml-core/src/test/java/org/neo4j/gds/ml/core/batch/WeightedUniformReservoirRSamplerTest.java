@@ -34,7 +34,7 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WeightedUniformRSamplerTest {
+class WeightedUniformReservoirRSamplerTest {
 
     @Test
     void shouldSampleSubsetOfNeighbors() {
