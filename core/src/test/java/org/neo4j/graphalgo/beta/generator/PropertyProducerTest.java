@@ -30,7 +30,7 @@ class PropertyProducerTest {
 
     @Test
     void testFixedPropertyProducer() {
-        var producer = PropertyProducer.fixed("foo", 0x13p37);
+        var producer = PropertyProducer.fixedDouble("foo", 0x13p37);
         assertThat(producer)
             .returns("foo", PropertyProducer::getPropertyName)
             .returns(ValueType.DOUBLE, PropertyProducer::propertyType)
@@ -43,7 +43,7 @@ class PropertyProducerTest {
 
     @Test
     void testRandomPropertyProducer() {
-        var producer = PropertyProducer.random("foo", 0.0, 1.0);
+        var producer = PropertyProducer.randomDouble("foo", 0.0, 1.0);
         assertThat(producer)
             .returns("foo", PropertyProducer::getPropertyName)
             .returns(ValueType.DOUBLE, PropertyProducer::propertyType)
@@ -62,7 +62,7 @@ class PropertyProducerTest {
 
     @Test
     void testRandomEmbeddingPropertyProducer() {
-        var producer = PropertyProducer.randomEmbeddings("foo", 7, 0.0F, 1.0F);
+        var producer = PropertyProducer.randomEmbedding("foo", 7, 0.0F, 1.0F);
         assertThat(producer)
             .returns("foo", PropertyProducer::getPropertyName)
             .returns(ValueType.FLOAT_ARRAY, PropertyProducer::propertyType)

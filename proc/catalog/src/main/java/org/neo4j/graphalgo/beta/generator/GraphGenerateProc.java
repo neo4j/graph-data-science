@@ -143,12 +143,12 @@ public final class GraphGenerateProc extends BaseProc {
             case "random":
                 double min = config.getDouble(RELATIONSHIP_PROPERTY_MIN_KEY, 0.0);
                 double max = config.getDouble(RELATIONSHIP_PROPERTY_MAX_KEY, 1.0);
-                propertyProducer = PropertyProducer.random(propertyName, min, max);
+                propertyProducer = PropertyProducer.randomDouble(propertyName, min, max);
                 break;
 
             case "fixed":
                 double value = config.requireDouble(RELATIONSHIP_PROPERTY_VALUE_KEY);
-                propertyProducer = PropertyProducer.fixed(propertyName, value);
+                propertyProducer = PropertyProducer.fixedDouble(propertyName, value);
                 break;
 
             default:

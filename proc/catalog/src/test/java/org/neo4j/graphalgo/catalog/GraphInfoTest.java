@@ -69,9 +69,9 @@ final class GraphInfoTest {
     static Stream<Arguments> producers() {
         return Stream.of(
             arguments(new PropertyProducer.EmptyPropertyProducer(), "emptyProducer"),
-            arguments(PropertyProducer.fixed("singleValue", 42), "singleValueProducer"),
+            arguments(PropertyProducer.fixedDouble("singleValue", 42), "singleValueProducer"),
             arguments(
-                PropertyProducer.randomEmbeddings("lotsOfSmallValues", 42, 0.0F, 1.0F),
+                PropertyProducer.randomEmbedding("lotsOfSmallValues", 42, 0.0F, 1.0F),
                 "lotsOfSmallValuesProducer"
             )
         );

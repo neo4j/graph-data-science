@@ -102,7 +102,7 @@ class ScalePropertiesTest {
             .nodeCount(nodeCount)
             .averageDegree(1)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .nodePropertyProducer(PropertyProducer.random("a", -100, 100))
+            .nodePropertyProducer(PropertyProducer.randomDouble("a", -100, 100))
             .build()
             .generate();
 

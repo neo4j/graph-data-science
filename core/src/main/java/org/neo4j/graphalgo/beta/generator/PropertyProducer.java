@@ -22,32 +22,33 @@ package org.neo4j.graphalgo.beta.generator;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Objects;
+import java.util.Random;
 
 public interface PropertyProducer<PROPERTY_SLICE> {
 
-    static PropertyProducer<double[]> fixed(String propertyName, double value) {
-        return new Fixed(propertyName, value);
+    static PropertyProducer<double[]> fixedDouble(String propertyName, double value) {
+        return new FixedDoubleProducer(propertyName, value);
     }
 
-    static PropertyProducer<double[]> random(String propertyName, double min, double max) {
-        return new Random(propertyName, min, max);
+    static PropertyProducer<double[]> randomDouble(String propertyName, double min, double max) {
+        return new RandomDoubleProducer(propertyName, min, max);
     }
 
-    static PropertyProducer<float[][]> randomEmbeddings(String propertyName, int embeddingSize, float min, float max) {
-        return new RandomEmbeddings(propertyName, embeddingSize, min, max);
+    static PropertyProducer<float[][]> randomEmbedding(String propertyName, int embeddingSize, float min, float max) {
+        return new RandomEmbeddingProducer(propertyName, embeddingSize, min, max);
     }
 
     String getPropertyName();
 
     ValueType propertyType();
 
-    void setProperty(PROPERTY_SLICE slice, int index, java.util.Random random);
+    void setProperty(PROPERTY_SLICE slice, int index, Random random);
 
-    class Fixed implements PropertyProducer<double[]> {
+    class FixedDoubleProducer implements PropertyProducer<double[]> {
         private final String propertyName;
         private final double value;
 
-        public Fixed(String propertyName, double value) {
+        public FixedDoubleProducer(String propertyName, double value) {
             this.propertyName = propertyName;
             this.value = value;
         }
@@ -63,7 +64,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
 
         @Override
-        public void setProperty(double[] doubles, int index, java.util.Random random) {
+        public void setProperty(double[] doubles, int index, Random random) {
             doubles[index] = value;
         }
 
@@ -71,9 +72,9 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Fixed fixed = (Fixed) o;
-            return Double.compare(fixed.value, value) == 0 &&
-                   Objects.equals(propertyName, fixed.propertyName);
+            FixedDoubleProducer fixedDoubleProducer = (FixedDoubleProducer) o;
+            return Double.compare(fixedDoubleProducer.value, value) == 0 &&
+                   Objects.equals(propertyName, fixedDoubleProducer.propertyName);
         }
 
         @Override
@@ -83,19 +84,19 @@ public interface PropertyProducer<PROPERTY_SLICE> {
 
         @Override
         public String toString() {
-            return "Fixed{" +
+            return "FixedDoubleProducer{" +
                    "propertyName='" + propertyName + '\'' +
                    ", value=" + value +
                    '}';
         }
     }
 
-    class Random implements PropertyProducer<double[]> {
+    class RandomDoubleProducer implements PropertyProducer<double[]> {
         private final String propertyName;
         private final double min;
         private final double max;
 
-        public Random(String propertyName, double min, double max) {
+        public RandomDoubleProducer(String propertyName, double min, double max) {
             this.propertyName = propertyName;
             this.min = min;
             this.max = max;
@@ -116,7 +117,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
 
         @Override
-        public void setProperty(double[] doubles, int index, java.util.Random random) {
+        public void setProperty(double[] doubles, int index, Random random) {
             doubles[index] = min + (random.nextDouble() * (max - min));
         }
 
@@ -124,7 +125,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Random random = (Random) o;
+            RandomDoubleProducer random = (RandomDoubleProducer) o;
             return Double.compare(random.min, min) == 0 &&
                    Double.compare(random.max, max) == 0 &&
                    Objects.equals(propertyName, random.propertyName);
@@ -137,7 +138,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
 
         @Override
         public String toString() {
-            return "Random{" +
+            return "RandomDoubleProducer{" +
                    "propertyName='" + propertyName + '\'' +
                    ", min=" + min +
                    ", max=" + max +
@@ -145,13 +146,13 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
     }
 
-    class RandomEmbeddings implements PropertyProducer<float[][]> {
+    class RandomEmbeddingProducer implements PropertyProducer<float[][]> {
         private final String propertyName;
         private final int embeddingSize;
         private final float min;
         private final float max;
 
-        public RandomEmbeddings(String propertyName, int embeddingSize, float min, float max) {
+        public RandomEmbeddingProducer(String propertyName, int embeddingSize, float min, float max) {
             this.propertyName = propertyName;
             this.embeddingSize = embeddingSize;
             this.min = min;
@@ -173,7 +174,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
 
         @Override
-        public void setProperty(float[][] embeddings, int index, java.util.Random random) {
+        public void setProperty(float[][] embeddings, int index, Random random) {
             var nodeEmbeddings = new float[embeddingSize];
             for (int i = 0; i < embeddingSize; i++) {
                 nodeEmbeddings[i] = min + (random.nextFloat() * (max - min));
@@ -185,7 +186,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            RandomEmbeddings random = (RandomEmbeddings) o;
+            RandomEmbeddingProducer random = (RandomEmbeddingProducer) o;
             return random.embeddingSize == embeddingSize &&
                    Double.compare(random.min, min) == 0 &&
                    Double.compare(random.max, max) == 0 &&
@@ -199,7 +200,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
 
         @Override
         public String toString() {
-            return "Random{" +
+            return "RandomDoubleProducer{" +
                    "propertyName='" + propertyName + '\'' +
                    ", embeddingSize=" + embeddingSize +
                    ", min=" + min +
@@ -220,7 +221,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
 
         @Override
-        public void setProperty(double[] doubles, int index, java.util.Random random) {
+        public void setProperty(double[] doubles, int index, Random random) {
         }
     }
 }

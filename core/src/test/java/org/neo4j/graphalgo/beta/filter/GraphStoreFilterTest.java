@@ -349,13 +349,13 @@ class GraphStoreFilterTest {
                         ? new NodeLabel[]{NodeLabel.of("A")}
                         : new NodeLabel[]{NodeLabel.of("B")}
                 )
-                .addNodePropertyProducer(NodeLabel.of("A"), PropertyProducer.fixed("foo", 42))
-                .addNodePropertyProducer(NodeLabel.of("A"), PropertyProducer.fixed("bar", 1337))
-                .addNodePropertyProducer(NodeLabel.of("B"), PropertyProducer.fixed("baz", 42))
-                .addNodePropertyProducer(NodeLabel.of("B"), PropertyProducer.fixed("bam", 1337))
+                .addNodePropertyProducer(NodeLabel.of("A"), PropertyProducer.fixedDouble("foo", 42))
+                .addNodePropertyProducer(NodeLabel.of("A"), PropertyProducer.fixedDouble("bar", 1337))
+                .addNodePropertyProducer(NodeLabel.of("B"), PropertyProducer.fixedDouble("baz", 42))
+                .addNodePropertyProducer(NodeLabel.of("B"), PropertyProducer.fixedDouble("bam", 1337))
                 .relationshipType(relType)
                 .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-                .relationshipPropertyProducer(PropertyProducer.random("foobar", 0, 1))
+                .relationshipPropertyProducer(PropertyProducer.randomDouble("foobar", 0, 1))
                 .build()
                 .generate();
 
@@ -447,9 +447,9 @@ class GraphStoreFilterTest {
                 .builder()
                 .nodeCount(100_000)
                 .nodeLabelProducer((node) -> ThreadLocalRandom.current().nextDouble(0, 1) > 0.5 ? labelA : labelB)
-                .nodePropertyProducer(PropertyProducer.random("nodeProp", 0, 1))
+                .nodePropertyProducer(PropertyProducer.randomDouble("nodeProp", 0, 1))
                 .relationshipDistribution(RelationshipDistribution.POWER_LAW)
-                .relationshipPropertyProducer(PropertyProducer.random("relProp", 0, 1))
+                .relationshipPropertyProducer(PropertyProducer.randomDouble("relProp", 0, 1))
                 .averageDegree(5)
                 .build()
                 .generate();

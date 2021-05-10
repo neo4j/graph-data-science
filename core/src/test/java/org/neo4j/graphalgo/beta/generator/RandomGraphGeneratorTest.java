@@ -154,7 +154,7 @@ class RandomGraphGeneratorTest {
             .nodeCount(nbrNodes)
             .averageDegree(avgDeg)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .relationshipPropertyProducer(PropertyProducer.fixed("property", fixedValue))
+            .relationshipPropertyProducer(PropertyProducer.fixedDouble("property", fixedValue))
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
@@ -176,7 +176,7 @@ class RandomGraphGeneratorTest {
             .nodeCount(10)
             .averageDegree(5L)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .relationshipPropertyProducer(PropertyProducer.random("prop", lowerBound, upperBound))
+            .relationshipPropertyProducer(PropertyProducer.randomDouble("prop", lowerBound, upperBound))
             .build();
         HugeGraph graph = randomGraphGenerator.generate();
 
@@ -224,7 +224,7 @@ class RandomGraphGeneratorTest {
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .nodePropertyProducer(PropertyProducer.random("foo", lowerBound, upperBound))
+            .nodePropertyProducer(PropertyProducer.randomDouble("foo", lowerBound, upperBound))
             .build()
             .generate();
 
@@ -245,7 +245,7 @@ class RandomGraphGeneratorTest {
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .nodePropertyProducer(PropertyProducer.randomEmbeddings("foo", 42, lowerBound, upperBound))
+            .nodePropertyProducer(PropertyProducer.randomEmbedding("foo", 42, lowerBound, upperBound))
             .build()
             .generate();
 
@@ -270,10 +270,10 @@ class RandomGraphGeneratorTest {
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
             .nodeLabelProducer(nodeId -> nodeId % 2 == 0 ? aLabel : bLabel)
-            .nodePropertyProducer(PropertyProducer.fixed("all", 1337.0))
-            .addNodePropertyProducer(NodeLabel.of("A"), PropertyProducer.fixed("foo", 42.0))
-            .addNodePropertyProducer(NodeLabel.of("B"), PropertyProducer.fixed("bar", 84.0))
-            .addNodePropertyProducer(NodeLabel.of("B"), PropertyProducer.fixed("baz", 23.0))
+            .nodePropertyProducer(PropertyProducer.fixedDouble("all", 1337.0))
+            .addNodePropertyProducer(NodeLabel.of("A"), PropertyProducer.fixedDouble("foo", 42.0))
+            .addNodePropertyProducer(NodeLabel.of("B"), PropertyProducer.fixedDouble("bar", 84.0))
+            .addNodePropertyProducer(NodeLabel.of("B"), PropertyProducer.fixedDouble("baz", 23.0))
             .build()
             .generate();
 
@@ -324,14 +324,14 @@ class RandomGraphGeneratorTest {
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .nodePropertyProducer(PropertyProducer.fixed("name", 1337.0))
-            .nodePropertyProducer(PropertyProducer.fixed("name", 42.0))
+            .nodePropertyProducer(PropertyProducer.fixedDouble("name", 1337.0))
+            .nodePropertyProducer(PropertyProducer.fixedDouble("name", 42.0))
             .build()
             .generate())
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Duplicate node properties with name [name]. " +
-                    "The first property producer is [Fixed{propertyName='name', value=1337.0}], " +
-                    "the second one is [Fixed{propertyName='name', value=42.0}].");
+                    "The first property producer is [FixedDoubleProducer{propertyName='name', value=1337.0}], " +
+                    "the second one is [FixedDoubleProducer{propertyName='name', value=42.0}].");
     }
 
     @Test
@@ -342,14 +342,14 @@ class RandomGraphGeneratorTest {
             .nodeCount(10)
             .averageDegree(2)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .addNodePropertyProducer(aLabel, PropertyProducer.fixed("name", 1337.0))
-            .addNodePropertyProducer(bLabel, PropertyProducer.fixed("name", 42.0))
+            .addNodePropertyProducer(aLabel, PropertyProducer.fixedDouble("name", 1337.0))
+            .addNodePropertyProducer(bLabel, PropertyProducer.fixedDouble("name", 42.0))
             .build()
             .generate())
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Duplicate node properties with name [name]. " +
-                    "The first property producer is [Fixed{propertyName='name', value=1337.0}], " +
-                    "the second one is [Fixed{propertyName='name', value=42.0}].");
+                    "The first property producer is [FixedDoubleProducer{propertyName='name', value=1337.0}], " +
+                    "the second one is [FixedDoubleProducer{propertyName='name', value=42.0}].");
     }
 
     @ParameterizedTest
@@ -384,9 +384,9 @@ class RandomGraphGeneratorTest {
 
     static Stream<PropertyProducer<?>> producers() {
         return Stream.of(
-            PropertyProducer.fixed("name", 42.0),
-            PropertyProducer.random("name", 42.0, 1337.0),
-            PropertyProducer.randomEmbeddings("name", 21, 42.0f, 1337.0f)
+            PropertyProducer.fixedDouble("name", 42.0),
+            PropertyProducer.randomDouble("name", 42.0, 1337.0),
+            PropertyProducer.randomEmbedding("name", 21, 42.0f, 1337.0f)
         );
     }
 

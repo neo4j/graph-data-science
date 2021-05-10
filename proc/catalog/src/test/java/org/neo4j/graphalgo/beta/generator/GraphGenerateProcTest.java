@@ -242,7 +242,7 @@ class GraphGenerateProcTest extends BaseProcTest {
         paramsMap.put(RELATIONSHIP_PROPERTY_VALUE_KEY, 42.0D);
         producers.add(Arguments.of(
             paramsMap,
-            new PropertyProducer.Fixed("fixed", 42)
+            new PropertyProducer.FixedDoubleProducer("fixed", 42)
         ));
 
         paramsMap = new HashMap<>();
@@ -252,7 +252,7 @@ class GraphGenerateProcTest extends BaseProcTest {
         paramsMap.put(RELATIONSHIP_PROPERTY_MAX_KEY, 42.0D);
         producers.add(Arguments.of(
             paramsMap,
-            new PropertyProducer.Random("random", 21, 42)
+            new PropertyProducer.RandomDoubleProducer("random", 21, 42)
         ));
 
         paramsMap = new HashMap<>();
@@ -261,7 +261,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
         producers.add(Arguments.of(
             paramsMap,
-            new PropertyProducer.Random("random", 0, 1)
+            new PropertyProducer.RandomDoubleProducer("random", 0, 1)
         ));
 
         return producers.stream();

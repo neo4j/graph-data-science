@@ -209,7 +209,7 @@ class CSRCompositeRelationshipIteratorTest {
             .nodeCount(nodeCount)
             .averageDegree(averageDegree)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .relationshipPropertyProducer(PropertyProducer.fixed("prop", 1.0D))
+            .relationshipPropertyProducer(PropertyProducer.fixedDouble("prop", 1.0D))
             .build()
             .generate();
 
