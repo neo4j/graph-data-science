@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.degree;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.Orientation;
@@ -200,5 +201,25 @@ final class DegreeCentralityTest {
 
         progressLogger.containsMessage(TestLog.INFO, ":: Start");
         progressLogger.containsMessage(TestLog.INFO, ":: Finish");
+    }
+
+    @ParameterizedTest
+    @EnumSource(Orientation.class)
+    void shouldSupportAllOrientations(Orientation orientation) {
+        var config = ImmutableDegreeCentralityConfig
+            .builder()
+            .orientation(orientation)
+            .build();
+
+        var degreeCentrality = new DegreeCentrality(
+            graph,
+            Pools.DEFAULT,
+            config,
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
+        );
+
+        // should not throw
+        degreeCentrality.compute();
     }
 }
