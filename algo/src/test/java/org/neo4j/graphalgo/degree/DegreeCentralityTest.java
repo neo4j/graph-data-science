@@ -84,19 +84,14 @@ final class DegreeCentralityTest {
             () -> Stream.of(
                 // Orientation NATURAL
                 Arguments.of(
-                    true,
-                    Orientation.NATURAL,
-                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
-                ),
-                Arguments.of(
-                    true,
-                    Orientation.NATURAL,
-                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
-                ),
-                Arguments.of(
                     false,
                     Orientation.NATURAL,
                     Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D)
+                ),
+                Arguments.of(
+                    true,
+                    Orientation.NATURAL,
+                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
                 ),
                 // Orientation REVERSE
                 Arguments.of(
@@ -108,6 +103,17 @@ final class DegreeCentralityTest {
                     true,
                     Orientation.REVERSE,
                     Map.of("a", 2.0D, "b", 10.0D, "c", 2.0D, "d", 2.0D, "e", 0.0D, "f", 2.0D)
+                ),
+                // Orientation UNDIRECTED
+                Arguments.of(
+                    false,
+                    Orientation.UNDIRECTED,
+                    Map.of("a", 1.0D, "b", 5.0D, "c", 2.0D, "d", 3.0D, "e", 4.0D, "f", 3.0D)
+                ),
+                Arguments.of(
+                    true,
+                    Orientation.UNDIRECTED,
+                    Map.of("a", 2.0D, "b", 12.0D, "c", 4.0D, "d", 6.0D, "e", 6.0D, "f", 6.0D)
                 )
             ),
             () -> Stream.of(Arguments.of(1), Arguments.of(4)));

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.degree;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.Algorithm;
@@ -36,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -86,7 +86,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                 result = graph::degree;
                 progressLogger.logProgress(graph.nodeCount());
                 break;
-            case REVERSE:
+            case REVERSE: {
                 var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
                 var degreeBatchSize = BitUtil.ceilDiv(graph.relationshipCount(), config.concurrency());
                 var tasks = PartitionUtils.degreePartition(
@@ -105,8 +105,24 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                 ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
                 result = degrees::get;
                 break;
-            case UNDIRECTED:
-                throw new NotImplementedException();
+            }
+            case UNDIRECTED: {
+                var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
+                var degreeBatchSize = BitUtil.ceilDiv(graph.relationshipCount(), config.concurrency());
+                var tasks = PartitionUtils.degreePartition(
+                    graph,
+                    degreeBatchSize,
+                    partition -> new UndirectedDegreeTask(
+                        graph.concurrentCopy(),
+                        partition,
+                        degrees,
+                        progressLogger
+                    )
+                );
+                ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+                result = degrees::get;
+                break;
+            }
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Orientation %s is not supported",
@@ -153,8 +169,22 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                 result = degrees::get;
                 break;
             }
-            case UNDIRECTED:
-                throw new NotImplementedException();
+            case UNDIRECTED: {
+                var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
+                var tasks = PartitionUtils.degreePartition(
+                    graph,
+                    degreeBatchSize,
+                    partition -> new UndirectedWeightedDegreeTask(
+                        graph.concurrentCopy(),
+                        partition,
+                        degrees,
+                        progressLogger
+                    )
+                );
+                ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+                result = degrees::get;
+                break;
+            }
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                 "Orientation %s is not supported",
@@ -232,6 +262,81 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         @Override
         public void run() {
             partition.consume(node -> graph.forEachRelationship(node, DEFAULT_WEIGHT, consumer));
+            progressLogger.logProgress(partition.nodeCount());
+        }
+    }
+
+    private static class UndirectedDegreeTask implements Runnable {
+
+        private final Graph graph;
+        private final Partition partition;
+        private final HugeAtomicDoubleArray degrees;
+        private final ProgressLogger progressLogger;
+
+        UndirectedDegreeTask(
+            Graph graph,
+            Partition partition,
+            HugeAtomicDoubleArray degrees,
+            ProgressLogger progressLogger
+        ) {
+            this.graph = graph;
+            this.partition = partition;
+            this.degrees = degrees;
+            this.progressLogger = progressLogger;
+        }
+
+        @Override
+        public void run() {
+            Function<Long, Integer> degreeFn = graph::degree;
+
+            partition.consume(node -> {
+                // outgoing
+                degrees.getAndAdd(node, degreeFn.apply(node));
+                // incoming
+                graph.forEachRelationship(node, (sourceNodeId, targetNodeId) -> {
+                    degrees.getAndAdd(targetNodeId, 1);
+                    return true;
+                });
+            });
+            progressLogger.logProgress(partition.nodeCount());
+        }
+    }
+
+    private static class UndirectedWeightedDegreeTask implements Runnable {
+
+        private final Graph graph;
+        private final Partition partition;
+        private final HugeAtomicDoubleArray degrees;
+        private final ProgressLogger progressLogger;
+
+        UndirectedWeightedDegreeTask(
+            Graph graph,
+            Partition partition,
+            HugeAtomicDoubleArray degrees,
+            ProgressLogger progressLogger
+        ) {
+            this.graph = graph;
+            this.partition = partition;
+            this.degrees = degrees;
+            this.progressLogger = progressLogger;
+        }
+
+        @Override
+        public void run() {
+            var nodeWeight = new MutableDouble();
+            partition.consume(node -> {
+                nodeWeight.setValue(0);
+                graph.forEachRelationship(node, DEFAULT_WEIGHT, ((sourceNodeId, targetNodeId, weight) -> {
+                    if (weight > 0.0D) {
+                        // outgoing
+                        nodeWeight.add(weight);
+                        // incoming
+                        degrees.getAndAdd(targetNodeId, weight);
+                    }
+                    return true;
+                }));
+                degrees.getAndAdd(node, nodeWeight.doubleValue());
+            });
             progressLogger.logProgress(partition.nodeCount());
         }
     }
