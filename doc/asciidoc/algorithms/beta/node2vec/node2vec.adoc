@@ -34,6 +34,9 @@ Node2Vec random walks are thus influenced by two parameters: the `returnFactor` 
 
 image::randomWalk.svg[Visuzalition of random walk parameters,align="center"]
 
+The probabilities for traversing a relationship during a random walk can be further influenced by specifying a `relationshipWeightProperty`.
+A relationship property value greater than 1 will increase the likelihood of a relationship being traversed, a property value between 0 and 1 will decrease that probability.
+
 For every node in the graph Node2Vec generates a series of random walks with the particular node as start node.
 The number of random walks per node can be influenced by the `walkPerNode` configuration parameters, the walk length is controlled by the `walkLength` parameter.
 
