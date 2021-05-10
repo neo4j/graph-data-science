@@ -89,20 +89,17 @@ public class LinkPredictionTrainEstimation {
         );
         return MemoryEstimations.builder("model selection")
             .add("split", StratifiedKFoldSplitter.memoryEstimation(config.validationFolds(), 1.0))
-            .add(estimateStatsMap(config.params().size(), "stats map train"))
-            .add(estimateStatsMap(config.params().size(), "stats map validation"))
+            // train and validation
+            .fixed("stats maps", 2 * estimateStatsMap(config.params().size()))
             .add(maxOverParams)
             .build();
     }
 
-    private static MemoryEstimation estimateStatsMap(int numberOfParams, String description) {
+    private static long estimateStatsMap(int numberOfParams) {
         var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
         var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfParams;
-        return MemoryEstimations.builder(description)
-            .fixed("hash map", sizeOfInstance(HashMap.class))
-            .fixed("array list", sizeOfInstance(ArrayList.class))
-            .fixed("model stats", sizeOfAllModelStatsInBytes)
-            .build();
+        return sizeOfInstance(HashMap.class) + sizeOfInstance(ArrayList.class) + sizeOfAllModelStatsInBytes;
+
     }
 
     private static MemoryEstimation estimateTrainModelOnEntireGraph(LinkPredictionTrainConfig config, int nodeFeatureDimension) {
