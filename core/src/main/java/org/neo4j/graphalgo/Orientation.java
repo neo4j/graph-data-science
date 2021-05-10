@@ -58,4 +58,8 @@ public enum Orientation {
         }
         return null;
     }
+
+    public static String toString(Orientation orientation) {
+        return orientation.toString();
+    }
 }

@@ -32,6 +32,7 @@ public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeig
 
     @Value.Default
     @Configuration.ConvertWith("org.neo4j.graphalgo.Orientation#parse")
+    @Configuration.ToMapValue("org.neo4j.graphalgo.Orientation#toString")
     default Orientation orientation() {
         return Orientation.NATURAL;
     }
