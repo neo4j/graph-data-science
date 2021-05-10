@@ -450,3 +450,41 @@ Doug still remains our most popular user, but there isn't such a big gap to the 
 Charles and Michael both only have one follower, but those relationships have a high relationship weight.
 Note that Bridget also has a weighted score of 0.0, despite having a connection from Alice.
 That is because the `score` property value between Bridget and Alice is negative and will be ignored by the algorithm.
+
+
+[[algorithms-degree-centrality-orientation-example]]
+== Setting an orientation
+
+By default, node centrality uses the `NATURAL` orientation to compute degrees.
+For some use-cases it makes sense to analyze a different orientation, for example, if we want to find out how many users follow another user.
+In order to change the orientation, we can use the `orientation` configuration key.
+Supported values are `NATURAL` (default), `REVERSE` and `UNDIRECTED`.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode, showing which users have the highest in-degree centrality using the reverse orientation of the relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.degree.stream(
+   'myGraph',
+   { orientation: 'REVERSE' }
+)
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score AS followees
+ORDER BY followees DESC, name DESC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name      | followees
+| "Alice"   | 3.0
+| "Mark"    | 2.0
+| "Michael" | 1.0
+| "Charles" | 1.0
+| "Bridget" | 1.0
+| "Doug"    | 0.0
+|===
+--
+
+The example shows that when looking at the reverse orientation, `Alice` is more central in the network than `Doug`.
