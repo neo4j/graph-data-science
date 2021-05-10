@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.ml.core;
 
+import java.util.Arrays;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public final class Dimensions {
 
     public static final int ROWS_INDEX = 0;
@@ -38,4 +42,15 @@ public final class Dimensions {
         return new int[]{rows, cols};
     }
 
+    public static String render(int[] dimensions) {
+        if (dimensions.length == 0) {
+            return "Scalar";
+        } else if (dimensions.length == 1) {
+            return "Vector(" + dimensions[0] + ")";
+        } else if (dimensions.length == 2) {
+            return "Matrix(" + dimensions[0] + ", " + dimensions[1]  + ")";
+        }
+
+        return formatWithLocale("%d-Dim Tensor: %s", dimensions.length, Arrays.toString(dimensions));
+    }
 }

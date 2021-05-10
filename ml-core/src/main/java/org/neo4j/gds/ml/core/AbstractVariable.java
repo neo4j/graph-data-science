@@ -72,7 +72,7 @@ public abstract class AbstractVariable<T extends Tensor<T>> implements Variable<
         return formatWithLocale(
             "%s: %s",
             this.getClass().getSimpleName(),
-            Tensor.renderDimensions(dimensions),
+            Dimensions.render(dimensions),
             requireGradient ? "; requireGradient" : ""
         );
     }
