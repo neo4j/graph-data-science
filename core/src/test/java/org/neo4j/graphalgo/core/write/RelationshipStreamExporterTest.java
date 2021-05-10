@@ -39,7 +39,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
@@ -222,18 +221,6 @@ class RelationshipStreamExporterTest extends BaseTest {
         assertThat(messages.get(4)).contains("WriteRelationshipStream has written 100 relationships");
         assertThat(messages.get(5)).contains("WriteRelationshipStream has written 105 relationships");
         assertThat(messages.get(6)).contains("WriteRelationshipStream :: Finished");
-    }
-
-    @Test
-    void throwsForParallelStreams() {
-        var relationshipStream = IntStream
-            .range(0, 10)
-            .mapToObj(ignored -> relationship("a", "a"))
-            .parallel();
-
-        assertThatThrownBy(() -> RelationshipStreamExporter.builder(db, graph, relationshipStream, TerminationFlag.RUNNING_TRUE).build())
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("supports only sequential streams");
     }
 
     RelationshipStreamExporter.Relationship relationship(String sourceVariable, String targetVariable, Value... values) {

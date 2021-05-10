@@ -298,7 +298,17 @@ YIELD
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                                                          | Type        | Default                | Optional | Description
+| modelName                                                     | String      | n/a                    | no       | The name of a Link Prediction model in the model catalog.
+| <<common-configuration-node-labels,nodeLabels>>               | String[]    | ['*']                  | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | String[]    | ['*']                  | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-concurrency,concurrency>>              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+| mutateRelationshipType                                        | String      | n/a                    | no       | The relationship type used for the new relationships written to the in-memory graph.
+| mutateProperty                                                | String      | 'probability'          | yes      | The relationship property in the GDS graph to which the result is written.
+|===
 
 include::specific-configuration.adoc[]
 
@@ -310,6 +320,53 @@ include::specific-configuration.adoc[]
 | computeMillis        | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis | Integer | Milliseconds for computing the global metrics.
 | mutateMillis         | Integer | Milliseconds for adding properties to the in-memory graph.
+| relationshipsWritten | Integer | Number of relationships created.
+| configuration        | Map     | Configuration used for running the algorithm.
+|===
+======
+
+[.include-with-write]
+======
+.Run Link Prediction in write mode on a named graph:
+[source]
+----
+CALL gds.alpha.ml.linkPrediction.predict.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  relationshipsWritten: Integer,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                                                          | Type        | Default                | Optional | Description
+| modelName                                                     | String      | n/a                    | no       | The name of a Link Prediction model in the model catalog.
+| <<common-configuration-node-labels,nodeLabels>>               | String[]    | ['*']                  | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | String[]    | ['*']                  | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-concurrency,concurrency>>              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+| writeRelationshipType                                         | String      | n/a                    | no       | The relationship type used to persist the computed relationships in the Neo4j database.
+| <<common-configuration-write-property,writeProperty>>         | String      | n/a                    | no       | The relationship property in the Neo4j database to which the result is written.
+|===
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type    | Description
+| createMillis         | Integer | Milliseconds for creating the graph.
+| computeMillis        | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis | Integer | Milliseconds for computing the global metrics.
+| writeMillis          | Integer | Milliseconds for writing result data back to Neo4j.
 | relationshipsWritten | Integer | Number of relationships created.
 | configuration        | Map     | Configuration used for running the algorithm.
 |===
@@ -563,21 +620,30 @@ CALL gds.alpha.ml.linkPrediction.predict.mutate('myGraph', {
 We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
 Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
 
-In order to analyze our predicted relationships we will write them back to Neo4j:
+[[algorithms-ml-linkprediction-examples-write]]
+=== Write
+
+In this example we will show how to use a trained model to predict new relationships in your in-memory graph, and write the predictions back to Neo4j.
+We will again use the model `'lp-numberOfPosts-model'`, as in the <<algorithms-ml-linkprediction-examples-mutate, mutate example>>.
 
 [role=query-example, group=lp]
 --
 [source, cypher]
 ----
-CALL gds.graph.writeRelationship('myGraph', 'KNOWS_PREDICTED', 'probability')
-YIELD relationshipsWritten, propertiesWritten
+CALL gds.alpha.ml.linkPrediction.predict.write('myGraph', {
+  relationshipTypes: ['KNOWS'],
+  modelName: 'lp-numberOfPosts-model',
+  writeRelationshipType: 'KNOWS_PREDICTED',
+  topN: 5,
+  threshold: 0.45
+}) YIELD relationshipsWritten
 ----
 
 .Results
 [opts="header"]
 |===
-| relationshipsWritten | propertiesWritten
-| 10                   | 10
+| relationshipsWritten
+| 10
 |===
 --
 

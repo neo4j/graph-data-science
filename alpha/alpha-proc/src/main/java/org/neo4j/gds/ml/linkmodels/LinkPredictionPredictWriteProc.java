@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
-import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.WriteRelationshipsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.results.StandardWriteRelationshipsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -36,44 +37,30 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
 import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
 
-public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictStreamConfig> {
+public class LinkPredictionPredictWriteProc extends WriteRelationshipsProc<LinkPredictionPredict, LinkPredictionResult, StandardWriteRelationshipsResult, LinkPredictionPredictWriteConfig> {
 
-    @Procedure(name = "gds.alpha.ml.linkPrediction.predict.stream", mode = Mode.READ)
+    @Procedure(name = "gds.alpha.ml.linkPrediction.predict.write", mode = Mode.READ)
     @Description(DESCRIPTION)
-    public Stream<Result> stream(
+    public Stream<StandardWriteRelationshipsResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var result = compute(graphNameOrConfig, configuration);
-
-        Graph graph = result.graph();
-
-        if (result.isGraphEmpty()) {
-            graph.release();
-            return Stream.empty();
-        }
-
-        return result.result().stream()
-            .map(predictedLink -> new Result(
-                graph.toOriginalNodeId(predictedLink.sourceId()),
-                graph.toOriginalNodeId(predictedLink.targetId()),
-                predictedLink.probability()
-            ));
+        return write(compute(graphNameOrConfig, configuration));
     }
 
     @Override
-    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, LinkPredictionPredictStreamConfig config) {
+    protected void validateConfigsBeforeLoad(GraphCreateConfig graphCreateConfig, LinkPredictionPredictWriteConfig config) {
         validateIsUndirectedGraph(graphCreateConfig, config);
     }
 
     @Override
-    protected LinkPredictionPredictStreamConfig newConfig(
+    protected LinkPredictionPredictWriteConfig newConfig(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
         CypherMapWrapper config
     ) {
-        return LinkPredictionPredictStreamConfig.of(
+        return LinkPredictionPredictWriteConfig.of(
             username,
             graphName,
             maybeImplicitCreate,
@@ -82,21 +69,14 @@ public class LinkPredictionPredictStreamProc extends AlgoBaseProc<LinkPrediction
     }
 
     @Override
-    protected AlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictStreamConfig> algorithmFactory() {
+    protected AlgorithmFactory<LinkPredictionPredict, LinkPredictionPredictWriteConfig> algorithmFactory() {
         return new LinkPredictionPredictFactory<>();
     }
 
-    @SuppressWarnings("unused")
-    public static final class Result {
-
-        public final long node1;
-        public final long node2;
-        public final double probability;
-
-        public Result(long node1, long node2, double probability) {
-            this.node1 = node1;
-            this.node2 = node2;
-            this.probability = probability;
-        }
+    @Override
+    protected AbstractResultBuilder<StandardWriteRelationshipsResult> resultBuilder(
+        ComputationResult<LinkPredictionPredict, LinkPredictionResult, LinkPredictionPredictWriteConfig> computeResult
+    ) {
+        return new StandardWriteRelationshipsResult.Builder();
     }
 }

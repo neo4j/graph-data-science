@@ -85,9 +85,6 @@ public final class RelationshipStreamExporter extends StatementApi {
             TerminationFlag terminationFlag
         ) {
             super(tx, idMapping, terminationFlag);
-            if (relationships.isParallel()) {
-                throw new IllegalArgumentException("Parallel relationship exporter supports only sequential streams. Use Stream#sequential().");
-            }
             this.relationships = relationships;
             this.batchSize = (int) MIN_BATCH_SIZE;
         }
@@ -133,7 +130,7 @@ public final class RelationshipStreamExporter extends StatementApi {
     ) {
         super(tx);
         this.toOriginalId = toOriginalId;
-        this.relationships = relationships;
+        this.relationships = relationships.sequential();
         this.batchSize = batchSize;
         this.terminationFlag = terminationFlag;
         this.progressLogger = progressLogger;

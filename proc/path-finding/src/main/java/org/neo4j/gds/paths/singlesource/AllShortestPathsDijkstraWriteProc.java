@@ -20,11 +20,11 @@
 package org.neo4j.gds.paths.singlesource;
 
 import org.neo4j.gds.paths.ShortestPathWriteProc;
-import org.neo4j.gds.paths.WriteResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.results.StandardWriteRelationshipsResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
@@ -44,7 +44,7 @@ public class AllShortestPathsDijkstraWriteProc extends ShortestPathWriteProc<Dij
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.write", mode = WRITE)
     @Description(DIJKSTRA_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<StandardWriteRelationshipsResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

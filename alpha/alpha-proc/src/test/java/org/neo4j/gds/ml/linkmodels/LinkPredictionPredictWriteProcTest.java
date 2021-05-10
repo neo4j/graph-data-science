@@ -43,10 +43,9 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
 
-class LinkPredictionPredictMutateProcTest extends BaseProcTest {
+class LinkPredictionPredictWriteProcTest extends BaseProcTest {
 
     private static final String GRAPH =
         "CREATE " +
@@ -68,7 +67,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(LinkPredictionPredictMutateProc.class, GraphStreamRelationshipPropertiesProc.class, GraphCreateProc.class);
+        registerProcedures(LinkPredictionPredictWriteProc.class, GraphStreamRelationshipPropertiesProc.class, GraphCreateProc.class);
         runQuery(GRAPH);
 
         runQuery(createQuery("g", UNDIRECTED));
@@ -90,7 +89,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
     }
 
     @Test
-    void canPredict() {
+    void canWrite() {
         var graphStore = GraphStoreCatalog
             .get(getUsername(), db.databaseId(), "g")
             .graphStore();
@@ -100,24 +99,49 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
             .call()
             .explicitCreation("g")
             .algo("gds.alpha.ml.linkPrediction.predict")
-            .mutateMode()
-            .addParameter("mutateRelationshipType", "PREDICTED")
+            .writeMode()
+            .addParameter("writeRelationshipType", "PREDICTED")
             .addParameter("modelName", "model")
             .addParameter("threshold", 0.5)
-            .addParameter("topN", 9)
+            .addParameter("topN", 10)
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
             "createMillis", greaterThan(-1L),
             "computeMillis", greaterThan(-1L),
-            "mutateMillis", greaterThan(-1L),
+            "writeMillis", greaterThan(-1L),
             "postProcessingMillis", 0L,
             // we are writing undirected rels so we get 2x topN
-            "relationshipsWritten", 18L,
+            "relationshipsWritten", 20L,
             "configuration", isA(Map.class)
         )));
+        var validationQuery =
+            "MATCH ()-[r:PREDICTED]->() " +
+            "RETURN r.probability AS probability " +
+            "ORDER BY probability DESC";
 
-        assertTrue(graphStore.hasRelationshipProperty(List.of(RelationshipType.of("PREDICTED")), "probability"));
+        assertCypherResult(validationQuery, List.of(
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5646362918030292),
+            Map.of("probability", 0.5473576181430894),
+            Map.of("probability", 0.5473576181430894)
+        ));
     }
 
     @Test
@@ -130,11 +154,11 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
             .call()
             .explicitCreation("g2")
             .algo("gds.alpha.ml.linkPrediction.predict")
-            .mutateMode()
-            .addParameter("mutateRelationshipType", "PREDICTED")
+            .writeMode()
+            .addParameter("writeRelationshipType", "PREDICTED")
             .addParameter("modelName", "model")
             .addParameter("threshold", 0.5)
-            .addParameter("topN", 9)
+            .addParameter("topN", 10)
             .yields();
 
         assertError(query, "Procedure requires relationship projections to be UNDIRECTED.");
@@ -151,7 +175,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
                 .builder()
                 .weights(
                     new Weights<>(new Matrix(
-                        new double[]{-0.0016811290857949518, 7.441367814815001E-4}, 1, 2)
+                        new double[]{0.000001, 0.1}, 1, 2)
                     )
                 )
                 .linkFeatureCombiner(LinkFeatureCombiners.L2)
