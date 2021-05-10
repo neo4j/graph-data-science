@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.ArrayList;
@@ -39,15 +38,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.ml.linkmodels.LinkPredictionTrain.estimateModelSelectResult;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public class LinkPredictionTrainEstimation {
 
-    static int FUDGED_MIN_NODE_FEATURES = 500;
+    static int ASSUMED_MIN_NODE_FEATURES = 500;
 
     static MemoryEstimation estimate(LinkPredictionTrainConfig config) {
-        var nodeFeatureDimension = Math.max(config.featureProperties().size(), FUDGED_MIN_NODE_FEATURES);
+        var nodeFeatureDimension = Math.max(config.featureProperties().size(), ASSUMED_MIN_NODE_FEATURES);
         // this is a max because we take the pessimistic stance and use the most expensive model
         // it stays in memory for the compute metric phases
         var modelDataEstimation = maxEstimation("max over models",
@@ -80,9 +80,10 @@ public class LinkPredictionTrainEstimation {
                     return MemoryEstimations.builder("train and evaluate model")
                         .fixed("stats map builder train", LinkPredictionTrain.ModelStatsBuilder.sizeInBytes())
                         .fixed("stats map builder validation", LinkPredictionTrain.ModelStatsBuilder.sizeInBytes())
-                        .max(
-                            estimateTrainModel(llrConfig, nodeFeatureDimension),
-                            estimateComputeMetric(config.trainRelationshipType(), (folds - 1) / folds)
+                        .max(List.of(
+                                estimateTrainModel(llrConfig, nodeFeatureDimension),
+                                estimateComputeMetric(config.trainRelationshipType(), (folds - 1) / folds)
+                            )
                         ).build();
                 }
             ).collect(Collectors.toList())
@@ -148,20 +149,6 @@ public class LinkPredictionTrainEstimation {
                     relationshipFraction
                 )))
             )
-            .build();
-    }
-
-    private static MemoryEstimation estimateModelSelectResult(LinkPredictionTrainConfig config) {
-        var numberOfParams = config.paramConfigs().size();
-        var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
-        var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfParams;
-        return MemoryEstimations.builder("model selection result")
-            .fixed("instance", MemoryUsage.sizeOfInstance(ImmutableModelSelectResult.class))
-            .fixed("model stats map train", MemoryUsage.sizeOfInstance(HashMap.class))
-            .fixed("model stats list train", MemoryUsage.sizeOfInstance(ArrayList.class))
-            .fixed("model stats map test", MemoryUsage.sizeOfInstance(HashMap.class))
-            .fixed("model stats list test", MemoryUsage.sizeOfInstance(ArrayList.class))
-            .fixed("model stats train", sizeOfAllModelStatsInBytes)
             .build();
     }
 

@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.linkmodels.LinkPredictionTrainEstimation.FUDGED_MIN_NODE_FEATURES;
+import static org.neo4j.gds.ml.linkmodels.LinkPredictionTrainEstimation.ASSUMED_MIN_NODE_FEATURES;
 
 class LinkPredictionTrainFactoryTest {
     @Test
@@ -73,9 +73,9 @@ class LinkPredictionTrainFactoryTest {
     @Test
     @GdsEditionTest(Edition.EE)
     void nodePropertiesShouldAffectWhenNotUsingCosine() {
-        var m1 = new LinkPredictionTrainFactory().memoryEstimation(getConfig(4, "HADAMARD", 10, FUDGED_MIN_NODE_FEATURES * 1000))
+        var m1 = new LinkPredictionTrainFactory().memoryEstimation(getConfig(4, "HADAMARD", 10, ASSUMED_MIN_NODE_FEATURES * 1000))
             .estimate(graphDimensions(10_100L, 70_000L, 30_000L), 4);
-        var m2 = new LinkPredictionTrainFactory().memoryEstimation(getConfig(4, "HADAMARD", 10, FUDGED_MIN_NODE_FEATURES * 10000))
+        var m2 = new LinkPredictionTrainFactory().memoryEstimation(getConfig(4, "HADAMARD", 10, ASSUMED_MIN_NODE_FEATURES * 10000))
             .estimate(graphDimensions(10_100L, 70_000L, 30_000L), 4);
         var fewNodePropertiesUsage = m1.memoryUsage().max;
         var manyNodePropertiesUsage = m2.memoryUsage().max;

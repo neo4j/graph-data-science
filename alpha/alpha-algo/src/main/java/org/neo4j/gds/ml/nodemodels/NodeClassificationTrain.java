@@ -100,7 +100,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             ),
             "best model evaluation"
         );
-        var maxOfModelSelectionAndBestModelEvaluation = maxEstimation(modelSelection, bestModelEvaluation);
+        var maxOfModelSelectionAndBestModelEvaluation = maxEstimation(List.of(modelSelection, bestModelEvaluation));
         // Final step is to retrain the best model with the entire node set.
         // Training memory is independent of node set size so we can skip that last estimation.
         return MemoryEstimations.builder()
@@ -148,7 +148,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             .build();
 
         return MemoryEstimations.builder("model selection")
-            .max(training, metricsComputation)
+            .max(List.of(training, metricsComputation))
             .build();
     }
 

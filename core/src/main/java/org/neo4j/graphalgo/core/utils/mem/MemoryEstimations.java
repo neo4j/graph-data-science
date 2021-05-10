@@ -54,10 +54,6 @@ public final class MemoryEstimations {
         return NULL_ESTIMATION;
     }
 
-    public static MemoryEstimation maxEstimation(MemoryEstimation one, MemoryEstimation theOther) {
-        return new MaxEstimation(one, theOther);
-    }
-
     public static MemoryEstimation maxEstimation(List<MemoryEstimation> components) {
         return new MaxEstimation(components);
     }
@@ -523,16 +519,6 @@ public final class MemoryEstimations {
         }
 
         /**
-         * Adds the biggest of two {@link MemoryEstimation} as a sub-component to the builder.
-         *
-         * Handy for when you do not not know ahead of time which one is going to result in the largest memory usage high-water mark
-         */
-        public Builder max(MemoryEstimation one, MemoryEstimation theOther) {
-            components.add(new MaxEstimation(one, theOther));
-            return this;
-        }
-
-        /**
          * Adds the biggest of several {@link MemoryEstimation} as a sub-component to the builder.
          *
          * Handy for when you do not not know ahead of time which one is going to result in the largest memory usage high-water mark
@@ -696,13 +682,12 @@ final class DelegateEstimation extends BaseEstimation {
 final class MaxEstimation extends BaseEstimation {
     private final List<MemoryEstimation> components;
 
-    public MaxEstimation(MemoryEstimation one, MemoryEstimation theOther) {
-        super("max of " + one.description() + " and " + theOther.description());
-        this.components = List.of(one, theOther);
-    }
-
     MaxEstimation(List<MemoryEstimation> components) {
-        this("max", components);
+        this(components.size() == 2
+            ? "max of " + components.get(0).description() + " and " + components.get(1).description()
+            : "max",
+            components
+        );
     }
 
     MaxEstimation(String description, List<MemoryEstimation> components) {

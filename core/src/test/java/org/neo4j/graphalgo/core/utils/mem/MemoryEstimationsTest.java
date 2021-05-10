@@ -23,6 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -143,9 +145,10 @@ class MemoryEstimationsTest {
     @Test
     void shouldPickBiggestMemoryUser() {
         MemoryEstimation maxEstimator = MemoryEstimations.builder()
-            .max(
-                MemoryEstimations.builder("node storer").perNode("node storer", nodeCount -> nodeCount).build(),
-                MemoryEstimations.builder("paralleliser").perThread("paralleliser", threadCount -> threadCount).build()
+            .max(List.of(
+                    MemoryEstimations.builder("node storer").perNode("node storer", nodeCount -> nodeCount).build(),
+                    MemoryEstimations.builder("paralleliser").perThread("paralleliser", threadCount -> threadCount).build()
+                )
             )
             .build();
 

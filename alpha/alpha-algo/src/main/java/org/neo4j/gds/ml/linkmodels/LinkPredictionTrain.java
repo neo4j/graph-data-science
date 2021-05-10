@@ -37,7 +37,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
+import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public class LinkPredictionTrain
     extends Algorithm<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig>> {
@@ -61,6 +63,20 @@ public class LinkPredictionTrain
     private final Graph testGraph;
     private final LinkPredictionTrainConfig config;
     private final AllocationTracker allocationTracker;
+
+    static MemoryEstimation estimateModelSelectResult(LinkPredictionTrainConfig config) {
+        var numberOfParams = config.paramConfigs().size();
+        var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
+        var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfParams;
+        return MemoryEstimations.builder("model selection result")
+            .fixed("instance", sizeOfInstance(ImmutableModelSelectResult.class))
+            .fixed("model stats map train", sizeOfInstance(HashMap.class))
+            .fixed("model stats list train", sizeOfInstance(ArrayList.class))
+            .fixed("model stats map test", sizeOfInstance(HashMap.class))
+            .fixed("model stats list test", sizeOfInstance(ArrayList.class))
+            .fixed("model stats train", sizeOfAllModelStatsInBytes)
+            .build();
+    }
 
     public LinkPredictionTrain(
         Graph graph,
@@ -257,7 +273,7 @@ public class LinkPredictionTrain
         private final int numberOfSplits;
 
         static long sizeInBytes() {
-            return 3 * MemoryUsage.sizeOfInstance(HashMap.class) + 8;
+            return 3 * sizeOfInstance(HashMap.class) + 8;
         }
 
         ModelStatsBuilder(LinkLogisticRegressionTrainConfig modelParams, int numberOfSplits) {
