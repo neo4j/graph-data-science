@@ -26,6 +26,7 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
@@ -50,13 +51,13 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
     // n x d
     private final Variable<Matrix> features;
     // n x 1
-    private final Variable<Matrix> targets;
+    private final Variable<Vector> targets;
 
     public LogisticLoss(
         Variable<Matrix> weights,
         Variable<Matrix> predictions,
         Variable<Matrix> features,
-        Variable<Matrix> targets
+        Variable<Vector> targets
     ) {
         super(List.of(weights, features, targets), Dimensions.scalar());
         this.weights = weights;
@@ -68,8 +69,8 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
     @Override
     public Scalar apply(ComputationContext ctx) {
         ctx.forward(predictions);
-        Matrix predTensor = ctx.data(predictions);
-        Matrix targetTensor = ctx.data(targets);
+        var predTensor = ctx.data(predictions);
+        var targetTensor = ctx.data(targets);
 
         double result = 0;
         for(int row = 0; row < predTensor.rows(); row++) {
@@ -85,7 +86,7 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
             }
         }
 
-        return new Scalar(-result/predTensor.rows());
+        return new Scalar(-result / predTensor.rows());
     }
 
     @Override
@@ -93,11 +94,11 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
         if (parent == weights) {
 
             ctx.forward(predictions);
-            Matrix predTensor = ctx.data(predictions);
-            Matrix targetTensor = ctx.data(targets);
-            Matrix weightsTensor = ctx.data(weights);
-            Matrix featuresTensor = ctx.data(features);
-            Matrix gradient = weightsTensor.zeros();
+            var predTensor = ctx.data(predictions);
+            var targetTensor = ctx.data(targets);
+            var weightsTensor = ctx.data(weights);
+            var featuresTensor = ctx.data(features);
+            var gradient = weightsTensor.zeros();
             int cols = weightsTensor.cols();
             int nodes = predTensor.rows();
             for (int node = 0; node < nodes; node++) {

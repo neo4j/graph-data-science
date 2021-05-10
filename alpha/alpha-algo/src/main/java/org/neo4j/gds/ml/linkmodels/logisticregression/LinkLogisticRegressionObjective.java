@@ -32,6 +32,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.graphalgo.api.Graph;
 
@@ -61,10 +62,9 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
         var relationshipCount = new MutableInt();
         batch.nodeIds().forEach(nodeId -> relationshipCount.add(graph.degree(nodeId)));
         var rows = relationshipCount.getValue();
-        double[] targets = makeTargetsArray(batch, rows);
-        var targetVariable = Constant.matrix(targets, rows, 1);
+        var targets = makeTargetsArray(batch, rows);
         var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData.weights()), rows * penalty / trainSize);
-        var unpenalizedLoss = new LogisticLoss(modelData.weights(), predictions, features, targetVariable);
+        var unpenalizedLoss = new LogisticLoss(modelData.weights(), predictions, features, targets);
         return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
     }
 
@@ -73,7 +73,7 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
         return modelData;
     }
 
-    private double[] makeTargetsArray(Batch batch, int rows) {
+    private Constant<Vector> makeTargetsArray(Batch batch, int rows) {
         var graphCopy = graph.concurrentCopy();
         double[] targets = new double[rows];
         var relationshipOffset = new MutableInt();
@@ -95,6 +95,6 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
                 return true;
             });
         });
-        return targets;
+        return Constant.vector(targets);
     }
 }

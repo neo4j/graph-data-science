@@ -32,7 +32,7 @@ class LogisticLossTest implements FiniteDifferenceTest {
 
     @Test
     void shouldApplyCorrectly() {
-        var targets = Constant.matrix(new double[]{1.0, 0.0}, 2, 1);
+        var targets = Constant.vector(new double[]{1.0, 0.0});
         var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0}, 1, 3));
         var features =  Constant.matrix(new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71}, 2, 3);
         var predictions = new Sigmoid<>(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
@@ -46,7 +46,7 @@ class LogisticLossTest implements FiniteDifferenceTest {
 
     @Test
     void logisticLossApproximatesGradient() {
-        var targets =  Constant.matrix(new double[]{1.0, 0.0}, 2, 1);
+        var targets =  Constant.vector(new double[]{1.0, 0.0});
         var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0}, 1, 3));
         var features =  Constant.matrix(new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71}, 2, 3);
         var predictions = new Sigmoid<>(new MatrixMultiplyWithTransposedSecondOperand(features, weights));

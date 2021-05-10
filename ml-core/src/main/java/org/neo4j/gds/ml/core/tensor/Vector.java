@@ -61,7 +61,7 @@ public class Vector extends Tensor<Vector> {
         return sum;
     }
 
-    private int length() {
+    public int length() {
         return dimensions[ROWS_INDEX];
     }
 }
