@@ -81,4 +81,26 @@ class PropertyProducerTest {
                 assertThat(value[0]).containsExactly(expected);
             });
     }
+
+    @Test
+    void testRandomLongPropertyProducer() {
+        var producer = PropertyProducer.randomLong("foo", 5, 10);
+        assertThat(producer)
+            .returns("foo", PropertyProducer::getPropertyName)
+            .returns(ValueType.LONG, PropertyProducer::propertyType)
+            .satisfies(p -> {
+                var random = new Random();
+                long[] value = {0};
+
+                var seedProducingPositiveNumber = 4096L;
+                random.setSeed(seedProducingPositiveNumber);
+                p.setProperty(value, 0, random);
+                assertThat(value[0]).isEqualTo(6);
+
+                var seedProducingNegativeNumber = 1;
+                random.setSeed(seedProducingNegativeNumber);
+                p.setProperty(value, 0, random);
+                assertThat(value[0]).isEqualTo(6);
+            });
+    }
 }

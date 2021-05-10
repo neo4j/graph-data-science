@@ -38,6 +38,10 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         return new RandomEmbeddingProducer(propertyName, embeddingSize, min, max);
     }
 
+    static PropertyProducer<long[]> randomLong(String propertyName, long min, long max) {
+        return new RandomLongProducer(propertyName, min, max);
+    }
+
     String getPropertyName();
 
     ValueType propertyType();
@@ -206,6 +210,43 @@ public interface PropertyProducer<PROPERTY_SLICE> {
                    ", min=" + min +
                    ", max=" + max +
                    '}';
+        }
+    }
+
+    class RandomLongProducer implements PropertyProducer<long[]> {
+
+        private final String propertyName;
+        private final long min;
+        private final long max;
+
+        RandomLongProducer(String propertyName, long min, long max) {
+            this.propertyName = propertyName;
+            this.min = min;
+            this.max = max;
+
+            if (max <= min) {
+                throw new IllegalArgumentException("Max value must be greater than min value");
+            }
+        }
+
+        @Override
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        @Override
+        public ValueType propertyType() {
+            return ValueType.LONG;
+        }
+
+        @Override
+        public void setProperty(long[] longs, int index, Random random) {
+            var modulo = random.nextLong() % (max - min);
+            if (modulo >= 0) {
+                longs[index] = modulo + min;
+            } else {
+                longs[index] = modulo + max;
+            }
         }
     }
 
