@@ -22,13 +22,8 @@ package org.neo4j.gds.paths;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.Label;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.kernel.impl.core.NodeEntity;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,158 +69,10 @@ class ShortestPathConfigTest {
             .hasMessageContaining("Expected a node or a node id for `targetNode`. Got Boolean");
     }
 
-    static final class TestNode implements Node {
-        private final long id;
+    static final class TestNode extends NodeEntity {
 
-        TestNode(long id) {this.id = id;}
-
-        @Override
-        public void delete() {
-
-        }
-
-        @Override
-        public Iterable<Relationship> getRelationships() {
-            return null;
-        }
-
-        @Override
-        public boolean hasRelationship() {
-            return false;
-        }
-
-        @Override
-        public Iterable<Relationship> getRelationships(RelationshipType... types) {
-            return null;
-        }
-
-        @Override
-        public Iterable<Relationship> getRelationships(
-            Direction direction, RelationshipType... types
-        ) {
-            return null;
-        }
-
-        @Override
-        public boolean hasRelationship(RelationshipType... types) {
-            return false;
-        }
-
-        @Override
-        public boolean hasRelationship(Direction direction, RelationshipType... types) {
-            return false;
-        }
-
-        @Override
-        public Iterable<Relationship> getRelationships(Direction dir) {
-            return null;
-        }
-
-        @Override
-        public boolean hasRelationship(Direction dir) {
-            return false;
-        }
-
-        @Override
-        public Relationship getSingleRelationship(
-            RelationshipType type, Direction dir
-        ) {
-            return null;
-        }
-
-        @Override
-        public Relationship createRelationshipTo(Node otherNode, RelationshipType type) {
-            return null;
-        }
-
-        @Override
-        public Iterable<RelationshipType> getRelationshipTypes() {
-            return null;
-        }
-
-        @Override
-        public int getDegree() {
-            return 0;
-        }
-
-        @Override
-        public int getDegree(RelationshipType type) {
-            return 0;
-        }
-
-        @Override
-        public int getDegree(Direction direction) {
-            return 0;
-        }
-
-        @Override
-        public int getDegree(RelationshipType type, Direction direction) {
-            return 0;
-        }
-
-        @Override
-        public void addLabel(Label label) {
-
-        }
-
-        @Override
-        public void removeLabel(Label label) {
-
-        }
-
-        @Override
-        public boolean hasLabel(Label label) {
-            return false;
-        }
-
-        @Override
-        public Iterable<Label> getLabels() {
-            return null;
-        }
-
-        @Override
-        public long getId() {
-            return id;
-        }
-
-        @Override
-        public boolean hasProperty(String key) {
-            return false;
-        }
-
-        @Override
-        public Object getProperty(String key) {
-            return null;
-        }
-
-        @Override
-        public Object getProperty(String key, Object defaultValue) {
-            return null;
-        }
-
-        @Override
-        public void setProperty(String key, Object value) {
-
-        }
-
-        @Override
-        public Object removeProperty(String key) {
-            return null;
-        }
-
-        @Override
-        public Iterable<String> getPropertyKeys() {
-            return null;
-        }
-
-        @Override
-        public Map<String, Object> getProperties(String... keys) {
-            return null;
-        }
-
-        @Override
-        public Map<String, Object> getAllProperties() {
-            return null;
+        TestNode(long nodeId) {
+            super(null, nodeId);
         }
     }
 }
