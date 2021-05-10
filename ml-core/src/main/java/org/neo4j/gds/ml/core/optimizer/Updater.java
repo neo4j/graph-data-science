@@ -17,12 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml;
+package org.neo4j.gds.ml.core.optimizer;
 
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.embeddings.graphsage.AdamOptimizer;
 
 import java.util.List;
 
@@ -34,7 +33,6 @@ public interface Updater {
     }
 
     static Updater defaultUpdater(List<Weights<? extends Tensor<?>>> weights) {
-        AdamOptimizer adamOptimizer = new AdamOptimizer(weights);
-        return adamOptimizer::update;
+        return new AdamOptimizer(weights);
     }
 }

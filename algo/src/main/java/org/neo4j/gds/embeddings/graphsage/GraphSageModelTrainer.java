@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.PassthroughVariable;
 import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
@@ -143,7 +144,7 @@ public class GraphSageModelTrainer {
     private void trainEpoch(Graph graph, HugeObjectArray<double[]> features, int epoch) {
         List<Weights<? extends Tensor<?>>> weights = getWeights();
 
-        AdamOptimizer updater = new AdamOptimizer(weights, learningRate);
+        var updater = new AdamOptimizer(weights, learningRate);
 
         AtomicInteger batchCounter = new AtomicInteger(0);
 

@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml;
 
 import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.optimizer.Updater;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.batch.Batch;

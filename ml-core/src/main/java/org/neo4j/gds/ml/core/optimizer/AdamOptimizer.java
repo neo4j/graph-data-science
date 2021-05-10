@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.ml.core.optimizer;
 
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.functions.Weights;
@@ -34,7 +34,7 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 // Division, squaring and square-rooting is done element-wise.
 // Based on https://arxiv.org/pdf/1412.6980.pdf
-public class AdamOptimizer {
+public class AdamOptimizer implements Updater {
 
     private static final double CLIP_MAX = 5.0;
     private static final double CLIP_MIN = -5.0;
