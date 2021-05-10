@@ -28,7 +28,8 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
-import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
+
+import static org.neo4j.gds.ml.linkmodels.LinkPredictionTrainEstimation.ASSUMED_MIN_NODE_FEATURES;
 
 class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfig> extends AbstractAlgorithmFactory<LinkPredictionPredict, CONFIG> {
 
@@ -79,6 +80,14 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        throw new MemoryEstimationNotImplementedException();
+        var model = ModelCatalog.get(
+            configuration.username(),
+            configuration.modelName(),
+            LinkLogisticRegressionData.class,
+            LinkPredictionTrainConfig.class
+        );
+        int linkFeatureDimension = model.data().weights().dimension(1);
+        var nodeFeatureDimension = Math.max(model.trainConfig().featureProperties().size(), ASSUMED_MIN_NODE_FEATURES);
+        return LinkPredictionPredict.memoryEstimation(configuration.topN(), linkFeatureDimension, nodeFeatureDimension);
     }
 }

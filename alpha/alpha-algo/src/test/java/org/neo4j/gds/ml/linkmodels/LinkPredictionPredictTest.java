@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.assertj.core.api.AssertionsForInterfaceTypes;
+import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -33,6 +34,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -156,4 +158,69 @@ class LinkPredictionPredictTest {
         ModelCatalog.drop("", modelName);
     }
 
+    @Test
+    void estimatedMemoryIsAlmostLinearInTopN() {
+        var factor = 10;
+        var bigTopN = 10_000;
+        var bigTopNMemory = LinkPredictionPredict.memoryEstimation(
+            bigTopN,
+            10,
+            10
+        ).estimate(GraphDimensions.of(42), 1337).memoryUsage();
+
+        assertThat(bigTopNMemory.max).isEqualTo(bigTopNMemory.min);
+
+        var hugeTopN = 10_000 * factor;
+        var hugeTopNMemory = LinkPredictionPredict.memoryEstimation(
+            hugeTopN,
+            10,
+            10
+        ).estimate(GraphDimensions.of(42), 1337).memoryUsage();
+
+        assertThat(hugeTopNMemory.max).isCloseTo(bigTopNMemory.max * factor, Percentage.withPercentage(1));
+    }
+
+    @Test
+    void estimatedMemoryIsAlmostLinearInNodeFeatureDimension() {
+        var factor = 10;
+        var bigDimension = 10_000;
+        var bigDimensionMemory = LinkPredictionPredict.memoryEstimation(
+            10,
+            10,
+            bigDimension
+        ).estimate(GraphDimensions.of(42), 1337).memoryUsage();
+
+        assertThat(bigDimensionMemory.max).isEqualTo(bigDimensionMemory.min);
+
+        var hugeDimension = 10_000 * factor;
+        var hugeDimensionMemory = LinkPredictionPredict.memoryEstimation(
+            100,
+            10,
+            hugeDimension
+        ).estimate(GraphDimensions.of(42), 1337).memoryUsage();
+
+        assertThat(hugeDimensionMemory.max).isCloseTo(bigDimensionMemory.max * factor, Percentage.withPercentage(1));
+    }
+
+    @Test
+    void estimatedMemoryIsAlmostLinearInLinkFeatureDimension() {
+        var factor = 10;
+        var bigDimension = 10_000;
+        var bigDimensionMemory = LinkPredictionPredict.memoryEstimation(
+            10,
+            bigDimension,
+            10
+        ).estimate(GraphDimensions.of(42), 1337).memoryUsage();
+
+        assertThat(bigDimensionMemory.max).isEqualTo(bigDimensionMemory.min);
+
+        var hugeDimension = 10_000 * factor;
+        var hugeDimensionMemory = LinkPredictionPredict.memoryEstimation(
+            100,
+            hugeDimension,
+            100
+        ).estimate(GraphDimensions.of(42), 1337).memoryUsage();
+
+        assertThat(hugeDimensionMemory.max).isCloseTo(bigDimensionMemory.max * factor, Percentage.withPercentage(1));
+    }
 }

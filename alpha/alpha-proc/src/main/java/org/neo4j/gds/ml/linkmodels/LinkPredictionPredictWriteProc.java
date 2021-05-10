@@ -24,9 +24,9 @@ import org.neo4j.graphalgo.WriteRelationshipsProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.graphalgo.results.StandardWriteRelationshipsResult;
 import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -36,16 +36,27 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionPredictCompanion.DESCRIPTION;
 import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class LinkPredictionPredictWriteProc extends WriteRelationshipsProc<LinkPredictionPredict, LinkPredictionResult, StandardWriteRelationshipsResult, LinkPredictionPredictWriteConfig> {
 
-    @Procedure(name = "gds.alpha.ml.linkPrediction.predict.write", mode = Mode.READ)
+    @Procedure(name = "gds.alpha.ml.linkPrediction.predict.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<StandardWriteRelationshipsResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return write(compute(graphNameOrConfig, configuration));
+    }
+
+    @Procedure(name = "gds.alpha.ml.linkPrediction.predict.write.estimate", mode = READ)
+    @Description("Estimates memory for applying a linkPrediction model")
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphName") Object graphNameOrConfig,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return computeEstimate(graphNameOrConfig, configuration);
     }
 
     @Override

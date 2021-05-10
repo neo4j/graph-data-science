@@ -26,6 +26,10 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.queue.BoundedLongLongPriorityQueue;
 
 import java.util.HashSet;
 import java.util.function.Consumer;
@@ -40,6 +44,14 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
     private final int topN;
     private final double threshold;
     private final AllocationTracker tracker;
+
+    public static MemoryEstimation memoryEstimation(int topN, int linkFeatureDimension, int nodeFeatureDimension) {
+        var builder = MemoryEstimations.builder(LinkPredictionPredict.class);
+        builder.add("TopN predictions", BoundedLongLongPriorityQueue.memoryEstimation(topN));
+        builder.fixed("node feature vectors", 2 * MemoryUsage.sizeOfDoubleArray(nodeFeatureDimension));
+        builder.fixed("link feature vector", MemoryUsage.sizeOfDoubleArray(linkFeatureDimension));
+        return builder.build();
+    }
 
     LinkPredictionPredict(
         LinkLogisticRegressionPredictor predictor,
