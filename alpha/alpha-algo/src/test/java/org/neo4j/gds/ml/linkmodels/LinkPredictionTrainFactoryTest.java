@@ -24,18 +24,17 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionTrainEstimation.ASSUMED_MIN_NODE_FEATURES;
+import static org.neo4j.graphalgo.MemoryEstimationTestUtil.subTree;
 
 class LinkPredictionTrainFactoryTest {
     @Test
@@ -160,20 +159,6 @@ class LinkPredictionTrainFactoryTest {
                 )
             )
             .build();
-    }
-
-    private static MemoryTree subTree(MemoryTree tree, String component) {
-        var components = tree.components();
-        Optional<MemoryTree> maybeSubtree = components.stream().filter(c -> c.description().equals(component)).findFirst();
-        return maybeSubtree.orElseThrow(() -> new RuntimeException("There is no component in the memory tree with name " + component));
-    }
-
-    private static MemoryTree subTree(MemoryTree tree, List<String> query) {
-        var t = tree;
-        for (String q : query) {
-            t = subTree(t, q);
-        }
-        return t;
     }
 
     private GraphDimensions graphDimensions(long nodeCount, long trainRelationshipCount, long testRelationshipCount) {
