@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
@@ -158,10 +157,9 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
     private DegreeFunction computeDegree(TaskFunction taskFunction) {
         var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
-        var degreeBatchSize = BitUtil.ceilDiv(graph.relationshipCount(), config.concurrency());
         var tasks = PartitionUtils.degreePartition(
             graph,
-            degreeBatchSize,
+            config.concurrency(),
             partition -> taskFunction.apply(partition, degrees)
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
@@ -170,10 +168,9 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
     private DegreeFunction computeDegreeAtomic(TaskFunctionAtomic taskFunction) {
         var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
-        var degreeBatchSize = BitUtil.ceilDiv(graph.relationshipCount(), config.concurrency());
         var tasks = PartitionUtils.degreePartition(
             graph,
-            degreeBatchSize,
+            config.concurrency(),
             partition -> taskFunction.apply(partition, degrees)
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);

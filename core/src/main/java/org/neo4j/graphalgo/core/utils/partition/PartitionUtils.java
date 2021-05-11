@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.partition;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.ArrayList;
@@ -71,11 +72,16 @@ public final class PartitionUtils {
         return tasks(concurrency, nodeCount, adjustedBatchSize, taskCreator);
     }
 
-    public static <TASK> List<TASK> degreePartition(Graph graph, long batchSize, Function<Partition, TASK> taskCreator) {
-        return degreePartition(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
+    public static <TASK> List<TASK> degreePartition(Graph graph, int concurrency, Function<Partition, TASK> taskCreator) {
+        var batchSize = Math.max(ParallelUtil.DEFAULT_BATCH_SIZE, BitUtil.ceilDiv(graph.relationshipCount(), concurrency));
+        return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
     }
 
-    public static <TASK> List<TASK> degreePartition(
+    public static <TASK> List<TASK> degreePartitionWithBatchSize(Graph graph, long batchSize, Function<Partition, TASK> taskCreator) {
+        return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
+    }
+
+    public static <TASK> List<TASK> degreePartitionWithBatchSize(
         PrimitiveLongIterator nodes,
         DegreeFunction degrees,
         long batchSize,
