@@ -20,8 +20,8 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.ml.core.RelationshipWeights;
-import org.neo4j.gds.ml.core.batch.UniformReservoirLSampler;
-import org.neo4j.gds.ml.core.batch.WeightedUniformReservoirRSampler;
+import org.neo4j.gds.ml.core.batch.UniformSampler;
+import org.neo4j.gds.ml.core.batch.WeightedUniformSampler;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipCursor;
 
@@ -49,14 +49,14 @@ public class NeighborhoodSampler {
         }
 
         if (graph.hasRelationshipProperty()) {
-            return new WeightedUniformReservoirRSampler(randomSeed)
+            return new WeightedUniformSampler(randomSeed)
                 .sample(
                     concurrentCopyGraph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
                     degree,
                     Math.toIntExact(numberOfSamples)
                 );
         } else {
-            return new UniformReservoirLSampler(randomSeed).sample(
+            return new UniformSampler(randomSeed).sample(
                 concurrentCopyGraph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
                 graph.degree(nodeId),
                 Math.toIntExact(numberOfSamples)

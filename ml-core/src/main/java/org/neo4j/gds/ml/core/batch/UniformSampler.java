@@ -27,15 +27,15 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 /*
- * L Algorithm for uniform sampling k elements from an input stream
+ * L Algorithm for uniform sampling exactly k elements from an input stream
  * https://richardstartin.github.io/posts/reservoir-sampling#algorithm-l
  *
  */
-public class UniformReservoirLSampler {
+public class UniformSampler {
 
     private final Random random;
 
-    public UniformReservoirLSampler(long randomSeed) {
+    public UniformSampler(long randomSeed) {
         this.random = new Random(randomSeed);
     }
 

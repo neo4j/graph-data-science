@@ -30,13 +30,13 @@ import java.util.stream.Stream;
  * Weighted Reservoir Sampling based on Algorithm A-Res:
  * https://en.wikipedia.org/wiki/Reservoir_sampling#Algorithm_A-Res
  */
-public class WeightedUniformReservoirRSampler {
+public class WeightedUniformSampler {
 
     // Used in the denominators in order to avoid division by zero.
     private static final double EPSILON = 1e-10;
     private final Random random;
 
-    public WeightedUniformReservoirRSampler(long randomSeed) {
+    public WeightedUniformSampler(long randomSeed) {
         this.random = new Random(randomSeed);
     }
 

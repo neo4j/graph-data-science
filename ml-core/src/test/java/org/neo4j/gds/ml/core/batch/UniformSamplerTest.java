@@ -32,7 +32,7 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class UniformReservoirLSamplerTest {
+class UniformSamplerTest {
 
     @Test
     void shouldSampleSubsetOfNeighbors() {
@@ -40,7 +40,7 @@ class UniformReservoirLSamplerTest {
 
         var sampled = new LongLongHashMap();
 
-        var sampler = new UniformReservoirLSampler(19L);
+        var sampler = new UniformSampler(19L);
         var input = LongStream.range(0, 100).toArray();
 
         var numberOfSampling = 1000;
@@ -63,7 +63,7 @@ class UniformReservoirLSamplerTest {
 
         var sampled = new LongLongHashMap();
 
-        var sampler = new UniformReservoirLSampler(19L);
+        var sampler = new UniformSampler(19L);
         var input = LongStream
             .range(0, 100)
             .mapToObj(targetId -> ImmutableRelationshipCursor.of(0, targetId, 0D))
@@ -89,7 +89,7 @@ class UniformReservoirLSamplerTest {
     void shouldSampleTheCorrectNumber(int numberOfSamples) {
         var input = LongStream.range(0, 18);
 
-        var sampler = new UniformReservoirLSampler(19L);
+        var sampler = new UniformSampler(19L);
         var sample = sampler.sample(input, 18, numberOfSamples);
 
         var expectedSize = Math.min(18, numberOfSamples);
@@ -103,7 +103,7 @@ class UniformReservoirLSamplerTest {
     void duplicateElements() {
         var input = LongStream.of(1, 1, 1);
 
-        var sampler = new UniformReservoirLSampler(19L);
+        var sampler = new UniformSampler(19L);
         var sample = sampler.sample(input, 3,2).toArray();
 
         assertThat(sample).containsExactly(1, 1);

@@ -34,7 +34,7 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WeightedUniformReservoirRSamplerTest {
+class WeightedUniformSamplerTest {
 
     @Test
     void shouldSampleSubsetOfNeighbors() {
@@ -42,7 +42,7 @@ class WeightedUniformReservoirRSamplerTest {
         int numberOfSamples = highWeightNodes.size();
 
         var sampled = new LongLongHashMap();
-        var sampler = new WeightedUniformReservoirRSampler(19L);
+        var sampler = new WeightedUniformSampler(19L);
 
         var input = LongStream.range(1, 100).mapToObj(targetId -> {
             var weight = highWeightNodes.contains(targetId) ? 99D : 1D;
@@ -80,7 +80,7 @@ class WeightedUniformReservoirRSamplerTest {
             return ImmutableRelationshipCursor.of(0, targetId, weight);
         }).collect(Collectors.toList());
 
-        var sampler = new WeightedUniformReservoirRSampler(19L);
+        var sampler = new WeightedUniformSampler(19L);
         var sample = sampler.sample(input.stream(), 18, numberOfSamples);
 
         var expectedSize = Math.min(18, numberOfSamples);
@@ -98,7 +98,7 @@ class WeightedUniformReservoirRSamplerTest {
         }).collect(Collectors.toList());
 
 
-        var sampler = new WeightedUniformReservoirRSampler(19L);
+        var sampler = new WeightedUniformSampler(19L);
         var sample = sampler.sample(input.stream(), 3,2).toArray();
 
         assertThat(sample).containsExactly(1, 1);
@@ -109,7 +109,7 @@ class WeightedUniformReservoirRSamplerTest {
         var input = LongStream.of(1, 1, 1)
             .mapToObj(targetId -> ImmutableRelationshipCursor.of(0, targetId, 0D)).collect(Collectors.toList());
 
-        var sampler = new WeightedUniformReservoirRSampler(19L);
+        var sampler = new WeightedUniformSampler(19L);
         var samples = sampler.sample(input.stream(), 3, 2).toArray();
 
         assertThat(samples).hasSize(2);
