@@ -52,6 +52,7 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -60,6 +61,7 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -128,8 +130,15 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
     }
 
     @Override
-    public AuthSubject usernameAuthSubject(String username, AuthSubject authSubject) {
-        return new CompatUsernameAuthSubject43(username, authSubject);
+    public SecurityContext securityContext(
+        String username, AuthSubject authSubject, AccessMode mode
+    ) {
+        return new SecurityContext(
+            new CompatUsernameAuthSubject43(username, authSubject),
+            mode,
+            // GDS is always operating from an embedded context
+            ClientConnectionInfo.EMBEDDED_CONNECTION
+        );
     }
 
     @Override

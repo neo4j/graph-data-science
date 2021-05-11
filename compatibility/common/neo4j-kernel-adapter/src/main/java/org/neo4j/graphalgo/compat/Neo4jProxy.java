@@ -51,6 +51,7 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -126,8 +127,14 @@ public final class Neo4jProxy {
         return IMPL.newRestrictedAccessMode(original, restricting);
     }
 
-    public static AuthSubject usernameAuthSubject(String username, AuthSubject authSubject) {
-        return IMPL.usernameAuthSubject(username, authSubject);
+    // Maybe we should move this to a test-only proxy?
+    @TestOnly
+    public static SecurityContext securityContext(
+        String username,
+        AuthSubject authSubject,
+        AccessMode mode
+    ) {
+        return IMPL.securityContext(username, authSubject, mode);
     }
 
     public static long getHighestPossibleIdInUse(

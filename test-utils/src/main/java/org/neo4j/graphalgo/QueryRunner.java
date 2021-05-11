@@ -25,7 +25,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
@@ -175,7 +174,7 @@ public final class QueryRunner {
     private static KernelTransaction.Revertable withUsername(Transaction tx, String username) {
         InternalTransaction topLevelTransaction = (InternalTransaction) tx;
         AuthSubject subject = topLevelTransaction.securityContext().subject();
-        SecurityContext securityContext = new SecurityContext(Neo4jProxy.usernameAuthSubject(username, subject), READ);
+        var securityContext = Neo4jProxy.securityContext(username, subject, READ);
         return topLevelTransaction.overrideWith(securityContext);
     }
 }

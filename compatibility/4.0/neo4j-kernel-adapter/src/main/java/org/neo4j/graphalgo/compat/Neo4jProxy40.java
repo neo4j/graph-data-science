@@ -55,6 +55,7 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -119,8 +120,12 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     }
 
     @Override
-    public AuthSubject usernameAuthSubject(String username, AuthSubject authSubject) {
-        return new CompatUsernameAuthSubject40(username, authSubject);
+    public SecurityContext securityContext(
+        String username,
+        AuthSubject authSubject,
+        AccessMode mode
+    ) {
+        return new SecurityContext(new CompatUsernameAuthSubject40(username, authSubject), mode);
     }
 
     @Override
