@@ -139,11 +139,17 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
 
         globalTriangleCount = globalTriangleCounter.longValue();
 
+        System.out.println("TOTAL NBR OF NODES EXCLUDED WITH MAX DEG FILTER: " + excluded.longValue());
+        System.out.println("TOTAL NBR OF DEGREE EXCLUDED WITH MAX DEG FILTER: " + excluded_sum_degrees.longValue());
+
         return TriangleCountResult.of(
             triangleCounts,
             globalTriangleCount
         );
     }
+
+    static final LongAdder excluded = new LongAdder();
+    static final LongAdder excluded_sum_degrees = new LongAdder();
 
     private class IntersectTask implements Runnable, IntersectionConsumer {
 
@@ -157,10 +163,13 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         public void run() {
             long node;
             while ((node = queue.getAndIncrement()) < graph.nodeCount() && running()) {
-                if (graph.degree(node) <= config.maxDegree()) {
+                var degree = graph.degree(node);
+                if (degree <= config.maxDegree()) {
                     intersect.intersectAll(node, this);
                 } else {
                     triangleCounts.set(node, EXCLUDED_NODE_TRIANGLE_COUNT);
+                    excluded.increment();
+                    excluded_sum_degrees.add(degree);
                 }
                 getProgressLogger().logProgress();
             }
