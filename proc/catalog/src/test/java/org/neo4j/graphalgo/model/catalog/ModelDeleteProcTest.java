@@ -81,7 +81,7 @@ class ModelDeleteProcTest extends ModelProcBaseTest {
             ImmutableGraphSageTrainConfig.builder()
                 .username(getUsername())
                 .modelName(MODEL_NAME)
-                .degreeAsProperty(true)
+                .addFeatureProperties("a")
                 .build()
         );
 

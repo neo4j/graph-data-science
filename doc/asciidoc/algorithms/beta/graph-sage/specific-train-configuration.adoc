@@ -3,11 +3,11 @@
 |===
 | Name                                                                             | Type          | Default   | Optional | Description
 | modelName                                                                        | String        | n/a       | no       | The name of the model to train, must not exist in the Model Catalog.
+| featureProperties                                                                | List<String>  | n/a       | no      | The names of the node properties that should be used as input features. All property names must exist in the in-memory graph and be of type Float or List<Float>.
 | embeddingDimension                                                               | Integer       | 64        | yes      | The dimension of the generated node embeddings as well as their hidden layer representations.
 | aggregator                                                                       | String        | "mean"    | yes      | What aggregator to be used by the layers. Supported values are "mean" and "pool".
 | activationFunction                                                               | String        | "sigmoid" | yes      | The activation function to be used in the model architecture. Supported values are "sigmoid" and "relu".
 | sampleSizes                                                                      | List<Integer> | [25, 10]  | yes      | A list of Integer values, the size of the list determines the number of layers and the values determine how many nodes will be sampled by the layers.
-| featureProperties                                                                | List<String>  | []        | yes      | The names of the node properties that should be used as input features. All property names must exist in the in-memory graph and be of type Float or List<Float>.
 | projectedFeatureDimension                                                        | Integer       | n/a       | yes      | The dimension to which feature properties will be projected
 | batchSize                                                                        | Integer       | 100       | yes      | The number of nodes per batch.
 | <<common-configuration-tolerance,tolerance>>                                     | Float         | 1e-4      | yes      | Tolerance controls the training cycles. The training will complete when the loss change is lower than the tolerance value, regardless of other halting criteria.
@@ -16,7 +16,5 @@
 | <<common-configuration-max-iterations,maxIterations>>                            | Integer       | 10        | yes      | Maximum number of parameter updates per epoch and batch.
 | searchDepth                                                                      | Integer       | 5         | yes      | Depth of a RandomWalk when sampling neighbors during training. This is used when computing the loss function.
 | negativeSampleWeight                                                             | Integer       | 20        | yes      | The weight of the negative samples. This is used when computing the loss function.
-| degreeAsProperty                                                                 | Boolean       | false     | yes      | Whether or not to use the degree of the node as a node property.
 | <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String        | null      | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
-5+| *Note*: At least one of `featureProperties` and `degreeAsProperty` has to be specified.
 |===

@@ -131,7 +131,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
                 ImmutableGraphSageTrainConfig.builder()
                     .username(getUsername())
                     .modelName(modelName)
-                    .degreeAsProperty(true)
+                    .addFeatureProperties("a")
                     .build()
             );
             ModelStoreProc.storeModel(db, model1);
@@ -159,7 +159,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
                 ImmutableGraphSageTrainConfig.builder()
                     .username(getUsername())
                     .modelName(modelName)
-                    .degreeAsProperty(true)
+                    .addFeatureProperties("a")
                     .build()
             );
             ModelStoreProc.storeModel(db, model1);

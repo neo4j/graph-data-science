@@ -57,7 +57,6 @@ public final class GraphSageTrainConfigSerializer implements TrainConfigSerializ
             .setIterationsConfig(serializableIterationsConfig(trainConfig))
             .setSearchDepth(trainConfig.searchDepth())
             .setNegativeSampleWeight(trainConfig.negativeSampleWeight())
-            .setDegreeAsProperty(trainConfig.degreeAsProperty())
             .setFeaturePropertiesConfig(serializableFeaturePropertiesConfig(trainConfig));
 
         var projectedFeatureDimensionBuilder = TrainConfigsProto.ProjectedFeatureDimension
@@ -87,8 +86,7 @@ public final class GraphSageTrainConfigSerializer implements TrainConfigSerializ
             .epochs(protoTrainConfig.getEpochs())
             .maxIterations(protoTrainConfig.getIterationsConfig().getMaxIterations())
             .negativeSampleWeight(protoTrainConfig.getNegativeSampleWeight())
-            .featureProperties(protoTrainConfig.getFeaturePropertiesConfig().getFeaturePropertiesList())
-            .degreeAsProperty(protoTrainConfig.getDegreeAsProperty());
+            .featureProperties(protoTrainConfig.getFeaturePropertiesConfig().getFeaturePropertiesList());
 
         var projectedFeatureDimension = protoTrainConfig.getProjectedFeatureDimension();
         if (projectedFeatureDimension.getPresent()) {

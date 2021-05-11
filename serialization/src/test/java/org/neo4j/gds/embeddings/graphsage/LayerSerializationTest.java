@@ -35,10 +35,10 @@ class LayerSerializationTest {
     void shouldWork() throws IOException {
         var config = ImmutableGraphSageTrainConfig.builder()
             .modelName("bogus")
+            .addFeatureProperties("a")
             .aggregator(Aggregator.AggregatorType.MEAN)
             .activationFunction(ActivationFunction.SIGMOID)
             .sampleSizes(List.of(25))
-            .degreeAsProperty(true)
             .build();
 
         var layer = config.layerConfigs(42).stream()

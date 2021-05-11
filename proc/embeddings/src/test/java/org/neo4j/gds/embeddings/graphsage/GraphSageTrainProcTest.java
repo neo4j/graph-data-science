@@ -77,7 +77,6 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .addParameter("aggregator", "mean")
             .addParameter("activationFunction", "sigmoid")
             .addParameter("embeddingDimension", 64)
-            .addParameter("degreeAsProperty", true)
             .addParameter("modelName", modelName)
             .yields();
 
@@ -109,7 +108,6 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
         assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
         assertEquals(64, trainConfig.embeddingDimension());
-        assertTrue(trainConfig.degreeAsProperty());
     }
 
     @Test
@@ -200,7 +198,6 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .algo("gds.beta.graphSage")
             .trainMode()
             .addParameter("featureProperties", List.of("age", "birth_year", "death_year"))
-            .addParameter("degreeAsProperty", true)
             .addParameter("modelName", modelName)
             .yields();
 
@@ -228,8 +225,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             "   modelName: $modelName," +
             "   nodeQuery: $nodeQuery," +
             "   relationshipQuery: $relationshipQuery," +
-            "   featureProperties: ['age', 'birth_year', 'death_year']," +
-            "   degreeAsProperty: true" +
+            "   featureProperties: ['age', 'birth_year', 'death_year']" +
             "})";
 
 
@@ -262,7 +258,6 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .addParameter("aggregator", "mean")
             .addParameter("activationFunction", "sigmoid")
             .addParameter("embeddingDimension", 42)
-            .addParameter("degreeAsProperty", true)
             .addParameter("modelName", modelName)
             .yields();
 
@@ -361,8 +356,8 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         String query = GdsCypher.call().explicitCreation(graphName)
             .algo("gds.beta.graphSage")
             .trainEstimation()
-            .addParameter("degreeAsProperty", true)
             .addParameter("modelName", modelName)
+            .addParameter("featureProperties", List.of("a"))
             .yields("requiredMemory");
 
         assertCypherResult(query, List.of(Map.of(
@@ -376,7 +371,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         String query = GdsCypher.call().explicitCreation(graphName)
             .algo("gds.beta.graphSage")
             .trainEstimation()
-            .addParameter("degreeAsProperty", true)
+            .addParameter("featureProperties", List.of("a"))
             .addParameter("modelName", modelName)
             .addParameter("projectedFeatureDimension", projectedFeatureDimension)
             .yields();

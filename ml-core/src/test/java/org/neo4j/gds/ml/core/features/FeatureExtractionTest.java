@@ -95,23 +95,22 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
     @Test
     void shouldConcatenateFeaturesHOAWithDegreeFeature() {
         var featureExtractors = new ArrayList<>(FeatureExtraction.propertyExtractors(validGraph, List.of("a", "b")));
-        featureExtractors.add(new DegreeFeatureExtractor(validGraph));
         var features = HugeObjectArray.newArray(double[].class, 4, AllocationTracker.empty());
         FeatureExtraction.extract(validGraph, featureExtractors, features);
         assertThat(features.get(0)).contains(
-            new double[]{ 2.0, 1.0, 1.2, 0.0 },
+            new double[]{ 2.0, 1.0, 1.2 },
             Offset.offset(1e-7)
         );
         assertThat(features.get(1)).contains(
-            new double[]{ 1.3, 1.0, 0.5, 0.0 },
+            new double[]{ 1.3, 1.0, 0.5 },
             Offset.offset(1e-7)
         );
         assertThat(features.get(2)).contains(
-            new double[]{ 0.0, 1.0, 2.8, 0.0 },
+            new double[]{ 0.0, 1.0, 2.8 },
             Offset.offset(1e-7)
         );
         assertThat(features.get(3)).contains(
-            new double[]{ 1.0, 1.0, 0.9, 0.0 },
+            new double[]{ 1.0, 1.0, 0.9 },
             Offset.offset(1e-7)
         );
     }

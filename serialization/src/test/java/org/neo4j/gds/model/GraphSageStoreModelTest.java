@@ -51,8 +51,8 @@ class GraphSageStoreModelTest extends BaseStoreModelTest<ModelData, GraphSageTra
     Model<ModelData, GraphSageTrainConfig> model() {
         GraphSageTrainConfig trainConfig = ImmutableGraphSageTrainConfig.builder()
             .modelName(MODEL)
+            .addFeatureProperties("a")
             .relationshipWeightProperty("weight")
-            .degreeAsProperty(true)
             .build();
 
         var modelData = ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction());

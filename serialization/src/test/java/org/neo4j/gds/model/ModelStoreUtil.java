@@ -42,8 +42,8 @@ public final class ModelStoreUtil {
     ) throws IOException {
         var trainConfig = ImmutableGraphSageTrainConfig.builder()
             .modelName(modelName)
+            .addFeatureProperties("a")
             .relationshipWeightProperty("weight")
-            .degreeAsProperty(true)
             .concurrency(1)
             .build();
 

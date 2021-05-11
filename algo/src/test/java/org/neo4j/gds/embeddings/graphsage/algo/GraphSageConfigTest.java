@@ -45,7 +45,7 @@ class GraphSageTrainConfigTest {
     @Test
     void shouldThrowIfNoPropertiesProvided() {
         var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo"));
-        var expectedMessage = "GraphSage requires at least one property. Either `featureProperties` or `degreeAsProperty` must be set.";
+        var expectedMessage = "GraphSage requires at least one property.";
         var throwable = assertThrows(IllegalArgumentException.class, () -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper));
         assertEquals(expectedMessage, throwable.getMessage());
     }
@@ -58,8 +58,8 @@ class GraphSageTrainConfigTest {
             Optional.empty(),
             CypherMapWrapper.create(Map.of(
                 "modelName", "graphSageModel",
-                "degreeAsProperty", true,
-                "projectedFeatureDimension", 42
+                "projectedFeatureDimension", 42,
+                "featureProperties", List.of("a")
             ))
         );
         assertTrue(multiLabelConfig.isMultiLabel());
@@ -69,7 +69,7 @@ class GraphSageTrainConfigTest {
             Optional.empty(),
             CypherMapWrapper.create(Map.of(
                 "modelName", "graphSageModel",
-                "degreeAsProperty", true
+                "featureProperties", List.of("a")
             ))
         );
         assertFalse(singleLabelConfig.isMultiLabel());

@@ -29,6 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
@@ -86,6 +87,8 @@ class GraphSageTest {
         RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
             .nodeCount(NODE_COUNT)
             .averageDegree(3)
+            .nodeLabelProducer(nodeId -> new NodeLabel[] {NodeLabel.of("P")})
+            .addNodePropertyProducer(NodeLabel.of("P"), PropertyProducer.random("f1", 0, 1))
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .relationshipPropertyProducer(PropertyProducer.fixed("weight", 1.0))
             .seed(123L)
@@ -103,7 +106,6 @@ class GraphSageTest {
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
 
         configBuilder = ImmutableGraphSageTrainConfig.builder()
-            .degreeAsProperty(true)
             .embeddingDimension(EMBEDDING_DIMENSION);
     }
 
@@ -115,7 +117,6 @@ class GraphSageTest {
             .aggregator(aggregator)
             .activationFunction(ActivationFunction.RELU)
             .sampleSizes(List.of(75,25))
-            .degreeAsProperty(false)
             .featureProperties(List.of("f1", "f2", "f3"))
             .concurrency(4)
             .build();
@@ -150,6 +151,7 @@ class GraphSageTest {
     void differentTrainAndPredictionGraph() {
         var trainConfig = configBuilder
             .modelName(MODEL_NAME)
+            .featureProperties(List.of("f1"))
             .relationshipWeightProperty("weight")
             .concurrency(1)
             .build();
@@ -176,6 +178,7 @@ class GraphSageTest {
         RandomGraphGenerator randomGraphGenerator = RandomGraphGenerator.builder()
             .nodeCount(2000)
             .averageDegree(3)
+            .nodePropertyProducer(PropertyProducer.random("f1", 0D, 1D))
             .relationshipDistribution(RelationshipDistribution.POWER_LAW)
             .relationshipPropertyProducer(PropertyProducer.fixed("weight", 1.0))
             .aggregation(Aggregation.SINGLE)
@@ -194,6 +197,7 @@ class GraphSageTest {
     void testLogging() {
         var trainConfig = configBuilder
             .modelName(MODEL_NAME)
+            .addFeatureProperties("f1")
             .build();
 
         var modelTrainer = new GraphSageModelTrainer(trainConfig, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);

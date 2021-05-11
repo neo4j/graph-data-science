@@ -54,7 +54,6 @@ class ModelToFileExporterTest {
         .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
         .embeddingDimension(64)
         .modelName("testModel")
-        .degreeAsProperty(true)
         .projectedFeatureDimension(5)
         .build();
 

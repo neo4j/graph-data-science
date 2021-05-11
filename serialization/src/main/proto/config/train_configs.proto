@@ -24,8 +24,7 @@ message GraphSageTrainConfig {
   int32 epochs = 13;
   int32 searchDepth = 14;
   int32 negativeSampleWeight = 15;
-  bool degreeAsProperty = 16;
-  ProjectedFeatureDimension projectedFeatureDimension = 17;
+  ProjectedFeatureDimension projectedFeatureDimension = 16;
 }
 
 message ProjectedFeatureDimension {

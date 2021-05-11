@@ -267,9 +267,9 @@ class GraphSageAlgorithmFactoryTest {
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
             .modelName("modelName")
+            .addFeatureProperties("a")
             .sampleSizes(List.of(1, 2))
             .aggregator(Aggregator.AggregatorType.MEAN)
-            .degreeAsProperty(true)
             .build();
 
         var model = Model.of(
@@ -322,9 +322,9 @@ class GraphSageAlgorithmFactoryTest {
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
             .modelName("modelName")
+            .addFeatureProperties("a")
             .sampleSizes(List.of(1, 2))
             .aggregator(Aggregator.AggregatorType.MEAN)
-            .degreeAsProperty(true)
             .build();
 
         var model = Model.of(
@@ -382,7 +382,7 @@ class GraphSageAlgorithmFactoryTest {
             Optional.empty(),
             CypherMapWrapper.create(Map.of(
                 "modelName", "graphSageModel",
-                "degreeAsProperty", true,
+                "featureProperties", List.of("a"),
                 "projectedFeatureDimension", 42
             ))
         );
@@ -402,7 +402,7 @@ class GraphSageAlgorithmFactoryTest {
             Optional.empty(),
             CypherMapWrapper.create(Map.of(
                 "modelName", "graphSageModel",
-                "degreeAsProperty", true
+                "featureProperties", List.of("a")
             ))
         );
         var singleLabelAlgo = new GraphSageTrainAlgorithmFactory()
@@ -499,7 +499,6 @@ class GraphSageAlgorithmFactoryTest {
                                             .batchSize(batchSize)
                                             .aggregator(aggregator)
                                             .embeddingDimension(embeddingDimension)
-                                            .degreeAsProperty(degreeAsProperty)
                                             .featureProperties(
                                                 IntStream.range(0, nodePropertySize)
                                                     .mapToObj(i -> String.valueOf('a' + i))
@@ -549,7 +548,7 @@ class GraphSageAlgorithmFactoryTest {
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
             .modelName(modelName)
-            .degreeAsProperty(true)
+            .addFeatureProperties("a")
             .build();
 
         var model = Model.of(

@@ -115,7 +115,6 @@ class GraphSageMultiLabelSerializationTest {
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
             .embeddingDimension(64)
             .modelName(MODEL_NAME)
-            .degreeAsProperty(true)
             .projectedFeatureDimension(5)
             .build();
 

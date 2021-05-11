@@ -61,7 +61,7 @@ class ModelCatalogStoreDocTest extends DocTestBase {
             GraphSage.MODEL_TYPE,
             GraphSchema.empty(),
             ModelData.of(new Layer[0], new SingleLabelFeatureFunction()),
-            ImmutableGraphSageTrainConfig.builder().modelName("my-model").degreeAsProperty(true).build(),
+            ImmutableGraphSageTrainConfig.builder().modelName("my-model").addFeatureProperties("a").build(),
             Model.Mappable.EMPTY
         ));
     }

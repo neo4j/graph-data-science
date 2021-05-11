@@ -25,7 +25,6 @@ import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelFeatureExtractors;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.features.BiasFeature;
-import org.neo4j.gds.ml.core.features.DegreeFeatureExtractor;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.gds.ml.core.features.HugeObjectArrayFeatureConsumer;
@@ -51,9 +50,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static org.neo4j.gds.ml.core.features.FeatureExtraction.featureCount;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
@@ -228,17 +225,10 @@ public final class GraphSageHelper {
     }
 
     public static List<FeatureExtractor> featureExtractors(Graph graph, GraphSageTrainConfig config) {
-        var propertyFeatureExtractors = FeatureExtraction.propertyExtractors(
+        return FeatureExtraction.propertyExtractors(
             graph,
             config.featureProperties()
         );
-
-        return config.degreeAsProperty() ?
-            Stream.concat(
-                propertyFeatureExtractors.stream(),
-                Stream.of(new DegreeFeatureExtractor(graph))
-            ).collect(toList())
-            : propertyFeatureExtractors;
     }
 
     public static MultiLabelFeatureExtractors multiLabelFeatureExtractors(
@@ -253,9 +243,6 @@ public final class GraphSageHelper {
             extractorsPerLabel.computeIfAbsent(nodeLabel, label -> {
                 var propertyKeys = filteredKeysPerLabel.get(label);
                 var featureExtractors = new ArrayList<>(FeatureExtraction.propertyExtractors(graph, propertyKeys, nodeId));
-                if (config.degreeAsProperty()) {
-                    featureExtractors.add(new DegreeFeatureExtractor(graph));
-                }
                 featureExtractors.add(new BiasFeature());
                 return featureExtractors;
             });

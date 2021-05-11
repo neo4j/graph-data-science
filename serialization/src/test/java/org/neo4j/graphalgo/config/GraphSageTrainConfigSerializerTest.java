@@ -102,7 +102,6 @@ class GraphSageTrainConfigSerializerTest {
             .maxIterations(maxIterations)
             .negativeSampleWeight(negativeSampleWeight)
             .featureProperties(List.of("age", "birth_year", "death_year"))
-            .degreeAsProperty(true)
             .batchSize(batchSize);
 
         var trainConfig = trainConfigBuilder.build();

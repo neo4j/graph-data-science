@@ -24,11 +24,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
@@ -53,6 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
+import static org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph.DUMMY_PROPERTY;
 
 @GdlExtension
 class GraphSageModelTrainerTest {
@@ -171,7 +172,7 @@ class GraphSageModelTrainerTest {
     @Test
     void testLogging() {
         var config = ImmutableGraphSageTrainConfig.builder()
-            .degreeAsProperty(true)
+            .addFeatureProperties(DUMMY_PROPERTY)
             .embeddingDimension(EMBEDDING_DIMENSION)
             .modelName("model")
             .epochs(1)

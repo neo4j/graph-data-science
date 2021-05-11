@@ -255,8 +255,7 @@ CALL gds.beta.graphSage.train(
     featureProperties: ['age', 'heightAndWeight'],
     aggregator: 'mean',
     activationFunction: 'sigmoid',
-    sampleSizes: [25, 10],
-    degreeAsProperty: true
+    sampleSizes: [25, 10]
   }
 )
 ----
@@ -370,7 +369,6 @@ CALL gds.beta.graphSage.train(
     aggregator: 'mean',
     activationFunction: 'sigmoid',
     sampleSizes: [25, 10],
-    degreeAsProperty: true,
     relationshipWeightProperty: 'relWeight',
     nodeLabels: ['Person'],
     relationshipTypes: ['KNOWS']
@@ -394,8 +392,7 @@ CALL gds.beta.graphSage.train(
   {
     modelName: 'graphSage',
     featureProperties: ['age', 'heightAndWeight'],
-    embeddingDimension: 3,
-    degreeAsProperty: true
+    embeddingDimension: 3
   }
 )
 ----

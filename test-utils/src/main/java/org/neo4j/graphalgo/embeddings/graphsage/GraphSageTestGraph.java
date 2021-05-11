@@ -94,6 +94,7 @@ public final class GraphSageTestGraph {
         ", (n19)-[:ORDERED { times: 5 }]->(n7)" +
         ", (n19)-[:ORDERED { times: 5 }]->(n11)";
 
+    public static final String DUMMY_PROPERTY = "dummyProp";
 
     private GraphSageTestGraph() {}
 }

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
@@ -44,7 +43,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -94,28 +92,6 @@ class MultiLabelGraphSageTrainTest {
     @Inject
     TestGraph unequalGraph;
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void shouldRunWithOrWithoutDegreeAsProperty(boolean degreeAsProperty) {
-        var config = ImmutableGraphSageTrainConfig.builder()
-            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
-            .embeddingDimension(64)
-            .modelName("foo")
-            .degreeAsProperty(degreeAsProperty)
-            .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
-            .build();
-
-        var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
-            graph,
-            config,
-            Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
-            AllocationTracker.empty()
-        );
-        // should not fail
-        multiLabelGraphSageTrain.compute();
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("featureSizes")
     void shouldRunWithDifferentProjectedFeatureSizes(String name, GraphSageTrainConfig config) {
@@ -162,7 +138,6 @@ class MultiLabelGraphSageTrainTest {
             .aggregator(Aggregator.AggregatorType.MEAN)
             .activationFunction(ActivationFunction.SIGMOID)
             .embeddingDimension(64)
-            .degreeAsProperty(true)
             .modelName(modelName)
             .build();
 
@@ -186,7 +161,6 @@ class MultiLabelGraphSageTrainTest {
         assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
         assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
         assertEquals(64, trainConfig.embeddingDimension());
-        assertTrue(trainConfig.degreeAsProperty());
     }
 
     @Test

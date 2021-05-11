@@ -82,8 +82,8 @@ class GraphSageTrainAlgorithmFactoryTest {
         var weightsPerLabel = MemoryRange.empty();
 
         if (config.isMultiLabel()) {
-            var minNumProperties = config.degreeAsProperty() ? 2 : 1;
-            var maxNumProperties = config.featureProperties().size() + (config.degreeAsProperty() ? 1 : 0);
+            var minNumProperties = 1;
+            var maxNumProperties = config.featureProperties().size();
             maxNumProperties += 1; // Add one for the label
             var minWeightsMemory = sizeOfDoubleArray(config.estimationFeatureDimension() * minNumProperties);
             var maxWeightsMemory = sizeOfDoubleArray(config.estimationFeatureDimension() * maxNumProperties);
@@ -114,7 +114,7 @@ class GraphSageTrainAlgorithmFactoryTest {
 
         // features: HugeOA[nodeCount * double[featureSize]]
         long minInitialFeaturesArray = config.isMultiLabel()
-            ? sizeOfDoubleArray(config.degreeAsProperty() ? 2 : 1)
+            ? sizeOfDoubleArray(1)
             : sizeOfDoubleArray(config.estimationFeatureDimension());
         long maxInitialFeaturesArray = sizeOfDoubleArray(config.estimationFeatureDimension());
         var minInitialFeaturesMemory = hugeObjectArraySize.applyAsLong(minInitialFeaturesArray);
@@ -383,9 +383,9 @@ class GraphSageTrainAlgorithmFactoryTest {
             .builder()
             .username("userName")
             .modelName("modelName")
+            .addFeatureProperties("a")
             .sampleSizes(List.of(1, 2))
-            .aggregator(Aggregator.AggregatorType.MEAN)
-            .degreeAsProperty(true);
+            .aggregator(Aggregator.AggregatorType.MEAN);
         var config = isMultiLabel
             ? builder.projectedFeatureDimension(SOME_REASONABLE_VALUE).build()
             : builder.build();
@@ -546,7 +546,6 @@ class GraphSageTrainAlgorithmFactoryTest {
                                                         .batchSize(batchSize)
                                                         .aggregator(aggregator)
                                                         .embeddingDimension(embeddingDimension)
-                                                        .degreeAsProperty(degreeAsProperty)
                                                         .projectedFeatureDimension(projectedFeatureDimension)
                                                         .featureProperties(
                                                             IntStream.range(0, featurePropertySize)

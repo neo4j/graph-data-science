@@ -128,11 +128,6 @@ public interface GraphSageTrainConfig extends
         return 20;
     }
 
-    @Value.Default
-    default boolean degreeAsProperty() {
-        return false;
-    }
-
     Optional<Integer> projectedFeatureDimension();
 
     @Override
@@ -172,14 +167,14 @@ public interface GraphSageTrainConfig extends
 
     @Configuration.Ignore
     default int estimationFeatureDimension() {
-        return projectedFeatureDimension().orElse(featureProperties().size() + (degreeAsProperty() ? 1 : 0));
+        return projectedFeatureDimension().orElse(featureProperties().size());
     }
 
     @Value.Check
     default void validate() {
-        if (featureProperties().isEmpty() && !degreeAsProperty()) {
+        if (featureProperties().isEmpty()) {
             throw new IllegalArgumentException(
-                "GraphSage requires at least one property. Either `featureProperties` or `degreeAsProperty` must be set."
+                "GraphSage requires at least one property."
             );
         }
         projectedFeatureDimension().ifPresent(value -> CypherMapWrapper.validateIntegerRange(

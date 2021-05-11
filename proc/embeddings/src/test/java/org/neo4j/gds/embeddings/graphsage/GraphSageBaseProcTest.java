@@ -148,7 +148,6 @@ class GraphSageBaseProcTest extends BaseProcTest {
             .addParameter("featureProperties", List.of("age", "birth_year", "death_year"))
             .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("activationFunction", activationFunction)
-            .addParameter("degreeAsProperty", true)
             .addParameter("aggregator", aggregator)
             .addParameter("modelName", modelName)
             .yields();
