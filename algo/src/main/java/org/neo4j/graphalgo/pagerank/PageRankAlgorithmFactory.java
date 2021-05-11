@@ -102,7 +102,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
             // However, relationship weights need to be normalized by the weighted degree.
             // The score is divided by the weighted degree before being sent to the neighbors.
             // For the unweighted case, we want a no-op and divide by 1.
-            degreeFunction = configuration.isWeighted()
+            degreeFunction = configuration.hasRelationshipWeightProperty()
                 ? degreeFunction
                 : (nodeId) -> 1;
 

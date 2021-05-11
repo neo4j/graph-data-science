@@ -101,7 +101,7 @@ public class GraphSageModelTrainer {
         this.executor = executor;
         this.progressLogger = progressLogger;
 
-        this.useWeights = config.relationshipWeightProperty() != null;
+        this.useWeights = config.hasRelationshipWeightProperty();
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {

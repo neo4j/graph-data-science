@@ -49,7 +49,7 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> impl
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(DegreeCentrality.class);
-        if (configuration.relationshipWeightProperty() != null) {
+        if (configuration.hasRelationshipWeightProperty()) {
             return builder
                 .perNode("degree cache", HugeDoubleArray::memoryEstimation)
                 .build();

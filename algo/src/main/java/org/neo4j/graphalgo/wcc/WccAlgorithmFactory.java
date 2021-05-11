@@ -48,7 +48,7 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Abs
     protected Wcc build(
         Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressLogger progressLogger
     ) {
-        if (configuration.relationshipWeightProperty() != null && configuration.threshold() == 0) {
+        if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
             progressLogger
                 .getLog()
                 .warn("Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");

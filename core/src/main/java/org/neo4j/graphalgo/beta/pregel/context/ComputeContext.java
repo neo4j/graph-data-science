@@ -31,7 +31,7 @@ public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentr
 
     public ComputeContext(ComputeStep<CONFIG, ?> computeStep, CONFIG config) {
         super(computeStep, config);
-        this.sendMessagesFunction = config.isWeighted()
+        this.sendMessagesFunction = config.hasRelationshipWeightProperty()
             ? computeStep::sendToNeighborsWeighted
             : computeStep::sendToNeighbors;
     }

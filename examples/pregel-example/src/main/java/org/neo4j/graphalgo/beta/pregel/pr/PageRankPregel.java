@@ -57,7 +57,7 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
             : 1.0 / context.nodeCount();
         context.setNodeValue(PAGE_RANK, initialValue);
 
-        weighted = context.config().relationshipWeightProperty() != null;
+        weighted = context.config().hasRelationshipWeightProperty();
     }
 
     @Override
