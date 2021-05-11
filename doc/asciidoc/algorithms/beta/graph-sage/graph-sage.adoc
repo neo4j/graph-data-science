@@ -379,6 +379,34 @@ CALL gds.beta.graphSage.train(
 Relationship weights are only used during GraphSAGE training.
 The trained models can then be used to stream or write back the generated node embeddings.
 
+
+=== Train when there are no node properties present in the graph
+
+In the case when you have a graph that does not have node properties we recommend to use existing algorithm in `mutate` mode to create node properties.
+Such algorithms can be <<algorithms-degree-centrality-examples-mutate, Degree Centrality>>, <<algorithms-page-rank-examples-mutate, PageRank>>, <<algorithms-betweenness-centrality-examples-mutate, Betweenness Centrality>>.
+
+The following example illustrates calling Degree Centrality in `mutate` mode and then using the mutated property as feature of GraphSAGE training:
+[source, cypher, role=noplay]
+----
+CALL gds.degree.mutate(
+  'noPropertiesGraph',
+  {
+    mutateProperty: 'degree'
+  }
+) YIELD nodePropertiesWritten
+
+CALL gds.beta.graphSage.train(
+  'noPropertiesGraph',
+  {
+    modelName: 'myModel',
+    featureProperties: ['degree']
+  }
+)
+----
+
+`gds.degree.mutate` will create node property `degree` for each of the nodes in the in-memory graph, which then can be used as `featureProperty` in the `GraphSAGE.train` mode.
+
+
 === Stream
 
 To generate embeddings and stream them back to the client we can use the stream mode.
