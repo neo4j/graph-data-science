@@ -27,7 +27,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.beta.generator.PropertyProducer;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -38,13 +40,18 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
+import static org.neo4j.graphalgo.TestSupport.crossArguments;
+import static org.neo4j.graphalgo.TestSupport.toArguments;
 
 @GdlExtension
 final class DegreeCentralityTest {
@@ -81,50 +88,48 @@ final class DegreeCentralityTest {
     private TestGraph graph;
 
     static Stream<Arguments> degreeCentralityParameters() {
-        return TestSupport.crossArguments(
-            () -> Stream.of(
-                // Orientation NATURAL
-                Arguments.of(
-                    false,
-                    Orientation.NATURAL,
-                    Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D)
-                ),
-                Arguments.of(
-                    true,
-                    Orientation.NATURAL,
-                    Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
-                ),
-                // Orientation REVERSE
-                Arguments.of(
-                    false,
-                    Orientation.REVERSE,
-                    Map.of("a", 1.0D, "b", 4.0D, "c", 1.0D, "d", 1.0D, "e", 1.0D, "f", 1.0D)
-                ),
-                Arguments.of(
-                    true,
-                    Orientation.REVERSE,
-                    Map.of("a", 2.0D, "b", 10.0D, "c", 2.0D, "d", 2.0D, "e", 0.0D, "f", 2.0D)
-                ),
-                // Orientation UNDIRECTED
-                Arguments.of(
-                    false,
-                    Orientation.UNDIRECTED,
-                    Map.of("a", 1.0D, "b", 5.0D, "c", 2.0D, "d", 3.0D, "e", 4.0D, "f", 3.0D)
-                ),
-                Arguments.of(
-                    true,
-                    Orientation.UNDIRECTED,
-                    Map.of("a", 2.0D, "b", 12.0D, "c", 4.0D, "d", 6.0D, "e", 6.0D, "f", 6.0D)
-                )
+        return Stream.of(
+            // Orientation NATURAL
+            Arguments.of(
+                false,
+                Orientation.NATURAL,
+                Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D)
             ),
-            () -> Stream.of(Arguments.of(1), Arguments.of(4)));
+            Arguments.of(
+                true,
+                Orientation.NATURAL,
+                Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
+            ),
+            // Orientation REVERSE
+            Arguments.of(
+                false,
+                Orientation.REVERSE,
+                Map.of("a", 1.0D, "b", 4.0D, "c", 1.0D, "d", 1.0D, "e", 1.0D, "f", 1.0D)
+            ),
+            Arguments.of(
+                true,
+                Orientation.REVERSE,
+                Map.of("a", 2.0D, "b", 10.0D, "c", 2.0D, "d", 2.0D, "e", 0.0D, "f", 2.0D)
+            ),
+            // Orientation UNDIRECTED
+            Arguments.of(
+                false,
+                Orientation.UNDIRECTED,
+                Map.of("a", 1.0D, "b", 5.0D, "c", 2.0D, "d", 3.0D, "e", 4.0D, "f", 3.0D)
+            ),
+            Arguments.of(
+                true,
+                Orientation.UNDIRECTED,
+                Map.of("a", 2.0D, "b", 12.0D, "c", 4.0D, "d", 6.0D, "e", 6.0D, "f", 6.0D)
+            )
+        );
     }
 
     @ParameterizedTest
     @MethodSource("degreeCentralityParameters")
-    void shouldComputeCorrectResults(boolean weighted, Orientation orientation, Map<String, Double> expected, int concurrency) {
+    void shouldComputeCorrectResults(boolean weighted, Orientation orientation, Map<String, Double> expected) {
         var configBuilder = ImmutableDegreeCentralityConfig.builder()
-            .concurrency(concurrency)
+            .concurrency(1)
             .orientation(orientation);
 
         if (weighted) {
@@ -145,6 +150,55 @@ final class DegreeCentralityTest {
         expected.forEach((variable, expectedDegree) -> {
             long nodeId = graph.toMappedNodeId(variable);
             assertEquals(expectedDegree, degreeFunction.get(nodeId), 1E-6);
+        });
+    }
+
+    static Stream<Arguments> parallelInput() {
+        return crossArguments(
+            toArguments(() -> Arrays.stream(Orientation.values())),
+            toArguments(() -> Stream.of(true, false))
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("parallelInput")
+    void shouldComputeParallel(Orientation orientation, boolean weighted) {
+        var concurrency = 4;
+        var averageDegree = 4;
+        var propertyKey = "foo";
+        var relationshipProperty = 2.0;
+
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(10_000)
+            .averageDegree(averageDegree)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .relationshipPropertyProducer(PropertyProducer.fixed(propertyKey, relationshipProperty))
+            .seed(42)
+            .allocationTracker(AllocationTracker.empty())
+            .build()
+            .generate();
+
+        var configBuilder = ImmutableDegreeCentralityConfig.builder()
+            .concurrency(concurrency)
+            .orientation(Orientation.NATURAL);
+
+        if (weighted) {
+            configBuilder.relationshipWeightProperty(propertyKey);
+        }
+
+        var degreeCentrality = new DegreeCentrality(
+            graph,
+            Pools.DEFAULT,
+            configBuilder.build(),
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
+        );
+
+        var degreeFunction = degreeCentrality.compute();
+
+        graph.forEachNode(node -> {
+            assertThat(degreeFunction.get(node)).isCloseTo((weighted ? relationshipProperty : 1) * averageDegree, within(1E-5));
+            return true;
         });
     }
 
