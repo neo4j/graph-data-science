@@ -66,8 +66,20 @@ public interface GraphSageTrainConfig extends
     }
 
     @Value.Default
-    default List<Long> sampleSizes() {
-        return List.of(25L, 10L);
+    @Configuration.ConvertWith("convertToIntSamples")
+    default List<Integer> sampleSizes() {
+        return List.of(25, 10);
+    }
+
+    static List<Integer> convertToIntSamples(List<Number> input) {
+        try {
+            return input.stream()
+                .map(Number::longValue)
+                .map(Math::toIntExact)
+                .collect(Collectors.toList());
+        } catch (ArithmeticException e) {
+            throw new IllegalArgumentException("Sample size must smaller than 2^31" , e);
+        }
     }
 
     @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#parse")

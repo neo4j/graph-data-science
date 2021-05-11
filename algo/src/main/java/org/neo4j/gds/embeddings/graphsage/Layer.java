@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.stream.LongStream;
 
 public interface Layer {
-    long sampleSize();
+    int sampleSize();
 
     Aggregator aggregator();
 

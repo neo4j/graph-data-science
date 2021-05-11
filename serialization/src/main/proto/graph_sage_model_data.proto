@@ -32,7 +32,7 @@ message Layer {
     MaxPoolingAggregator pool = 2;
   }
 
-  int64 sampleSize = 3;
+  int32 sampleSize = 3;
   int64 randomState = 4;
 }
 

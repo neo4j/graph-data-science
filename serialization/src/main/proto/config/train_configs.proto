@@ -17,7 +17,7 @@ message GraphSageTrainConfig {
   RelationshipWeightConfigProto relationshipWeightConfig = 7;
   FeaturePropertiesConfigProto featurePropertiesConfig = 8;
 
-  repeated int64 sampleSizes = 9;
+  repeated int32 sampleSizes = 9;
   AggregatorType aggregator = 10;
   ActivationFunction activationFunction = 11;
   double learningRate = 12;

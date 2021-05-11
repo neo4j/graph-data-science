@@ -28,11 +28,13 @@ import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -71,6 +73,24 @@ class GraphSageTrainConfigTest {
             ))
         );
         assertFalse(singleLabelConfig.isMultiLabel());
+    }
+
+    @Test
+    void failOnLongSamples() {
+        assertThatThrownBy(() ->
+            GraphSageTrainConfig.of(
+                "",
+                Optional.empty(),
+                Optional.empty(),
+                CypherMapWrapper.create(Map.of(
+                    "modelName", "graphSageModel",
+                    "featureProperties", List.of("one"),
+                    "sampleSizes", List.of(Long.MAX_VALUE)
+                ))
+            ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasRootCauseExactlyInstanceOf(ArithmeticException.class)
+            .hasMessageContaining("Sample size must smaller than 2^31");
     }
 
     @Nested

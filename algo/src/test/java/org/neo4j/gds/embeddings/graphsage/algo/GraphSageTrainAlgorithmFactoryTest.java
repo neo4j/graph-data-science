@@ -383,7 +383,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             .builder()
             .username("userName")
             .modelName("modelName")
-            .sampleSizes(List.of(1L, 2L))
+            .sampleSizes(List.of(1, 2))
             .aggregator(Aggregator.AggregatorType.MEAN)
             .degreeAsProperty(true);
         var config = isMultiLabel
@@ -507,7 +507,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             /* multi label  */ Optional.of(42)
         );
         var labelCounts = List.of(1, 42);
-        var sampleSizesList = List.of(List.of(5L, 100L));
+        var sampleSizesList = List.of(List.of(5, 100));
 
         return nodeCounts.flatMap(nodeCountPair -> {
             var nodeCount = nodeCountPair.getOne();

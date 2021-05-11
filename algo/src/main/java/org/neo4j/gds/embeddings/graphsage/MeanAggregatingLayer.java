@@ -27,13 +27,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MeanAggregatingLayer implements Layer {
 
     private final NeighborhoodSampler sampler;
-    private final long sampleSize;
+    private final int sampleSize;
     private final Weights<Matrix> weights;
     private final ActivationFunction activationFunction;
 
     MeanAggregatingLayer(
         Weights<Matrix> weights,
-        long sampleSize,
+        int sampleSize,
         ActivationFunction activationFunction,
         long randomSeed
     ) {
@@ -45,7 +45,7 @@ public class MeanAggregatingLayer implements Layer {
 
     public MeanAggregatingLayer(
         Weights<Matrix> weights,
-        long sampleSize,
+        int sampleSize,
         ActivationFunction activationFunction
     ) {
         this(
@@ -67,7 +67,7 @@ public class MeanAggregatingLayer implements Layer {
     }
 
     @Override
-    public long sampleSize() {
+    public int sampleSize() {
         return sampleSize;
     }
 }

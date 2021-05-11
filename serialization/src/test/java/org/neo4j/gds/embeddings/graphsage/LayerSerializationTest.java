@@ -37,7 +37,7 @@ class LayerSerializationTest {
             .modelName("bogus")
             .aggregator(Aggregator.AggregatorType.MEAN)
             .activationFunction(ActivationFunction.SIGMOID)
-            .sampleSizes(List.of(25L))
+            .sampleSizes(List.of(25))
             .degreeAsProperty(true)
             .build();
 

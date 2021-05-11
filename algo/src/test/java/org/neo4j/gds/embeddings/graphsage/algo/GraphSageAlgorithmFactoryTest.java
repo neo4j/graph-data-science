@@ -267,7 +267,7 @@ class GraphSageAlgorithmFactoryTest {
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
             .modelName("modelName")
-            .sampleSizes(List.of(1L, 2L))
+            .sampleSizes(List.of(1, 2))
             .aggregator(Aggregator.AggregatorType.MEAN)
             .degreeAsProperty(true)
             .build();
@@ -322,7 +322,7 @@ class GraphSageAlgorithmFactoryTest {
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
             .modelName("modelName")
-            .sampleSizes(List.of(1L, 2L))
+            .sampleSizes(List.of(1, 2))
             .aggregator(Aggregator.AggregatorType.MEAN)
             .degreeAsProperty(true)
             .build();
@@ -477,7 +477,7 @@ class GraphSageAlgorithmFactoryTest {
         var embeddingDimensions = List.of(64, 256);
         var aggregators = List.of(Aggregator.AggregatorType.MEAN, Aggregator.AggregatorType.POOL);
         var degreesAsProperty = List.of(true, false);
-        var sampleSizesList = List.of(List.of(5L, 100L));
+        var sampleSizesList = List.of(List.of(5, 100));
 
         return nodeCounts.flatMap(nodeCountPair -> {
             var nodeCount = nodeCountPair.getOne();

@@ -28,7 +28,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MaxPoolAggregatingLayer implements Layer {
 
     private final NeighborhoodSampler sampler;
-    private final long sampleSize;
+    private final int sampleSize;
     private final Weights<Matrix> poolWeights;
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
@@ -36,7 +36,7 @@ public class MaxPoolAggregatingLayer implements Layer {
     private final ActivationFunction activationFunction;
 
     MaxPoolAggregatingLayer(
-        long sampleSize,
+        int sampleSize,
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
@@ -56,7 +56,7 @@ public class MaxPoolAggregatingLayer implements Layer {
     }
 
     public MaxPoolAggregatingLayer(
-        long sampleSize,
+        int sampleSize,
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
@@ -76,7 +76,7 @@ public class MaxPoolAggregatingLayer implements Layer {
     }
 
     @Override
-    public long sampleSize() {
+    public int sampleSize() {
         return sampleSize;
     }
 

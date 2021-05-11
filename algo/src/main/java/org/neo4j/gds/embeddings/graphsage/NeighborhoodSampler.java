@@ -37,7 +37,7 @@ public class NeighborhoodSampler {
         this.randomSeed = randomSeed;
     }
 
-    public LongStream sample(Graph graph, long nodeId, long numberOfSamples) {
+    public LongStream sample(Graph graph, long nodeId, int numberOfSamples) {
         var degree = graph.degree(nodeId);
 
         var concurrentCopyGraph = graph.concurrentCopy();
@@ -53,13 +53,13 @@ public class NeighborhoodSampler {
                 .sample(
                     concurrentCopyGraph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
                     degree,
-                    Math.toIntExact(numberOfSamples)
+                    numberOfSamples
                 );
         } else {
             return new UniformSampler(randomSeed).sample(
                 concurrentCopyGraph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
-                graph.degree(nodeId),
-                Math.toIntExact(numberOfSamples)
+                degree,
+                numberOfSamples
             );
         }
     }

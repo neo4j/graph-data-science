@@ -144,6 +144,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
             .explicitCreation(graphName)
             .algo("gds.beta.graphSage")
             .trainMode()
+            .addParameter("sampleSizes", List.of(2, 4))
             .addParameter("featureProperties", List.of("age", "birth_year", "death_year"))
             .addParameter("embeddingDimension", embeddingDimension)
             .addParameter("activationFunction", activationFunction)

@@ -114,7 +114,7 @@ class GraphSageTest {
             .modelName(MODEL_NAME)
             .aggregator(aggregator)
             .activationFunction(ActivationFunction.RELU)
-            .sampleSizes(List.of(75L,25L))
+            .sampleSizes(List.of(75,25))
             .degreeAsProperty(false)
             .featureProperties(List.of("f1", "f2", "f3"))
             .concurrency(4)

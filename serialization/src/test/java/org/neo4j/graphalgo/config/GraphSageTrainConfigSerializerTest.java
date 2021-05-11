@@ -84,7 +84,7 @@ class GraphSageTrainConfigSerializerTest {
     @MethodSource("nonDefaultParameters")
     void testRoundTripWithNonDefaultParameters(
         int embeddingDimension,
-        List<Long> sampleSizes,
+        List<Integer> sampleSizes,
         double tolerance,
         double learningRate,
         int epochs,
@@ -128,7 +128,7 @@ class GraphSageTrainConfigSerializerTest {
     private static Stream<Arguments> nonDefaultParameters() {
         return org.neo4j.graphalgo.TestSupport.crossArguments(
             () -> Stream.of(Arguments.of(512)),                         // embeddingDimension
-            () -> Stream.of(Arguments.of(List.of(42L, 1337L))),         // sampleSizes
+            () -> Stream.of(Arguments.of(List.of(42, 1337))),         // sampleSizes
             () -> Stream.of(Arguments.of(10.1), Arguments.of(0.8)),     // tolerance
             () -> Stream.of(Arguments.of(100.1), Arguments.of(0.18)),   // learningRate
             () -> Stream.of(Arguments.of(100), Arguments.of(1000)),     // epochs

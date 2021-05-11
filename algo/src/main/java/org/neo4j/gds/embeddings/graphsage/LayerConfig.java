@@ -27,7 +27,7 @@ import java.util.Optional;
 public interface LayerConfig {
     int rows();
     int cols();
-    long sampleSize();
+    int sampleSize();
 
     Optional<Integer> bias();
 
