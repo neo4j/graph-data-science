@@ -27,11 +27,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
-import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
@@ -66,7 +64,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
         "50, 24.239937336323717"
     })
     void shouldComputeLossBatchSizeOne(int negativeSamplingFactor, double expectedLoss) {
-        Variable<Matrix> combinedEmbeddings = Constant.matrix(
+        var combinedEmbeddings = Constant.matrix(
             new double[]{
                 1.5, -1, 0.75,  // nodeId
                 1, -0.75, 0.7,  // positive nodeId
@@ -75,7 +73,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
             3, 3
         );
 
-        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, new long[]{0, 1, 2}, negativeSamplingFactor);
+        var lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, new long[]{0, 1, 2}, negativeSamplingFactor);
 
         var lossData = ctx.forward(lossVar);
 
@@ -92,7 +90,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
         "50, 76.87999339630119"
     })
     void shouldComputeLoss(int negativeSamplingFactor, double expectedLoss) {
-        Variable<Matrix> combinedEmbeddings = Constant.matrix(
+        var combinedEmbeddings = Constant.matrix(
             new double[]{
                 1.5, -1, 0.75,      // nodeId
                 0.5, -0.1, 0.7,     // nodeId
@@ -107,7 +105,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
             9, 3
         );
 
-        Variable<Scalar> lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, new long[]{0, 1, 2, 3, 4, 5, 6, 7, 8}, negativeSamplingFactor);
+        var lossVar = new GraphSageLoss(UNWEIGHTED, combinedEmbeddings, new long[]{0, 1, 2, 3, 4, 5, 6, 7, 8}, negativeSamplingFactor);
 
         var lossData = ctx.forward(lossVar);
 
@@ -116,7 +114,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
 
     @Test
     void testGradient() {
-        Weights<Matrix> combinedEmbeddings = new Weights<>(new Matrix(
+        var combinedEmbeddings = new Weights<>(new Matrix(
             new double[]{
                 1.5, -1, 0.75,  // nodeId
                 1, -0.75, 0.7,  // positive nodeId
@@ -169,7 +167,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
             "50, 24.239937336323717"
         })
         void shouldComputeLossBatchSizeOne(int Q, double expectedLoss) {
-            Variable<Matrix> combinedEmbeddings = Constant.matrix(
+            var combinedEmbeddings = Constant.matrix(
                 new double[]{
                     1.5, -1, 0.75,  // nodeId
                     1, -0.75, 0.7,  // positive nodeId
@@ -178,7 +176,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
                 3, 3
             );
 
-            Variable<Scalar> lossVar = new GraphSageLoss(graph::relationshipProperty, combinedEmbeddings, new long[]{0, 1, 2}, Q);
+            var lossVar = new GraphSageLoss(graph::relationshipProperty, combinedEmbeddings, new long[]{0, 1, 2}, Q);
 
             var lossData = ctx.forward(lossVar);
 
@@ -195,7 +193,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
             "50, 48.47987467264743"
         })
         void shouldComputeOnFilteredGraph(int Q, double expectedLoss) {
-            Weights<Matrix> combinedEmbeddings = new Weights<>(new Matrix(
+            var combinedEmbeddings = new Weights<>(new Matrix(
                 new double[]{
                     1.5, -1, 0.75,  // nodeId
                     1.5, -1, 0.75,  // nodeId
@@ -212,7 +210,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
                 graphStore.relationshipTypes(),
                 Optional.of("times")
             );
-            Variable<Scalar> lossVar = new GraphSageLoss(filteredGraph::relationshipProperty, combinedEmbeddings, new long[]{0, 1, 0, 0, 1, 0}, Q);
+            var lossVar = new GraphSageLoss(filteredGraph::relationshipProperty, combinedEmbeddings, new long[]{0, 1, 0, 0, 1, 0}, Q);
 
             var lossData = ctx.forward(lossVar);
 
@@ -226,7 +224,7 @@ class GraphSageLossTest implements FiniteDifferenceTest {
 
         @Test
         void testGradient() {
-            Weights<Matrix> combinedEmbeddings = new Weights<>(new Matrix(
+            var combinedEmbeddings = new Weights<>(new Matrix(
                 new double[]{
                     1.5, -1, 0.75,  // nodeId
                     1, -0.75, 0.7,  // positive nodeId
