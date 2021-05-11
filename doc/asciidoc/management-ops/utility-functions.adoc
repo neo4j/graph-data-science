@@ -28,7 +28,7 @@ RETURN gds.version() AS version
 [opts="header"]
 |===
 | version
-| "1.5.2"
+| "1.5.3"
 |===
 --
 
