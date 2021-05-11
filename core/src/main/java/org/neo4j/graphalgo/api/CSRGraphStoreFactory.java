@@ -109,7 +109,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
 
         var propertiesIter = properties.iterator();
         propertyMappings.mappings().forEach(propertyMapping -> {
-            var compressedProperties = propertiesIter.next();
+            var propertiesList = propertiesIter.next();
             propertyStoreBuilder.putIfAbsent(
                 propertyMapping.propertyKey(),
                 RelationshipProperty.of(
@@ -117,7 +117,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                     NumberType.FLOATING_POINT,
                     GraphStore.PropertyState.PERSISTENT,
                     ImmutableProperties.of(
-                        compressedProperties,
+                        propertiesList,
                         relationshipCount,
                         projection.orientation(),
                         projection.isMultiGraph(),

@@ -28,7 +28,7 @@ package org.neo4j.graphalgo.api;
 public interface PropertyCursor extends AutoCloseable {
     /**
      * Initialize this cursor to point to the given {@code index}.
-     * The correct value for the index in highly implementation specific.
+     * The correct value for the index is highly implementation specific.
      * The better way get initialize a cursor is through {@link org.neo4j.graphalgo.api.AdjacencyList#propertyCursor(long)} or related.
      */
     PropertyCursor init(long index, int degree);

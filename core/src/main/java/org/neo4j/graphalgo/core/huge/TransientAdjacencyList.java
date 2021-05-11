@@ -113,7 +113,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
             .perNode("degrees", HugeIntArray::memoryEstimation)
 
              This is the estimation for the property implementation which shares the actual
-             degree data with the adjacency list. We only need to count the reference, which is alreadya ccounted for.
+             degree data with the adjacency list. We only need to count the reference, which is already accounted for.
              */
             .perNode("offsets", HugeLongArray::memoryEstimation)
             .build();

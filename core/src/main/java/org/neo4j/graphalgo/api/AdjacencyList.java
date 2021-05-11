@@ -42,7 +42,7 @@ public interface AdjacencyList extends AutoCloseable {
      * Create a new cursor for the target ids of the given {@code node}.
      * The cursor is not expected to return correct property values.
      *
-     * NOTE: Whether and how {@code AdjacencyCursor}s will return properties unclear.
+     * NOTE: Whether and how {@code AdjacencyCursor}s will return properties is unclear.
      *
      * Undefined behavior if the node does not exist.
      */
@@ -54,7 +54,7 @@ public interface AdjacencyList extends AutoCloseable {
      * Create a new cursor for the target ids of the given {@code node}.
      * If the cursor cannot produce property values, it will yield the provided {@code fallbackValue}.
      *
-     * NOTE: Whether and how {@code AdjacencyCursor}s will return properties unclear.
+     * NOTE: Whether and how {@code AdjacencyCursor}s will return properties is unclear.
      *
      * Undefined behavior if the node does not exist.
      */
@@ -64,9 +64,9 @@ public interface AdjacencyList extends AutoCloseable {
      * Create a new cursor for the target ids of the given {@code node}.
      * The cursor is not expected to return correct property values.
      *
-     * NOTE: Whether and how {@code AdjacencyCursor}s will return properties unclear.
+     * NOTE: Whether and how {@code AdjacencyCursor}s will return properties is unclear.
      *
-     * The Implementation might try to reuse the provided {@code reuse} cursor, if possible.
+     * The implementation might try to reuse the provided {@code reuse} cursor, if possible.
      * That is not guaranteed, however, implementation may choose to ignore the reuse cursor for any reason.
      *
      * Undefined behavior if the node does not exist.
@@ -79,9 +79,9 @@ public interface AdjacencyList extends AutoCloseable {
      * Create a new cursor for the target ids of the given {@code node}.
      * If the cursor cannot produce property values, it will yield the provided {@code fallbackValue}.
      *
-     * NOTE: Whether and how {@code AdjacencyCursor}s will return properties unclear.
+     * NOTE: Whether and how {@code AdjacencyCursor}s will return properties is unclear.
      *
-     * The Implementation might try to reuse the provided {@code reuse} cursor, if possible.
+     * The implementation might try to reuse the provided {@code reuse} cursor, if possible.
      * That is not guaranteed, however, implementation may choose to ignore the reuse cursor for any reason.
      *
      * Undefined behavior if the node does not exist.
@@ -113,9 +113,9 @@ public interface AdjacencyList extends AutoCloseable {
 
     /**
      * Create a new cursor for the properties of the relationships of a given {@code node}.
-     *  The cursor is expected to produce property values.
+     * The cursor is expected to produce property values.
      *
-     * The Implementation might try to reuse the provided {@code reuse} cursor, if possible.
+     * The implementation might try to reuse the provided {@code reuse} cursor, if possible.
      * That is not guaranteed, however, implementation may choose to ignore the reuse cursor for any reason.
      *
      * Undefined behavior if the node does not exist.
@@ -131,7 +131,7 @@ public interface AdjacencyList extends AutoCloseable {
      *
      * NOTE: Fallback behavior is not widely available and will be part of the next episode.
      *
-     * The Implementation might try to reuse the provided {@code reuse} cursor, if possible.
+     * The implementation might try to reuse the provided {@code reuse} cursor, if possible.
      * That is not guaranteed, however, implementation may choose to ignore the reuse cursor for any reason.
      *
      * Undefined behavior if the node does not exist.
