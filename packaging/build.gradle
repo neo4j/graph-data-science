@@ -70,8 +70,15 @@ task versionsJson {
             shadowJar.version = gdsVersion
             neo4jVersions.flatten().forEach { version ->
                 indexedVersionsJson[version] = [
-                        'neo4j'  : version,
                         'version': gdsVersion,
+                        'neo4jVersion'  : version,
+                        'downloadUrl'    : "$bucketUrl/${shadowJar.archiveName}",
+                        'config': [
+                                '+:dbms.security.procedures.unrestricted': [
+                                        "gds.*"
+                                ]
+                        ],
+                        'neo4j'  : version,
                         'jar'    : "$bucketUrl/${shadowJar.archiveName}",
                 ]
             }
