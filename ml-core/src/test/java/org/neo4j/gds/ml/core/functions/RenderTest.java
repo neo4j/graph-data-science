@@ -29,8 +29,8 @@ public class RenderTest {
 
     @Test
     void renderMultiLevel() {
-        var matrix = new MatrixConstant(new double[]{0, 1, 0, 1}, 2, 2);
-        var otherMatrix = new MatrixConstant(new double[]{1, 0, 1, 0}, 2, 2);
+        var matrix = Constant.matrix(new double[]{0, 1, 0, 1}, 2, 2);
+        var otherMatrix = Constant.matrix(new double[]{1, 0, 1, 0}, 2, 2);
 
         var elementSum = new MatrixSum(List.of(matrix, otherMatrix));
         var sigmoid = new Sigmoid<>(elementSum);
@@ -38,8 +38,8 @@ public class RenderTest {
         assertThat(sigmoid.render()).isEqualTo(
             "Sigmoid: Matrix(2, 2), requireGradient: false" + System.lineSeparator() +
             "|-- MatrixSum: Matrix(2, 2), requireGradient: false" + System.lineSeparator() +
-            "\t|-- MatrixConstant: Matrix(2, 2), requireGradient: false" + System.lineSeparator() +
-            "\t|-- MatrixConstant: Matrix(2, 2), requireGradient: false" + System.lineSeparator()
+            "\t|-- Constant: Matrix(2, 2), requireGradient: false" + System.lineSeparator() +
+            "\t|-- Constant: Matrix(2, 2), requireGradient: false" + System.lineSeparator()
         );
     }
 }

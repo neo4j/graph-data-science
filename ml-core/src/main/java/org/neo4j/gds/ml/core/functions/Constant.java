@@ -72,6 +72,11 @@ public class Constant<T extends Tensor<T>> extends AbstractVariable<T> {
 
     @Override
     public String toString() {
-        return formatWithLocale("Constant: " + data.toString());
+        return formatWithLocale(
+            "%s: %s, requireGradient: %b",
+            this.getClass().getSimpleName(),
+            data.toString(),
+            requireGradient()
+        );
     }
 }

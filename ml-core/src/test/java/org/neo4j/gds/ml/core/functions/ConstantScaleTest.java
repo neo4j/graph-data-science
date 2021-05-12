@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContextBaseTest;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.helper.Constant;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 
@@ -59,7 +58,7 @@ class ConstantScaleTest extends ComputationContextBaseTest implements FiniteDiff
         assertThat(new ConstantScale<>(parent, 4).render()).isEqualTo(
             "ConstantScale: scale by 4.0, requireGradient: false" +
             System.lineSeparator() +
-            "|-- Constant: 1.0" +
+            "|-- Constant: 1.0, requireGradient: false" +
             System.lineSeparator());
     }
 
