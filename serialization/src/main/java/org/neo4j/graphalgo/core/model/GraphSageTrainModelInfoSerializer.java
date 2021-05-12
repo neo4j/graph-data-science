@@ -19,23 +19,33 @@
  */
 package org.neo4j.graphalgo.core.model;
 
-import com.google.protobuf.Empty;
 import org.neo4j.gds.ModelInfoSerializer;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.ImmutableGraphSageTrainMetrics;
+import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 
-public class GraphSageTrainModelInfoSerializer implements ModelInfoSerializer<Model.Mappable, Empty> {
+public class GraphSageTrainModelInfoSerializer implements ModelInfoSerializer<GraphSageModelTrainer.GraphSageTrainMetrics, GraphSageProto.GraphSageMetrics> {
 
     @Override
-    public Empty toSerializable(Model.Mappable modelInfo) {
-        return Empty.newBuilder().build();
+    public GraphSageProto.GraphSageMetrics toSerializable(GraphSageModelTrainer.GraphSageTrainMetrics modelInfo) {
+        return GraphSageProto.GraphSageMetrics.newBuilder()
+            .setStartLoss(modelInfo.startLoss())
+            .putAllEpochLosses(modelInfo.epochLosses())
+            .setDidConverge(modelInfo.didConverge())
+            .build();
     }
 
     @Override
-    public Model.Mappable fromSerializable(Empty protoModelInfo) {
-        return Model.Mappable.EMPTY;
+    public GraphSageModelTrainer.GraphSageTrainMetrics fromSerializable(GraphSageProto.GraphSageMetrics protoModelInfo) {
+        return ImmutableGraphSageTrainMetrics.builder()
+            .startLoss(protoModelInfo.getStartLoss())
+            .didConverge(protoModelInfo.getDidConverge())
+            .epochLosses(protoModelInfo.getEpochLossesMap())
+            .build();
     }
 
     @Override
-    public Class<Empty> serializableClass() {
-        return Empty.class;
+    public Class<GraphSageProto.GraphSageMetrics> serializableClass() {
+        return GraphSageProto.GraphSageMetrics.class;
     }
 }

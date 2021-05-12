@@ -48,3 +48,9 @@ message MaxPoolingAggregator {
   Vector bias = 4;
   ActivationFunction activationFunction = 5;
 }
+
+message GraphSageMetrics {
+  double startLoss = 1;
+  map<int32, double> epochLosses = 2;
+  bool didConverge = 3;
+}

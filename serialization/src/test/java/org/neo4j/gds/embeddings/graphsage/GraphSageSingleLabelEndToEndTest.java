@@ -84,7 +84,7 @@ class GraphSageSingleLabelEndToEndTest {
     private Graph graph;
 
     @Test
-    void e2eTest() throws IOException, ClassNotFoundException {
+    void e2eTest() throws IOException {
         Model<ModelData, GraphSageTrainConfig> model = train();
         var originalEmbeddings = produceEmbeddings(model);
 
@@ -138,7 +138,6 @@ class GraphSageSingleLabelEndToEndTest {
             AllocationTracker.empty()
         );
 
-        Model<ModelData, GraphSageTrainConfig> model = trainAlgo.compute();
-        return model;
+        return trainAlgo.compute();
     }
 }
