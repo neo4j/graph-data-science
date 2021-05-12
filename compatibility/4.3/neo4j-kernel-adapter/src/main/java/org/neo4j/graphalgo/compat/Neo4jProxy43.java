@@ -32,7 +32,6 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.ImportLogic;
-import org.neo4j.internal.batchimport.IndexImporterFactory;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.cache.LongArray;
 import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
@@ -75,6 +74,7 @@ import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
+import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
@@ -108,6 +108,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public final class Neo4jProxy43 implements Neo4jProxyApi {
 
@@ -312,6 +313,31 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
     }
 
     @Override
+    public Configuration batchImporterConfig(int writeConcurrency, Optional<Long> pageCacheMemory) {
+        return new Configuration() {
+            @Override
+            public int maxNumberOfProcessors() {
+                return writeConcurrency;
+            }
+
+            @Override
+            public long pageCacheMemory() {
+                return pageCacheMemory.orElseGet(() -> Configuration.super.pageCacheMemory());
+            }
+
+            @Override
+            public boolean highIO() {
+                return false;
+            }
+
+            @Override
+            public boolean populateNodeIndex() {
+                return true;
+            }
+        };
+    }
+
+    @Override
     public BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
         DatabaseLayout directoryStructure,
@@ -341,7 +367,7 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
             jobScheduler,
             badCollector,
             TransactionLogInitializer.getLogFilesInitializer(),
-            IndexImporterFactory.EMPTY,
+            new IndexImporterFactoryImpl(dbConfig),
             EmptyMemoryTracker.INSTANCE
         );
     }

@@ -130,22 +130,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
     }
 
     @NotNull
-    private org.neo4j.internal.batchimport.Configuration getImportConfig() {
-        return new org.neo4j.internal.batchimport.Configuration() {
-            @Override
-            public int maxNumberOfProcessors() {
-                return config.writeConcurrency();
-            }
-
-            @Override
-            public long pageCacheMemory() {
-                return config.pageCacheMemory().orElseGet(() -> Configuration.super.pageCacheMemory());
-            }
-
-            @Override
-            public boolean highIO() {
-                return false;
-            }
-        };
+    private Configuration getImportConfig() {
+        return Neo4jProxy.batchImporterConfig(config.writeConcurrency(), config.pageCacheMemory());
     }
 }

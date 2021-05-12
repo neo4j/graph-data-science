@@ -272,6 +272,10 @@ public final class Neo4jProxy {
         return IMPL.homeDirectory(databaseLayout);
     }
 
+    public static Configuration batchImporterConfig(int writeConcurrency, Optional<Long> pageCacheMemory) {
+        return IMPL.batchImporterConfig(writeConcurrency, pageCacheMemory);
+    }
+
     public static BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
         DatabaseLayout directoryStructure,

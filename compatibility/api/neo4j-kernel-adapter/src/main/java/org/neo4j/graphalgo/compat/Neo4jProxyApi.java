@@ -82,6 +82,7 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 public interface Neo4jProxyApi {
 
@@ -182,6 +183,11 @@ public interface Neo4jProxyApi {
     Path metadataStore(DatabaseLayout databaseLayout);
 
     Path homeDirectory(DatabaseLayout databaseLayout);
+
+    Configuration batchImporterConfig(
+        int writeConcurrency,
+        Optional<Long> pageCacheMemory
+    );
 
     BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,

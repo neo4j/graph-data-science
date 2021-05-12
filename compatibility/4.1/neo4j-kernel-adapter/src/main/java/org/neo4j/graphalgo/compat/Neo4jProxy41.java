@@ -101,6 +101,7 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 public final class Neo4jProxy41 implements Neo4jProxyApi {
 
@@ -292,6 +293,26 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     @Override
     public Path homeDirectory(DatabaseLayout databaseLayout) {
         return databaseLayout.getNeo4jLayout().homeDirectory().toPath();
+    }
+
+    @Override
+    public Configuration batchImporterConfig(int writeConcurrency, Optional<Long> pageCacheMemory) {
+        return new Configuration() {
+            @Override
+            public int maxNumberOfProcessors() {
+                return writeConcurrency;
+            }
+
+            @Override
+            public long pageCacheMemory() {
+                return pageCacheMemory.orElseGet(() -> Configuration.super.pageCacheMemory());
+            }
+
+            @Override
+            public boolean highIO() {
+                return false;
+            }
+        };
     }
 
     @Override
