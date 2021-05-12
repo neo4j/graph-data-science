@@ -329,13 +329,16 @@ public class GraphSageModelTrainer {
         }
 
         @Override
+        @Value.Auxiliary
+        @Value.Derived
         default Map<String, Object> toMap() {
             return Map.of(
-                "startLoss", startLoss(),
-                "epochLosses", epochLosses(),
-                "didConverge", didConverge(),
-                "ranEpochs", ranEpochs()
-            );
+                "metrics", Map.of(
+                    "startLoss", startLoss(),
+                    "epochLosses", epochLosses().entrySet().stream().collect(Collectors.toMap(String::valueOf, String::valueOf)),
+                    "didConverge", didConverge(),
+                    "ranEpochs", ranEpochs()
+            ));
         }
     }
 

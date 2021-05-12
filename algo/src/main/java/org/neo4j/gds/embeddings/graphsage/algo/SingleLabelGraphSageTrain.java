@@ -67,7 +67,8 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
             GraphSage.MODEL_TYPE,
             graph.schema(),
             ModelData.of(trainResult.layers(), new SingleLabelFeatureFunction()),
-            config
+            config,
+            trainResult.metrics()
         );
     }
 

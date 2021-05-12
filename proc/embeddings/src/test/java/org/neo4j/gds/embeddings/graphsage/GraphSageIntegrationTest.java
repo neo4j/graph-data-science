@@ -31,6 +31,7 @@ import java.util.Map;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -105,7 +106,11 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
             Map.of("modelName", modelName),
             singletonList(
                 Map.of(
-                    "modelInfo", Map.of("modelName", modelName, "modelType", GraphSage.MODEL_TYPE),
+                    "modelInfo", allOf(
+                        hasEntry("modelName", modelName),
+                        hasEntry("modelType", GraphSage.MODEL_TYPE),
+                        hasEntry(equalTo("metrics"), isA(Map.class))
+                    ),
                     "creationTime", isA(ZonedDateTime.class),
                     "trainConfig", allOf(
                         aMapWithSize(18),

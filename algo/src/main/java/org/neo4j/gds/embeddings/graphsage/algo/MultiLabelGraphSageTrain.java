@@ -87,7 +87,8 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
             GraphSage.MODEL_TYPE,
             graph.schema(),
             ModelData.of(trainResult.layers(), multiLabelFeatureFunction),
-            config
+            config,
+            trainResult.metrics()
         );
     }
 
