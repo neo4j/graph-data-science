@@ -108,6 +108,7 @@ public interface GraphSageTrainConfig extends
     }
 
     @Value.Default
+    @Configuration.IntegerRange(min = 1)
     default int epochs() {
         return 1;
     }

@@ -66,6 +66,21 @@ class GraphSageTrainConfigTest {
             .hasMessageContaining("must be within the range [1,");
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {-20, 0})
+    void failOnInvalidEpochs(int projectedFeatureDimension) {
+        var mapWrapper = CypherMapWrapper.create(Map.of(
+            "modelName", "foo",
+            "featureProperties", List.of("a"),
+            "epochs", projectedFeatureDimension
+        ));
+
+        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Value for `epochs` was `%d`", projectedFeatureDimension)
+            .hasMessageContaining("must be within the range [1,");
+    }
+
     @Test
     void shouldKnowIfMultiOrSingleLabel() {
         var multiLabelConfig = GraphSageTrainConfig.of(
