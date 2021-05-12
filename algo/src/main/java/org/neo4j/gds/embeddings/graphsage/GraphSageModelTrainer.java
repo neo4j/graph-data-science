@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import com.carrotsearch.hppc.LongHashSet;
+import org.immutables.value.Value;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -35,6 +36,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.ImmutableRelationshipCursor;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
@@ -59,7 +61,6 @@ import java.util.stream.LongStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelTrainer {
     private Layer[] layers;
@@ -108,7 +109,7 @@ public class GraphSageModelTrainer {
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
         progressLogger.logStart();
-        Map<String, Double> epochLosses = new TreeMap<>();
+        Map<Integer, Double> epochLosses = new TreeMap<>();
 
         this.layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
@@ -116,25 +117,24 @@ public class GraphSageModelTrainer {
 
         double initialLoss = evaluateLoss(graph, features, -1);
         double previousLoss = initialLoss;
+        boolean converged = false;
         for (int epoch = 0; epoch < epochs; epoch++) {
             var epochMessage = ":: Epoch " + (epoch + 1);
             progressLogger.logStart(epochMessage);
 
             trainEpoch(graph, features, epoch);
             double newLoss = evaluateLoss(graph, features, epoch);
-            epochLosses.put(
-                formatWithLocale("Epoch: %d", epoch),
-                newLoss
-            );
+            epochLosses.put(epoch, newLoss);
             progressLogger.logFinish(epochMessage);
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
+                converged = true;
                 break;
             }
             previousLoss = newLoss;
         }
         progressLogger.logFinish();
 
-        return ModelTrainResult.of(initialLoss, epochLosses, this.layers);
+        return ModelTrainResult.of(initialLoss, epochLosses, converged, this.layers);
     }
 
     private void trainEpoch(Graph graph, HugeObjectArray<double[]> features, int epoch) {
@@ -318,19 +318,43 @@ public class GraphSageModelTrainer {
     }
 
     @ValueClass
+    public interface GraphSageTrainMetrics extends Model.Mappable {
+        double startLoss();
+        Map<Integer, Double> epochLosses();
+        boolean didConverge();
+
+        @Value.Derived
+        default int ranEpochs() {
+            return epochLosses().size();
+        }
+
+        @Override
+        default Map<String, Object> toMap() {
+            return Map.of(
+                "startLoss", startLoss(),
+                "epochLosses", epochLosses(),
+                "didConverge", didConverge(),
+                "ranEpochs", ranEpochs()
+            );
+        }
+    }
+
+    @ValueClass
     public interface ModelTrainResult {
 
-        double startLoss();
-
-        Map<String, Double> epochLosses();
+        GraphSageTrainMetrics metrics();
 
         Layer[] layers();
 
-        static ModelTrainResult of(double startLoss, Map<String, Double> epochLosses, Layer[] layers) {
+        static ModelTrainResult of(
+            double startLoss,
+            Map<Integer, Double> epochLosses,
+            boolean converged,
+            Layer[] layers
+        ) {
             return ImmutableModelTrainResult.builder()
-                .startLoss(startLoss)
-                .epochLosses(epochLosses)
                 .layers(layers)
+                .metrics(ImmutableGraphSageTrainMetrics.of(startLoss, epochLosses, converged))
                 .build();
         }
     }

@@ -46,6 +46,8 @@ import org.neo4j.logging.NullLog;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -221,4 +223,42 @@ class GraphSageModelTrainerTest {
 
         trainer.train(arrayGraph, arrayFeatures);
     }
+
+    @Test
+    void testLosses() {
+        var numberOfEpochs = 10;
+        var trainer = new GraphSageModelTrainer(
+            configBuilder.modelName("meh").epochs(numberOfEpochs).build(),
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER
+        );
+
+        var trainResult = trainer.train(graph, features);
+
+        var metrics = trainResult.metrics();
+        assertThat(metrics.didConverge()).isFalse();
+        assertThat(metrics.ranEpochs()).isEqualTo(numberOfEpochs);
+        assertThat(metrics.epochLosses().keySet())
+            .containsExactlyElementsOf(IntStream.range(0, numberOfEpochs).boxed().collect(
+                Collectors.toList()));
+    }
+
+    @Test
+    void testConvergence() {
+        var numberOfEpochs = 10;
+        var trainer = new GraphSageModelTrainer(
+            configBuilder.modelName("meh").tolerance(100.0).epochs(numberOfEpochs).build(),
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER
+        );
+
+        var trainResult = trainer.train(graph, features);
+
+        var trainMetrics = trainResult.metrics();
+        assertThat(trainMetrics.didConverge()).isTrue();
+        assertThat(trainMetrics.ranEpochs()).isEqualTo(1);
+
+    }
+
+
 }
