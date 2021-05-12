@@ -39,9 +39,16 @@ task versionsJson {
         def shouldUpdateVersion = project.version.toString().matches("^(\\d+\\.){2}\\d+\$")
         if (shouldUpdateVersion) {
             indexedVersionsJson[ver.neo4j] = [
-                    'neo4j': ver.neo4j,
                     'version': project.version,
-                    'jar': "$bucketUrl/${shadowJar.archiveName}",
+                    'neo4jVersion'  : ver.neo4j,
+                    'downloadUrl'    : "$bucketUrl/${shadowJar.archiveName}",
+                    'config': [
+                            '+:dbms.security.procedures.unrestricted': [
+                                    "gds.*"
+                            ]
+                    ],
+                    'neo4j'  : ver.neo4j,
+                    'jar'    : "$bucketUrl/${shadowJar.archiveName}",
             ]
         }
         outFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(indexedVersionsJson.values()))
