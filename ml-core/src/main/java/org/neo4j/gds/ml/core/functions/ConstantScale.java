@@ -51,10 +51,10 @@ public class ConstantScale<T extends Tensor<T>> extends AbstractVariable<T> {
     @Override
     public String toString() {
         return formatWithLocale(
-            "%s: scale by %s",
+            "%s: scale by %s, requireGradient: %b",
             this.getClass().getSimpleName(),
             Double.toString(constant),
-            requireGradient() ? "; requireGradient" : ""
+            requireGradient()
         );
     }
 }

@@ -36,10 +36,10 @@ public class RenderTest {
         var sigmoid = new Sigmoid<>(elementSum);
 
         assertThat(sigmoid.render()).isEqualTo(
-            "Sigmoid: Matrix(2, 2)" + System.lineSeparator() +
-            "|-- MatrixSum: Matrix(2, 2)" + System.lineSeparator() +
-            "\t|-- MatrixConstant: Matrix(2, 2)" + System.lineSeparator() +
-            "\t|-- MatrixConstant: Matrix(2, 2)" + System.lineSeparator()
+            "Sigmoid: Matrix(2, 2), requireGradient: false" + System.lineSeparator() +
+            "|-- MatrixSum: Matrix(2, 2), requireGradient: false" + System.lineSeparator() +
+            "\t|-- MatrixConstant: Matrix(2, 2), requireGradient: false" + System.lineSeparator() +
+            "\t|-- MatrixConstant: Matrix(2, 2), requireGradient: false" + System.lineSeparator()
         );
     }
 }

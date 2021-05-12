@@ -66,6 +66,11 @@ public class Weights<T extends Tensor<T>> extends AbstractVariable<T> {
 
     @Override
     public String toString() {
-        return formatWithLocale("Weights: " + data.toString());
+        return formatWithLocale(
+            "%s: %s, requireGradient: %b",
+            this.getClass().getSimpleName(),
+            data.toString(),
+            requireGradient()
+        );
     }
 }

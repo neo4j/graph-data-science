@@ -45,11 +45,7 @@ public interface Variable<T extends Tensor<T>> {
         return sb.toString();
     }
 
-    static <T extends Tensor<T>> void render(
-        final StringBuilder sb,
-        final Variable<T> variable,
-        final int depth
-    ) {
+    static  <T extends Tensor<T>> void render(StringBuilder sb, Variable<T> variable, int depth) {
 
         sb.append("\t".repeat(Math.max(0, depth - 1)));
 

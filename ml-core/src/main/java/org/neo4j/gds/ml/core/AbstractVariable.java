@@ -70,10 +70,10 @@ public abstract class AbstractVariable<T extends Tensor<T>> implements Variable<
     @Override
     public String toString() {
         return formatWithLocale(
-            "%s: %s",
+            "%s: %s, requireGradient: %b",
             this.getClass().getSimpleName(),
             Dimensions.render(dimensions),
-            requireGradient ? "; requireGradient" : ""
+            requireGradient
         );
     }
 }
