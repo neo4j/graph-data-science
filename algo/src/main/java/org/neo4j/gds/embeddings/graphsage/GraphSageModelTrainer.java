@@ -57,6 +57,7 @@ import java.util.stream.LongStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
+import static org.neo4j.gds.ml.core.batch.NegativeSampler.negativeNode;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelTrainer {
@@ -285,24 +286,14 @@ public class GraphSageModelTrainer {
         return neighborBatchBuilder.build();
     }
 
-    private LongStream negativeBatch(Graph graph, long batchSize) {
+    public LongStream negativeBatch(Graph graph, long batchSize) {
         Random rand = new Random(layers[0].randomState());
         return LongStream.range(0, batchSize)
-            .map(ignore -> {
-                double randomValue = rand.nextDouble();
-                double cumulativeProbability = 0;
-
-                for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                    cumulativeProbability += Math.pow(graph.degree(nodeId), 0.75) / degreeProbabilityNormalizer;
-                    if (randomValue < cumulativeProbability) {
-                        return nodeId;
-                    }
-                }
-                throw new RuntimeException(
-                    "This happens when there are no relationships in the Graph. " +
-                    "This condition is checked by the calling procedure."
-                );
-            });
+            .map(ignore -> negativeNode(
+                Partition.of(0, graph.nodeCount()),
+                rand,
+                (nodeId) -> Math.pow(graph.degree(nodeId), 0.75) / degreeProbabilityNormalizer
+            ));
     }
 
     private List<Weights<? extends Tensor<?>>> getWeights() {
