@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.datasets;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
@@ -35,6 +36,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class DatasetManagerTest {
+
+    @AfterAll
+    static void resetToCommunityEdition() {
+        GdsEdition.instance().setToCommunityEdition();
+    }
 
     @Test
     void testCloseRemovesDbDirectory(@TempDir Path tempDir) throws IOException {
