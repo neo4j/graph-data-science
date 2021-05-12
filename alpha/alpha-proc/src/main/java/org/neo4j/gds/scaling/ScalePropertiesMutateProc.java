@@ -22,7 +22,6 @@ package org.neo4j.gds.scaling;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
@@ -48,7 +47,7 @@ public class ScalePropertiesMutateProc extends MutatePropertyProc<ScalePropertie
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesMutateConfig> computationResult) {
-        return (DoubleArrayNodeProperties) computationResult.result().scaledProperties()::get;
+        return ScalePropertiesProc.nodeProperties(computationResult);
     }
 
     @Override

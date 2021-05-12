@@ -24,8 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -38,13 +38,13 @@ class L1NormTest {
         return Stream.of(
             Arguments.of(
                 5,
-                (DoubleNodeProperties) nodeId -> nodeId,
+                new DoubleTestProperties(nodeId -> nodeId),
                 10D,
                 new double[]{0, 0.1D, 0.2D, 0.3D, 0.4D}
             ),
             Arguments.of(
                 5,
-                (DoubleNodeProperties) nodeId -> (nodeId % 2 == 0) ? -nodeId : nodeId,
+                new DoubleTestProperties(nodeId ->(nodeId % 2 == 0) ? -nodeId : nodeId),
                 10D,
                 new double[]{0, 0.1D, - 0.2D, 0.3D, -0.40D}
             )
@@ -64,11 +64,12 @@ class L1NormTest {
 
     @Test
     void avoidsDivByZero() {
-        var properties = (DoubleNodeProperties) nodeId -> 0D;
+        var properties = new DoubleTestProperties(nodeId -> 0D);
         var scaler = L1Norm.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {
             assertThat(scaler.scaleProperty(i)).isEqualTo(0D);
         }
     }
+
 }

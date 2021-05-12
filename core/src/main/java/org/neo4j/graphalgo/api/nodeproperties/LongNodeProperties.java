@@ -30,7 +30,6 @@ import java.util.stream.LongStream;
 import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
 import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
 
-@FunctionalInterface
 public interface LongNodeProperties extends NodeProperties {
 
     @Override

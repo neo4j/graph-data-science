@@ -130,9 +130,22 @@ public class NodeClassificationPredictMutateProc
         if (result.predictedProbabilities().isPresent()) {
             var probabilityPropertyKey = config.predictedProbabilityProperty().orElseThrow();
             var probabilityProperties = result.predictedProbabilities().get();
+
+            var properties = new DoubleArrayNodeProperties() {
+                @Override
+                public long size() {
+                    return computationResult.graph().nodeCount();
+                }
+
+                @Override
+                public double[] doubleArrayValue(long nodeId) {
+                    return probabilityProperties.get(nodeId);
+                }
+            };
+
             nodeProperties.add(NodeProperty.of(
                 probabilityPropertyKey,
-                (DoubleArrayNodeProperties) probabilityProperties::get
+                properties
             ));
         }
 

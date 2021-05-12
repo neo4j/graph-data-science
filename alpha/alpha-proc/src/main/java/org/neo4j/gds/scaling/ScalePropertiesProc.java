@@ -17,31 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.fastrp;
+package org.neo4j.gds.scaling;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 
-final class FastRPCompanion {
+public class ScalePropertiesProc {
 
-    static final String DESCRIPTION = "Random Projection produces node embeddings via the fastrp algorithm";
+    static NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<ScaleProperties, ScaleProperties.Result, ? extends ScalePropertiesBaseConfig> computationResult) {
+        var size = computationResult.graph().nodeCount();
+        var scaledProperties = computationResult.result().scaledProperties();
 
-    private FastRPCompanion() {}
-
-    static <CONFIG extends FastRPBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<FastRP, FastRP.FastRPResult, CONFIG> computationResult) {
-        var nodeCount = computationResult.graph().nodeCount();
-        var embeddings = computationResult.result().embeddings();
-
-        return new FloatArrayNodeProperties() {
+        return new DoubleArrayNodeProperties() {
             @Override
-            public float[] floatArrayValue(long nodeId) {
-                return embeddings.get(nodeId);
+            public long size() {
+                return size;
             }
 
             @Override
-            public long size() {
-                return nodeCount;
+            public double[] doubleArrayValue(long nodeId) {
+                return scaledProperties.get(nodeId);
             }
         };
     }

@@ -210,35 +210,59 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
     }
 
     private DoubleNodeProperties transformFloatArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
-        return (nodeId) -> {
-            var propertyValue = property.floatArrayValue(nodeId);
+        return new DoubleNodeProperties() {
+            @Override
+            public double doubleValue(long nodeId) {
+                var propertyValue = property.floatArrayValue(nodeId);
 
-            if (propertyValue == null || propertyValue.length != expectedArrayLength) {
-                throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+                if (propertyValue == null || propertyValue.length != expectedArrayLength) {
+                    throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+                }
+                return propertyValue[idx];
             }
-            return propertyValue[idx];
+
+            @Override
+            public long size() {
+                return property.size();
+            }
         };
     }
 
     private DoubleNodeProperties transformDoubleArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
-        return (nodeId) -> {
-            var propertyValue = property.doubleArrayValue(nodeId);
+        return new DoubleNodeProperties() {
+            @Override
+            public double doubleValue(long nodeId) {
+                var propertyValue = property.doubleArrayValue(nodeId);
 
-            if (propertyValue == null || propertyValue.length != expectedArrayLength) {
-                throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+                if (propertyValue == null || propertyValue.length != expectedArrayLength) {
+                    throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+                }
+                return propertyValue[idx];
             }
-            return propertyValue[idx];
+
+            @Override
+            public long size() {
+                return property.size();
+            }
         };
     }
 
     private DoubleNodeProperties transformLongArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
-        return (nodeId) -> {
-            var propertyValue = property.longArrayValue(nodeId);
+        return new DoubleNodeProperties() {
+            @Override
+            public double doubleValue(long nodeId) {
+                var propertyValue = property.longArrayValue(nodeId);
 
-            if (propertyValue == null || propertyValue.length != expectedArrayLength) {
-                throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+                if (propertyValue == null || propertyValue.length != expectedArrayLength) {
+                    throw createInvalidArrayException(propertyName, expectedArrayLength, nodeId, Optional.ofNullable(propertyValue).map(v -> v.length).orElse(0));
+                }
+                return propertyValue[idx];
             }
-            return propertyValue[idx];
+
+            @Override
+            public long size() {
+                return property.size();
+            }
         };
     }
 

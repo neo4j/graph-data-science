@@ -27,13 +27,13 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPred
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.nodeproperties.DoubleArrayTestProperties;
+import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
 
 import java.util.List;
 
@@ -54,17 +54,17 @@ class NodeClassificationPredictConsumerTest {
         graphStore.addNodeProperty(
             NodeLabel.ALL_NODES,
             "nan-embedding-1",
-            (DoubleArrayNodeProperties) (long nodeId) -> new double[] {Double.NaN, Double.NaN}
+            new DoubleArrayTestProperties((long nodeId) -> new double[] {Double.NaN, Double.NaN})
         );
         graphStore.addNodeProperty(
             NodeLabel.ALL_NODES,
             "nan-embedding-2",
-            (DoubleArrayNodeProperties) (long nodeId) -> new double[] {Double.NaN, Double.NaN}
+            new DoubleArrayTestProperties((long nodeId) -> new double[] {Double.NaN, Double.NaN})
         );
         graphStore.addNodeProperty(
             NodeLabel.ALL_NODES,
             "without-nan",
-            (DoubleNodeProperties) (long nodeId) -> 4.2
+            new DoubleTestProperties(nodeId -> 4.2)
         );
         Graph graph = graphStore.getUnion();
         var featureProperties = List.of("nan-embedding-1", "nan-embedding-2");

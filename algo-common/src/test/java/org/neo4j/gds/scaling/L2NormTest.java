@@ -24,8 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -38,7 +38,7 @@ class L2NormTest {
         double l2norm = 16.881943016134134;
         double[] expected = {0 / l2norm, 1 / l2norm, 2 / l2norm, 3 / l2norm, 4 / l2norm, 5 / l2norm, 6 / l2norm, 7 / l2norm, 8 / l2norm, 9 / l2norm};
         return Stream.of(
-            Arguments.of((DoubleNodeProperties) nodeId -> nodeId, l2norm, expected)
+            Arguments.of(new DoubleTestProperties(nodeId -> nodeId), l2norm, expected)
         );
     }
 
@@ -55,7 +55,7 @@ class L2NormTest {
 
     @Test
     void avoidsDivByZero() {
-        var properties = (DoubleNodeProperties) nodeId -> 0D;
+        var properties = new DoubleTestProperties(nodeId -> 0D);
         var scaler = L2Norm.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {

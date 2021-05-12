@@ -63,6 +63,11 @@ public abstract class NullPropertyMap implements NodeProperties {
         public OptionalDouble getMaxDoublePropertyValue() {
             return OptionalDouble.empty();
         }
+
+        @Override
+        public long size() {
+            return 0;
+        }
     }
 
     static public class LongNullPropertyMap extends NullPropertyMap implements LongNodeProperties {
@@ -93,6 +98,11 @@ public abstract class NullPropertyMap implements NodeProperties {
         @Override
         public ValueType valueType() {
             return ValueType.LONG;
+        }
+
+        @Override
+        public long size() {
+            return 0;
         }
     }
 

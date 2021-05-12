@@ -100,9 +100,21 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build();
 
+            var properties = new DoubleNodeProperties() {
+                @Override
+                public long size() {
+                    return computationResult.graph().nodeCount();
+                }
+
+                @Override
+                public double doubleValue(long nodeId) {
+                    return spanningTree.head((int) nodeId);
+                }
+            };
+
             exporter.write(
                 config.writeProperty(),
-                (DoubleNodeProperties) (nodeId) -> spanningTree.head((int) nodeId)
+                properties
             );
 
             builder.withNodePropertiesWritten(exporter.propertiesWritten());

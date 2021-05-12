@@ -113,9 +113,21 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
     public boolean masterCompute(MasterComputeContext<PageRankConfig> context) {
         var concurrency = context.config().concurrency();
 
+        var properties = new DoubleNodeProperties() {
+            @Override
+            public long size() {
+                return context.nodeCount();
+            }
+
+            @Override
+            public double doubleValue(long nodeId) {
+                return context.doubleNodeValue(nodeId, NEXT_RANK);
+            }
+        };
+
         // Normalize using L2-Norm (Power iteration)
         var scaler = ScalarScaler.Variant.L2NORM.create(
-            (DoubleNodeProperties) nodeId -> context.doubleNodeValue(nodeId, NEXT_RANK),
+            properties,
             context.nodeCount(),
             concurrency,
             context.executorService()

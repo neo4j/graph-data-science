@@ -29,9 +29,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -39,6 +36,9 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.nodeproperties.DoubleArrayTestProperties;
+import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
+import org.neo4j.graphalgo.nodeproperties.FloatArrayTestProperties;
 
 import java.util.Comparator;
 import java.util.stream.LongStream;
@@ -150,16 +150,16 @@ class KnnTest {
 
     static Stream<NodeProperties> emptyProperties() {
         return Stream.of(
-            (DoubleNodeProperties) nodeId -> Double.NaN,
+            new DoubleTestProperties(nodeId -> Double.NaN),
             new NullPropertyMap.DoubleNullPropertyMap(Double.NaN),
-            (FloatArrayNodeProperties) nodeId -> new float[]{},
-            (DoubleArrayNodeProperties) nodeId -> new double[]{}
+            new FloatArrayTestProperties(nodeId -> new float[]{}),
+            new DoubleArrayTestProperties(nodeId -> new double[]{})
         );
     }
 
     @Test
     void testMixedExistingAndNonExistingProperties(SoftAssertions softly) {
-        var nodeProperties = (DoubleNodeProperties) nodeId -> nodeId == 0 ? Double.NaN : 42.1337;
+        var nodeProperties = new DoubleTestProperties(nodeId -> nodeId == 0 ? Double.NaN : 42.1337);
         var knn = new Knn(
             graph.nodeCount(),
             ImmutableKnnBaseConfig.builder().nodeWeightProperty("knn").topK(1).build(),

@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
@@ -87,7 +86,7 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateConfig> computationResult) {
-        return (DoubleNodeProperties) computationResult.result()::get;
+        return DegreeCentralityProc.nodeProperties(computationResult);
     }
 
     public static final class MutateResult extends StandardMutateResult {

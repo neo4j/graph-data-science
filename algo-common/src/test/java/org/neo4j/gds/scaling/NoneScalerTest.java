@@ -23,8 +23,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -37,7 +37,7 @@ class NoneScalerTest {
     private static Stream<Arguments> properties() {
         double[] expected = {4, 6, 8, 10};
         return Stream.of(
-            Arguments.of((DoubleNodeProperties) nodeId -> 2 * (nodeId + 1), expected)
+            Arguments.of(new DoubleTestProperties(nodeId -> 2 * (nodeId + 1)), expected)
         );
     }
 

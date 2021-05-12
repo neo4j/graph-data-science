@@ -22,7 +22,6 @@ package org.neo4j.gds.scaling;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
@@ -49,7 +48,7 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamConfig> computationResult) {
-        return (DoubleArrayNodeProperties) computationResult.result().scaledProperties()::get;
+        return ScalePropertiesProc.nodeProperties(computationResult);
     }
 
     @Override

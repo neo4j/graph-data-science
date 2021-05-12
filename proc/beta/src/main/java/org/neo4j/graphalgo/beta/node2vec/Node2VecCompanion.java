@@ -34,7 +34,20 @@ final class Node2VecCompanion {
     static <CONFIG extends Node2VecBaseConfig> NodeProperties nodeProperties(
         AlgoBaseProc.ComputationResult<Node2Vec, HugeObjectArray<Vector>, CONFIG> computationResult
     ) {
-        return (FloatArrayNodeProperties) (nodeId) -> computationResult.result().get(nodeId).data();
+        var size = computationResult.graph().nodeCount();
+        var embeddings = computationResult.result();
+
+        return new FloatArrayNodeProperties() {
+            @Override
+            public long size() {
+                return size;
+            }
+
+            @Override
+            public float[] floatArrayValue(long nodeId) {
+                return embeddings.get(nodeId).data();
+            }
+        };
     }
 
     private Node2VecCompanion() {}

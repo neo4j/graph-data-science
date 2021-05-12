@@ -17,36 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.result;
+package org.neo4j.graphalgo.nodeproperties;
 
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 
-public class CentralityResult {
+import java.util.function.LongToDoubleFunction;
 
-    protected final HugeDoubleArray result;
+public final class DoubleTestProperties implements DoubleNodeProperties {
+    private final LongToDoubleFunction transformer;
 
-    public CentralityResult(HugeDoubleArray result) {
-        this.result = result;
+    public DoubleTestProperties(LongToDoubleFunction transformer) {this.transformer = transformer;}
+
+    @Override
+    public long size() {
+        return 0;
     }
 
-    public HugeDoubleArray array() {
-        return this.result;
-    }
-
-    public void export(String propertyName, NodePropertyExporter exporter) {
-        exporter.write(
-            propertyName,
-            asNodeProperties()
-        );
-    }
-
-    public double score(final long nodeId) {
-        return result.get(nodeId);
-    }
-
-    public DoubleNodeProperties asNodeProperties() {
-        return result.asNodeProperties();
+    @Override
+    public double doubleValue(long nodeId) {
+        return transformer.applyAsDouble(nodeId);
     }
 }

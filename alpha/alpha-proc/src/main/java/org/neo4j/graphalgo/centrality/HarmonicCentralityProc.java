@@ -104,9 +104,21 @@ public class HarmonicCentralityProc extends AlgoBaseProc<HarmonicCentrality, Har
                 .parallel(Pools.DEFAULT, computationResult.config().writeConcurrency())
                 .build();
 
+            var properties = new DoubleNodeProperties() {
+                @Override
+                public long size() {
+                    return computationResult.graph().nodeCount();
+                }
+
+                @Override
+                public double doubleValue(long nodeId) {
+                    return computationResult.result().getCentralityScore(nodeId);
+                }
+            };
+
             exporter.write(
                 config.writeProperty(),
-                (DoubleNodeProperties) computationResult.result()::getCentralityScore
+                properties
             );
         }
 

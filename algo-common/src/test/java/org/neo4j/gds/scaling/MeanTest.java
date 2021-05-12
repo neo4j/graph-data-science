@@ -24,9 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -39,10 +38,9 @@ class MeanTest {
     private static Stream<Arguments> properties() {
         double[] expected = {-0.5, -7 / 18D, -5 / 18D, -3 / 18D, -1 / 18D, 1 / 18D, 3 / 18D, 5 / 18D, 7 / 18D, 0.5};
         return Stream.of(
-            Arguments.of((DoubleNodeProperties) nodeId -> nodeId, 4.5D, 9D, expected),
-            Arguments.of((DoubleNodeProperties) nodeId -> -nodeId - 1, -5.5D, 9D, Arrays.stream(expected).map(v -> -v).toArray()),
-            Arguments.of((LongNodeProperties) nodeId -> nodeId, 4.5D, 9D, expected),
-            Arguments.of((DoubleNodeProperties) nodeId -> 50000000D * nodeId, 50000000D * 4.5D, 4.5e8, expected)
+            Arguments.of(new DoubleTestProperties(nodeId -> nodeId), 4.5D, 9D, expected),
+            Arguments.of(new DoubleTestProperties(nodeId -> -nodeId - 1), -5.5D, 9D, Arrays.stream(expected).map(v -> -v).toArray()),
+            Arguments.of(new DoubleTestProperties(nodeId -> 50000000D * nodeId), 50000000D * 4.5D, 4.5e8, expected)
         );
     }
 
@@ -60,7 +58,7 @@ class MeanTest {
 
     @Test
     void avoidsDivByZero() {
-        var properties = (DoubleNodeProperties) nodeId -> 4D;
+        var properties = new DoubleTestProperties(nodeId -> 4D);
         var scaler = Mean.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {

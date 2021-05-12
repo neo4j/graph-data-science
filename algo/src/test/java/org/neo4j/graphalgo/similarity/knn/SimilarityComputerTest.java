@@ -32,11 +32,11 @@ import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
+import org.neo4j.graphalgo.nodeproperties.DoubleArrayTestProperties;
+import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
+import org.neo4j.graphalgo.nodeproperties.FloatArrayTestProperties;
+import org.neo4j.graphalgo.nodeproperties.LongArrayTestProperties;
+import org.neo4j.graphalgo.nodeproperties.LongTestProperties;
 
 import java.util.Random;
 import java.util.stream.Stream;
@@ -48,41 +48,42 @@ class SimilarityComputerTest {
 
     @Property
     void doublePropertySimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
-        NodeProperties props = (DoubleNodeProperties) nodeId -> Math.exp(Math.log1p(nodeId / 42.0));
+        NodeProperties props = new DoubleTestProperties(nodeId -> Math.exp(Math.log1p(nodeId / 42.0)));
         var sim = SimilarityComputer.ofDoubleProperty(props);
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
     }
 
     @Property
     void doublePropertySimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
-        NodeProperties props = (DoubleNodeProperties) nodeId -> Math.exp(Math.log1p(nodeId / 42.0));
+        NodeProperties props = new DoubleTestProperties(nodeId -> Math.exp(Math.log1p(nodeId / 42.0)));
         var sim = SimilarityComputer.ofDoubleProperty(props);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
     }
 
     @Property
     void longPropertySimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
-        NodeProperties props = (LongNodeProperties) nodeId -> nodeId;
+        NodeProperties props = new LongTestProperties(nodeId -> nodeId);
         var sim = SimilarityComputer.ofLongProperty(props);
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
     }
 
     @Property
     void longPropertySimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
-        NodeProperties props = (LongNodeProperties) nodeId -> nodeId;
+        NodeProperties props = new LongTestProperties(nodeId -> nodeId);
         var sim = SimilarityComputer.ofLongProperty(props);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
     }
 
     @Property
     void floatArrayPropertySimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
-        NodeProperties props = (FloatArrayNodeProperties) nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0)
+        NodeProperties props = new FloatArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0)
             .boxed()
             .reduce(new FloatArrayList(42), (floats, value) -> {
                 floats.add(value.floatValue());
                 return floats;
             }, (f1, f2) -> f1)
-            .toArray();
+            .toArray()
+        );
         var sim = SimilarityComputer.ofFloatArrayProperty(props);
 
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
@@ -90,20 +91,21 @@ class SimilarityComputerTest {
 
     @Property
     void floatArrayPropertySimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
-        NodeProperties props = (FloatArrayNodeProperties) nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0)
+        NodeProperties props = new FloatArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0)
             .boxed()
             .reduce(new FloatArrayList(42), (floats, value) -> {
                 floats.add(value.floatValue());
                 return floats;
             }, (f1, f2) -> f1)
-            .toArray();
+            .toArray()
+        );
         var sim = SimilarityComputer.ofFloatArrayProperty(props);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
     }
 
     @Property
     void doubleArrayPropertySimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
-        NodeProperties props = (DoubleArrayNodeProperties) nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0).toArray();
+        NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0).toArray());
         var sim = SimilarityComputer.ofDoubleArrayProperty(props);
 
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
@@ -111,14 +113,14 @@ class SimilarityComputerTest {
 
     @Property
     void doubleArrayPropertySimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
-        NodeProperties props = (DoubleArrayNodeProperties) nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0).toArray();
+        NodeProperties props = new DoubleArrayTestProperties(nodeId -> new Random(nodeId).doubles(42, 0.0, 1.0).toArray());
         var sim = SimilarityComputer.ofDoubleArrayProperty(props);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
     }
 
     @Property
     void longArrayPropertySimilarityReturns1ForEqualValues(@ForAll @Positive long id) {
-        NodeProperties props = (LongArrayNodeProperties) nodeId -> new Random(nodeId).longs(42, 0, 1337).toArray();
+        NodeProperties props = new LongArrayTestProperties(nodeId -> new Random(nodeId).longs(42, 0, 1337).toArray());
         var sim = SimilarityComputer.ofLongArrayProperty(props);
 
         assertThat(sim.similarity(id, id)).isEqualTo(1.0);
@@ -126,7 +128,7 @@ class SimilarityComputerTest {
 
     @Property
     void longArrayPropertySimilarityReturnsValuesBetween0And1(@ForAll @From("differentValues") LongLongPair ids) {
-        NodeProperties props = (LongArrayNodeProperties) nodeId -> new Random(nodeId).longs(42, 0, 1337).toArray();
+        NodeProperties props = new LongArrayTestProperties(nodeId -> new Random(nodeId).longs(42, 0, 1337).toArray());
         var sim = SimilarityComputer.ofLongArrayProperty(props);
         assertThat(sim.similarity(ids.getOne(), ids.getTwo())).isStrictlyBetween(0.0, 1.0);
     }
@@ -136,7 +138,7 @@ class SimilarityComputerTest {
         double[] doubleArray = new Random(42).doubles(42, 0.0, 1.0).toArray();
         double[] doubleArrayCopy = doubleArray.clone();
         doubleArrayCopy[1] = doubleArrayCopy[1] + 1.0D;
-        NodeProperties props = (DoubleArrayNodeProperties) nodeId -> {
+        NodeProperties props = new DoubleArrayTestProperties(nodeId -> {
             if (nodeId == 0) {
                 return doubleArray;
             }
@@ -144,7 +146,7 @@ class SimilarityComputerTest {
                 return doubleArrayCopy;
             }
             return new double[0];
-        };
+        });
         var sim = SimilarityComputer.ofDoubleArrayProperty(props);
 
         assertThat(sim.similarity(0, 1)).isCloseTo(1.0D, within(0.05));
@@ -159,11 +161,11 @@ class SimilarityComputerTest {
 
     static Stream<SimilarityComputer> nonFiniteSimilarities() {
         return Stream.of(
-            SimilarityComputer.ofDoubleProperty((DoubleNodeProperties) nodeId -> Double.NaN),
-            SimilarityComputer.ofDoubleProperty((DoubleNodeProperties) nodeId -> Double.POSITIVE_INFINITY),
-            SimilarityComputer.ofDoubleProperty((DoubleNodeProperties) nodeId -> Double.NEGATIVE_INFINITY),
-            SimilarityComputer.ofFloatArrayProperty((FloatArrayNodeProperties) nodeId -> new float[]{}),
-            SimilarityComputer.ofDoubleArrayProperty((DoubleArrayNodeProperties) nodeId -> new double[]{})
+            SimilarityComputer.ofDoubleProperty(new DoubleTestProperties(nodeId -> Double.NaN)),
+            SimilarityComputer.ofDoubleProperty(new DoubleTestProperties(nodeId -> Double.POSITIVE_INFINITY)),
+            SimilarityComputer.ofDoubleProperty(new DoubleTestProperties(nodeId -> Double.NEGATIVE_INFINITY)),
+            SimilarityComputer.ofFloatArrayProperty(new FloatArrayTestProperties(nodeId -> new float[]{})),
+            SimilarityComputer.ofDoubleArrayProperty(new DoubleArrayTestProperties(nodeId -> new double[]{}))
         );
     }
 

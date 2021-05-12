@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StatsProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
@@ -79,7 +78,7 @@ public class DegreeCentralityStatsProc extends StatsProc<DegreeCentrality, Degre
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStatsConfig> computationResult) {
-        return (DoubleNodeProperties) computationResult.result()::get;
+        return DegreeCentralityProc.nodeProperties(computationResult);
     }
 
     @Override

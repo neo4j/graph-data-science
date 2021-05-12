@@ -71,4 +71,9 @@ public final class LongIfChangedNodeProperties implements LongNodeProperties {
 
         return seedValue == Long.MIN_VALUE || (seedValue != writeValue) ? Values.longValue(writeValue) : null;
     }
+
+    @Override
+    public long size() {
+        return newProperties.size();
+    }
 }

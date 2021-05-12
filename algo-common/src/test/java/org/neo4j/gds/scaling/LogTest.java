@@ -23,7 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -35,7 +35,7 @@ class LogTest {
     private static Stream<Arguments> properties() {
         double[] expected = {1, 2, 3, 4};
         return Stream.of(
-            Arguments.of((DoubleNodeProperties) nodeId -> Math.pow(Math.E, nodeId), expected)
+            Arguments.of(new DoubleTestProperties(nodeId -> Math.pow(Math.E, nodeId)), expected)
         );
     }
 

@@ -50,7 +50,20 @@ final class LouvainProc {
                 tracker
             );
         } else {
-            return (LongArrayNodeProperties) computationResult.result()::getCommunities;
+            var size = computationResult.graph().nodeCount();
+            var communityResult = computationResult.result();
+
+            return new LongArrayNodeProperties() {
+                @Override
+                public long size() {
+                    return size;
+                }
+
+                @Override
+                public long[] longArrayValue(long nodeId) {
+                    return communityResult.getCommunities(nodeId);
+                }
+            };
         }
     }
 

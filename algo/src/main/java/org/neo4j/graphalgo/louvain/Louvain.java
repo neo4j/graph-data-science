@@ -307,6 +307,11 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         public OptionalLong getMaxLongPropertyValue() {
             return OptionalLong.empty();
         }
+
+        @Override
+        public long size() {
+            return graph.nodeCount();
+        }
     }
 
     static final class RelationshipCreator implements Runnable {

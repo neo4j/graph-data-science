@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.degree;
 
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
+import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.result.AbstractCentralityResultBuilder;
 
 public final class DegreeCentralityProc {
@@ -42,5 +44,22 @@ public final class DegreeCentralityProc {
             .withCentralityFunction(!computeResult.isGraphEmpty() ? result::get : null);
 
         return procResultBuilder;
+    }
+
+    static NodeProperties nodeProperties(AlgoBaseProc.ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, ? extends DegreeCentralityConfig> computationResult) {
+        var size = computationResult.graph().nodeCount();
+        var degrees = computationResult.result();
+
+        return new DoubleNodeProperties() {
+            @Override
+            public long size() {
+                return size;
+            }
+
+            @Override
+            public double doubleValue(long nodeId) {
+                return degrees.get(nodeId);
+            }
+        };
     }
 }

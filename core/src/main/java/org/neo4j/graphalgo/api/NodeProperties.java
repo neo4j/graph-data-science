@@ -72,9 +72,7 @@ public interface NodeProperties {
     /**
      * @return the number of values stored.
      */
-    default long size() {
-        return 0;
-    }
+    long size();
 
     /**
      * @return the maximum long value contained in the mapping or an empty {@link OptionalLong} if the mapping is

@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.degree;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.StreamProc;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.common.CentralityStreamResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -82,6 +81,6 @@ public class DegreeCentralityStreamProc extends StreamProc<DegreeCentrality, Deg
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStreamConfig> computationResult) {
-        return (DoubleNodeProperties) computationResult.result()::get;
+        return DegreeCentralityProc.nodeProperties(computationResult);
     }
 }

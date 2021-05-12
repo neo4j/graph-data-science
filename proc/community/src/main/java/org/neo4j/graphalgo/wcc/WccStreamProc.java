@@ -93,7 +93,7 @@ public class WccStreamProc extends StreamProc<
     @Override
     protected NodeProperties nodeProperties(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
         DisjointSetStruct dss = computationResult.result();
-        LongNodeProperties simpleNodeProperties = dss::setIdOf;
+        LongNodeProperties simpleNodeProperties = dss.asNodeProperties();
 
         return computationResult.config().consecutiveIds()
             ? new ConsecutiveLongNodeProperties(simpleNodeProperties, computationResult.graph().nodeCount(), allocationTracker())

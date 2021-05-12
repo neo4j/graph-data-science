@@ -80,14 +80,26 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
     }
 
     public void export(final String propertyName, final NodePropertyExporter exporter) {
+        DoubleNodeProperties properties = new DoubleNodeProperties() {
+            @Override
+            public double doubleValue(long nodeId) {
+                return centrality(
+                    farness.get(nodeId),
+                    component.get(nodeId),
+                    nodeCount,
+                    wassermanFaust
+                );
+            }
+
+            @Override
+            public long size() {
+                return graph.nodeCount();
+            }
+        };
+
         exporter.write(
             propertyName,
-            (DoubleNodeProperties) (nodeId) -> centrality(
-                farness.get(nodeId),
-                component.get(nodeId),
-                nodeCount,
-                wassermanFaust
-            )
+            properties
         );
     }
 

@@ -31,6 +31,19 @@ final class FastRPExtendedCompanion {
     private FastRPExtendedCompanion() {}
 
     static <CONFIG extends FastRPExtendedBaseConfig> NodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<FastRP, FastRP.FastRPResult, CONFIG> computationResult) {
-        return (FloatArrayNodeProperties) nodeId -> computationResult.result().embeddings().get(nodeId);
+        var size = computationResult.graph().nodeCount();
+        var embeddings = computationResult.result().embeddings();
+
+        return new FloatArrayNodeProperties() {
+            @Override
+            public long size() {
+                return size;
+            }
+
+            @Override
+            public float[] floatArrayValue(long nodeId) {
+                return embeddings.get(nodeId);
+            }
+        };
     }
 }

@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongArrayNodeProperties;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.write.ImmutableNodeProperty;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
 
@@ -58,11 +59,14 @@ final class PregelBaseProc {
                         nodeProperties = compositeNodeValue.doubleProperties(propertyKey).asNodeProperties();
                         break;
                     case LONG_ARRAY:
-                        nodeProperties = (LongArrayNodeProperties) compositeNodeValue.longArrayProperties(propertyKey)::get;
+                        nodeProperties = new HugeObjectArrayLongArrayProperties(
+                            compositeNodeValue.longArrayProperties(propertyKey)
+                        );
                         break;
                     case DOUBLE_ARRAY:
-                        nodeProperties = (DoubleArrayNodeProperties) compositeNodeValue.doubleArrayProperties(
-                            propertyKey)::get;
+                        nodeProperties = new HugeObjectArrayDoubleArrayProperties(
+                            compositeNodeValue.doubleArrayProperties(propertyKey)
+                        );
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported property type: " + element.propertyType());
@@ -76,5 +80,38 @@ final class PregelBaseProc {
     }
 
     private PregelBaseProc() {}
+
+    static class HugeObjectArrayLongArrayProperties implements LongArrayNodeProperties {
+        private final HugeObjectArray<long[]> longArrays;
+
+        HugeObjectArrayLongArrayProperties(HugeObjectArray<long[]> longArrays) {this.longArrays = longArrays;}
+
+        @Override
+        public long size() {
+            return longArrays.size();
+        }
+
+        @Override
+        public long[] longArrayValue(long nodeId) {
+            return longArrays.get(nodeId);
+        }
+    }
+
+    static class HugeObjectArrayDoubleArrayProperties implements DoubleArrayNodeProperties {
+        private final HugeObjectArray<double[]> doubleArrays;
+
+        HugeObjectArrayDoubleArrayProperties(HugeObjectArray<double[]> doubleArrays) {this.doubleArrays = doubleArrays;}
+
+        @Override
+        public long size() {
+            return doubleArrays.size();
+        }
+
+
+        @Override
+        public double[] doubleArrayValue(long nodeId) {
+            return doubleArrays.get(nodeId);
+        }
+    }
 
 }

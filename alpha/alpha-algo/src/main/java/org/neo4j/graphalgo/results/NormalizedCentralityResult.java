@@ -38,6 +38,16 @@ public class NormalizedCentralityResult extends CentralityResult {
 
     @Override
     public DoubleNodeProperties asNodeProperties() {
-        return this::score;
+        return new DoubleNodeProperties() {
+            @Override
+            public long size() {
+                return result.size();
+            }
+
+            @Override
+            public double doubleValue(long nodeId) {
+                return score(nodeId);
+            }
+        };
     }
 }

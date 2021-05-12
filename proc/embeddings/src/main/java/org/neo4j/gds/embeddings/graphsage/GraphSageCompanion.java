@@ -37,7 +37,21 @@ public final class GraphSageCompanion {
 
     @NotNull
     public static <T extends GraphSageBaseConfig> DoubleArrayNodeProperties getNodeProperties(AlgoBaseProc.ComputationResult<GraphSage, GraphSage.GraphSageResult, T> computationResult) {
-        return computationResult.result().embeddings()::get;
+        var size = computationResult.graph().nodeCount();
+        var embeddings = computationResult.result().embeddings();
+
+        return new DoubleArrayNodeProperties() {
+            @Override
+            public long size() {
+                return size;
+            }
+
+            @Override
+            public double[] doubleArrayValue(long nodeId) {
+
+                return embeddings.get(nodeId);
+            }
+        };
     }
 
     /**
