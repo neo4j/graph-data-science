@@ -184,17 +184,13 @@ public interface Neo4jProxyApi {
 
     Path homeDirectory(DatabaseLayout databaseLayout);
 
-    Configuration batchImporterConfig(
-        int writeConcurrency,
-        Optional<Long> pageCacheMemory
-    );
-
     BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
         PageCacheTracer pageCacheTracer,
-        Configuration config,
+        int writeConcurrency,
+        Optional<Long> pageCacheMemory,
         LogService logService,
         ExecutionMonitor executionMonitor,
         AdditionalInitialIds additionalInitialIds,

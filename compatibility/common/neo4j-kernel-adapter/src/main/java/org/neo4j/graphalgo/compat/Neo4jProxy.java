@@ -28,7 +28,6 @@ import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.ImportLogic;
 import org.neo4j.internal.batchimport.cache.LongArray;
 import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
@@ -272,16 +271,13 @@ public final class Neo4jProxy {
         return IMPL.homeDirectory(databaseLayout);
     }
 
-    public static Configuration batchImporterConfig(int writeConcurrency, Optional<Long> pageCacheMemory) {
-        return IMPL.batchImporterConfig(writeConcurrency, pageCacheMemory);
-    }
-
     public static BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
         PageCacheTracer pageCacheTracer,
-        Configuration config,
+        int writeConcurrency,
+        Optional<Long> pageCacheMemory,
         LogService logService,
         ExecutionMonitor executionMonitor,
         AdditionalInitialIds additionalInitialIds,
@@ -296,7 +292,8 @@ public final class Neo4jProxy {
             directoryStructure,
             fileSystem,
             pageCacheTracer,
-            config,
+            writeConcurrency,
+            pageCacheMemory,
             logService,
             executionMonitor,
             additionalInitialIds,

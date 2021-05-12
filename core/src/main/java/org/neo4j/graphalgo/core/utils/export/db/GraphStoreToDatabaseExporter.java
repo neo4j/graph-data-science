@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.export.db;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
@@ -28,7 +27,6 @@ import org.neo4j.graphalgo.core.utils.export.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.export.GraphStoreInput;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.ImportLogic;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
@@ -79,7 +77,6 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         DIRECTORY_IS_WRITABLE.validate(neo4jHome);
         var databaseConfig = Config.defaults(Settings.neo4jHome(), neo4jHome);
         var databaseLayout = Neo4jLayout.of(databaseConfig).databaseLayout(config.dbName());
-        var importConfig = getImportConfig();
 
         var lifeSupport = new LifeSupport();
 
@@ -111,7 +108,8 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
                 databaseLayout,
                 fs,
                 PageCacheTracer.NULL,
-                importConfig,
+                config.writeConcurrency(),
+                config.pageCacheMemory(),
                 logService,
                 Neo4jProxy.invisibleExecutionMonitor(),
                 AdditionalInitialIds.EMPTY,
@@ -127,10 +125,5 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         } finally {
             lifeSupport.shutdown();
         }
-    }
-
-    @NotNull
-    private Configuration getImportConfig() {
-        return Neo4jProxy.batchImporterConfig(config.writeConcurrency(), config.pageCacheMemory());
     }
 }

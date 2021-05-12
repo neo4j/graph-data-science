@@ -278,8 +278,23 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     }
 
     @Override
-    public Configuration batchImporterConfig(int writeConcurrency, Optional<Long> pageCacheMemory) {
-        return new Configuration() {
+    public BatchImporter instantiateBatchImporter(
+        BatchImporterFactory factory,
+        DatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        PageCacheTracer pageCacheTracer,
+        int writeConcurrency,
+        Optional<Long> pageCacheMemory,
+        LogService logService,
+        ExecutionMonitor executionMonitor,
+        AdditionalInitialIds additionalInitialIds,
+        Config dbConfig,
+        RecordFormats recordFormats,
+        ImportLogic.Monitor monitor,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    ) {
+        var importerConfig = new Configuration() {
             @Override
             public int maxNumberOfProcessors() {
                 return writeConcurrency;
@@ -295,29 +310,11 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
                 return false;
             }
         };
-    }
-
-    @Override
-    public BatchImporter instantiateBatchImporter(
-        BatchImporterFactory factory,
-        DatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        PageCacheTracer pageCacheTracer,
-        Configuration config,
-        LogService logService,
-        ExecutionMonitor executionMonitor,
-        AdditionalInitialIds additionalInitialIds,
-        Config dbConfig,
-        RecordFormats recordFormats,
-        ImportLogic.Monitor monitor,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
         return BatchImporterFactoryProxy.instantiateBatchImporter(
             factory,
             directoryStructure,
             fileSystem,
-            config,
+            importerConfig,
             logService,
             executionMonitor,
             additionalInitialIds,
