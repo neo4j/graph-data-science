@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.catalog;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphRemoveNodePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -75,11 +76,13 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
     private Long removeNodeProperties(GraphStore graphStore, GraphRemoveNodePropertiesConfig config) {
         Collection<NodeLabel> validNodeLabels = config.validNodeLabels(graphStore);
 
+        // We want to make sure not to count properties twice, if they are attached to multiple labels
         long sum = validNodeLabels.stream()
-            .mapToLong(nodeLabel ->
-                config.nodeProperties().stream()
-                    .mapToLong(property -> graphStore.nodePropertyValues(nodeLabel, property).size())
-                    .sum())
+            .flatMap(nodeLabel ->
+                config.nodeProperties().stream().map(property -> graphStore.nodePropertyValues(nodeLabel, property))
+            )
+            .distinct()
+            .mapToLong(NodeProperties::size)
             .sum();
 
         validNodeLabels.forEach(label ->

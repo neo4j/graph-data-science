@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeProjection;
@@ -55,7 +56,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, GraphRemoveNodePropertiesProc.class);
+        registerProcedures( GraphCreateProc.class, GraphRemoveNodePropertiesProc.class, FastRPMutateProc.class );
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher.call()
@@ -164,5 +165,34 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
             rootCause.getMessage(),
             containsString("No node projection with property key(s) ['nodeProp1', 'nodeProp2', 'nodeProp3'] found.")
         );
+    }
+
+    @Test
+    void shouldReportRemovalOfFastRPProperties() {
+        var fastRPCall = GdsCypher
+            .call()
+            .explicitCreation(TEST_GRAPH_SAME_PROPERTIES)
+            .algo("fastRP")
+            .mutateMode()
+            .addParameter("mutateProperty", "fastrp")
+            .addParameter("embeddingDimension", 1)
+            .yields();
+
+        runQuery(fastRPCall);
+
+        String graphWriteQuery = formatWithLocale(
+            "CALL gds.graph.removeNodeProperties(" +
+            "   '%s', " +
+            "   ['nodeProp1', 'nodeProp2', 'fastrp']" +
+            ") YIELD graphName, nodeProperties, propertiesRemoved",
+            TEST_GRAPH_SAME_PROPERTIES
+        );
+
+        runQueryWithRowConsumer(graphWriteQuery, row -> {
+            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
+            assertEquals(Arrays.asList("fastrp", "nodeProp1", "nodeProp2"), row.get("nodeProperties"));
+            assertEquals(18L, row.getNumber("propertiesRemoved").longValue());
+        });
+
     }
 }
