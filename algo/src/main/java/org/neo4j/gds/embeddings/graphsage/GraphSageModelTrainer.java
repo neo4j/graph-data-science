@@ -268,7 +268,7 @@ public class GraphSageModelTrainer {
             int searchDepth = ThreadLocalRandom.current().nextInt(maxSearchDepth) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
-                NeighborhoodSampler neighborhoodSampler = new NeighborhoodSampler(0L);
+                NeighborhoodSampler neighborhoodSampler = new NeighborhoodSampler(currentNode.get() + searchDepth);
                 OptionalLong maybeSample = neighborhoodSampler.sampleOne(graph, nodeId);
                 if (maybeSample.isPresent()) {
                     currentNode.set(maybeSample.getAsLong());
