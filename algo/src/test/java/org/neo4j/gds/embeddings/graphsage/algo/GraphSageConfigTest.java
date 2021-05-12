@@ -22,6 +22,8 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
@@ -35,9 +37,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GraphSageTrainConfigTest {
@@ -46,8 +47,24 @@ class GraphSageTrainConfigTest {
     void shouldThrowIfNoPropertiesProvided() {
         var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo"));
         var expectedMessage = "GraphSage requires at least one property.";
-        var throwable = assertThrows(IllegalArgumentException.class, () -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper));
-        assertEquals(expectedMessage, throwable.getMessage());
+        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(expectedMessage);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-20, 0})
+    void failOnInvalidProjectedFeatureDimension(int projectedFeatureDimension) {
+        var mapWrapper = CypherMapWrapper.create(Map.of(
+            "modelName", "foo",
+            "featureProperties", List.of("a"),
+            "projectedFeatureDimension", projectedFeatureDimension
+        ));
+
+        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Value for `projectedFeatureDimension` was `%d`", projectedFeatureDimension)
+            .hasMessageContaining("must be within the range [1,");
     }
 
     @Test
