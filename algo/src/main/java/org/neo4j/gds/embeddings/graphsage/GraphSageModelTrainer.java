@@ -75,7 +75,6 @@ public class GraphSageModelTrainer {
     private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
     private final ExecutorService executor;
     private final ProgressLogger progressLogger;
-    private double degreeProbabilityNormalizer;
     private final int batchSize;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ExecutorService executor, ProgressLogger progressLogger) {
@@ -113,11 +112,6 @@ public class GraphSageModelTrainer {
         this.layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
-
-        degreeProbabilityNormalizer = LongStream
-            .range(0, graph.nodeCount())
-            .mapToDouble(nodeId -> Math.pow(graph.degree(nodeId), 0.75))
-            .sum();
 
         double initialLoss = evaluateLoss(graph, features, -1);
         double previousLoss = initialLoss;
@@ -295,8 +289,9 @@ public class GraphSageModelTrainer {
 
         // each node should be possible to sample
         // therefore we need fictive rels to all nodes
+        // Math.log to avoid always sampling the high degree nodes
         var degreeWeightedNodes = LongStream.range(0, nodeCount)
-            .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, graph.degree(nodeId)));
+            .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, Math.log(graph.degree(nodeId))));
 
         return sampler.sample(degreeWeightedNodes, nodeCount, batchSize);
     }
