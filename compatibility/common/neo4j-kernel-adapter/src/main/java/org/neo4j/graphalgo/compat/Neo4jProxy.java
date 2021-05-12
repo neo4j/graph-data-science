@@ -190,8 +190,8 @@ public final class Neo4jProxy {
         return IMPL.relationshipsReference(nodeCursor);
     }
 
-    public static void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
-        IMPL.nodeLabelScan(dataRead, label, cursor);
+    public static void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
+        IMPL.nodeLabelScan(kernelTransaction, label, cursor);
     }
 
     public static void nodeIndexScan(

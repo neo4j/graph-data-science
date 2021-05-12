@@ -194,8 +194,8 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     }
 
     @Override
-    public void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
-        dataRead.nodeLabelScan(label, cursor, IndexOrder.NONE);
+    public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
+        kernelTransaction.dataRead().nodeLabelScan(label, cursor, IndexOrder.NONE);
     }
 
     @Override

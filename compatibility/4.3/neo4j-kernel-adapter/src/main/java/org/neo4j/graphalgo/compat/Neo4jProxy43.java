@@ -21,10 +21,12 @@ package org.neo4j.graphalgo.compat;
 
 import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.collections.api.factory.Sets;
+import org.neo4j.common.EntityType;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
@@ -51,6 +53,7 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.internal.kernel.api.TokenPredicate;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
@@ -61,7 +64,9 @@ import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexOrder;
+import org.neo4j.internal.schema.SchemaDescriptor;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
@@ -107,6 +112,7 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -206,8 +212,26 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
     }
 
     @Override
-    public void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor) {
-        dataRead.nodeLabelScan(label, cursor, IndexOrder.NONE);
+    public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
+        Iterator<IndexDescriptor> nodeIndexes = kernelTransaction
+            .schemaRead()
+            .index(SchemaDescriptor.forAnyEntityTokens(EntityType.NODE));
+        if (!nodeIndexes.hasNext()) {
+            throw new IllegalStateException("There is no index that can back a node label scan.");
+        }
+        IndexDescriptor nodeLabelIndexDescriptor = nodeIndexes.next();
+        try {
+            var read = kernelTransaction.dataRead();
+            var session = read.tokenReadSession(nodeLabelIndexDescriptor);
+            read.nodeLabelScan(
+                session,
+                cursor,
+                IndexQueryConstraints.unordered(true),
+                new TokenPredicate(label)
+            );
+        } catch (KernelException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

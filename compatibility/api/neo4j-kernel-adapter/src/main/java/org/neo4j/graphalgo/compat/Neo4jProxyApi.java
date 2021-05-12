@@ -130,7 +130,7 @@ public interface Neo4jProxyApi {
 
     long relationshipsReference(NodeCursor nodeCursor);
 
-    void nodeLabelScan(Read dataRead, int label, NodeLabelIndexCursor cursor);
+    void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor);
 
     void nodeIndexScan(
         Read dataRead,
