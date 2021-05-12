@@ -82,22 +82,22 @@ public interface GraphSageTrainConfig extends
         }
     }
 
+    @Value.Default
     @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#toString")
-    @Value.Default
     default Aggregator.AggregatorType aggregator() {
         return Aggregator.AggregatorType.MEAN;
     }
 
+    @Value.Default
     @Configuration.ConvertWith("org.neo4j.gds.embeddings.graphsage.ActivationFunction#parse")
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.ActivationFunction#toString")
-    @Value.Default
     default ActivationFunction activationFunction() {
         return ActivationFunction.SIGMOID;
     }
 
-    @Value.Default
     @Override
+    @Value.Default
     default double tolerance() {
         return 1e-4;
     }
@@ -112,8 +112,8 @@ public interface GraphSageTrainConfig extends
         return 1;
     }
 
-    @Value.Default
     @Override
+    @Value.Default
     default int maxIterations() {
         return 10;
     }
@@ -202,7 +202,25 @@ public interface GraphSageTrainConfig extends
     default void validateAgainstGraphStore(GraphStore graphStore) {
         var nodeLabels = this.nodeLabelIdentifiers(graphStore);
         var nodePropertyNames = this.featureProperties();
-        if (!this.isMultiLabel()) {
+
+        if (this.isMultiLabel()) {
+            // each property exists on at least one label
+            var allProperties =
+                graphStore
+                    .schema()
+                    .nodeSchema()
+                    .allProperties();
+            var missingProperties = nodePropertyNames
+                .stream()
+                .filter(key -> !allProperties.contains(key))
+                .collect(Collectors.toSet());
+            if (!missingProperties.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Each property set in `featureProperties` must exist for at least one label. Missing properties: %s",
+                    missingProperties
+                ));
+            }
+        } else {
             // all properties exist on all labels
             List<String> missingProperties = nodePropertyNames
                 .stream()
@@ -213,25 +231,6 @@ public interface GraphSageTrainConfig extends
                     "The following node properties are not present for each label in the graph: %s. Properties that exist for each label are %s",
                     missingProperties,
                     graphStore.nodePropertyKeys(nodeLabels)
-                ));
-            }
-        } else {
-            // each property exists on at least one label
-            var allProperties =
-                graphStore.nodePropertyKeys()
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> nodeLabels.contains(entry.getKey()))
-                    .flatMap(entry -> entry.getValue().stream())
-                    .collect(Collectors.toSet());
-            var missingProperties = nodePropertyNames
-                .stream()
-                .filter(key -> !allProperties.contains(key))
-                .collect(Collectors.toSet());
-            if (!missingProperties.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Each property set in `featureProperties` must exist for at least one label. Missing properties: %s",
-                    missingProperties
                 ));
             }
         }

@@ -19,16 +19,15 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
-import org.neo4j.graphalgo.core.loading.ImmutableGraphStoreWithConfig;
-import org.neo4j.graphalgo.gdl.GdlFactory;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.List;
 import java.util.Map;
@@ -111,8 +110,10 @@ class GraphSageTrainConfigTest {
     }
 
     @Nested
-    class MultiLabelGraphSageConfigProcTest {
+    @GdlExtension
+    class MultiLabelGraphSageConfigTest {
 
+        @GdlGraph
         private static final String GRAPH =
             "CREATE" +
             "  (dan:Person {age: 20, height: 185, weight: 75})," +
@@ -146,15 +147,8 @@ class GraphSageTrainConfigTest {
             "  (brie)-[:LIKES]->(bongos)," +
             "  (john)-[:LIKES]->(trumpet)";
 
-        private GraphStoreWithConfig store;
-
-        @BeforeEach
-        void setUp() {
-            store = ImmutableGraphStoreWithConfig.of(
-                GdlFactory.of(GRAPH).build().graphStore(),
-                GraphCreateFromStoreConfig.emptyWithName("", "persons")
-            );
-        }
+        @Inject
+        private GraphStore graphStore;
 
         @Test
         void testMissingPropertyForSingleLabel() {
@@ -164,9 +158,11 @@ class GraphSageTrainConfigTest {
                 .addNodeLabel("Person")
                 .build();
 
-            assertThatIllegalArgumentException().isThrownBy(
-                () -> singleLabelConfig.validateAgainstGraphStore(store.graphStore())
-            ).withMessage("The following node properties are not present for each label in the graph: [doesnotexist]. Properties that exist for each label are [weight, age, height]");
+            assertThatIllegalArgumentException()
+                .isThrownBy(() -> singleLabelConfig.validateAgainstGraphStore(graphStore))
+                .withMessage(
+                    "The following node properties are not present for each label in the graph: [doesnotexist]." +
+                    " Properties that exist for each label are [weight, age, height]");
         }
 
         @Test
@@ -178,9 +174,9 @@ class GraphSageTrainConfigTest {
                 .projectedFeatureDimension(4)
                 .build();
 
-            assertThatIllegalArgumentException().isThrownBy(
-                () -> singleLabelConfig.validateAgainstGraphStore(store.graphStore())
-            ).withMessage("Each property set in `featureProperties` must exist for at least one label. Missing properties: [doesnotexist]");
+            assertThatIllegalArgumentException()
+                .isThrownBy(() -> singleLabelConfig.validateAgainstGraphStore(graphStore))
+                .withMessage("Each property set in `featureProperties` must exist for at least one label. Missing properties: [doesnotexist]");
         }
 
         @Test
@@ -193,7 +189,7 @@ class GraphSageTrainConfigTest {
                 .build();
 
             assertThatNoException().isThrownBy(
-                () -> singleLabelConfig.validateAgainstGraphStore(store.graphStore())
+                () -> singleLabelConfig.validateAgainstGraphStore(graphStore)
             );
 
             var multiLabelConfig = ImmutableGraphSageTrainConfig.builder()
@@ -206,7 +202,7 @@ class GraphSageTrainConfigTest {
                 .build();
 
             assertThatNoException().isThrownBy(
-                () -> multiLabelConfig.validateAgainstGraphStore(store.graphStore())
+                () -> multiLabelConfig.validateAgainstGraphStore(graphStore)
             );
         }
     }
