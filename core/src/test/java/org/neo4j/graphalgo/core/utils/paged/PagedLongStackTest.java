@@ -83,6 +83,28 @@ final class PagedLongStackTest {
     }
 
     @Test
+    void shouldPeekFromPreviousPage() {
+        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
+
+        int repetitions = stack.pageSize + 1;
+        long expectedLast = 0;
+        long expected = 0;
+        for (int i = 0; i < repetitions; i++) {
+            long value = between(0L, 1337L).Long();
+            expected = expectedLast;
+            expectedLast = value;
+            stack.push(value);
+        }
+
+        long last = stack.pop();
+        long actual = stack.peek();
+        final String reason = "Wrong Value at index " + stack.pageSize;
+        final String reasonLast = "Wrong Value at index " + repetitions;
+        assertThat(reason, actual, is(expected));
+        assertThat(reasonLast, last, is(expectedLast));
+    }
+
+    @Test
     void shouldClearToAnEmptyStack() {
         PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
         IntStream.range(0, between(13, 37).integer())
