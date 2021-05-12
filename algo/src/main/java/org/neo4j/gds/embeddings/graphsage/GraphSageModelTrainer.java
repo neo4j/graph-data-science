@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.batch.WeightedUniformSampler;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.PassthroughVariable;
 import org.neo4j.gds.ml.core.functions.Weights;
@@ -31,6 +32,7 @@ import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.ImmutableRelationshipCursor;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -44,7 +46,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
-import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
@@ -57,7 +58,6 @@ import java.util.stream.LongStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
-import static org.neo4j.gds.ml.core.batch.NegativeSampler.negativeNode;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelTrainer {
@@ -248,7 +248,8 @@ public class GraphSageModelTrainer {
             batch.stream(),
             LongStream.concat(
                 neighborBatch(graph, batch),
-                negativeBatch(graph, batch.nodeCount())
+                // batch.nodeCount is <= config.batchsize (which is an int)
+                negativeBatch(graph, Math.toIntExact(batch.nodeCount()))
             )
         ).toArray();
 
@@ -267,6 +268,7 @@ public class GraphSageModelTrainer {
     private LongStream neighborBatch(Graph graph, Partition batch) {
         var neighborBatchBuilder = LongStream.builder();
         batch.consume(nodeId -> {
+            // randomWalk with at most maxSearchDepth steps and only save last node
             int searchDepth = ThreadLocalRandom.current().nextInt(maxSearchDepth) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
@@ -286,14 +288,17 @@ public class GraphSageModelTrainer {
         return neighborBatchBuilder.build();
     }
 
-    public LongStream negativeBatch(Graph graph, long batchSize) {
-        Random rand = new Random(layers[0].randomState());
-        return LongStream.range(0, batchSize)
-            .map(ignore -> negativeNode(
-                Partition.of(0, graph.nodeCount()),
-                rand,
-                (nodeId) -> Math.pow(graph.degree(nodeId), 0.75) / degreeProbabilityNormalizer
-            ));
+    // get a negative sample per node in batch
+    private LongStream negativeBatch(Graph graph, int batchSize) {
+        long nodeCount = graph.nodeCount();
+        var sampler = new WeightedUniformSampler(layers[0].randomState());
+
+        // each node should be possible to sample
+        // therefore we need fictive rels to all nodes
+        var degreeWeightedNodes = LongStream.range(0, nodeCount)
+            .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, graph.degree(nodeId)));
+
+        return sampler.sample(degreeWeightedNodes, nodeCount, batchSize);
     }
 
     private List<Weights<? extends Tensor<?>>> getWeights() {
