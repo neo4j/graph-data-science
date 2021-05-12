@@ -385,8 +385,24 @@ The trained models can then be used to stream or write back the generated node e
 In the case when you have a graph that does not have node properties we recommend to use existing algorithm in `mutate` mode to create node properties.
 Such algorithms can be <<algorithms-degree-centrality-examples-mutate, Degree Centrality>>, <<algorithms-page-rank-examples-mutate, PageRank>>, <<algorithms-betweenness-centrality-examples-mutate, Betweenness Centrality>>.
 
-The following example illustrates calling Degree Centrality in `mutate` mode and then using the mutated property as feature of GraphSAGE training:
-[source, cypher, role=noplay]
+The following example illustrates calling Degree Centrality in `mutate` mode and then using the mutated property as feature of GraphSAGE training.
+For the purpose of this example we are going to use the `Persons` graph, but we will not load any properties to the in-memory graph.
+
+.Create the in-memory graph without loading any node properties
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+  'noPropertiesGraph',
+  'Person', {
+    KNOWS: {
+      type: 'KNOWS',
+      orientation: 'UNDIRECTED'
+    }
+})
+----
+
+.Run DegreeCentrality mutate to create a new property for each node
+[source, cypher, role=noplay query-example, no-result=true, group=noProps]
 ----
 CALL gds.degree.mutate(
   'noPropertiesGraph',
@@ -394,7 +410,11 @@ CALL gds.degree.mutate(
     mutateProperty: 'degree'
   }
 ) YIELD nodePropertiesWritten
+----
 
+.Run GraphSAGE train using the property produced by DegreeCentrality as feature property
+[source, cypher, role=noplay query-example, no-result=true, group=noProps]
+----
 CALL gds.beta.graphSage.train(
   'noPropertiesGraph',
   {
@@ -402,10 +422,13 @@ CALL gds.beta.graphSage.train(
     featureProperties: ['degree']
   }
 )
+YIELD trainMillis
+RETURN trainMillis
 ----
 
 `gds.degree.mutate` will create node property `degree` for each of the nodes in the in-memory graph, which then can be used as `featureProperty` in the `GraphSAGE.train` mode.
 
+NOTE: Using separate algorithms to produce featureProperties can also be very useful to capture graph topology properties.
 
 === Stream
 
