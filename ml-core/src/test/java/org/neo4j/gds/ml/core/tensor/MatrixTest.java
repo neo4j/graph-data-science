@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.core.tensor;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -87,6 +86,14 @@ class MatrixTest {
 
         assertThrows(ArithmeticException.class, () -> matrix.add(matrixToAdd));
     }
+
+    @Test
+    void isVector() {
+        assertThat(new Matrix(1, 3).isVector()).isTrue();
+        assertThat(new Matrix(3, 1).isVector()).isTrue();
+        assertThat(new Matrix(3, 3).isVector()).isFalse();
+    }
+
 
     @Test
     void shouldEstimateMemory() {

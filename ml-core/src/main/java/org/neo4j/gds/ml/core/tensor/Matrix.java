@@ -84,4 +84,8 @@ public class Matrix extends Tensor<Matrix> {
     public int cols() {
         return dimensions[Dimensions.COLUMNS_INDEX];
     }
+
+    public boolean isVector() {
+        return rows() == 1 || cols() == 1;
+    }
 }
