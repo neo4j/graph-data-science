@@ -26,8 +26,6 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-
 public class L2NormSquared extends SingleParentVariable<Scalar> {
 
     public L2NormSquared(Variable<Matrix> parent) {
@@ -35,20 +33,20 @@ public class L2NormSquared extends SingleParentVariable<Scalar> {
     }
 
     public static long sizeInBytesOfApply() {
-        return sizeOfDoubleArray(1);
+        return Scalar.sizeInBytes();
     }
 
     @Override
     public Scalar apply(ComputationContext ctx) {
-        Matrix p = (Matrix) ctx.data(parent());
-        var rows = p.rows();
-        var cols = p.cols();
+        var parent = (Matrix) ctx.data(parent());
+        var rows = parent.rows();
+        var cols = parent.cols();
 
         var biasColumnIndex = cols - 1;
         double l2NormWithoutBias = 0;
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < biasColumnIndex; col++) {
-                var value = p.dataAt(row * cols + col);
+                var value = parent.dataAt(row * cols + col);
                 l2NormWithoutBias += (value * value);
             }
         }
@@ -58,7 +56,7 @@ public class L2NormSquared extends SingleParentVariable<Scalar> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        Matrix data = (Matrix) ctx.data(parent).copy();
+        var data = (Matrix) ctx.data(parent).copy();
         var rows = data.rows();
         var cols = data.cols();
         var biasColumnIndex = cols - 1;

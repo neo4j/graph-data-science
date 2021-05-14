@@ -57,5 +57,7 @@ public class Scalar extends Tensor<Scalar> {
         return data[0];
     }
 
-
+    public static long sizeInBytes() {
+        return Tensor.sizeInBytes(Dimensions.scalar());
+    }
 }
