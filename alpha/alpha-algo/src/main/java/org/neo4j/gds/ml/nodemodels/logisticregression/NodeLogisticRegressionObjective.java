@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.ml.Objective;
+import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
@@ -52,8 +53,8 @@ public class NodeLogisticRegressionObjective implements Objective<NodeLogisticRe
         var batchLocalWeightGradient = Weights.sizeInBytes(numberOfClasses, numberOfFeatures);
         var targets = Matrix.sizeInBytes(batchSize, 1);
         var weightedFeatures = MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(
-            new int[]{batchSize, numberOfFeatures},
-            new int[]{numberOfClasses, numberOfFeatures}
+            Dimensions.matrix(batchSize, numberOfFeatures),
+            Dimensions.matrix(numberOfClasses, numberOfFeatures)
         );
         var softMax = weightedFeatures;
         var unpenalizedLoss = CrossEntropyLoss.sizeInBytes();
