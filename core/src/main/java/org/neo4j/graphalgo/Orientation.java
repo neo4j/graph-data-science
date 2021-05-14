@@ -20,10 +20,11 @@
 package org.neo4j.graphalgo;
 
 import java.util.Arrays;
-import java.util.Locale;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public enum Orientation {
 
@@ -31,32 +32,32 @@ public enum Orientation {
     REVERSE,
     UNDIRECTED;
 
-    public static Orientation of(String value) {
-        try {
-            return Orientation.valueOf(value.toUpperCase(Locale.ENGLISH));
-        } catch (IllegalArgumentException e) {
-            String availableProjections = Arrays
-                .stream(Orientation.values())
-                .map(Orientation::name)
-                .collect(Collectors.joining(", "));
+    private static final List<String> VALUES = Arrays
+        .stream(Orientation.values())
+        .map(Orientation::name)
+        .collect(Collectors.toList());
+
+    public static Orientation parse(Object input) {
+        if (input instanceof String) {
+            var inputString = toUpperCaseWithLocale((String) input);
+            if (VALUES.contains(inputString)) {
+                return Orientation.valueOf(inputString);
+            }
+
             throw new IllegalArgumentException(formatWithLocale(
                 "Orientation `%s` is not supported. Must be one of: %s.",
-                value,
-                availableProjections));
+                inputString,
+                VALUES
+            ));
         }
-    }
+        else if (input instanceof Orientation) {
+            return (Orientation) input;
+        }
 
-    public static Orientation parse(Object object) {
-        if (object == null) {
-            return null;
-        }
-        if (object instanceof String) {
-            return of(((String) object).toUpperCase(Locale.ENGLISH));
-        }
-        if (object instanceof Orientation) {
-            return (Orientation) object;
-        }
-        return null;
+        throw new IllegalArgumentException(formatWithLocale(
+            "Expected Orientation or String. Got %s.",
+            input.getClass().getSimpleName()
+        ));
     }
 
     public static String toString(Orientation orientation) {

@@ -372,7 +372,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 "B",
                 RelationshipProjection.builder()
                     .type("REL")
-                    .orientation(Orientation.of(orientation))
+                    .orientation(Orientation.parse(orientation))
                     .build()
             )
             .graphCreate(name)
@@ -1299,6 +1299,17 @@ class GraphCreateProcTest extends BaseProcTest {
             "CALL gds.graph.create('g', '*', $relProjection)",
             map("relProjection", relProjection),
             "Aggregation `INVALID` is not supported."
+        );
+    }
+
+    @Test
+    void failsOnInvalidOrientation() {
+        Map<String, Object> relProjection = map("A", map(TYPE_KEY, "REL", ORIENTATION_KEY, "INVALID"));
+
+        assertError(
+            "CALL gds.graph.create('g', '*', $relProjection)",
+            map("relProjection", relProjection),
+            "Orientation `INVALID` is not supported."
         );
     }
 
