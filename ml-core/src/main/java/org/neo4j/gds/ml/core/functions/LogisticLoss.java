@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.core.functions;
 
 import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
@@ -31,6 +30,12 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import java.util.List;
 
 import static java.lang.Math.log;
+import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
+import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
+import static org.neo4j.gds.ml.core.Dimensions.isVector;
+import static org.neo4j.gds.ml.core.Dimensions.scalar;
+import static org.neo4j.gds.ml.core.Dimensions.totalSize;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 /**
    This variable represents the composition of the logistic regression model's prediction function
@@ -59,7 +64,12 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
         Variable<Matrix> features,
         Variable<Vector> targets
     ) {
-        super(List.of(weights, features, targets), Dimensions.scalar());
+        super(List.of(weights, features, targets), scalar());
+
+        validateVectorDimensions(weights.dimensions(), features.dimension(COLUMNS_INDEX));
+        validateVectorDimensions(predictions.dimensions(), features.dimension(ROWS_INDEX));
+        validateVectorDimensions(targets.dimensions(), features.dimension(ROWS_INDEX));
+
         this.weights = weights;
         this.predictions = predictions;
         this.features = features;
@@ -72,21 +82,26 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
         var predTensor = ctx.data(predictions);
         var targetTensor = ctx.data(targets);
 
+        var nodeCount = targetTensor.length();
+
         double result = 0;
-        for(int row = 0; row < predTensor.rows(); row++) {
-            double v1 = targetTensor.dataAt(row) * log(predTensor.dataAt(row));
-            double v2 = (1.0 - targetTensor.dataAt(row)) * log(1.0 - predTensor.dataAt(row));
-            if (predTensor.dataAt(row) == 0) {
+        for(int nodeId = 0; nodeId < nodeCount; nodeId++) {
+            var predicted = predTensor.dataAt(nodeId);
+            var target = targetTensor.dataAt(nodeId);
+            double v1 = target * log(predicted);
+            double v2 = (1.0 - target) * log(1.0 - predicted);
+
+            if (predicted == 0) {
                 result += v2;
             }
-            else if (predTensor.dataAt(row) == 1.0) {
+            else if (predicted == 1.0) {
                 result += v1;
             } else {
                 result += v1 + v2;
             }
         }
 
-        return new Scalar(-result / predTensor.rows());
+        return new Scalar(-result / nodeCount);
     }
 
     @Override
@@ -99,18 +114,29 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
             var weightsTensor = ctx.data(weights);
             var featuresTensor = ctx.data(features);
             var gradient = weightsTensor.zeros();
-            int cols = weightsTensor.cols();
-            int nodes = predTensor.rows();
-            for (int node = 0; node < nodes; node++) {
-                double errorPerNode = (predTensor.dataAt(node) - targetTensor.dataAt(node)) / nodes;
-                for (int dim = 0; dim < cols; dim++) {
-                    gradient.addDataAt(dim, errorPerNode * featuresTensor.dataAt(node * cols + dim));
+            int featureCount = weightsTensor.cols();
+            int nodeCount = targetTensor.length();
+
+            for (int node = 0; node < nodeCount; node++) {
+                double errorPerNode = (predTensor.dataAt(node) - targetTensor.dataAt(node)) / nodeCount;
+                for (int feature = 0; feature < featureCount; feature++) {
+                    gradient.addDataAt(feature, errorPerNode * featuresTensor.dataAt(node * featureCount + feature));
                 }
             }
             return gradient;
         } else {
             // assume other variables do not require gradient
             return ctx.data(parent).zeros();
+        }
+    }
+
+    private void validateVectorDimensions(int[] dimensions, int vectorLength) {
+        if (!isVector(dimensions) || totalSize(dimensions) != vectorLength) {
+            throw new IllegalStateException(formatWithLocale(
+                "Expected a vector of size %d. Got %s",
+                vectorLength,
+                totalSize(dimensions)
+            ));
         }
     }
 }
