@@ -390,7 +390,7 @@ public final class TestSupport {
 
     public static String getCypherAggregation(String aggregation, String property) {
         String cypherAggregation;
-        switch (Aggregation.lookup(aggregation)) {
+        switch (Aggregation.parse(aggregation)) {
             case SINGLE:
                 cypherAggregation = "head(collect(%s))";
                 break;

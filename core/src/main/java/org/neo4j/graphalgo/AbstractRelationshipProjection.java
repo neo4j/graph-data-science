@@ -77,7 +77,7 @@ public abstract class AbstractRelationshipProjection extends ElementProjection {
             builder.orientation(Orientation.parse(nonEmptyString(map, ORIENTATION_KEY)));
         }
         if (map.containsKey(AGGREGATION_KEY)) {
-            Aggregation aggregation = Aggregation.lookup(nonEmptyString(map, AGGREGATION_KEY));
+            Aggregation aggregation = Aggregation.parse(nonEmptyString(map, AGGREGATION_KEY));
             builder.aggregation(aggregation);
             return create(map, aggregation, properties -> builder.properties(properties).build());
         }

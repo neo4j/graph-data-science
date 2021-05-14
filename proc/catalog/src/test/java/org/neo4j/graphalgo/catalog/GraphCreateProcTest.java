@@ -581,7 +581,7 @@ class GraphCreateProcTest extends BaseProcTest {
                 RelationshipProjection.builder()
                     .type("KNOWS")
                     .orientation(Orientation.NATURAL)
-                    .addProperty("weight", "weight", DefaultValue.of(Double.NaN), Aggregation.lookup(aggregation))
+                    .addProperty("weight", "weight", DefaultValue.of(Double.NaN), Aggregation.parse(aggregation))
                     .build()
             )
             .graphCreate(standard)

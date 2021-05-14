@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.core.Aggregation;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
@@ -97,7 +96,7 @@ public abstract class PropertyMapping {
             if (aggregationValue == null) {
                 aggregation = Aggregation.DEFAULT;
             } else if (aggregationValue instanceof String) {
-                aggregation = Aggregation.lookup(((String) aggregationValue).toUpperCase(Locale.ENGLISH));
+                aggregation = Aggregation.parse(aggregationValue);
             } else {
                 throw new IllegalStateException(formatWithLocale(
                     "Expected the value of '%s' to be of type String, but was '%s'",

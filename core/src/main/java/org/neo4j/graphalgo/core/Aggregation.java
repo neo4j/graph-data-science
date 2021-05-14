@@ -20,10 +20,12 @@
 package org.neo4j.graphalgo.core;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public enum Aggregation {
     DEFAULT {
@@ -107,35 +109,35 @@ public enum Aggregation {
         return mappingDefaultValue;
     }
 
-    public static Aggregation lookup(String name) {
-        if (name.equalsIgnoreCase("SKIP")) {
-            name = SINGLE.name();
-        }
-        try {
-            return Aggregation.valueOf(name.toUpperCase(Locale.ENGLISH));
-        } catch (IllegalArgumentException e) {
-            String availableStrategies = Arrays
-                    .stream(Aggregation.values())
-                    .map(Aggregation::name)
-                    .collect(Collectors.joining(", "));
-            throw new IllegalArgumentException(formatWithLocale(
-                    "Aggregation `%s` is not supported. Must be one of: %s.",
-                    name,
-                    availableStrategies));
-        }
-    }
+    private static final List<String> VALUES = Arrays
+        .stream(Aggregation.values())
+        .map(Aggregation::name)
+        .collect(Collectors.toList());
 
-    public static Aggregation parse(Object object) {
-        if (object == null) {
-            return null;
+    public static Aggregation parse(Object input) {
+        if (input instanceof String) {
+            var inputString = toUpperCaseWithLocale((String) input);
+
+            if (VALUES.contains(inputString)) {
+                return Aggregation.valueOf(inputString.toUpperCase(Locale.ENGLISH));
+            } else if (inputString.equalsIgnoreCase("SKIP")) {
+                return SINGLE;
+            }
+
+            throw new IllegalArgumentException(formatWithLocale(
+                "Aggregation `%s` is not supported. Must be one of: %s.",
+                inputString,
+                VALUES
+            ));
         }
-        if (object instanceof String) {
-            return lookup(((String) object).toUpperCase(Locale.ENGLISH));
+        else if (input instanceof Aggregation) {
+            return (Aggregation) input;
         }
-        if (object instanceof Aggregation) {
-            return (Aggregation) object;
-        }
-        return null;
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "Expected Aggregation or String. Got %s.",
+            input.getClass().getSimpleName()
+        ));
     }
 
     public static Aggregation resolve(Aggregation aggregation) {
