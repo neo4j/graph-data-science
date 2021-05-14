@@ -37,7 +37,7 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
     private final int cols;
 
     public WeightedElementwiseMax(
-        Variable<?> parent,
+        Variable<Matrix> parent,
         RelationshipWeights relationshipWeights,
         SubGraph subGraph
     ) {

@@ -31,7 +31,7 @@ public class ElementwiseMax extends SingleParentVariable<Matrix> {
     private final int rows;
     private final int cols;
 
-    public ElementwiseMax(Variable<?> parent, int[][] adjacencyMatrix) {
+    public ElementwiseMax(Variable<Matrix> parent, int[][] adjacencyMatrix) {
         super(parent, Dimensions.matrix(adjacencyMatrix.length, parent.dimension(1)));
         this.adjacencyMatrix = adjacencyMatrix;
         this.rows = adjacencyMatrix.length;
