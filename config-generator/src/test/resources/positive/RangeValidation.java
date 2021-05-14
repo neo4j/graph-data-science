@@ -20,6 +20,7 @@
 package positive;
 
 import org.neo4j.graphalgo.annotation.Configuration;
+import java.util.List;
 import java.util.Optional;
 
 @Configuration("RangeValidationConfig")
@@ -36,4 +37,7 @@ public interface RangeValidation {
 
     @Configuration.DoubleRange(min = 21.0, max = 42.0, minInclusive = false, maxInclusive = true)
     Optional<Double> maybeDoubleWithinRange();
+
+    @Configuration.DoubleRange(min = 21.0, max = 42.0, minInclusive = false, maxInclusive = true)
+    List<Double> listDoubleWithinRange();
 }

@@ -20,6 +20,7 @@
 package positive;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
@@ -37,6 +38,8 @@ public final class RangeValidationConfig implements RangeValidation {
 
     private Optional<Double> maybeDoubleWithinRange;
 
+    private List<Double> listDoubleWithinRange;
+
     public RangeValidationConfig(@NotNull CypherMapWrapper config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
@@ -47,7 +50,8 @@ public final class RangeValidationConfig implements RangeValidation {
                 21,
                 42,
                 false,
-                true);
+                true
+            );
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
@@ -77,7 +81,10 @@ public final class RangeValidationConfig implements RangeValidation {
             errors.add(e);
         }
         try {
-            this.maybeDoubleWithinRange = CypherMapWrapper.failOnNull("maybeDoubleWithinRange", config.getOptional("maybeDoubleWithinRange", Double.class));
+            this.maybeDoubleWithinRange = CypherMapWrapper.failOnNull(
+                "maybeDoubleWithinRange",
+                config.getOptional("maybeDoubleWithinRange", Double.class)
+            );
             maybeDoubleWithinRange.ifPresent(maybeDoubleWithinRange ->
                 org.neo4j.graphalgo.core.CypherMapWrapper.validateDoubleRange(
                     "maybeDoubleWithinRange",
@@ -88,6 +95,22 @@ public final class RangeValidationConfig implements RangeValidation {
                     true
                 )
             );
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.listDoubleWithinRange = CypherMapWrapper.failOnNull(
+                "listDoubleWithinRange",
+                config.requireChecked("listDoubleWithinRange", List.class)
+            );
+            listDoubleWithinRange.forEach(listDoubleWithinRange -> org.neo4j.graphalgo.core.CypherMapWrapper.validateDoubleRange(
+                "listDoubleWithinRange",
+                listDoubleWithinRange,
+                21.0,
+                42.0,
+                false,
+                true
+            ));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
@@ -128,5 +151,10 @@ public final class RangeValidationConfig implements RangeValidation {
     @Override
     public Optional<Double> maybeDoubleWithinRange() {
         return this.maybeDoubleWithinRange;
+    }
+
+    @Override
+    public List<Double> listDoubleWithinRange() {
+        return this.listDoubleWithinRange;
     }
 }

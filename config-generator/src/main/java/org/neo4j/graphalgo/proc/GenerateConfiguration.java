@@ -372,15 +372,24 @@ final class GenerateConfiguration {
 
         var fieldCodeBuilder = CodeBlock.builder().addStatement("this.$N = $L", definition.fieldName(), codeBlock);
 
-        Consumer<CodeBlock> validationConsumer = isTypeOf(Optional.class, definition.fieldType())
-            ? validatorCode -> fieldCodeBuilder.addStatement(
+        Consumer<CodeBlock> validationConsumer = fieldCodeBuilder::addStatement;
+        if (isTypeOf(Optional.class, definition.fieldType())) {
+            validationConsumer = validatorCode -> fieldCodeBuilder.addStatement(
                 String.format(
                     Locale.US,
                     "%1$s.ifPresent(%1$s -> %2$s)",
                     definition.fieldName(),
                     validatorCode
-                ))
-            : fieldCodeBuilder::addStatement;
+                ));
+        } else if (isTypeOf(List.class, definition.fieldType())){
+            validationConsumer = validatorCode -> fieldCodeBuilder.addStatement(
+                String.format(
+                    Locale.US,
+                    "%1$s.forEach(%1$s -> %2$s)",
+                    definition.fieldName(),
+                    validatorCode
+                ));
+        }
 
         if (definition.member().validatesIntegerRange()) {
             Configuration.IntegerRange range = definition
