@@ -22,6 +22,8 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -32,15 +34,22 @@ import org.neo4j.graphalgo.extension.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GraphSageTrainConfigTest {
+
+    private static Stream<Arguments> invalidActivationFunctions() {
+        return Stream.of(
+            Arguments.of(1, "Expected ActivationFunction or String. Got Integer."),
+            Arguments.of("alwaysTrue", "ActivationFunction `alwaysTrue` is not supported. Must be one of: ['RELU', 'SIGMOID'].")
+        );
+    }
 
     @Test
     void shouldThrowIfNoPropertiesProvided() {
@@ -79,6 +88,15 @@ class GraphSageTrainConfigTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Value for `epochs` was `%d`", projectedFeatureDimension)
             .hasMessageContaining("must be within the range [1,");
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidActivationFunctions")
+    void failOnInvalidActivationFunction(Object activationFunction, String errorMessage) {
+        var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo", "activationFunction", activationFunction));
+        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(errorMessage);
     }
 
     @Test

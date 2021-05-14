@@ -23,10 +23,14 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.functions.Relu;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.graphalgo.utils.StringJoining;
 
-import java.util.Locale;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public enum ActivationFunction {
@@ -61,17 +65,33 @@ public enum ActivationFunction {
         return valueOf(toUpperCaseWithLocale(activationFunction));
     }
 
-    public static ActivationFunction parse(Object object) {
-        if (object == null) {
-            return null;
+    private static final List<String> VALUES = Arrays
+        .stream(ActivationFunction.values())
+        .map(ActivationFunction::name)
+        .collect(Collectors.toList());
+
+
+    public static ActivationFunction parse(Object input) {
+        if (input instanceof String) {
+            var inputString = toUpperCaseWithLocale((String) input);
+
+            if (!VALUES.contains(inputString)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "ActivationFunction `%s` is not supported. Must be one of: %s.",
+                    input,
+                    StringJoining.join(VALUES)
+                ));
+            }
+
+            return of(inputString);
+        } else if (input instanceof ActivationFunction) {
+            return (ActivationFunction) input;
         }
-        if (object instanceof String) {
-            return of(((String) object).toUpperCase(Locale.ENGLISH));
-        }
-        if (object instanceof ActivationFunction) {
-            return (ActivationFunction) object;
-        }
-        return null;
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "Expected ActivationFunction or String. Got %s.",
+            input.getClass().getSimpleName()
+        ));
     }
 
     public static String toString(ActivationFunction af) {
