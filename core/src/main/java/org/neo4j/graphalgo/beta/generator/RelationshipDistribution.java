@@ -20,10 +20,16 @@
 package org.neo4j.graphalgo.beta.generator;
 
 import org.neo4j.graphalgo.core.utils.statistics.DistributionHelper;
+import org.neo4j.graphalgo.utils.StringJoining;
 
-import java.util.Locale;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public enum RelationshipDistribution {
     UNIFORM {
@@ -65,17 +71,30 @@ public enum RelationshipDistribution {
         }
     };
 
+    private static final List<String> VALUES = Arrays
+        .stream(RelationshipDistribution.values())
+        .map(RelationshipDistribution::name)
+        .collect(Collectors.toList());
+
     public static RelationshipDistribution parse(Object object) {
-        if (object == null) {
-            return null;
-        }
         if (object instanceof String) {
-            return RelationshipDistribution.valueOf(((String) object).toUpperCase(Locale.ENGLISH));
-        }
-        if (object instanceof RelationshipDistribution) {
+            var inputString = toUpperCaseWithLocale((String) object);
+            if(!VALUES.contains(inputString)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "RelationshipDistribution `%s` is not supported. Must be one of: %s.",
+                    object,
+                    StringJoining.join(VALUES)
+                ));
+            }
+            return RelationshipDistribution.valueOf(inputString);
+        } else if (object instanceof RelationshipDistribution) {
             return (RelationshipDistribution) object;
         }
-        return null;
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "Expected RelationshipDistribution or String. Got %s.",
+            object.getClass().getSimpleName()
+        ));
     }
 
     /**

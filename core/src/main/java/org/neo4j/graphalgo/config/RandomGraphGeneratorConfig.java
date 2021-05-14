@@ -102,10 +102,12 @@ public interface RandomGraphGeneratorConfig extends GraphCreateConfig {
 
     @Value.Default
     default RelationshipProjections relationshipProjections() {
+        // Necessary to avoid throwing NPE for invalid relationshipDistribution
+        var relDistribution = (relationshipDistribution() == null) ? "tmp" : relationshipDistribution().name();
         return RelationshipProjections.builder()
             .putProjection(
-                RelationshipType.of(relationshipDistribution().name()),
-                RelationshipProjection.of(relationshipDistribution().name(), orientation(), aggregation())
+                RelationshipType.of(relDistribution),
+                RelationshipProjection.of(relDistribution, orientation(), aggregation())
             )
             .build();
     }

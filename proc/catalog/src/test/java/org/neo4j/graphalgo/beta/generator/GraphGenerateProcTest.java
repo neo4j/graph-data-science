@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.beta.generator;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,6 +62,16 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphGenerateProcTest extends BaseProcTest {
 
+    private static Stream<Arguments> invalidRelationshipDistributions() {
+        return Stream.of(
+            Arguments.of(1L, "Expected RelationshipDistribution or String. Got Long."),
+            Arguments.of(
+                "'bestDistribution'",
+                "RelationshipDistribution `bestDistribution` is not supported. Must be one of: ['POWER_LAW', 'RANDOM', 'UNIFORM']."
+            )
+        );
+    }
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphGenerateProc.class, NodeSimilarityStatsProc.class);
@@ -81,6 +92,16 @@ class GraphGenerateProcTest extends BaseProcTest {
         Throwable throwable = rootCause(ex);
         assertEquals(IllegalArgumentException.class, throwable.getClass());
         assertEquals("`graphName` can not be null or blank, but it was ``", throwable.getMessage());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidRelationshipDistributions")
+    void shouldThrowOnInvalidRelationshipDistribution(Object distribution, String error) {
+        var generateQuery = formatWithLocale("CALL gds.beta.graph.generate('test', 10, 5, {relationshipDistribution: %s})", distribution);
+        Assertions.assertThatThrownBy(() -> runQuery(generateQuery))
+            .isInstanceOf(QueryExecutionException.class)
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasRootCauseMessage(error);
     }
 
     @Test
