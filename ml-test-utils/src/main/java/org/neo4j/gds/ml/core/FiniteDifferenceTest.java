@@ -22,11 +22,11 @@ package org.neo4j.gds.ml.core;
 import org.assertj.core.data.Offset;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.neo4j.gds.ml.core.Dimensions.totalSize;
 
 public interface FiniteDifferenceTest {
 
@@ -46,7 +46,7 @@ public interface FiniteDifferenceTest {
 
     default void finiteDifferenceShouldApproximateGradient(List<Weights<?>> weightVariables, Variable<Scalar> loss) {
         for (Weights<?> variable : weightVariables) {
-            for (int i = 0; i < Tensor.totalSize(variable.dimensions()); i++) {
+            for (int i = 0; i < totalSize(variable.dimensions()); i++) {
                 ComputationContext ctx = new ComputationContext();
                 double f0 = ctx.forward(loss).value();
                 ctx.backward(loss);

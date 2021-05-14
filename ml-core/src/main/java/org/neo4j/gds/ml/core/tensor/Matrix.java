@@ -86,6 +86,6 @@ public class Matrix extends Tensor<Matrix> {
     }
 
     public boolean isVector() {
-        return rows() == 1 || cols() == 1;
+        return Dimensions.isVector(dimensions);
     }
 }

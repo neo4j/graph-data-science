@@ -42,6 +42,22 @@ public final class Dimensions {
         return new int[]{rows, cols};
     }
 
+    public static boolean isVector(int[] dimensions) {
+        // at most one dimensions can be larger than 1
+        return Arrays.stream(dimensions).filter(dim -> dim > 1).count() <= 1;
+    }
+
+    public static int totalSize(int[] dimensions) {
+        if (dimensions.length == 0) {
+            return 0;
+        }
+        int totalSize = 1;
+        for (int dim : dimensions) {
+            totalSize *= dim;
+        }
+        return totalSize;
+    }
+
     public static String render(int[] dimensions) {
         if (dimensions.length == 0) {
             return "Scalar";
