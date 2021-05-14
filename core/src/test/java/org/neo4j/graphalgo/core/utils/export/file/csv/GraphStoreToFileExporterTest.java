@@ -305,8 +305,20 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             GRAPH_INFO_FILE_NAME,
             List.of(
-                List.of(CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME, CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME, CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME, CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME),
-                List.of(graphStore.databaseId().databaseId().uuid().toString(), graphStore.databaseId().name(), Long.toString(graphStore.nodeCount()), Long.toString(3L))
+                List.of(
+                    CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME,
+                    CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
+                    CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
+                    CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
+                    CsvGraphInfoVisitor.BIT_ID_MAP_COLUMN_NAME
+                ),
+                List.of(
+                    graphStore.databaseId().databaseId().uuid().toString(),
+                    graphStore.databaseId().name(),
+                    Long.toString(graphStore.nodeCount()),
+                    Long.toString(3L),
+                    Boolean.toString(false)
+                )
             )
         );
     }

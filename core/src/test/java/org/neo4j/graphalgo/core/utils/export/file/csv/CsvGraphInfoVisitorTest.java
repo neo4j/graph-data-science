@@ -31,10 +31,10 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvGraphInfoVisitor
 class CsvGraphInfoVisitorTest extends CsvVisitorTest {
 
     @Test
-    void shouldExportDatabaseId() {
+    void shouldExportGraphInfo() {
         NamedDatabaseId namedDatabaseId = TestDatabaseIdRepository.randomNamedDatabaseId();
         CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
-        graphInfoVisitor.export(ImmutableGraphInfo.of(namedDatabaseId, 1337L, 19L));
+        graphInfoVisitor.export(ImmutableGraphInfo.of(namedDatabaseId, 1337L, 19L, false));
         graphInfoVisitor.close();
 
         assertCsvFiles(List.of(GRAPH_INFO_FILE_NAME));
@@ -46,7 +46,8 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
                     namedDatabaseId.databaseId().uuid().toString(),
                     namedDatabaseId.name(),
                     Long.toString(1337L),
-                    Long.toString(19L)
+                    Long.toString(19L),
+                    Boolean.toString(false)
                 )
             )
         );
@@ -58,7 +59,8 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
             CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME,
             CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
             CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
-            CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME
+            CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
+            CsvGraphInfoVisitor.BIT_ID_MAP_COLUMN_NAME
         );
     }
 }

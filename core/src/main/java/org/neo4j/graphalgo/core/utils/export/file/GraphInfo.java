@@ -27,4 +27,5 @@ public interface GraphInfo {
     NamedDatabaseId namedDatabaseId();
     long nodeCount();
     long maxOriginalId();
+    boolean bitIdMap();
 }
