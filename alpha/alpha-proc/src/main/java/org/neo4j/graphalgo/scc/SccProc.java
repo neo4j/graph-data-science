@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -96,14 +96,14 @@ public class SccProc extends AlgoBaseProc<SccAlgorithm, HugeLongArray, SccConfig
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build();
 
-            var properties = new DoubleNodeProperties() {
+            var properties = new LongNodeProperties() {
                 @Override
                 public long size() {
                     return computationResult.graph().nodeCount();
                 }
 
                 @Override
-                public double doubleValue(long nodeId) {
+                public long longValue(long nodeId) {
                     return components.get(nodeId);
                 }
             };
