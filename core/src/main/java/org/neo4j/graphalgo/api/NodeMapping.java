@@ -40,10 +40,6 @@ public interface NodeMapping extends IdMapping, NodeIterator, BatchNodeIterable 
         throw new UnsupportedOperationException("This node mapping does not support label filtering");
     }
 
-    default boolean bitIdMap() {
-        return false;
-    }
-
     @FunctionalInterface
     interface NodeLabelConsumer {
 

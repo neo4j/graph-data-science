@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
+import org.neo4j.graphalgo.core.loading.IdMapImplementations;
 import org.neo4j.graphalgo.core.utils.export.file.GraphInfo;
 import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphInfo;
 
@@ -37,7 +38,7 @@ public interface MetaDataStore {
             graphStore.databaseId(),
             graphStore.nodeCount(),
             graphStore.nodes().highestNeoId(),
-            graphStore.nodes().bitIdMap()
+            IdMapImplementations.useBitIdMap()
         );
         NodeSchema nodeSchema = graphStore.schema().nodeSchema();
         RelationshipSchema relationshipSchema = graphStore.schema().relationshipSchema();

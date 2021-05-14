@@ -87,11 +87,6 @@ public class BitIdMap implements NodeMapping, NodeIterator, BatchNodeIterable {
     }
 
     @Override
-    public boolean bitIdMap() {
-        return true;
-    }
-
-    @Override
     public long toMappedNodeId(long nodeId) {
         return sparseLongArray.toMappedNodeId(nodeId);
     }
