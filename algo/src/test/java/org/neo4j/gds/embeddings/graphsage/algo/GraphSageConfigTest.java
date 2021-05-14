@@ -141,7 +141,7 @@ class GraphSageTrainConfigTest {
     }
 
     @Test
-    void failOnLongSamples() {
+    void failOnLongSizedSamples() {
         assertThatThrownBy(() ->
             GraphSageTrainConfig.of(
                 "",
@@ -156,6 +156,23 @@ class GraphSageTrainConfigTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasRootCauseExactlyInstanceOf(ArithmeticException.class)
             .hasMessageContaining("Sample size must smaller than 2^31");
+    }
+
+    @Test
+    void failOnZeroSample() {
+        assertThatThrownBy(() ->
+            GraphSageTrainConfig.of(
+                "",
+                Optional.empty(),
+                Optional.empty(),
+                CypherMapWrapper.create(Map.of(
+                    "modelName", "graphSageModel",
+                    "featureProperties", List.of("one"),
+                    "sampleSizes", List.of(1, 10, 0, 20)
+                ))
+            ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Value for `sampleSizes` was `0`, but must be within the range [1,");
     }
 
     @Nested

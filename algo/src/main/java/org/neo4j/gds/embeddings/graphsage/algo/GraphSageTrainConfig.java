@@ -66,6 +66,7 @@ public interface GraphSageTrainConfig extends
     }
 
     @Value.Default
+    @Configuration.IntegerRange(min = 1)
     @Configuration.ConvertWith("convertToIntSamples")
     default List<Integer> sampleSizes() {
         return List.of(25, 10);
