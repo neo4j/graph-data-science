@@ -51,6 +51,13 @@ class GraphSageTrainConfigTest {
         );
     }
 
+    private static Stream<Arguments> invalidAggregator() {
+        return Stream.of(
+            Arguments.of(1, "Expected Aggregator or String. Got Integer."),
+            Arguments.of("alwaysTrue", "Aggregator `alwaysTrue` is not supported. Must be one of: ['MEAN', 'POOL'].")
+        );
+    }
+
     @Test
     void shouldThrowIfNoPropertiesProvided() {
         var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo"));
@@ -94,6 +101,15 @@ class GraphSageTrainConfigTest {
     @MethodSource("invalidActivationFunctions")
     void failOnInvalidActivationFunction(Object activationFunction, String errorMessage) {
         var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo", "activationFunction", activationFunction));
+        assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(errorMessage);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidAggregator")
+    void failOnInvalidAggregator(Object aggregator, String errorMessage) {
+        var mapWrapper = CypherMapWrapper.create(Map.of("modelName", "foo","aggregator", aggregator));
         assertThatThrownBy(() -> GraphSageTrainConfig.of("", Optional.empty(), Optional.empty(), mapWrapper))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(errorMessage);
