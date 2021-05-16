@@ -20,10 +20,8 @@
 package org.neo4j.gds.ml.core.tensor;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.tensor.Scalar;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ScalarTest {
 
@@ -33,8 +31,9 @@ class ScalarTest {
 
         Scalar zero = scalar.zeros();
 
-        assertNotSame(scalar, zero);
-        assertArrayEquals(new double[] {0D}, zero.data);
+        assertThat(zero)
+            .isNotSameAs(scalar)
+            .isEqualTo(new Scalar(0D));
     }
 
     @Test
@@ -43,8 +42,9 @@ class ScalarTest {
 
         Scalar copy = scalar.copy();
 
-        assertNotSame(scalar, copy);
-        assertArrayEquals(new double[] {5D}, copy.data);
+        assertThat(copy)
+            .isNotSameAs(scalar)
+            .isEqualTo(new Scalar(5D));
     }
 
     @Test
@@ -54,8 +54,9 @@ class ScalarTest {
 
         Scalar sum = scalar.add(scalarToAdd);
 
-        assertNotSame(scalar, sum);
-        assertNotSame(scalarToAdd, sum);
-        assertArrayEquals(new double[] {7D}, sum.data);
+        assertThat(sum)
+            .isNotSameAs(scalar)
+            .isNotSameAs(scalarToAdd)
+            .isEqualTo(new Scalar(7D));
     }
 }

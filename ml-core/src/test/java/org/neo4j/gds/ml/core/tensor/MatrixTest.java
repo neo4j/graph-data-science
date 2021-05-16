@@ -23,9 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 class MatrixTest {
@@ -35,10 +33,11 @@ class MatrixTest {
         Matrix matrix = Matrix.fill(6D, 3, 4);
 
         Matrix zeros = matrix.zeros();
+        var expected = new Matrix(ArrayUtil.fill(0D, 12), 3, 4);
 
-        assertNotSame(matrix, zeros);
-        assertArrayEquals(matrix.dimensions, zeros.dimensions);
-        assertArrayEquals(ArrayUtil.fill(0D, 12), zeros.data);
+        assertThat(zeros)
+            .isNotSameAs(matrix)
+            .isEqualTo(expected);
     }
 
     @Test
@@ -47,9 +46,9 @@ class MatrixTest {
 
         Matrix copy = matrix.copy();
 
-        assertNotSame(matrix, copy);
-        assertArrayEquals(matrix.dimensions, copy.dimensions);
-        assertArrayEquals(ArrayUtil.fill(6D, 12), copy.data);
+        assertThat(copy)
+            .isNotSameAs(matrix)
+            .isEqualTo(matrix);
     }
 
     @Test
@@ -58,10 +57,13 @@ class MatrixTest {
 
         Matrix copy = matrix.copy();
 
-        assertNotSame(matrix, copy);
-        assertArrayEquals(matrix.dimensions, copy.dimensions);
-        assertNotSame(matrix.data, copy.data);
-        assertArrayEquals(matrix.data, copy.data);
+        assertThat(copy)
+            .isNotSameAs(matrix)
+            .isEqualTo(matrix);
+
+        // test internal objects was also copied
+        copy.setDataAt(2, 42);
+        assertThat(copy).isNotEqualTo(matrix);
     }
 
     @Test
@@ -70,21 +72,21 @@ class MatrixTest {
         var matrixToAdd = new Matrix(new double[] { 10D, 12D }, 1, 2);
 
         Matrix sum = matrix.add(matrixToAdd);
+        var expected = new Matrix(new double[]{11D, 14D}, 1, 2);
 
-        assertNotSame(matrix, sum);
-        assertNotSame(matrixToAdd, sum);
-
-        assertArrayEquals(new double[]{ 11D, 14D}, sum.data);
-        assertArrayEquals(matrix.dimensions, sum.dimensions);
-        assertArrayEquals(matrixToAdd.dimensions, sum.dimensions);
+        assertThat(sum)
+            .isNotSameAs(matrix)
+            .isNotSameAs(matrixToAdd)
+            .isEqualTo(expected);
     }
 
     @Test
-    void addsMatrixDifferentDimensions() {
+    void failOnAddingMatricesWithDifferentDimensions() {
         var matrix = new Matrix(new double[] { 1D, 2D }, 1, 2);
         var matrixToAdd = new Matrix(new double[] { 10D, 12D }, 2, 1);
 
-        assertThrows(ArithmeticException.class, () -> matrix.add(matrixToAdd));
+        assertThatThrownBy(() -> matrix.add(matrixToAdd))
+            .isInstanceOf(ArithmeticException.class);
     }
 
     @Test

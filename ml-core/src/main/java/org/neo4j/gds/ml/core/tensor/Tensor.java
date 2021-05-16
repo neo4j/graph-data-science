@@ -119,7 +119,27 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
         return sum;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        return equals((Tensor<?>) o, 1e-32);
+    }
+
     public static long sizeInBytes(int[] dimensions) {
         return MemoryUsage.sizeOfDoubleArray(Dimensions.totalSize(dimensions));
+    }
+
+    public boolean equals(Tensor<?> other, double tolerance) {
+        if (!Arrays.equals(dimensions, other.dimensions)) {
+            return false;
+        }
+
+        for (int i = 0; i < other.data.length; i++) {
+            if (Math.abs(data[i] - other.data[i]) > tolerance) {
+                return false;
+            }
+        }
+        return true;
     }
 }

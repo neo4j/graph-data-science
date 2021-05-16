@@ -20,10 +20,8 @@
 package org.neo4j.gds.ml.core.tensor;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.tensor.Vector;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
@@ -35,8 +33,9 @@ class VectorTest {
 
         Vector zeros = vector.zeros();
 
-        assertNotSame(vector, zeros);
-        assertArrayEquals(new double[] {0, 0, 0, 0, 0}, zeros.data);
+        assertThat(zeros)
+            .isNotSameAs(vector)
+            .isEqualTo(new Vector(new double[] {0, 0, 0, 0, 0}));
     }
 
     @Test
@@ -45,9 +44,13 @@ class VectorTest {
 
         Vector copy = vector.copy();
 
-        assertNotSame(vector, copy);
-        assertArrayEquals(vector.data, copy.data);
-        assertNotSame(vector.data, copy.data);
+        assertThat(copy)
+            .isNotSameAs(vector)
+            .isEqualTo(vector);
+
+        // test internal objects was also copied
+        copy.setDataAt(2, 42);
+        assertThat(copy).isNotEqualTo(vector);
     }
 
     @Test
@@ -56,8 +59,9 @@ class VectorTest {
 
         Vector copy = vector.copy();
 
-        assertNotSame(vector, copy);
-        assertArrayEquals(new double[] {}, copy.data);
+        assertThat(copy)
+            .isNotSameAs(vector)
+            .isEqualTo(vector);
     }
 
     @Test
@@ -67,10 +71,10 @@ class VectorTest {
 
         Vector sum = vector.add(vectorToAdd);
 
-        assertNotSame(vector, sum);
-        assertNotSame(vectorToAdd, sum);
-
-        assertArrayEquals(new double[]{7D, 8D, 9D}, sum.data);
+        assertThat(sum)
+            .isNotSameAs(vector)
+            .isNotSameAs(vectorToAdd)
+            .isEqualTo(new Vector(new double[]{7D, 8D, 9D}));
     }
 
     @Test

@@ -20,15 +20,9 @@
 package org.neo4j.gds.ml.core.tensor;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.ml.core.tensor.TensorFactory;
-import org.neo4j.gds.ml.core.tensor.Vector;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 class TensorFactoryTest {
@@ -39,12 +33,18 @@ class TensorFactoryTest {
         Tensor<?> vector = TensorFactory.constant(1, new int[]{2});
         Tensor<?> matrix = TensorFactory.constant(1, new int[]{3, 4});
 
-        assertTrue(scalar instanceof Scalar);
-        assertArrayEquals(new int[]{1}, scalar.dimensions);
-        assertTrue(vector instanceof Vector);
-        assertArrayEquals(new int[]{2}, vector.dimensions);
-        assertTrue(matrix instanceof Matrix);
-        assertArrayEquals(new int[]{3, 4}, matrix.dimensions);
+
+        assertThat(scalar)
+            .isInstanceOf(Scalar.class)
+            .isEqualTo(new Scalar(1));
+
+        assertThat(vector)
+            .isInstanceOf(Vector.class)
+            .isEqualTo(new Vector(new double[]{1,1}));
+
+        assertThat(matrix)
+            .isInstanceOf(Matrix.class)
+            .isEqualTo(Matrix.fill(1, 3, 4));
     }
 
     @Test
