@@ -26,9 +26,7 @@ public interface Variable<T extends Tensor<T>> {
 
     Tensor<?> gradient(Variable<?> parent, ComputationContext ctx);
 
-    default boolean requireGradient() {
-        return false;
-    }
+    boolean requireGradient();
 
     Iterable<? extends Variable<?>> parents();
 
