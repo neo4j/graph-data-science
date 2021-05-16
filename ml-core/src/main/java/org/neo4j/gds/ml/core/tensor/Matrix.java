@@ -36,7 +36,7 @@ public class Matrix extends Tensor<Matrix> {
     }
 
     public Matrix(int rows, int cols) {
-        this(new double[rows * cols], rows, cols);
+        this(new double[Math.multiplyExact(rows, cols)], rows, cols);
     }
 
     public static Matrix fill(double v, int rows, int cols) {
