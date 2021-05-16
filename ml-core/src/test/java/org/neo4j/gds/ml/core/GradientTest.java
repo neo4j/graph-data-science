@@ -25,10 +25,10 @@ import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.MatrixSum;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -57,17 +57,12 @@ class GradientTest {
 
         assertArrayEquals(Dimensions.scalar(), sum.dimensions());
         assertEquals(45D, ctx.data(sum).value());
-        assertArrayEquals(new int[]{5, 1}, ctx.data(add).dimensions());
-
-        assertArrayEquals(ArrayUtil.fill(9D, 5), ctx.data(add).data());
+        assertThat(ctx.data(add)).isEqualTo(Matrix.fill(9D, 5, 1));
 
         ctx.backward(sum);
 
         assertNull(ctx.gradient(operand2), "Gradient should be null for Constant");
-        assertArrayEquals(new int[]{5, 1}, ctx.gradient(add).dimensions());
-        assertArrayEquals(new int[]{5, 1}, ctx.gradient(operand1).dimensions());
-
-        assertArrayEquals(ArrayUtil.fill(1D, 5), ctx.gradient(add).data());
-        assertArrayEquals(ArrayUtil.fill(1D, 5), ctx.gradient(operand1).data());
+        assertThat(ctx.gradient(add)).isEqualTo(Matrix.fill(1D, 5, 1));
+        assertThat(ctx.gradient(operand1)).isEqualTo(Matrix.fill(1D, 5, 1));
     }
 }

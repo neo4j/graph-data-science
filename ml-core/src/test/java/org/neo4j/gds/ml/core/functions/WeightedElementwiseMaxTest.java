@@ -91,16 +91,14 @@ class WeightedElementwiseMaxTest extends ComputationContextBaseTest implements F
             subGraph
         );
 
-        Matrix matrix = weightedEmbeddings.apply(ctx);
-
-        double[] expected = new double[] {
+        var expected = new Matrix(new double[] {
             5.0, 5.0, 5.0, // d1
             2.0, 2.0, 2.0, // d2
             2.0, 2.0, 2.0, // d3
             3.0, 3.0, 3.0, // d4
-        };
+        }, 4, 3);
 
-        assertThat(matrix.data()).isEqualTo(expected);
+        assertThat(weightedEmbeddings.apply(ctx)).isEqualTo(expected);
     }
 
     @Test

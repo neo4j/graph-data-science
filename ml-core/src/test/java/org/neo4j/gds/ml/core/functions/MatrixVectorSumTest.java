@@ -33,7 +33,7 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -46,9 +46,10 @@ class MatrixVectorSumTest extends ComputationContextBaseTest implements FiniteDi
         Constant<Vector> vector = Constant.vector(new double[]{1, 1, 1});
 
         Variable<Matrix> broadcastSum = new MatrixVectorSum(matrix, vector);
-        double[] result = ctx.forward(broadcastSum).data();
 
-        assertArrayEquals(new double[] {2, 3, 4, 5, 6, 8}, result);
+        var expected = new Matrix(new double[]{2, 3, 4, 5, 6, 8}, 2, 3);
+        assertThat(ctx.forward(broadcastSum))
+            .isEqualTo(expected);
     }
 
     @Test

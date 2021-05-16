@@ -21,15 +21,12 @@ package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContextBaseTest;
-import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
-import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MultiMeanTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
     @Test
@@ -52,20 +49,15 @@ class MultiMeanTest extends ComputationContextBaseTest implements FiniteDifferen
         adj[1] = new int[] {0, 3};
         int[] selfAdjacency = {0, 1};
 
-        double[] expected = {
+        var expected = new Matrix(new double[]{
             2.5, 3.5,
-            11.0/3, 2
-        };
+            11.0 / 3, 2
+        }, 2, 2);
 
-        int[] expectedDim = Dimensions.matrix(2, 2);
+        var data = Constant.matrix(matrix, 4, 2);
+        var mean = new MultiMean(data, adj, selfAdjacency);
 
-        Variable<Matrix> data = Constant.matrix(matrix, 4, 2);
-        Variable<Matrix> mean = new MultiMean(data, adj, selfAdjacency);
-
-        Tensor<?> result = ctx.forward(mean);
-
-        assertArrayEquals(expectedDim, result.dimensions());
-        assertArrayEquals(expected, result.data());
+        assertThat(ctx.forward(mean)).isEqualTo(expected);
     }
 
 

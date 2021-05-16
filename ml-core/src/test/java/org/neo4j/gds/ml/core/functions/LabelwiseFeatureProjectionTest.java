@@ -36,8 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
@@ -79,18 +78,15 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
             labels
         );
 
-        Matrix result = projection.apply(new ComputationContext());
-        var actual = result.data();
+        var actual = projection.apply(new ComputationContext());
 
-        var expected = new double[]{
+        var expected = new Matrix(new double[]{
             5.0, 2.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 3.0, 5.0, 0.0,
             0.0, 0.0, 0.0, 0.0, 15.0
-        };
-        assertEquals(nodeIds.length, result.dimension(0), "Should have as many rows as there are nodes processed");
-        assertEquals(PROJECTED_FEATURE_SIZE, result.dimension(1), "Should have as many columns as the target projected feature size");
-        assertEquals(nodeIds.length * PROJECTED_FEATURE_SIZE, actual.length, "Should have node count * projected feature size elements");
-        assertArrayEquals(expected, actual);
+        }, nodeIds.length, PROJECTED_FEATURE_SIZE);
+
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

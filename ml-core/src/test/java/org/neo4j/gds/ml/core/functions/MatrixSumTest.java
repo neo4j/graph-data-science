@@ -21,10 +21,11 @@ package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -38,9 +39,10 @@ class MatrixSumTest {
         assertArrayEquals(new int[]{2, 2}, add.dimensions());
 
         ComputationContext ctx = new ComputationContext();
-        Tensor<?> forward = ctx.forward(add);
-        assertArrayEquals(new double[]{3.0, 6.0, 9.0, 12.0}, forward.data());
-        assertArrayEquals(new int[]{2, 2}, forward.dimensions());
+
+        var expected = new Matrix(new double[]{3.0, 6.0, 9.0, 12.0}, 2, 2);
+
+        assertThat(ctx.forward(add)).isEqualTo(expected);
     }
 
     @Test

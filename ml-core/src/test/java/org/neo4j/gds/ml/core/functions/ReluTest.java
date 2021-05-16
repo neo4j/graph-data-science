@@ -24,14 +24,11 @@ import org.neo4j.gds.ml.core.ComputationContextBaseTest;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ReluTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
     @Override
@@ -61,11 +58,8 @@ public class ReluTest extends ComputationContextBaseTest implements FiniteDiffer
 
         Variable<Vector> relu = new Relu<>(p);
 
-        Tensor<?> resultData = ctx.forward(relu);
-        assertNotNull(resultData);
-        assertEquals(vectorData.length, resultData.data().length);
-
-        assertArrayEquals(new double[]{14, 0.01 * -5, 36, 0}, resultData.data());
+        var expected = new Vector(new double[]{14, 0.01 * -5, 36, 0});
+        assertThat(ctx.forward(relu)).isEqualTo(expected);
     }
 
     @Test
@@ -75,12 +69,8 @@ public class ReluTest extends ComputationContextBaseTest implements FiniteDiffer
 
         Variable<Vector> relu = new Relu<>(p);
 
-        Tensor<?> resultData = ctx.forward(relu);
-        assertNotNull(resultData);
-        assertEquals(vectorData.length, resultData.data().length);
-
-        assertArrayEquals(new double[]{}, resultData.data());
-
+        var expected = new Vector(new double[]{});
+        assertThat(ctx.forward(relu)).isEqualTo(expected);
     }
 
 }

@@ -28,7 +28,7 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -52,18 +52,17 @@ class MatrixMultiplyWithTransposedSecondOperandTest extends ComputationContextBa
             2.1, 5, -1
         };
 
-        double[] expected = {
+        var expected = new Matrix(new double[]{
             27,  9.1,
             60, 27.4
-        };
+        }, 2, 2);
 
         var A = Constant.matrix(m1, 2, 3);
         var B = Constant.matrix(m2, 2, 3);
 
         Variable<Matrix> product = new MatrixMultiplyWithTransposedSecondOperand(A, B);
-        double[] result = ctx.forward(product).data();
 
-        assertArrayEquals(expected, result);
+        assertThat(ctx.forward(product)).isEqualTo(expected);
     }
 
     @Test

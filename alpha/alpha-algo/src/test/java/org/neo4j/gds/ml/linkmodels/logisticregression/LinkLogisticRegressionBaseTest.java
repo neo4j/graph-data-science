@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
-import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
@@ -68,14 +67,14 @@ class LinkLogisticRegressionBaseTest {
 
         var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());
         var features = base.features(graph, allNodesBatch);
-        var expectedFeatures = new double[]{
+        var expectedFeatures = new Matrix(new double[]{
             0.49, 0.49, 1.0,
             4.00, 2.56, 1.0,
             0.09, 0.16, 1.0,
             1.00, 3.61, 1.0
-        };
-        var featuresData = features.apply(new ComputationContext()).data();
-        assertThat(featuresData).containsExactly(expectedFeatures, Offset.offset(1e-6));
+        }, 4, 3);
+
+        assertThat(features.apply(new ComputationContext())).satisfies(tensor -> tensor.equals(expectedFeatures, 1e-6));
     }
 
 }

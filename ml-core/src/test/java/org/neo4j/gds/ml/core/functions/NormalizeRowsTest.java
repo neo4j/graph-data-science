@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
-import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContextBaseTest;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
@@ -57,14 +56,16 @@ class NormalizeRowsTest extends ComputationContextBaseTest implements FiniteDiff
             1, 0,
             0, 1
         };
-        double[] expectedData = new double[]{
-            3.0/5, 4.0/5,
+        var expected = new Matrix(new double[]{
+            3.0 / 5, 4.0 / 5,
             1, 0,
             0, 1
-        };
-        Weights<Matrix> w = new Weights<>(new Matrix(data, 3, 2));
-        Variable<Matrix> normalizeRows = new NormalizeRows(w);
-        assertThat(ctx.forward(normalizeRows).data()).contains(expectedData, Offset.offset(1e-8));
+        }, 3, 2);
+
+        var w = new Weights<>(new Matrix(data, 3, 2));
+        var normalizeRows = new NormalizeRows(w);
+
+        assertThat(ctx.forward(normalizeRows)).satisfies(tensor -> tensor.equals(expected, 1e-8));
     }
 
 

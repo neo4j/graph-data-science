@@ -31,6 +31,10 @@ public class Vector extends Tensor<Vector> {
         super(data, Dimensions.vector(data.length));
     }
 
+    public Vector(int size) {
+        this(new double[size]);
+    }
+
     public static Vector fill(double v, int length) {
         return new Vector(ArrayUtil.fill(v, length));
     }

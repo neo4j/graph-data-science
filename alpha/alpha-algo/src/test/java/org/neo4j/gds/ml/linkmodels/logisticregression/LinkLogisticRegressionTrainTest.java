@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
-import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -77,13 +77,9 @@ class LinkLogisticRegressionTrainTest {
         assertThat(result).isNotNull();
 
         var trainedWeights = result.weights();
-        assertThat(trainedWeights.dimension(ROWS_INDEX)).isEqualTo(1);
-        assertThat(trainedWeights.dimension(COLUMNS_INDEX)).isEqualTo(3);
 
-        assertThat(trainedWeights.data().data()).containsExactly(
-            new double[]{-1.0681821169962793, 1.0115009499444914, -0.1381213947059403},
-            Offset.offset(1e-8)
-        );
+        var expected = new Matrix(new double[]{-1.0681821169962793, 1.0115009499444914, -0.1381213947059403}, 1, 3);
+        assertThat(trainedWeights.data()).satisfies(matrix -> matrix.equals(expected, 1e-8));
     }
 
     @Test

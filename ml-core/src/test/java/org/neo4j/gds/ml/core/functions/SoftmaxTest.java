@@ -42,7 +42,7 @@ class SoftmaxTest implements FiniteDifferenceTest {
         var result = softmax.apply(ctx);
 
         assertThat(Arrays.stream(result.data())).allMatch(d -> d < 1.0);
-        assertThat(Arrays.stream(result.data()).sum()).isCloseTo(1.0, Offset.offset(1e-10));
+        assertThat(result.aggregateSum()).isCloseTo(1.0, Offset.offset(1e-10));
     }
 
     @Test
@@ -60,32 +60,28 @@ class SoftmaxTest implements FiniteDifferenceTest {
 
         var result = ctx.forward(softmax);
 
-        assertThat(result).isNotNull();
-        assertThat(result.dimensions()).containsExactly(3, 6);
-        assertThat(result.data())
-            .containsExactly(
-                new double[]{
-                    0.054825408857653565,
-                    0.09039181775844467,
-                    0.006713723746217652,
-                    0.0998984082186269,
-                    0.7381549425213091,
-                    0.010015698897748167,
-                    1.0 / 6,
-                    1.0 / 6,
-                    1.0 / 6,
-                    1.0 / 6,
-                    1.0 / 6,
-                    1.0 / 6,
-                    0.054825408857653565,
-                    0.09039181775844467,
-                    0.006713723746217652,
-                    0.0998984082186269,
-                    0.7381549425213091,
-                    0.010015698897748167
-                },
-                Offset.offset(1e-8)
-            );
+        var expected = new Matrix(new double[]{
+            0.054825408857653565,
+            0.09039181775844467,
+            0.006713723746217652,
+            0.0998984082186269,
+            0.7381549425213091,
+            0.010015698897748167,
+            1.0 / 6,
+            1.0 / 6,
+            1.0 / 6,
+            1.0 / 6,
+            1.0 / 6,
+            1.0 / 6,
+            0.054825408857653565,
+            0.09039181775844467,
+            0.006713723746217652,
+            0.0998984082186269,
+            0.7381549425213091,
+            0.010015698897748167
+        }, 3, 6);
+
+        assertThat(result).satisfies(matrix -> matrix.equals(expected, 1e-8));
     }
 
     @Test

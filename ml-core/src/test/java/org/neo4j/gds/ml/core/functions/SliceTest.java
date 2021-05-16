@@ -28,7 +28,7 @@ import org.neo4j.gds.ml.core.tensor.Scalar;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SliceTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
 
@@ -43,14 +43,14 @@ class SliceTest extends ComputationContextBaseTest implements FiniteDifferenceTe
 
         int[] rows = new int[] {0, 2, 0};
         Variable<Matrix> slice = new Slice(weights, rows);
-        double[] result = ctx.forward(slice).data();
 
-        assertArrayEquals(
-            new double[]{
-                1, 2, 3,
-                1, 3, 2,
-                1, 2, 3
-            }, result);
+        var expected = new Matrix(new double[]{
+            1, 2, 3,
+            1, 3, 2,
+            1, 2, 3
+        }, 3, 3);
+
+        assertThat(ctx.forward(slice)).isEqualTo(expected);
     }
 
     @Test

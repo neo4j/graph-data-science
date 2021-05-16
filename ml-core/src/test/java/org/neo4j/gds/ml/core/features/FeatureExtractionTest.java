@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -49,11 +50,9 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
         var featureExtractors = FeatureExtraction.propertyExtractors(validGraph, List.of("a", "b"));
         var allNodesBatch = new LazyBatch(0, (int) validGraph.nodeCount(), validGraph.nodeCount());
         var featuresMatrix = FeatureExtraction.extract(allNodesBatch, featureExtractors);
-        assertThat(featuresMatrix.dimensions()).containsExactly(4, 3);
-        assertThat(new ComputationContext().forward(featuresMatrix).data()).contains(
-            new double[]{ 2.0, 1.0, 1.2, 1.3, 1.0, 0.5, 0.0, 1.0, 2.8, 1.0, 1.0, 0.9 },
-            Offset.offset(1e-7)
-        );
+
+        var expected = new Matrix(new double[]{ 2.0, 1.0, 1.2, 1.3, 1.0, 0.5, 0.0, 1.0, 2.8, 1.0, 1.0, 0.9 }, 4, 3);
+        assertThat(new ComputationContext().forward(featuresMatrix)).satisfies(matrix -> matrix.equals(expected, 1e-7));
     }
 
     @Test
@@ -62,11 +61,10 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
         allExtractors.add(new BiasFeature());
         var allNodesBatch = new LazyBatch(0, (int) validGraph.nodeCount(), validGraph.nodeCount());
         var featuresMatrix = FeatureExtraction.extract(allNodesBatch, allExtractors);
+
+        var expected = new Matrix(new double[]{ 2.0, 1.0, 1.2, 1.0, 1.3, 1.0, 0.5, 1.0, 0.0, 1.0, 2.8, 1.0, 1.0, 1.0, 0.9, 1.0 }, 4, 4);
         assertThat(featuresMatrix.dimensions()).containsExactly(4, 4);
-        assertThat(new ComputationContext().forward(featuresMatrix).data()).contains(
-            new double[]{ 2.0, 1.0, 1.2, 1.0, 1.3, 1.0, 0.5, 1.0, 0.0, 1.0, 2.8, 1.0, 1.0, 1.0, 0.9, 1.0 },
-            Offset.offset(1e-7)
-        );
+        assertThat(new ComputationContext().forward(featuresMatrix)).satisfies(matrix -> matrix.equals(expected, 1e-7));
     }
 
     @Test
@@ -125,7 +123,7 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
     }
 
     @Test
-    public void shouldCalculateMemoryUsage() throws Exception {
+    public void shouldCalculateMemoryUsage() {
         assertThat(FeatureExtraction.memoryUsageInBytes(1)).isEqualTo(24L);
         assertThat(FeatureExtraction.memoryUsageInBytes(42)).isEqualTo(1008L);
         assertThat(FeatureExtraction.memoryUsageInBytes(43)).isEqualTo(1032L);

@@ -24,14 +24,11 @@ import org.neo4j.gds.ml.core.ComputationContextBaseTest;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 class SigmoidTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
@@ -61,31 +58,23 @@ class SigmoidTest extends ComputationContextBaseTest implements FiniteDifference
 
         Variable<Vector> sigmoid = new Sigmoid<>(p);
 
-        Tensor<?> resultData = ctx.forward(sigmoid);
-        assertNotNull(resultData);
-        assertEquals(vectorData.length, resultData.data().length);
-
-        assertArrayEquals(new double[]{
+        var expected = new Vector(new double[]{
             (1 / (1 + Math.pow(Math.E, -14))),
             (1 / (1 + Math.pow(Math.E, -5))),
             (1 / (1 + Math.pow(Math.E, -36)))
-        }, resultData.data());
+        });
 
+        assertThat(ctx.forward(sigmoid)).isEqualTo(expected);
     }
 
     @Test
     void returnsEmptyDataForEmptyVariable() {
-        double[] vectorData = {};
-        Constant<Vector> p = Constant.vector(vectorData);
+        var emptyVector = new Vector(0);
+        var constant = new Constant<>(emptyVector);
 
-        Variable<Vector> sigmoid = new Sigmoid<>(p);
+        Variable<Vector> sigmoid = new Sigmoid<>(constant);
 
-        Tensor<?> resultData = ctx.forward(sigmoid);
-        assertNotNull(resultData);
-        assertEquals(vectorData.length, resultData.data().length);
-
-        assertArrayEquals(new double[]{}, resultData.data());
-
+        assertThat(ctx.forward(sigmoid)).isEqualTo(emptyVector);
     }
 
 }

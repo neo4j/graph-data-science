@@ -29,7 +29,7 @@ import org.neo4j.gds.ml.core.tensor.Scalar;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ElementwiseMaxTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
 
@@ -53,11 +53,12 @@ public class ElementwiseMaxTest extends ComputationContextBaseTest implements Fi
         };
         Variable<Matrix> max = new ElementwiseMax(weights, adjacencyMatrix);
 
-        double[] expected = new double[]{
+        var expected = new Matrix(new double[]{
             0, 0, 0,
             3, 3, 3
-        };
-        assertArrayEquals(expected, ctx.forward(max).data());
+        }, 2, 3);
+
+        assertThat(ctx.forward(max)).isEqualTo(expected);
     }
 
     @Test

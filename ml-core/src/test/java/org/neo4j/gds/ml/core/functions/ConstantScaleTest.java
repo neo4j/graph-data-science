@@ -29,7 +29,6 @@ import org.neo4j.gds.ml.core.tensor.Scalar;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class ConstantScaleTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
     @Test
@@ -38,7 +37,8 @@ class ConstantScaleTest extends ComputationContextBaseTest implements FiniteDiff
         double constant = 5.34D;
         Variable<Matrix> scaled = new ConstantScale<>(matrix, constant);
 
-        assertArrayEquals(new double[]{constant, 2 * constant, 3 * constant, 4 * constant}, ctx.forward(scaled).data());
+        assertThat(ctx.forward(scaled))
+            .isEqualTo(new Matrix(new double[]{constant, 2 * constant, 3 * constant, 4 * constant}, 2, 2));
     }
 
 
