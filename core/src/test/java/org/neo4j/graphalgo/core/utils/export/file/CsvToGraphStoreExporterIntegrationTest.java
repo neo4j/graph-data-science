@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.utils.export.file;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -65,7 +66,7 @@ class CsvToGraphStoreExporterIntegrationTest {
 
         GraphStoreToFileExporter.csv(graphStore, config(concurrency), graphLocation).run(AllocationTracker.empty());
 
-        var importer = CsvToGraphStoreExporter.create(config(concurrency), graphLocation);
+        var importer = CsvToGraphStoreExporter.create(config(concurrency), graphLocation, new TestLog());
         importer.run(AllocationTracker.empty());
 
         var importedGraphStore = importer.userGraphStore().graphStore();

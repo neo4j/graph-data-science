@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
+import org.neo4j.logging.NullLog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -133,6 +134,8 @@ class GraphStoreRelationshipVisitorTest {
             .databaseId(TestDatabaseIdRepository.randomNamedDatabaseId())
             .concurrency(1)
             .tracker(AllocationTracker.empty())
+            .bitIdMap(false)
+            .log(NullLog.getInstance())
             .build()
             .getUnion();
     }

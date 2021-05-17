@@ -37,6 +37,10 @@ import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
+import org.neo4j.graphalgo.beta.filter.GraphStoreFilter;
+import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
+import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.config.ImmutableGraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
@@ -48,7 +52,9 @@ import org.neo4j.graphalgo.core.utils.export.ImmutableImportedProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.logging.Log;
 import org.neo4j.values.storable.NumberType;
+import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -69,15 +75,19 @@ public final class CsvToGraphStoreExporter {
     private final GraphStoreBuilder graphStoreBuilder;
     private String userName;
 
+    private final Log log;
+
     public static CsvToGraphStoreExporter create(
         GraphStoreToFileExporterConfig config,
-        Path importPath
+        Path importPath,
+        Log log
     ) {
         return new CsvToGraphStoreExporter(
             new GraphStoreNodeVisitor.Builder(),
             new GraphStoreRelationshipVisitor.Builder(),
             config,
-            importPath
+            importPath,
+            log
         );
     }
 
@@ -85,13 +95,15 @@ public final class CsvToGraphStoreExporter {
         GraphStoreNodeVisitor.Builder nodeVisitorBuilder,
         GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder,
         GraphStoreToFileExporterConfig config,
-        Path importPath
+        Path importPath,
+        Log log
     ) {
         this.nodeVisitorBuilder = nodeVisitorBuilder.withReverseIdMapping(config.includeMetaData());
         this.relationshipVisitorBuilder = relationshipVisitorBuilder;
         this.config = config;
         this.importPath = importPath;
         this.graphStoreBuilder = new GraphStoreBuilder().concurrency(config.writeConcurrency());
+        this.log = log;
     }
 
     public UserGraphStore userGraphStore() {
@@ -101,6 +113,7 @@ public final class CsvToGraphStoreExporter {
     public GraphStoreExporter.ImportedProperties run(AllocationTracker tracker) {
         var fileInput = new FileInput(importPath);
         graphStoreBuilder.tracker(tracker);
+        graphStoreBuilder.log(log);
         this.userName = fileInput.userName();
         return export(fileInput, tracker);
     }
@@ -118,6 +131,7 @@ public final class CsvToGraphStoreExporter {
         NodeSchema nodeSchema = fileInput.nodeSchema();
 
         GraphInfo graphInfo = fileInput.graphInfo();
+        graphStoreBuilder.bitIdMap(graphInfo.bitIdMap());
         graphStoreBuilder.databaseId(graphInfo.namedDatabaseId());
 
         int concurrency = config.writeConcurrency();
@@ -295,9 +309,11 @@ public final class CsvToGraphStoreExporter {
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
         int concurrency,
+        boolean bitIdMap,
+        Log log,
         AllocationTracker tracker
     ) {
-        return CSRGraphStore.of(
+        var graphStore = CSRGraphStore.of(
             databaseId,
             nodes,
             nodePropertyStores,
@@ -306,6 +322,28 @@ public final class CsvToGraphStoreExporter {
             concurrency,
             tracker
         );
+        if (bitIdMap) {
+            var config = ImmutableGraphCreateFromGraphConfig.builder()
+                .concurrency(concurrency)
+                .nodeFilter("*")
+                .relationshipFilter("*")
+                .graphName("new")
+                .fromGraphName("old")
+                .originalConfig(GraphCreateFromStoreConfig.emptyWithName("user", "old"))
+                .build();
+            try {
+                return GraphStoreFilter.filter(
+                    graphStore,
+                    config,
+                    Pools.DEFAULT,
+                    log,
+                    tracker
+                );
+            } catch (ParseException | SemanticErrors e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return graphStore;
     }
 
     public static final Validator<Path> DIRECTORY_IS_READABLE = value -> {
