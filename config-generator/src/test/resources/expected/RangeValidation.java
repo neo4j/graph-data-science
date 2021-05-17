@@ -103,7 +103,7 @@ public final class RangeValidationConfig implements RangeValidation {
                 "listDoubleWithinRange",
                 config.requireChecked("listDoubleWithinRange", List.class)
             );
-            listDoubleWithinRange.forEach(listDoubleWithinRange -> org.neo4j.graphalgo.core.CypherMapWrapper.validateDoubleRange(
+            this.listDoubleWithinRange.forEach(listDoubleWithinRange -> CypherMapWrapper.validateDoubleRange(
                 "listDoubleWithinRange",
                 listDoubleWithinRange,
                 21.0,

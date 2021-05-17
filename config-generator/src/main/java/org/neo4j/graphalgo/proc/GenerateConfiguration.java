@@ -383,12 +383,10 @@ final class GenerateConfiguration {
                 ));
         } else if (isTypeOf(List.class, definition.fieldType())){
             validationConsumer = validatorCode -> fieldCodeBuilder.addStatement(
-                String.format(
-                    Locale.US,
-                    "%1$s.forEach(%1$s -> %2$s)",
-                    definition.fieldName(),
-                    validatorCode
-                ));
+                "this.$1N.forEach($1N -> $2L)",
+                definition.fieldName(),
+               validatorCode
+            );
         }
 
         if (definition.member().validatesIntegerRange()) {
