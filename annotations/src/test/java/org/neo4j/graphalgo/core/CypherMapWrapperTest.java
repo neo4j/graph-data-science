@@ -23,9 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -33,6 +35,8 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -70,6 +74,43 @@ class CypherMapWrapperTest {
         assertEquals(42D, primitivesWrapper.getDouble("integer", 0.0D));
         assertEquals(1337D, primitivesWrapper.getDouble("long", 0.0D));
         assertEquals(1337.42D, primitivesWrapper.getDouble("float", 0.0D), 0.0001D);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "nodeProperty",
+            "nodeproperty",
+            "NodeProperty",
+            "NODEPROPERTY",
+            "NodEpRoPeRtY"
+    })
+    void shouldMatchCaseInsensitive(String cypherProvided) {
+        var map = CypherMapWrapper.create(Map.of(cypherProvided, 42L));
+        assertThat(map)
+            .returns(true, cmw -> cmw.containsKey("nodeProperty"))
+            .returns(42L, cmw -> cmw.requireLong("nodeProperty"))
+            .returns(42L, cmw -> cmw.requireNumber("nodeProperty"))
+            .returns(42L, cmw -> cmw.requireChecked("nodeProperty", Long.class));
+
+        assertThatCode(() -> map.requireOnlyKeysFrom(List.of("nodeProperty"))).doesNotThrowAnyException();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "nodePropertie",
+            "nodepropertie",
+            "NodePropertie",
+            "NODEPROPERTIE",
+            "NodEpRoPeRtIe"
+    })
+    void shouldSuggestMatchCaseInsensitive(String cypherProvided) {
+        var map = CypherMapWrapper.create(Map.of(cypherProvided, 42L));
+
+        assertThatThrownBy(() -> map.requireLong("nodeProperty"))
+            .hasMessage("No value specified for the mandatory configuration parameter `nodeProperty` (a similar parameter exists: [%s])", cypherProvided);
+
+        assertThatThrownBy(() -> map.requireOnlyKeysFrom(List.of("nodeProperty")))
+            .hasMessage("Unexpected configuration key: %s (Did you mean [nodeProperty]?)", cypherProvided);
     }
 
     @Test
@@ -214,7 +255,7 @@ class CypherMapWrapperTest {
         );
     }
 
-    static Stream<Arguments> mutextParams() {
+    static Stream<Arguments> mutexParams() {
         return Stream.of(
             arguments(
                 map("aaa", 42, "bbb", 1337, "xxx", 42),
@@ -272,7 +313,7 @@ class CypherMapWrapperTest {
     }
 
     @ParameterizedTest
-    @MethodSource("mutextParams")
+    @MethodSource("mutexParams")
     void testMutexPairsConflictWithSecondPair(Map<String, Object> map, String expectedMessage) {
         CypherMapWrapper config = CypherMapWrapper.create(map);
 

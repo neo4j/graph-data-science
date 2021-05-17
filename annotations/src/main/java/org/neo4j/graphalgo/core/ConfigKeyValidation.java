@@ -23,26 +23,31 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.StringSimilarity.similarStrings;
+import static org.neo4j.graphalgo.core.StringSimilarity.similarStringsIgnoreCase;
 
 public final class ConfigKeyValidation {
 
     private ConfigKeyValidation() {}
 
     public static void requireOnlyKeysFrom(Collection<String> allowedKeys, Collection<String> configKeys) {
-        Collection<String> keys = new HashSet<>(configKeys);
-        keys.removeAll(allowedKeys);
-        if (keys.isEmpty()) {
+        var unexpectedKeys = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        unexpectedKeys.addAll(configKeys);
+        // we don't use addAll here because it might use the `allowedKeys` collection for lookups
+        // and that one does not match case-insensitively
+        for (var allowedKey : allowedKeys) {
+            unexpectedKeys.remove(allowedKey);
+        }
+        if (unexpectedKeys.isEmpty()) {
             return;
         }
-        List<String> suggestions = keys.stream()
+        List<String> suggestions = unexpectedKeys.stream()
             .map(invalid -> {
-                List<String> candidates = similarStrings(invalid, allowedKeys);
+                List<String> candidates = similarStringsIgnoreCase(invalid, allowedKeys);
                 candidates.removeAll(configKeys);
 
                 if (candidates.isEmpty()) {

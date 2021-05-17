@@ -32,12 +32,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.TreeMap;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static org.neo4j.graphalgo.core.StringSimilarity.similarStrings;
+import static org.neo4j.graphalgo.core.StringSimilarity.similarStringsIgnoreCase;
 
 /**
  * Wrapper around configuration options map
@@ -74,20 +71,16 @@ public final class CypherMapWrapper {
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> getMap(String key) {
-        return getChecked(key, emptyMap(), Map.class);
+        return getChecked(key, Map.of(), Map.class);
     }
 
     @SuppressWarnings("unchecked")
     public List<String> getList(String key) {
-        return getChecked(key, emptyList(), List.class);
+        return getChecked(key, List.of(), List.class);
     }
 
     public <E> Optional<E> getOptional(String key, Class<E> clazz) {
-        if (containsKey(key)) {
-            return Optional.of(getChecked(key, null, clazz));
-        } else {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(getChecked(key, null, clazz));
     }
 
     @Contract("_, !null -> !null")
@@ -102,16 +95,6 @@ public final class CypherMapWrapper {
             return value;
         }
         return getChecked(oldKey, defaultValue, String.class);
-    }
-
-    Optional<String> getStringWithFallback(String key, String oldKey) {
-        Optional<String> value = getString(key);
-        // #migration-note: On Java9+ there is a #or method on Optional that we should use instead
-        //  https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/Optional.html#or(java.util.function.Supplier)
-        if (!value.isPresent()) {
-            value = getString(oldKey);
-        }
-        return value;
     }
 
     public boolean getBool(String key, boolean defaultValue) {
@@ -289,8 +272,8 @@ public final class CypherMapWrapper {
         return value;
     }
 
-    static <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
-        if (canHardCastToDouble(expectedType, value)) {
+    private static <V> V typedValue(String key, Class<V> expectedType, @Nullable Object value) {
+        if (Double.class.isAssignableFrom(expectedType) && value instanceof Number) {
             return expectedType.cast(((Number) value).doubleValue());
         } else if (expectedType.equals(Integer.class) && value instanceof Long) {
             return expectedType.cast(Math.toIntExact((Long) value));
@@ -307,10 +290,6 @@ public final class CypherMapWrapper {
         return expectedType.cast(value);
     }
 
-    private static boolean canHardCastToDouble(Class<?> expectedType, @Nullable Object value) {
-        return Double.class.isAssignableFrom(expectedType) && Number.class.isInstance(value);
-    }
-
     private IllegalArgumentException missingValueFor(String key) {
         return missingValueFor(key, config.keySet());
     }
@@ -320,7 +299,7 @@ public final class CypherMapWrapper {
     }
 
     private static String missingValueForMessage(String key, Collection<String> candidates) {
-        List<String> suggestions = similarStrings(key, candidates);
+        List<String> suggestions = similarStringsIgnoreCase(key, candidates);
         return missingValueMessage(key, suggestions);
     }
 
@@ -458,12 +437,12 @@ public final class CypherMapWrapper {
         Collection<String> missingAndCandidates = new ArrayList<>();
         Collection<String> missingWithoutCandidates = new ArrayList<>();
         boolean hasAtLastOneKey = false;
-        for (String key : asList(keyOne, keyTwo)) {
+        for (String key : List.of(keyOne, keyTwo)) {
             if (config.containsKey(key)) {
                 hasAtLastOneKey = true;
             } else {
-                List<String> candidates = similarStrings(key, config.keySet());
-                candidates.removeAll(asList(forbiddenSuggestions));
+                List<String> candidates = similarStringsIgnoreCase(key, config.keySet());
+                candidates.removeAll(List.of(forbiddenSuggestions));
                 String message = missingValueMessage(key, candidates);
                 (candidates.isEmpty()
                     ? missingWithoutCandidates
@@ -527,15 +506,17 @@ public final class CypherMapWrapper {
         if (config == null) {
             return empty();
         }
-        Map<String, Object> filteredConfig = config.entrySet()
-            .stream()
-            .filter(e -> e.getValue() != null)
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        return new CypherMapWrapper(filteredConfig);
+        Map<String, Object> configMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        config.forEach((key, value) -> {
+            if (value != null) {
+                configMap.put(key, value);
+            }
+        });
+        return new CypherMapWrapper(configMap);
     }
 
     public static CypherMapWrapper empty() {
-        return new CypherMapWrapper(emptyMap());
+        return new CypherMapWrapper(Map.of());
     }
 
     public CypherMapWrapper withString(String key, String value) {
@@ -551,13 +532,7 @@ public final class CypherMapWrapper {
     }
 
     public CypherMapWrapper withEntry(String key, Object value) {
-        HashMap<String, Object> newMap = new HashMap<>(config);
-        newMap.put(key, value);
-        return new CypherMapWrapper(newMap);
-    }
-
-    CypherMapWrapper withDouble(String key, Double value) {
-        HashMap<String, Object> newMap = new HashMap<>(config);
+        Map<String, Object> newMap = copyValues();
         newMap.put(key, value);
         return new CypherMapWrapper(newMap);
     }
@@ -566,14 +541,20 @@ public final class CypherMapWrapper {
         if (!containsKey(key)) {
             return this;
         }
-        HashMap<String, Object> newMap = new HashMap<>(config);
+        Map<String, Object> newMap = copyValues();
         newMap.remove(key);
         return new CypherMapWrapper(newMap);
     }
 
     public CypherMapWrapper withoutAny(Collection<String> keys) {
-        Map<String, Object> newMap = new HashMap<>(config);
+        Map<String, Object> newMap = copyValues();
         newMap.keySet().removeAll(keys);
         return new CypherMapWrapper(newMap);
+    }
+
+    private Map<String, Object> copyValues() {
+        Map<String, Object> copiedMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        copiedMap.putAll(config);
+        return copiedMap;
     }
 }
