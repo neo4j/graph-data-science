@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
+import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
-import org.neo4j.gds.ml.core.functions.MatrixConstant;
+import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.graphalgo.api.Graph;
@@ -34,11 +35,11 @@ public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase 
     }
 
     static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures) {
-        var dimensionsOfFirstMatrix = new int[]{batchSize, numberOfFeatures};
-        var dimensionsOfSecondMatrix = new int[]{1, numberOfFeatures};
+        var dimensionsOfFirstMatrix = Dimensions.matrix(batchSize, numberOfFeatures);
+        var dimensionsOfSecondMatrix = Dimensions.matrix(1, numberOfFeatures);
         return
             sizeOfFeatureExtractorsInBytes(numberOfFeatures) +
-            MatrixConstant.sizeInBytes(batchSize, numberOfFeatures) +
+            Constant.sizeInBytes(dimensionsOfFirstMatrix) +
             MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(dimensionsOfFirstMatrix, dimensionsOfSecondMatrix) +
             Sigmoid.sizeInBytes(batchSize, 1);
     }
