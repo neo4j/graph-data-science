@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
@@ -62,7 +63,7 @@ class ModelCatalogStoreDocTest extends DocTestBase {
             GraphSchema.empty(),
             ModelData.of(new Layer[0], new SingleLabelFeatureFunction()),
             ImmutableGraphSageTrainConfig.builder().modelName("my-model").addFeatureProperties("a").build(),
-            Model.Mappable.EMPTY
+            EmptyGraphSageTrainMetrics.instance
         ));
     }
 

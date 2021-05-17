@@ -23,6 +23,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
@@ -116,7 +117,8 @@ class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {
                 .username(getUsername())
                 .modelName(modelName)
                 .addFeatureProperties("a")
-                .build()
+                .build(),
+            EmptyGraphSageTrainMetrics.instance
         );
 
         ModelCatalog.set(model);
@@ -177,7 +179,16 @@ class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {
             map("modelName", modelName),
             singletonList(
                 map(
-                    "modelInfo", map("modelName", modelName + "_public", "modelType", "graphSage"),
+                    "modelInfo",
+                    map("modelName",
+                        modelName + "_public",
+                        "modelType", "graphSage",
+                        "metrics", Map.of(
+                            "startLoss", 0.0,
+                            "didConverge", false,
+                            "ranEpochs", 0,
+                            "epochLosses", Map.of())
+                    ),
                     "trainConfig", isA(Map.class),
                     "graphSchema", EXPECTED_SCHEMA,
                     "creationTime", isA(ZonedDateTime.class),
@@ -209,7 +220,15 @@ class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {
             Map.of("modelName", modelName),
             singletonList(
                 Map.of(
-                    "modelInfo", Map.of("modelName", modelName, "modelType", GraphSage.MODEL_TYPE),
+                    "modelInfo", map("modelName",
+                        modelName,
+                        "modelType", "graphSage",
+                        "metrics", Map.of(
+                            "startLoss", 0.0,
+                            "didConverge", false,
+                            "ranEpochs", 0,
+                            "epochLosses", Map.of())
+                    ),
                     "creationTime", Matchers.isA(ZonedDateTime.class),
                     "trainConfig", Matchers.isA(Map.class),
                     "loaded", false,

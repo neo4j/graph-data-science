@@ -21,6 +21,7 @@ package org.neo4j.gds.model.storage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
@@ -63,7 +64,8 @@ class ModelToFileExporterTest {
         GraphSage.MODEL_TYPE,
         GRAPH_SCHEMA,
         ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-        TRAIN_CONFIG
+        TRAIN_CONFIG,
+        EmptyGraphSageTrainMetrics.instance
     );
 
     @Test

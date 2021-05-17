@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.model;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.api.DefaultValue;
@@ -77,7 +78,8 @@ class ModelSerializationTest {
                 .aggregator(Aggregator.AggregatorType.MEAN)
                 .activationFunction(ActivationFunction.SIGMOID)
                 .featureProperties(List.of("age", "birth_year", "death_year", "embedding"))
-                .build()
+                .build(),
+            EmptyGraphSageTrainMetrics.instance
         );
 
         var protoModelMetaData = ModelMetaDataSerializer.toSerializable(model);

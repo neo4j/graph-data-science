@@ -26,12 +26,12 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.model.StoredModel;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -196,7 +196,8 @@ class ModelListProcTest extends ModelProcBaseTest {
                     .username(getUsername())
                     .modelName(modelName)
                     .addFeatureProperties("a")
-                    .build()
+                    .build(),
+                EmptyGraphSageTrainMetrics.instance
             );
             ModelStoreProc.storeModel(db, model1);
 
@@ -224,10 +225,11 @@ class ModelListProcTest extends ModelProcBaseTest {
                     .username(getUsername())
                     .modelName(modelName)
                     .addFeatureProperties("a")
-                    .build()
+                    .build(),
+                EmptyGraphSageTrainMetrics.instance
             );
             ModelStoreProc.storeModel(db, model1);
-            ((StoredModel) ModelCatalog.getUntyped(getUsername(), modelName)).unload();
+            ModelCatalog.getUntyped(getUsername(), modelName).unload();
 
             assertCypherResult(
                 "CALL gds.beta.model.list('testModel1') YIELD loaded, stored",

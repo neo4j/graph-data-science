@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.model.catalog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
@@ -78,7 +79,8 @@ class ModelStoreProcTest extends ModelProcBaseTest {
                 .username(getUsername())
                 .modelName(modelName)
                 .addFeatureProperties("a")
-                .build()
+                .build(),
+            EmptyGraphSageTrainMetrics.instance
         );
 
         ModelCatalog.set(model1);
@@ -113,7 +115,8 @@ class ModelStoreProcTest extends ModelProcBaseTest {
                 .username(getUsername())
                 .modelName(modelName)
                 .addFeatureProperties("a")
-                .build()
+                .build(),
+            EmptyGraphSageTrainMetrics.instance
 
         );
 

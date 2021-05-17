@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.model;
 
+import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
@@ -63,7 +64,8 @@ class GraphSageStoreModelTest extends BaseStoreModelTest<ModelData, GraphSageTra
             GraphSage.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
-            trainConfig
+            trainConfig,
+            EmptyGraphSageTrainMetrics.instance
         );
     }
 }

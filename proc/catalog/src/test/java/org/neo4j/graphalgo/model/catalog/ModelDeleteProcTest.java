@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.model.catalog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
@@ -68,7 +69,7 @@ class ModelDeleteProcTest extends ModelProcBaseTest {
 
         storeModelInCatalog();
         runQuery("CALL gds.alpha.model.store($modelName)", Map.of("modelName", MODEL_NAME));
-        ((StoredModel) ModelCatalog.getUntyped(getUsername(), MODEL_NAME)).unload();
+        ModelCatalog.getUntyped(getUsername(), MODEL_NAME).unload();
     }
 
     private void storeModelInCatalog() {
@@ -82,7 +83,8 @@ class ModelDeleteProcTest extends ModelProcBaseTest {
                 .username(getUsername())
                 .modelName(MODEL_NAME)
                 .addFeatureProperties("a")
-                .build()
+                .build(),
+            EmptyGraphSageTrainMetrics.instance
         );
 
         ModelCatalog.set(model1);
