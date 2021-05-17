@@ -257,7 +257,6 @@ class GraphSageModelTrainerTest {
         var trainMetrics = trainResult.metrics();
         assertThat(trainMetrics.didConverge()).isTrue();
         assertThat(trainMetrics.ranEpochs()).isEqualTo(1);
-
     }
 
 

@@ -182,9 +182,9 @@ public class GraphSageModelTrainer {
             .getLog()
             .debug("Epoch %d\tBatch %d, Initial loss: %.10f", epoch, batchIndex, newLoss);
 
-        int iteration = 0;
-        while (iteration < maxIterations) {
-            progressLogger.logStart(":: Iteration " + (iteration + 1));
+        int iteration = 1;
+        for (; iteration <= maxIterations; iteration++) {
+            progressLogger.logStart(":: Iteration " + iteration);
             oldLoss = newLoss;
 
             ComputationContext localCtx = new ComputationContext();
@@ -193,15 +193,14 @@ public class GraphSageModelTrainer {
             double lossDiff = Math.abs((oldLoss - newLoss) / oldLoss);
 
             if (lossDiff < tolerance) {
-                progressLogger.logFinish(":: Iteration " + (iteration + 1));
+                progressLogger.logFinish(":: Iteration " + iteration);
                 break;
             }
             localCtx.backward(lossFunction);
 
             updater.update(localCtx);
 
-            progressLogger.logFinish(":: Iteration " + (iteration + 1));
-            iteration++;
+            progressLogger.logFinish(":: Iteration " + iteration);
         }
 
         progressLogger.getLog().debug(
