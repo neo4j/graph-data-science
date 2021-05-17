@@ -301,13 +301,13 @@ class CosineDocTest extends BaseProcTest {
 
     @Test
     void embeddings() {
-        String setEmbeddingsQuery = "CREATE (french:Cuisine {name:'French'})          SET french.embedding = [0.71, 0.33, 0.81, 0.52, 0.41]\n" +
+        String setEmbeddingsQuery = "CREATE (french:Cuisine {name:'French'})          SET french.embedding = [0.0, 0.33, 0.81, 0.52, 0.41]\n" +
                                     "CREATE (italian:Cuisine {name:'Italian'})        SET italian.embedding = [0.31, 0.72, 0.58, 0.67, 0.31]\n" +
-                                    "CREATE (indian:Cuisine {name:'Indian'})          SET indian.embedding = [0.43, 0.26, 0.98, 0.51, 0.76]\n" +
+                                    "CREATE (indian:Cuisine {name:'Indian'})          SET indian.embedding = [0.43, 0.0, 0.98, 0.51, 0.76]\n" +
                                     "CREATE (lebanese:Cuisine {name:'Lebanese'})      SET lebanese.embedding = [0.12, 0.23, 0.35, 0.31, 0.39]\n" +
-                                    "CREATE (portuguese:Cuisine {name:'Portuguese'})  SET portuguese.embedding = [0.47, 0.98, 0.81, 0.72, 0.89]\n" +
+                                    "CREATE (portuguese:Cuisine {name:'Portuguese'})  SET portuguese.embedding = [0.47, 0.98, 0.0, 0.72, 0.89]\n" +
                                     "CREATE (british:Cuisine {name:'British'})        SET british.embedding = [0.94, 0.12, 0.23, 0.4, 0.71]\n" +
-                                    "CREATE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31, 0.56, 0.98, 0.21, 0.62]";
+                                    "CREATE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31, 0.56, 0.98, 0.0, 0.62]";
 
         runQuery(setEmbeddingsQuery);
 
@@ -316,38 +316,21 @@ class CosineDocTest extends BaseProcTest {
                        " WITH collect(userData) AS data" +
                        " CALL gds.alpha.similarity.cosine.stream({" +
                        "  data: data," +
-                       "  skipValue: null" +
+                       "  skipValue: 0.0" +
                        " })" +
                        " YIELD item1, item2, count1, count2, similarity" +
                        " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
-                       " ORDER BY similarity DESC";
+                       " ORDER BY similarity DESC" +
+                       " LIMIT 3";
 
         String expectedString = "+--------------------------------------------------+\n" +
                                 "| from         | to           | similarity         |\n" +
                                 "+--------------------------------------------------+\n" +
-                                "| \"Lebanese\"   | \"Portuguese\" | 0.9671144333535775 |\n" +
-                                "| \"Portuguese\" | \"Lebanese\"   | 0.9671144333535775 |\n" +
-                                "| \"Indian\"     | \"Lebanese\"   | 0.9590440861639105 |\n" +
-                                "| \"Lebanese\"   | \"Indian\"     | 0.9590440861639105 |\n" +
-                                "| \"Italian\"    | \"Portuguese\" | 0.9582444106965535 |\n" +
-                                "| \"Portuguese\" | \"Italian\"    | 0.9582444106965535 |\n" +
-                                "| \"Indian\"     | \"Mauritian\"  | 0.9464344561993275 |\n" +
-                                "| \"Mauritian\"  | \"Indian\"     | 0.9464344561993275 |\n" +
-                                "| \"French\"     | \"Indian\"     | 0.9414524820541921 |\n" +
-                                "| \"Indian\"     | \"French\"     | 0.9414524820541921 |\n" +
-                                "| \"Portuguese\" | \"Mauritian\"  | 0.92092461331529   |\n" +
-                                "| \"Mauritian\"  | \"Portuguese\" | 0.92092461331529   |\n" +
-                                "| \"Lebanese\"   | \"Mauritian\"  | 0.9192477665074964 |\n" +
-                                "| \"Mauritian\"  | \"Lebanese\"   | 0.9192477665074964 |\n" +
-                                "| \"Italian\"    | \"Lebanese\"   | 0.9072862556290799 |\n" +
-                                "| \"French\"     | \"Mauritian\"  | 0.8913504022120791 |\n" +
-                                "| \"French\"     | \"Lebanese\"   | 0.8853775767967607 |\n" +
-                                "| \"Italian\"    | \"French\"     | 0.8778358577197801 |\n" +
-                                "| \"British\"    | \"French\"     | 0.8384644973081824 |\n" +
-                                "| \"British\"    | \"Indian\"     | 0.7717276859027897 |\n" +
-                                "| \"British\"    | \"Lebanese\"   | 0.7393113934601527 |\n" +
+                                "| \"Mauritian\"  | \"Portuguese\" | 0.9955829148132149 |\n" +
+                                "| \"Portuguese\" | \"Mauritian\"  | 0.9955829148132149 |\n" +
+                                "| \"Indian\"     | \"Portuguese\" | 0.9954426605601884 |\n" +
                                 "+--------------------------------------------------+\n" +
-                                "21 rows\n";
+                                "3 rows\n";
 
         assertEquals(expectedString, runQuery(query, Result::resultAsString));
     }
