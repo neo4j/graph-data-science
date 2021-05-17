@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.config.RandomSeedConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -41,9 +42,7 @@ import java.util.stream.Collectors;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig, RelationshipWeightConfig {
-
-    Optional<Long> randomSeed();
+public interface LinkPredictionTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig, RelationshipWeightConfig, RandomSeedConfig {
 
     @Configuration.IntegerRange(min = 2)
     int validationFolds();

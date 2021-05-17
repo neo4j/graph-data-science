@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.config.RandomSeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
@@ -38,11 +39,9 @@ import java.util.stream.Collectors;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig {
+public interface NodeClassificationTrainConfig extends AlgoBaseConfig, FeaturePropertiesConfig, ModelConfig, RandomSeedConfig {
 
     long serialVersionUID = 0x42L;
-
-    Optional<Long> randomSeed();
 
     @Configuration.ConvertWith("org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification#parse")
     @Configuration.ToMapValue("org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification#specificationsToString")

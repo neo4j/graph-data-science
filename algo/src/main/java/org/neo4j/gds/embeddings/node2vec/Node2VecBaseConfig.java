@@ -23,11 +23,10 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
+import org.neo4j.graphalgo.config.RandomSeedConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
-import java.util.Optional;
-
-public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig {
+public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig, RandomSeedConfig {
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)
@@ -106,6 +105,4 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
     default int iterations() {
         return 1;
     }
-
-    Optional<Long> randomSeed();
 }

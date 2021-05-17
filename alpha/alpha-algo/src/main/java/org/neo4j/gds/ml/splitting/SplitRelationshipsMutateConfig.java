@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.MutateConfig;
+import org.neo4j.graphalgo.config.RandomSeedConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
@@ -37,9 +38,7 @@ import java.util.stream.Stream;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateConfig {
-
-    Optional<Long> randomSeed();
+public interface SplitRelationshipsMutateConfig extends AlgoBaseConfig, MutateConfig, RandomSeedConfig {
 
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     double holdoutFraction();

@@ -25,16 +25,16 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.EmbeddingDimensionConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
+import org.neo4j.graphalgo.config.RandomSeedConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig, FeaturePropertiesConfig {
+public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig, FeaturePropertiesConfig, RandomSeedConfig {
 
     List<Number> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
 
@@ -58,8 +58,6 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
     default float normalizationStrength() {
         return 0.0f;
     }
-
-    Optional<Long> randomSeed();
 
     static void validateCommon(List<? extends Number> iterationWeights) {
         if (iterationWeights.isEmpty()) {
