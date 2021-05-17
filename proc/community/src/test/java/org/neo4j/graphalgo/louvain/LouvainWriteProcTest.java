@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.louvain;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -35,8 +36,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -157,7 +160,7 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
             .algo("louvain")
             .writeMode()
             .addParameter("writeProperty", writeProperty)
-            .addParameter("seedProperty", "seed")
+            .addParameter("seedProperty", SEED_PROPERTY)
             .yields("communityCount", "ranLevels");
 
         runQueryWithRowConsumer(
@@ -200,6 +203,45 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
             .yields("communityCount");
 
         assertCypherResult(query, List.of(Map.of("communityCount", 0L)));
+    }
+
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+            Arguments.of(Map.of("minCommunitySize", 0), new Long[] {8L, 11L, 13L, 14L}),
+            Arguments.of(Map.of("minCommunitySize", 3), new Long[] {8L, 13L}),
+            Arguments.of(Map.of("minCommunitySize", 0, "consecutiveIds", true), new Long[] {0L, 1L, 2L, 3L}),
+            Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), new Long[] {2L, 3L}),
+            Arguments.of(Map.of("minCommunitySize", 0, "seedProperty", SEED_PROPERTY), new Long[] {1L, 2L, 42L}),
+            Arguments.of(Map.of("minCommunitySize", 3, "seedProperty", SEED_PROPERTY), new Long[] {2L, 42L})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void testWriteWithMinCommunitySize(Map<String, Object> parameters, Long[] expectedCommunityIds) {
+        var query = GdsCypher
+            .call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withNodeProperty(SEED_PROPERTY)
+            .algo("louvain")
+            .writeMode()
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addAllParameters(parameters)
+            .yields("communityCount");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(parameters.containsKey("seedProperty") ? 3L : 4L, row.getNumber("communityCount"));
+
+        });
+
+        runQueryWithRowConsumer(
+            "MATCH (n) RETURN collect(DISTINCT n." + WRITE_PROPERTY + ") AS communities ",
+            row -> {
+                @SuppressWarnings("unchecked") var actualComponents = (List<Long>) row.get("communities");
+                assertThat(actualComponents, containsInAnyOrder(expectedCommunityIds));
+            }
+        );
     }
 
     @Override
