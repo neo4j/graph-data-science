@@ -289,8 +289,8 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
                     "params: [{" +
                     "   penalty: 1.0," +
                     "   batchSizes: 1," +
-                    "   minepochs: 1," +
-                    "   maxepochs: 1," +
+                    "   miniepochs: 1," +
+                    "   maxxepochs: 1," +
                     "   patiences: 1," +
                     "   tollerance: 1," +
                     "   shareUpdaters: true" +
@@ -298,8 +298,8 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
 
         assertThatThrownBy(() -> runQuery(query))
             .hasMessageContaining("batchSizes (Did you mean [batchSize]?)")
-            .hasMessageContaining("minepochs (Did you mean [minEpochs]?)")
-            .hasMessageContaining("maxepochs (Did you mean [maxEpochs]?)")
+            .hasMessageContaining("miniepochs (Did you mean one of [minEpochs, maxEpochs]?)")
+            .hasMessageContaining("maxxepochs (Did you mean one of [maxEpochs, minEpochs]?)")
             .hasMessageContaining("patiences (Did you mean [patience]?)")
             .hasMessageContaining("tollerance (Did you mean [tolerance]?)")
             .hasMessageContaining("shareUpdaters (Did you mean [sharedUpdater]?)");
