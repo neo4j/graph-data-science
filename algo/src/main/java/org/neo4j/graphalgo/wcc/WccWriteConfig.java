@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.wcc;
 
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.config.CommunitySizeConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -30,7 +31,7 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface WccWriteConfig extends WccBaseConfig, WritePropertyConfig {
+public interface WccWriteConfig extends WccBaseConfig, WritePropertyConfig, CommunitySizeConfig {
 
     static WccWriteConfig of(
         String username,
