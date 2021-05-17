@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.similarity;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
@@ -30,6 +31,7 @@ import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
@@ -419,6 +421,62 @@ class CosineProcTest extends AlphaSimilarityProcTest<CosineAlgorithm, WeightedIn
         assertEquals((double) row.get("p95"), 0.91, 0.01);
         assertEquals((double) row.get("p99"), 0.91, 0.01);
         assertEquals((double) row.get("p100"), 0.91, 0.01);
+    }
+
+    @Test
+    void simpleCosineWithSkipValueTest() {
+        Map<String, Object> params = map("config", map("topK", 0, "skipValue", 1.0), "missingValue", 0);
+
+        assertCypherResult(STATEMENT_STREAM, params, List.of(
+            Map.of(
+                "item1", 0L,
+                "item2", 1L,
+                "count1", 2L,
+                "count2", 2L,
+                "intersection", 0L,
+                "similarity", Matchers.closeTo(0.3713907D, 0.00001D)
+            ),
+            Map.of(
+                "item1", 0L,
+                "item2", 2L,
+                "count1", 2L,
+                "count2", 3L,
+                "intersection", 0L,
+                "similarity", Matchers.closeTo(0.9284767D, 0.00001D)
+            ),
+            Map.of(
+                "item1", 0L,
+                "item2", 3L,
+                "count1", 2L,
+                "count2", 3L,
+                "intersection", 0L,
+                "similarity", 0.0D
+            ),
+            Map.of(
+                "item1", 1L,
+                "item2", 2L,
+                "count1", 2L,
+                "count2", 3L,
+                "intersection", 0L,
+                "similarity", 0.0D
+            ),
+            Map.of(
+                "item1", 1L,
+                "item2", 3L,
+                "count1", 2L,
+                "count2", 3L,
+                "intersection", 0L,
+                "similarity", 0.0D
+            ),
+            Map.of(
+                "item1", 2L,
+                "item2", 3L,
+                "count1", 3L,
+                "count2", 3L,
+                "intersection", 0L,
+                "similarity", 0.0D
+            )
+        ));
     }
 
     @Test

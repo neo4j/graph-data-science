@@ -87,7 +87,7 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
                 .map(NumberUtils::getDoubleValue)
                 .collect(Collectors.toList());
 
-            long weightsSize = skipAnything ? skipSize(skipValue, skipNan, weightList) : weightList.size();
+            long weightsSize = skipAnything ? skipSize(skipValue, weightList) : weightList.size();
 
             if (weightsSize > degreeCutoff) {
                 double[] weights = Weights.buildWeights(weightList);
@@ -99,8 +99,8 @@ public class WeightedInput implements Comparable<WeightedInput>, SimilarityInput
         return inputs;
     }
 
-    private static long skipSize(Double skipValue, boolean skipNan, List<Double> weightList) {
-        return weightList.stream().filter(value -> !Intersections.shouldSkip(value, skipValue, skipNan)).count();
+    private static long skipSize(Double skipValue, List<Double> weightList) {
+        return weightList.stream().filter(value -> !Intersections.shouldSkip(value, skipValue)).count();
     }
 
     public int compareTo(WeightedInput o) {
