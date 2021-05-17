@@ -211,7 +211,7 @@ include::../common-configuration/common-parameters-named-graph.adoc[]
 
 include::../common-configuration/common-write-configuration-named-graph.adoc[]
 
-include::specific-configuration.adoc[]
+include::specific-configuration-write.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]

@@ -29,13 +29,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
-import org.neo4j.gds.WritePropertyConfigProcTest;
-import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.Result;
 
@@ -46,6 +46,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -364,6 +366,47 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
         runQueryWithRowConsumer(
             "MATCH (n) WHERE n.id = 1 RETURN n.community AS community",
             row -> assertEquals(11, row.getNumber("community").intValue())
+        );
+    }
+
+    static Stream<Arguments> communitySizeInputs() {
+        return Stream.of(
+            Arguments.of(Map.of("minCommunitySize", 1), new Long[] {2L, 7L, 3L, 4L, 5L, 6L, 8L, 9L, 10L, 11L}),
+            Arguments.of(Map.of("minCommunitySize", 2), new Long[] {2L, 7L}),
+            Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), new Long[] {0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L}),
+            Arguments.of(Map.of("minCommunitySize", 2, "consecutiveIds", true), new Long[] {0L, 1L}),
+            Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", "seed"), new Long[] {1L, 2L}),
+            Arguments.of(Map.of("minCommunitySize", 2, "seedProperty", "seed"), new Long[] {1L, 2L})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("communitySizeInputs")
+    void testWriteWithMinCommunitySize(Map<String, Object> parameters, Long[] expectedCommunityIds) {
+        String writeProp = "writeProp";
+        var query = GdsCypher
+            .call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withNodeProperty("seed")
+            .algo("labelPropagation")
+            .writeMode()
+            .addParameter("writeProperty", writeProp)
+            .addAllParameters(parameters)
+            .yields("communityCount");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(parameters.containsKey("seedProperty") ? 2L : 10L, row.getNumber("communityCount"));
+
+        });
+
+        runQueryWithRowConsumer(
+            "MATCH (n) RETURN collect(DISTINCT n." + writeProp + ") AS communities ",
+            row -> {
+                @SuppressWarnings("unchecked") var actualComponents = (List<Long>) row.get("communities");
+                System.out.println("actualComponents = " + actualComponents);
+                assertThat(actualComponents, containsInAnyOrder(expectedCommunityIds));
+            }
         );
     }
 
