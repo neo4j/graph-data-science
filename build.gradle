@@ -1,5 +1,5 @@
 plugins {
-    id 'com.github.hierynomus.license'              version '0.15.0'                apply false
+    id 'com.github.hierynomus.license'              version '0.16.1'                apply false
     id 'com.github.johnrengelman.shadow'            version '5.2.0'                 apply false
     id 'de.undercouch.download'                     version '3.4.3'                 apply false
     id 'ch.kk7.spawn'                               version '1.0.20180924200750'    apply false
