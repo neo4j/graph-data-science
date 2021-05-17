@@ -47,7 +47,7 @@ RETURN gds.alpha.linkprediction.adamicAdar(node1:Node, node2:Node, {
 | `node1`                | Node    | null           | no       | A node
 | `node2`                | Node    | null           | no       | Another node
 | `relationshipQuery`    | String  | null           | yes      | The relationship type used to compute similarity between `node1` and `node2`
-| `direction`            | String  | BOTH           | yes      | The direction of relationship type used to compute similarity between `node1` and `node2`
+| `direction`            | String  | BOTH           | yes      | The relationship direction used to compute similarity between `node1` and `node2`. Possible values are `OUTGOING`, `INCOMING` and `BOTH`.
 |===
 
 
