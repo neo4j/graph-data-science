@@ -56,7 +56,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
             return;
         }
 
-        CURSOR neighboursAMain = cursor(nodeA, degreeA, cache);
+        CURSOR neighboursAMain = cursorForNode(cache, nodeA, degreeA);
         cache = neighboursAMain;
 
         // find first neighbour B of A with id > A
@@ -86,7 +86,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
             // check the second node's degree
             int degreeB = degree(nodeB);
             if (degreeFilter.test(degreeB)) {
-                neighboursB = cursor(nodeB, degreeB, neighboursB);
+                neighboursB = cursorForNode(neighboursB, nodeB, degreeB);
                 // find first neighbour Cb of B with id > B
                 nodeCFromB = neighboursB.skipUntil(nodeB);
 
@@ -158,21 +158,13 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         return triangleC;
     }
 
-    private @NotNull CURSOR cursor(long node, int degree, @Nullable CURSOR reuse) {
-        return reuse == null
-            ? newCursor(node, degree)
-            : repositionCursor(reuse, node, degree);
-    }
-
     private @NotNull CURSOR copyCursor(@NotNull CURSOR source, @Nullable CURSOR destination) {
         return checkCursorInstance(source.shallowCopy(destination));
     }
 
     protected abstract CURSOR checkCursorInstance(AdjacencyCursor cursor);
 
-    protected abstract CURSOR newCursor(long node, int degree);
-
-    protected abstract CURSOR repositionCursor(CURSOR reuse, long node, int degree);
+    protected abstract CURSOR cursorForNode(@Nullable CURSOR reuse, long node, int degree);
 
     protected abstract int degree(long node);
 }

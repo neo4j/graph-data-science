@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.triangle.intersect;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
@@ -46,12 +47,7 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
     }
 
     @Override
-    protected AdjacencyCursor newCursor(long node, int degree) {
-        return adjacencyList.adjacencyCursor(node);
-    }
-
-    @Override
-    protected AdjacencyCursor repositionCursor(AdjacencyCursor reuse, long node, int degree) {
+    protected AdjacencyCursor cursorForNode(@Nullable AdjacencyCursor reuse, long node, int degree) {
         return adjacencyList.adjacencyCursor(reuse, node);
     }
 
