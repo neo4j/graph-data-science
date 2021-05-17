@@ -476,14 +476,17 @@ CALL gds.beta.graphSage.train(
   {
     modelName: 'graphSage',
     featureProperties: ['age', 'heightAndWeight'],
-    embeddingDimension: 3
+    embeddingDimension: 3,
+    randomSeed: 19
   }
 )
 ----
 
 Once we have trained a model (named `'graphSage'`) we can use it to generate and stream the embeddings.
 
-[source, cypher, role=noplay query-example, no-result=true, group=graphSage]
+[role=query-example, group=graphSage]
+--
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.stream(
   'persons',
@@ -491,20 +494,22 @@ CALL gds.beta.graphSage.stream(
     modelName: 'graphSage'
   }
 )
+YIELD nodeId, embedding
 ----
 
 [opts=header]
 .Results
 |===
 | nodeId | embedding
-| 0      | [0.5773502692664537,0.5773502691669364,0.5773502691354871]
-| 1      | [0.5773502692979483,0.5773502691576353,0.5773502691132936]
-| 2      | [0.5773502692500592,0.5773502691717781,0.5773502691470399]
-| 3      | [0.5773502692751916,0.577350269164356,0.5773502691293296]
-| 4      | [0.5773502693595794,0.577350269139434,0.5773502690698639]
-| 5      | [0.5773502693858079,0.5773502691316881,0.5773502690513813]
-| 6      | [0.577350269340378,0.5773502691451048,0.5773502690833946]
+| 0      | [0.5285002502800851, 0.4682181746560116, 0.7081378580985543]
+| 1      | [0.5285002502805347, 0.4682181746562454, 0.7081378580980643]
+| 2      | [0.5285002502800688, 0.4682181746560031, 0.7081378580985722]
+| 3      | [0.5285002502786851, 0.46821817465528415, 0.7081378581000802]
+| 4      | [0.5285002503230048, 0.4682181746783139, 0.708137858051776]
+| 5      | [0.5285002503854339, 0.46821817471075367, 0.7081378579837347]
+| 6      | [0.5285002502788793, 0.46821817465538507, 0.7081378580998686]
 |===
+--
 
 NOTE: Due to the random initialisation of the weight variables the results may vary slightly between the runs.
 

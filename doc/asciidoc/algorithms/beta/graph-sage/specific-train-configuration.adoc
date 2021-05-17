@@ -17,4 +17,5 @@
 | searchDepth                                                                      | Integer       | 5         | yes      | Depth of a RandomWalk when sampling neighbors during training. This is used when computing the loss function.
 | negativeSampleWeight                                                             | Integer       | 20        | yes      | The weight of the negative samples. This is used when computing the loss function.
 | <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String        | null      | yes      | If set, the values stored at the given property are used as relationship weights during the computation. If not set, the graph is considered unweighted.
+| randomSeed                                                                       | Integer       | random    | yes      | A random seed which is used to control the randomness in computing the embeddings.
 |===
