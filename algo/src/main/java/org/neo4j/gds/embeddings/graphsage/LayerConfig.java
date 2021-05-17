@@ -28,6 +28,7 @@ public interface LayerConfig {
     int rows();
     int cols();
     int sampleSize();
+    long randomSeed();
 
     Optional<Integer> bias();
 

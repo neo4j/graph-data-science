@@ -49,6 +49,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,6 +63,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
 
 public class GraphSageModelTrainer {
+    private final long randomSeed;
     private Layer[] layers;
     private final boolean useWeights;
     private final double learningRate;
@@ -102,8 +104,8 @@ public class GraphSageModelTrainer {
         this.labelProjectionWeights = labelProjectionWeights;
         this.executor = executor;
         this.progressLogger = progressLogger;
-
         this.useWeights = config.hasRelationshipWeightProperty();
+        this.randomSeed = config.randomSeed().orElse(ThreadLocalRandom.current().nextLong());
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
@@ -172,7 +174,7 @@ public class GraphSageModelTrainer {
             layer.generateNewRandomState();
         }
 
-        Variable<Scalar> lossFunction = lossFunction(batch, graph, features);
+        Variable<Scalar> lossFunction = lossFunction(batch, graph, features, batchIndex);
 
         double newLoss = Double.MAX_VALUE;
         double oldLoss;
@@ -217,13 +219,14 @@ public class GraphSageModelTrainer {
         int epoch
     ) {
         DoubleAdder doubleAdder = new DoubleAdder();
+        AtomicInteger batchIndex = new AtomicInteger(0);
 
         var tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
             batch -> (Runnable) () -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable<Scalar> loss = lossFunction(batch, graph, features);
+                Variable<Scalar> loss = lossFunction(batch, graph, features, batchIndex.getAndIncrement());
                 doubleAdder.add(ctx.forward(loss).value());
             }
         );
@@ -235,8 +238,10 @@ public class GraphSageModelTrainer {
         return lossValue;
     }
 
-    private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features) {
-        var neighbours = neighborBatch(graph, batch).toArray();
+    private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features, int batchIndex) {
+        var batchLocalRandomSeed = batchIndex + randomSeed;
+
+        var neighbours = neighborBatch(graph, batch, batchLocalRandomSeed).toArray();
 
         var neighborsSet = new LongHashSet(neighbours.length);
         neighborsSet.addAll(neighbours);
@@ -246,7 +251,7 @@ public class GraphSageModelTrainer {
             LongStream.concat(
                 Arrays.stream(neighbours),
                 // batch.nodeCount is <= config.batchsize (which is an int)
-                negativeBatch(graph, Math.toIntExact(batch.nodeCount()), neighborsSet)
+                negativeBatch(graph, Math.toIntExact(batch.nodeCount()), neighborsSet, batchLocalRandomSeed)
             )
         ).toArray();
 
@@ -262,11 +267,13 @@ public class GraphSageModelTrainer {
         return new PassthroughVariable<>(lossFunction);
     }
 
-    private LongStream neighborBatch(Graph graph, Partition batch) {
+    private LongStream neighborBatch(Graph graph, Partition batch, long batchLocalSeed) {
         var neighborBatchBuilder = LongStream.builder();
+        var localRandom = new Random(batchLocalSeed);
+
         batch.consume(nodeId -> {
             // randomWalk with at most maxSearchDepth steps and only save last node
-            int searchDepth = ThreadLocalRandom.current().nextInt(maxSearchDepth) + 1;
+            int searchDepth = localRandom.nextInt(maxSearchDepth) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
                 NeighborhoodSampler neighborhoodSampler = new NeighborhoodSampler(currentNode.get() + searchDepth);
@@ -286,9 +293,9 @@ public class GraphSageModelTrainer {
     }
 
     // get a negative sample per node in batch
-    private LongStream negativeBatch(Graph graph, int batchSize, LongHashSet neighbours) {
+    private LongStream negativeBatch(Graph graph, int batchSize, LongHashSet neighbours, long batchLocalRandomSeed) {
         long nodeCount = graph.nodeCount();
-        var sampler = new WeightedUniformSampler(layers[0].randomState());
+        var sampler = new WeightedUniformSampler(batchLocalRandomSeed);
 
         // each node should be possible to sample
         // therefore we need fictive rels to all nodes

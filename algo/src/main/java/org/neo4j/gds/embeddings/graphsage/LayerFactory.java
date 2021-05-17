@@ -23,7 +23,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -38,10 +38,12 @@ public final class LayerFactory {
 
         ActivationFunction activationFunction = layerConfig.activationFunction();
 
+        var randomSeed = layerConfig.randomSeed();
         Weights<Matrix> weights = generateWeights(
             rows,
             cols,
-            activationFunction.weightInitBound(rows, cols)
+            activationFunction.weightInitBound(rows, cols),
+            randomSeed
         );
 
         switch (layerConfig.aggregatorType()) {
@@ -49,7 +51,8 @@ public final class LayerFactory {
                 return new MeanAggregatingLayer(
                     weights,
                     layerConfig.sampleSize(),
-                    activationFunction
+                    activationFunction,
+                    randomSeed
                 );
             case POOL:
                 Weights<Matrix> poolWeights = weights;
@@ -57,13 +60,15 @@ public final class LayerFactory {
                 Weights<Matrix> selfWeights = generateWeights(
                     rows,
                     cols,
-                    activationFunction.weightInitBound(rows, cols)
+                    activationFunction.weightInitBound(rows, cols),
+                    randomSeed
                 );
 
                 Weights<Matrix> neighborsWeights = generateWeights(
                     rows,
                     rows,
-                    activationFunction.weightInitBound(rows, rows)
+                    activationFunction.weightInitBound(rows, rows),
+                    randomSeed
                 );
 
                 Weights<Vector> bias = new Weights<>(Vector.fill(0D, rows));
@@ -74,17 +79,18 @@ public final class LayerFactory {
                     selfWeights,
                     neighborsWeights,
                     bias,
-                    activationFunction
+                    activationFunction,
+                    randomSeed
                 );
             default:
                 throw new RuntimeException(formatWithLocale("Aggregator: %s is unknown", layerConfig.aggregatorType()));
         }
     }
 
-    public static Weights<Matrix> generateWeights(int rows, int cols, double weightBound) {
+    public static Weights<Matrix> generateWeights(int rows, int cols, double weightBound, long randomSeed) {
 
-        double[] data = ThreadLocalRandom.current()
-            .doubles(rows * cols, -weightBound, weightBound)
+        double[] data = new Random(randomSeed)
+            .doubles(Math.multiplyExact(rows, cols), -weightBound, weightBound)
             .toArray();
 
         return new Weights<>(new Matrix(

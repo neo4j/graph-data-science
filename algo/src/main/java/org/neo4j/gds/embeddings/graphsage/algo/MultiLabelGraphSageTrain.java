@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeMultiLabelFeatures;
@@ -106,7 +107,12 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 //TODO: how should we initialize the values in the matrix?
-                e -> generateWeights(config.projectedFeatureDimension().orElseThrow(), e.getValue(), WEIGHT_BOUND)
+                e -> generateWeights(
+                    config.projectedFeatureDimension().orElseThrow(),
+                    e.getValue(),
+                    WEIGHT_BOUND,
+                    config.randomSeed().orElse(ThreadLocalRandom.current().nextLong())
+                )
             ));
     }
 }

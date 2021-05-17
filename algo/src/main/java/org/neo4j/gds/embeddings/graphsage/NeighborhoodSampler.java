@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipCursor;
 
 import java.util.OptionalLong;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 import java.util.stream.LongStream;
 
 public class NeighborhoodSampler {
@@ -69,7 +69,7 @@ public class NeighborhoodSampler {
     }
 
     void generateNewRandomState() {
-        this.randomSeed = ThreadLocalRandom.current().nextLong();
+        this.randomSeed = new Random(randomSeed).nextLong();
     }
 
     OptionalLong sampleOne(Graph graph, long nodeId) {

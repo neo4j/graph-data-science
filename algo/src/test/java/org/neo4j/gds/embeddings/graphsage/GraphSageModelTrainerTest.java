@@ -272,4 +272,29 @@ class GraphSageModelTrainerTest {
         assertThat(trainMetrics.didConverge()).isTrue();
         assertThat(trainMetrics.ranEpochs()).isEqualTo(1);
     }
+
+    @ParameterizedTest
+    @ValueSource(longs = {20L, -100L, 30L})
+    void shouldConsiderRandomSeed(long seed) {
+        var arrayFeatures = HugeObjectArray.newArray(double[].class, arrayGraph.nodeCount(), AllocationTracker.empty());
+        LongStream
+            .range(0, arrayGraph.nodeCount())
+            .forEach(n -> arrayFeatures.set(n, arrayGraph.nodeProperties("features").doubleArrayValue(n)));
+        var config = GraphSageTrainConfig.builder()
+            .embeddingDimension(12)
+            .aggregator(Aggregator.AggregatorType.MEAN)
+            .activationFunction(ActivationFunction.SIGMOID)
+            .addFeatureProperty("features")
+            .modelName("model")
+            .randomSeed(seed)
+            .build();
+
+        var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
+        var otherTrainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
+
+        var result = trainer.train(arrayGraph, arrayFeatures);
+        var otherResult = otherTrainer.train(arrayGraph, arrayFeatures);
+
+        assertThat(result).usingRecursiveComparison().isEqualTo(otherResult);
+    }
 }

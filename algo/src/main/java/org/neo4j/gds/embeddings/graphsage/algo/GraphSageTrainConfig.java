@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.config.FeaturePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.config.RandomSeedConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -40,6 +41,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -55,7 +57,8 @@ public interface GraphSageTrainConfig extends
     ToleranceConfig,
     EmbeddingDimensionConfig,
     RelationshipWeightConfig,
-    FeaturePropertiesConfig {
+    FeaturePropertiesConfig,
+    RandomSeedConfig {
 
     long serialVersionUID = 0x42L;
 
@@ -148,6 +151,10 @@ public interface GraphSageTrainConfig extends
     @Configuration.Ignore
     default List<LayerConfig> layerConfigs(int featureDimension) {
         List<LayerConfig> result = new ArrayList<>(sampleSizes().size());
+
+        Random random = new Random();
+        randomSeed().ifPresent(random::setSeed);
+
         for (int i = 0; i < sampleSizes().size(); i++) {
             LayerConfig layerConfig = LayerConfig.builder()
                 .aggregatorType(aggregator())
@@ -155,6 +162,7 @@ public interface GraphSageTrainConfig extends
                 .rows(embeddingDimension())
                 .cols(i == 0 ? featureDimension : embeddingDimension())
                 .sampleSize(sampleSizes().get(i))
+                .randomSeed(random.nextLong())
                 .build();
 
             result.add(layerConfig);

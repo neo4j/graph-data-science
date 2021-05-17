@@ -22,8 +22,6 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 public class MeanAggregatingLayer implements Layer {
 
     private final NeighborhoodSampler sampler;
@@ -41,19 +39,6 @@ public class MeanAggregatingLayer implements Layer {
         this.weights = weights;
         this.activationFunction = activationFunction;
         this.sampler = new NeighborhoodSampler(randomSeed);
-    }
-
-    public MeanAggregatingLayer(
-        Weights<Matrix> weights,
-        int sampleSize,
-        ActivationFunction activationFunction
-    ) {
-        this(
-            weights,
-            sampleSize,
-            activationFunction,
-            ThreadLocalRandom.current().nextLong()
-        );
     }
 
     @Override
