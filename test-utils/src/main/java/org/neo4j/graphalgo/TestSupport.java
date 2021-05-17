@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -411,5 +412,11 @@ public final class TestSupport {
                 break;
         }
         return formatWithLocale(cypherAggregation, property);
+    }
+
+    public static SecureTransaction fullAccessTransaction(GraphDatabaseAPI api) {
+        try (var tx = api.beginTx()) {
+            return SecureTransaction.of(api, tx);
+        }
     }
 }

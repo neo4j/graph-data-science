@@ -218,7 +218,7 @@ abstract class AlphaSimilarityProc
         };
 
         SimilarityExporter similarityExporter = new SimilarityExporter(
-            SecureTransaction.of(api),
+            SecureTransaction.of(api, procedureTransaction),
             config.writeRelationshipType(),
             config.writeProperty(),
             terminationFlag

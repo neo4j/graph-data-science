@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphWriteNodePropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
@@ -115,7 +116,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
             );
 
             var exporter = NodePropertyExporter
-                .builder(api, subGraph, TerminationFlag.wrap(transaction))
+                .builder(SecureTransaction.of(api, procedureTransaction), subGraph, TerminationFlag.wrap(transaction))
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .withProgressLogger(progressLogger)
                 .build();

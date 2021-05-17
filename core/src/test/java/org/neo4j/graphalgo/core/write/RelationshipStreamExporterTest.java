@@ -24,11 +24,14 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
+import org.neo4j.graphdb.security.AuthorizationViolationException;
+import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -39,9 +42,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.core.utils.TerminationFlag.RUNNING_TRUE;
 
 class RelationshipStreamExporterTest extends BaseTest {
 
@@ -58,6 +63,22 @@ class RelationshipStreamExporterTest extends BaseTest {
     }
 
     @Test
+    void doesNotExportWhenNotAllowed() {
+        var exportRelationships = List.of(
+            relationship("a", "b", Values.longValue(42L), Values.doubleValue(1332)),
+            relationship("c", "d", Values.longValue(47L), Values.doubleValue(1337))
+        );
+
+        var secureTransaction = TestSupport.fullAccessTransaction(db).withRestrictedAccess(AccessMode.Static.READ);
+        var exporter = RelationshipStreamExporter
+            .builder(secureTransaction, graph, exportRelationships.stream(), RUNNING_TRUE)
+            .build();
+
+        assertThatExceptionOfType(AuthorizationViolationException.class)
+            .isThrownBy(() -> exporter.write("OUT_TYPE"));
+    }
+
+    @Test
     void exportScalar() {
         var exportRelationships = List.of(
             relationship("a", "b", Values.longValue(42L), Values.doubleValue(1332)),
@@ -69,7 +90,12 @@ class RelationshipStreamExporterTest extends BaseTest {
         );
 
         var exporter = RelationshipStreamExporter
-            .builder(db, graph, exportRelationships.stream(), TerminationFlag.RUNNING_TRUE)
+            .builder(
+                TestSupport.fullAccessTransaction(db),
+                graph,
+                exportRelationships.stream(),
+                TerminationFlag.RUNNING_TRUE
+            )
             .build();
 
         var relationshipType = "FOOBAR";
@@ -118,7 +144,12 @@ class RelationshipStreamExporterTest extends BaseTest {
         );
 
         var exporter = RelationshipStreamExporter
-            .builder(db, graph, exportRelationships.stream(), TerminationFlag.RUNNING_TRUE)
+            .builder(
+                TestSupport.fullAccessTransaction(db),
+                graph,
+                exportRelationships.stream(),
+                TerminationFlag.RUNNING_TRUE
+            )
             .build();
 
         var relationshipType = "FOOBAR";
@@ -162,7 +193,7 @@ class RelationshipStreamExporterTest extends BaseTest {
             .mapToObj(ignored -> relationship(randomVariable(rand, nodeCount), randomVariable(rand, nodeCount)));
 
         var exporter = RelationshipStreamExporter
-            .builder(db, graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
+            .builder(TestSupport.fullAccessTransaction(db), graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
             .withBatchSize(batchSize)
             .build();
 
@@ -178,7 +209,7 @@ class RelationshipStreamExporterTest extends BaseTest {
     @Test
     void exportEmptyStream() {
         var exporter = RelationshipStreamExporter
-            .builder(db, graph, Stream.empty(), TerminationFlag.RUNNING_TRUE)
+            .builder(TestSupport.fullAccessTransaction(db), graph, Stream.empty(), TerminationFlag.RUNNING_TRUE)
             .build();
 
         var relationshipsWritten = exporter.write("FOOBAR");
@@ -202,7 +233,7 @@ class RelationshipStreamExporterTest extends BaseTest {
             .mapToObj(ignored -> relationship(randomVariable(rand, nodeCount), randomVariable(rand, nodeCount)));
 
         var exporter = RelationshipStreamExporter
-            .builder(db, graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
+            .builder(TestSupport.fullAccessTransaction(db), graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
             .withBatchSize(batchSize)
             .withLog(log)
             .build();

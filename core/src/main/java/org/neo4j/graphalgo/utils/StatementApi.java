@@ -42,7 +42,7 @@ public abstract class StatementApi {
     }
 
     protected GraphDatabaseService api() {
-        return tx.db();
+        return tx.api();
     }
 
     protected final <T> T applyInTransaction(TxFunction<T> fun) {

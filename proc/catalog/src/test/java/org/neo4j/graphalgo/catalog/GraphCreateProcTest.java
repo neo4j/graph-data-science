@@ -755,6 +755,7 @@ class GraphCreateProcTest extends BaseProcTest {
         try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(db)) {
             GraphCreateProc proc = new GraphCreateProc();
 
+            proc.procedureTransaction = transactions.tx();
             proc.transaction = transactions.ktx();
             proc.api = db;
             proc.callContext = ProcedureCallContext.EMPTY;

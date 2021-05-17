@@ -31,7 +31,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphalgo.utils.StatementApi;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.values.storable.Values;
@@ -51,13 +50,13 @@ public final class RelationshipExporter extends StatementApi {
     private final ProgressLogger progressLogger;
     private final ExecutorService executorService;
 
-    public static RelationshipExporter.Builder of(GraphDatabaseService db, Graph graph, TerminationFlag terminationFlag) {
-        return of(SecureTransaction.of(db), graph, terminationFlag);
-    }
-
-    public static RelationshipExporter.Builder of(SecureTransaction tx, Graph graph, TerminationFlag terminationFlag) {
+    public static RelationshipExporter.Builder of(
+        SecureTransaction secureTransaction,
+        Graph graph,
+        TerminationFlag terminationFlag
+    ) {
         return new RelationshipExporter.Builder(
-            tx,
+            secureTransaction,
             graph,
             terminationFlag
         );

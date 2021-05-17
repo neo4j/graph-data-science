@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.results;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
 import java.util.List;
@@ -48,7 +48,7 @@ class SimilarityExporterTest extends BaseTest {
         final var similarityScore = 1.0;
         var similarityResults = List.of(new SimilarityResult(0, 1, 1, 1, 1, similarityScore, false, false));
         SimilarityExporter similarityExporter = new SimilarityExporter(
-            SecureTransaction.of(db),
+            TestSupport.fullAccessTransaction(db),
             WRITE_RELATIONSHIP_TYPE,
             WRITE_PROPERTY,
             TerminationFlag.RUNNING_TRUE

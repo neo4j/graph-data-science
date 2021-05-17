@@ -131,15 +131,14 @@ abstract class AbstractCursorBasedScanner<
     private final Store store;
 
     AbstractCursorBasedScanner(int prefetchSize, SecureTransaction transaction, Attachment attachment) {
-        var neoStores = GraphDatabaseApiProxy.neoStores(transaction.db());
+        var neoStores = GraphDatabaseApiProxy.neoStores(transaction.api());
         var store = store(neoStores);
         int recordSize = store.getRecordSize();
         int recordsPerPage = store.getRecordsPerPage();
 
         this.transaction = transaction.fork();
         this.prefetchSize = prefetchSize;
-        // get is OK here, since we are forking a new transaction
-        this.kernelTransaction = this.transaction.topLevelKernelTransaction().get();
+        this.kernelTransaction = this.transaction.topLevelKernelTransaction();
         this.entityCursorScan = entityCursorScan(kernelTransaction, attachment);
         this.cursors = new ThreadLocal<>();
         this.recordSize = recordSize;

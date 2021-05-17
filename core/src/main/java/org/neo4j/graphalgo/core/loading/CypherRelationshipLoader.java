@@ -41,7 +41,6 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -82,12 +81,11 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
     CypherRelationshipLoader(
         String relationshipQuery,
         NodeMapping nodeMapping,
-        GraphDatabaseAPI api,
         GraphCreateFromCypherConfig config,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions
     ) {
-        super(relationshipQuery, nodeMapping.nodeCount(), api, config, loadingContext);
+        super(relationshipQuery, nodeMapping.nodeCount(), config, loadingContext);
         this.nodeMapping = nodeMapping;
         this.dimensionsAfterNodeLoading = dimensions;
         this.loaderContext = new Context();

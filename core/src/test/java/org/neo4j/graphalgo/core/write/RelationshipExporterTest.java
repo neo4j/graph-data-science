@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.write;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,6 +31,7 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -39,13 +39,15 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.gdl.GdlFactory;
+import org.neo4j.graphdb.security.AuthorizationViolationException;
+import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.values.storable.Values;
 
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isA;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
@@ -78,6 +80,21 @@ class RelationshipExporterTest extends BaseTest {
     }
 
     @Test
+    void doesNotExportWhenNotAllowed() {
+        Graph graph = new StoreLoaderBuilder()
+            .api(db)
+            .graphName("foo")
+            .build()
+            .graph();
+
+        var secureTransaction = TestSupport.fullAccessTransaction(db).withRestrictedAccess(AccessMode.Static.READ);
+        var exporter = RelationshipExporter.of(secureTransaction, graph, RUNNING_TRUE).build();
+
+        assertThatExceptionOfType(AuthorizationViolationException.class)
+            .isThrownBy(() -> exporter.write("OUT_TYPE"));
+    }
+
+    @Test
     void exportRelationships() {
         RelationshipExporter exporter = setupExportTest(/* includeProperties */ true);
         exporter.write("FOOBAR", "weight");
@@ -99,14 +116,18 @@ class RelationshipExporterTest extends BaseTest {
             .graphStore();
 
         RelationshipExporter
-            .of(db, graphStore.getGraph(RelationshipType.of("NEW_REL"), Optional.of("newWeight")), RUNNING_TRUE)
+            .of(
+                TestSupport.fullAccessTransaction(db),
+                graphStore.getGraph(RelationshipType.of("NEW_REL"), Optional.of("newWeight")),
+                RUNNING_TRUE
+            )
             .withRelationPropertyTranslator(relProperty -> Values.longValue((long) relProperty))
             .build()
             .write("NEW_REL", "newWeight");
 
         runQueryWithRowConsumer(db,
             "MATCH ()-[r:NEW_REL]->() RETURN r.newWeight AS newWeight",
-            row -> assertThat(row.get("newWeight"), isA(Long.class)));
+            row -> assertThat(row.get("newWeight")).isInstanceOf(Long.class));
     }
 
     @Test
@@ -170,7 +191,9 @@ class RelationshipExporterTest extends BaseTest {
 
         // with a rel exporter
         var log = new TestLog();
-        var exporterBuilder = RelationshipExporter.of(db, graph, TerminationFlag.RUNNING_TRUE).withLog(log);
+        var exporterBuilder = RelationshipExporter
+            .of(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
+            .withLog(log);
         if (parallel) {
             exporterBuilder = exporterBuilder.parallel(Pools.DEFAULT, 4);
         }
@@ -180,7 +203,7 @@ class RelationshipExporterTest extends BaseTest {
         exporter.write("T");
 
         // then assert messages
-        Assertions.assertThat(log.getMessages(TestLog.INFO))
+        assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .containsExactly(
                 "WriteRelationships :: Start",
@@ -227,7 +250,7 @@ class RelationshipExporterTest extends BaseTest {
 
         // export into new database
         return RelationshipExporter
-            .of(db, fromGraph, RUNNING_TRUE)
+            .of(TestSupport.fullAccessTransaction(db), fromGraph, RUNNING_TRUE)
             .build();
     }
 

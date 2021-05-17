@@ -49,9 +49,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.extension.GdlSupportExtension;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.database.NamedDatabaseId;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
@@ -127,7 +124,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
         GraphDimensions graphDimensions,
         NamedDatabaseId databaseId
     ) {
-        super(graphCreateConfig, NO_API_CONTEXT, graphDimensions);
+        super(graphCreateConfig, GraphLoaderContext.NULL_CONTEXT, graphDimensions);
         this.gdlHandler = gdlHandler;
         this.databaseId = databaseId;
     }
@@ -416,18 +413,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphCreateFromGdlCon
             ));
         }
     }
-
-    private static final GraphLoaderContext NO_API_CONTEXT = new GraphLoaderContext() {
-        @Override
-        public GraphDatabaseAPI api() {
-            return null;
-        }
-
-        @Override
-        public Log log() {
-            return NullLog.getInstance();
-        }
-    };
 
     private static final class GraphDimensionsGdlReader {
 

@@ -25,22 +25,17 @@ import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
+import org.neo4j.logging.NullLog;
 
 import java.util.concurrent.ExecutorService;
 
 @ValueClass
 public interface GraphLoaderContext {
 
-    GraphDatabaseAPI api();
+    SecureTransaction secureTransaction();
 
     Log log();
-
-    @Value.Default
-    default SecureTransaction transaction() {
-        return SecureTransaction.of(api());
-    }
 
     @Value.Default
     default ExecutorService executor() {
@@ -57,15 +52,15 @@ public interface GraphLoaderContext {
         return TerminationFlag.RUNNING_TRUE;
     }
 
-    GraphLoaderContext NULL_CONTEXT_FOR_FICTITIOUS_LOADING = new GraphLoaderContext() {
+    GraphLoaderContext NULL_CONTEXT = new GraphLoaderContext() {
         @Override
-        public GraphDatabaseAPI api() {
+        public SecureTransaction secureTransaction() {
             return null;
         }
 
         @Override
         public Log log() {
-            return null;
+            return NullLog.getInstance();
         }
     };
 }

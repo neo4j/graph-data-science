@@ -142,6 +142,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
                 throw new RuntimeException("Could not instantiate Procedure Class " + getProcedureClazz().getSimpleName());
             }
 
+            proc.procedureTransaction = transactions.tx();
             proc.transaction = transactions.ktx();
             proc.api = graphDb();
             proc.callContext = ProcedureCallContext.EMPTY;
@@ -623,7 +624,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .api(db)
+                .secureTransaction(TestSupport.fullAccessTransaction(db))
                 .log(new TestLog())
                 .build())
             .username("")

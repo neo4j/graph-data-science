@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -53,21 +52,17 @@ abstract class CypherRecordLoader<R> {
     final GraphCreateFromCypherConfig cypherConfig;
     final GraphLoaderContext loadingContext;
 
-    protected final GraphDatabaseAPI api;
-
     private final long recordCount;
     private final String loadQuery;
 
     CypherRecordLoader(
         String loadQuery,
         long recordCount,
-        GraphDatabaseAPI api,
         GraphCreateFromCypherConfig cypherConfig,
         GraphLoaderContext loadingContext
     ) {
         this.loadQuery = loadQuery;
         this.recordCount = recordCount;
-        this.api = api;
         this.cypherConfig = cypherConfig;
         this.loadingContext = loadingContext;
     }

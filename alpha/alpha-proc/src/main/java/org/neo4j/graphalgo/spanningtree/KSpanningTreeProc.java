@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -95,7 +96,8 @@ public class KSpanningTreeProc extends AlgoBaseProc<KSpanningTree, SpanningTree,
 
         builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount);
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-            final NodePropertyExporter exporter = NodePropertyExporter.builder(api, graph, TerminationFlag.wrap(transaction))
+            final NodePropertyExporter exporter = NodePropertyExporter
+                .builder(SecureTransaction.of(api, procedureTransaction), graph, TerminationFlag.wrap(transaction))
                 .withLog(log)
                 .parallel(Pools.DEFAULT, config.writeConcurrency())
                 .build();

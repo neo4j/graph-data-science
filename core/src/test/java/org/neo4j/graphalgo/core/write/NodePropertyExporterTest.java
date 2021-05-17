@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
@@ -70,7 +71,9 @@ class NodePropertyExporterTest extends BaseTest {
             .build()
             .graph();
 
-        NodePropertyExporter exporter = NodePropertyExporter.builder(db, graph, TerminationFlag.RUNNING_TRUE).build();
+        NodePropertyExporter exporter = NodePropertyExporter
+            .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
+            .build();
 
         int[] intData = {23, 42, 84};
         exporter.write("newProp1",  new LongTestProperties(nodeId -> intData[(int) nodeId]));
@@ -102,7 +105,9 @@ class NodePropertyExporterTest extends BaseTest {
             .build()
             .graph();
 
-        NodePropertyExporter exporter = NodePropertyExporter.builder(db, graph, TerminationFlag.RUNNING_TRUE).build();
+        NodePropertyExporter exporter = NodePropertyExporter
+            .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
+            .build();
 
         int[] intData = {23, 42, 84};
         double[] doubleData = {123D, 142D, 184D};
@@ -153,7 +158,9 @@ class NodePropertyExporterTest extends BaseTest {
 
         // with a node exporter
         var log = new TestLog();
-        var exporterBuilder = NodePropertyExporter.builder(db, graph, TerminationFlag.RUNNING_TRUE).withLog(log);
+        var exporterBuilder = NodePropertyExporter
+            .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)
+            .withLog(log);
         if (parallel) {
             exporterBuilder = exporterBuilder.parallel(Pools.DEFAULT, 4);
         }
@@ -193,7 +200,8 @@ class NodePropertyExporterTest extends BaseTest {
 
     private void transactionTerminationTest(ExecutorService executorService) {
         TerminationFlag terminationFlag = () -> false;
-        NodePropertyExporter exporter = NodePropertyExporter.builder(db, new DirectIdMapping(3), terminationFlag)
+        NodePropertyExporter exporter = NodePropertyExporter
+            .builder(TestSupport.fullAccessTransaction(db), new DirectIdMapping(3), terminationFlag)
             .parallel(executorService, 4)
             .build();
 

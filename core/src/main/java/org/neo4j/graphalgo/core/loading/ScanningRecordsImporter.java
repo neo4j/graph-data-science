@@ -56,7 +56,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
     ) {
         this.factory = factory;
         this.label = label;
-        this.transaction = loadingContext.transaction();
+        this.transaction = loadingContext.secureTransaction();
         this.dimensions = dimensions;
         this.threadPool = loadingContext.executor();
         this.tracker = loadingContext.tracker();

@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.utils.StatementApi;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.values.storable.Value;
 
@@ -53,10 +52,6 @@ public class NodePropertyExporter extends StatementApi {
     protected final long nodeCount;
     protected final LongUnaryOperator toOriginalId;
     protected final LongAdder propertiesWritten;
-
-    public static Builder builder(GraphDatabaseService db, IdMapping idMapping, TerminationFlag terminationFlag) {
-        return builder(SecureTransaction.of(db), idMapping, terminationFlag);
-    }
 
     public static Builder builder(SecureTransaction tx, IdMapping idMapping, TerminationFlag terminationFlag) {
         return new Builder(tx, idMapping, terminationFlag);

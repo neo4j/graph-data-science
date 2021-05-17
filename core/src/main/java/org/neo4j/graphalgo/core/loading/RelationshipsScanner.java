@@ -51,7 +51,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
             return InternalImporter.createEmptyScanner();
         }
         return new RelationshipsScanner.Creator(
-            loadingContext.transaction(),
+            loadingContext.secureTransaction(),
             progressLogger,
             idMap,
             scanner,

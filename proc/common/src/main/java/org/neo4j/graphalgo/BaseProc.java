@@ -112,8 +112,7 @@ public abstract class BaseProc {
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .api(api)
-                .transaction(SecureTransaction.of(api, procedureTransaction, transaction.securityContext()))
+                .secureTransaction(SecureTransaction.of(api, procedureTransaction))
                 .log(log)
                 .tracker(tracker)
                 .terminationFlag(TerminationFlag.wrap(transaction))
@@ -126,7 +125,7 @@ public abstract class BaseProc {
     private GraphLoader newFictitiousLoader(GraphCreateConfig createConfig) {
         return ImmutableGraphLoader
             .builder()
-            .context(GraphLoaderContext.NULL_CONTEXT_FOR_FICTITIOUS_LOADING)
+            .context(GraphLoaderContext.NULL_CONTEXT)
             .username(username())
             .createConfig(createConfig)
             .build();

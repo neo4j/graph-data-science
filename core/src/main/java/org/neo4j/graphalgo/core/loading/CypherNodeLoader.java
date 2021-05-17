@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -59,12 +58,11 @@ class CypherNodeLoader extends CypherRecordLoader<CypherNodeLoader.LoadResult> {
     CypherNodeLoader(
         String nodeQuery,
         long nodeCount,
-        GraphDatabaseAPI api,
         GraphCreateFromCypherConfig config,
         GraphLoaderContext loadingContext,
         GraphDimensions outerDimensions
     ) {
-        super(nodeQuery, nodeCount, api, config, loadingContext);
+        super(nodeQuery, nodeCount, config, loadingContext);
         this.nodeCount = nodeCount;
         this.outerDimensions = outerDimensions;
         this.highestNodeId = 0L;

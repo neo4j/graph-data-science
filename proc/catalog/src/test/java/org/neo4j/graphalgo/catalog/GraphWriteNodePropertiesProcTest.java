@@ -268,6 +268,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         try (var transactions = newKernelTransaction(db)) {
             var proc = new GraphWriteNodePropertiesProc();
 
+            proc.procedureTransaction = transactions.tx();
             proc.transaction = transactions.ktx();
             proc.api = db;
             proc.callContext = ProcedureCallContext.EMPTY;

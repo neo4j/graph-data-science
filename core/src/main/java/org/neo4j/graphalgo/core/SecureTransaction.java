@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -27,8 +26,7 @@ import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-
-import java.util.Optional;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 /**
  * Manage transactions by making sure that the correct {@link SecurityContext} is applied.
@@ -54,66 +52,39 @@ public final class SecureTransaction implements AutoCloseable {
     }
 
     /**
-     * Creates a new {@code SecureTransaction} with {@link AccessMode.Static#FULL} access.
-     * This mirrors the default behavior of creating new transactions with {@link GraphDatabaseService#beginTx()}.
-     */
-    public static SecureTransaction of(GraphDatabaseService db) {
-        return of(db, (Transaction) null);
-    }
-
-    /**
      * Creates a new {@code SecureTransaction} with the same {@link SecurityContext} as the provided {@link Transaction}.
      * If this instance is {@link #close() closed}, the supplied transaction will be {@link Transaction#close() closed} as well.
      * <p>
      * The {@code Transaction} can be null, in which case this method behaves the same as {@link #of(GraphDatabaseService)}.
      */
-    public static SecureTransaction of(GraphDatabaseService db, @Nullable Transaction top) {
+    public static SecureTransaction of(GraphDatabaseAPI api, Transaction top) {
+        var internalTransaction = (InternalTransaction) top;
         return ofEdition(
-            db,
-            (InternalTransaction) top,
-            Optional
-                .ofNullable((InternalTransaction) top)
-                .map(InternalTransaction::securityContext)
-                .orElse(SecurityContext.AUTH_DISABLED)
+            api,
+            internalTransaction,
+            internalTransaction.securityContext()
         );
     }
 
-    /**
-     * Creates a new {@code SecureTransaction} with the given {@link SecurityContext}.
-     */
-    public static SecureTransaction of(GraphDatabaseService db, SecurityContext securityContext) {
-        return of(db, null, securityContext);
-    }
-
-    /**
-     * Creates a new {@code SecureTransaction} with the given {@link SecurityContext}, ignoring the context within the {@code Transaction}.
-     * If this instance is {@link #close() closed}, the supplied transaction will be {@link Transaction#close() closed} as well.
-     * <p>
-     * The {@code Transaction} can be null, in which case this method behaves the same as {@link #of(GraphDatabaseService, SecurityContext)}.
-     */
-    public static SecureTransaction of(GraphDatabaseService db, @Nullable Transaction transaction, SecurityContext securityContext) {
-        return ofEdition(db, (InternalTransaction) transaction, securityContext);
-    }
-
     private static SecureTransaction ofEdition(
-        GraphDatabaseService db,
-        @Nullable InternalTransaction top,
+        GraphDatabaseAPI api,
+        InternalTransaction top,
         SecurityContext securityContext
     ) {
         securityContext = GdsEdition.instance().isOnEnterpriseEdition() ? securityContext : SecurityContext.AUTH_DISABLED;
-        return new SecureTransaction(db, top, securityContext);
+        return new SecureTransaction(api, top, securityContext);
     }
 
-    private final GraphDatabaseService db;
-    private final @Nullable InternalTransaction topTx;
+    private final GraphDatabaseAPI api;
+    private final InternalTransaction topTx;
     private final SecurityContext securityContext;
 
     private SecureTransaction(
-        GraphDatabaseService db,
-        @Nullable InternalTransaction top,
+        GraphDatabaseAPI api,
+        InternalTransaction top,
         SecurityContext securityContext
     ) {
-        this.db = db;
+        this.api = api;
         this.topTx = top;
         this.securityContext = securityContext;
     }
@@ -124,7 +95,7 @@ public final class SecureTransaction implements AutoCloseable {
      * will throw a {@link org.neo4j.graphdb.NotInTransactionException} upon access.
      */
     public <T, E extends Exception> T apply(TxFunction<T, E> block) throws E {
-        Transaction tx = db.beginTx();
+        Transaction tx = api.beginTx();
         KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
         ktx.overrideWith(securityContext);
         try (tx) {
@@ -139,7 +110,7 @@ public final class SecureTransaction implements AutoCloseable {
      * The new transaction is closed afterwards.
      */
     public <E extends Exception> void accept(TxConsumer<E> block) throws E {
-        Transaction tx = db.beginTx();
+        Transaction tx = api.beginTx();
         KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
         ktx.overrideWith(securityContext);
         try (tx) {
@@ -151,8 +122,8 @@ public final class SecureTransaction implements AutoCloseable {
     /**
      * Returns the {@link GraphDatabaseService} provided to this instance.
      */
-    public GraphDatabaseService db() {
-        return db;
+    public GraphDatabaseAPI api() {
+        return api;
     }
 
     /**
@@ -161,8 +132,8 @@ public final class SecureTransaction implements AutoCloseable {
      * or {@link #of(GraphDatabaseService, Transaction, SecurityContext)} with a non-{@code null} value for
      * the {@code Transaction} parameter.
      */
-    public Optional<KernelTransaction> topLevelKernelTransaction() {
-        return Optional.ofNullable(topTx).map(InternalTransaction::kernelTransaction);
+    public KernelTransaction topLevelKernelTransaction() {
+        return topTx.kernelTransaction();
     }
 
     /**
@@ -179,7 +150,7 @@ public final class SecureTransaction implements AutoCloseable {
     public SecureTransaction withRestrictedAccess(AccessMode.Static accessMode) {
         var restrictedMode = Neo4jProxy.newRestrictedAccessMode(securityContext.mode(), accessMode);
         var newContext = securityContext.withMode(restrictedMode);
-        return new SecureTransaction(db, topTx, newContext);
+        return new SecureTransaction(api, topTx, newContext);
     }
 
     /**
@@ -192,9 +163,9 @@ public final class SecureTransaction implements AutoCloseable {
      * empty {@code Optional} when it's called on the returned instance.
      */
     public SecureTransaction fork() {
-        InternalTransaction tx = (InternalTransaction) db.beginTx();
+        InternalTransaction tx = (InternalTransaction) api.beginTx();
         tx.kernelTransaction().overrideWith(securityContext);
-        return new SecureTransaction(db, tx, securityContext);
+        return new SecureTransaction(api, tx, securityContext);
     }
 
     /**

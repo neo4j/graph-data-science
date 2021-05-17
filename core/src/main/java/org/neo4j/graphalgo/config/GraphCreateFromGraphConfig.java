@@ -57,6 +57,7 @@ public interface GraphCreateFromGraphConfig extends GraphCreateConfig {
     }
 
     @Value.Default
+    @Configuration.Ignore
     @Override
     default GraphStoreFactory.Supplier graphStoreFactory() {
         return originalConfig().graphStoreFactory();

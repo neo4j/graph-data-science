@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.similarity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -50,7 +50,7 @@ class EmbeddingsAsInputTest extends BaseProcTest {
         //   CREATE
         //     (a:Label { id:"1", embedding: [42F, 43F] })
         //   , (b:Label { id:"2", embedding: [44F, 45F] })
-        SecureTransaction.of(db).accept((tx, ktx) -> {
+        TestSupport.fullAccessTransaction(db).accept((tx, ktx) -> {
             var tokens = ktx.tokenWrite();
             var label = tokens.labelGetOrCreateForName("Label");
             var id = tokens.propertyKeyGetOrCreateForName("id");

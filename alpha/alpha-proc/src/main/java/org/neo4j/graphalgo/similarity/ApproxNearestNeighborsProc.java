@@ -185,7 +185,7 @@ public class ApproxNearestNeighborsProc extends AlphaSimilarityProc<ApproxNeares
         };
 
         SimilarityExporter similarityExporter = new SimilarityExporter(
-            SecureTransaction.of(api),
+            SecureTransaction.of(api, procedureTransaction),
             config.writeRelationshipType(),
             config.writeProperty(),
             algorithm.getTerminationFlag()

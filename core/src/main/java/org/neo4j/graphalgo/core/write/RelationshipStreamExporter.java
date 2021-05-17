@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.utils.StatementApi;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.values.storable.Value;
 
 import java.util.Arrays;
@@ -60,13 +59,13 @@ public final class RelationshipStreamExporter extends StatementApi {
     }
 
     public static RelationshipStreamExporter.Builder builder(
-        GraphDatabaseService db,
+        SecureTransaction secureTransaction,
         IdMapping idMapping,
         Stream<Relationship> relationships,
         TerminationFlag terminationFlag
     ) {
         return new RelationshipStreamExporter.Builder(
-            SecureTransaction.of(db),
+            secureTransaction,
             idMapping,
             relationships,
             terminationFlag

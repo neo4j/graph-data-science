@@ -70,7 +70,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
             graphCreateConfig,
             loadingContext,
             new GraphDimensionsCypherReader(
-                loadingContext.transaction().withRestrictedAccess(READ),
+                loadingContext.secureTransaction().withRestrictedAccess(READ),
                 graphCreateConfig
             ).call()
         );
@@ -134,7 +134,6 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
             BatchLoadResult nodeCount = new CountingCypherRecordLoader(
                 nodeQuery(),
                 NODE,
-                loadingContext.api(),
                 cypherConfig,
                 loadingContext
             ).load(tx);
@@ -142,7 +141,6 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
             CypherNodeLoader.LoadResult nodes = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
-                loadingContext.api(),
                 cypherConfig,
                 loadingContext,
                 dimensions
@@ -208,7 +206,6 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
         CypherRelationshipLoader relationshipLoader = new CypherRelationshipLoader(
             relationshipQuery,
             idsAndProperties.idMap(),
-            loadingContext.api(),
             cypherConfig,
             loadingContext,
             nodeLoadDimensions
@@ -224,7 +221,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
     }
 
     private SecureTransaction readOnlyTransaction() {
-        return loadingContext.transaction().withRestrictedAccess(READ);
+        return loadingContext.secureTransaction().withRestrictedAccess(READ);
     }
 
     private EstimationResult getNodeEstimation() {
