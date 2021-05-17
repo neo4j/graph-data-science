@@ -16,6 +16,11 @@ protobuf {
         }
         generatedFilesBaseDir = "$buildDir/generated-protos"
     }
+    generateProtoTasks {
+        all().each { protoTask ->
+            protoTask.outputs.cacheIf { false }
+        }
+    }
 }
 
 dependencies {
