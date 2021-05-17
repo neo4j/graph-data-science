@@ -129,8 +129,7 @@ public enum Aggregation {
                 inputString,
                 VALUES
             ));
-        }
-        else if (input instanceof Aggregation) {
+        } else if (input instanceof Aggregation) {
             return (Aggregation) input;
         }
 
