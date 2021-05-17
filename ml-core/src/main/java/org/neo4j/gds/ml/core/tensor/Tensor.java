@@ -126,6 +126,11 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
         return equals((Tensor<?>) o, 1e-32);
     }
 
+    @Override
+    public int hashCode() {
+        return 31 * Arrays.hashCode(data) + Arrays.hashCode(dimensions);
+    }
+
     public static long sizeInBytes(int[] dimensions) {
         return MemoryUsage.sizeOfDoubleArray(Dimensions.totalSize(dimensions));
     }
