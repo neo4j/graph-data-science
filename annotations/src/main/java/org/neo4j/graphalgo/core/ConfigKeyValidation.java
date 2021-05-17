@@ -37,8 +37,16 @@ public final class ConfigKeyValidation {
     public static void requireOnlyKeysFrom(Collection<String> allowedKeys, Collection<String> configKeys) {
         var unexpectedKeys = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         unexpectedKeys.addAll(configKeys);
-        // we don't use addAll here because it might use the `allowedKeys` collection for lookups
-        // and that one does not match case-insensitively
+
+        // We are doing the equivalent of `removeAll` here.
+        // As of jdk16, TreeSet does not have a specialized removeAll implementation and reverts to use
+        // the default implementation in `AbstractSet#removeAll`
+        // The JavaDocs for this method specifies the following behavior:
+        // > This implementation determines which is the smaller of this set and the specified collection [..]
+        // > If this set has fewer elements, then the implementation iterates over this set, checking
+        // > each element [..] to see if it is contained in the specified collection.
+        // The specified collection does not guarantee the case-insensitive comparison and
+        // `removeAll` would not return the correct result.
         for (var allowedKey : allowedKeys) {
             unexpectedKeys.remove(allowedKey);
         }
