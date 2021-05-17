@@ -19,6 +19,9 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
@@ -28,6 +31,8 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
@@ -42,7 +47,15 @@ public final class TransientAdjacencyList implements AdjacencyList {
     public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
     public static final long PAGE_MASK = PAGE_SIZE - 1;
 
-    private byte[][] pages;
+    public static MemoryEstimation compressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
+        return MemoryEstimations.setup("", dimensions -> {
+            long nodeCount = dimensions.nodeCount();
+            long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
+            long relCount = undirected ? relCountForType * 2 : relCountForType;
+            long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
+            return TransientAdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
+        });
+    }
 
     public static MemoryEstimation compressedMemoryEstimation(long avgDegree, long nodeCount) {
         // Best case scenario:
@@ -70,29 +83,17 @@ public final class TransientAdjacencyList implements AdjacencyList {
         return MemoryEstimations
             .builder(TransientAdjacencyList.class)
             .fixed("pages", pagesMemoryRange)
+            .perNode("degrees", HugeIntArray::memoryEstimation)
+            .perNode("offsets", HugeLongArray::memoryEstimation)
             .build();
     }
 
+    @TestOnly
     public static MemoryEstimation compressedMemoryEstimation(boolean undirected) {
         return compressedMemoryEstimation(ALL_RELATIONSHIPS, undirected);
     }
 
-    public static MemoryEstimation compressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
-        return MemoryEstimations.setup("", dimensions -> {
-            long nodeCount = dimensions.nodeCount();
-            long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
-            long relCount = undirected ? relCountForType * 2 : relCountForType;
-            long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
-            return TransientAdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
-        });
-    }
-
-    public static MemoryEstimation uncompressedMemoryEstimation(boolean undirected) {
-        return uncompressedMemoryEstimation(ALL_RELATIONSHIPS, undirected);
-    }
-
     public static MemoryEstimation uncompressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
-
         return MemoryEstimations
             .builder(TransientAdjacencyList.class)
             .perGraphDimension("pages", (dimensions, concurrency) -> {
@@ -106,7 +107,21 @@ public final class TransientAdjacencyList implements AdjacencyList {
 
                 return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
             })
+            /*
+             NOTE: one might think to follow this with something like
+
+            .perNode("degrees", HugeIntArray::memoryEstimation)
+
+             This is the estimation for the property implementation which shares the actual
+             degree data with the adjacency list. We only need to count the reference, which is already accounted for.
+             */
+            .perNode("offsets", HugeLongArray::memoryEstimation)
             .build();
+    }
+
+    @TestOnly
+    public static MemoryEstimation uncompressedMemoryEstimation(boolean undirected) {
+        return uncompressedMemoryEstimation(ALL_RELATIONSHIPS, undirected);
     }
 
     /* test private */
@@ -117,30 +132,72 @@ public final class TransientAdjacencyList implements AdjacencyList {
         return (firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
     }
 
-    public TransientAdjacencyList(byte[][] pages) {
+    private byte[][] pages;
+    private HugeIntArray degrees;
+    private HugeLongArray offsets;
+
+    public TransientAdjacencyList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
         this.pages = pages;
+        this.degrees = degrees;
+        this.offsets = offsets;
     }
 
     @Override
     public void close() {
         pages = null;
+        degrees = null;
+        offsets = null;
+    }
+
+    @Override
+    public int degree(long node) {
+        return degrees.get(node);
     }
 
     // Cursors
 
     @Override
-    public Cursor rawCursor() {
-        return new Cursor(pages);
+    public AdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
+        var offset = offsets.get(node);
+        if (offset == 0) {
+            return AdjacencyCursor.empty();
+        }
+        var degree = degrees.get(node);
+        var cursor = new DecompressingCursor(pages);
+        cursor.init(offset, degree);
+        return cursor;
     }
 
     @Override
-    public AdjacencyCursor rawDecompressingCursor() {
-        return new DecompressingCursor(pages);
+    public AdjacencyCursor adjacencyCursor(@Nullable AdjacencyCursor reuse, long node, double fallbackValue) {
+        if (reuse instanceof DecompressingCursor) {
+            reuse.init(offsets.get(node), degrees.get(node));
+            return reuse;
+        }
+        return adjacencyCursor(node, fallbackValue);
     }
 
-    public static final class Cursor extends MutableIntValue implements PropertyCursor {
+    @Override
+    public PropertyCursor propertyCursor(long node, double fallbackValue) {
+        var offset = offsets.get(node);
+        if (offset == 0) {
+            return PropertyCursor.empty();
+        }
+        var degree = degrees.get(node);
+        var cursor = new Cursor(pages);
+        cursor.init(offset, degree);
+        return cursor;
+    }
 
-        static final Cursor EMPTY = new Cursor(new byte[0][]);
+    @Override
+    public PropertyCursor propertyCursor(PropertyCursor reuse, long node, double fallbackValue) {
+        if (reuse instanceof Cursor) {
+            return reuse.init(offsets.get(node), degrees.get(node));
+        }
+        return propertyCursor(node, fallbackValue);
+    }
+
+    private static final class Cursor extends MutableIntValue implements PropertyCursor {
 
         private byte[][] pages;
 
@@ -201,16 +258,15 @@ public final class TransientAdjacencyList implements AdjacencyList {
             currentPosition = 0;
         }
 
-        /**
-         * Copy iteration state from another cursor without changing {@code other}.
-         */
         @Override
-        public void copyFrom(AdjacencyCursor other) {
-            assert(other instanceof DecompressingCursor);
-            var theOther = ((DecompressingCursor) other);
-            decompress.copyFrom(theOther.decompress);
-            currentPosition = theOther.currentPosition;
-            maxTargets = theOther.maxTargets;
+        public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
+            var dest = destination instanceof DecompressingCursor
+                ? (DecompressingCursor) destination
+                : new DecompressingCursor(pages);
+            dest.decompress.copyFrom(this.decompress);
+            dest.currentPosition = this.currentPosition;
+            dest.maxTargets = this.maxTargets;
+            return dest;
         }
 
         @Override

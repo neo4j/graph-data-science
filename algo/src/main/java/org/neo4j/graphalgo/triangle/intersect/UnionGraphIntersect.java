@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.triangle.intersect;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.Graph;
@@ -26,7 +27,6 @@ import org.neo4j.graphalgo.core.huge.CompositeAdjacencyCursor;
 import org.neo4j.graphalgo.core.huge.CompositeAdjacencyList;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 
-import java.util.ArrayList;
 import java.util.function.LongToIntFunction;
 
 public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacencyCursor> {
@@ -39,32 +39,24 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
         CompositeAdjacencyList compositeAdjacencyList,
         long maxDegree
     ) {
-        super(compositeAdjacencyList::rawDecompressingCursor, maxDegree);
+        super(maxDegree);
         this.degreeFunction = degreeFunction;
         this.compositeAdjacencyList = compositeAdjacencyList;
     }
 
     @Override
-    protected CompositeAdjacencyCursor cursor(long nodeId, int unusedDegree, CompositeAdjacencyCursor reuse) {
-        var adjacencyCursors = new ArrayList<AdjacencyCursor>(compositeAdjacencyList.adjacencyLists().size());
-        var cursors = reuse.cursors();
-        var emptyCursors = empty.cursors();
-
-        compositeAdjacencyList.forEachOffset(
-            nodeId,
-            (list, index, offset, degree, hasAdjacency) -> adjacencyCursors.add(
-                index,
-                hasAdjacency
-                    ? cursors.get(index).initializedTo(offset, degree)
-                    : emptyCursors.get(index)
-            )
-        );
-        return new CompositeAdjacencyCursor(adjacencyCursors);
+    protected int degree(long nodeId) {
+        return degreeFunction.applyAsInt(nodeId);
     }
 
     @Override
-    protected int degree(long nodeId) {
-        return degreeFunction.applyAsInt(nodeId);
+    protected CompositeAdjacencyCursor checkCursorInstance(AdjacencyCursor cursor) {
+        return (CompositeAdjacencyCursor) cursor;
+    }
+
+    @Override
+    protected CompositeAdjacencyCursor cursorForNode(@Nullable CompositeAdjacencyCursor reuse, long node, int degree) {
+        return compositeAdjacencyList.adjacencyCursor(reuse, node);
     }
 
     @ServiceProvider
@@ -81,7 +73,7 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
             var topology = ((UnionGraph) graph).relationshipTopology();
             return new UnionGraphIntersect(
                 graph::degree,
-                topology.list(),
+                topology,
                 config.maxDegree()
             );
         }

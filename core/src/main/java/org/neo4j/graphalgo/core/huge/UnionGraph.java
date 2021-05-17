@@ -22,10 +22,6 @@ package org.neo4j.graphalgo.core.huge;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
-import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -281,30 +277,15 @@ public final class UnionGraph implements CSRGraph {
         return true;
     }
 
-    @ValueClass
-    public interface UnionGraphTopology {
-        CompositeAdjacencyList list();
-
-        CompositeAdjacencyOffsets offsets();
-    }
-
-    public UnionGraphTopology relationshipTopology() {
-        List<AdjacencyDegrees> adjacencyDegrees = new ArrayList<>(graphs.size());
-        List<AdjacencyList> adjacencyLists = new ArrayList<>(graphs.size());
-        List<AdjacencyOffsets> adjacencyOffsets  = new ArrayList<>(graphs.size());
-
-        for (CSRGraph graph : graphs) {
-            for (Relationships.Topology topology : graph.relationshipTopologies().values()) {
-                adjacencyDegrees.add(topology.degrees());
-                adjacencyLists.add(topology.list());
-                adjacencyOffsets.add(topology.offsets());
-            }
-        }
-
-        return ImmutableUnionGraphTopology.builder()
-            .offsets(new CompositeAdjacencyOffsets(adjacencyOffsets))
-            .list(new CompositeAdjacencyList(adjacencyDegrees, adjacencyLists, adjacencyOffsets))
-            .build();
+    public CompositeAdjacencyList relationshipTopology() {
+        var adjacencies = graphs
+            .stream()
+            .map(CSRGraph::relationshipTopologies)
+            .map(Map::values)
+            .flatMap(Collection::stream)
+            .map(Relationships.Topology::adjacencyList)
+            .collect(Collectors.toList());
+        return new CompositeAdjacencyList(adjacencies);
     }
 
     @Override

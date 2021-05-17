@@ -46,8 +46,6 @@ public final class AdjacencyListWithPropertiesBuilder {
         RelationshipProjection projection,
         Map<String, Integer> relationshipPropertyTokens,
         AdjacencyListBuilderFactory listBuilderFactory,
-        AdjacencyDegreesFactory degreesFactory,
-        AdjacencyOffsetsFactory offsetsFactory,
         AllocationTracker tracker
     ) {
         var aggregations = aggregations(projection);
@@ -58,8 +56,6 @@ public final class AdjacencyListWithPropertiesBuilder {
             nodeCount,
             projection,
             listBuilderFactory,
-            degreesFactory,
-            offsetsFactory,
             aggregations,
             propertyKeyIds,
             defaultValues,
@@ -71,8 +67,6 @@ public final class AdjacencyListWithPropertiesBuilder {
         long nodeCount,
         RelationshipProjection projection,
         AdjacencyListBuilderFactory listBuilderFactory,
-        AdjacencyDegreesFactory degreesFactory,
-        AdjacencyOffsetsFactory offsetsFactory,
         Aggregation[] aggregations,
         int[] propertyKeyIds,
         double[] defaultValues,
@@ -81,7 +75,7 @@ public final class AdjacencyListWithPropertiesBuilder {
         return create(
             nodeCount,
             projection,
-            adjacencyCompressorFactory(degreesFactory, offsetsFactory),
+            adjacencyCompressorFactory(),
             listBuilderFactory,
             aggregations,
             propertyKeyIds,
@@ -125,11 +119,8 @@ public final class AdjacencyListWithPropertiesBuilder {
         );
     }
 
-    private static AdjacencyCompressorFactory adjacencyCompressorFactory(
-        AdjacencyDegreesFactory degreesFactory,
-        AdjacencyOffsetsFactory offsetsFactory
-    ) {
-        return new DeltaVarLongCompressor.Factory(degreesFactory, offsetsFactory);
+    private static AdjacencyCompressorFactory adjacencyCompressorFactory() {
+        return DeltaVarLongCompressor.Factory.INSTANCE;
     }
 
     private static double[] defaultValues(RelationshipProjection projection) {

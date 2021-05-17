@@ -25,20 +25,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EdgeSplitterBaseTest {
     void assertRelExists(Relationships.Topology topology, long source, long... targets) {
-        var cursor = topology.list().decompressingCursor(
-            topology.offsets().get(source),
-            topology.degrees().degree(source)
-        );
+        var cursor = topology.adjacencyList().adjacencyCursor(source);
         for (long target : targets) {
             assertThat(cursor.nextVLong()).isEqualTo(target);
         }
     }
 
-    void assertRelProperties(Relationships.Properties properties, long source, double... values) {
-        var cursor = properties.list().cursor(
-            properties.offsets().get(source),
-            properties.degrees().degree(source)
-        );
+    void assertRelProperties(
+        Relationships.Properties properties,
+        long source,
+        double... values
+    ) {
+        var cursor = properties.propertiesList().propertyCursor(source);
         for (double property : values) {
             assertThat(Double.longBitsToDouble(cursor.nextLong())).isEqualTo(property);
         }

@@ -19,9 +19,17 @@
  */
 package org.neo4j.graphalgo.api;
 
+/**
+ * Cursor iterating over the values of relationship properties.
+ * A lot of the methods here are very low-level and break when looked at slightly askew.
+ * Better iteration methods and defined access patterns will be added under the continuation of
+ * Adjacency Compression III – Return of the Iterator
+ */
 public interface PropertyCursor extends AutoCloseable {
     /**
      * Initialize this cursor to point to the given {@code index}.
+     * The correct value for the index is highly implementation specific.
+     * The better way get initialize a cursor is through {@link org.neo4j.graphalgo.api.AdjacencyList#propertyCursor(long)} or related.
      */
     PropertyCursor init(long index, int degree);
 
@@ -39,4 +47,34 @@ public interface PropertyCursor extends AutoCloseable {
 
     @Override
     void close();
+
+    /**
+     * Returns a cursor that is always empty.
+     */
+    static PropertyCursor empty() {
+        return EmptyPropertyCursor.INSTANCE;
+    }
+
+    enum EmptyPropertyCursor implements PropertyCursor {
+        INSTANCE;
+
+        @Override
+        public PropertyCursor init(long index, int degree) {
+            return INSTANCE;
+        }
+
+        @Override
+        public boolean hasNextLong() {
+            return false;
+        }
+
+        @Override
+        public long nextLong() {
+            return -1;
+        }
+
+        @Override
+        public void close() {
+        }
+    }
 }

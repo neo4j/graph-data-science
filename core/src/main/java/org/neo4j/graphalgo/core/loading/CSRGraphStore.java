@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.CSRGraph;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.Graph;
@@ -418,20 +419,20 @@ public class CSRGraphStore implements GraphStore {
             ));
         }
 
-        var topology = relationships.get(relationshipType);
+        var adjacencyList = relationships.get(relationshipType).adjacencyList();
 
         var relationshipPropertyStore = relationshipProperties.get(relationshipType);
-
         var properties = propertyKeys.isEmpty()
-            ? new Relationships.Properties[0]
+            ? CSRCompositeRelationshipIterator.EMPTY_PROPERTIES
             : propertyKeys
                 .stream()
                 .map(relationshipPropertyStore::get)
                 .map(RelationshipProperty::values)
-                .toArray(Relationships.Properties[]::new);
+                .map(Relationships.Properties::propertiesList)
+                .toArray(AdjacencyList[]::new);
 
         return new CSRCompositeRelationshipIterator(
-            topology,
+            adjacencyList,
             propertyKeys.toArray(new String[0]),
             properties
         );
@@ -448,9 +449,9 @@ public class CSRGraphStore implements GraphStore {
         if (this.nodes instanceof AutoCloseable) {
             closeables.accept((AutoCloseable) this.nodes);
         }
-        this.relationships.values().forEach(rel -> closeables.add(rel.list()).add(rel.offsets()).add(rel.degrees()));
+        this.relationships.values().forEach(rel -> closeables.add(rel.adjacencyList()));
         this.relationshipProperties.forEach((propertyName, properties) ->
-            properties.values().forEach(prop -> closeables.add(prop.values().list()).add(prop.values().offsets()))
+            properties.values().forEach(prop -> closeables.add(prop.values().propertiesList()))
         );
 
         var errorWhileClosing = closeables.build().distinct().flatMap(closeable -> {

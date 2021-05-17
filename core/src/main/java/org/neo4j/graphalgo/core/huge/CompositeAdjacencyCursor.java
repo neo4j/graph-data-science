@@ -19,8 +19,11 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -130,13 +133,20 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
     }
 
     @Override
-    public void copyFrom(AdjacencyCursor sourceCursor) {
-        assert(sourceCursor instanceof CompositeAdjacencyCursor);
-        var other = (CompositeAdjacencyCursor) sourceCursor;
-        List<AdjacencyCursor> otherCursors = other.cursors();
-        for (int i = 0; i < cursors.size(); i++) {
-            cursors.get(i).copyFrom(otherCursors.get(i));
+    public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
+        var destCursors = destination instanceof CompositeAdjacencyCursor
+            ? ((CompositeAdjacencyCursor) destination).cursors
+            : emptyList(cursors.size());
+
+        var destIter = destCursors.listIterator();
+        for (AdjacencyCursor cursor : cursors) {
+            destIter.set(cursor.shallowCopy(destIter.next()));
         }
+        return new CompositeAdjacencyCursor(destCursors);
+    }
+
+    private List<AdjacencyCursor> emptyList(int size) {
+        return Arrays.asList(new AdjacencyCursor[size]);
     }
 
     @Override

@@ -19,43 +19,36 @@
  */
 package org.neo4j.graphalgo.triangle.intersect;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 
 public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
 
-    private final AdjacencyDegrees degrees;
-    private final AdjacencyOffsets offsets;
+    private final AdjacencyList adjacencyList;
 
-    private HugeGraphIntersect(
-        AdjacencyDegrees degrees,
-        AdjacencyList adjacency,
-        AdjacencyOffsets offsets,
-        long maxDegree
-    ) {
-        super(adjacency::rawDecompressingCursor, maxDegree);
-        this.degrees = degrees;
-        this.offsets = offsets;
-    }
-
-    @Override
-    public AdjacencyCursor cursor(long node, int degree, AdjacencyCursor reuse) {
-        final long offset = offsets.get(node);
-        if (offset == 0L) {
-            return empty;
-        }
-        return super.cursor(offset, degree, reuse);
+    private HugeGraphIntersect(AdjacencyList adjacency, long maxDegree) {
+        super(maxDegree);
+        this.adjacencyList = adjacency;
     }
 
     @Override
     protected int degree(long node) {
-        return degrees.degree(node);
+        return adjacencyList.degree(node);
+    }
+
+    @Override
+    protected AdjacencyCursor checkCursorInstance(AdjacencyCursor cursor) {
+        return cursor;
+    }
+
+    @Override
+    protected AdjacencyCursor cursorForNode(@Nullable AdjacencyCursor reuse, long node, int degree) {
+        return adjacencyList.adjacencyCursor(reuse, node);
     }
 
     @ServiceProvider
@@ -70,8 +63,8 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
         public RelationshipIntersect load(Graph graph, RelationshipIntersectConfig config) {
             assert graph instanceof HugeGraph;
             var hugeGraph = (HugeGraph) graph;
-            var topology = hugeGraph.relationshipTopology();
-            return new HugeGraphIntersect(topology.degrees(), topology.list(), topology.offsets(), config.maxDegree());
+            var topology = hugeGraph.relationshipTopology().adjacencyList();
+            return new HugeGraphIntersect(topology, config.maxDegree());
         }
     }
 }

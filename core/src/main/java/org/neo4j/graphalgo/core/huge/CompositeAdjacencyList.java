@@ -19,83 +19,79 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
-import org.neo4j.graphalgo.api.AdjacencyDegrees;
 import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.AdjacencyOffsets;
 import org.neo4j.graphalgo.api.PropertyCursor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CompositeAdjacencyList implements AdjacencyList {
 
-    private final List<AdjacencyDegrees> adjacencyDegrees;
     private final List<AdjacencyList> adjacencyLists;
-    private final List<AdjacencyOffsets> adjacencyOffsets;
 
-    CompositeAdjacencyList(
-        List<AdjacencyDegrees> adjacencyDegrees,
-        List<AdjacencyList> adjacencyLists,
-        List<AdjacencyOffsets> adjacencyOffsets
-    ) {
-        this.adjacencyDegrees = adjacencyDegrees;
+    CompositeAdjacencyList(List<AdjacencyList> adjacencyLists) {
         this.adjacencyLists = adjacencyLists;
-        this.adjacencyOffsets = adjacencyOffsets;
     }
 
-    public List<AdjacencyList> adjacencyLists() {
-        return adjacencyLists;
-    }
-
-    @Override
-    public PropertyCursor rawCursor() {
-        throw new UnsupportedOperationException("CompositeAdjacencyList#rawCursor is not supported");
+    public int size() {
+        return adjacencyLists.size();
     }
 
     @Override
-    public PropertyCursor cursor(long offset, int degree) {
-        throw new UnsupportedOperationException("CompositeAdjacencyList#cursor is not supported");
+    public int degree(long node) {
+        long degree = 0;
+        for (var adjacency : adjacencyLists) {
+            degree += adjacency.degree(node);
+        }
+        return Math.toIntExact(degree);
     }
 
     @Override
-    public CompositeAdjacencyCursor rawDecompressingCursor() {
-        List<AdjacencyCursor> adjacencyCursors = adjacencyLists
-            .stream()
-            .map(AdjacencyList::rawDecompressingCursor)
-            .collect(Collectors.toList());
-        return new CompositeAdjacencyCursor(adjacencyCursors);
+    public CompositeAdjacencyCursor adjacencyCursor(long node) {
+        return adjacencyCursor(node, Double.NaN);
     }
 
     @Override
-    public CompositeAdjacencyCursor decompressingCursor(long nodeId, int unusedDegree) {
-        var adjacencyCursors = new ArrayList<AdjacencyCursor>(adjacencyLists.size());
-        forEachOffset(nodeId, (adjacencyList, index, offset, degree, hasAdjacency) -> {
-            var cursor = adjacencyList.rawDecompressingCursor();
-            if (offset != 0) {
-                cursor.init(offset, degree);
+    public CompositeAdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
+        var cursors = new ArrayList<AdjacencyCursor>(adjacencyLists.size());
+        for (var adjacency : adjacencyLists) {
+            cursors.add(adjacency.adjacencyCursor(node, fallbackValue));
+        }
+        return new CompositeAdjacencyCursor(cursors);
+    }
+
+    @Override
+    public CompositeAdjacencyCursor adjacencyCursor(@Nullable AdjacencyCursor reuse, long node) {
+        return adjacencyCursor(reuse, node, Double.NaN);
+    }
+
+    @Override
+    public CompositeAdjacencyCursor adjacencyCursor(@Nullable AdjacencyCursor reuse, long node, double fallbackValue) {
+        if (reuse instanceof CompositeAdjacencyCursor) {
+            var compositeReuse = (CompositeAdjacencyCursor) reuse;
+            var iter = (compositeReuse).cursors().listIterator();
+            while (iter.hasNext()) {
+                var index = iter.nextIndex();
+                var cursor = iter.next();
+                var newCursor = adjacencyLists.get(index).adjacencyCursor(cursor, node, fallbackValue);
+                if (newCursor != cursor) {
+                    iter.set(newCursor);
+                }
             }
-            adjacencyCursors.add(cursor);
-        });
-        return new CompositeAdjacencyCursor(adjacencyCursors);
+            return compositeReuse;
+        }
+        return adjacencyCursor(node, fallbackValue);
+    }
+
+    @Override
+    public PropertyCursor propertyCursor(long node, double fallbackValue) {
+        throw new UnsupportedOperationException("CompositeAdjacencyList#propertyCursor is not supported");
     }
 
     @Override
     public void close() {
         adjacencyLists.forEach(AdjacencyList::close);
-    }
-
-    public void forEachOffset(long nodeId, CompositeIndexedOffsetOperator func) {
-        for (int i = 0; i < adjacencyLists.size(); i++) {
-            long offset = adjacencyOffsets.get(i).get(nodeId);
-            int degree = adjacencyDegrees.get(i).degree(nodeId);
-            func.apply(adjacencyLists.get(i), i, offset, degree, offset != 0);
-        }
-    }
-
-    @FunctionalInterface
-    public interface CompositeIndexedOffsetOperator {
-        void apply(AdjacencyList list, int index, long offset, int degree, boolean hasAdjacency);
     }
 }

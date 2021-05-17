@@ -154,7 +154,7 @@ public class RelationshipsBuilder {
         ParallelUtil.runWithConcurrency(concurrency, flushTasks, executorService);
 
         var adjacencyListsWithProperties = adjacencyListWithPropertiesBuilder.build();
-        var compressedTopology = adjacencyListsWithProperties.adjacency();
+        var adjacencyList = adjacencyListsWithProperties.adjacency();
 
         if (loadRelationshipProperty) {
             return adjacencyListsWithProperties.properties().stream().map(compressedProperties ->
@@ -162,11 +162,8 @@ public class RelationshipsBuilder {
                     relationshipCounter.longValue(),
                     orientation,
                     isMultiGraph,
-                    compressedTopology.adjacencyDegrees(),
-                    compressedTopology.adjacencyList(),
-                    compressedTopology.adjacencyOffsets(),
-                    compressedProperties.adjacencyList(),
-                    compressedProperties.adjacencyOffsets(),
+                    adjacencyList,
+                    compressedProperties,
                     DOUBLE_DEFAULT_FALLBACK
                 )
             ).collect(Collectors.toList());
@@ -175,9 +172,7 @@ public class RelationshipsBuilder {
                 relationshipCounter.longValue(),
                 orientation,
                 isMultiGraph,
-                compressedTopology.adjacencyDegrees(),
-                compressedTopology.adjacencyList(),
-                compressedTopology.adjacencyOffsets()
+                adjacencyList
             ));
         }
     }

@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.compress.CompressedProperties;
 import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.IdsAndProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -70,9 +69,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
             relationships.put(
                 relationshipType,
                 ImmutableTopology.of(
-                    adjacency.adjacencyDegrees(),
-                    adjacency.adjacencyList(),
-                    adjacency.adjacencyOffsets(),
+                    adjacency,
                     relationshipCount,
                     projection.orientation(),
                     projection.isMultiGraph()
@@ -84,7 +81,6 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                     relationshipType,
                     constructRelationshipPropertyStore(
                         projection,
-                        adjacency.adjacencyDegrees(),
                         properties,
                         relationshipCount
                     )
@@ -105,8 +101,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
 
     private RelationshipPropertyStore constructRelationshipPropertyStore(
         RelationshipProjection projection,
-        AdjacencyDegrees degrees,
-        Iterable<CompressedProperties> properties,
+        Iterable<AdjacencyList> properties,
         long relationshipCount
     ) {
         PropertyMappings propertyMappings = projection.properties();
@@ -114,7 +109,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
 
         var propertiesIter = properties.iterator();
         propertyMappings.mappings().forEach(propertyMapping -> {
-            var compressedProperties = propertiesIter.next();
+            var propertiesList = propertiesIter.next();
             propertyStoreBuilder.putIfAbsent(
                 propertyMapping.propertyKey(),
                 RelationshipProperty.of(
@@ -122,9 +117,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
                     NumberType.FLOATING_POINT,
                     GraphStore.PropertyState.PERSISTENT,
                     ImmutableProperties.of(
-                        degrees,
-                        compressedProperties.adjacencyList(),
-                        compressedProperties.adjacencyOffsets(),
+                        propertiesList,
                         relationshipCount,
                         projection.orientation(),
                         projection.isMultiGraph(),

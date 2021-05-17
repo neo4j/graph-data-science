@@ -37,17 +37,11 @@ import static org.neo4j.graphalgo.core.loading.AdjacencyBuilder.IGNORE_VALUE;
 
 public abstract class AdjacencyBuilderBaseTest {
 
-    protected void testAdjacencyList(
-        AdjacencyListBuilderFactory listBuilderFactory,
-        AdjacencyDegreesFactory degreesFactory,
-        AdjacencyOffsetsFactory offsetsFactory
-    ) {
+    protected void testAdjacencyList(AdjacencyListBuilderFactory listBuilderFactory) {
         AdjacencyListWithPropertiesBuilder globalBuilder = AdjacencyListWithPropertiesBuilder.create(
             6,
             RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
             listBuilderFactory,
-            degreesFactory,
-            offsetsFactory,
             new Aggregation[]{Aggregation.NONE},
             new int[0],
             new double[0],
@@ -81,16 +75,9 @@ public abstract class AdjacencyBuilderBaseTest {
 
         adjacencyBuilder.flushTasks().forEach(Runnable::run);
 
-        var compressedTopology = globalBuilder.build().adjacency();
-
-        try (var adjacencyList = compressedTopology.adjacencyList();
-             var adjacencyDegrees = compressedTopology.adjacencyDegrees();
-             var adjacencyOffsets = compressedTopology.adjacencyOffsets()
-        ) {
+        try (var adjacencyList = globalBuilder.build().adjacency()) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-                int degree = adjacencyDegrees.degree(nodeId);
-                long offset = adjacencyOffsets.get(nodeId);
-                try (var cursor = adjacencyList.decompressingCursor(offset, degree)) {
+                try (var cursor = adjacencyList.adjacencyCursor(nodeId)) {
                     while (cursor.hasNextVLong()) {
                         long target = cursor.nextVLong();
                         assertEquals(relationships.remove(nodeId), target);

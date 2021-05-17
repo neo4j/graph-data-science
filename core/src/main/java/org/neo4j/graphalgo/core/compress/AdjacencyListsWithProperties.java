@@ -20,13 +20,14 @@
 package org.neo4j.graphalgo.core.compress;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.AdjacencyList;
 
 import java.util.List;
 
 @ValueClass
 public interface AdjacencyListsWithProperties {
 
-    CompressedTopology adjacency();
+    AdjacencyList adjacency();
 
-    List<CompressedProperties> properties();
+    List<AdjacencyList> properties();
 }

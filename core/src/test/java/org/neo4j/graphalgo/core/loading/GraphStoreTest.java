@@ -40,9 +40,7 @@ import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyDegrees;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyOffsets;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -152,10 +150,7 @@ class GraphStoreTest extends BaseTest {
             0L,
             Orientation.NATURAL,
             false,
-            TransientAdjacencyDegrees.Factory.INSTANCE.newDegrees(HugeIntArray.of()),
-            new TransientAdjacencyList(new byte[0][0]),
-            TransientAdjacencyOffsets.Factory.INSTANCE.newOffsets(HugeLongArray.of()),
-            null,
+            new TransientAdjacencyList(new byte[0][0], HugeIntArray.of(), HugeLongArray.of()),
             null,
             42.0
         );

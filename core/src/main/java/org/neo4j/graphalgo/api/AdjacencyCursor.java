@@ -19,23 +19,28 @@
  */
 package org.neo4j.graphalgo.api;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+/**
+ * Cursor iterating over the target ids of one adjacency list.
+ * A lot of the methods here are very low-level and break when looked at slightly askew.
+ * Better iteration methods and defined access patterns will be added under the continuation of
+ * Adjacency Compression III – Return of the Iterator
+ */
 public interface AdjacencyCursor extends AutoCloseable {
 
+    /**
+     * Special ID value that could be returned to indicate that no valid value can be produced
+     */
     long NOT_FOUND = -1;
 
     /**
      * Initialize this cursor to point to the given {@code index}.
+     * The correct value for the index is highly implementation specific.
+     * The better way get initialize a cursor is through {@link org.neo4j.graphalgo.api.AdjacencyList#adjacencyCursor(long)} or related.
      */
     void init(long index, int degree);
-
-    /**
-     * Initialize this cursor to point to the given {@code index}.
-     * Returns this to allow chaining.
-     */
-    default AdjacencyCursor initializedTo(long index, int degree) {
-        this.init(index, degree);
-        return this;
-    }
 
     /**
      * Return how many targets can be decoded in total. This is equivalent to the degree.
@@ -56,6 +61,8 @@ public interface AdjacencyCursor extends AutoCloseable {
 
     /**
      * Decode and peek the next target id. Does not progress the internal cursor unlike {@link #nextVLong()}.
+     *
+     * It is undefined behavior if this is called after {@link #hasNextVLong()} returns {@code false}.
      */
     long peekVLong();
 
@@ -85,11 +92,74 @@ public interface AdjacencyCursor extends AutoCloseable {
     long advance(long nodeId);
 
     /**
-     * Copies internal states from {@code sourceCursor} into {@code this} cursor.
-     * If the types don't match, the behavior is undefined.
+     * Create a shallow copy of this cursor.
+     * Iteration state is copied and will advance independently from this cursor.
+     * The underlying data might be shared between instances.
+     * If the provided {@code destination} argument is not null, it might be re-used instead of having to create a new instance.
+     * It is *not* guaranteed that the {@code destination} will be reused.
+     * If the {@code destination} is not if the same type than this cursor, the behavior of this method in undefined.
      */
-    void copyFrom(AdjacencyCursor sourceCursor);
+    @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination);
 
     @Override
     void close();
+
+    /**
+     * Returns a cursor that is always empty.
+     */
+    static AdjacencyCursor empty() {
+        return EmptyAdjacencyCursor.INSTANCE;
+    }
+
+    enum EmptyAdjacencyCursor implements AdjacencyCursor {
+        INSTANCE;
+
+        @Override
+        public void init(long index, int degree) {
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public boolean hasNextVLong() {
+            return false;
+        }
+
+        @Override
+        public long nextVLong() {
+            return NOT_FOUND;
+        }
+
+        @Override
+        public long peekVLong() {
+            return NOT_FOUND;
+        }
+
+        @Override
+        public int remaining() {
+            return 0;
+        }
+
+        @Override
+        public long skipUntil(long nodeId) {
+            return NOT_FOUND;
+        }
+
+        @Override
+        public long advance(long nodeId) {
+            return NOT_FOUND;
+        }
+
+        @Override
+        public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
+            return INSTANCE;
+        }
+
+        @Override
+        public void close() {
+        }
+    }
 }

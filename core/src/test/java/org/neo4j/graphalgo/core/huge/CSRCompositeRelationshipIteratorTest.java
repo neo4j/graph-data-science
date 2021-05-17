@@ -21,12 +21,10 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.ImmutableProperties;
-import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
@@ -216,21 +214,11 @@ class CSRCompositeRelationshipIteratorTest {
         var maybeProperties = graph.relationships().properties();
         assertThat(maybeProperties).isPresent();
         var property = maybeProperties.get();
-        Relationships.Properties[] properties = new Relationships.Properties[1];
-        properties[0] = ImmutableProperties
-            .builder()
-            .degrees(graph.relationshipTopology().degrees())
-            .offsets(property.offsets())
-            .list(property.list())
-            .elementCount(nodeCount)
-            .orientation(Orientation.NATURAL)
-            .isMultiGraph(true)
-            .defaultPropertyValue(Double.NaN)
-            .build();
+        var properties = new AdjacencyList[] { property.propertiesList() };
 
         String[] propertyKeys = {"prop"};
         var iterator = new CSRCompositeRelationshipIterator(
-            graph.relationshipTopology(),
+            graph.relationshipTopology().adjacencyList(),
             propertyKeys,
             properties
         );

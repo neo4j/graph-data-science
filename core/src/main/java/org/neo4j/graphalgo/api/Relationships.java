@@ -38,18 +38,13 @@ public interface Relationships {
         long relationshipCount,
         Orientation orientation,
         boolean isMultiGraph,
-        AdjacencyDegrees adjacencyDegrees,
-        AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets
+        AdjacencyList adjacencyList
     ) {
         return of(
             relationshipCount,
             orientation,
             isMultiGraph,
-            adjacencyDegrees,
             adjacencyList,
-            adjacencyOffsets,
-            null,
             null,
             DOUBLE_DEFAULT_FALLBACK
         );
@@ -59,27 +54,20 @@ public interface Relationships {
         long relationshipCount,
         Orientation orientation,
         boolean isMultiGraph,
-        AdjacencyDegrees adjacencyDegrees,
         AdjacencyList adjacencyList,
-        AdjacencyOffsets adjacencyOffsets,
-        @Nullable AdjacencyList properties,
-        @Nullable AdjacencyOffsets propertyOffsets,
+        @Nullable AdjacencyList propertiesList,
         double defaultPropertyValue
     ) {
         Topology topology = ImmutableTopology.of(
-            adjacencyDegrees,
             adjacencyList,
-            adjacencyOffsets,
             relationshipCount,
             orientation,
             isMultiGraph
         );
 
-        Optional<Properties> maybePropertyCSR = properties != null && propertyOffsets != null
+        Optional<Properties> maybePropertyCSR = propertiesList != null
             ? Optional.of(ImmutableProperties.of(
-                adjacencyDegrees,
-                properties,
-                propertyOffsets,
+                propertiesList,
                 relationshipCount,
                 orientation,
                 isMultiGraph,
@@ -91,11 +79,7 @@ public interface Relationships {
 
     @ValueClass
     interface Topology {
-        AdjacencyDegrees degrees();
-
-        AdjacencyList list();
-
-        AdjacencyOffsets offsets();
+        AdjacencyList adjacencyList();
 
         long elementCount();
 
@@ -105,8 +89,15 @@ public interface Relationships {
     }
 
     @ValueClass
-    @SuppressWarnings("immutables:subtype")
-    interface Properties extends Topology {
+    interface Properties {
+        AdjacencyList propertiesList();
+
+        long elementCount();
+
+        Orientation orientation();
+
+        boolean isMultiGraph();
+
         double defaultPropertyValue();
     }
 }
