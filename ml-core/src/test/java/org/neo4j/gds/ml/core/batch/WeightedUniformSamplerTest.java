@@ -19,22 +19,36 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
+import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongLongHashMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.api.ImmutableRelationshipCursor;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class WeightedUniformSamplerTest {
+
+    private static Stream<Arguments> negativeSampleSources() {
+        var input = List.of(1L, 2L, 3L);
+
+        return Stream.of(
+            Arguments.of(input, LongHashSet.from(1L), List.of(2L, 3L)),
+            Arguments.of(input, LongHashSet.from(1L, 3L), List.of(2L))
+        );
+    }
 
     @Test
     void shouldSampleSubsetOfNeighbors() {
@@ -113,5 +127,19 @@ class WeightedUniformSamplerTest {
         var samples = sampler.sample(input.stream(), 3, 2).toArray();
 
         assertThat(samples).hasSize(2);
+    }
+
+    @ParameterizedTest
+    @MethodSource("negativeSampleSources")
+    void shouldNotSampleFromIgnored(List<Long> sourceNodes, LongHashSet samplesToExclude, List<Long> expected) {
+        var input = sourceNodes.stream().map(targetId -> {
+            var weight = 1D;
+            return ImmutableRelationshipCursor.of(0, targetId, weight);
+        }).collect(Collectors.toList());
+
+        var actual = new WeightedUniformSampler(42L)
+            .sample(input.stream(), 3, 2, sample -> !samplesToExclude.contains(sample));
+
+        assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
     }
 }

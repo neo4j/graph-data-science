@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.core.utils.queue.BoundedLongPriorityQueue;
 
 import java.util.Random;
+import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -41,6 +42,10 @@ public class WeightedUniformSampler {
     }
 
     public LongStream sample(Stream<RelationshipCursor> input, long inputSize, int numberOfSamples) {
+        return sample(input, inputSize, numberOfSamples, v -> true);
+    }
+
+    public LongStream sample(Stream<RelationshipCursor> input, long inputSize, int numberOfSamples, LongPredicate includeNode) {
         if (numberOfSamples == 0) {
             return LongStream.empty();
         }
@@ -53,19 +58,26 @@ public class WeightedUniformSampler {
         var inputIterator = input.iterator();
 
         for (int i = 0; i < numberOfSamples; i++) {
-            processRelationship(reservoir, inputIterator.next());
+            processRelationship(reservoir, inputIterator.next(), includeNode);
         }
 
         while (inputIterator.hasNext()) {
-            processRelationship(reservoir, inputIterator.next());
+            processRelationship(reservoir, inputIterator.next(), includeNode);
         }
 
         return reservoir.elements();
     }
 
-    private void processRelationship(BoundedLongPriorityQueue reservoir, RelationshipCursor relationshipCursor) {
-        // Higher weights should be more likely to be sampled
-        var priority = Math.pow(random.nextDouble(), 1 / relationshipCursor.property() + EPSILON);
-        reservoir.offer(relationshipCursor.targetId(), priority);
+    private void processRelationship(
+        BoundedLongPriorityQueue reservoir,
+        RelationshipCursor relationshipCursor,
+        LongPredicate includeNode
+    ) {
+        var node =  relationshipCursor.targetId();
+        if (includeNode.test(node)) {
+            // Higher weights should be more likely to be sampled
+            var priority = Math.pow(random.nextDouble(), 1 / relationshipCursor.property() + EPSILON);
+            reservoir.offer(node, priority);
+        }
     }
 }

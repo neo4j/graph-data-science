@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -238,12 +239,17 @@ public class GraphSageModelTrainer {
     }
 
     private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features) {
+        var neighbours = neighborBatch(graph, batch).toArray();
+
+        var neighborsSet = new LongHashSet(neighbours.length);
+        neighborsSet.addAll(neighbours);
+
         var totalBatch = LongStream.concat(
             batch.stream(),
             LongStream.concat(
-                neighborBatch(graph, batch),
+                Arrays.stream(neighbours),
                 // batch.nodeCount is <= config.batchsize (which is an int)
-                negativeBatch(graph, Math.toIntExact(batch.nodeCount()))
+                negativeBatch(graph, Math.toIntExact(batch.nodeCount()), neighborsSet)
             )
         ).toArray();
 
@@ -283,7 +289,7 @@ public class GraphSageModelTrainer {
     }
 
     // get a negative sample per node in batch
-    private LongStream negativeBatch(Graph graph, int batchSize) {
+    private LongStream negativeBatch(Graph graph, int batchSize, LongHashSet neighbours) {
         long nodeCount = graph.nodeCount();
         var sampler = new WeightedUniformSampler(layers[0].randomState());
 
@@ -293,7 +299,7 @@ public class GraphSageModelTrainer {
         var degreeWeightedNodes = LongStream.range(0, nodeCount)
             .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, Math.log(graph.degree(nodeId))));
 
-        return sampler.sample(degreeWeightedNodes, nodeCount, batchSize);
+        return sampler.sample(degreeWeightedNodes, nodeCount, batchSize, sample -> !neighbours.contains(sample));
     }
 
     private List<Weights<? extends Tensor<?>>> getWeights() {
