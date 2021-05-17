@@ -11,6 +11,11 @@ protobuf {
         artifact = "com.google.protobuf:protoc:${ver.'protobuf'}"
         generatedFilesBaseDir = "$buildDir/generated-protos"
     }
+    generateProtoTasks {
+        all().each { protoTask ->
+            protoTask.outputs.cacheIf { false }
+        }
+    }
 }
 
 dependencies {
