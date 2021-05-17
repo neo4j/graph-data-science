@@ -61,7 +61,7 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisi
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
-class GraphStoreToFileExporterTest extends CsvTest {
+public class GraphStoreToFileExporterTest extends CsvTest {
 
     @GdlGraph
     private static final String GDL =
