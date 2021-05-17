@@ -101,13 +101,18 @@ public interface RandomGraphGeneratorConfig extends GraphCreateConfig {
     }
 
     @Value.Default
+    @Configuration.Ignore
+    default RelationshipType relationshipType() {
+        return RelationshipType.of("REL");
+    }
+
+    @Value.Default
+    @Configuration.Ignore
     default RelationshipProjections relationshipProjections() {
-        // Necessary to avoid throwing NPE for invalid relationshipDistribution
-        var relDistribution = (relationshipDistribution() == null) ? "tmp" : relationshipDistribution().name();
         return RelationshipProjections.builder()
             .putProjection(
-                RelationshipType.of(relDistribution),
-                RelationshipProjection.of(relDistribution, orientation(), aggregation())
+                relationshipType(),
+                RelationshipProjection.of(relationshipType().name, orientation(), aggregation())
             )
             .build();
     }

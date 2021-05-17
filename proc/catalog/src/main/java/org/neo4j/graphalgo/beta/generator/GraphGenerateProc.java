@@ -116,6 +116,7 @@ public final class GraphGenerateProc extends BaseProc {
             .nodeCount(nodeCount)
             .averageDegree(averageDegree)
             .relationshipDistribution(config.relationshipDistribution())
+            .relationshipType(config.relationshipType())
             .aggregation(config.aggregation())
             .orientation(config.orientation())
             .allowSelfLoops(AllowSelfLoops.of(config.allowSelfLoops()))

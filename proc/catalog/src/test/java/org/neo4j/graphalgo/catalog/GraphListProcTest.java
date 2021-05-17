@@ -178,8 +178,8 @@ class GraphListProcTest extends BaseProcTest {
                     )
                 ),
                 "relationshipProjection", map(
-                    "UNIFORM", map(
-                        "type", "UNIFORM",
+                    "REL", map(
+                        "type", "REL",
                         "orientation", "NATURAL",
                         "aggregation", "NONE",
                         "properties", emptyMap()
