@@ -47,7 +47,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
@@ -172,7 +171,7 @@ final class DegreeCentralityTest {
             .nodeCount(10_000)
             .averageDegree(averageDegree)
             .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .relationshipPropertyProducer(PropertyProducer.fixed(propertyKey, relationshipProperty))
+            .relationshipPropertyProducer(PropertyProducer.fixedDouble(propertyKey, relationshipProperty))
             .seed(42)
             .allocationTracker(AllocationTracker.empty())
             .build()
@@ -197,7 +196,7 @@ final class DegreeCentralityTest {
         var degreeFunction = degreeCentrality.compute();
 
         graph.forEachNode(node -> {
-            assertThat(degreeFunction.get(node)).isCloseTo((weighted ? relationshipProperty : 1) * averageDegree, within(1E-5));
+            assertThat(degreeFunction.get(node)).isEqualTo((weighted ? relationshipProperty : 1) * averageDegree);
             return true;
         });
     }
