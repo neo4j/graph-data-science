@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
@@ -46,7 +47,6 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.internal.kernel.api.security.AdminActionOnResource;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -125,6 +125,14 @@ public abstract class BaseProc {
         }
         // Check for full DBMS admin privileges
         return securityContext.allowsAdminAction(AdminActionOnResource.ALL);
+    }
+
+    protected GraphStoreWithConfig graphStoreFromCatalog(String graphName) {
+        if (isGdsAdmin()) {
+            return GraphStoreCatalog.getAsAdmin(username(), databaseId(), graphName);
+        } else {
+            return GraphStoreCatalog.get(username(), databaseId(), graphName);
+        }
     }
 
     protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {

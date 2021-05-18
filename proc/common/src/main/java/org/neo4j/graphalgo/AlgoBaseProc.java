@@ -276,12 +276,7 @@ public abstract class AlgoBaseProc<
             estimationBuilder.add("graph", memoryTreeWithDimensions.memoryEstimation());
         } else {
             String graphName = config.graphName().orElseThrow(IllegalStateException::new);
-
-            GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(
-                username(),
-                databaseId(),
-                graphName
-            );
+            GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName);
             GraphStore graphStore = graphStoreWithConfig.graphStore();
 
             Graph filteredGraph = graphStore.getGraph(
@@ -333,11 +328,7 @@ public abstract class AlgoBaseProc<
         GraphStoreWithConfig graphCandidate;
 
         if (maybeGraphName.isPresent()) {
-            if (isGdsAdmin()) {
-                graphCandidate = GraphStoreCatalog.getAsAdmin(username(), databaseId(), maybeGraphName.get());
-            } else {
-                graphCandidate = GraphStoreCatalog.get(username(), databaseId(), maybeGraphName.get());
-            }
+            graphCandidate = graphStoreFromCatalog(maybeGraphName.get());
             validateConfigsBeforeLoad(graphCandidate.config(), config);
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
