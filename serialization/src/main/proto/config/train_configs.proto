@@ -25,6 +25,7 @@ message GraphSageTrainConfig {
   int32 searchDepth = 14;
   int32 negativeSampleWeight = 15;
   ProjectedFeatureDimension projectedFeatureDimension = 16;
+  RandomSeed randomSeed = 17;
 }
 
 message ProjectedFeatureDimension {

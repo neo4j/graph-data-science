@@ -23,6 +23,7 @@ import org.neo4j.gds.TrainConfigSerializer;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.graphalgo.config.proto.CommonConfigProto;
 import org.neo4j.graphalgo.core.model.proto.GraphSageCommonProto;
 import org.neo4j.graphalgo.core.model.proto.TrainConfigsProto;
 
@@ -42,6 +43,11 @@ public final class GraphSageTrainConfigSerializer implements TrainConfigSerializ
     public TrainConfigsProto.GraphSageTrainConfig toSerializable(GraphSageTrainConfig trainConfig) {
         var protoConfigBuilder = TrainConfigsProto.GraphSageTrainConfig.newBuilder();
 
+        var randomSeedBuilder = CommonConfigProto.RandomSeed
+            .newBuilder()
+            .setPresent(trainConfig.randomSeed().isPresent());
+        trainConfig.randomSeed().ifPresent(randomSeedBuilder::setValue);
+
         protoConfigBuilder
             .setModelConfig(serializableModelConfig(trainConfig))
             .setEmbeddingDimensionConfig(serializableEmbeddingDimensionsConfig(trainConfig))
@@ -56,6 +62,7 @@ public final class GraphSageTrainConfigSerializer implements TrainConfigSerializ
             .setEpochs(trainConfig.epochs())
             .setIterationsConfig(serializableIterationsConfig(trainConfig))
             .setSearchDepth(trainConfig.searchDepth())
+            .setRandomSeed(randomSeedBuilder)
             .setNegativeSampleWeight(trainConfig.negativeSampleWeight())
             .setFeaturePropertiesConfig(serializableFeaturePropertiesConfig(trainConfig));
 
@@ -72,9 +79,7 @@ public final class GraphSageTrainConfigSerializer implements TrainConfigSerializ
 
     @Override
     public GraphSageTrainConfig fromSerializable(TrainConfigsProto.GraphSageTrainConfig protoTrainConfig) {
-        var trainConfigBuilder = GraphSageTrainConfig.builder();
-
-        trainConfigBuilder
+        var trainConfigBuilder =  GraphSageTrainConfig.builder()
             .modelName(protoTrainConfig.getModelConfig().getModelName())
             .embeddingDimension(protoTrainConfig.getEmbeddingDimensionConfig().getEmbeddingDimension())
             .aggregator(Aggregator.AggregatorType.of(protoTrainConfig.getAggregator().name()))
@@ -87,6 +92,11 @@ public final class GraphSageTrainConfigSerializer implements TrainConfigSerializ
             .maxIterations(protoTrainConfig.getIterationsConfig().getMaxIterations())
             .negativeSampleWeight(protoTrainConfig.getNegativeSampleWeight())
             .featureProperties(protoTrainConfig.getFeaturePropertiesConfig().getFeaturePropertiesList());
+
+        var randomSeed = protoTrainConfig.getRandomSeed();
+        if (randomSeed.getPresent()) {
+            trainConfigBuilder.randomSeed(randomSeed.getValue());
+        }
 
         var projectedFeatureDimension = protoTrainConfig.getProjectedFeatureDimension();
         if (projectedFeatureDimension.getPresent()) {
