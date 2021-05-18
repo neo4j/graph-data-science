@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
@@ -59,9 +60,14 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
+        var executorService = Pools.DEFAULT;
+        if(configuration.hasRelationshipWeightProperty()) {
+            validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
+        }
+
         return configuration.isMultiLabel()
-        ? new MultiLabelGraphSageTrain(graph, configuration, Pools.DEFAULT, progressLogger, tracker)
-        : new SingleLabelGraphSageTrain(graph, configuration, Pools.DEFAULT, progressLogger, tracker);
+        ? new MultiLabelGraphSageTrain(graph, configuration, executorService, progressLogger, tracker)
+        : new SingleLabelGraphSageTrain(graph, configuration, executorService, progressLogger, tracker);
     }
 
     @Override

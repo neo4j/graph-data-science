@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
@@ -61,16 +62,23 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
+        var graphSageModel = ModelCatalog.get(
+            configuration.username(),
+            configuration.modelName(),
+            ModelData.class,
+            GraphSageTrainConfig.class
+        );
+
+        var executorService = Pools.DEFAULT;
+        if(graphSageModel.trainConfig().hasRelationshipWeightProperty()) {
+            validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
+        }
+
         return new GraphSage(
             graph,
             configuration,
-            ModelCatalog.get(
-                configuration.username(),
-                configuration.modelName(),
-                ModelData.class,
-                GraphSageTrainConfig.class
-            ),
-            Pools.DEFAULT,
+            graphSageModel,
+            executorService,
             tracker,
             progressLogger
         );
