@@ -64,7 +64,7 @@ class AggregationTest {
         UnsupportedOperationException exception = assertThrows(
                 UnsupportedOperationException.class,
                 () -> Aggregation.NONE.merge(42, 42));
-        String expected = "Multiple relationships between the same pair of nodes are not expected. Try using SKIP or some other aggregation.";
+        String expected = "Multiple relationships between the same pair of nodes are not expected. Try using SINGLE or some other aggregation.";
         assertEquals(expected, exception.getMessage());
     }
 

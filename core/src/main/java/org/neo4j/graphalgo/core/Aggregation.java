@@ -39,7 +39,7 @@ public enum Aggregation {
         public double merge(double runningTotal, double value) {
             throw new UnsupportedOperationException(
                     "Multiple relationships between the same pair of nodes are not expected. " +
-                    "Try using SKIP or some other aggregation.");
+                    "Try using SINGLE or some other aggregation.");
         }
     },
     SINGLE {
@@ -120,8 +120,6 @@ public enum Aggregation {
 
             if (VALUES.contains(inputString)) {
                 return Aggregation.valueOf(inputString.toUpperCase(Locale.ENGLISH));
-            } else if (inputString.equalsIgnoreCase("SKIP")) {
-                return SINGLE;
             }
 
             throw new IllegalArgumentException(formatWithLocale(
