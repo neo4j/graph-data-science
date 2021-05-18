@@ -83,7 +83,7 @@ final class PagedLongStackTest {
 
     @Test
     void shouldPeekFromPreviousPage() {
-        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.empty());
+        PagedLongStack stack = new PagedLongStack(between(0L, 10L).Long(), AllocationTracker.EMPTY);
 
         int repetitions = stack.pageSize + 1;
         long expectedLast = 0;
