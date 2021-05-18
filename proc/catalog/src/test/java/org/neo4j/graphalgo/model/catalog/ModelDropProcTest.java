@@ -133,7 +133,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
                     .modelName(modelName)
                     .addFeatureProperties("a")
                     .build(),
-                EmptyGraphSageTrainMetrics.instance
+                EmptyGraphSageTrainMetrics.INSTANCE
             );
             ModelStoreProc.storeModel(db, model1);
 
@@ -162,7 +162,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
                     .modelName(modelName)
                     .addFeatureProperties("a")
                     .build(),
-                EmptyGraphSageTrainMetrics.instance
+                EmptyGraphSageTrainMetrics.INSTANCE
             );
             ModelStoreProc.storeModel(db, model1);
             ModelCatalog.getUntyped(getUsername(), modelName).unload();

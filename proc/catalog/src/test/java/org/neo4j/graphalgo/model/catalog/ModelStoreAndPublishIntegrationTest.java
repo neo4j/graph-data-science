@@ -118,7 +118,7 @@ class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {
                 .modelName(modelName)
                 .addFeatureProperties("a")
                 .build(),
-            EmptyGraphSageTrainMetrics.instance
+            EmptyGraphSageTrainMetrics.INSTANCE
         );
 
         ModelCatalog.set(model);

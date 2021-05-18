@@ -334,7 +334,12 @@ public class GraphSageModelTrainer {
             return Map.of(
                 "metrics", Map.of(
                     "startLoss", startLoss(),
-                    "epochLosses", epochLosses().entrySet().stream().collect(Collectors.toMap(String::valueOf, String::valueOf)),
+                    "epochLosses", epochLosses().entrySet().stream().collect(
+                        Collectors.toMap(
+                            entry -> String.valueOf(entry.getKey()),
+                            entry -> String.valueOf(entry.getValue())
+                        )
+                    ),
                     "didConverge", didConverge(),
                     "ranEpochs", ranEpochs()
             ));

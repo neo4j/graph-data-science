@@ -80,7 +80,7 @@ class ModelStoreProcTest extends ModelProcBaseTest {
                 .modelName(modelName)
                 .addFeatureProperties("a")
                 .build(),
-            EmptyGraphSageTrainMetrics.instance
+            EmptyGraphSageTrainMetrics.INSTANCE
         );
 
         ModelCatalog.set(model1);
@@ -116,7 +116,7 @@ class ModelStoreProcTest extends ModelProcBaseTest {
                 .modelName(modelName)
                 .addFeatureProperties("a")
                 .build(),
-            EmptyGraphSageTrainMetrics.instance
+            EmptyGraphSageTrainMetrics.INSTANCE
 
         );
 

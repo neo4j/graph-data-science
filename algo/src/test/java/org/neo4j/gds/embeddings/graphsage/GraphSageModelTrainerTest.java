@@ -45,6 +45,7 @@ import org.neo4j.logging.NullLog;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -241,6 +242,14 @@ class GraphSageModelTrainerTest {
         assertThat(metrics.epochLosses().keySet())
             .containsExactlyElementsOf(IntStream.range(0, numberOfEpochs).boxed().collect(
                 Collectors.toList()));
+
+        var metricsMap =  metrics.toMap().get("metrics");
+        assertThat(metricsMap).isInstanceOf(Map.class);
+
+        var epochLosses = ((Map<String, Object>) metricsMap).get("epochLosses");
+        assertThat(epochLosses).isInstanceOf(Map.class);
+        assertThat((Map<String, String>) epochLosses)
+            .containsOnlyKeys(IntStream.range(0, numberOfEpochs).mapToObj(String::valueOf).collect(Collectors.toList()));
     }
 
     @Test

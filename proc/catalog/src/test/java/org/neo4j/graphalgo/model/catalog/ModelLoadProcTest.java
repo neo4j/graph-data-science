@@ -75,7 +75,7 @@ class ModelLoadProcTest extends ModelProcBaseTest {
                 .modelName(MODEL_NAME)
                 .addFeatureProperties("a")
                 .build(),
-            EmptyGraphSageTrainMetrics.instance
+            EmptyGraphSageTrainMetrics.INSTANCE
         );
 
         ModelCatalog.set(model1);

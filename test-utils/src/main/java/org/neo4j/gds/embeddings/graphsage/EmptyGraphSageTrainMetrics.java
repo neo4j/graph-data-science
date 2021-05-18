@@ -23,10 +23,9 @@ import java.util.Map;
 
 public final class EmptyGraphSageTrainMetrics implements GraphSageModelTrainer.GraphSageTrainMetrics {
 
-    public static final GraphSageModelTrainer.GraphSageTrainMetrics instance = new EmptyGraphSageTrainMetrics();
+    public static final GraphSageModelTrainer.GraphSageTrainMetrics INSTANCE = new EmptyGraphSageTrainMetrics();
 
-    private EmptyGraphSageTrainMetrics() {
-    }
+    private EmptyGraphSageTrainMetrics() {}
 
     @Override
     public double startLoss() {
@@ -42,8 +41,4 @@ public final class EmptyGraphSageTrainMetrics implements GraphSageModelTrainer.G
     public boolean didConverge() {
         return false;
     }
-
-
-
-
 }

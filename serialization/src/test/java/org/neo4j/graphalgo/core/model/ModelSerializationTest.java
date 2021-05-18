@@ -79,7 +79,7 @@ class ModelSerializationTest {
                 .activationFunction(ActivationFunction.SIGMOID)
                 .featureProperties(List.of("age", "birth_year", "death_year", "embedding"))
                 .build(),
-            EmptyGraphSageTrainMetrics.instance
+            EmptyGraphSageTrainMetrics.INSTANCE
         );
 
         var protoModelMetaData = ModelMetaDataSerializer.toSerializable(model);

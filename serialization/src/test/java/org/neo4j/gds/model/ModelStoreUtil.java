@@ -57,7 +57,7 @@ public final class ModelStoreUtil {
             GraphSchema.empty(),
             modelData,
             trainConfig,
-            EmptyGraphSageTrainMetrics.instance
+            EmptyGraphSageTrainMetrics.INSTANCE
         );
 
         var resolvedStoreDir = storeDir.resolve(UUID.randomUUID().toString());

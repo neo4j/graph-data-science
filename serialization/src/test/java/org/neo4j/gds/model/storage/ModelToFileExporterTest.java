@@ -65,7 +65,7 @@ class ModelToFileExporterTest {
         GRAPH_SCHEMA,
         ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
         TRAIN_CONFIG,
-        EmptyGraphSageTrainMetrics.instance
+        EmptyGraphSageTrainMetrics.INSTANCE
     );
 
     @Test

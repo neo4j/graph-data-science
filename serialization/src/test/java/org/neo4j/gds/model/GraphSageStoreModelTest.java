@@ -65,7 +65,7 @@ class GraphSageStoreModelTest extends BaseStoreModelTest<ModelData, GraphSageTra
             GraphSchema.empty(),
             modelData,
             trainConfig,
-            EmptyGraphSageTrainMetrics.instance
+            EmptyGraphSageTrainMetrics.INSTANCE
         );
     }
 }
