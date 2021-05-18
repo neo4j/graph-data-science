@@ -44,7 +44,15 @@ public final class Dimensions {
 
     public static boolean isVector(int[] dimensions) {
         // at most one dimensions can be larger than 1
-        return Arrays.stream(dimensions).filter(dim -> dim > 1).count() <= 1;
+        var length = dimensions.length;
+        var dimLargerOne = 0;
+        for (int i = 0; i < length; i++) {
+            if (dimensions[i] > 1) {
+                dimLargerOne++;
+            }
+        }
+
+        return dimLargerOne <= 1;
     }
 
     public static int totalSize(int[] dimensions) {
