@@ -320,7 +320,7 @@ class CosineDocTest extends BaseProcTest {
                        " })" +
                        " YIELD item1, item2, count1, count2, similarity" +
                        " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity" +
-                       " ORDER BY similarity DESC" +
+                       " ORDER BY similarity DESC, from ASC" +
                        " LIMIT 3";
 
         String expectedString = "+--------------------------------------------------+\n" +
