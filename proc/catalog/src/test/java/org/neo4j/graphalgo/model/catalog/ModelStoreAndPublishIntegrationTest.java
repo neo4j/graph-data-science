@@ -184,10 +184,9 @@ class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {
                         modelName + "_public",
                         "modelType", "graphSage",
                         "metrics", Map.of(
-                            "startLoss", 0.0,
                             "didConverge", false,
                             "ranEpochs", 0,
-                            "epochLosses", Map.of())
+                            "epochLosses", List.of())
                     ),
                     "trainConfig", isA(Map.class),
                     "graphSchema", EXPECTED_SCHEMA,
@@ -224,10 +223,9 @@ class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {
                         modelName,
                         "modelType", "graphSage",
                         "metrics", Map.of(
-                            "startLoss", 0.0,
                             "didConverge", false,
                             "ranEpochs", 0,
-                            "epochLosses", Map.of())
+                            "epochLosses", List.of())
                     ),
                     "creationTime", Matchers.isA(ZonedDateTime.class),
                     "trainConfig", Matchers.isA(Map.class),

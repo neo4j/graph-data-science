@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import java.util.Map;
+import java.util.List;
 
 public final class EmptyGraphSageTrainMetrics implements GraphSageModelTrainer.GraphSageTrainMetrics {
 
@@ -28,13 +28,8 @@ public final class EmptyGraphSageTrainMetrics implements GraphSageModelTrainer.G
     private EmptyGraphSageTrainMetrics() {}
 
     @Override
-    public double startLoss() {
-        return 0;
-    }
-
-    @Override
-    public Map<Integer, Double> epochLosses() {
-        return Map.of();
+    public List<Double> epochLosses() {
+        return List.of();
     }
 
     @Override

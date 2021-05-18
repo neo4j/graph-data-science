@@ -47,8 +47,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -227,9 +225,18 @@ class GraphSageModelTrainerTest {
 
     @Test
     void testLosses() {
-        var numberOfEpochs = 10;
+        var config = configBuilder
+            .modelName("randomSeed2")
+            .embeddingDimension(12)
+            .epochs(10)
+            .tolerance(1e-10)
+            .addSampleSizes(5, 3)
+            .batchSize(5)
+            .maxIterations(100)
+            .build();
+
         var trainer = new GraphSageModelTrainer(
-            configBuilder.modelName("meh").epochs(numberOfEpochs).build(),
+            config,
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER
         );
@@ -238,25 +245,23 @@ class GraphSageModelTrainerTest {
 
         var metrics = trainResult.metrics();
         assertThat(metrics.didConverge()).isFalse();
-        assertThat(metrics.ranEpochs()).isEqualTo(numberOfEpochs);
-        assertThat(metrics.epochLosses().keySet())
-            .containsExactlyElementsOf(IntStream.range(0, numberOfEpochs).boxed().collect(
-                Collectors.toList()));
+        assertThat(metrics.ranEpochs()).isEqualTo(10);
 
         var metricsMap =  metrics.toMap().get("metrics");
         assertThat(metricsMap).isInstanceOf(Map.class);
 
         var epochLosses = ((Map<String, Object>) metricsMap).get("epochLosses");
-        assertThat(epochLosses).isInstanceOf(Map.class);
-        assertThat((Map<String, String>) epochLosses)
-            .containsOnlyKeys(IntStream.range(0, numberOfEpochs).mapToObj(String::valueOf).collect(Collectors.toList()));
+        assertThat(epochLosses)
+            .isInstanceOf(List.class)
+            .asList()
+            // TODO: losses are still not deterministic, find out what's happening and assert with real values.
+            .containsExactlyElementsOf(metrics.epochLosses());
     }
 
     @Test
     void testConvergence() {
-        var numberOfEpochs = 10;
         var trainer = new GraphSageModelTrainer(
-            configBuilder.modelName("meh").tolerance(100.0).epochs(numberOfEpochs).build(),
+            configBuilder.modelName("convergingModel:)").tolerance(100.0).epochs(10).build(),
             Pools.DEFAULT,
             ProgressLogger.NULL_LOGGER
         );
@@ -267,6 +272,4 @@ class GraphSageModelTrainerTest {
         assertThat(trainMetrics.didConverge()).isTrue();
         assertThat(trainMetrics.ranEpochs()).isEqualTo(1);
     }
-
-
 }

@@ -29,10 +29,9 @@ class GraphSageTrainModelInfoSerializerTest {
     @Test
     void testSerialization() {
         var trainMetrics = ImmutableGraphSageTrainMetrics.builder()
-            .startLoss(1.9)
-            .putEpochLosse(1, 100.1)
-            .putEpochLosse(2, 100.0)
-            .putEpochLosse(3, 99.9)
+            .addEpochLosse(100.1)
+            .addEpochLosse(100.0)
+            .addEpochLosse(99.9)
             .didConverge(true)
             .build();
 

@@ -49,7 +49,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
-import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -109,22 +108,23 @@ public class GraphSageModelTrainer {
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
         progressLogger.logStart();
-        Map<Integer, Double> epochLosses = new TreeMap<>();
+        var epochLosses = new ArrayList<Double>();
 
         this.layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
 
         double initialLoss = evaluateLoss(graph, features, -1);
+        epochLosses.add(0, initialLoss);
         double previousLoss = initialLoss;
         boolean converged = false;
-        for (int epoch = 0; epoch < epochs; epoch++) {
-            var epochMessage = ":: Epoch " + (epoch + 1);
+        for (int epoch = 1; epoch <= epochs; epoch++) {
+            var epochMessage = ":: Epoch " + epoch;
             progressLogger.logStart(epochMessage);
 
             trainEpoch(graph, features, epoch);
             double newLoss = evaluateLoss(graph, features, epoch);
-            epochLosses.put(epoch, newLoss);
+            epochLosses.add(epoch, newLoss);
             progressLogger.logFinish(epochMessage);
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
                 converged = true;
@@ -318,13 +318,15 @@ public class GraphSageModelTrainer {
 
     @ValueClass
     public interface GraphSageTrainMetrics extends Model.Mappable {
-        double startLoss();
-        Map<Integer, Double> epochLosses();
+        List<Double> epochLosses();
         boolean didConverge();
 
         @Value.Derived
         default int ranEpochs() {
-            return epochLosses().size();
+            // Exclude the `initialLoss`
+            return epochLosses().isEmpty()
+                ? 0
+                : epochLosses().size() - 1;
         }
 
         @Override
@@ -333,13 +335,7 @@ public class GraphSageModelTrainer {
         default Map<String, Object> toMap() {
             return Map.of(
                 "metrics", Map.of(
-                    "startLoss", startLoss(),
-                    "epochLosses", epochLosses().entrySet().stream().collect(
-                        Collectors.toMap(
-                            entry -> String.valueOf(entry.getKey()),
-                            entry -> String.valueOf(entry.getValue())
-                        )
-                    ),
+                    "epochLosses", epochLosses(),
                     "didConverge", didConverge(),
                     "ranEpochs", ranEpochs()
             ));
@@ -355,13 +351,13 @@ public class GraphSageModelTrainer {
 
         static ModelTrainResult of(
             double startLoss,
-            Map<Integer, Double> epochLosses,
+            List<Double> epochLosses,
             boolean converged,
             Layer[] layers
         ) {
             return ImmutableModelTrainResult.builder()
                 .layers(layers)
-                .metrics(ImmutableGraphSageTrainMetrics.of(startLoss, epochLosses, converged))
+                .metrics(ImmutableGraphSageTrainMetrics.of(epochLosses, converged))
                 .build();
         }
     }

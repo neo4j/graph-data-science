@@ -29,8 +29,7 @@ public class GraphSageTrainModelInfoSerializer implements ModelInfoSerializer<Gr
     @Override
     public GraphSageProto.GraphSageMetrics toSerializable(GraphSageModelTrainer.GraphSageTrainMetrics modelInfo) {
         return GraphSageProto.GraphSageMetrics.newBuilder()
-            .setStartLoss(modelInfo.startLoss())
-            .putAllEpochLosses(modelInfo.epochLosses())
+            .addAllEpochLosses(modelInfo.epochLosses())
             .setDidConverge(modelInfo.didConverge())
             .build();
     }
@@ -38,9 +37,8 @@ public class GraphSageTrainModelInfoSerializer implements ModelInfoSerializer<Gr
     @Override
     public GraphSageModelTrainer.GraphSageTrainMetrics fromSerializable(GraphSageProto.GraphSageMetrics protoModelInfo) {
         return ImmutableGraphSageTrainMetrics.builder()
-            .startLoss(protoModelInfo.getStartLoss())
             .didConverge(protoModelInfo.getDidConverge())
-            .epochLosses(protoModelInfo.getEpochLossesMap())
+            .epochLosses(protoModelInfo.getEpochLossesList())
             .build();
     }
 

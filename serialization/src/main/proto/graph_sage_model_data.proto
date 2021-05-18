@@ -51,6 +51,6 @@ message MaxPoolingAggregator {
 
 message GraphSageMetrics {
   double startLoss = 1;
-  map<int32, double> epochLosses = 2;
+  repeated double epochLosses = 2;
   bool didConverge = 3;
 }
