@@ -66,13 +66,12 @@ public class GraphDropProc extends CatalogProc {
         }
 
         var databaseName = dbName.isEmpty() ? databaseId().name() : dbName;
-        var username = username();
 
         if (failIfMissing) {
             var missingGraphs = graphNames.stream().flatMap(name -> {
                 try {
                     // get the graph to check if it exists
-                    GraphStoreCatalog.get(username, databaseName, name);
+                    graphStoreFromCatalog(name, databaseName);
                     return Stream.empty();
                 } catch (NoSuchElementException missing) {
                     return Stream.of(new MissingGraph(name, missing));

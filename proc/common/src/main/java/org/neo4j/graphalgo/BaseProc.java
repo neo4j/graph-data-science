@@ -128,10 +128,14 @@ public abstract class BaseProc {
     }
 
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName) {
+        return graphStoreFromCatalog(graphName, databaseId().name())
+    }
+
+    protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, String databaseName) {
         if (isGdsAdmin()) {
-            return GraphStoreCatalog.getAsAdmin(username(), databaseId(), graphName);
+            return GraphStoreCatalog.getAsAdmin(username(), databaseName, graphName);
         } else {
-            return GraphStoreCatalog.get(username(), databaseId(), graphName);
+            return GraphStoreCatalog.get(username(), databaseName, graphName);
         }
     }
 

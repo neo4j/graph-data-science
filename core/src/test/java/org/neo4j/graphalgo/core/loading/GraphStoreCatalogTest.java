@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.graphalgo.extension.GdlSupportExtension.DATABASE_ID;
 
 @GdlExtension
@@ -123,6 +124,70 @@ class GraphStoreCatalogTest {
         assertTrue(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
         GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {}, true);
         assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+    }
+
+    @Test
+    void removeAsAdmin() {
+        GraphStoreCatalog.set(CONFIG, graphStore);
+        GraphStoreCatalog.removeAsAdmin("admin", DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {
+            assertEquals(graphStore, graphStoreWithConfig.graphStore());
+        }, true);
+        assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+    }
+
+    @Test
+    void removeAsAdminPrefersOwnGraphCatalog() {
+        var adminConfig = GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
+        GraphStoreCatalog.set(adminConfig, graphStore);
+        GraphStoreCatalog.set(CONFIG, graphStore);
+
+        GraphStoreCatalog.removeAsAdmin("admin", DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {
+            assertEquals(graphStore, graphStoreWithConfig.graphStore());
+        }, true);
+        assertFalse(GraphStoreCatalog.exists("admin", DATABASE_ID, GRAPH_NAME));
+        assertTrue(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+    }
+
+    @Test
+    void removeAsAdminThrowsIfNoGraphIsMatching() {
+        assertThatThrownBy(() -> GraphStoreCatalog.removeAsAdmin(
+            "admin",
+            DATABASE_ID,
+            GRAPH_NAME,
+            graphStoreWithConfig -> fail("How did you remove a graph that never existed?"),
+            true
+        ))
+            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
+    }
+
+    @Test
+    void removeAsAdminSuggestsOnlyOwnGraphs() {
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME + "y"), graphStore);
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME + "z"), graphStore);
+
+        assertThatThrownBy(() -> GraphStoreCatalog.removeAsAdmin(
+            "admin",
+            DATABASE_ID,
+            GRAPH_NAME + "x",
+            graphStoreWithConfig -> fail("Should not have removed the graph"),
+            true
+        ))
+            .hasMessage("Graph with name `%s` does not exist on database `%s`. Did you mean `%s`?", GRAPH_NAME + "x", DATABASE_ID.name(), GRAPH_NAME + "y");
+    }
+
+    @Test
+    void removeAsAdminFailsOnMultipleGraphsMatching() {
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+
+        assertThatThrownBy(() -> GraphStoreCatalog.removeAsAdmin(
+            "admin",
+            DATABASE_ID,
+            GRAPH_NAME,
+            graphStoreWithConfig -> fail("Should not have removed the graph"),
+            true
+        ))
+            .hasMessage("Multiple graphs that match '%s' are found", GRAPH_NAME);
     }
 
     @Test

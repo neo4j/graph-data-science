@@ -51,6 +51,10 @@ public final class GraphStoreCatalog {
     }
 
     public static GraphStoreWithConfig getAsAdmin(String username, NamedDatabaseId databaseId, String graphName) {
+        return getAsAdmin(username, databaseId.name(), graphName);
+    }
+
+    public static GraphStoreWithConfig getAsAdmin(String username, String databaseId, String graphName) {
         var userCatalogKey = UserCatalog.UserCatalogKey.of(databaseId, graphName);
         var ownCatalog = getUserCatalog(username);
         var maybeGraph = ownCatalog.get(userCatalogKey, false);
@@ -119,6 +123,54 @@ public final class GraphStoreCatalog {
             removedGraphConsumer,
             failOnMissing
         );
+    }
+
+    public static void removeAsAdmin(
+        String username,
+        NamedDatabaseId databaseId,
+        String graphName,
+        Consumer<GraphStoreWithConfig> removedGraphConsumer,
+        boolean failOnMissing
+    ) {
+        removeAsAdmin(username, databaseId.name(), graphName, removedGraphConsumer, failOnMissing);
+    }
+
+    public static void removeAsAdmin(
+        String username,
+        String databaseName,
+        String graphName,
+        Consumer<GraphStoreWithConfig> removedGraphConsumer,
+        boolean failOnMissing
+    ) {
+        var userCatalogKey = UserCatalog.UserCatalogKey.of(databaseName, graphName);
+        var ownCatalog = getUserCatalog(username);
+
+        var didRemove = ownCatalog.remove(userCatalogKey, removedGraphConsumer, false);
+        if (didRemove) {
+            return;
+        }
+
+        var usersWithMatchingGraphs = userCatalogs
+            .entrySet()
+            .stream()
+            .flatMap(e -> Stream.ofNullable(e.getValue().get(userCatalogKey, false)).map(graph -> e.getKey()))
+            .collect(Collectors.toSet());
+
+        if (usersWithMatchingGraphs.isEmpty() && failOnMissing) {
+            // suggests only own graphs names
+            throw ownCatalog.graphNotFoundException(userCatalogKey);
+        }
+
+        if (usersWithMatchingGraphs.size() > 1) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Multiple graphs that match '%s' are found",
+                graphName
+            ));
+        }
+
+        for (var user: usersWithMatchingGraphs) {
+            remove(user, databaseName, graphName, removedGraphConsumer, failOnMissing);
+        }
     }
 
     public static int graphStoresCount() {
@@ -305,18 +357,21 @@ public final class GraphStoreCatalog {
             return userCatalogKey != null && graphsByName.containsKey(userCatalogKey);
         }
 
-        private void remove(
+        private boolean remove(
             UserCatalogKey userCatalogKey,
             Consumer<GraphStoreWithConfig> removedGraphConsumer,
             boolean failOnMissing
         ) {
-            Optional.ofNullable(get(userCatalogKey, failOnMissing)).ifPresent(graphStoreWithConfig -> {
-                removedGraphConsumer.accept(graphStoreWithConfig);
-                graphStoreWithConfig.graphStore().canRelease(true);
-                graphStoreWithConfig.graphStore().release();
-                removeDegreeDistribution(userCatalogKey);
-                graphsByName.remove(userCatalogKey);
-            });
+            return Optional.ofNullable(get(userCatalogKey, failOnMissing))
+                .map(graphStoreWithConfig -> {
+                    removedGraphConsumer.accept(graphStoreWithConfig);
+                    graphStoreWithConfig.graphStore().canRelease(true);
+                    graphStoreWithConfig.graphStore().release();
+                    removeDegreeDistribution(userCatalogKey);
+                    graphsByName.remove(userCatalogKey);
+                    return true;
+                })
+                .orElse(Boolean.FALSE);
         }
 
         private void remove(String databaseName) {
