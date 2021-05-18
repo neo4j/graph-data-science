@@ -20,12 +20,15 @@
 package org.neo4j.graphalgo.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
+import org.eclipse.collections.impl.block.factory.Functions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
@@ -34,9 +37,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class PartitionUtilsTest {
@@ -95,16 +101,16 @@ class PartitionUtilsTest {
             Arguments.of(1, 42, List.of(Partition.of(0, 42))),
             Arguments.of(1, 42_000, List.of(Partition.of(0, 42_000))),
             Arguments.of(4, 40_000, List.of(
-                Partition.of(0, ParallelUtil.DEFAULT_BATCH_SIZE),
-                Partition.of(10_000, ParallelUtil.DEFAULT_BATCH_SIZE),
-                Partition.of(20_000, ParallelUtil.DEFAULT_BATCH_SIZE),
-                Partition.of(30_000, ParallelUtil.DEFAULT_BATCH_SIZE)
+                Partition.of(0, DEFAULT_BATCH_SIZE),
+                Partition.of(10_000, DEFAULT_BATCH_SIZE),
+                Partition.of(20_000, DEFAULT_BATCH_SIZE),
+                Partition.of(30_000, DEFAULT_BATCH_SIZE)
             )),
             Arguments.of(4, 42_000, List.of(
-                Partition.of(0            , ParallelUtil.DEFAULT_BATCH_SIZE + 500),
-                Partition.of(10_000 +  500, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
-                Partition.of(20_000 + 1000, ParallelUtil.DEFAULT_BATCH_SIZE + 500),
-                Partition.of(30_000 + 1500, ParallelUtil.DEFAULT_BATCH_SIZE + 500)
+                Partition.of(0            , DEFAULT_BATCH_SIZE + 500),
+                Partition.of(10_000 +  500, DEFAULT_BATCH_SIZE + 500),
+                Partition.of(20_000 + 1000, DEFAULT_BATCH_SIZE + 500),
+                Partition.of(30_000 + 1500, DEFAULT_BATCH_SIZE + 500)
             ))
         );
     }
@@ -118,6 +124,27 @@ class PartitionUtilsTest {
 
     @Test
     void testDegreePartitioning() {
+        var concurrency = 4;
+
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(DEFAULT_BATCH_SIZE)
+            .averageDegree(concurrency)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .allocationTracker(AllocationTracker.empty())
+            .build()
+            .generate();
+
+        var expectedPartitionSize = graph.nodeCount() / concurrency;
+        var partitions = PartitionUtils.degreePartition(graph, concurrency, Functions.identity());
+
+        assertThat(partitions.size()).isEqualTo(concurrency);
+        for (int i = 0; i < concurrency; i++) {
+            assertThat(partitions.get(i).nodeCount()).isCloseTo(expectedPartitionSize, within(10L));
+        }
+    }
+
+    @Test
+    void testDegreePartitioningWithBatchSize() {
         Graph graph = fromGdl(
             "(a)-->(b)" +
             "(a)-->(c)" +
@@ -125,7 +152,7 @@ class PartitionUtilsTest {
             "(b)-->(c)"
         );
 
-        var partitions = PartitionUtils.degreePartition(graph, 2, Function.identity());
+        var partitions = PartitionUtils.degreePartitionWithBatchSize(graph, 2, Function.identity());
         assertEquals(2, partitions.size());
         assertEquals(0, partitions.get(0).startNode());
         assertEquals(2, partitions.get(0).nodeCount());
@@ -145,7 +172,7 @@ class PartitionUtilsTest {
         nodeFilter.set(0);
         nodeFilter.set(2);
 
-        var partitions = PartitionUtils.degreePartition(
+        var partitions = PartitionUtils.degreePartitionWithBatchSize(
             new SetBitsIterable(nodeFilter).primitiveLongIterator(), graph::degree, 2, Function.identity()
         );
         assertEquals(1, partitions.size());

@@ -94,7 +94,7 @@ public class Node2VecModel {
                 config.initialLearningRate() - iteration * learningRateAlpha
             );
 
-            var tasks = PartitionUtils.degreePartition(
+            var tasks = PartitionUtils.degreePartitionWithBatchSize(
                 PrimitiveLongCollections.range(0, walks.size() - 1),
                 walks::walkLength,
                 BitUtil.ceilDiv(randomWalkProbabilities.sampleCount(), config.concurrency()),

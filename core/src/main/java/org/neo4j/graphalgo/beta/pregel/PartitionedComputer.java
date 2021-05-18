@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.beta.pregel;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
@@ -101,11 +100,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             case RANGE:
                 return PartitionUtils.rangePartition(concurrency, graph.nodeCount(), partitionFunction);
             case DEGREE:
-                var batchSize = Math.max(
-                    ParallelUtil.DEFAULT_BATCH_SIZE,
-                    BitUtil.ceilDiv(graph.relationshipCount(), concurrency)
-                );
-                return PartitionUtils.degreePartition(graph, batchSize, partitionFunction);
+                return PartitionUtils.degreePartition(graph, concurrency, partitionFunction);
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Unsupported partitioning `%s`",
