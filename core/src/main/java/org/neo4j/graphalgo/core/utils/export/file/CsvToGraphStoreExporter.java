@@ -131,7 +131,7 @@ public final class CsvToGraphStoreExporter {
         NodeSchema nodeSchema = fileInput.nodeSchema();
 
         GraphInfo graphInfo = fileInput.graphInfo();
-        graphStoreBuilder.bitIdMap(graphInfo.bitIdMap());
+        graphStoreBuilder.useBitIdMap(graphInfo.bitIdMap());
         graphStoreBuilder.databaseId(graphInfo.namedDatabaseId());
 
         int concurrency = config.writeConcurrency();
@@ -309,7 +309,7 @@ public final class CsvToGraphStoreExporter {
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
         int concurrency,
-        boolean bitIdMap,
+        boolean useBitIdMap,
         Log log,
         AllocationTracker tracker
     ) {
@@ -322,7 +322,12 @@ public final class CsvToGraphStoreExporter {
             concurrency,
             tracker
         );
-        if (bitIdMap) {
+        if (useBitIdMap) {
+            // When the originally persisted graph was using a BitIdMap
+            // we at first load an ordinary IdMap and transform it to a
+            // BitIdMap afterwards. As the Graph filtering code path does
+            // exactly that we call filtering with a true expression for
+            // nodes and relationships.
             var config = ImmutableGraphCreateFromGraphConfig.builder()
                 .concurrency(concurrency)
                 .nodeFilter("*")

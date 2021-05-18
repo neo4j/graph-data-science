@@ -134,7 +134,7 @@ class GraphStoreRelationshipVisitorTest {
             .databaseId(TestDatabaseIdRepository.randomNamedDatabaseId())
             .concurrency(1)
             .tracker(AllocationTracker.empty())
-            .bitIdMap(false)
+            .useBitIdMap(false)
             .log(NullLog.getInstance())
             .build()
             .getUnion();
