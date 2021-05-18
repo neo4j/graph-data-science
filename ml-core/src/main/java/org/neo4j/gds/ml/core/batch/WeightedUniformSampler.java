@@ -57,10 +57,6 @@ public class WeightedUniformSampler {
         var reservoir = BoundedLongPriorityQueue.max(numberOfSamples);
         var inputIterator = input.iterator();
 
-        for (int i = 0; i < numberOfSamples; i++) {
-            processRelationship(reservoir, inputIterator.next(), includeNode);
-        }
-
         while (inputIterator.hasNext()) {
             processRelationship(reservoir, inputIterator.next(), includeNode);
         }
@@ -76,7 +72,7 @@ public class WeightedUniformSampler {
         var node =  relationshipCursor.targetId();
         if (includeNode.test(node)) {
             // Higher weights should be more likely to be sampled
-            var priority = Math.pow(random.nextDouble(), 1 / relationshipCursor.property() + EPSILON);
+            var priority = Math.pow(random.nextDouble(), 1 / (relationshipCursor.property() + EPSILON));
             reservoir.offer(node, priority);
         }
     }

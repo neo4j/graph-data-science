@@ -297,7 +297,7 @@ public class GraphSageModelTrainer {
         // therefore we need fictive rels to all nodes
         // Math.log to avoid always sampling the high degree nodes
         var degreeWeightedNodes = LongStream.range(0, nodeCount)
-            .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, Math.log(graph.degree(nodeId))));
+            .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, Math.pow(graph.degree(nodeId), 0.75)));
 
         return sampler.sample(degreeWeightedNodes, nodeCount, batchSize, sample -> !neighbours.contains(sample));
     }
