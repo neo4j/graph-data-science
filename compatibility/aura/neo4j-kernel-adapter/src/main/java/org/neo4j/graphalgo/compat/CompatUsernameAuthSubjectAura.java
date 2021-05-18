@@ -22,12 +22,8 @@ package org.neo4j.graphalgo.compat;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 final class CompatUsernameAuthSubjectAura extends CompatUsernameAuthSubject {
+
     CompatUsernameAuthSubjectAura(String username, AuthSubject authSubject) {
         super(username, authSubject);
-    }
-
-    @Override
-    public void setPasswordChangeNoLongerRequired() {
-        authSubject.setPasswordChangeNoLongerRequired();
     }
 }

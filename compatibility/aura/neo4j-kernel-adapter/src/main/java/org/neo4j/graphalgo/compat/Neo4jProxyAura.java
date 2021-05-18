@@ -21,10 +21,12 @@ package org.neo4j.graphalgo.compat;
 
 import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.collections.api.factory.Sets;
+import org.neo4j.common.EntityType;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
@@ -42,7 +44,6 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
-import org.neo4j.internal.batchimport.staging.ExecutionMonitors;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -52,6 +53,8 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.internal.kernel.api.TokenPredicate;
+import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -61,19 +64,22 @@ import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexOrder;
+import org.neo4j.internal.schema.SchemaDescriptor;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
-import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
+import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
@@ -106,6 +112,7 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -133,7 +140,12 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
     public SecurityContext securityContext(
         String username, AuthSubject authSubject, AccessMode mode
     ) {
-        return new SecurityContext(new CompatUsernameAuthSubjectAura(username, authSubject), mode);
+        return new SecurityContext(
+            new CompatUsernameAuthSubjectAura(username, authSubject),
+            mode,
+            // GDS is always operating from an embedded context
+            ClientConnectionInfo.EMBEDDED_CONNECTION
+        );
     }
 
     @Override
@@ -141,12 +153,12 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
         RecordStore<? extends AbstractBaseRecord> recordStore,
         KernelTransaction kernelTransaction
     ) {
-        return recordStore.getHighestPossibleIdInUse(kernelTransaction.pageCursorTracer());
+        return recordStore.getHighestPossibleIdInUse(kernelTransaction.cursorContext());
     }
 
     @Override
     public PageCursor pageFileIO(PagedFile pagedFile, long pageId, int pageFileFlags) throws IOException {
-        return pagedFile.io(pageId, pageFileFlags, PageCursorTracer.NULL);
+        return pagedFile.io(pageId, pageFileFlags, CursorContext.NULL);
     }
 
     @Override
@@ -169,29 +181,29 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
     public PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
         return kernelTransaction
             .cursors()
-            .allocatePropertyCursor(kernelTransaction.pageCursorTracer(), kernelTransaction.memoryTracker());
+            .allocatePropertyCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
     }
 
     @Override
     public NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction) {
-        return kernelTransaction.cursors().allocateNodeCursor(kernelTransaction.pageCursorTracer());
+        return kernelTransaction.cursors().allocateNodeCursor(kernelTransaction.cursorContext());
     }
 
     @Override
     public RelationshipScanCursor allocateRelationshipScanCursor(KernelTransaction kernelTransaction) {
-        return kernelTransaction.cursors().allocateRelationshipScanCursor(kernelTransaction.pageCursorTracer());
+        return kernelTransaction.cursors().allocateRelationshipScanCursor(kernelTransaction.cursorContext());
     }
 
     @Override
     public NodeLabelIndexCursor allocateNodeLabelIndexCursor(KernelTransaction kernelTransaction) {
-        return kernelTransaction.cursors().allocateNodeLabelIndexCursor(kernelTransaction.pageCursorTracer());
+        return kernelTransaction.cursors().allocateNodeLabelIndexCursor(kernelTransaction.cursorContext());
     }
 
     @Override
     public NodeValueIndexCursor allocateNodeValueIndexCursor(KernelTransaction kernelTransaction) {
         return kernelTransaction
             .cursors()
-            .allocateNodeValueIndexCursor(kernelTransaction.pageCursorTracer(), kernelTransaction.memoryTracker());
+            .allocateNodeValueIndexCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
     }
 
     @Override
@@ -201,7 +213,25 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
 
     @Override
     public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
-        kernelTransaction.dataRead().nodeLabelScan(label, cursor, IndexOrder.NONE);
+        Iterator<IndexDescriptor> nodeIndexes = kernelTransaction
+            .schemaRead()
+            .index(SchemaDescriptor.forAnyEntityTokens(EntityType.NODE));
+        if (!nodeIndexes.hasNext()) {
+            throw new IllegalStateException("There is no index that can back a node label scan.");
+        }
+        IndexDescriptor nodeLabelIndexDescriptor = nodeIndexes.next();
+        try {
+            var read = kernelTransaction.dataRead();
+            var session = read.tokenReadSession(nodeLabelIndexDescriptor);
+            read.nodeLabelScan(
+                session,
+                cursor,
+                IndexQueryConstraints.unordered(true),
+                new TokenPredicate(label)
+            );
+        } catch (KernelException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -338,6 +368,11 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
             public boolean highIO() {
                 return false;
             }
+
+            @Override
+            public boolean populateNodeIndex() {
+                return true;
+            }
         };
         return factory.instantiate(
             directoryStructure,
@@ -353,6 +388,7 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
             jobScheduler,
             badCollector,
             TransactionLogInitializer.getLogFilesInitializer(),
+            new IndexImporterFactoryImpl(dbConfig),
             EmptyMemoryTracker.INSTANCE
         );
     }
@@ -435,7 +471,7 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
 
     @Override
     public ExecutionMonitor invisibleExecutionMonitor() {
-        return ExecutionMonitors.defaultVisible();
+        return ExecutionMonitor.INVISIBLE;
     }
 
     @Override
@@ -534,7 +570,7 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
         public Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) throws IOException {
             return delegate.calculateEstimates((values, kernelTransaction) -> propertySizeCalculator.calculateSize(
                 values,
-                kernelTransaction.pageCursorTracer(),
+                kernelTransaction.cursorContext(),
                 kernelTransaction.memoryTracker()
             ));
         }
