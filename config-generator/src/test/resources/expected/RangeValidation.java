@@ -31,6 +31,8 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 public final class RangeValidationConfig implements RangeValidation {
     private int integerWithinRange;
 
+    private long longWithinRange;
+
     private double doubleWithinRange;
 
     private Optional<Double> maybeDoubleWithinRange;
@@ -44,6 +46,18 @@ public final class RangeValidationConfig implements RangeValidation {
                 integerWithinRange,
                 21,
                 42,
+                false,
+                true);
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.longWithinRange = config.requireLong("longWithinRange")
+            CypherMapWrapper.validateLongRange(
+                "longWithinRange",
+                longWithinRange,
+                21L,
+                42L,
                 false,
                 true);
         } catch (IllegalArgumentException e) {
@@ -99,6 +113,11 @@ public final class RangeValidationConfig implements RangeValidation {
     @Override
     public int integerWithinRange() {
         return this.integerWithinRange;
+    }
+
+    @Override
+    public long longWithinRange() {
+        return this.longWithinRange;
     }
 
     @Override

@@ -171,6 +171,7 @@ final class ConfigParser {
         }
 
         memberBuilder.validatesIntegerRange(isAnnotationPresent(method, Configuration.IntegerRange.class));
+        memberBuilder.validatesLongRange(isAnnotationPresent(method, Configuration.LongRange.class));
         memberBuilder.validatesDoubleRange(isAnnotationPresent(method, Configuration.DoubleRange.class));
 
         if (isAnnotationPresent(method, Value.Check.class)) {
@@ -238,6 +239,9 @@ final class ConfigParser {
 
         @Value.Default
         public boolean validatesIntegerRange() { return false; }
+
+        @Value.Default
+        public boolean validatesLongRange() { return false; }
 
         @Value.Default
         public boolean validatesDoubleRange() { return false; }

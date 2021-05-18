@@ -247,6 +247,24 @@ public final class CypherMapWrapper {
         return value;
     }
 
+    public static long validateLongRange(
+        String key,
+        long value,
+        long min,
+        long max,
+        boolean minInclusive,
+        boolean maxInclusive
+    ) {
+        boolean meetsLowerBound = minInclusive ? value >= min : value > min;
+        boolean meetsUpperBound = maxInclusive ? value <= max : value < max;
+
+        if (!meetsLowerBound || !meetsUpperBound) {
+            throw outOfRangeError(key, value, Long.toString(min), Long.toString(max), minInclusive, maxInclusive);
+        }
+
+        return value;
+    }
+
     public static double validateDoubleRange(
         String key,
         double value,

@@ -399,6 +399,23 @@ final class GenerateConfiguration {
             ));
         }
 
+        if (definition.member().validatesLongRange()) {
+            Configuration.LongRange range = definition
+                .member()
+                .method()
+                .getAnnotation(Configuration.LongRange.class);
+            validationConsumer.accept(CodeBlock.of(
+                "$T.validateLongRange($S, $L, $L, $L, $L, $L)",
+                CypherMapWrapper.class,
+                definition.configKey(),
+                definition.fieldName(),
+                elementUtils.getConstantExpression(range.min()),
+                elementUtils.getConstantExpression(range.max()),
+                elementUtils.getConstantExpression(range.minInclusive()),
+                elementUtils.getConstantExpression(range.maxInclusive())
+            ));
+        }
+
         if (definition.member().validatesDoubleRange()) {
             Configuration.DoubleRange range = definition
                 .member()

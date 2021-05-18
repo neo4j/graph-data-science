@@ -106,6 +106,16 @@ public @interface Configuration {
     @Documented
     @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.CLASS)
+    @interface LongRange {
+        long min() default Long.MIN_VALUE;
+        long max() default Long.MAX_VALUE;
+        boolean minInclusive() default true;
+        boolean maxInclusive() default true;
+    }
+
+    @Documented
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.CLASS)
     @interface DoubleRange {
         double min() default -Double.MAX_VALUE;
         double max() default Double.MAX_VALUE;

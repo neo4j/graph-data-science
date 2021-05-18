@@ -28,6 +28,9 @@ public interface RangeValidation {
     @Configuration.IntegerRange(min = 21, max = 42, minInclusive = false, maxInclusive = true)
     int integerWithinRange();
 
+    @Configuration.LongRange(min = 21, max = 42, minInclusive = false, maxInclusive = true)
+    long longWithinRange();
+
     @Configuration.DoubleRange(min = 21.0, max = 42.0, minInclusive = false, maxInclusive = true)
     double doubleWithinRange();
 
