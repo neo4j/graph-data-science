@@ -23,26 +23,39 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.core.StringSimilarity.similarStrings;
+import static org.neo4j.graphalgo.core.StringSimilarity.similarStringsIgnoreCase;
 
 public final class ConfigKeyValidation {
 
     private ConfigKeyValidation() {}
 
     public static void requireOnlyKeysFrom(Collection<String> allowedKeys, Collection<String> configKeys) {
-        Collection<String> keys = new HashSet<>(configKeys);
-        keys.removeAll(allowedKeys);
-        if (keys.isEmpty()) {
+        var unexpectedKeys = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        unexpectedKeys.addAll(configKeys);
+
+        // We are doing the equivalent of `removeAll` here.
+        // As of jdk16, TreeSet does not have a specialized removeAll implementation and reverts to use
+        // the default implementation in `AbstractSet#removeAll`
+        // The JavaDocs for this method specifies the following behavior:
+        // > This implementation determines which is the smaller of this set and the specified collection [..]
+        // > If this set has fewer elements, then the implementation iterates over this set, checking
+        // > each element [..] to see if it is contained in the specified collection.
+        // The specified collection does not guarantee the case-insensitive comparison and
+        // `removeAll` would not return the correct result.
+        for (var allowedKey : allowedKeys) {
+            unexpectedKeys.remove(allowedKey);
+        }
+        if (unexpectedKeys.isEmpty()) {
             return;
         }
-        List<String> suggestions = keys.stream()
+        List<String> suggestions = unexpectedKeys.stream()
             .map(invalid -> {
-                List<String> candidates = similarStrings(invalid, allowedKeys);
+                List<String> candidates = similarStringsIgnoreCase(invalid, allowedKeys);
                 candidates.removeAll(configKeys);
 
                 if (candidates.isEmpty()) {

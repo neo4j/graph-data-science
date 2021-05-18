@@ -105,12 +105,12 @@ class ConfigKeyValidationTest extends BaseProcTest {
     void misspelledOptionalKeyWithSuggestion() {
         QueryExecutionException exception = Assertions.assertThrows(
             QueryExecutionException.class,
-            () -> runQuery("CALL gds.testProc.test({maxiterations: 1337, writeProperty: 'p', nodeProjection: '*', relationshipProjection: '*'})")
+            () -> runQuery("CALL gds.testProc.test({maxiiterations: 1337, writeProperty: 'p', nodeProjection: '*', relationshipProjection: '*'})")
         );
 
         assertThat(
             exception,
-            rootCause(IllegalArgumentException.class, "Unexpected configuration key: maxiterations (Did you mean [maxIterations]?)")
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: maxiiterations (Did you mean [maxIterations]?)")
         );
     }
 
@@ -123,7 +123,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
 
         assertThat(
             exception,
-            rootCause(IllegalArgumentException.class, "Unexpected configuration key: writeConccurrency (Did you mean one of [writeConcurrency, readConcurrency]?)")
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: writeConccurrency (Did you mean one of [writeConcurrency, readConcurrency, concurrency]?)")
         );
     }
 
