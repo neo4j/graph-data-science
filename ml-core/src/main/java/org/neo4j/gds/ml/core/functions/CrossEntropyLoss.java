@@ -30,8 +30,6 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-
 public class CrossEntropyLoss extends AbstractVariable<Scalar> {
     private final Variable<Matrix> predictions;
     private final Variable<Vector> targets;
@@ -43,7 +41,7 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
     }
 
     public static long sizeInBytes() {
-        return sizeOfDoubleArray(1);
+        return Scalar.sizeInBytes();
     }
 
     @Override

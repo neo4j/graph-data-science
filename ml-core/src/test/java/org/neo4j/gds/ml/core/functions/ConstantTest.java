@@ -17,41 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.tensor;
+package org.neo4j.gds.ml.core.functions;
 
-import org.neo4j.gds.ml.core.Dimensions;
+import org.junit.jupiter.api.Test;
 
-public class Scalar extends Tensor<Scalar> {
+import static org.assertj.core.api.Assertions.assertThat;
 
-    public Scalar(double value) {
-        super(new double[] {value}, Dimensions.scalar());
+class ConstantTest {
+
+    @Test
+    void requireGradient() {
+        assertThat(Constant.scalar(1).requireGradient()).isFalse();
+        var data = new double[]{1, 1, 1, 1};
+        assertThat(Constant.matrix(data, 2, 2).requireGradient()).isFalse();
+        assertThat(Constant.vector(data).requireGradient()).isFalse();
     }
 
-    @Override
-    public Scalar zeros() {
-        return new Scalar(0D);
-    }
-
-    @Override
-    public Scalar copy() {
-        return new Scalar(value());
-    }
-
-    @Override
-    public Scalar add(Scalar b) {
-        return new Scalar(value() + b.value());
-    }
-
-    @Override
-    public String toString() {
-        return Double.toString(value());
-    }
-
-    public double value() {
-        return data[0];
-    }
-
-    public static long sizeInBytes() {
-        return Tensor.sizeInBytes(Dimensions.scalar());
-    }
 }

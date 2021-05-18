@@ -23,35 +23,43 @@ import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
+import static org.neo4j.gds.ml.core.Dimensions.scalar;
+import static org.neo4j.gds.ml.core.Dimensions.totalSize;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public class MeanSquaredError extends AbstractVariable<Scalar> {
-    private final Variable<Matrix> predictions;
-    private final Variable<Matrix> targets;
+    private final Variable<?> predictions;
+    private final Variable<?> targets;
 
     public MeanSquaredError(
-        Variable<Matrix> predictions,
-        Variable<Matrix> targets
+        Variable<?> predictions,
+        Variable<?> targets
     ) {
-        super(List.of(predictions, targets), Dimensions.scalar());
+        super(List.of(predictions, targets), scalar());
         this.predictions = predictions;
         this.targets = targets;
+
+        validateDimensions(predictions, targets);
     }
 
     @Override
     public Scalar apply(ComputationContext ctx) {
-        Tensor<?> predictedData = ctx.data(predictions);
-        Tensor<?> targetData = ctx.data(targets);
+        var predictedData = ctx.data(predictions);
+        var targetData = ctx.data(targets);
+
         double sumOfSquares = 0;
-        for (int i = 0; i < predictedData.totalSize(); i++) {
+        var length = predictedData.totalSize();
+        for (int i = 0; i < length; i++) {
             sumOfSquares += Math.pow((predictedData.dataAt(i) - targetData.dataAt(i)), 2);
         }
 
-        return new Scalar(sumOfSquares/predictedData.totalSize());
+        return new Scalar(sumOfSquares / length);
     }
 
     @Override
@@ -59,14 +67,26 @@ public class MeanSquaredError extends AbstractVariable<Scalar> {
         Variable<?> parent, ComputationContext ctx
     ) {
         // targets should be a constant, so gradient should not really be required
-        Tensor<?> parentData = ctx.data(parent);
-        Tensor<?> notParentData = parent == predictions ? ctx.data(targets) : ctx.data(predictions);
-        double[] grad = new double[parentData.totalSize()];
-        double scale = ctx.gradient(this).data()[0]/parentData.totalSize();
-        for (int i = 0; i < parentData.totalSize(); i++) {
-            grad[i] = scale * 2 * (parentData.dataAt(i) - notParentData.dataAt(i));
+        var parentData = ctx.data(parent);
+        var otherParentData = parent == predictions ? ctx.data(targets) : ctx.data(predictions);
+
+        var length = parentData.totalSize();
+        double[] grad = new double[length];
+        double scale = ctx.gradient(this).data()[0] / length;
+        for (int i = 0; i < length; i++) {
+            grad[i] = scale * 2 * (parentData.dataAt(i) - otherParentData.dataAt(i));
         }
 
-        return new Matrix(grad, parentData.totalSize(), 1);
+        return new Vector(grad);
+    }
+
+    private void validateDimensions(Variable<?> predictions, Variable<?> targets) {
+        if (totalSize(predictions.dimensions()) != totalSize(targets.dimensions())) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Targets and predictions must be of equal size. Got predictions: %s, targets: %s",
+                Dimensions.render(predictions.dimensions()),
+                Dimensions.render(targets.dimensions())
+            ));
+        }
     }
 }

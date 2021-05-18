@@ -66,11 +66,6 @@ public class Constant<T extends Tensor<T>> extends AbstractVariable<T> {
     }
 
     @Override
-    public boolean requireGradient() {
-        return false;
-    }
-
-    @Override
     public String toString() {
         return formatWithLocale(
             "%s: %s, requireGradient: %b",

@@ -19,33 +19,40 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class MeanSquaredErrorTest implements FiniteDifferenceTest {
     @Test
     void testForward() {
         ComputationContext ctx = new ComputationContext();
-        Weights<Matrix> a = new Weights<>(new Matrix(new double[]{1, 1, 1, 1, 1, 1}, 6, 1));
-        Weights<Matrix> b = new Weights<>(new Matrix(new double[]{3, 2, 2, 2, 2, 1}, 6, 1));
+        var a = new Weights<>(new Vector(new double[]{1, 1, 1, 1, 1, 1}));
+        var b = new Weights<>(new Vector(new double[]{3, 2, 2, 2, 2, 1}));
 
-        MeanSquaredError meanSquaredError = new MeanSquaredError(a, b);
-        Scalar value = ctx.forward(meanSquaredError);
-        Assertions.assertEquals((4 + 1 + 1 + 1 + 1 + 0)/6.0, value.value());
+        var meanSquaredError = new MeanSquaredError(a, b);
+        assertThat(ctx.forward(meanSquaredError).value()).isEqualTo((4 + 1 + 1 + 1 + 1 + 0) / 6.0);
     }
 
     @Test
     void testGradient() {
-        Weights<Matrix> a = new Weights<>(new Matrix(new double[]{1, 1, 1, 1, 1, 1}, 6, 1));
-        Weights<Matrix> b = new Weights<>(new Matrix(new double[]{3, 2, 2, 2, 2, 1}, 6, 1));
+        var a = new Weights<>(new Vector(new double[]{1, 1, 1, 1, 1, 1}));
+        var b = new Weights<>(new Vector(new double[]{3, 2, 2, 2, 2, 1}));
 
         finiteDifferenceShouldApproximateGradient(List.of(a, b), new MeanSquaredError(a, b));
+    }
+
+    @Test
+    void failOnWrongSizedArguments() {
+        assertThatThrownBy(() -> new MeanSquaredError(Constant.vector(new double[]{1, 1, 1, 1, 1, 1}), Constant.vector(new double[]{1, 1, 1, 1, 1})))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Targets and predictions must be of equal size. Got predictions: Vector(6), targets: Vector(5)");
     }
 
     @Override

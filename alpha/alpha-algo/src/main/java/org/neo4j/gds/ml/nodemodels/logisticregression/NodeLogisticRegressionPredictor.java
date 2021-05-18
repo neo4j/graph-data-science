@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.features.BiasFeature;
@@ -36,6 +35,8 @@ import org.neo4j.graphalgo.api.Graph;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
+import static org.neo4j.gds.ml.core.Dimensions.matrix;
 import static org.neo4j.gds.ml.core.features.FeatureExtraction.extract;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
@@ -45,13 +46,13 @@ public class NodeLogisticRegressionPredictor implements Predictor<Matrix, NodeLo
     private final List<String> featureProperties;
 
     public static long sizeOfPredictionsVariableInBytes(int batchSize, int numberOfFeatures, int numberOfClasses) {
-        var dimensionsOfFirstMatrix = new int[]{batchSize, numberOfFeatures};
-        var dimensionsOfSecondMatrix = new int[]{numberOfClasses, numberOfFeatures};
-        var resultRows = dimensionsOfFirstMatrix[0];
-        var resultCols = dimensionsOfSecondMatrix[0]; // transposed second operand means we get the rows
+        var dimensionsOfFirstMatrix = matrix(batchSize, numberOfFeatures);
+        var dimensionsOfSecondMatrix = matrix(numberOfClasses, numberOfFeatures);
+        var resultRows = dimensionsOfFirstMatrix[ROWS_INDEX];
+        var resultCols = dimensionsOfSecondMatrix[ROWS_INDEX]; // transposed second operand means we get the rows
         return
             sizeOfFeatureExtractorsInBytes(numberOfFeatures) +
-            Constant.sizeInBytes(Dimensions.matrix(batchSize, numberOfFeatures)) +
+            Constant.sizeInBytes(dimensionsOfFirstMatrix) +
             MatrixMultiplyWithTransposedSecondOperand.sizeInBytes(dimensionsOfFirstMatrix, dimensionsOfSecondMatrix) +
             Softmax.sizeInBytes(resultRows, resultCols);
     }

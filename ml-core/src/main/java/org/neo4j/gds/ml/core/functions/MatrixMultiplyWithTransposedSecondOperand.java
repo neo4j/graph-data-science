@@ -37,9 +37,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class MatrixMultiplyWithTransposedSecondOperand extends AbstractVariable<Matrix> {
 
     public static long sizeInBytes(int[] dimensionsOfFirstMatrix, int[] dimensionsOfSecondMatrix) {
-        var resultRows = dimensionsOfFirstMatrix[0];
-        var resultCols = dimensionsOfSecondMatrix[0]; // transposed second operand means we get the rows
-        return Matrix.sizeInBytes(resultRows, resultCols);
+        // transposed second operand means the result dimensions are rows(FIRST_MATRIX) x rows(SECOND_MATRIX)
+        return Matrix.sizeInBytes(dimensionsOfFirstMatrix[ROWS_INDEX], dimensionsOfSecondMatrix[ROWS_INDEX]);
     }
 
     private final Variable<Matrix> A;

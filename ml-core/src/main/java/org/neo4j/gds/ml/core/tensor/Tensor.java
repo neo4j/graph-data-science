@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.core.tensor;
 
+import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.Arrays;
@@ -78,7 +79,7 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
 
     // TODO: figure out how to replace this one
     public void addInPlace(Tensor<?> other) {
-        int totalSize = totalSize(dimensions);
+        int totalSize = Dimensions.totalSize(dimensions);
         for (int pos = 0; pos < totalSize; pos++) {
             data[pos] += other.data[pos];
         }
@@ -98,7 +99,7 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
     }
 
     public int totalSize() {
-        return totalSize(dimensions);
+        return Dimensions.totalSize(dimensions);
     }
 
     // TODO: figure out how to replace this one
@@ -118,18 +119,7 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
         return sum;
     }
 
-    public static int totalSize(int[] dimensions) {
-        if (dimensions.length == 0) {
-            return 0;
-        }
-        int totalSize = 1;
-        for (int dim : dimensions) {
-            totalSize *= dim;
-        }
-        return totalSize;
-    }
-
     public static long sizeInBytes(int[] dimensions) {
-        return MemoryUsage.sizeOfDoubleArray(totalSize(dimensions));
+        return MemoryUsage.sizeOfDoubleArray(Dimensions.totalSize(dimensions));
     }
 }

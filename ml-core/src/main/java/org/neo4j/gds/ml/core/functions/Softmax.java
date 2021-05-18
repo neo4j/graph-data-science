@@ -32,7 +32,7 @@ public class Softmax extends SingleParentVariable<Matrix> {
     private final int rows;
     private final int cols;
 
-    public Softmax(Variable<?> parent) {
+    public Softmax(Variable<Matrix> parent) {
         super(parent, parent.dimensions());
         rows = dimension(ROWS_INDEX);
         cols = dimension(COLUMNS_INDEX);
