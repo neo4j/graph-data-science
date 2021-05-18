@@ -83,7 +83,12 @@ class CosineDocTest extends BaseProcTest {
                                 "+--------------------+\n" +
                                 "1 row\n";
 
-        assertEquals(expectedString, runQuery("RETURN gds.alpha.similarity.cosine([3,8,7,5,2,9], [10,8,6,6,4,5]) AS similarity", Result::resultAsString));
+        assertEquals(expectedString,
+            runQuery(
+                "RETURN gds.alpha.similarity.cosine([3,8,7,5,2,9], [10,8,6,6,4,5]) AS similarity",
+                Result::resultAsString
+            )
+        );
     }
 
     @Test
