@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
@@ -31,7 +30,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 /**
  * Manage transactions by making sure that the correct {@link SecurityContext} is applied.
  */
-public final class SecureTransaction implements AutoCloseable {
+public final class SecureTransaction {
 
     public interface TxConsumer<E extends Exception> {
 
@@ -54,8 +53,6 @@ public final class SecureTransaction implements AutoCloseable {
     /**
      * Creates a new {@code SecureTransaction} with the same {@link SecurityContext} as the provided {@link Transaction}.
      * If this instance is {@link #close() closed}, the supplied transaction will be {@link Transaction#close() closed} as well.
-     * <p>
-     * The {@code Transaction} can be null, in which case this method behaves the same as {@link #of(GraphDatabaseService)}.
      */
     public static SecureTransaction of(GraphDatabaseAPI api, Transaction top) {
         var internalTransaction = (InternalTransaction) top;
@@ -120,7 +117,7 @@ public final class SecureTransaction implements AutoCloseable {
     }
 
     /**
-     * Returns the {@link GraphDatabaseService} provided to this instance.
+     * Returns the {@link GraphDatabaseAPI} provided to this instance.
      */
     public GraphDatabaseAPI api() {
         return api;
@@ -128,9 +125,6 @@ public final class SecureTransaction implements AutoCloseable {
 
     /**
      * Returns the {@link KernelTransaction} for the provided top-level {@code Transaction}.
-     * This is only present if this instance was created with either {@link #of(GraphDatabaseService, Transaction)}
-     * or {@link #of(GraphDatabaseService, Transaction, SecurityContext)} with a non-{@code null} value for
-     * the {@code Transaction} parameter.
      */
     public KernelTransaction topLevelKernelTransaction() {
         return topTx.kernelTransaction();
@@ -138,7 +132,7 @@ public final class SecureTransaction implements AutoCloseable {
 
     /**
      * Returns a <strong>new</strong> {@link SecureTransaction} restricted by the provided {@link AccessMode}.
-     * The mode only restricts does not override the given {@code SecurityContext}, i.e. you cannot grant more access.
+     * The mode only restricts but does not override the given {@code SecurityContext}, i.e. you cannot grant more access.
      * <p>
      * One use-case is to restrict the access to {@link AccessMode.Static#READ} to make sure that only read-only
      * queries can be executed.
@@ -155,12 +149,10 @@ public final class SecureTransaction implements AutoCloseable {
 
     /**
      * Return a new {@link SecureTransaction} that owns a newly created top-level {@code Transaction}.
-     * The returned instance will always own a transaction, regardless of whether {@code this} instance owns one.
      * The returned instance will operate under the same {@code SecurityContext} as {@code this} instance.
      * <p>
      * This is intended for when you need to keep track of a new transaction for a longer time, in which case you can
-     * use {@link #topLevelKernelTransaction()} to get the underlying transaction. That method will never return an
-     * empty {@code Optional} when it's called on the returned instance.
+     * use {@link #topLevelKernelTransaction()} to get the underlying transaction.
      */
     public SecureTransaction fork() {
         InternalTransaction tx = (InternalTransaction) api.beginTx();
@@ -169,13 +161,9 @@ public final class SecureTransaction implements AutoCloseable {
     }
 
     /**
-     * Closing this {@link SecureTransaction} only has an effect if it owns a top-level {@code Transaction},
-     * in which case {@link Transaction#close()} will be called, without calling {@link Transaction#commit()}.
+     * Closes the underlying transaction.
      */
-    @Override
     public void close() {
-        if (topTx != null) {
-            topTx.close();
-        }
+        topTx.close();
     }
 }
