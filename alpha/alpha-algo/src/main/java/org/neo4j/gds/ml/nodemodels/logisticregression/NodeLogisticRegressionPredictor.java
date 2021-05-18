@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.nodemodels.logisticregression;
 
 import org.neo4j.gds.ml.Predictor;
-import org.neo4j.gds.ml.Predictor;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
