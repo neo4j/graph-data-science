@@ -21,10 +21,7 @@ package org.neo4j.graphalgo.catalog;
 
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.internal.kernel.api.security.AdminActionOnResource;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,12 +39,9 @@ public class GraphListProc extends CatalogProc {
     @Procedure(name = "gds.graph.list", mode = READ)
     @Description(DESCRIPTION)
     public Stream<GraphInfoWithHistogram> list(@Name(value = "graphName", defaultValue = NO_VALUE) String graphName) {
-        var securityContext = transaction.securityContext();
-        var username = username();
-
-        var graphEntries = isGdsAdmin(securityContext, username)
+        var graphEntries = isGdsAdmin()
             ? GraphStoreCatalog.getAllGraphStores().map(graphStore -> Map.entry(graphStore.config(), graphStore.graphStore()))
-            : GraphStoreCatalog.getGraphStores(username).entrySet().stream();
+            : GraphStoreCatalog.getGraphStores(username()).entrySet().stream();
 
         if (graphName != null && !graphName.equals(NO_VALUE)) {
             validateGraphName(graphName);
@@ -61,20 +55,5 @@ public class GraphListProc extends CatalogProc {
             GraphStore graphStore = e.getValue();
             return GraphInfoWithHistogram.of(graphCreateConfig, graphStore);
         });
-    }
-
-    private boolean isGdsAdmin(SecurityContext securityContext, String username) {
-        if (GdsEdition.instance().isOnCommunityEdition()) {
-            // Only GDS-EE knows the concept of GDS Admins
-            return false;
-        }
-        if (!securityContext.subject().hasUsername(username)) {
-            // Check that we actually have auth enabled and that the
-            // security context can make decisions about the user.
-            // no auth or anonymous auth always returns false here
-            return false;
-        }
-        // Check for full DBMS admin privileges
-        return securityContext.allowsAdminAction(AdminActionOnResource.ALL);
     }
 }

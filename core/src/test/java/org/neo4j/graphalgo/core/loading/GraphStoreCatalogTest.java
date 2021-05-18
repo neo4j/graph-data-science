@@ -38,8 +38,10 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.extension.GdlSupportExtension.DATABASE_ID;
 
@@ -69,6 +71,50 @@ class GraphStoreCatalogTest {
         GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME);
         assertEquals(graphStore, graphStoreWithConfig.graphStore());
         assertEquals(CONFIG, graphStoreWithConfig.config());
+    }
+
+    @Test
+    void getAsAdmin() {
+        GraphStoreCatalog.set(CONFIG, graphStore);
+        var graphStoreWithConfig = GraphStoreCatalog.getAsAdmin("admin", DATABASE_ID, GRAPH_NAME);
+        assertEquals(graphStore, graphStoreWithConfig.graphStore());
+        assertEquals(CONFIG, graphStoreWithConfig.config());
+    }
+
+    @Test
+    void getAsAdminPrefersOwnGraphCatalog() {
+        var adminConfig = GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
+        GraphStoreCatalog.set(adminConfig, graphStore); // {} -> admin -> DB -> GRAPH_NAME -> graphStore
+        GraphStoreCatalog.set(CONFIG, graphStore);      // {} -> alice -> DB -> GRAPH_NAME -> graphStore
+
+        var graphStoreWithConfig = GraphStoreCatalog.getAsAdmin("admin", DATABASE_ID, GRAPH_NAME);
+        assertEquals(graphStore, graphStoreWithConfig.graphStore());
+        assertEquals(adminConfig, graphStoreWithConfig.config());
+        assertNotEquals(CONFIG, graphStoreWithConfig.config());
+    }
+
+    @Test
+    void getAsAdminThrowsIfNoGraphIsMatching() {
+        assertThatThrownBy(() -> GraphStoreCatalog.getAsAdmin("admin", DATABASE_ID, GRAPH_NAME))
+            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
+    }
+
+    @Test
+    void getAsAdminSuggestsOnlyOwnGraphs() {
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME + "y"), graphStore);
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME + "z"), graphStore);
+
+        assertThatThrownBy(() -> GraphStoreCatalog.getAsAdmin("admin", DATABASE_ID, GRAPH_NAME + "x"))
+            .hasMessage("Graph with name `%s` does not exist on database `%s`. Did you mean `%s`?", GRAPH_NAME + "x", DATABASE_ID.name(), GRAPH_NAME + "y");
+    }
+
+    @Test
+    void getAsAdminFailsOnMultipleGraphsMatching() {
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+
+        assertThatThrownBy(() -> GraphStoreCatalog.getAsAdmin("admin", DATABASE_ID, GRAPH_NAME))
+            .hasMessage("Multiple graphs that match '%s' are found", GRAPH_NAME);
     }
 
     @Test

@@ -44,7 +44,9 @@ import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.internal.kernel.api.security.AdminActionOnResource;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -103,6 +105,26 @@ public abstract class BaseProc {
 
     protected NamedDatabaseId databaseId() {
         return api.databaseId();
+    }
+
+    protected boolean isGdsAdmin() {
+        if (transaction == null) {
+            // No transaction available (likely we're in a test), no-one is admin here
+            return false;
+        }
+        if (GdsEdition.instance().isOnCommunityEdition()) {
+            // Only GDS-EE knows the concept of GDS Admins
+            return false;
+        }
+        var securityContext = transaction.securityContext();
+        if (!securityContext.subject().hasUsername(username())) {
+            // Check that we actually have auth enabled and that the
+            // security context can make decisions about the user.
+            // no auth or anonymous auth always returns false here
+            return false;
+        }
+        // Check for full DBMS admin privileges
+        return securityContext.allowsAdminAction(AdminActionOnResource.ALL);
     }
 
     protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {

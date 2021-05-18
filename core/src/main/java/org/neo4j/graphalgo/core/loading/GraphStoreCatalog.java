@@ -50,6 +50,34 @@ public final class GraphStoreCatalog {
         return getUserCatalog(username).get(UserCatalog.UserCatalogKey.of(databaseName, graphName));
     }
 
+    public static GraphStoreWithConfig getAsAdmin(String username, NamedDatabaseId databaseId, String graphName) {
+        var userCatalogKey = UserCatalog.UserCatalogKey.of(databaseId, graphName);
+        var ownCatalog = getUserCatalog(username);
+        var maybeGraph = ownCatalog.get(userCatalogKey, false);
+        if (maybeGraph != null) {
+            return maybeGraph;
+        }
+        var allMatchingGraphs = userCatalogs
+            .values()
+            .stream()
+            .flatMap(c -> Stream.ofNullable(c.get(userCatalogKey, false)))
+            .collect(Collectors.toList());
+
+        if (allMatchingGraphs.size() == 1) {
+            return allMatchingGraphs.get(0);
+        }
+
+        if (allMatchingGraphs.isEmpty()) {
+            // suggests only own graphs names
+            throw ownCatalog.graphNotFoundException(userCatalogKey);
+        }
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "Multiple graphs that match '%s' are found",
+            graphName
+        ));
+    }
+
     public static void set(GraphCreateConfig config, GraphStore graphStore) {
         graphStore.canRelease(false);
         userCatalogs.compute(config.username(), (user, userCatalog) -> {
@@ -240,26 +268,30 @@ public final class GraphStoreCatalog {
             var graphStoreWithConfig = graphsByName.get(userCatalogKey);
 
             if (graphStoreWithConfig == null && failOnMissing) {
-                var graphName = userCatalogKey.graphName();
-
-                var availableGraphNames = graphsByName
-                    .keySet()
-                    .stream()
-                    .map(UserCatalogKey::graphName)
-                    .collect(Collectors.toList());
-
-                throw new NoSuchElementException(prettySuggestions(
-                    formatWithLocale(
-                        "Graph with name `%s` does not exist on database `%s`.",
-                        graphName,
-                        userCatalogKey.databaseName()
-                    ),
-                    graphName,
-                    availableGraphNames
-                ));
+                throw graphNotFoundException(userCatalogKey);
             }
 
             return graphStoreWithConfig;
+        }
+
+        private NoSuchElementException graphNotFoundException(UserCatalogKey userCatalogKey) {
+            var graphName = userCatalogKey.graphName();
+
+            var availableGraphNames = graphsByName
+                .keySet()
+                .stream()
+                .map(UserCatalogKey::graphName)
+                .collect(Collectors.toList());
+
+            return new NoSuchElementException(prettySuggestions(
+                formatWithLocale(
+                    "Graph with name `%s` does not exist on database `%s`.",
+                    graphName,
+                    userCatalogKey.databaseName()
+                ),
+                graphName,
+                availableGraphNames
+            ));
         }
 
         private Optional<Map<String, Object>> getDegreeDistribution(UserCatalogKey userCatalogKey) {

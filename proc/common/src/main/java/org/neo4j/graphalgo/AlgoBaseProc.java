@@ -333,7 +333,11 @@ public abstract class AlgoBaseProc<
         GraphStoreWithConfig graphCandidate;
 
         if (maybeGraphName.isPresent()) {
-            graphCandidate = GraphStoreCatalog.get(username(), databaseId(), maybeGraphName.get());
+            if (isGdsAdmin()) {
+                graphCandidate = GraphStoreCatalog.getAsAdmin(username(), databaseId(), maybeGraphName.get());
+            } else {
+                graphCandidate = GraphStoreCatalog.get(username(), databaseId(), maybeGraphName.get());
+            }
             validateConfigsBeforeLoad(graphCandidate.config(), config);
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();
