@@ -79,15 +79,15 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
     @Override
     public Scalar apply(ComputationContext ctx) {
         ctx.forward(predictions);
-        var predTensor = ctx.data(predictions);
-        var targetTensor = ctx.data(targets);
+        var predVector = ctx.data(predictions);
+        var targetVector = ctx.data(targets);
 
-        var nodeCount = targetTensor.length();
+        var nodeCount = targetVector.length();
 
         double result = 0;
         for(int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            var predicted = predTensor.dataAt(nodeId);
-            var target = targetTensor.dataAt(nodeId);
+            var predicted = predVector.dataAt(nodeId);
+            var target = targetVector.dataAt(nodeId);
             double v1 = target * log(predicted);
             double v2 = (1.0 - target) * log(1.0 - predicted);
 
@@ -109,16 +109,16 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
         if (parent == weights) {
 
             ctx.forward(predictions);
-            var predTensor = ctx.data(predictions);
-            var targetTensor = ctx.data(targets);
-            var weightsTensor = ctx.data(weights);
+            var predVector = ctx.data(predictions);
+            var targetVector = ctx.data(targets);
+            var weightsVector = ctx.data(weights);
             var featuresTensor = ctx.data(features);
-            var gradient = weightsTensor.zeros();
-            int featureCount = weightsTensor.cols();
-            int nodeCount = targetTensor.length();
+            var gradient = weightsVector.zeros();
+            int featureCount = weightsVector.cols();
+            int nodeCount = targetVector.length();
 
             for (int node = 0; node < nodeCount; node++) {
-                double errorPerNode = (predTensor.dataAt(node) - targetTensor.dataAt(node)) / nodeCount;
+                double errorPerNode = (predVector.dataAt(node) - targetVector.dataAt(node)) / nodeCount;
                 for (int feature = 0; feature < featureCount; feature++) {
                     gradient.addDataAt(feature, errorPerNode * featuresTensor.dataAt(node * featureCount + feature));
                 }
