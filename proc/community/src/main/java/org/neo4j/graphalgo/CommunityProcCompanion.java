@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.api.nodeproperties.LongIfChangedNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.CommunitySizeConfig;
+import org.neo4j.graphalgo.config.ComponentSizeConfig;
 import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -67,20 +68,36 @@ public final class CommunityProcCompanion {
         }
 
         if (config instanceof CommunitySizeConfig) {
-            var csc = (CommunitySizeConfig) config;
-            if (csc.hasMinCommunitySize()) {
-                var communitySizes = CommunityStatistics.communitySizes(
-                    result.size(),
-                    result::longValue,
-                    Pools.DEFAULT,
-                    config.concurrency(),
-                    tracker
-                );
-                result = new CommunitySizeFilter(result, communitySizes, csc.minCommunitySize());
-            }
+            var finalResult = result;
+            result = ((CommunitySizeConfig) config)
+                .minCommunitySize()
+                .map(size -> applySizeFilter(finalResult, size, config.concurrency(), tracker))
+                .orElse(result);
+        } else if (config instanceof ComponentSizeConfig) {
+            var finalResult = result;
+            result = ((ComponentSizeConfig) config)
+                .minComponentSize()
+                .map(size -> applySizeFilter(finalResult, size, config.concurrency(), tracker))
+                .orElse(result);
         }
 
         return result;
+    }
+
+    private static LongNodeProperties applySizeFilter(
+        LongNodeProperties nodeProperties,
+        long size,
+        int concurrency,
+        AllocationTracker tracker
+    ) {
+        var communitySizes = CommunityStatistics.communitySizes(
+            nodeProperties.size(),
+            nodeProperties::longValue,
+            Pools.DEFAULT,
+            concurrency,
+            tracker
+        );
+        return new CommunitySizeFilter(nodeProperties, communitySizes, size);
     }
 
     private static class CommunitySizeFilter implements LongNodeProperties {

@@ -207,11 +207,11 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implement
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-            Arguments.of(Map.of("minCommunitySize", 0), new Long[] {8L, 11L, 13L, 14L}),
+            Arguments.of(Map.of("minCommunitySize", 1), new Long[] {8L, 11L, 13L, 14L}),
             Arguments.of(Map.of("minCommunitySize", 3), new Long[] {8L, 13L}),
-            Arguments.of(Map.of("minCommunitySize", 0, "consecutiveIds", true), new Long[] {0L, 1L, 2L, 3L}),
+            Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), new Long[] {0L, 1L, 2L, 3L}),
             Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), new Long[] {2L, 3L}),
-            Arguments.of(Map.of("minCommunitySize", 0, "seedProperty", SEED_PROPERTY), new Long[] {1L, 2L, 42L}),
+            Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", SEED_PROPERTY), new Long[] {1L, 2L, 42L}),
             Arguments.of(Map.of("minCommunitySize", 3, "seedProperty", SEED_PROPERTY), new Long[] {2L, 42L})
         );
     }

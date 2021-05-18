@@ -19,18 +19,12 @@
  */
 package org.neo4j.graphalgo.config;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
+
+import java.util.Optional;
 
 public interface CommunitySizeConfig {
 
-    @Value.Default
-    default Long minCommunitySize() {
-        return 0L;
-    }
-
-    @Configuration.Ignore
-    default boolean hasMinCommunitySize() {
-        return minCommunitySize() > 0;
-    }
+    @Configuration.LongRange(min = 1L)
+    Optional<Long> minCommunitySize();
 }
