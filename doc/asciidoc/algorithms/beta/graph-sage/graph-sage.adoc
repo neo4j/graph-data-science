@@ -53,11 +53,30 @@ include::specific-train-configuration.adoc[]
 [opts="header",cols="1m,1,6"]
 |===
 | Name          | Type    | Description
-| graphName     | String  | The name of the in-memory graph used during training
-| modelInfo     | Map     | Details of the trained model
-| configuration | Map     | The configuration used to run the procedure
-| trainMillis   | Integer | Milliseconds to train the model
+| graphName     | String  | The name of the in-memory graph used during training.
+| modelInfo     | Map     | Details of the trained model.
+| configuration | Map     | The configuration used to run the procedure.
+| trainMillis   | Integer | Milliseconds to train the model.
 |===
+
+.Details on `modelInfo`
+[opts="header",cols="1m,1,6"]
+|===
+| Name    | Type   | Description
+| name    | String | The name of the trained model.
+| type    | String | The type of the trained model. Always `graphSage`.
+| metrics | Map    | Metrics related to running the training, details in the table below.
+|===
+
+.Metrics collected during training
+[opts="header",cols="1m,1,6"]
+|===
+| Name        | Type    | Description
+| ranEpochs   | Integer | The number of ran epochs during training.
+| epochLosses | List    | Ordered list of the losses after each epoch. The first value is the initial loss before training.
+| didConverge | Boolean | Indicates if the training has converged.
+|===
+
 ======
 
 [.include-with-stream]
@@ -257,11 +276,25 @@ CALL gds.beta.graphSage.train(
     activationFunction: 'sigmoid',
     sampleSizes: [25, 10]
   }
-)
+) YIELD modelInfo as info
+RETURN
+  info.name as modelName,
+  info.metrics.didConverge as didConverge,
+  info.metrics.ranEpochs as ranEpochs,
+  info.metrics.epochLosses as epochLosses
 ----
 
-WARNING: The `train` procedure will raise an error if there are no relationships in the graph.
+[opts=header]
+.Results
+|===
+| modelName         | didConverge | ranEpochs | epochLosses
+| exampleTrainModel | true        | 1         | [186.0494816886275, 186.04946806237382]
+|===
 
+NOTE: Due to the random initialisation of the weight variables the results may vary between different runs.
+
+Looking at the results we can draw the following conclusions, the training converged after a single epoch, the losses are almost identical.
+Tuning the algorithm parameters, such as trying out different `sampleSizes`, `searchDepth`, `embeddingDimension` or `batchSize` can improve the losses.
 
 === Train with multiple node labels
 
