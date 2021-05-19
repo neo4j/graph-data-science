@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.PassthroughVariable;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
+import org.neo4j.gds.ml.core.optimizer.Updater;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
@@ -143,72 +144,87 @@ public class GraphSageModelTrainer {
 
         var updater = new AdamOptimizer(weights, learningRate);
 
+        // Change: no generateNewRandomState for each batch
 
-        var tasks = PartitionUtils.rangePartitionWithBatchSize(
+        var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
-            batch -> (Runnable) () -> trainOnBatch(
+            batch -> new BatchTask (
                 batch,
                 graph,
                 features,
-                updater,
-                epoch,
-                getBatchIndex(batch)
+                updater
             )
         );
-
-        ParallelUtil.run(tasks, executor);
-    }
-
-    private void trainOnBatch(
-        Partition batch,
-        Graph graph,
-        HugeObjectArray<double[]> features,
-        AdamOptimizer updater,
-        int epoch,
-        int batchIndex
-    ) {
-        for (Layer layer : layers) {
-            layer.generateNewRandomState();
-        }
-
-        Variable<Scalar> lossFunction = lossFunction(batch, graph, features, batchIndex);
 
         double newLoss = Double.MAX_VALUE;
         double oldLoss;
 
-        progressLogger
-            .getLog()
-            .debug("Epoch %d\tBatch %d, Initial loss: %.10f", epoch, batchIndex, newLoss);
-
         int iteration = 1;
-        for (; iteration <= maxIterations; iteration++) {
-            progressLogger.logStart(":: Iteration " + iteration);
+        for (;iteration <= maxIterations; iteration++) {
+            progressLogger.logStart(":: Iteration " + (iteration));
             oldLoss = newLoss;
 
-            ComputationContext localCtx = new ComputationContext();
+            // run the iteration for each Batch
+            ParallelUtil.run(batchTasks, executor);
 
-            newLoss = localCtx.forward(lossFunction).value();
+            newLoss = batchTasks.stream().mapToDouble(task -> task.loss).average().orElseThrow();
             double lossDiff = Math.abs((oldLoss - newLoss) / oldLoss);
 
             if (lossDiff < tolerance) {
-                progressLogger.logFinish(":: Iteration " + iteration);
+                progressLogger.logFinish(":: Iteration " + (iteration));
                 break;
             }
-            localCtx.backward(lossFunction);
 
-            updater.update(localCtx);
+            // propage new loss and update
+            batchTasks.forEach(BatchTask::backward);
 
-            progressLogger.logFinish(":: Iteration " + iteration);
+            progressLogger.getLog().debug(
+                "Epoch %d LOSS: %.10f at iteration %d",
+                epoch,
+                newLoss,
+                iteration
+            );
+
+            progressLogger.logFinish(":: Iteration " + (iteration));
+        }
+    }
+
+    class BatchTask implements Runnable {
+
+        private final Updater updater;
+        private final ComputationContext localCtx;
+        private final Variable<Scalar> lossFunction;
+        private double loss;
+
+        BatchTask (
+            Partition batch,
+            Graph graph,
+            HugeObjectArray<double[]> features,
+            Updater updater
+        ) {
+
+            this.updater = updater;
+            this.localCtx = new ComputationContext();
+            this.lossFunction = lossFunction(batch, graph, features, getBatchIndex(batch));
         }
 
-        progressLogger.getLog().debug(
-            "Epoch %d\tBatch %d LOSS: %.10f at iteration %d",
-            epoch,
-            batchIndex,
-            newLoss,
-            iteration
-        );
+        @Override
+        public void run() {
+            loss = localCtx.forward(lossFunction).value();
+        }
+
+        public void backward() {
+            localCtx.backward(lossFunction);
+        }
+
+        public double loss() {
+            return loss;
+        }
+
+        public void update() {
+            updater.update(localCtx);
+        }
     }
 
     private double evaluateLoss(

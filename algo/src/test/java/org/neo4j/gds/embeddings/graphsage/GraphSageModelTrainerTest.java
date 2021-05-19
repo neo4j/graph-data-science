@@ -297,7 +297,6 @@ class GraphSageModelTrainerTest {
         assertThat(result).usingRecursiveComparison().isEqualTo(otherResult);
     }
 
-    @Disabled
     @ParameterizedTest
     @ValueSource(longs = {20L, -100L, 30L})
     void seededMultiBatch(long seed) {
