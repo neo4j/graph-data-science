@@ -21,11 +21,15 @@ package org.neo4j.graphalgo.core.utils.export.file.csv;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.loading.IdMapImplementations;
+import org.neo4j.graphalgo.core.loading.construction.TestMethodRunner;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreToFileExporter;
 import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -46,6 +50,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.TestSupport.graphStoreFromGDL;
 import static org.neo4j.graphalgo.core.utils.export.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
@@ -56,7 +61,7 @@ import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvRelationshipVisi
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
-class GraphStoreToFileExporterTest extends CsvTest {
+public class GraphStoreToFileExporterTest extends CsvTest {
 
     @GdlGraph
     private static final String GDL =
@@ -305,8 +310,20 @@ class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             GRAPH_INFO_FILE_NAME,
             List.of(
-                List.of(CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME, CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME, CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME, CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME),
-                List.of(graphStore.databaseId().databaseId().uuid().toString(), graphStore.databaseId().name(), Long.toString(graphStore.nodeCount()), Long.toString(3L))
+                List.of(
+                    CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME,
+                    CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
+                    CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
+                    CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
+                    CsvGraphInfoVisitor.BIT_ID_MAP_COLUMN_NAME
+                ),
+                List.of(
+                    graphStore.databaseId().databaseId().uuid().toString(),
+                    graphStore.databaseId().name(),
+                    Long.toString(graphStore.nodeCount()),
+                    Long.toString(3L),
+                    Boolean.toString(false)
+                )
             )
         );
     }
@@ -423,6 +440,44 @@ class GraphStoreToFileExporterTest extends CsvTest {
                 List.of("42", "43")
             )
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    void exportBitIdMapUsage(TestMethodRunner runTest) {
+        var config = ImmutableGraphStoreToFileExporterConfig
+            .builder()
+            .exportName(tempDir.toString())
+            .writeConcurrency(1)
+            .includeMetaData(true)
+            .build();
+
+        runTest.run(() -> {
+            var graphStore = graphStoreFromGDL("(:A), (:B)");
+            var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+            exporter.run(AllocationTracker.empty());
+
+            var bitIdMap = IdMapImplementations.useBitIdMap();
+            assertDataContent(
+                GRAPH_INFO_FILE_NAME,
+                List.of(
+                    List.of(
+                        CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME,
+                        CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
+                        CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
+                        CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
+                        CsvGraphInfoVisitor.BIT_ID_MAP_COLUMN_NAME
+                    ),
+                    List.of(
+                        graphStore.databaseId().databaseId().uuid().toString(),
+                        graphStore.databaseId().name(),
+                        Long.toString(graphStore.nodeCount()),
+                        Long.toString(1L),
+                        Boolean.toString(bitIdMap)
+                    )
+                )
+            );
+        });
     }
 
     private String stringIdOf(String variable) {

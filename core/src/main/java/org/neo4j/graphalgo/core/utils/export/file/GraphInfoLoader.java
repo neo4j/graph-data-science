@@ -49,7 +49,6 @@ public class GraphInfoLoader {
     }
 
     public GraphInfo load() {
-
         try (var fileReader = Files.newBufferedReader(graphInfoPath, StandardCharsets.UTF_8)) {
             var mappingIterator = objectReader.<GraphInfoLine>readValues(fileReader);
 
@@ -59,6 +58,7 @@ public class GraphInfoLoader {
                 .namedDatabaseId(databaseId)
                 .nodeCount(line.nodeCount)
                 .maxOriginalId(line.maxOriginalId)
+                .bitIdMap(line.bitIdMap)
                 .build();
 
         } catch (IOException e) {
@@ -78,5 +78,8 @@ public class GraphInfoLoader {
 
         @JsonProperty
         long maxOriginalId;
+
+        @JsonProperty
+        boolean bitIdMap;
     }
 }

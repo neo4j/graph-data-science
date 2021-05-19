@@ -99,7 +99,7 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
                     .exportName("")
                     .includeMetaData(true)
                     .build();
-                var graphStoreImporter = CsvToGraphStoreExporter.create(config, path);
+                var graphStoreImporter = CsvToGraphStoreExporter.create(config, path, userLog);
 
                 graphStoreImporter.run(AllocationTracker.empty());
 

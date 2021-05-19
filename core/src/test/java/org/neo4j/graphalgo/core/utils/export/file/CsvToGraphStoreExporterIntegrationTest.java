@@ -22,15 +22,30 @@ package org.neo4j.graphalgo.core.utils.export.file;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.NodeMapping;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.api.schema.NodeSchema;
+import org.neo4j.graphalgo.core.loading.BitIdMap;
+import org.neo4j.graphalgo.core.loading.CSRGraphStoreUtil;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.TestMethodRunner;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.kernel.database.DatabaseIdFactory;
+import org.neo4j.values.storable.Values;
 
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 @GdlExtension
@@ -65,12 +80,50 @@ class CsvToGraphStoreExporterIntegrationTest {
 
         GraphStoreToFileExporter.csv(graphStore, config(concurrency), graphLocation).run(AllocationTracker.empty());
 
-        var importer = CsvToGraphStoreExporter.create(config(concurrency), graphLocation);
+        var importer = CsvToGraphStoreExporter.create(config(concurrency), graphLocation, new TestLog());
         importer.run(AllocationTracker.empty());
 
         var importedGraphStore = importer.userGraphStore().graphStore();
         var importedGraph = importedGraphStore.getUnion();
         assertGraphEquals(graph, importedGraph);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void withBitIdMap(int concurrency) {
+        TestMethodRunner.runWithBitIdMap(() -> {
+            var nodeSchema = NodeSchema.builder()
+                .addProperty(NodeLabel.of("A"), "prop1", ValueType.LONG)
+                .addProperty(NodeLabel.of("B"), "prop2", ValueType.DOUBLE)
+                .build();
+            var nodesBuilder = GraphFactory.initNodesBuilder()
+                .nodeSchema(nodeSchema)
+                .maxOriginalId(1337L)
+                .nodeCount(3L)
+                .hasDisjointPartitions(true)
+                .tracker(AllocationTracker.empty())
+                .concurrency(concurrency)
+                .build();
+
+            nodesBuilder.addNode(1335L, Map.of("prop1", Values.longValue(42L)), NodeLabel.of("A"));
+            nodesBuilder.addNode(1336L, Map.of("prop1", Values.longValue(43L)), NodeLabel.of("A"));
+            nodesBuilder.addNode(1337L, Map.of("prop2", Values.doubleValue(13.37D)), NodeLabel.of("B"));
+
+            var nodeMapping = nodesBuilder.build().nodeMapping();
+
+            var graphStore = graphStoreFromNodeMapping(nodeMapping);
+            var expectedGraph = graphStore.getUnion();
+
+            GraphStoreToFileExporter.csv(graphStore, config(concurrency), graphLocation).run(AllocationTracker.empty());
+
+            var importer = CsvToGraphStoreExporter.create(config(concurrency), graphLocation, new TestLog());
+            importer.run(AllocationTracker.empty());
+
+            var importedGraphStore = importer.userGraphStore().graphStore();
+            var importedGraph = importedGraphStore.getUnion();
+            assertThat(importedGraphStore.nodes()).isInstanceOf(BitIdMap.class);
+            assertGraphEquals(expectedGraph, importedGraph);
+        });
     }
 
     private GraphStoreToFileExporterConfig config(int concurrency) {
@@ -80,4 +133,18 @@ class CsvToGraphStoreExporterIntegrationTest {
             .includeMetaData(true)
             .build();
     }
+
+    static GraphStore graphStoreFromNodeMapping(NodeMapping nodeMapping) {
+        var relationships = GraphFactory.emptyRelationships(nodeMapping, AllocationTracker.empty());
+        var hugeGraph = GraphFactory.create(nodeMapping, relationships, AllocationTracker.empty());
+        return CSRGraphStoreUtil.createFromGraph(
+            DatabaseIdFactory.from("Test", UUID.randomUUID()),
+            hugeGraph,
+            "REL",
+            Optional.empty(),
+            1,
+            AllocationTracker.empty()
+        );
+    }
+
 }

@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils.export.file;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
@@ -38,7 +39,7 @@ class CsvToGraphStoreExporterTest {
     @ValueSource(ints = {1, 4})
     void shouldImportProperties(int concurrency) throws URISyntaxException {
 
-        var exporter = CsvToGraphStoreExporter.create(config(concurrency), importPath());
+        var exporter = CsvToGraphStoreExporter.create(config(concurrency), importPath(), new TestLog());
         exporter.run(AllocationTracker.empty());
 
         var userGraphStore = exporter.userGraphStore();

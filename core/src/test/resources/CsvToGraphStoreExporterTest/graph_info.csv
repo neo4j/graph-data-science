@@ -1,2 +1,2 @@
-databaseId,databaseName,nodeCount,maxOriginalId
-26ca2600-2f7a-4e99-acc1-9d976603698c,testDb,10,1337
+databaseId,databaseName,nodeCount,maxOriginalId,bitIdMap
+26ca2600-2f7a-4e99-acc1-9d976603698c,testDb,10,1337,false
