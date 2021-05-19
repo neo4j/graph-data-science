@@ -72,6 +72,10 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
 
     static final String LOUVAIN_GRAPH = "myGraph";
 
+    static final String WRITE_PROPERTY = "writeProperty";
+    static final String SEED_PROPERTY = "seed";
+
+
     @Neo4jGraph
     private static final String DB_CYPHER = "CREATE" +
                                        "  (a:Node {seed: 1})" +        // 0

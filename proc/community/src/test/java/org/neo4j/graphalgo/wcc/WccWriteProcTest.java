@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo.wcc;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -31,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -228,6 +232,44 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> implements
             .yields("componentCount");
 
         assertForSeedTests(query, WRITE_PROPERTY);
+    }
+
+    static Stream<Arguments> componentSizeInputs() {
+        return Stream.of(
+            Arguments.of(Map.of("minComponentSize", 1), new Long[] {0L, 7L, 9L}),
+            Arguments.of(Map.of("minComponentSize", 2), new Long[] {0L, 7L}),
+            Arguments.of(Map.of("minComponentSize", 1, "consecutiveIds", true), new Long[] {0L, 1L, 2L}),
+            Arguments.of(Map.of("minComponentSize", 2, "consecutiveIds", true), new Long[] {0L, 1L}),
+            Arguments.of(Map.of("minComponentSize", 1, "seedProperty", SEED_PROPERTY), new Long[] {42L, 46L, 48L}),
+            Arguments.of(Map.of("minComponentSize", 2, "seedProperty", SEED_PROPERTY), new Long[] {42L, 46L})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("componentSizeInputs")
+    void testWriteWithMinComponentSize(Map<String, Object> parameters, Long[] expectedComponentIds) {
+        var query = GdsCypher
+            .call()
+            .withAnyLabel()
+            .withAnyRelationshipType()
+            .withNodeProperty(SEED_PROPERTY)
+            .algo("wcc")
+            .writeMode()
+            .addParameter("writeProperty", WRITE_PROPERTY)
+            .addAllParameters(parameters)
+            .yields("componentCount");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(3L, row.getNumber("componentCount"));
+        });
+
+        runQueryWithRowConsumer(
+            "MATCH (n) RETURN collect(DISTINCT n." + WRITE_PROPERTY + ") AS components ",
+            row -> {
+                @SuppressWarnings("unchecked") var actualComponents = (List<Long>) row.get("components");
+                assertThat(actualComponents, containsInAnyOrder(expectedComponentIds));
+            }
+        );
     }
 
     private void assertForSeedTests(String query, String writeProperty) {

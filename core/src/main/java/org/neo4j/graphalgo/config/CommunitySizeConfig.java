@@ -17,33 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.wcc;
+package org.neo4j.graphalgo.config;
 
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.ComponentSizeConfig;
-import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface WccWriteConfig extends WccBaseConfig, WritePropertyConfig, ComponentSizeConfig {
+public interface CommunitySizeConfig {
 
-    static WccWriteConfig of(
-        String username,
-        Optional<String> graphName,
-        Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper userInput
-    ) {
-        return new WccWriteConfigImpl(
-            graphName,
-            maybeImplicitCreate,
-            username,
-            userInput
-        );
-    }
+    @Configuration.LongRange(min = 1L)
+    Optional<Long> minCommunitySize();
 }

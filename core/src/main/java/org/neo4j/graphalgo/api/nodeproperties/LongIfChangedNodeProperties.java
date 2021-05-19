@@ -31,7 +31,7 @@ public final class LongIfChangedNodeProperties implements LongNodeProperties {
     private final NodeProperties seedProperties;
     private final NodeProperties newProperties;
 
-    public static NodeProperties of(GraphStore graphStore, String seedProperty, NodeProperties newProperties) {
+    public static LongNodeProperties of(GraphStore graphStore, String seedProperty, LongNodeProperties newProperties) {
         var propertyState = graphStore.nodePropertyState(seedProperty);
         if (propertyState == GraphStore.PropertyState.PERSISTENT) {
             NodeProperties seedProperties = graphStore.nodePropertyValues(seedProperty);
