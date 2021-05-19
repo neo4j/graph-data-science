@@ -29,6 +29,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -43,7 +44,7 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
-        GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName);
+        GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName, Optional.empty());
 
         DeleteRelationshipsConfig.of(graphName, relationshipType).validate(graphStoreWithConfig.graphStore());
 

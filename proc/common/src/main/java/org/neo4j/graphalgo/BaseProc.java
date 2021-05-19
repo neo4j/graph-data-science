@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.util.function.Predicate.isEqual;
@@ -101,6 +102,10 @@ public abstract class BaseProc {
         }
     }
 
+    protected AllocationTracker allocationTracker() {
+        return tracker;
+    }
+
     protected String username() {
         return transaction != null
             ? transaction.subjectOrAnonymous().username()
@@ -109,6 +114,27 @@ public abstract class BaseProc {
 
     protected NamedDatabaseId databaseId() {
         return api.databaseId();
+    }
+
+    protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, BaseConfig config) {
+        return GraphStoreCatalog.get(catalogRequest(config, Optional.empty()), graphName);
+    }
+
+    protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, Optional<String> usernameOverride) {
+        return GraphStoreCatalog.get(catalogRequest(usernameOverride, Optional.empty()), graphName);
+    }
+
+    protected CatalogRequest catalogRequest(BaseConfig config, Optional<String> databaseOverride) {
+        return catalogRequest(Optional.ofNullable(config.usernameOverride()), databaseOverride);
+    }
+
+    protected CatalogRequest catalogRequest(Optional<String> usernameOverride, Optional<String> databaseOverride) {
+        return ImmutableCatalogRequest.of(
+            databaseOverride.orElseGet(() -> databaseId().name()),
+            username(),
+            usernameOverride,
+            isGdsAdmin()
+        );
     }
 
     protected boolean isGdsAdmin() {
@@ -138,27 +164,6 @@ public abstract class BaseProc {
 
         // Check for full DBMS admin privileges
         return securityContext.allowsAdminAction(AdminActionOnResource.ALL);
-    }
-
-    protected CatalogRequest catalogRequest() {
-        return catalogRequest(Optional.empty(), Optional.empty());
-    }
-
-    protected CatalogRequest catalogRequest(Optional<String> usernameOverride, Optional<String> databaseOverride) {
-        return ImmutableCatalogRequest.of(
-            databaseOverride.orElseGet(() -> databaseId().name()),
-            username(),
-            usernameOverride,
-            isGdsAdmin()
-        );
-    }
-
-    protected GraphStoreWithConfig graphStoreFromCatalog(String graphName) {
-        return graphStoreFromCatalog(graphName, databaseId().name());
-    }
-
-    protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, String databaseName) {
-        return GraphStoreCatalog.get(catalogRequest(Optional.empty(), Optional.of(databaseName)), graphName);
     }
 
     protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
@@ -230,7 +235,7 @@ public abstract class BaseProc {
     public <C extends BaseConfig> void tryValidateMemoryUsage(
         C config,
         Function<C, MemoryTreeWithDimensions> runEstimation,
-        AlgoBaseProc.FreeMemoryInspector inspector
+        FreeMemoryInspector inspector
     ) {
         if (config.sudo()) {
             log.debug("Sudo mode: Won't check for available memory.");
@@ -249,7 +254,7 @@ public abstract class BaseProc {
 
     private void validateMemoryUsage(
         MemoryTreeWithDimensions memoryTreeWithDimensions,
-        AlgoBaseProc.FreeMemoryInspector inspector
+        FreeMemoryInspector inspector
     ) {
         long freeMemory = inspector.freeMemory();
         long minBytesProcedure = memoryTreeWithDimensions.memoryTree.memoryUsage().min;
@@ -311,26 +316,20 @@ public abstract class BaseProc {
         long freeMemory();
     }
 
-    protected AllocationTracker allocationTracker() {
-        return tracker;
-    }
-
     private static final class AdminCheck {
 
-        private static final Optional<Class<?>> NEO4JEE_SECURITY_CONTEXT_CLASS = findNeo4jEnterpriseSecurityContext();
+        private static final Predicate<SecurityContext> NEO4JEE_SECURITY_CONTEXT_CHECK = findNeo4jEnterpriseSecurityContext();
 
         private static boolean couldHaveAdminUser(SecurityContext securityContext) {
-            return NEO4JEE_SECURITY_CONTEXT_CLASS
-                .map(cls -> cls.isInstance(securityContext))
-                .orElse(Boolean.FALSE);
+            return NEO4JEE_SECURITY_CONTEXT_CHECK.test(securityContext);
         }
 
-        private static Optional<Class<?>> findNeo4jEnterpriseSecurityContext() {
+        private static Predicate<SecurityContext> findNeo4jEnterpriseSecurityContext() {
             try {
                 var cls = Class.forName("com.neo4j.kernel.enterprise.api.security.EnterpriseSecurityContext");
-                return Optional.of(cls);
-            } catch (ClassNotFoundException e) {
-                return Optional.empty();
+                return cls::isInstance;
+            } catch (ClassNotFoundException ce) {
+                return always -> false;
             }
         }
     }

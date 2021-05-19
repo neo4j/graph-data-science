@@ -67,7 +67,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = graphStoreFromCatalog(graphName).graphStore();
+        GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
 
        return streamRelationshipProperties(graphStore, config, PropertiesResult::new);
@@ -94,7 +94,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = graphStoreFromCatalog(graphName).graphStore();
+        GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
 
         return streamRelationshipProperties(

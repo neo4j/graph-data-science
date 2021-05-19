@@ -36,7 +36,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -276,7 +275,7 @@ public abstract class AlgoBaseProc<
             estimationBuilder.add("graph", memoryTreeWithDimensions.memoryEstimation());
         } else {
             String graphName = config.graphName().orElseThrow(IllegalStateException::new);
-            GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName);
+            GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName, config);
             GraphStore graphStore = graphStoreWithConfig.graphStore();
 
             Graph filteredGraph = graphStore.getGraph(
@@ -328,7 +327,7 @@ public abstract class AlgoBaseProc<
         GraphStoreWithConfig graphCandidate;
 
         if (maybeGraphName.isPresent()) {
-            graphCandidate = graphStoreFromCatalog(maybeGraphName.get());
+            graphCandidate = graphStoreFromCatalog(maybeGraphName.get(), config);
             validateConfigsBeforeLoad(graphCandidate.config(), config);
         } else if (config.implicitCreateConfig().isPresent()) {
             GraphCreateConfig createConfig = config.implicitCreateConfig().get();

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
@@ -36,6 +37,14 @@ public interface BaseConfig {
     @Value.Default
     default String username() {
         return AuthSubject.ANONYMOUS.username();
+    }
+
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.Key("username")
+    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
+    default @Nullable String usernameOverride() {
+        return null;
     }
 
     @Value.Default

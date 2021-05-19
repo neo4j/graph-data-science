@@ -56,7 +56,7 @@ public class GraphStoreExportProc extends BaseProc {
 
         var result = runWithExceptionLogging(
             "Graph creation failed", () -> {
-                var graphStore = graphStoreFromCatalog(graphName).graphStore();
+                var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
 
                 var exporter = GraphStoreToDatabaseExporter.newExporter(graphStore, api, exportConfig);
 
@@ -90,7 +90,7 @@ public class GraphStoreExportProc extends BaseProc {
         var exportConfig = GraphStoreToFileExporterConfig.of(username(), cypherConfig);
         validateConfig(cypherConfig, exportConfig);
 
-        var graphStore = graphStoreFromCatalog(graphName).graphStore();
+        var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
         var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
         var result = GraphStoreExporterUtil.runGraphStoreExportToCsv(
             graphStore,
@@ -124,7 +124,7 @@ public class GraphStoreExportProc extends BaseProc {
 
         var estimate = runWithExceptionLogging(
             "CSV export estimation failed", () -> {
-                var graphStore = graphStoreFromCatalog(graphName).graphStore();
+                var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
 
 
                 var dimensions = GraphDimensions.of(graphStore.nodeCount(), graphStore.relationshipCount());

@@ -29,11 +29,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.function.Predicate.not;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -68,10 +66,8 @@ public class GraphDropProc extends CatalogProc {
             throw typeMismatch(graphName, -1);
         }
 
-        var request = catalogRequest(
-            Optional.ofNullable(username).filter(not(String::isBlank)),
-            Optional.ofNullable(dbName).filter(not(String::isBlank))
-        );
+        var config = GraphDropConfig.of(failIfMissing, dbName, username);
+        var request = catalogRequest(config.catalogUser(), config.databaseName());
 
         if (failIfMissing) {
             var missingGraphs = graphNames.stream().flatMap(name -> {

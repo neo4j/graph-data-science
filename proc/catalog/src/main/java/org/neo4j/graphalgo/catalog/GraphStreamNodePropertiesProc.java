@@ -63,7 +63,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = graphStoreFromCatalog(graphName).graphStore();
+        GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
 
        return streamNodeProperties(graphStore, config, PropertiesResult::new);
@@ -90,7 +90,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         );
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = graphStoreFromCatalog(graphName).graphStore();
+        GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
 
         return streamNodeProperties(graphStore, config, (nodeId, propertyName, propertyValue) -> new PropertyResult(nodeId,propertyValue));

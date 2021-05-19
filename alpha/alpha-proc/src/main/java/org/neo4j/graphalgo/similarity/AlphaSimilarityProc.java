@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.loading.CatalogRequest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -187,7 +188,7 @@ abstract class AlphaSimilarityProc
     }
 
     private void removeGraph() {
-        GraphStoreCatalog.remove(catalogRequest(), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {}, true);
+        GraphStoreCatalog.remove(CatalogRequest.of(username(), databaseId()), SIMILARITY_FAKE_GRAPH_NAME, (gsc) -> {}, true);
     }
 
     private Stream<SimilaritySummaryResult> emptyStream(String writeRelationshipType, String writeProperty) {
