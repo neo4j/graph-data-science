@@ -52,7 +52,6 @@ import java.util.OptionalLong;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
@@ -144,7 +143,6 @@ public class GraphSageModelTrainer {
 
         var updater = new AdamOptimizer(weights, learningRate);
 
-        AtomicInteger batchCounter = new AtomicInteger(0);
 
         var tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
@@ -155,7 +153,7 @@ public class GraphSageModelTrainer {
                 features,
                 updater,
                 epoch,
-                batchCounter.incrementAndGet()
+                getBatchIndex(batch)
             )
         );
 
@@ -219,14 +217,13 @@ public class GraphSageModelTrainer {
         int epoch
     ) {
         DoubleAdder doubleAdder = new DoubleAdder();
-        AtomicInteger batchIndex = new AtomicInteger(0);
 
         var tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
             batch -> (Runnable) () -> {
                 ComputationContext ctx = new ComputationContext();
-                Variable<Scalar> loss = lossFunction(batch, graph, features, batchIndex.getAndIncrement());
+                Variable<Scalar> loss = lossFunction(batch, graph, features, getBatchIndex(batch));
                 doubleAdder.add(ctx.forward(loss).value());
             }
         );
@@ -312,6 +309,10 @@ public class GraphSageModelTrainer {
             .flatMap(layer -> layer.weights().stream())
             .collect(Collectors.toList()));
         return weights;
+    }
+
+    private int getBatchIndex(Partition partition) {
+        return Math.toIntExact(Math.floorDiv(partition.startNode(), partition.nodeCount()));
     }
 
     private int firstLayerColumns(GraphSageTrainConfig config, Graph graph) {
