@@ -23,8 +23,6 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 public class MaxPoolAggregatingLayer implements Layer {
 
     private final NeighborhoodSampler sampler;
@@ -53,26 +51,6 @@ public class MaxPoolAggregatingLayer implements Layer {
         this.sampler = new NeighborhoodSampler(randomState);
 
         this.activationFunction = activationFunction;
-    }
-
-    public MaxPoolAggregatingLayer(
-        int sampleSize,
-        Weights<Matrix> poolWeights,
-        Weights<Matrix> selfWeights,
-        Weights<Matrix> neighborsWeights,
-        Weights<Vector> bias,
-        ActivationFunction activationFunction
-    ) {
-
-        this(
-            sampleSize,
-            poolWeights,
-            selfWeights,
-            neighborsWeights,
-            bias,
-            activationFunction,
-            ThreadLocalRandom.current().nextLong()
-        );
     }
 
     @Override
