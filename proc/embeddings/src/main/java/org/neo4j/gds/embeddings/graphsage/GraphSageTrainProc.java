@@ -93,7 +93,7 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, ModelData, Gra
         GraphStore graphStore, GraphCreateConfig graphCreateConfig, GraphSageTrainConfig config
     ) {
         super.validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
-        config.validateAgainstGraphStore(graphStore);config.validateAgainstGraphStore(graphStore);
+        config.validateAgainstGraphStore(graphStore);
         if (graphStore.relationshipCount() == 0) {
             throw new IllegalArgumentException("There should be at least one relationship in the graph.");
         }

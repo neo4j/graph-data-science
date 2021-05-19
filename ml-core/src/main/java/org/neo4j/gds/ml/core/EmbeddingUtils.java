@@ -20,6 +20,10 @@
 package org.neo4j.gds.ml.core;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+
+import java.util.concurrent.ExecutorService;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -87,5 +91,30 @@ public final class EmbeddingUtils {
             ));
         }
         return propertyValue;
+    }
+
+    public static void validateRelationshipWeightPropertyValue(Graph graph, int concurrency, ExecutorService executorService) {
+        var tasks = PartitionUtils.degreePartition(
+            graph,
+            concurrency,
+            partition -> (Runnable) () -> {
+                var concurrentGraph = graph.concurrentCopy();
+                partition.consume(nodeId -> {
+                    concurrentGraph.forEachRelationship(
+                        nodeId,
+                        Double.NaN,
+                        (sourceNodeId, targetNodeId, property) -> {
+                            if (Double.isNaN(property)) {
+                                throw new RuntimeException(
+                                    "Found a relationship without the specified property. Consider using `defaultValue` when loading the graph.");
+                            }
+                            return true;
+                        }
+                    );
+                });
+            }
+        );
+
+        ParallelUtil.run(tasks, executorService);
     }
 }
