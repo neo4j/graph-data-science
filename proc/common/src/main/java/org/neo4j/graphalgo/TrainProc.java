@@ -96,6 +96,7 @@ public abstract class TrainProc<ALGO extends Algorithm<ALGO, Model<TRAIN_RESULT,
             this.modelInfo = new HashMap<>();
             modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
             modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
+            modelInfo.putAll(trainedModel.customInfo().toMap());
             this.configuration = trainConfig.toMap();
             this.trainMillis = trainMillis;
         }
