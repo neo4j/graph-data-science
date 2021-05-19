@@ -150,9 +150,7 @@ public class GraphSageModelTrainer {
             graph.nodeCount(),
             batchSize,
             batch -> new BatchTask (
-                batch,
-                graph,
-                features,
+                lossFunction(batch, graph, features, getBatchIndex(batch)),
                 updater
             )
         );
@@ -194,23 +192,21 @@ public class GraphSageModelTrainer {
         }
     }
 
-    class BatchTask implements Runnable {
+    static class BatchTask implements Runnable {
 
         private final Updater updater;
         private final ComputationContext localCtx;
         private final Variable<Scalar> lossFunction;
         private double loss;
 
-        BatchTask (
-            Partition batch,
-            Graph graph,
-            HugeObjectArray<double[]> features,
+        BatchTask(
+            Variable<Scalar> lossFunction,
             Updater updater
         ) {
 
             this.updater = updater;
             this.localCtx = new ComputationContext();
-            this.lossFunction = lossFunction(batch, graph, features, getBatchIndex(batch));
+            this.lossFunction = lossFunction;
         }
 
         @Override
@@ -331,7 +327,7 @@ public class GraphSageModelTrainer {
         return weights;
     }
 
-    private int getBatchIndex(Partition partition) {
+    private static int getBatchIndex(Partition partition) {
         return Math.toIntExact(Math.floorDiv(partition.startNode(), partition.nodeCount()));
     }
 
