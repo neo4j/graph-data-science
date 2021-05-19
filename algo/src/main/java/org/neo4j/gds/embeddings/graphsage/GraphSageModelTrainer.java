@@ -264,7 +264,7 @@ public class GraphSageModelTrainer {
         return new PassthroughVariable<>(lossFunction);
     }
 
-    private LongStream neighborBatch(Graph graph, Partition batch, long batchLocalSeed) {
+    LongStream neighborBatch(Graph graph, Partition batch, long batchLocalSeed) {
         var neighborBatchBuilder = LongStream.builder();
         var localRandom = new Random(batchLocalSeed);
 
@@ -290,7 +290,7 @@ public class GraphSageModelTrainer {
     }
 
     // get a negative sample per node in batch
-    private LongStream negativeBatch(Graph graph, int batchSize, LongHashSet neighbours, long batchLocalRandomSeed) {
+    LongStream negativeBatch(Graph graph, int batchSize, LongHashSet neighbours, long batchLocalRandomSeed) {
         long nodeCount = graph.nodeCount();
         var sampler = new WeightedUniformSampler(batchLocalRandomSeed);
 
