@@ -186,7 +186,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
             .withNodeLabel("King")
             .withNodeProperty(PropertyMapping.of("age", 1.0))
             .withRelationshipType("REL", Orientation.UNDIRECTED)
-            .withRelationshipProperty(relationshipWeightProperty/*, DefaultValue.of(1.5, true)*/)
+            .withRelationshipProperty(relationshipWeightProperty)
             .graphCreate("inductiveGraph")
             .yields();
 
