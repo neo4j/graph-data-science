@@ -34,9 +34,11 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,26 +71,35 @@ class GraphStoreCatalogTest {
     @Test
     void get() {
         GraphStoreCatalog.set(CONFIG, graphStore);
-        GraphStoreWithConfig graphStoreWithConfig = GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME);
+        var graphStoreWithConfig = GraphStoreCatalog.get(
+            CatalogRequest.of(USER_NAME, DATABASE_ID),
+            GRAPH_NAME
+        );
         assertEquals(graphStore, graphStoreWithConfig.graphStore());
         assertEquals(CONFIG, graphStoreWithConfig.config());
     }
 
     @Test
-    void getAsAdmin() {
+    void getAsAdminReturnsOtherUsersGraphs() {
         GraphStoreCatalog.set(CONFIG, graphStore);
-        var graphStoreWithConfig = GraphStoreCatalog.getAsAdmin("admin", DATABASE_ID, GRAPH_NAME);
+        var graphStoreWithConfig = GraphStoreCatalog.get(
+            CatalogRequest.ofAdmin("admin", DATABASE_ID),
+            GRAPH_NAME
+        );
         assertEquals(graphStore, graphStoreWithConfig.graphStore());
         assertEquals(CONFIG, graphStoreWithConfig.config());
     }
 
     @Test
-    void getAsAdminPrefersOwnGraphCatalog() {
+    void getAsAdminReturnsGraphsFromOwnCatalogIfAvailable() {
         var adminConfig = GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
         GraphStoreCatalog.set(adminConfig, graphStore); // {} -> admin -> DB -> GRAPH_NAME -> graphStore
         GraphStoreCatalog.set(CONFIG, graphStore);      // {} -> alice -> DB -> GRAPH_NAME -> graphStore
 
-        var graphStoreWithConfig = GraphStoreCatalog.getAsAdmin("admin", DATABASE_ID, GRAPH_NAME);
+        var graphStoreWithConfig = GraphStoreCatalog.get(
+            CatalogRequest.ofAdmin("admin", DATABASE_ID),
+            GRAPH_NAME
+        );
         assertEquals(graphStore, graphStoreWithConfig.graphStore());
         assertEquals(adminConfig, graphStoreWithConfig.config());
         assertNotEquals(CONFIG, graphStoreWithConfig.config());
@@ -96,7 +107,7 @@ class GraphStoreCatalogTest {
 
     @Test
     void getAsAdminThrowsIfNoGraphIsMatching() {
-        assertThatThrownBy(() -> GraphStoreCatalog.getAsAdmin("admin", DATABASE_ID, GRAPH_NAME))
+        assertThatThrownBy(() -> GraphStoreCatalog.get(CatalogRequest.ofAdmin("admin", DATABASE_ID), GRAPH_NAME))
             .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
     }
 
@@ -105,8 +116,16 @@ class GraphStoreCatalogTest {
         GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME + "y"), graphStore);
         GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME + "z"), graphStore);
 
-        assertThatThrownBy(() -> GraphStoreCatalog.getAsAdmin("admin", DATABASE_ID, GRAPH_NAME + "x"))
-            .hasMessage("Graph with name `%s` does not exist on database `%s`. Did you mean `%s`?", GRAPH_NAME + "x", DATABASE_ID.name(), GRAPH_NAME + "y");
+        assertThatThrownBy(() -> GraphStoreCatalog.get(
+            CatalogRequest.ofAdmin("admin", DATABASE_ID),
+            GRAPH_NAME + "x"
+        ))
+            .hasMessage(
+                "Graph with name `%s` does not exist on database `%s`. Did you mean `%s`?",
+                GRAPH_NAME + "x",
+                DATABASE_ID.name(),
+                GRAPH_NAME + "y"
+            );
     }
 
     @Test
@@ -114,24 +133,87 @@ class GraphStoreCatalogTest {
         GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME), graphStore);
         GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
 
-        assertThatThrownBy(() -> GraphStoreCatalog.getAsAdmin("admin", DATABASE_ID, GRAPH_NAME))
+        assertThatThrownBy(() -> GraphStoreCatalog.get(CatalogRequest.ofAdmin("admin", DATABASE_ID), GRAPH_NAME))
             .hasMessage("Multiple graphs that match '%s' are found", GRAPH_NAME);
+    }
+
+    @Test
+    void getAsAdminUsesTheUserOverrideToSelectFromMultipleGraphsMatching() {
+        var aliceConfig = GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME);
+        GraphStoreCatalog.set(aliceConfig, graphStore);
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+
+        var graphStoreWithConfig = GraphStoreCatalog.get(
+            CatalogRequest.ofAdmin("admin", Optional.of("alice"), DATABASE_ID),
+            GRAPH_NAME
+        );
+        assertEquals(graphStore, graphStoreWithConfig.graphStore());
+        assertEquals(aliceConfig, graphStoreWithConfig.config());
+    }
+
+    @Test
+    void getAsAdminReturnsTheGraphFromTheOverrideEvenIfAGraphFromOwnCatalogIsAvailable() {
+        var adminConfig = GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
+        GraphStoreCatalog.set(adminConfig, graphStore);
+        GraphStoreCatalog.set(CONFIG, graphStore);
+
+        var graphStoreWithConfig = GraphStoreCatalog.get(
+            CatalogRequest.ofAdmin("admin", Optional.of(USER_NAME), DATABASE_ID),
+            GRAPH_NAME
+        );
+        assertEquals(graphStore, graphStoreWithConfig.graphStore());
+        assertEquals(CONFIG, graphStoreWithConfig.config());
+        assertNotEquals(adminConfig, graphStoreWithConfig.config());
+    }
+
+    @Test
+    void getAsAdminReturnsOnlyTheGraphFromTheOverrideEvenIfAGraphFromOwnCatalogIsAvailable() {
+        var adminConfig = GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
+        GraphStoreCatalog.set(adminConfig, graphStore);
+
+        assertThatThrownBy(() -> GraphStoreCatalog.get(
+            CatalogRequest.ofAdmin("admin", Optional.of(USER_NAME), DATABASE_ID),
+            GRAPH_NAME
+        ))
+            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
+    }
+
+    @Test
+    void getAsAdminReturnsOnlyTheGraphFromTheOverrideEvenIfAGraphFromADifferentUserIsAvailable() {
+        var bobConfig = GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME);
+        GraphStoreCatalog.set(bobConfig, graphStore);
+
+        assertThatThrownBy(() -> GraphStoreCatalog.get(
+            CatalogRequest.ofAdmin("admin", Optional.of(USER_NAME), DATABASE_ID),
+            GRAPH_NAME
+        ))
+            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
     }
 
     @Test
     void remove() {
         GraphStoreCatalog.set(CONFIG, graphStore);
         assertTrue(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
-        GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {}, true);
+        GraphStoreCatalog.remove(
+            CatalogRequest.of(USER_NAME, DATABASE_ID),
+            GRAPH_NAME,
+            graphStoreWithConfig -> {},
+            true
+        );
         assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
     void removeAsAdmin() {
         GraphStoreCatalog.set(CONFIG, graphStore);
-        GraphStoreCatalog.removeAsAdmin("admin", DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {
-            assertEquals(graphStore, graphStoreWithConfig.graphStore());
-        }, true);
+        GraphStoreCatalog.remove(
+            CatalogRequest.ofAdmin("admin", DATABASE_ID),
+            GRAPH_NAME,
+            graphStoreWithConfig -> {
+                assertEquals(graphStore, graphStoreWithConfig.graphStore());
+            },
+            true
+        );
         assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
     }
 
@@ -141,18 +223,22 @@ class GraphStoreCatalogTest {
         GraphStoreCatalog.set(adminConfig, graphStore);
         GraphStoreCatalog.set(CONFIG, graphStore);
 
-        GraphStoreCatalog.removeAsAdmin("admin", DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {
-            assertEquals(graphStore, graphStoreWithConfig.graphStore());
-        }, true);
+        GraphStoreCatalog.remove(
+            CatalogRequest.ofAdmin("admin", DATABASE_ID),
+            GRAPH_NAME,
+            graphStoreWithConfig -> {
+                assertEquals(graphStore, graphStoreWithConfig.graphStore());
+            },
+            true
+        );
         assertFalse(GraphStoreCatalog.exists("admin", DATABASE_ID, GRAPH_NAME));
         assertTrue(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
     void removeAsAdminThrowsIfNoGraphIsMatching() {
-        assertThatThrownBy(() -> GraphStoreCatalog.removeAsAdmin(
-            "admin",
-            DATABASE_ID,
+        assertThatThrownBy(() -> GraphStoreCatalog.remove(
+            CatalogRequest.ofAdmin("admin", DATABASE_ID),
             GRAPH_NAME,
             graphStoreWithConfig -> fail("How did you remove a graph that never existed?"),
             true
@@ -161,18 +247,33 @@ class GraphStoreCatalogTest {
     }
 
     @Test
+    void removeAsAdminDoesNotThrowIfNoGraphAreMatchingIfFailIfMissingFlagIsFalse() {
+        assertThatCode(() -> GraphStoreCatalog.remove(
+            CatalogRequest.ofAdmin("admin", DATABASE_ID),
+            GRAPH_NAME,
+            graphStoreWithConfig -> fail("How did you remove a graph that never existed?"),
+            false
+        ))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
     void removeAsAdminSuggestsOnlyOwnGraphs() {
         GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME + "y"), graphStore);
         GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME + "z"), graphStore);
 
-        assertThatThrownBy(() -> GraphStoreCatalog.removeAsAdmin(
-            "admin",
-            DATABASE_ID,
+        assertThatThrownBy(() -> GraphStoreCatalog.remove(
+            CatalogRequest.ofAdmin("admin", DATABASE_ID),
             GRAPH_NAME + "x",
             graphStoreWithConfig -> fail("Should not have removed the graph"),
             true
         ))
-            .hasMessage("Graph with name `%s` does not exist on database `%s`. Did you mean `%s`?", GRAPH_NAME + "x", DATABASE_ID.name(), GRAPH_NAME + "y");
+            .hasMessage(
+                "Graph with name `%s` does not exist on database `%s`. Did you mean `%s`?",
+                GRAPH_NAME + "x",
+                DATABASE_ID.name(),
+                GRAPH_NAME + "y"
+            );
     }
 
     @Test
@@ -180,9 +281,8 @@ class GraphStoreCatalogTest {
         GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME), graphStore);
         GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
 
-        assertThatThrownBy(() -> GraphStoreCatalog.removeAsAdmin(
-            "admin",
-            DATABASE_ID,
+        assertThatThrownBy(() -> GraphStoreCatalog.remove(
+            CatalogRequest.ofAdmin("admin", DATABASE_ID),
             GRAPH_NAME,
             graphStoreWithConfig -> fail("Should not have removed the graph"),
             true
@@ -191,11 +291,95 @@ class GraphStoreCatalogTest {
     }
 
     @Test
+    void removeAsAdminUsesTheUserOverrideToSelectFromMultipleGraphsMatching() {
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("alice", GRAPH_NAME), graphStore);
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+
+        GraphStoreCatalog.remove(
+            CatalogRequest.ofAdmin("admin", Optional.of("alice"), DATABASE_ID),
+            GRAPH_NAME,
+            graphStoreWithConfig -> {
+                assertEquals(graphStore, graphStoreWithConfig.graphStore());
+            },
+            true
+        );
+        assertFalse(GraphStoreCatalog.exists("alice", DATABASE_ID, GRAPH_NAME));
+        assertTrue(GraphStoreCatalog.exists("bob", DATABASE_ID, GRAPH_NAME));
+    }
+
+    @Test
+    void removeDoesNotRemoveOtherUsersGraphs() {
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
+
+        GraphStoreCatalog.remove(
+            CatalogRequest.of(USER_NAME, DATABASE_ID),
+            GRAPH_NAME,
+            graphStoreWithConfig -> fail("Should not have removed the graph"),
+            false
+        );
+        assertTrue(GraphStoreCatalog.exists("bob", DATABASE_ID, GRAPH_NAME));
+    }
+
+    @Test
+    void removeAsAdminReturnsTheGraphFromTheOverrideEvenIfAGraphFromOwnCatalogIsAvailable() {
+        var adminConfig = GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME);
+        GraphStoreCatalog.set(adminConfig, graphStore);
+        GraphStoreCatalog.set(CONFIG, graphStore);
+
+        GraphStoreCatalog.remove(
+            CatalogRequest.ofAdmin("admin", Optional.of(USER_NAME), DATABASE_ID),
+            GRAPH_NAME,
+            graphStoreWithConfig -> {
+                assertEquals(graphStore, graphStoreWithConfig.graphStore());
+            },
+            true
+        );
+        assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+        assertTrue(GraphStoreCatalog.exists("admin", DATABASE_ID, GRAPH_NAME));
+    }
+
+    @Test
+    void removeAsAdminReturnsOnlyTheGraphFromTheOverrideEvenIfAGraphFromOwnCatalogIsAvailable() {
+        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("admin", GRAPH_NAME), graphStore);
+
+        assertThatThrownBy(() -> GraphStoreCatalog.remove(
+            CatalogRequest.ofAdmin("admin", Optional.of(USER_NAME), DATABASE_ID),
+            GRAPH_NAME,
+            graphStoreWithConfig -> fail("Should not have removed the graph"),
+            true
+        ))
+            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
+
+        assertTrue(GraphStoreCatalog.exists("admin", DATABASE_ID, GRAPH_NAME));
+    }
+
+    @Test
+    void removeAsAdminReturnsOnlyTheGraphFromTheOverrideEvenIfAGraphFromADifferentUserIsAvailable() {
+        var bobConfig = GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME);
+        GraphStoreCatalog.set(bobConfig, graphStore);
+
+        assertThatThrownBy(() -> GraphStoreCatalog.remove(
+            CatalogRequest.ofAdmin("admin", Optional.of(USER_NAME), DATABASE_ID),
+            GRAPH_NAME,
+            graphStoreWithConfig -> fail("Should not have removed the graph"),
+            true
+        ))
+            .hasMessage("Graph with name `%s` does not exist on database `%s`.", GRAPH_NAME, DATABASE_ID.name());
+
+        assertTrue(GraphStoreCatalog.exists("bob", DATABASE_ID, GRAPH_NAME));
+    }
+
+    @Test
     void graphStoresCount() {
         assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
         GraphStoreCatalog.set(CONFIG, graphStore);
         assertEquals(1, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
-        GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {}, true);
+        GraphStoreCatalog.remove(
+            CatalogRequest.of(USER_NAME, DATABASE_ID),
+            GRAPH_NAME,
+            graphStoreWithConfig -> {},
+            true
+        );
         assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
     }
 
@@ -208,7 +392,12 @@ class GraphStoreCatalogTest {
         assertEquals(2, GraphStoreCatalog.graphStoresCount());
         GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("clive", GRAPH_NAME), graphStore);
         assertEquals(3, GraphStoreCatalog.graphStoresCount());
-        GraphStoreCatalog.remove(USER_NAME, DATABASE_ID, GRAPH_NAME, graphStoreWithConfig -> {}, true);
+        GraphStoreCatalog.remove(
+            CatalogRequest.of(USER_NAME, DATABASE_ID),
+            GRAPH_NAME,
+            graphStoreWithConfig -> {},
+            true
+        );
         assertEquals(2, GraphStoreCatalog.graphStoresCount());
     }
 
@@ -256,15 +445,35 @@ class GraphStoreCatalogTest {
     static Stream<Arguments> graphInput() {
         return Stream.of(
             Arguments.of("db_0", List.of(), "graph", "Graph with name `graph` does not exist on database `db_0`."),
-            Arguments.of("db_1", List.of("graph0"), "graph1", "Graph with name `graph1` does not exist on database `db_1`. Did you mean `graph0`?"),
-            Arguments.of("db_2", List.of("graph0", "graph1"), "graph2", "Graph with name `graph2` does not exist on database `db_2`. Did you mean one of [`graph0`, `graph1`]?"),
-            Arguments.of("db_42", List.of("graph0", "graph1", "foobar"), "graph2", "Graph with name `graph2` does not exist on database `db_42`. Did you mean one of [`graph0`, `graph1`]?")
+            Arguments.of(
+                "db_1",
+                List.of("graph0"),
+                "graph1",
+                "Graph with name `graph1` does not exist on database `db_1`. Did you mean `graph0`?"
+            ),
+            Arguments.of(
+                "db_2",
+                List.of("graph0", "graph1"),
+                "graph2",
+                "Graph with name `graph2` does not exist on database `db_2`. Did you mean one of [`graph0`, `graph1`]?"
+            ),
+            Arguments.of(
+                "db_42",
+                List.of("graph0", "graph1", "foobar"),
+                "graph2",
+                "Graph with name `graph2` does not exist on database `db_42`. Did you mean one of [`graph0`, `graph1`]?"
+            )
         );
     }
 
     @ParameterizedTest
     @MethodSource("graphInput")
-    void shouldThrowOnMissingGraph(String dbName, Iterable<String> existingGraphs, String searchGraphName, String expectedMessage) {
+    void shouldThrowOnMissingGraph(
+        String dbName,
+        Iterable<String> existingGraphs,
+        String searchGraphName,
+        String expectedMessage
+    ) {
         var dummyDatabaseId = DatabaseIdFactory.from(dbName, UUID.fromString("0-0-0-0-0"));
         var dummyGraphStore = GdlFactory.of("()").build().graphStore();
 
@@ -275,12 +484,20 @@ class GraphStoreCatalogTest {
 
         // test the get code path
         assertThatExceptionOfType(NoSuchElementException.class)
-            .isThrownBy(() -> GraphStoreCatalog.get(USER_NAME, dummyDatabaseId, searchGraphName))
+            .isThrownBy(() -> GraphStoreCatalog.get(
+                CatalogRequest.of(USER_NAME, dummyDatabaseId),
+                searchGraphName
+            ))
             .withMessage(expectedMessage);
 
         // test the drop code path
         assertThatExceptionOfType(NoSuchElementException.class)
-            .isThrownBy(() -> GraphStoreCatalog.remove(USER_NAME, dummyDatabaseId, searchGraphName, graphStoreWithConfig -> {}, true))
+            .isThrownBy(() -> GraphStoreCatalog.remove(
+                CatalogRequest.of(USER_NAME, dummyDatabaseId),
+                searchGraphName,
+                graphStoreWithConfig -> {},
+                true
+            ))
             .withMessage(expectedMessage);
     }
 }

@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.graphalgo.core.loading.CatalogRequest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -62,7 +63,7 @@ public class NodePropertyFunc {
         Objects.requireNonNull(nodeLabel);
 
         String username = transaction.subjectOrAnonymous().username();
-        GraphStore graphStore = GraphStoreCatalog.get(username, api.databaseId(), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(CatalogRequest.of(username, api.databaseId()), graphName).graphStore();
         boolean projectAll = nodeLabel.equals(PROJECT_ALL);
 
         if (projectAll) {

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -42,22 +43,11 @@ public final class GraphStoreCatalog {
 
     private GraphStoreCatalog() { }
 
-    public static GraphStoreWithConfig get(String username, NamedDatabaseId databaseId, String graphName) {
-        return getUserCatalog(username).get(UserCatalog.UserCatalogKey.of(databaseId, graphName));
-    }
+    public static GraphStoreWithConfig get(CatalogRequest request, String graphName) {
+        var userCatalogKey = UserCatalog.UserCatalogKey.of(request.databaseName(), graphName);
+        var ownCatalog = getUserCatalog(request.username());
 
-    public static GraphStoreWithConfig get(String username, String databaseName, String graphName) {
-        return getUserCatalog(username).get(UserCatalog.UserCatalogKey.of(databaseName, graphName));
-    }
-
-    public static GraphStoreWithConfig getAsAdmin(String username, NamedDatabaseId databaseId, String graphName) {
-        return getAsAdmin(username, databaseId.name(), graphName);
-    }
-
-    public static GraphStoreWithConfig getAsAdmin(String username, String databaseId, String graphName) {
-        var userCatalogKey = UserCatalog.UserCatalogKey.of(databaseId, graphName);
-        var ownCatalog = getUserCatalog(username);
-        var maybeGraph = ownCatalog.get(userCatalogKey, false);
+        var maybeGraph = ownCatalog.get(userCatalogKey, request.restrictSearchToUsernameCatalog());
         if (maybeGraph != null) {
             return maybeGraph;
         }
@@ -82,71 +72,20 @@ public final class GraphStoreCatalog {
         ));
     }
 
-    public static void set(GraphCreateConfig config, GraphStore graphStore) {
-        graphStore.canRelease(false);
-        userCatalogs.compute(config.username(), (user, userCatalog) -> {
-            if (userCatalog == null) {
-                userCatalog = new UserCatalog();
-            }
-            userCatalog.set(
-                UserCatalog.UserCatalogKey.of(graphStore.databaseId(), config.graphName()),
-                config,
-                graphStore
-            );
-            return userCatalog;
-        });
-    }
-
-    public static boolean exists(String username, NamedDatabaseId databaseId, String graphName) {
-        return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(databaseId, graphName));
-    }
-
     public static void remove(
-        String username,
-        NamedDatabaseId databaseId,
+        CatalogRequest request,
         String graphName,
         Consumer<GraphStoreWithConfig> removedGraphConsumer,
         boolean failOnMissing
     ) {
-        remove(username, databaseId.name(), graphName, removedGraphConsumer, failOnMissing);
-    }
+        var userCatalogKey = UserCatalog.UserCatalogKey.of(request.databaseName(), graphName);
+        var ownCatalog = getUserCatalog(request.username());
 
-    public static void remove(
-        String username,
-        String databaseName,
-        String graphName,
-        Consumer<GraphStoreWithConfig> removedGraphConsumer,
-        boolean failOnMissing
-    ) {
-        getUserCatalog(username).remove(
-            UserCatalog.UserCatalogKey.of(databaseName, graphName),
-            removedGraphConsumer,
-            failOnMissing
+        var didRemove = ownCatalog.remove(
+            userCatalogKey, removedGraphConsumer,
+            failOnMissing && request.restrictSearchToUsernameCatalog()
         );
-    }
-
-    public static void removeAsAdmin(
-        String username,
-        NamedDatabaseId databaseId,
-        String graphName,
-        Consumer<GraphStoreWithConfig> removedGraphConsumer,
-        boolean failOnMissing
-    ) {
-        removeAsAdmin(username, databaseId.name(), graphName, removedGraphConsumer, failOnMissing);
-    }
-
-    public static void removeAsAdmin(
-        String username,
-        String databaseName,
-        String graphName,
-        Consumer<GraphStoreWithConfig> removedGraphConsumer,
-        boolean failOnMissing
-    ) {
-        var userCatalogKey = UserCatalog.UserCatalogKey.of(databaseName, graphName);
-        var ownCatalog = getUserCatalog(username);
-
-        var didRemove = ownCatalog.remove(userCatalogKey, removedGraphConsumer, false);
-        if (didRemove) {
+        if (didRemove || request.restrictSearchToUsernameCatalog()) {
             return;
         }
 
@@ -168,9 +107,37 @@ public final class GraphStoreCatalog {
             ));
         }
 
-        for (var user: usersWithMatchingGraphs) {
-            remove(user, databaseName, graphName, removedGraphConsumer, failOnMissing);
+        for (var username: usersWithMatchingGraphs) {
+            getUserCatalog(username).remove(
+                userCatalogKey,
+                removedGraphConsumer,
+                failOnMissing
+            );
         }
+    }
+
+    @TestOnly
+    public static GraphStoreWithConfig get(String username, NamedDatabaseId databaseId, String graphName) {
+        return get(CatalogRequest.of(username, databaseId), graphName);
+    }
+
+    public static void set(GraphCreateConfig config, GraphStore graphStore) {
+        graphStore.canRelease(false);
+        userCatalogs.compute(config.username(), (user, userCatalog) -> {
+            if (userCatalog == null) {
+                userCatalog = new UserCatalog();
+            }
+            userCatalog.set(
+                UserCatalog.UserCatalogKey.of(graphStore.databaseId(), config.graphName()),
+                config,
+                graphStore
+            );
+            return userCatalog;
+        });
+    }
+
+    public static boolean exists(String username, NamedDatabaseId databaseId, String graphName) {
+        return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(databaseId, graphName));
     }
 
     public static int graphStoresCount() {
@@ -258,10 +225,6 @@ public final class GraphStoreCatalog {
             String graphName();
 
             String databaseName();
-
-            static UserCatalogKey of(GraphCreateConfig createConfig, String databaseName) {
-                return of(databaseName, createConfig.graphName());
-            }
 
             static UserCatalogKey of(NamedDatabaseId databaseId, String graphName) {
                 return of(databaseId.name(), graphName);

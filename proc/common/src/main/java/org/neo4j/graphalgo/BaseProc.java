@@ -32,8 +32,10 @@ import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
 import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.loading.CatalogRequest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
+import org.neo4j.graphalgo.core.loading.ImmutableCatalogRequest;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
@@ -55,6 +57,7 @@ import org.neo4j.procedure.Context;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -127,16 +130,25 @@ public abstract class BaseProc {
         return securityContext.allowsAdminAction(AdminActionOnResource.ALL);
     }
 
+    protected CatalogRequest catalogRequest() {
+        return catalogRequest(Optional.empty(), Optional.empty());
+    }
+
+    protected CatalogRequest catalogRequest(Optional<String> usernameOverride, Optional<String> databaseOverride) {
+        return ImmutableCatalogRequest.of(
+            databaseOverride.orElseGet(() -> databaseId().name()),
+            username(),
+            usernameOverride,
+            isGdsAdmin()
+        );
+    }
+
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName) {
         return graphStoreFromCatalog(graphName, databaseId().name());
     }
 
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, String databaseName) {
-        if (isGdsAdmin()) {
-            return GraphStoreCatalog.getAsAdmin(username(), databaseName, graphName);
-        } else {
-            return GraphStoreCatalog.get(username(), databaseName, graphName);
-        }
+        return GraphStoreCatalog.get(catalogRequest(Optional.empty(), Optional.of(databaseName)), graphName);
     }
 
     protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
