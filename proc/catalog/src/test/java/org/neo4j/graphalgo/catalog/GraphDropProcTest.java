@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.catalog;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +28,17 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.QueryRunner;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
+import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.AuthenticationResult;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -36,12 +47,15 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Map.entry;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.core.Is.isA;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.cypherdsl.core.Cypher.call;
 import static org.neo4j.cypherdsl.core.Cypher.literalOf;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo.EMBEDDED_CONNECTION;
 
 class GraphDropProcTest extends BaseProcTest {
     private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";
@@ -201,6 +215,77 @@ class GraphDropProcTest extends BaseProcTest {
             Map.of("graphName", GRAPH_NAME, "failIfMissing", false),
             Collections.emptyList()
         );
+    }
+
+    @Test
+    @GdsEditionTest(Edition.EE)
+    void doNotAcceptUsernameOverrideForNonGdsAdmins() {
+        var graphNameParams = Map.<String, Object>of("name", GRAPH_NAME);
+
+        QueryRunner.runQuery(db, "alice", "CALL gds.graph.create($name, 'A', 'REL')", graphNameParams);
+
+        assertThatThrownBy(() -> QueryRunner.runQuery(db, "bob", "CALL gds.graph.drop($name, true, '', 'alice')", graphNameParams))
+            .hasMessageContaining("Cannot override the username as a non-admin");
+
+        QueryRunner.runQuery(db, "alice", "CALL gds.graph.exists($name)", graphNameParams, result -> {
+            result.accept(row -> {
+                assertThat(row.getString("graphName")).isEqualTo(GRAPH_NAME);
+                assertThat(row.getBoolean("exists")).isTrue();
+                return true;
+            });
+            return null;
+        });
+    }
+
+    @Test
+    @GdsEditionTest(Edition.EE)
+    void considerUsernameOverrideForGdsAdmins() {
+        var graphNameParams = Map.<String, Object>of("name", GRAPH_NAME);
+
+        QueryRunner.runQuery(db, "alice", "CALL gds.graph.create($name, 'A', 'REL')", graphNameParams);
+
+        try (var tx = db.beginTx()) {
+            var kernelTransaction = ((InternalTransaction) tx).kernelTransaction();
+            var newSecurityContext = new SecurityContext(
+                new AuthSubject() {
+                    @Override
+                    public AuthenticationResult getAuthenticationResult() {
+                        return AuthenticationResult.SUCCESS;
+                    }
+
+                    @Override
+                    public boolean hasUsername(String username) {
+                        return true;
+                    }
+
+                    @Override
+                    public String username() {
+                        return "admin";
+                    }
+                },
+                AccessMode.Static.FULL, EMBEDDED_CONNECTION
+            );
+            try (var revert = kernelTransaction.overrideWith(newSecurityContext)) {
+                try (var result = tx.execute(
+                    "CALL gds.graph.drop($name, true, '', 'alice')",
+                    graphNameParams
+                )) {
+                    result.accept(row -> {
+                        assertThat(row.getString("graphName")).isEqualTo(GRAPH_NAME);
+                        return true;
+                    });
+                }
+            }
+        }
+
+        QueryRunner.runQuery(db, "alice", "CALL gds.graph.exists($name)", graphNameParams, result -> {
+            result.accept(row -> {
+                assertThat(row.getString("graphName")).isEqualTo(GRAPH_NAME);
+                assertThat(row.getBoolean("exists")).isFalse();
+                return true;
+            });
+            return null;
+        });
     }
 
     @Test
