@@ -62,7 +62,7 @@ public class PortFinder implements ParameterResolver, TestInstancePostProcessor 
     }
 
     public static final int PREFERRED_PORT = 1337;
-    public static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create("gds-ee");
+    public static final ExtensionContext.Namespace NAMESPACE = ExtensionContext.Namespace.create("gds");
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
@@ -97,15 +97,18 @@ public class PortFinder implements ParameterResolver, TestInstancePostProcessor 
                 trySetValueToField(testInstance, context, field);
             } catch (SecurityException | InaccessibleObjectException | IllegalAccessException illegalAccessException) {
                 throw new ExtensionConfigurationException(
-                    formatWithLocale("Field %s cannot be set, please make it either public or accessible to reflection.", field
-                        .getName()));
+                    formatWithLocale(
+                        "Field %s cannot be set, please make it either public or accessible to reflection.",
+                        field.getName()
+                    ));
             }
         }
     }
 
-    private void trySetValueToField(Object testInstance, ExtensionContext context, Field field) throws IllegalAccessException {
-        var fieldContext = Modifier.isStatic(field.getModifiers()) ? null : testInstance;
-        var existingValue = field.get(fieldContext);
+    private void trySetValueToField(Object testInstance, ExtensionContext extensionContext, Field field)
+    throws IllegalAccessException {
+        var testObject = Modifier.isStatic(field.getModifiers()) ? null : testInstance;
+        var existingValue = field.get(testObject);
 
         if (existingValue != null && !Objects.equals(existingValue, 0)) {
             throw new ExtensionConfigurationException(
@@ -113,9 +116,9 @@ public class PortFinder implements ParameterResolver, TestInstancePostProcessor 
         }
 
         var annotation = field.getAnnotation(FreePort.class);
-        var value = freePortFromStore(context, annotation);
+        var value = freePortFromStore(extensionContext, annotation);
 
-        field.set(fieldContext, value);
+        field.set(testObject, value);
     }
 
     private int freePortFromStore(ExtensionContext extensionContext, FreePort annotation) {
