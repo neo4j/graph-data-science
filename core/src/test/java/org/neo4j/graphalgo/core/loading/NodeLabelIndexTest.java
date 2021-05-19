@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.extension.Neo4jGraphExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
@@ -36,7 +37,16 @@ public class NodeLabelIndexTest extends BaseTest {
 
     @Test
     void shouldLoadWithoutNodeLabelIndex() {
-        runQueryWithRowConsumer("SHOW INDEXES WHERE entityType = 'NODE'", row -> runQuery("DROP INDEX " + row.getString("name")));
+        runQueryWithResultConsumer(
+            "SHOW INDEXES WHERE entityType = 'NODE'",
+            result -> {
+                assertThat(result.hasNext()).isTrue();
+                runQueryWithResultConsumer(
+                    "DROP INDEX " + result.next().get("name"),
+                    innerResult -> assertThat(innerResult.resultAsString()).contains("Indexes removed: 1")
+                );
+            }
+        );
 
         var graph = new StoreLoaderBuilder()
             .api(db)
