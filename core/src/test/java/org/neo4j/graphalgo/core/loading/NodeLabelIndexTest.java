@@ -22,8 +22,10 @@ package org.neo4j.graphalgo.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.extension.Neo4jGraphExtension;
+import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -36,6 +38,9 @@ public class NodeLabelIndexTest extends BaseTest {
     public static final String DB_CYPHER = "CREATE (a:Foo),(b:Bar)";
 
     @Test
+    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_0, message = "Label index is mandatory in 4.0.")
+    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_1, message = "Label index is mandatory in 4.1.")
+    @DisableForNeo4jVersion(value = Neo4jVersion.V_4_2, message = "Label index is mandatory in 4.2.")
     void shouldLoadWithoutNodeLabelIndex() {
         runQueryWithResultConsumer(
             "SHOW INDEXES WHERE entityType = 'NODE'",
