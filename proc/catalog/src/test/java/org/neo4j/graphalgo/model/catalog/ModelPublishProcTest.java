@@ -96,7 +96,8 @@ class ModelPublishProcTest extends ModelProcBaseTest {
                     "trainConfig", map(
                         "dummyConfigProperty", TestTrainConfig.of().dummyConfigProperty(),
                         "modelName", TestTrainConfig.of().modelName(),
-                        "sudo", TestTrainConfig.of().sudo()
+                        "sudo", TestTrainConfig.of().sudo(),
+                        "username", TestTrainConfig.of().usernameOverride()
                     ),
                     "graphSchema", EXPECTED_SCHEMA,
                     "creationTime", isA(ZonedDateTime.class),
@@ -132,7 +133,8 @@ class ModelPublishProcTest extends ModelProcBaseTest {
                     "trainConfig", map(
                         "dummyConfigProperty", TestTrainConfig.of().dummyConfigProperty(),
                         "modelName", TestTrainConfig.of().modelName(),
-                        "sudo", TestTrainConfig.of().sudo()
+                        "sudo", TestTrainConfig.of().sudo(),
+                        "username", TestTrainConfig.of().usernameOverride()
                     ),
                     "graphSchema", EXPECTED_SCHEMA,
                     "creationTime", isA(ZonedDateTime.class),

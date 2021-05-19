@@ -85,7 +85,8 @@ class ModelDropProcTest extends ModelProcBaseTest {
                     "trainConfig", map(
                         "dummyConfigProperty", trainConfig.dummyConfigProperty(),
                         "modelName", trainConfig.modelName(),
-                        "sudo", trainConfig.sudo()
+                        "sudo", trainConfig.sudo(),
+                        "username", trainConfig.usernameOverride()
                     ),
                     "loaded", true,
                     "stored", false,
