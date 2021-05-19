@@ -20,9 +20,7 @@
 package org.neo4j.graphalgo.junit.annotation;
 
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
 
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -34,11 +32,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Target({ METHOD, TYPE, ANNOTATION_TYPE })
 @Retention(RUNTIME)
 @ExtendWith(DisableForNeo4jVersionCondition.class)
-@Repeatable(DisableForNeo4jVersions.class)
-public @interface DisableForNeo4jVersion {
+public @interface DisableForNeo4jVersions {
 
-    Neo4jVersion value();
-
-    String message() default "";
+    DisableForNeo4jVersion[] value();
 
 }
