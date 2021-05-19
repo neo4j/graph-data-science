@@ -128,7 +128,7 @@ public abstract class BaseProc {
     }
 
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName) {
-        return graphStoreFromCatalog(graphName, databaseId().name())
+        return graphStoreFromCatalog(graphName, databaseId().name());
     }
 
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, String databaseName) {

@@ -78,9 +78,7 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
             ) {
                 var masterGraph = graph;
                 if (!configuration.nonNegativeRelationshipTypes().isEmpty()) {
-                    var graphStore = GraphStoreCatalog
-                        .get(username(), databaseId(), configuration.graphName().get())
-                        .graphStore();
+                    var graphStore = graphStoreFromCatalog(configuration.graphName().get()).graphStore();
                     masterGraph = graphStore.getGraph(
                         configuration.nodeLabelIdentifiers(graphStore),
                         configuration.superGraphTypes(),

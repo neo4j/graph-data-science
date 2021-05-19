@@ -175,7 +175,7 @@ public class GraphCreateProc extends CatalogProc {
 
         var procedureConfig = CypherMapWrapper.create(configuration);
 
-        var fromGraphStore = GraphStoreCatalog.get(username(), databaseId(), fromGraphName);
+        var fromGraphStore = graphStoreFromCatalog(fromGraphName);
 
         var graphCreateConfig = GraphCreateFromGraphConfig.of(
             username(),
