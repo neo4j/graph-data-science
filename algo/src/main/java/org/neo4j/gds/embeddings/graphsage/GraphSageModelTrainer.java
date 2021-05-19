@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.batch.WeightedUniformSampler;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.PassthroughVariable;
 import org.neo4j.gds.ml.core.functions.Weights;
@@ -31,6 +33,7 @@ import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.ImmutableRelationshipCursor;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -44,7 +47,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalLong;
-import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
@@ -74,7 +76,6 @@ public class GraphSageModelTrainer {
     private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
     private final ExecutorService executor;
     private final ProgressLogger progressLogger;
-    private double degreeProbabilityNormalizer;
     private final int batchSize;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ExecutorService executor, ProgressLogger progressLogger) {
@@ -112,11 +113,6 @@ public class GraphSageModelTrainer {
         this.layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
-
-        degreeProbabilityNormalizer = LongStream
-            .range(0, graph.nodeCount())
-            .mapToDouble(nodeId -> Math.pow(graph.degree(nodeId), 0.75))
-            .sum();
 
         double initialLoss = evaluateLoss(graph, features, -1);
         double previousLoss = initialLoss;
@@ -243,11 +239,17 @@ public class GraphSageModelTrainer {
     }
 
     private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features) {
+        var neighbours = neighborBatch(graph, batch).toArray();
+
+        var neighborsSet = new LongHashSet(neighbours.length);
+        neighborsSet.addAll(neighbours);
+
         var totalBatch = LongStream.concat(
             batch.stream(),
             LongStream.concat(
-                neighborBatch(graph, batch),
-                negativeBatch(graph, batch.nodeCount())
+                Arrays.stream(neighbours),
+                // batch.nodeCount is <= config.batchsize (which is an int)
+                negativeBatch(graph, Math.toIntExact(batch.nodeCount()), neighborsSet)
             )
         ).toArray();
 
@@ -266,6 +268,7 @@ public class GraphSageModelTrainer {
     private LongStream neighborBatch(Graph graph, Partition batch) {
         var neighborBatchBuilder = LongStream.builder();
         batch.consume(nodeId -> {
+            // randomWalk with at most maxSearchDepth steps and only save last node
             int searchDepth = ThreadLocalRandom.current().nextInt(maxSearchDepth) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
@@ -285,24 +288,18 @@ public class GraphSageModelTrainer {
         return neighborBatchBuilder.build();
     }
 
-    private LongStream negativeBatch(Graph graph, long batchSize) {
-        Random rand = new Random(layers[0].randomState());
-        return LongStream.range(0, batchSize)
-            .map(ignore -> {
-                double randomValue = rand.nextDouble();
-                double cumulativeProbability = 0;
+    // get a negative sample per node in batch
+    private LongStream negativeBatch(Graph graph, int batchSize, LongHashSet neighbours) {
+        long nodeCount = graph.nodeCount();
+        var sampler = new WeightedUniformSampler(layers[0].randomState());
 
-                for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                    cumulativeProbability += Math.pow(graph.degree(nodeId), 0.75) / degreeProbabilityNormalizer;
-                    if (randomValue < cumulativeProbability) {
-                        return nodeId;
-                    }
-                }
-                throw new RuntimeException(
-                    "This happens when there are no relationships in the Graph. " +
-                    "This condition is checked by the calling procedure."
-                );
-            });
+        // each node should be possible to sample
+        // therefore we need fictive rels to all nodes
+        // Math.log to avoid always sampling the high degree nodes
+        var degreeWeightedNodes = LongStream.range(0, nodeCount)
+            .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, Math.pow(graph.degree(nodeId), 0.75)));
+
+        return sampler.sample(degreeWeightedNodes, nodeCount, batchSize, sample -> !neighbours.contains(sample));
     }
 
     private List<Weights<? extends Tensor<?>>> getWeights() {
