@@ -19,20 +19,32 @@
  */
 package org.neo4j.gds.ml.core.features;
 
-import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class ScalarPropertyExtractor implements ScalarFeatureExtractor {
     private final Graph graph;
     private final String propertyKey;
+    private final NodeProperties nodeProperties;
 
     ScalarPropertyExtractor(Graph graph, String propertyKey) {
         this.graph = graph;
         this.propertyKey = propertyKey;
+        this.nodeProperties = graph.nodeProperties(propertyKey);
     }
 
     @Override
     public double extract(long nodeId) {
-        return EmbeddingUtils.getCheckedDoubleNodeProperty(graph, propertyKey, nodeId);
+        var propertyValue = nodeProperties.doubleValue(nodeId);
+        if (Double.isNaN(propertyValue)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Missing node property for property key `%s` on node with id `%s`. Consider using a default value in the property projection.",
+                propertyKey,
+                graph.toOriginalNodeId(nodeId)
+            ));
+        }
+        return propertyValue;
     }
 }
