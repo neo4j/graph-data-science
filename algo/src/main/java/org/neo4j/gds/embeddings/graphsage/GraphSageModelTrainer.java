@@ -157,6 +157,8 @@ public class GraphSageModelTrainer {
             )
         );
 
+        var backwardTasks = batchTasks.stream().map(task -> (Runnable) task::backward).collect(Collectors.toList());
+
         double newLoss = Double.MAX_VALUE;
         double oldLoss;
 
@@ -177,7 +179,9 @@ public class GraphSageModelTrainer {
             }
 
             // propage new loss and update
-            batchTasks.forEach(BatchTask::backward);
+            ParallelUtil.run(backwardTasks, executor);
+
+            batchTasks.forEach(BatchTask::update);
 
             progressLogger.getLog().debug(
                 "Epoch %d LOSS: %.10f at iteration %d",
