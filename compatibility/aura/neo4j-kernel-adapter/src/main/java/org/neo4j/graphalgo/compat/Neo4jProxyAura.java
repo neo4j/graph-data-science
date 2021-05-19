@@ -72,8 +72,8 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -209,6 +209,11 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
     @Override
     public long relationshipsReference(NodeCursor nodeCursor) {
         return nodeCursor.relationshipsReference();
+    }
+
+    @Override
+    public boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
+        return NodeLabelIndexLookup.hasNodeLabelIndex(kernelTransaction);
     }
 
     @Override

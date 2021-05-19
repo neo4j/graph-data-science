@@ -19,18 +19,10 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.common.EntityType;
+import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
-import org.neo4j.internal.kernel.api.InternalIndexState;
-import org.neo4j.internal.kernel.api.SchemaRead;
-import org.neo4j.internal.kernel.api.exceptions.schema.IndexNotFoundKernelException;
-import org.neo4j.internal.schema.IndexDescriptor;
-import org.neo4j.internal.schema.IndexType;
-import org.neo4j.internal.schema.SchemaDescriptor;
-import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 
@@ -50,37 +42,8 @@ public final class NodeScannerFactory {
 
     private static boolean hasNodeLabelIndex(SecureTransaction secureTransaction) {
         try (var forkedTransaction = secureTransaction.fork()) {
-            return findUsableMatchingIndex(
-                // .get() is safe since we fork the transaction
-                forkedTransaction.topLevelKernelTransaction().get(),
-                SchemaDescriptor.forAnyEntityTokens(EntityType.NODE)
-            ) != IndexDescriptor.NO_INDEX;
+            // .get() is safe since we fork the transaction
+            return Neo4jProxy.hasNodeLabelIndex(forkedTransaction.topLevelKernelTransaction().get());
         }
-    }
-
-    private static IndexDescriptor findUsableMatchingIndex(
-        KernelTransaction transaction,
-        SchemaDescriptor schemaDescriptor
-    ) {
-        SchemaRead schemaRead = transaction.schemaRead();
-        Iterator<IndexDescriptor> iterator = schemaRead.index(schemaDescriptor);
-        while (iterator.hasNext()) {
-            IndexDescriptor index = iterator.next();
-            if (index.getIndexType() != IndexType.FULLTEXT && indexIsOnline(schemaRead, index)) {
-                return index;
-            }
-        }
-        return IndexDescriptor.NO_INDEX;
-    }
-
-    private static boolean indexIsOnline(SchemaRead schemaRead, IndexDescriptor index) {
-        InternalIndexState state = InternalIndexState.FAILED;
-        try {
-            state = schemaRead.indexGetState(index);
-        } catch (IndexNotFoundKernelException e) {
-            // Well the index should always exist here, but if we didn't find it while checking the state,
-            // then we obviously don't want to use it.
-        }
-        return state == InternalIndexState.ONLINE;
     }
 }

@@ -213,6 +213,11 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
     }
 
     @Override
+    public boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
+        return NodeLabelIndexLookup.hasNodeLabelIndex(kernelTransaction);
+    }
+
+    @Override
     public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
         Iterator<IndexDescriptor> nodeIndexes = kernelTransaction
             .schemaRead()
