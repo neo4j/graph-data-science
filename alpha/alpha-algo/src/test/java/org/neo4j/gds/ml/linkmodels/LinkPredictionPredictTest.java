@@ -24,6 +24,7 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
@@ -73,6 +74,7 @@ class LinkPredictionPredictTest {
         var numberOfFeatures = 3;
         var numberOfNodeFeatures = 2;
         List<String> featureProperties = List.of("a", "b");
+        var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         var modelData = LinkLogisticRegressionData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 -2.0, -1.0, 3.0,
@@ -82,12 +84,11 @@ class LinkPredictionPredictTest {
             .build();
 
         var result = new LinkPredictionPredict(
-            new LinkLogisticRegressionPredictor(modelData, featureProperties),
+            new LinkLogisticRegressionPredictor(modelData, featureProperties, extractors),
             graph,
             1,
             1,
             topN,
-            AllocationTracker.empty(),
             TestProgressLogger.NULL_LOGGER,
             0.0
         ).compute();

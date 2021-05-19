@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -59,8 +60,9 @@ class LinkLogisticRegressionTrainTest {
 
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopper() {
+        var featureProperties = List.of("a", "b");
         var config = new LinkLogisticRegressionTrainConfigImpl(
-            List.of("a", "b"),
+            featureProperties,
             CypherMapWrapper.create(Map.of(
                 "maxEpochs", 100000,
                 "tolerance", 1e-4,
@@ -68,11 +70,12 @@ class LinkLogisticRegressionTrainTest {
             ))
         );
 
+        var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         trainSet.setAll(i -> i);
-        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, ProgressLogger.NULL_LOGGER);
+        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, extractors, config, ProgressLogger.NULL_LOGGER);
 
-        var result = linearRegression.compute().modelData();
+        var result = linearRegression.compute();
 
         assertThat(result).isNotNull();
 
@@ -84,8 +87,9 @@ class LinkLogisticRegressionTrainTest {
 
     @Test
     void shouldComputeWithDefaultAdamOptimizerAndStreakStopperConcurrently() {
+        var featureProperties = List.of("a", "b");
         var config = new LinkLogisticRegressionTrainConfigImpl(
-            List.of("a", "b"),
+            featureProperties,
             CypherMapWrapper.create(Map.of(
                 "penalty", 1.0,
                 "maxEpochs", 1000000,
@@ -95,11 +99,13 @@ class LinkLogisticRegressionTrainTest {
             ))
         );
 
+        var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
+
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         trainSet.setAll(i -> i);
-        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, ProgressLogger.NULL_LOGGER);
+        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, extractors, config, ProgressLogger.NULL_LOGGER);
 
-        var result = linearRegression.compute().modelData();
+        var result = linearRegression.compute();
 
         assertThat(result).isNotNull();
 
@@ -120,8 +126,9 @@ class LinkLogisticRegressionTrainTest {
 
     @Test
     void usingPenaltyShouldGiveSmallerAbsoluteValueWeights() {
+        var featureProperties = List.of("a", "b");
         var config = new LinkLogisticRegressionTrainConfigImpl(
-            List.of("a", "b"),
+            featureProperties,
             CypherMapWrapper.create(Map.of(
                 "maxEpochs", 100000,
                 "tolerance", 1e-4,
@@ -130,11 +137,13 @@ class LinkLogisticRegressionTrainTest {
             ))
         );
 
+        var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
+
         var trainSet = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         trainSet.setAll(i -> i);
-        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, config, ProgressLogger.NULL_LOGGER);
+        var linearRegression = new LinkLogisticRegressionTrain(graph, trainSet, extractors, config, ProgressLogger.NULL_LOGGER);
 
-        var result = linearRegression.compute().modelData();
+        var result = linearRegression.compute();
 
         assertThat(result).isNotNull();
 

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
@@ -116,14 +117,15 @@ class LinkPredictionEndToEndTest {
     }
 
     private LinkPredictionPredict predictAlgorithm(Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> model) {
-        var predictor = new LinkLogisticRegressionPredictor(model.data(), model.trainConfig().featureProperties());
+        var extractors = FeatureExtraction.propertyExtractors(graph, model.trainConfig().featureProperties());
+
+        var predictor = new LinkLogisticRegressionPredictor(model.data(), model.trainConfig().featureProperties(), extractors);
         return new LinkPredictionPredict(
             predictor,
             graph,
             100,
             4,
             1000,
-            AllocationTracker.empty(),
             ProgressLogger.NULL_LOGGER,
             0.0
         );

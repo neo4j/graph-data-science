@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
@@ -30,8 +31,8 @@ import java.util.List;
 
 public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase {
 
-    public LinkLogisticRegressionPredictor(LinkLogisticRegressionData modelData, List<String> featureProperties) {
-        super(modelData, featureProperties);
+    public LinkLogisticRegressionPredictor(LinkLogisticRegressionData modelData, List<String> featureProperties, List<FeatureExtractor> extractors) {
+        super(modelData, featureProperties, extractors);
     }
 
     static long sizeOfBatchInBytes(int batchSize, int numberOfFeatures) {
@@ -52,9 +53,9 @@ public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase 
         return modelData;
     }
 
-    public double predictedProbability(Graph graph, long sourceId, long targetId) {
+    public double predictedProbability(long sourceId, long targetId) {
         var weightsArray = modelData.weights().data().data();
-        var features = features(graph, sourceId, targetId);
+        var features = features(sourceId, targetId);
         var affinity = 0D;
         var biasIndex = weightsArray.length - 1;
         for (int i = 0; i < biasIndex; i++) {

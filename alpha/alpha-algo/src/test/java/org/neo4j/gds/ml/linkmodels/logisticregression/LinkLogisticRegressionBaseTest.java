@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
@@ -55,6 +56,7 @@ class LinkLogisticRegressionBaseTest {
     @Test
     void shouldComputeCorrectFeatures() {
         var featureProperties = List.of("a", "b");
+        var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         double[] weightsArray = new double[featureProperties.size() + 1];
         var weights = new Weights<>(new Matrix(weightsArray, 1, weightsArray.length));
         var base = new LinkLogisticRegressionBase(LinkLogisticRegressionData.builder()
@@ -62,7 +64,8 @@ class LinkLogisticRegressionBaseTest {
             .nodeFeatureDimension(2)
             .weights(weights)
             .build(),
-            featureProperties
+            featureProperties,
+            extractors
         );
 
         var allNodesBatch = new LazyBatch(0, (int) graph.nodeCount(), graph.nodeCount());

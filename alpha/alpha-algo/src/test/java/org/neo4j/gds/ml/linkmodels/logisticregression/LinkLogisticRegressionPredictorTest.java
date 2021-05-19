@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.LinkFeatureCombiner;
@@ -81,14 +82,15 @@ class LinkLogisticRegressionPredictorTest {
     @ParameterizedTest
     void computesProbability(String sourceNode, String targetNode, double expectedResult) {
         List<String> featureProperties = List.of("x", "y");
+        var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         var modelData = LinkLogisticRegressionData
             .builder()
             .from(LinkLogisticRegressionData.from(graph, featureProperties, new SumCombiner()))
             .weights(new Weights<>(new Matrix(WEIGHTS, 1, WEIGHTS.length)))
             .build();
-        var predictor = new LinkLogisticRegressionPredictor(modelData, featureProperties);
+        var predictor = new LinkLogisticRegressionPredictor(modelData, featureProperties, extractors);
 
-        var result = predictor.predictedProbability(graph, idFunction.of(sourceNode), idFunction.of(targetNode));
+        var result = predictor.predictedProbability(idFunction.of(sourceNode), idFunction.of(targetNode));
 
         assertThat(result).isCloseTo(expectedResult, Offset.offset(1e-10));
     }

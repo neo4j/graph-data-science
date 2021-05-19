@@ -24,6 +24,7 @@ import org.neo4j.gds.ml.Objective;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ConstantScale;
 import org.neo4j.gds.ml.core.functions.ElementSum;
@@ -46,8 +47,8 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
     private final Graph graph;
     private final double penalty;
 
-    public LinkLogisticRegressionObjective(LinkLogisticRegressionData llrData, List<String> featureProperties, double penalty, Graph graph) {
-        super(llrData, featureProperties);
+    public LinkLogisticRegressionObjective(LinkLogisticRegressionData llrData, List<String> featureProperties, List<FeatureExtractor> extractors, double penalty, Graph graph) {
+        super(llrData, featureProperties, extractors);
         this.graph = graph;
         this.penalty = penalty;
     }

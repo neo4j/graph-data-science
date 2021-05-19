@@ -25,7 +25,6 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPred
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
@@ -43,7 +42,6 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
     private final int concurrency;
     private final int topN;
     private final double threshold;
-    private final AllocationTracker tracker;
 
     public static MemoryEstimation memoryEstimation(int topN, int linkFeatureDimension, int nodeFeatureDimension) {
         var builder = MemoryEstimations.builder(LinkPredictionPredict.class);
@@ -59,7 +57,6 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
         int batchSize,
         int concurrency,
         int topN,
-        AllocationTracker tracker,
         ProgressLogger progressLogger,
         double threshold
     ) {
@@ -68,7 +65,6 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
         this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.topN = topN;
-        this.tracker = tracker;
         this.threshold = threshold;
         this.progressLogger = progressLogger;
     }
@@ -124,7 +120,7 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
                 var smallestTarget = sourceId + 1;
                 LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
                         if (neighbors.contains(targetId)) return;
-                        var probability = predictor.predictedProbability(graph, sourceId, targetId);
+                        var probability = predictor.predictedProbability(sourceId, targetId);
                         if (probability < threshold) return;
                         predictedLinks.add(sourceId, targetId, probability);
                     }

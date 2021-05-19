@@ -54,7 +54,7 @@ public class SignedProbabilitiesCollector implements Consumer<Batch> {
     public void accept(Batch batch) {
         batch.nodeIds().forEach(sourceId -> {
             graph.forEachRelationship(sourceId, -1, (source, target, predictionTarget) -> {
-                var predictedProbability = predictor.predictedProbability(graph, source, target);
+                var predictedProbability = predictor.predictedProbability(source, target);
                 var signedProbability = sign(predictionTarget, source, target) * predictedProbability;
                 signedProbabilities.add(signedProbability);
                 return true;

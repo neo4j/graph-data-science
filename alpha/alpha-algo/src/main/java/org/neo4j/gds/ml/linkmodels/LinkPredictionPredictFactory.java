@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
@@ -66,13 +67,14 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
             LinkPredictionTrainConfig.class
         );
 
+        var extractors = FeatureExtraction.propertyExtractors(graph, model.trainConfig().featureProperties());
+
         return new LinkPredictionPredict(
-            new LinkLogisticRegressionPredictor(model.data(), model.trainConfig().featureProperties()),
+            new LinkLogisticRegressionPredictor(model.data(), model.trainConfig().featureProperties(), extractors),
             graph,
             configuration.batchSize(),
             configuration.concurrency(),
             configuration.topN(),
-            tracker,
             progressLogger,
             configuration.threshold()
         );

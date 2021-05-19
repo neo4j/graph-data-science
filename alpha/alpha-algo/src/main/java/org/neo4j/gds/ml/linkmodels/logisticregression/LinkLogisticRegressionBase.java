@@ -24,6 +24,7 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
@@ -38,9 +39,12 @@ public class LinkLogisticRegressionBase {
 
     protected final List<String> featureProperties;
 
-    LinkLogisticRegressionBase(LinkLogisticRegressionData modelData, List<String> featureProperties) {
+    protected final List<FeatureExtractor> extractors;
+
+    LinkLogisticRegressionBase(LinkLogisticRegressionData modelData, List<String> featureProperties, List<FeatureExtractor> extractors) {
         this.modelData = modelData;
         this.featureProperties = featureProperties;
+        this.extractors = extractors;
     }
 
     protected Variable<Matrix> predictions(Constant<Matrix> features) {
@@ -59,7 +63,7 @@ public class LinkLogisticRegressionBase {
         var relationshipOffset = new MutableInt();
         batch.nodeIds().forEach(nodeId -> {
             graphCopy.forEachRelationship(nodeId, (src, trg) -> {
-                var linkFeatures = features(graph, src, trg);
+                var linkFeatures = features(src, trg);
                 setLinkFeatures(linkFeatures, features, relationshipOffset.getValue(), cols);
                 relationshipOffset.increment();
                 return true;
@@ -68,20 +72,20 @@ public class LinkLogisticRegressionBase {
         return Constant.matrix(features, rows, cols);
     }
 
-    protected double[] features(Graph graph, long sourceId, long targetId) {
-        var sourceFeatures = nodeFeatures(graph, sourceId);
-        var targetFeatures = nodeFeatures(graph, targetId);
+    protected double[] features(long sourceId, long targetId) {
+        var sourceFeatures = nodeFeatures(sourceId);
+        var targetFeatures = nodeFeatures(targetId);
         return modelData.linkFeatureCombiner().combine(sourceFeatures, targetFeatures);
     }
 
-    protected double[] nodeFeatures(Graph graph, long nodeId) {
+    protected double[] nodeFeatures(long nodeId) {
         var features = new double[modelData.nodeFeatureDimension()];
 
         var consumer = featureConsumer(features);
         FeatureExtraction.extract(
             nodeId,
             -1,
-            FeatureExtraction.propertyExtractors(graph, featureProperties),
+            extractors,
             consumer
         );
         return features;

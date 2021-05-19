@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -65,12 +66,13 @@ class LinkLogisticRegressionObjectiveTest {
     @Test
     void shouldProduceCorrectLoss() {
         List<String> featureProperties = List.of("a", "b");
+        var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         var data = LinkLogisticRegressionData.from(
             graph,
             featureProperties,
             LinkFeatureCombiners.L2
         );
-        var objective = new LinkLogisticRegressionObjective(data, featureProperties, 1.0, graph);
+        var objective = new LinkLogisticRegressionObjective(data, featureProperties, extractors, 1.0, graph);
         var loss = objective.loss(allNodesBatch, graph.relationshipCount());
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
@@ -81,12 +83,13 @@ class LinkLogisticRegressionObjectiveTest {
     @Test
     void shouldProduceCorrectLossWithNonZeroWeights() {
         List<String> featureProperties = List.of("a", "b");
+        var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
         var data = LinkLogisticRegressionData.from(
             graph,
             featureProperties,
             LinkFeatureCombiners.L2
         );
-        var objective = new LinkLogisticRegressionObjective(data, featureProperties, 1.0, graph);
+        var objective = new LinkLogisticRegressionObjective(data, featureProperties, extractors, 1.0, graph);
         // we proceed to "injecting" non-zero values for the weights of the model
         var weights = objective.weights();
         var backingArray = weights.get(0).data().data();

@@ -22,32 +22,37 @@ package org.neo4j.gds.ml.linkmodels.logisticregression;
 import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
+import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 public class LinkLogisticRegressionTrain {
 
     private final Graph graph;
     private final HugeLongArray trainSet;
+    private final List<FeatureExtractor> extractors;
     private final LinkLogisticRegressionTrainConfig config;
     private final ProgressLogger progressLogger;
 
     public LinkLogisticRegressionTrain(
         Graph graph,
         HugeLongArray trainSet,
+        List<FeatureExtractor> extractors,
         LinkLogisticRegressionTrainConfig config,
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.trainSet = trainSet;
+        this.extractors = extractors;
         this.config = config;
         this.progressLogger = progressLogger;
     }
 
-    public LinkLogisticRegressionPredictor compute() {
+    public LinkLogisticRegressionData compute() {
         var llrData = LinkLogisticRegressionData.from(
             graph,
             config.featureProperties(),
@@ -56,12 +61,13 @@ public class LinkLogisticRegressionTrain {
         var objective = new LinkLogisticRegressionObjective(
             llrData,
             config.featureProperties(),
+            extractors,
             config.penalty(),
             graph
         );
         var training = new Training(config, progressLogger, graph.nodeCount());
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
         training.train(objective, queueSupplier, config.concurrency());
-        return new LinkLogisticRegressionPredictor(objective.modelData, config.featureProperties());
+        return objective.modelData;
     }
 }

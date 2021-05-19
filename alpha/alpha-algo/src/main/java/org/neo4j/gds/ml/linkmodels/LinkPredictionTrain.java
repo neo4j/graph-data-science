@@ -20,6 +20,8 @@
 package org.neo4j.gds.ml.linkmodels;
 
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrain;
@@ -63,6 +65,8 @@ public class LinkPredictionTrain
     private final Graph testGraph;
     private final LinkPredictionTrainConfig config;
     private final AllocationTracker allocationTracker;
+    private final List<FeatureExtractor> trainExtractors;
+    private final List<FeatureExtractor> testExtractors;
 
     static MemoryEstimation estimateModelSelectResult(LinkPredictionTrainConfig config) {
         var numberOfParams = config.paramConfigs().size();
@@ -85,6 +89,8 @@ public class LinkPredictionTrain
     ) {
         this.trainGraph = graph.relationshipTypeFilteredGraph(Set.of(config.trainRelationshipType()));
         this.testGraph = graph.relationshipTypeFilteredGraph(Set.of(config.testRelationshipType()));
+        this.trainExtractors = FeatureExtraction.propertyExtractors(trainGraph, config.featureProperties());
+        this.testExtractors = FeatureExtraction.propertyExtractors(testGraph, config.featureProperties());
         this.config = config;
         this.progressLogger = progressLogger;
         this.allocationTracker = AllocationTracker.empty();
@@ -106,16 +112,16 @@ public class LinkPredictionTrain
 
         // train best model on the entire training graph
         progressLogger.startSubTask("Training");
-        var predictor = trainModel(nodeIds, bestParameters, progressLogger);
+        var modelData = trainModel(nodeIds, bestParameters, progressLogger);
         progressLogger.finishSubTask("Training");
 
         // evaluate the best model on the training and test graphs
         progressLogger.startSubTask("Evaluation");
         progressLogger.startSubTask("Training");
-        var outerTrainMetrics = computeMetric(trainGraph, nodeIds, predictor, progressLogger);
+        var outerTrainMetrics = computeMetric(trainGraph, nodeIds, predictor(modelData, trainExtractors), progressLogger);
         progressLogger.finishSubTask("Training");
         progressLogger.startSubTask("Testing");
-        var testMetrics = computeMetric(testGraph, nodeIds, predictor, progressLogger);
+        var testMetrics = computeMetric(testGraph, nodeIds, predictor(modelData, testExtractors), progressLogger);
         progressLogger.finishSubTask("Testing");
 
         var metrics = mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
@@ -127,13 +133,17 @@ public class LinkPredictionTrain
             config.modelName(),
             MODEL_TYPE,
             trainGraph.schema(),
-            predictor.modelData(),
+            modelData,
             config,
             LinkPredictionModelInfo.of(
                 modelSelectResult.bestParameters(),
                 metrics
             )
         );
+    }
+
+    public LinkLogisticRegressionPredictor predictor(LinkLogisticRegressionData modelData, List<FeatureExtractor> extractors) {
+        return new LinkLogisticRegressionPredictor(modelData, config.featureProperties(), extractors);
     }
 
     private Map<LinkMetric, MetricData<LinkLogisticRegressionTrainConfig>> mergeMetrics(
@@ -173,7 +183,8 @@ public class LinkPredictionTrain
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
                 // we use a less fine grained progress logging for LP than for NC
-                var predictor = trainModel(trainSet, modelParams, NULL_LOGGER);
+                var modelData = trainModel(trainSet, modelParams, NULL_LOGGER);
+                var predictor = predictor(modelData, trainExtractors);
                 progressLogger.logProgress();
 
                 // 4. evaluate each model candidate on the train and validation sets
@@ -249,7 +260,7 @@ public class LinkPredictionTrain
         ));
     }
 
-    private LinkLogisticRegressionPredictor trainModel(
+    private LinkLogisticRegressionData trainModel(
         HugeLongArray trainSet,
         LinkLogisticRegressionTrainConfig llrConfig,
         ProgressLogger progressLogger
@@ -258,6 +269,7 @@ public class LinkPredictionTrain
         var llrTrain = new LinkLogisticRegressionTrain(
             trainGraph,
             trainSet,
+            trainExtractors,
             llrConfig,
             progressLogger
         );
