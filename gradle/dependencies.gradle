@@ -3,7 +3,7 @@ ext {
         '4.0': properties.getOrDefault('neo4jVersion40', '4.0.11'),
         '4.1': properties.getOrDefault('neo4jVersion41', '4.1.8'),
         '4.2': properties.getOrDefault('neo4jVersion42', '4.2.6'),
-        '4.3': properties.getOrDefault('neo4jVersion43', '4.3.0-drop05.0'),
+        '4.3': properties.getOrDefault('neo4jVersion43', '4.3.0'),
     ]
     scalas = [
         '4.0': '2.12.7',
