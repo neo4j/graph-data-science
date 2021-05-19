@@ -39,11 +39,11 @@ import static com.google.testing.compile.JavaFileObjects.forResource;
 import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.jupiter.api.condition.JRE.JAVA_12;
+import static org.junit.jupiter.api.condition.JRE.JAVA_16;
 
-// Need to disable this for Java versions > 11
-// the dependency to com.google.testing.compile:compile-testing has not been updated since May 2019
-@DisabledForJreRange(min = JAVA_12)
+// Need to disable this for Java versions >= 16
+// See https://github.com/google/compile-testing/issues/222
+@DisabledForJreRange(min = JAVA_16)
 @EnableRuleMigrationSupport
 class ConfigurationProcessorTest {
 
