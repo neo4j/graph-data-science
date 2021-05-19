@@ -96,11 +96,7 @@ public final class EmbeddingUtils {
     public static void validateRelationshipWeightPropertyValue(Graph graph, int concurrency, ExecutorService executorService) {
         var tasks = PartitionUtils.degreePartition(
             graph,
-            ParallelUtil.adjustedBatchSize(
-                graph.nodeCount(),
-                concurrency,
-                ParallelUtil.DEFAULT_BATCH_SIZE
-            ),
+            concurrency,
             partition -> (Runnable) () -> {
                 var concurrentGraph = graph.concurrentCopy();
                 partition.consume(nodeId -> {
