@@ -20,7 +20,9 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -275,26 +277,42 @@ class GraphSageModelTrainerTest {
 
     @ParameterizedTest
     @ValueSource(longs = {20L, -100L, 30L})
-    void shouldConsiderRandomSeed(long seed) {
-        var arrayFeatures = HugeObjectArray.newArray(double[].class, arrayGraph.nodeCount(), AllocationTracker.empty());
-        LongStream
-            .range(0, arrayGraph.nodeCount())
-            .forEach(n -> arrayFeatures.set(n, arrayGraph.nodeProperties("features").doubleArrayValue(n)));
-        var config = GraphSageTrainConfig.builder()
+    void seededSingleBatch(long seed) {
+        var config = configBuilder
+            .modelName("randomSeed")
             .embeddingDimension(12)
-            .aggregator(Aggregator.AggregatorType.MEAN)
-            .activationFunction(ActivationFunction.SIGMOID)
-            .addFeatureProperty("features")
-            .modelName("model")
             .randomSeed(seed)
+            .concurrency(1)
             .build();
 
         var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
         var otherTrainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
 
-        var result = trainer.train(arrayGraph, arrayFeatures);
-        var otherResult = otherTrainer.train(arrayGraph, arrayFeatures);
+        var result = trainer.train(graph, features);
+        var otherResult = otherTrainer.train(graph, features);
 
         assertThat(result).usingRecursiveComparison().isEqualTo(otherResult);
+    }
+
+    @Disabled
+    @ParameterizedTest
+    @ValueSource(longs = {20L, -100L, 30L})
+    void seededMultiBatch(long seed) {
+        var config = configBuilder
+            .modelName("randomSeed")
+            .embeddingDimension(12)
+            .randomSeed(seed)
+            .concurrency(1)
+            .batchSize(5)
+            .build();
+
+        var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
+        var otherTrainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
+
+        var result = trainer.train(graph, features);
+        var otherResult = otherTrainer.train(graph, features);
+
+        // Needs deterministic weights updates
+        assertThat(result).usingRecursiveComparison().withComparatorForType(new DoubleComparator(1e-10), Double.class).isEqualTo(otherResult);
     }
 }
