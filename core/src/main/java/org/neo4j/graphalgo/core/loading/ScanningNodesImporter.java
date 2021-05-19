@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.IndexPropertyMappings.LoadablePropertyMappings;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -75,12 +76,13 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         NodeMappingBuilder<BUILDER> nodeMappingBuilder
     ) {
         super(
-            scannerFactory(dimensions),
+            scannerFactory(loadingContext.transaction(), dimensions),
             "Node",
             loadingContext,
             dimensions,
             concurrency
         );
+
         this.graphCreateConfig = graphCreateConfig;
         this.progressLogger = progressLogger;
         this.terminationFlag = loadingContext.terminationFlag();
@@ -90,13 +92,14 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     }
 
     private static StoreScanner.Factory<NodeReference> scannerFactory(
+        SecureTransaction transaction,
         GraphDimensions dimensions
     ) {
         var tokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
         assert tokenNodeLabelMapping != null : "Only null in Cypher loader";
 
         int[] labelIds = tokenNodeLabelMapping.keys().toArray();
-        return NodeScannerFactory.create(labelIds);
+        return NodeScannerFactory.create(transaction, labelIds);
     }
 
     @Override

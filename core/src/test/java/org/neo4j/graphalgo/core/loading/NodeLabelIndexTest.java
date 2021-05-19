@@ -32,7 +32,7 @@ import static org.neo4j.graphalgo.TestSupport.fromGdl;
 public class NodeLabelIndexTest extends BaseTest {
 
     @Neo4jGraph
-    public static final String DB_CYPHER = "CREATE (a:Foo)";
+    public static final String DB_CYPHER = "CREATE (a:Foo),(b:Bar)";
 
     @Test
     void shouldLoadWithoutNodeLabelIndex() {
@@ -41,9 +41,10 @@ public class NodeLabelIndexTest extends BaseTest {
         var graph = new StoreLoaderBuilder()
             .api(db)
             .addNodeLabel("Foo")
+            .addNodeLabel("Bar")
             .build()
             .graph();
 
-        assertGraphEquals(fromGdl("(:Foo)"), graph);
+        assertGraphEquals(fromGdl("(:Foo),(:Bar)"), graph);
     }
 }
