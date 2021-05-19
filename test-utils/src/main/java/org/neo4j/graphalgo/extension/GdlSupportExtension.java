@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -147,16 +148,12 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
     }
 
     private static <T> void injectInstance(Object testInstance, String graphNamePrefix, T instance, Class<T> clazz, String suffix) {
-        Class<?> testClass = testInstance.getClass();
-        do {
-            stream(testClass.getDeclaredFields())
-                .filter(field -> field.getType() == clazz)
-                .filter(field -> isAnnotated(field, Inject.class))
-                .filter(field -> field.getName().equalsIgnoreCase(graphNamePrefix + suffix))
-                .forEach(field -> setField(testInstance, field, instance));
-            testClass = testClass.getSuperclass();
-        }
-        while (testClass != null);
+        Stream.<Class<?>>iterate(testInstance.getClass(), Objects::nonNull, Class::getSuperclass)
+            .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
+            .filter(field -> field.getType() == clazz)
+            .filter(field -> isAnnotated(field, Inject.class))
+            .filter(field -> field.getName().equalsIgnoreCase(graphNamePrefix + suffix))
+            .forEach(field -> setField(testInstance, field, instance));
     }
 
     @ValueClass
