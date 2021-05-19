@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.GraphStreamRelationshipPropertiesConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

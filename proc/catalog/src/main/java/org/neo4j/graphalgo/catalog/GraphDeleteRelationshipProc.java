@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.catalog;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.DeleteRelationshipsConfig;
 import org.neo4j.graphalgo.core.loading.DeletionResult;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

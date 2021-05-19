@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporter;
 import org.neo4j.graphalgo.core.utils.export.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreExporterUtil;
