@@ -214,7 +214,7 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
 
     @Override
     public boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
-        return NodeLabelIndexLookup.hasNodeLabelIndex(kernelTransaction);
+        return NodeLabelIndexLookup43.hasNodeLabelIndex(kernelTransaction);
     }
 
     @Override

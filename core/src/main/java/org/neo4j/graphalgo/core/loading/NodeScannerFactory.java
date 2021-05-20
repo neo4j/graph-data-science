@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.logging.Log;
 
 import java.util.Arrays;
 
@@ -30,8 +31,18 @@ public final class NodeScannerFactory {
 
     private NodeScannerFactory() {}
 
-    public static StoreScanner.Factory<NodeReference> create(SecureTransaction secureTransaction, int[] labelIds) {
-        if (Arrays.stream(labelIds).anyMatch(labelId -> labelId == ANY_LABEL) || !hasNodeLabelIndex(secureTransaction)) {
+    public static StoreScanner.Factory<NodeReference> create(
+        SecureTransaction secureTransaction,
+        int[] labelIds,
+        Log log
+    ) {
+        var hasNodeLabelIndex = hasNodeLabelIndex(secureTransaction);
+
+        if (!hasNodeLabelIndex && labelIds.length > 0) {
+            log.info("Attempted to use node label index, but no index was found. Falling back to node store scan.");
+        }
+
+        if (Arrays.stream(labelIds).anyMatch(labelId -> labelId == ANY_LABEL) || !hasNodeLabelIndex) {
             return NodeCursorBasedScanner::new;
         } else if (labelIds.length == 1) {
             return (prefetchSize, transaction) -> new NodeLabelIndexBasedScanner(labelIds[0], prefetchSize, transaction);
@@ -41,9 +52,12 @@ public final class NodeScannerFactory {
     }
 
     private static boolean hasNodeLabelIndex(SecureTransaction secureTransaction) {
-        try (var forkedTransaction = secureTransaction.fork()) {
-            // .get() is safe since we fork the transaction
-            return Neo4jProxy.hasNodeLabelIndex(forkedTransaction.topLevelKernelTransaction().get());
+        var tx = secureTransaction.fork();
+        var ktx = tx.topLevelKernelTransaction();
+        try {
+            return Neo4jProxy.hasNodeLabelIndex(ktx);
+        } finally {
+            tx.close();
         }
     }
 }

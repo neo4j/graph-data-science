@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
+import org.neo4j.logging.Log;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -76,7 +77,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         NodeMappingBuilder<BUILDER> nodeMappingBuilder
     ) {
         super(
-            scannerFactory(loadingContext.transaction(), dimensions),
+            scannerFactory(loadingContext.secureTransaction(), dimensions, loadingContext.log()),
             "Node",
             loadingContext,
             dimensions,
@@ -93,13 +94,14 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
 
     private static StoreScanner.Factory<NodeReference> scannerFactory(
         SecureTransaction transaction,
-        GraphDimensions dimensions
+        GraphDimensions dimensions,
+        Log log
     ) {
         var tokenNodeLabelMapping = dimensions.tokenNodeLabelMapping();
         assert tokenNodeLabelMapping != null : "Only null in Cypher loader";
 
         int[] labelIds = tokenNodeLabelMapping.keys().toArray();
-        return NodeScannerFactory.create(transaction, labelIds);
+        return NodeScannerFactory.create(transaction, labelIds, log);
     }
 
     @Override

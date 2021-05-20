@@ -30,10 +30,10 @@ import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Iterator;
 
-final class NodeLabelIndexLookup {
+final class NodeLabelIndexLookupAura {
 
     static boolean hasNodeLabelIndex(KernelTransaction transaction) {
-        return NodeLabelIndexLookup.findUsableMatchingIndex(
+        return NodeLabelIndexLookupAura.findUsableMatchingIndex(
             transaction,
             SchemaDescriptor.forAnyEntityTokens(EntityType.NODE)
         ) != IndexDescriptor.NO_INDEX;
@@ -65,5 +65,5 @@ final class NodeLabelIndexLookup {
         return state == InternalIndexState.ONLINE;
     }
 
-    private NodeLabelIndexLookup() {}
+    private NodeLabelIndexLookupAura() {}
 }

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.extension.Neo4jGraphExtension;
@@ -53,13 +54,18 @@ public class NodeLabelIndexTest extends BaseTest {
             }
         );
 
+        var log = new TestLog();
         var graph = new StoreLoaderBuilder()
             .api(db)
+            .log(log)
             .addNodeLabel("Foo")
             .addNodeLabel("Bar")
             .build()
             .graph();
 
         assertGraphEquals(fromGdl("(:Foo),(:Bar)"), graph);
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .contains("Attempted to use node label index, but no index was found. Falling back to node store scan.");
     }
 }

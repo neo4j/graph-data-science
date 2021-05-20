@@ -213,7 +213,7 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
 
     @Override
     public boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
-        return NodeLabelIndexLookup.hasNodeLabelIndex(kernelTransaction);
+        return NodeLabelIndexLookupAura.hasNodeLabelIndex(kernelTransaction);
     }
 
     @Override
