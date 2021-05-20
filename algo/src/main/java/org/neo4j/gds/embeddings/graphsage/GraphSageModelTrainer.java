@@ -53,7 +53,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -115,7 +114,14 @@ public class GraphSageModelTrainer {
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
 
-        double initialLoss = evaluateLoss(graph, features, -1);
+        var weights = getWeights();
+        var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
+            graph.nodeCount(),
+            batchSize,
+            batch -> new BatchTask(lossFunction(batch, graph, features, getBatchIndex(batch)), weights, tolerance)
+        );
+
+        double initialLoss = evaluateLoss(batchTasks.stream().map(BatchTask::forwardTask).collect(Collectors.toList()));
         epochLosses.add(0, initialLoss);
         double previousLoss = initialLoss;
         boolean converged = false;
@@ -123,7 +129,7 @@ public class GraphSageModelTrainer {
             var epochMessage = ":: Epoch " + epoch;
             progressLogger.logStart(epochMessage);
 
-            double newLoss = trainEpoch(graph, features, epoch);
+            double newLoss = trainEpoch(batchTasks, epoch);
             epochLosses.add(epoch, newLoss);
             progressLogger.logFinish(epochMessage);
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
@@ -137,18 +143,12 @@ public class GraphSageModelTrainer {
         return ModelTrainResult.of(initialLoss, epochLosses, converged, this.layers);
     }
 
-    private double trainEpoch(Graph graph, HugeObjectArray<double[]> features, int epoch) {
+    private double trainEpoch(List<BatchTask> batchTasks, int epoch) {
         List<Weights<? extends Tensor<?>>> weights = getWeights();
 
         var updater = new AdamOptimizer(weights, learningRate);
 
         // Change: no generateNewRandomState for each batch
-
-        var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
-            graph.nodeCount(),
-            batchSize,
-            batch -> new BatchTask(lossFunction(batch, graph, features, getBatchIndex(batch)), weights, tolerance)
-        );
 
         double totalLoss = Double.NaN;
         int iteration = 1;
@@ -157,7 +157,7 @@ public class GraphSageModelTrainer {
 
             // run forward + maybe backward for each Batch
             ParallelUtil.run(batchTasks, executor);
-            totalLoss = batchTasks.stream().mapToDouble(BatchTask::loss).sum();
+            totalLoss = batchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
 
             var converged = batchTasks.stream().allMatch(task -> task.converged);
             if (converged) {
@@ -224,29 +224,39 @@ public class GraphSageModelTrainer {
         public List<? extends Tensor<?>> weightGradients() {
             return weightGradients;
         }
+
+        BatchForwardTask forwardTask() {
+            return new BatchForwardTask(lossFunction);
+        }
     }
 
-    private double evaluateLoss(
-        Graph graph,
-        HugeObjectArray<double[]> features,
-        int epoch
-    ) {
-        DoubleAdder doubleAdder = new DoubleAdder();
+    static class BatchForwardTask implements Runnable {
 
-        var tasks = PartitionUtils.rangePartitionWithBatchSize(
-            graph.nodeCount(),
-            batchSize,
-            batch -> (Runnable) () -> {
-                ComputationContext ctx = new ComputationContext();
-                Variable<Scalar> loss = lossFunction(batch, graph, features, getBatchIndex(batch));
-                doubleAdder.add(ctx.forward(loss).value());
-            }
-        );
+        private final Variable<Scalar> lossFunction;
+        private double loss;
 
-        ParallelUtil.run(tasks, executor);
+        BatchForwardTask(Variable<Scalar> lossFunction) {
+            this.lossFunction = lossFunction;
+            this.loss = Double.MAX_VALUE;
+        }
 
-        double lossValue = doubleAdder.doubleValue();
-        progressLogger.getLog().debug("Loss after epoch %s: %s", epoch, lossValue);
+        @Override
+        public void run() {
+            var localCtx = new ComputationContext();
+            loss = localCtx.forward(lossFunction).value();
+        }
+
+        public double loss() {
+            return loss;
+        }
+    }
+
+    private double evaluateLoss(List<BatchForwardTask> batchTasks) {
+
+        ParallelUtil.run(batchTasks, executor);
+
+        var lossValue = batchTasks.stream().mapToDouble(BatchForwardTask::loss).average().orElseThrow();
+        progressLogger.getLog().debug("Initial Loss: %s", lossValue);
         return lossValue;
     }
 
