@@ -120,7 +120,8 @@ public final class GraphStoreCatalog {
             ));
         }
 
-        for (var username: usersWithMatchingGraphs) {
+        if (!usersWithMatchingGraphs.isEmpty()) {
+            var username = usersWithMatchingGraphs.iterator().next();
             getUserCatalog(username).remove(
                 userCatalogKey,
                 removedGraphConsumer,
