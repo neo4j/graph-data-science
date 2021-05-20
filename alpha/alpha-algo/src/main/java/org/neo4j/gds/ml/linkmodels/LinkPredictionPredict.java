@@ -51,7 +51,7 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
         return builder.build();
     }
 
-    LinkPredictionPredict(
+    public LinkPredictionPredict(
         LinkLogisticRegressionPredictor predictor,
         Graph graph,
         int batchSize,
