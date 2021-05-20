@@ -124,8 +124,7 @@ public class GraphSageModelTrainer {
             var epochMessage = ":: Epoch " + epoch;
             progressLogger.logStart(epochMessage);
 
-            trainEpoch(graph, features, epoch);
-            double newLoss = evaluateLoss(graph, features, epoch);
+            double newLoss = trainEpoch(graph, features, epoch);
             epochLosses.add(epoch, newLoss);
             progressLogger.logFinish(epochMessage);
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
@@ -139,7 +138,7 @@ public class GraphSageModelTrainer {
         return ModelTrainResult.of(initialLoss, epochLosses, converged, this.layers);
     }
 
-    private void trainEpoch(Graph graph, HugeObjectArray<double[]> features, int epoch) {
+    private double trainEpoch(Graph graph, HugeObjectArray<double[]> features, int epoch) {
         List<Weights<? extends Tensor<?>>> weights = getWeights();
 
         var updater = new AdamOptimizer(weights, learningRate);
@@ -152,13 +151,14 @@ public class GraphSageModelTrainer {
             batch -> new BatchTask(lossFunction(batch, graph, features, getBatchIndex(batch)), weights, tolerance)
         );
 
-
+        double totalLoss = Double.NaN;
         int iteration = 1;
         for (;iteration <= maxIterations; iteration++) {
             progressLogger.logStart(":: Iteration " + iteration);
 
             // run forward + maybe backward for each Batch
             ParallelUtil.run(batchTasks, executor);
+            totalLoss = batchTasks.stream().mapToDouble(BatchTask::loss).sum();
 
             var converged = batchTasks.stream().allMatch(task -> task.converged);
             if (converged) {
@@ -168,17 +168,17 @@ public class GraphSageModelTrainer {
 
             batchTasks.forEach(task -> updater.update(task.weightGradients()));
 
-            var avgLoss = batchTasks.stream().mapToDouble(task -> task.prevLoss).average().orElseThrow();
-
             progressLogger.getLog().debug(
                 "Epoch %d LOSS: %.10f at iteration %d",
                 epoch,
-                avgLoss,
+                totalLoss,
                 iteration
             );
 
             progressLogger.logFinish(":: Iteration " + iteration);
         }
+
+        return totalLoss;
     }
 
     static class BatchTask implements Runnable {
