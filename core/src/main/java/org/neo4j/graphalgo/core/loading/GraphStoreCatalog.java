@@ -24,6 +24,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.utils.StringJoining;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
@@ -51,24 +52,34 @@ public final class GraphStoreCatalog {
         if (maybeGraph != null) {
             return maybeGraph;
         }
-        var allMatchingGraphs = userCatalogs
-            .values()
+
+        var usersWithMatchingGraphs = userCatalogs
+            .entrySet()
             .stream()
-            .flatMap(c -> Stream.ofNullable(c.get(userCatalogKey, false)))
+            .flatMap(e -> Stream
+                .ofNullable(e.getValue().get(userCatalogKey, false))
+                .map(graph -> Map.entry(e.getKey(), graph)))
             .collect(Collectors.toList());
 
-        if (allMatchingGraphs.size() == 1) {
-            return allMatchingGraphs.get(0);
+        if (usersWithMatchingGraphs.size() == 1) {
+            return usersWithMatchingGraphs.get(0).getValue();
         }
 
-        if (allMatchingGraphs.isEmpty()) {
+        if (usersWithMatchingGraphs.isEmpty()) {
             // suggests only own graphs names
             throw ownCatalog.graphNotFoundException(userCatalogKey);
         }
 
+        var usernames = StringJoining.joinVerbose(
+            usersWithMatchingGraphs.stream()
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet())
+        );
+
         throw new IllegalArgumentException(formatWithLocale(
-            "Multiple graphs that match '%s' are found",
-            graphName
+            "Multiple graphs that match '%s' are found from the users %s.",
+            graphName,
+            usernames
         ));
     }
 
@@ -101,9 +112,11 @@ public final class GraphStoreCatalog {
         }
 
         if (usersWithMatchingGraphs.size() > 1) {
+            var usernames = StringJoining.joinVerbose(usersWithMatchingGraphs);
             throw new IllegalArgumentException(formatWithLocale(
-                "Multiple graphs that match '%s' are found",
-                graphName
+                "Multiple graphs that match '%s' are found from the users %s.",
+                graphName,
+                usernames
             ));
         }
 

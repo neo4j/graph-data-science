@@ -134,7 +134,7 @@ class GraphStoreCatalogTest {
         GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
 
         assertThatThrownBy(() -> GraphStoreCatalog.get(CatalogRequest.ofAdmin("admin", DATABASE_ID), GRAPH_NAME))
-            .hasMessage("Multiple graphs that match '%s' are found", GRAPH_NAME);
+            .hasMessage("Multiple graphs that match '%s' are found from the users alice and bob.", GRAPH_NAME);
     }
 
     @Test
@@ -287,7 +287,7 @@ class GraphStoreCatalogTest {
             graphStoreWithConfig -> fail("Should not have removed the graph"),
             true
         ))
-            .hasMessage("Multiple graphs that match '%s' are found", GRAPH_NAME);
+            .hasMessage("Multiple graphs that match '%s' are found from the users alice and bob.", GRAPH_NAME);
     }
 
     @Test
