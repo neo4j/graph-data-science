@@ -1,7 +1,11 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    nokogiri (1.11.1-x86_64-linux)
+    mini_portile2 (2.5.1)
+    nokogiri (1.11.4)
+      mini_portile2 (~> 2.5.0)
+      racc (~> 1.4)
+    nokogiri (1.11.4-x86_64-linux)
       racc (~> 1.4)
     racc (1.5.2)
 
