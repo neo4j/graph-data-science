@@ -47,9 +47,7 @@ import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.internal.kernel.api.security.AdminActionOnResource;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -61,7 +59,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static java.util.function.Predicate.isEqual;
@@ -137,6 +134,10 @@ public abstract class BaseProc {
         );
     }
 
+    // this should be the same as the predefined role from enterprise-security
+    // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
+    private static final String PREDEFINED_ADMIN_ROLE = "admin";
+
     protected boolean isGdsAdmin() {
         if (transaction == null) {
             // No transaction available (likely we're in a test), no-one is admin here
@@ -146,24 +147,8 @@ public abstract class BaseProc {
             // Only GDS-EE knows the concept of GDS Admins
             return false;
         }
-        var securityContext = transaction.securityContext();
-
-        if (!AdminCheck.couldHaveAdminUser(securityContext)) {
-            // We are not running on a DB that supports RBAC
-            // Unlike Neo4j-CE, where everyone is admin, in GDS
-            // no one is admin by default
-            return false;
-        }
-
-        if (!securityContext.subject().hasUsername(username())) {
-            // Check that we actually have auth enabled and that the
-            // security context can make decisions about the user.
-            // no auth or anonymous auth always returns false here
-            return false;
-        }
-
-        // Check for full DBMS admin privileges
-        return securityContext.allowsAdminAction(AdminActionOnResource.ALL);
+        // only users wit te admin role are GDS admins
+        return transaction.securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
     }
 
     protected final GraphLoader newLoader(GraphCreateConfig createConfig, AllocationTracker tracker) {
@@ -314,23 +299,5 @@ public abstract class BaseProc {
     @FunctionalInterface
     public interface FreeMemoryInspector {
         long freeMemory();
-    }
-
-    private static final class AdminCheck {
-
-        private static final Predicate<SecurityContext> NEO4JEE_SECURITY_CONTEXT_CHECK = findNeo4jEnterpriseSecurityContext();
-
-        private static boolean couldHaveAdminUser(SecurityContext securityContext) {
-            return NEO4JEE_SECURITY_CONTEXT_CHECK.test(securityContext);
-        }
-
-        private static Predicate<SecurityContext> findNeo4jEnterpriseSecurityContext() {
-            try {
-                var cls = Class.forName("com.neo4j.kernel.enterprise.api.security.EnterpriseSecurityContext");
-                return cls::isInstance;
-            } catch (ClassNotFoundException ce) {
-                return always -> false;
-            }
-        }
     }
 }
