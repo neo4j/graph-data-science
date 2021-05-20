@@ -149,38 +149,35 @@ public class GraphSageModelTrainer {
         var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
-            batch -> new BatchTask(lossFunction(batch, graph, features, getBatchIndex(batch)), weights)
+            batch -> new BatchTask(lossFunction(batch, graph, features, getBatchIndex(batch)), weights, tolerance)
         );
 
-        double newLoss = Double.MAX_VALUE;
-        double oldLoss;
 
         int iteration = 1;
         for (;iteration <= maxIterations; iteration++) {
-            progressLogger.logStart(":: Iteration " + (iteration));
-            oldLoss = newLoss;
+            progressLogger.logStart(":: Iteration " + iteration);
 
-            // run forward + backward for each Batch and store loss + localWeightGradients
+            // run forward + maybe backward for each Batch
             ParallelUtil.run(batchTasks, executor);
 
-            newLoss = batchTasks.stream().mapToDouble(task -> task.loss).average().orElseThrow();
-            double lossDiff = Math.abs((oldLoss - newLoss) / oldLoss);
-
-            if (lossDiff < tolerance) {
-                progressLogger.logFinish(":: Iteration " + (iteration));
+            var converged = batchTasks.stream().allMatch(task -> task.converged);
+            if (converged) {
+                progressLogger.logFinish(":: Iteration " + iteration);
                 break;
             }
 
             batchTasks.forEach(task -> updater.update(task.weightGradients()));
 
+            var avgLoss = batchTasks.stream().mapToDouble(task -> task.prevLoss).average().orElseThrow();
+
             progressLogger.getLog().debug(
                 "Epoch %d LOSS: %.10f at iteration %d",
                 epoch,
-                newLoss,
+                avgLoss,
                 iteration
             );
 
-            progressLogger.logFinish(":: Iteration " + (iteration));
+            progressLogger.logFinish(":: Iteration " + iteration);
         }
     }
 
@@ -188,27 +185,41 @@ public class GraphSageModelTrainer {
 
         private final Variable<Scalar> lossFunction;
         private final List<Weights<? extends Tensor<?>>> weightVariables;
-        private double loss;
         private Stream<Tensor<?>> weightGradients;
+        private final double tolerance;
+        private boolean converged;
+        private double prevLoss;
 
         BatchTask(
             Variable<Scalar> lossFunction,
-            List<Weights<? extends Tensor<?>>> weightVariables
+            List<Weights<? extends Tensor<?>>> weightVariables,
+            double tolerance
         ) {
             this.lossFunction = lossFunction;
             this.weightVariables = weightVariables;
+            this.tolerance = tolerance;
+            this.prevLoss = Double.MAX_VALUE;
         }
 
         @Override
         public void run() {
             var localCtx = new ComputationContext();
-            loss = localCtx.forward(lossFunction).value();
-            localCtx.backward(lossFunction);
-            weightGradients = weightVariables.stream().map(localCtx::gradient);
+            var loss = localCtx.forward(lossFunction).value();
+
+            converged = Math.abs(prevLoss - loss) < tolerance;
+            prevLoss = loss;
+            if (!converged) {
+                localCtx.backward(lossFunction);
+                weightGradients = weightVariables.stream().map(localCtx::gradient);
+            }
+        }
+
+        public boolean converged() {
+            return converged;
         }
 
         public double loss() {
-            return loss;
+            return prevLoss;
         }
 
         public Stream<Tensor<?>> weightGradients() {
