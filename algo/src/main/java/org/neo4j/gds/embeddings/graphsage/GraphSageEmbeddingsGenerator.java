@@ -77,8 +77,7 @@ public class GraphSageEmbeddingsGenerator {
 
         progressLogger.logStart();
 
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
+        var tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
             partition -> createEmbeddings(graph, partition, features, result)

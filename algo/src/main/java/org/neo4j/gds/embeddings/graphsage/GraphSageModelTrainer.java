@@ -144,8 +144,7 @@ public class GraphSageModelTrainer {
 
         AtomicInteger batchCounter = new AtomicInteger(0);
 
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
+        var tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
             batch -> (Runnable) () -> trainOnBatch(
@@ -219,8 +218,7 @@ public class GraphSageModelTrainer {
     ) {
         DoubleAdder doubleAdder = new DoubleAdder();
 
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
+        var tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
             batch -> (Runnable) () -> {

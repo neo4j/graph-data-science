@@ -163,8 +163,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
         long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
         float sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
-        List<Runnable> tasks = PartitionUtils.rangePartition(
-            concurrency,
+        List<Runnable> tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
             partition -> new InitRandomVectorTask(
@@ -188,8 +187,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
             double iterationWeight = iterationWeights.get(i).doubleValue();
             final boolean firstIteration = i == 0;
 
-            List<Runnable> tasks = PartitionUtils.rangePartition(
-                concurrency,
+            List<Runnable> tasks = PartitionUtils.rangePartitionWithBatchSize(
                 graph.nodeCount(),
                 batchSize,
                 partition -> new PropagateEmbeddingsTask(
