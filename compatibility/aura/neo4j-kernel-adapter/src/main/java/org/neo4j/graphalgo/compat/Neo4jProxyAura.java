@@ -72,8 +72,8 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -112,7 +112,6 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -212,14 +211,21 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
     }
 
     @Override
+    public boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
+        return NodeLabelIndexLookupAura.hasNodeLabelIndex(kernelTransaction);
+    }
+
+    @Override
     public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
-        Iterator<IndexDescriptor> nodeIndexes = kernelTransaction
-            .schemaRead()
-            .index(SchemaDescriptor.forAnyEntityTokens(EntityType.NODE));
-        if (!nodeIndexes.hasNext()) {
+        var nodeLabelIndexDescriptor = NodeLabelIndexLookupAura.findUsableMatchingIndex(
+            kernelTransaction,
+            SchemaDescriptor.forAnyEntityTokens(EntityType.NODE)
+        );
+
+        if (nodeLabelIndexDescriptor == IndexDescriptor.NO_INDEX) {
             throw new IllegalStateException("There is no index that can back a node label scan.");
         }
-        IndexDescriptor nodeLabelIndexDescriptor = nodeIndexes.next();
+
         try {
             var read = kernelTransaction.dataRead();
             var session = read.tokenReadSession(nodeLabelIndexDescriptor);
