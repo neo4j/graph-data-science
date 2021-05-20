@@ -34,6 +34,7 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.ImportLogic;
+import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.cache.LongArray;
 import org.neo4j.internal.batchimport.cache.NumberArrayFactory;
@@ -369,6 +370,10 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
                 return false;
             }
 
+            @Override
+            public IndexConfig indexConfig() {
+                return IndexConfig.DEFAULT.withLabelIndex();
+            }
         };
         return factory.instantiate(
             directoryStructure,
