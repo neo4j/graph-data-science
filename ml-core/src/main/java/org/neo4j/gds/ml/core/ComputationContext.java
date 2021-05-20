@@ -39,6 +39,7 @@ public class ComputationContext {
         this.gradients = new ConcurrentHashMap<>();
     }
 
+    // Only one forward call is expected for the caching strategy
     public <T extends Tensor<T>> T forward(Variable<T> variable) {
         var cachedData = (T) data.get(variable);
         if (cachedData != null) {

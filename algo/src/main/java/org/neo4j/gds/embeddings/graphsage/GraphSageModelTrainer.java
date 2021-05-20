@@ -29,7 +29,6 @@ import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.PassthroughVariable;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
-import org.neo4j.gds.ml.core.optimizer.Updater;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
@@ -58,6 +57,7 @@ import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
@@ -149,13 +149,8 @@ public class GraphSageModelTrainer {
         var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
-            batch -> new BatchTask (
-                lossFunction(batch, graph, features, getBatchIndex(batch)),
-                updater
-            )
+            batch -> new BatchTask(lossFunction(batch, graph, features, getBatchIndex(batch)), weights)
         );
-
-        var backwardTasks = batchTasks.stream().map(task -> (Runnable) task::backward).collect(Collectors.toList());
 
         double newLoss = Double.MAX_VALUE;
         double oldLoss;
@@ -165,7 +160,7 @@ public class GraphSageModelTrainer {
             progressLogger.logStart(":: Iteration " + (iteration));
             oldLoss = newLoss;
 
-            // run the iteration for each Batch
+            // run forward + backward for each Batch and store loss + localWeightGradients
             ParallelUtil.run(batchTasks, executor);
 
             newLoss = batchTasks.stream().mapToDouble(task -> task.loss).average().orElseThrow();
@@ -176,10 +171,7 @@ public class GraphSageModelTrainer {
                 break;
             }
 
-            // propage new loss and update
-            ParallelUtil.run(backwardTasks, executor);
-
-            batchTasks.forEach(BatchTask::update);
+            batchTasks.forEach(task -> updater.update(task.weightGradients()));
 
             progressLogger.getLog().debug(
                 "Epoch %d LOSS: %.10f at iteration %d",
@@ -194,36 +186,33 @@ public class GraphSageModelTrainer {
 
     static class BatchTask implements Runnable {
 
-        private final Updater updater;
-        private final ComputationContext localCtx;
         private final Variable<Scalar> lossFunction;
+        private final List<Weights<? extends Tensor<?>>> weightVariables;
         private double loss;
+        private Stream<Tensor<?>> weightGradients;
 
         BatchTask(
             Variable<Scalar> lossFunction,
-            Updater updater
+            List<Weights<? extends Tensor<?>>> weightVariables
         ) {
-
-            this.updater = updater;
-            this.localCtx = new ComputationContext();
             this.lossFunction = lossFunction;
+            this.weightVariables = weightVariables;
         }
 
         @Override
         public void run() {
+            var localCtx = new ComputationContext();
             loss = localCtx.forward(lossFunction).value();
-        }
-
-        public void backward() {
             localCtx.backward(lossFunction);
+            weightGradients = weightVariables.stream().map(localCtx::gradient);
         }
 
         public double loss() {
             return loss;
         }
 
-        public void update() {
-            updater.update(localCtx);
+        public Stream<Tensor<?>> weightGradients() {
+            return weightGradients;
         }
     }
 
