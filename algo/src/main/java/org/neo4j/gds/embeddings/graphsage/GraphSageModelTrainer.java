@@ -118,7 +118,7 @@ public class GraphSageModelTrainer {
         var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
-            batch -> new BatchTask(lossFunction(batch, graph, features, getBatchIndex(batch)), weights, tolerance)
+            batch -> new BatchTask(lossFunction(batch, graph, features), weights, tolerance)
         );
 
         double initialLoss = evaluateLoss(batchTasks.stream().map(BatchTask::forwardTask).collect(Collectors.toList()));
@@ -260,8 +260,8 @@ public class GraphSageModelTrainer {
         return lossValue;
     }
 
-    private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features, int batchIndex) {
-        var batchLocalRandomSeed = batchIndex + randomSeed;
+    private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features) {
+        var batchLocalRandomSeed = getBatchIndex(batch) + randomSeed;
 
         var neighbours = neighborBatch(graph, batch, batchLocalRandomSeed).toArray();
 
