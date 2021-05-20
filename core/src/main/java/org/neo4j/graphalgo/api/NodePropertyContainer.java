@@ -28,6 +28,7 @@ public interface NodePropertyContainer {
 
     /**
      * Return the property values for a property key
+     * NOTE: Avoid using this on the hot path, favor caching the NodeProperties object when possible
      *
      * @param propertyKey the node property key
      * @return the values associated with that key

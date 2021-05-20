@@ -25,13 +25,16 @@ import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
-import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
 public class LinkLogisticRegressionPredictor extends LinkLogisticRegressionBase {
 
-    public LinkLogisticRegressionPredictor(LinkLogisticRegressionData modelData, List<String> featureProperties, List<FeatureExtractor> extractors) {
+    public LinkLogisticRegressionPredictor(
+        LinkLogisticRegressionData modelData,
+        List<String> featureProperties,
+        List<FeatureExtractor> extractors
+    ) {
         super(modelData, featureProperties, extractors);
     }
 
