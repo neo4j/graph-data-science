@@ -39,7 +39,7 @@ final class NodeLabelIndexLookup43 {
         ) != IndexDescriptor.NO_INDEX;
     }
 
-    private static IndexDescriptor findUsableMatchingIndex(
+    static IndexDescriptor findUsableMatchingIndex(
         KernelTransaction transaction,
         SchemaDescriptor schemaDescriptor
     ) {

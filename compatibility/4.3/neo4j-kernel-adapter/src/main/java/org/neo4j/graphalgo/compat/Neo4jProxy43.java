@@ -113,7 +113,6 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -219,13 +218,15 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
 
     @Override
     public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
-        Iterator<IndexDescriptor> nodeIndexes = kernelTransaction
-            .schemaRead()
-            .index(SchemaDescriptor.forAnyEntityTokens(EntityType.NODE));
-        if (!nodeIndexes.hasNext()) {
+        var nodeLabelIndexDescriptor = NodeLabelIndexLookup43.findUsableMatchingIndex(
+            kernelTransaction,
+            SchemaDescriptor.forAnyEntityTokens(EntityType.NODE)
+        );
+
+        if (nodeLabelIndexDescriptor == IndexDescriptor.NO_INDEX) {
             throw new IllegalStateException("There is no index that can back a node label scan.");
         }
-        IndexDescriptor nodeLabelIndexDescriptor = nodeIndexes.next();
+
         try {
             var read = kernelTransaction.dataRead();
             var session = read.tokenReadSession(nodeLabelIndexDescriptor);
