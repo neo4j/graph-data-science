@@ -39,11 +39,12 @@ import static com.google.testing.compile.JavaFileObjects.forResource;
 import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import static com.google.testing.compile.JavaSourceSubjectFactory.javaSource;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.jupiter.api.condition.JRE.JAVA_16;
+import static org.junit.jupiter.api.condition.JRE.JAVA_12;
 
-// Need to disable this for Java versions >= 16
-// See https://github.com/google/compile-testing/issues/222
-@DisabledForJreRange(min = JAVA_16)
+// Need to disable this for Java versions > 11
+// There are unusual test errors on jdk15 and jdk16
+// Also see https://github.com/google/compile-testing/issues/222
+@DisabledForJreRange(min = JAVA_12)
 @EnableRuleMigrationSupport
 class ConfigurationProcessorTest {
 
