@@ -57,7 +57,6 @@ import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
@@ -185,7 +184,7 @@ public class GraphSageModelTrainer {
 
         private final Variable<Scalar> lossFunction;
         private final List<Weights<? extends Tensor<?>>> weightVariables;
-        private Stream<Tensor<?>> weightGradients;
+        private List<? extends Tensor<?>> weightGradients;
         private final double tolerance;
         private boolean converged;
         private double prevLoss;
@@ -210,7 +209,7 @@ public class GraphSageModelTrainer {
             prevLoss = loss;
             if (!converged) {
                 localCtx.backward(lossFunction);
-                weightGradients = weightVariables.stream().map(localCtx::gradient);
+                weightGradients = weightVariables.stream().map(localCtx::gradient).collect(Collectors.toList());
             }
         }
 
@@ -222,7 +221,7 @@ public class GraphSageModelTrainer {
             return prevLoss;
         }
 
-        public Stream<Tensor<?>> weightGradients() {
+        public List<? extends Tensor<?>> weightGradients() {
             return weightGradients;
         }
     }

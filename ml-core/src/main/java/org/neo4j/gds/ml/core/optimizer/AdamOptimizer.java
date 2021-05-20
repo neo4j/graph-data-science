@@ -29,7 +29,6 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
@@ -78,21 +77,17 @@ public class AdamOptimizer implements Updater {
 
     // TODO: probably doesnt have to be synchronized
     public synchronized void update(ComputationContext otherCtx) {
-        var localWeightGradients = weights.stream().map(otherCtx::gradient);
+        var localWeightGradients = weights.stream().map(otherCtx::gradient).collect(Collectors.toList());
         update(localWeightGradients);
 
     }
 
-    public synchronized void update(Stream<? extends Tensor<?>> contextLocalWeightGradients) {
+    public synchronized void update(List<? extends Tensor<?>> contextLocalWeightGradients) {
         iteration += 1;
-
-        var clippedGradients = contextLocalWeightGradients
-            .map(gradient -> gradient.mapInPlace(this::clip))
-            .collect(Collectors.toList());
 
         for (int i = 0; i < weights.size(); i++) {
             var weight = this.weights.get(i);
-            var gradient = clippedGradients.get(i);
+            var gradient = contextLocalWeightGradients.get(i).mapInPlace(this::clip);
 
             // m_t = beta_1 * m_t + (1 - beta_1) * g_t
             var momentumTerm = momentumTerms.get(i);
