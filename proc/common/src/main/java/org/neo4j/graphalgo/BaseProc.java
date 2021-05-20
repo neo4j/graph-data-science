@@ -147,7 +147,7 @@ public abstract class BaseProc {
             // Only GDS-EE knows the concept of GDS Admins
             return false;
         }
-        // only users wit te admin role are GDS admins
+        // only users with the admin role are GDS admins
         return transaction.securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
     }
 
