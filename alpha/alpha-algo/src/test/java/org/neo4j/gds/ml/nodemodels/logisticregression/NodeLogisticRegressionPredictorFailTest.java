@@ -48,7 +48,7 @@ public class NodeLogisticRegressionPredictorFailTest extends FeatureExtractionBa
     public void shouldEstimateMemoryUsage() {
         var memoryUsageInBytes = NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(100, 10, 10);
 
-        int memoryUsageOfFeatureExtractors = 256; // 24 bytes * number of features plus 16 for size of BiasFeature
+        int memoryUsageOfFeatureExtractors = 336; // 32 bytes * number of features plus 16 for size of BiasFeature
         int memoryUsageOfFeatureMatrix = 8016; // 8 bytes * batch size * number of features + 16
         int memoryUsageOfMatrixMultiplication = 8016; // 8 bytes per double * batchSize * numberOfClasses + 16
         int memoryUsageOfSoftMax = memoryUsageOfMatrixMultiplication; // computed over the matrix multiplication, it requires an equally-sized matrix

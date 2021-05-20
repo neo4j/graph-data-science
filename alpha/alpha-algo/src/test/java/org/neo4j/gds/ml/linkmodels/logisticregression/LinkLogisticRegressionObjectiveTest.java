@@ -123,7 +123,7 @@ class LinkLogisticRegressionObjectiveTest {
         var l2norm = 24;                            // 8 bytes for a double + 16 for the double array
         var constantScale = 24;                     // 8 bytes for a double + 16 for the double array
         var elementSum = 24;                        // 8 bytes for a double + 16 for the double array
-        var predictor = 9888;                       // from LinkLogisticRegressionPredictorTest
+        var predictor = 9968;                       // from LinkLogisticRegressionPredictorTest
 
         var trainEpoch = makeTargets +
                          weightedFeatures +

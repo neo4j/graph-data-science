@@ -29,7 +29,7 @@ public class NodeLogisticRegressionPredictorTest {
     public void shouldEstimateMemoryUsage() {
         var memoryUsageInBytes = NodeLogisticRegressionPredictor.sizeOfPredictionsVariableInBytes(100, 10, 10);
 
-        int memoryUsageOfFeatureExtractors = 240; // 24 bytes * number of features
+        int memoryUsageOfFeatureExtractors = 320; // 32 bytes * number of features
         int memoryUsageOfFeatureMatrix = 8032; // 8 bytes * batch size * number of features + 32
         int memoryUsageOfMatrixMultiplication = 8000; // 8 bytes per double * batchSize * numberOfClasses
         int memoryUsageOfSoftMax = memoryUsageOfMatrixMultiplication; // computed over the matrix multiplication, it requires an equally-sized matrix

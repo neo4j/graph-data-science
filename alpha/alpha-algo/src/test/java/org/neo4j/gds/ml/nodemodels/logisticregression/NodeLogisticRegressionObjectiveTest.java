@@ -85,7 +85,7 @@ class NodeLogisticRegressionObjectiveTest {
         var l2norm = 8 + 16;                        // 8 bytes for a double + 16 for the double array
         var constantScale = 8 + 16;                 // 8 bytes for a double + 16 for the double array
         var elementSum = 8 + 16;                    // 8 bytes for a double + 16 for the double array
-        var predictor = 24304;                      // black box, not from this class
+        var predictor = 24384;                      // black box, not from this class
 
         var trainEpoch = makeTargets +
                          weightedFeatures +

@@ -99,7 +99,7 @@ class LinkLogisticRegressionPredictorTest {
     public void shouldEstimateMemoryUsage() {
         var memoryUsageInBytes = LinkLogisticRegressionPredictor.sizeOfBatchInBytes(100, 10);
 
-        int memoryUsageOfFeatureExtractors = 240; // 24 bytes * number of features
+        int memoryUsageOfFeatureExtractors = 320; // 32 bytes * number of features
         int memoryUsageOfFeatureMatrix = 8016; // 8 bytes * batch size * number of features + 16
         int memoryUsageOfMatrixMultiplication = 816; // 8 bytes per double * batchSize + 16
         int memoryUsageOfSigmoid = 816; // 8 bytes per double * batchSize + 16
