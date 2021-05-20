@@ -73,8 +73,9 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
         return result;
     }
 
-    public void mapInPlace(DoubleUnaryOperator f) {
+    public Tensor<SELF> mapInPlace(DoubleUnaryOperator f) {
         Arrays.setAll(data, i -> f.applyAsDouble(data[i]));
+        return this;
     }
 
     // TODO: figure out how to replace this one

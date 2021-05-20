@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
@@ -77,12 +78,21 @@ public class AdamOptimizer implements Updater {
 
     // TODO: probably doesnt have to be synchronized
     public synchronized void update(ComputationContext otherCtx) {
+        var localWeightGradients = weights.stream().map(otherCtx::gradient);
+        update(localWeightGradients);
+
+    }
+
+    public synchronized void update(Stream<? extends Tensor<?>> contextLocalWeightGradients) {
         iteration += 1;
-        weights.forEach(weight -> otherCtx.gradient(weight).mapInPlace(this::clip));
+
+        var clippedGradients = contextLocalWeightGradients
+            .map(gradient -> gradient.mapInPlace(this::clip))
+            .collect(Collectors.toList());
 
         for (int i = 0; i < weights.size(); i++) {
-            var variable = weights.get(i);
-            var gradient = otherCtx.gradient(variable);
+            var weight = this.weights.get(i);
+            var gradient = clippedGradients.get(i);
 
             // m_t = beta_1 * m_t + (1 - beta_1) * g_t
             var momentumTerm = momentumTerms.get(i);
@@ -106,7 +116,7 @@ public class AdamOptimizer implements Updater {
             var vCap = updatedVelocityTerm.scalarMultiply(1d / (1 - Math.pow(beta_2, iteration)));
 
             // theta_0 = theta_0 - (alpha * m_cap) / (math.sqrt(v_cap) + epsilon)	#updates the parameters
-            var theta_0 = variable.data();
+            var theta_0 = weight.data();
             theta_0.addInPlace(mCap
                 .scalarMultiply(-alpha)
                 .elementwiseProduct(vCap.map(v -> 1 / (Math.sqrt(v) + epsilon)))
