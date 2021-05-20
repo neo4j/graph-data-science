@@ -206,7 +206,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             List.of(
                 map(
                     "graphName", null,
-                    "modelInfo", aMapWithSize(2),
+                    "modelInfo", aMapWithSize(3),
                     "graphCreateConfig", aMapWithSize(4),
                     "configuration", isA(Map.class),
                     "trainMillis", greaterThan(0L)
@@ -239,7 +239,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             List.of(
                 map(
                     "graphName", null,
-                    "modelInfo", aMapWithSize(2),
+                    "modelInfo", aMapWithSize(3),
                     "graphCreateConfig", aMapWithSize(4),
                     "configuration", isA(Map.class),
                     "trainMillis", greaterThan(0L)
