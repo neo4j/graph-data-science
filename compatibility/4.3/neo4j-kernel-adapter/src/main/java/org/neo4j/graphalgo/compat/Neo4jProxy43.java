@@ -138,13 +138,17 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
 
     @Override
     public SecurityContext securityContext(
-        String username, AuthSubject authSubject, AccessMode mode
+        String username,
+        AuthSubject authSubject,
+        AccessMode mode,
+        String databaseName
     ) {
         return new SecurityContext(
             new CompatUsernameAuthSubject43(username, authSubject),
             mode,
             // GDS is always operating from an embedded context
-            ClientConnectionInfo.EMBEDDED_CONNECTION
+            ClientConnectionInfo.EMBEDDED_CONNECTION,
+            databaseName
         );
     }
 

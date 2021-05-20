@@ -131,9 +131,10 @@ public final class Neo4jProxy {
     public static SecurityContext securityContext(
         String username,
         AuthSubject authSubject,
-        AccessMode mode
+        AccessMode mode,
+        String databaseName
     ) {
-        return IMPL.securityContext(username, authSubject, mode);
+        return IMPL.securityContext(username, authSubject, mode, databaseName);
     }
 
     public static long getHighestPossibleIdInUse(

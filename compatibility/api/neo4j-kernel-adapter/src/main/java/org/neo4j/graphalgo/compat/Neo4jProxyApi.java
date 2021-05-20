@@ -94,7 +94,8 @@ public interface Neo4jProxyApi {
     SecurityContext securityContext(
         String username,
         AuthSubject authSubject,
-        AccessMode mode
+        AccessMode mode,
+        String databaseName
     );
 
     long getHighestPossibleIdInUse(

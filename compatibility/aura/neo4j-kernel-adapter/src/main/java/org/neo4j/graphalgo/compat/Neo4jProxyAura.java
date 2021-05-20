@@ -137,7 +137,10 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
 
     @Override
     public SecurityContext securityContext(
-        String username, AuthSubject authSubject, AccessMode mode
+        String username,
+        AuthSubject authSubject,
+        AccessMode mode,
+        String databaseName
     ) {
         return new SecurityContext(
             new CompatUsernameAuthSubjectAura(username, authSubject),

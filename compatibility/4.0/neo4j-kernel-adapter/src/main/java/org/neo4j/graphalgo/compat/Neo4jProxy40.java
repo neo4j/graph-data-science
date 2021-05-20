@@ -124,7 +124,8 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     public SecurityContext securityContext(
         String username,
         AuthSubject authSubject,
-        AccessMode mode
+        AccessMode mode,
+        String databaseName
     ) {
         return new SecurityContext(new CompatUsernameAuthSubject40(username, authSubject), mode);
     }

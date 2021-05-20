@@ -53,7 +53,7 @@ public final class QueryRunner {
         BiConsumer<Transaction, Result.ResultRow> rowConsumer
     ) {
         runInTransaction(db, tx -> {
-            try (KernelTransaction.Revertable ignored = withUsername(tx, username);
+            try (KernelTransaction.Revertable ignored = withUsername(tx, username, db.databaseName());
                  Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 result.accept(row -> {
                     rowConsumer.accept(tx, row);
@@ -115,7 +115,7 @@ public final class QueryRunner {
     ) {
         return applyInTransaction(db, tx -> {
             try (
-                KernelTransaction.Revertable ignored = withUsername(tx, username);
+                KernelTransaction.Revertable ignored = withUsername(tx, username, db.databaseName());
                 Result result = runQueryWithoutClosingTheResult(tx, query, params)
             ) {
                 return resultFunction.apply(result);
@@ -130,7 +130,7 @@ public final class QueryRunner {
         Map<String, Object> params
     ) {
         runInTransaction(db, tx -> {
-            try (KernelTransaction.Revertable ignored = withUsername(tx, username);
+            try (KernelTransaction.Revertable ignored = withUsername(tx, username, db.databaseName());
                  Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 result.accept(CONSUME_ROWS);
             }
@@ -171,10 +171,10 @@ public final class QueryRunner {
         });
     }
 
-    private static KernelTransaction.Revertable withUsername(Transaction tx, String username) {
+    private static KernelTransaction.Revertable withUsername(Transaction tx, String username, String databaseName) {
         InternalTransaction topLevelTransaction = (InternalTransaction) tx;
         AuthSubject subject = topLevelTransaction.securityContext().subject();
-        var securityContext = Neo4jProxy.securityContext(username, subject, READ);
+        var securityContext = Neo4jProxy.securityContext(username, subject, READ, databaseName);
         return topLevelTransaction.overrideWith(securityContext);
     }
 }
