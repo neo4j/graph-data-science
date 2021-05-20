@@ -28,8 +28,6 @@ import org.neo4j.internal.schema.IndexType;
 import org.neo4j.internal.schema.SchemaDescriptor;
 import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.Iterator;
-
 final class NodeLabelIndexLookupAura {
 
     static boolean hasNodeLabelIndex(KernelTransaction transaction) {
@@ -43,10 +41,11 @@ final class NodeLabelIndexLookupAura {
         KernelTransaction transaction,
         SchemaDescriptor schemaDescriptor
     ) {
-        SchemaRead schemaRead = transaction.schemaRead();
-        Iterator<IndexDescriptor> iterator = schemaRead.index(schemaDescriptor);
+        var schemaRead = transaction.schemaRead();
+        var iterator = schemaRead.index(schemaDescriptor);
+
         while (iterator.hasNext()) {
-            IndexDescriptor index = iterator.next();
+            var index = iterator.next();
             if (index.getIndexType() != IndexType.FULLTEXT && indexIsOnline(schemaRead, index)) {
                 return index;
             }
@@ -55,7 +54,7 @@ final class NodeLabelIndexLookupAura {
     }
 
     private static boolean indexIsOnline(SchemaRead schemaRead, IndexDescriptor index) {
-        InternalIndexState state = InternalIndexState.FAILED;
+        var state = InternalIndexState.FAILED;
         try {
             state = schemaRead.indexGetState(index);
         } catch (IndexNotFoundKernelException e) {
