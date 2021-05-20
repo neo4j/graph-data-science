@@ -369,10 +369,6 @@ public final class Neo4jProxy43 implements Neo4jProxyApi {
                 return false;
             }
 
-            @Override
-            public boolean populateNodeIndex() {
-                return true;
-            }
         };
         return factory.instantiate(
             directoryStructure,
