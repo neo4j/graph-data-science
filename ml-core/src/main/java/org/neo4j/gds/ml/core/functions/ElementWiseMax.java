@@ -75,23 +75,21 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        Tensor<?> result = ctx.data(parent).zeros();
+        var result = (Matrix) ctx.data(parent).zeros();
 
         var rows = adjacencyMatrix.length;
-        var cols = parent.dimension(Dimensions.COLUMNS_INDEX);
+        var cols = result.cols();
 
-        double[] parentData = ctx.data(parent).data();
-        double[] thisGradient = ctx.gradient(this).data();
-        double[] thisData = ctx.data(this).data();
+        var parentData = (Matrix) ctx.data(parent);
+        var thisGradient = ctx.gradient(this);
+        var thisData = ctx.data(this);
 
         for (int row = 0; row < rows; row++) {
             int[] neighbors = this.adjacencyMatrix[row];
             for (int col = 0; col < cols; col++) {
                 for (int neighbor : neighbors) {
-                    int thisElementIndex = row * cols + col;
-                    int neighborElementIndex = neighbor * cols + col;
-                    if (DoubleUtil.compareWithDefaultThreshold(parentData[neighborElementIndex], thisData[thisElementIndex])) {
-                        result.addDataAt(neighborElementIndex, thisGradient[thisElementIndex]);
+                    if (DoubleUtil.compareWithDefaultThreshold(parentData.dataAt(neighbor, col), thisData.dataAt(row, col))) {
+                        result.addDataAt(neighbor, col, thisGradient.dataAt(row, col));
                     }
                 }
             }
