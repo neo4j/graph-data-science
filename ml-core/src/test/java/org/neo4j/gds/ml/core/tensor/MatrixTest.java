@@ -138,6 +138,24 @@ class MatrixTest {
         assertThat(matrix.dataAt(1, 0)).isEqualTo(4);
         assertThat(matrix.dataAt(1, 1)).isEqualTo(-5);
         assertThat(matrix.dataAt(1, 2)).isEqualTo(0);
+    }
 
+    @Test
+    void testAddDataAtRowCol() {
+        Matrix matrix = Matrix.fill(1, 2, 3);
+
+        matrix.addDataAt(0, 0, 1.5);
+        matrix.addDataAt(0, 1, .1);
+        matrix.addDataAt(0, 2, 1.9);
+        matrix.addDataAt(1, 0, 4);
+        matrix.addDataAt(1, 1, -5);
+        matrix.addDataAt(1, 2, 0);
+
+        assertThat(matrix.dataAt(0, 0)).isEqualTo(1 + 1.5);
+        assertThat(matrix.dataAt(0, 1)).isEqualTo(1 + .1);
+        assertThat(matrix.dataAt(0, 2)).isEqualTo(1 + 1.9);
+        assertThat(matrix.dataAt(1, 0)).isEqualTo(1 + 4);
+        assertThat(matrix.dataAt(1, 1)).isEqualTo(1 + -5);
+        assertThat(matrix.dataAt(1, 2)).isEqualTo(1 + 0);
     }
 }

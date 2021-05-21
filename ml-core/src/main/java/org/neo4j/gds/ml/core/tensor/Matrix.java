@@ -57,6 +57,10 @@ public class Matrix extends Tensor<Matrix> {
         setDataAt(row * columns + column, newValue);
     }
 
+    public void addDataAt(int row, int column, double newValue) {
+        setDataAt(row, column, dataAt(row, column) + newValue);
+    }
+
     @Override
     public Matrix zeros() {
         return fill(0D, rows(), cols());
