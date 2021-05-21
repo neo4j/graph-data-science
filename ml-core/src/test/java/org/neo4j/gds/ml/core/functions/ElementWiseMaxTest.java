@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContextBaseTest;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
@@ -31,31 +30,29 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ElementwiseMaxTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
-
-    private Weights<Matrix> weights;
-
-    @BeforeEach
-    protected void setup() {
-        super.setup();
-        weights = new Weights<>(new Matrix(new double[]{
-            1, 2, 3,
-            3, 2, 1,
-            1, 3, 2
-        }, 3, 3));
-    }
+class ElementWiseMaxTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
 
     @Test
     void testApply() {
-        int[][] adjacencyMatrix = {
-            new int[]{},
-            new int[]{0, 1, 2}
-        };
-        Variable<Matrix> max = new ElementwiseMax(weights, adjacencyMatrix);
+        var parent = new Weights<>(new Matrix(new double[]{
+            1, 2, 3,
+            5, 2, 1,
+            9, 4, 2
+        }, 3, 3));
+
+        var adjacencyMatrix = new int[2][3];
+
+        // Node 0 --> no neighbours
+        adjacencyMatrix[0] = new int[]{};
+
+        // Node 1 --> three neighbours
+        adjacencyMatrix[1] = new int[]{0, 1, 2};
+
+        Variable<Matrix> max = new ElementWiseMax(parent, adjacencyMatrix);
 
         var expected = new Matrix(new double[]{
-            0, 0, 0,
-            3, 3, 3
+            0, 0, 0,    // Node 0 --> no neighbours --> 0s
+            9, 4, 3     //
         }, 2, 3);
 
         assertThat(ctx.forward(max)).isEqualTo(expected);
@@ -63,12 +60,18 @@ public class ElementwiseMaxTest extends ComputationContextBaseTest implements Fi
 
     @Test
     void shouldApproximateGradient() {
+        var weights = new Weights<>(new Matrix(new double[]{
+            1, 2, 3,
+            3, 2, 1,
+            1, 3, 2
+        }, 3, 3));
+
         int[][] adjacencyMatrix = {
             new int[]{},
             new int[]{0, 1, 2},
             new int[]{}
         };
-        ElementSum sum = new ElementSum(List.of(new ElementwiseMax(weights, adjacencyMatrix)));
+        ElementSum sum = new ElementSum(List.of(new ElementWiseMax(weights, adjacencyMatrix)));
         Variable<Scalar> loss = new ConstantScale<>(sum, 2);
         finiteDifferenceShouldApproximateGradient(weights, loss);
     }

@@ -26,37 +26,46 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.graphalgo.core.utils.DoubleUtil;
 
-public class ElementwiseMax extends SingleParentVariable<Matrix> {
-    private final int[][] adjacencyMatrix;
-    private final int rows;
-    private final int cols;
 
-    public ElementwiseMax(Variable<Matrix> parent, int[][] adjacencyMatrix) {
-        super(parent, Dimensions.matrix(adjacencyMatrix.length, parent.dimension(1)));
+/*
+    Column-wise, element-wise maximum
+        Parent matrix       n x m
+        Adjacency matrix    p x q
+        Result              p x n
+
+    Assumption:
+        Neighbour node IDs are smaller than the row count of the parent matrix
+
+    int[nodes][neighbours] adjacencyMatrix
+ */
+public class ElementWiseMax extends SingleParentVariable<Matrix> {
+    private final Variable<Matrix> parent;
+    private final int[][] adjacencyMatrix;
+
+    public ElementWiseMax(Variable<Matrix> parent, int[][] adjacencyMatrix) {
+        super(parent, Dimensions.matrix(adjacencyMatrix.length, parent.dimension(Dimensions.COLUMNS_INDEX)));
+        this.parent = parent;
         this.adjacencyMatrix = adjacencyMatrix;
-        this.rows = adjacencyMatrix.length;
-        this.cols = parent.dimension(1);
     }
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        Matrix max = Matrix.fill(Double.NEGATIVE_INFINITY, rows, cols);
+        var parentData = ctx.data(parent);
 
-        double[] parentData = ctx.data(parent()).data();
+        var rows = adjacencyMatrix.length;
+        var cols = parentData.cols();
+
+        var max = Matrix.fill(Double.NEGATIVE_INFINITY, rows, cols);
+
         for (int row = 0; row < rows; row++) {
             int[] neighbors = this.adjacencyMatrix[row];
             for(int col = 0; col < cols; col++) {
-                int resultElementIndex = row * cols + col;
                 if (neighbors.length > 0) {
                     for (int neighbor : neighbors) {
-                        int neighborElementIndex = neighbor * cols + col;
-                        max.setDataAt(
-                            resultElementIndex,
-                            Math.max(parentData[neighborElementIndex], max.dataAt(resultElementIndex))
-                        );
+                        max.setDataAt(row, col, Math.max(parentData.dataAt(neighbor, col), max.dataAt(row, col)));
                     }
                 } else {
-                    max.setDataAt(resultElementIndex, 0);
+                    max.setDataAt(row, col, 0);
                 }
             }
         }
@@ -68,11 +77,14 @@ public class ElementwiseMax extends SingleParentVariable<Matrix> {
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         Tensor<?> result = ctx.data(parent).zeros();
 
+        var rows = adjacencyMatrix.length;
+        var cols = parent.dimension(Dimensions.COLUMNS_INDEX);
+
         double[] parentData = ctx.data(parent).data();
         double[] thisGradient = ctx.gradient(this).data();
         double[] thisData = ctx.data(this).data();
 
-        for (int row = 0; row < this.adjacencyMatrix.length; row++) {
+        for (int row = 0; row < rows; row++) {
             int[] neighbors = this.adjacencyMatrix[row];
             for (int col = 0; col < cols; col++) {
                 for (int neighbor : neighbors) {

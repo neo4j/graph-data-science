@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.functions.ElementwiseMax;
+import org.neo4j.gds.ml.core.functions.ElementWiseMax;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
 import org.neo4j.gds.ml.core.functions.MatrixSum;
 import org.neo4j.gds.ml.core.functions.MatrixVectorSum;
@@ -76,7 +76,7 @@ public class MaxPoolingAggregator implements Aggregator {
             relationshipWeightsFunction ->
                 // Weighted with respect to the Relationship Weights
                 new WeightedElementwiseMax(neighborhoodActivations, relationshipWeightsFunction, subGraph)
-        ).orElse(new ElementwiseMax(neighborhoodActivations, subGraph.adjacency));
+        ).orElse(new ElementWiseMax(neighborhoodActivations, subGraph.adjacency));
 
 
         Variable<Matrix> selfPreviousLayer = new Slice(previousLayerRepresentations, subGraph.selfAdjacency);
