@@ -29,7 +29,7 @@ RETURN gds.version() AS version
 [opts="header"]
 |===
 | version
-| "1.6.0-alpha07"
+| "1.7.0-alpha01"
 |===
 --
 
