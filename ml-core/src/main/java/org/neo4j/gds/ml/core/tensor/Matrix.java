@@ -27,12 +27,18 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Matrix extends Tensor<Matrix> {
 
+    // FIXME: Adjust memory estimation because we added these two fields
+    private final int columns;
+    private final int rows;
+
     public static long sizeInBytes(int rows, int cols) {
         return MemoryUsage.sizeOfDoubleArray(rows * cols);
     }
 
     public Matrix(double[] data, int rows, int cols) {
         super(data, Dimensions.matrix(rows, cols));
+        this.rows = rows;
+        this.columns = cols;
     }
 
     public Matrix(int rows, int cols) {
@@ -41,6 +47,10 @@ public class Matrix extends Tensor<Matrix> {
 
     public static Matrix fill(double v, int rows, int cols) {
         return new Matrix(ArrayUtil.fill(v, rows * cols), rows, cols);
+    }
+
+    public double dataAt(int row, int col) {
+        return dataAt(row * columns + col);
     }
 
     @Override
@@ -78,11 +88,11 @@ public class Matrix extends Tensor<Matrix> {
     }
 
     public int rows() {
-        return dimensions[Dimensions.ROWS_INDEX];
+        return rows;
     }
 
     public int cols() {
-        return dimensions[Dimensions.COLUMNS_INDEX];
+        return columns;
     }
 
     public boolean isVector() {

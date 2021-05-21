@@ -103,4 +103,21 @@ class MatrixTest {
         var _10_05 = Matrix.sizeInBytes(10, 5);
         assertThat(_05_10).isEqualTo(_10_05);
     }
+
+    @Test
+    void testDataAtRowCol() {
+        Matrix matrix = new Matrix(new double[]{
+            1.5D, .1, 1.9,
+            4D, -5D, 0
+        }, 2, 3);
+
+
+        assertThat(matrix.dataAt(0, 0)).isEqualTo(1.5);
+        assertThat(matrix.dataAt(0, 1)).isEqualTo(.1);
+        assertThat(matrix.dataAt(0, 2)).isEqualTo(1.9);
+        assertThat(matrix.dataAt(1, 0)).isEqualTo(4);
+        assertThat(matrix.dataAt(1, 1)).isEqualTo(-5);
+        assertThat(matrix.dataAt(1, 2)).isEqualTo(0);
+
+    }
 }
