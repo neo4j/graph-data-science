@@ -120,4 +120,24 @@ class MatrixTest {
         assertThat(matrix.dataAt(1, 2)).isEqualTo(0);
 
     }
+
+    @Test
+    void testSetDataAtRowCol() {
+        Matrix matrix = Matrix.fill(0, 2, 3);
+
+        matrix.setDataAt(0, 0, 1.5);
+        matrix.setDataAt(0, 1, .1);
+        matrix.setDataAt(0, 2, 1.9);
+        matrix.setDataAt(1, 0, 4);
+        matrix.setDataAt(1, 1, -5);
+        matrix.setDataAt(1, 2, 0);
+
+        assertThat(matrix.dataAt(0, 0)).isEqualTo(1.5);
+        assertThat(matrix.dataAt(0, 1)).isEqualTo(.1);
+        assertThat(matrix.dataAt(0, 2)).isEqualTo(1.9);
+        assertThat(matrix.dataAt(1, 0)).isEqualTo(4);
+        assertThat(matrix.dataAt(1, 1)).isEqualTo(-5);
+        assertThat(matrix.dataAt(1, 2)).isEqualTo(0);
+
+    }
 }
