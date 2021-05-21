@@ -29,8 +29,7 @@ public enum Neo4jVersion {
     V_4_0,
     V_4_1,
     V_4_2,
-    V_4_3,
-    V_Aura;
+    V_4_3;
 
     @Override
     public String toString() {
@@ -43,8 +42,6 @@ public enum Neo4jVersion {
                 return "4.2";
             case V_4_3:
                 return "4.3";
-            case V_Aura:
-                return "aura";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
@@ -79,19 +76,6 @@ public enum Neo4jVersion {
     }
 
     static Neo4jVersion parse(String version) {
-        // Aura relevant implementation detail
-        //
-        // `Version.getNeo4jVersion()` allows for a system property override: `unsupported.neo4j.custom.version`
-        //
-        // This override is used by Aura for reasons relevant to them, setting the version to something like `4.2-Aura`.
-        // Before parsing the version according to major+minor version, we check if the version has this Aura suffix.
-        // If it does we set the `Neo4jVersion` to `V_Aura`.
-        //
-        // TODO: Having to fall back to matching the physical version because the version override isn't working the
-        //       way it was intended.
-        if (version.endsWith("-aura") || version.equals("4.3.0-drop04.0")) {
-            return Neo4jVersion.V_Aura;
-        }
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)
             .limit(2)
