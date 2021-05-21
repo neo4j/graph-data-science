@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.similarity.nodesim;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -96,6 +97,27 @@ final class NodeSimilarityTest {
         ", (d)-[:LIKES {prop: 1.0}]->(i2)" +
         ", (d)-[:LIKES {prop: 1.0}]->(i3)";
 
+    @GdlGraph(graphNamePrefix = "naturalUnion", orientation = NATURAL)
+    private static final String DB_CYPHER_UNION =
+        "CREATE" +
+        "  (a:Person)" +
+        ", (b:Person)" +
+        ", (c:Person)" +
+        ", (d:Person)" +
+        ", (i1:Item)" +
+        ", (i2:Item)" +
+        ", (i3:Item)" +
+        ", (i4:Item)" +
+        ", (a)-[:LIKES3 {prop: 1.0}]->(i1)" +
+        ", (a)-[:LIKES2 {prop: 1.0}]->(i2)" +
+        ", (a)-[:LIKES1 {prop: 2.0}]->(i3)" +
+        ", (b)-[:LIKES2 {prop: 1.0}]->(i1)" +
+        ", (b)-[:LIKES1 {prop: 1.0}]->(i2)" +
+        ", (c)-[:LIKES3 {prop: 1.0}]->(i3)" +
+        ", (d)-[:LIKES2 {prop: 0.5}]->(i1)" +
+        ", (d)-[:LIKES3 {prop: 1.0}]->(i2)" +
+        ", (d)-[:LIKES1 {prop: 1.0}]->(i3)";
+
     @Inject
     private TestGraph naturalGraph;
 
@@ -104,6 +126,9 @@ final class NodeSimilarityTest {
 
     @Inject
     private TestGraph undirectedGraph;
+
+    @Inject
+    private TestGraph naturalUnionGraph;
 
     private static final Collection<String> EXPECTED_OUTGOING = new HashSet<>();
     private static final Collection<String> EXPECTED_INCOMING = new HashSet<>();
@@ -465,6 +490,29 @@ final class NodeSimilarityTest {
         Set<SimilarityResult> result = nodeSimilarity.computeToStream().collect(Collectors.toSet());
         nodeSimilarity.release();
         assertNotEquals(Collections.emptySet(), result);
+    }
+
+    @Test
+    void shouldComputeForUnionGraphs() {
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
+            naturalGraph,
+            configBuilder().concurrency(1).build(),
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
+        );
+        var result1 = nodeSimilarity.computeToStream().collect(Collectors.toSet());
+
+        nodeSimilarity = new NodeSimilarity(
+            naturalUnionGraph,
+            configBuilder().concurrency(1).build(),
+            Pools.DEFAULT,
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
+        );
+        var result2 = nodeSimilarity.computeToStream().collect(Collectors.toSet());
+
+        assertEquals(result1, result2);
     }
 
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")

@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.similarity.SimilarityGraphBuilder;
 import org.neo4j.graphalgo.similarity.SimilarityGraphResult;
 import org.neo4j.graphalgo.similarity.SimilarityResult;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
@@ -44,6 +45,7 @@ import java.util.stream.Stream;
 public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResult> {
 
     private final Graph graph;
+    private final boolean sortVectors;
     private final NodeSimilarityBaseConfig config;
 
     private final ExecutorService executorService;
@@ -65,6 +67,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         AllocationTracker tracker
     ) {
         this.graph = graph;
+        this.sortVectors = graph.schema().relationshipSchema().availableTypes().size() > 1;
         this.config = config;
         this.executorService = executorService;
         this.progressLogger = progressLogger;
@@ -174,6 +177,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                 vectorComputer.forEachRelationship(node);
                 if (weighted) {
                     weights.set(node, vectorComputer.getWeights());
+                }
+                if (sortVectors) {
+                    Arrays.sort(vectorComputer.targetIds.buffer);
                 }
                 return vectorComputer.targetIds.buffer;
             }
