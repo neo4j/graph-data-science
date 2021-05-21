@@ -67,13 +67,13 @@ class AdamicAdarDocTest extends BaseProcTest {
         @Language("Cypher")
         String query = " MATCH (p1:Person {name: 'Michael'})" +
                        " MATCH (p2:Person {name: 'Karin'})" +
-                       " RETURN gds.alpha.linkprediction.adamicAdar(p1, p2) AS score";
+                       " RETURN round(gds.alpha.linkprediction.adamicAdar(p1, p2), 11) AS score";
 
-        String expectedString = "+--------------------+" + NL +
-                                "| score              |" + NL +
-                                "+--------------------+" + NL +
-                                "| 0.9102392266268373 |" + NL +
-                                "+--------------------+" + NL +
+        String expectedString = "+---------------+" + NL +
+                                "| score         |" + NL +
+                                "+---------------+" + NL +
+                                "| 0.91023922663 |" + NL +
+                                "+---------------+" + NL +
                                 "1 row" + NL;
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedString, result.resultAsString()));
