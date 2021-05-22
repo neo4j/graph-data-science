@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.DoubleUtil;
     Column-wise, element-wise maximum
         Parent matrix       n x m
         Adjacency matrix    p x q
-        Result              p x n
+        Result              p x m
 
     Assumption:
         Neighbour node IDs are smaller than the row count of the parent matrix

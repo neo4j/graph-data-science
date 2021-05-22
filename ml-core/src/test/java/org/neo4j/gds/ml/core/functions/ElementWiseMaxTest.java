@@ -37,8 +37,9 @@ class ElementWiseMaxTest extends ComputationContextBaseTest implements FiniteDif
         var parent = new Weights<>(new Matrix(new double[]{
             1, 2, 3,
             5, 2, 1,
-            9, 4, 2
-        }, 3, 3));
+            9, 4, 2,
+            1, 1, 1
+        }, 4, 3));
 
         var adjacencyMatrix = new int[2][3];
 
