@@ -158,4 +158,23 @@ class MatrixTest {
         assertThat(matrix.dataAt(1, 1)).isEqualTo(1 + -5);
         assertThat(matrix.dataAt(1, 2)).isEqualTo(1 + 0);
     }
+
+    @Test
+    void testUpdateDataAtRowCol() {
+        Matrix matrix = Matrix.fill(2, 2, 3);
+
+        matrix.updateDataAt(0, 0, v -> v * v);
+        matrix.updateDataAt(0, 1, v -> v - 1);
+        matrix.updateDataAt(0, 2, v -> v / 4);
+        matrix.updateDataAt(1, 0, v -> v + 1);
+        matrix.updateDataAt(1, 1, v -> v);
+        matrix.updateDataAt(1, 2, v -> v * 5);
+
+        assertThat(matrix.dataAt(0, 0)).isEqualTo(4);
+        assertThat(matrix.dataAt(0, 1)).isEqualTo(1);
+        assertThat(matrix.dataAt(0, 2)).isEqualTo(0.5);
+        assertThat(matrix.dataAt(1, 0)).isEqualTo(3);
+        assertThat(matrix.dataAt(1, 1)).isEqualTo(2);
+        assertThat(matrix.dataAt(1, 2)).isEqualTo(10);
+    }
 }

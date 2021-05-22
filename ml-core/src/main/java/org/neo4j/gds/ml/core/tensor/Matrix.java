@@ -23,6 +23,8 @@ import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
+import java.util.function.DoubleUnaryOperator;
+
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Matrix extends Tensor<Matrix> {
@@ -58,7 +60,11 @@ public class Matrix extends Tensor<Matrix> {
     }
 
     public void addDataAt(int row, int column, double newValue) {
-        setDataAt(row, column, dataAt(row, column) + newValue);
+        updateDataAt(row, column, v -> v + newValue);
+    }
+
+    public void updateDataAt(int row, int column, DoubleUnaryOperator updater) {
+        setDataAt(row, column, updater.applyAsDouble(dataAt(row, column)));
     }
 
     @Override
