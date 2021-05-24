@@ -73,7 +73,7 @@ include::specific-train-configuration.adoc[]
 |===
 | Name        | Type    | Description
 | ranEpochs   | Integer | The number of ran epochs during training.
-| epochLosses | List    | Ordered list of the losses after each epoch. The first value is the initial loss before training.
+| epochLosses | List    | Ordered list of the losses after each epoch.
 | didConverge | Boolean | Indicates if the training has converged.
 |===
 

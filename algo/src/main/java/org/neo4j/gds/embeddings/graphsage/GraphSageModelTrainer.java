@@ -109,7 +109,6 @@ public class GraphSageModelTrainer {
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
         progressLogger.logStart();
-        var epochLosses = new ArrayList<Double>();
 
         this.layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
@@ -122,17 +121,15 @@ public class GraphSageModelTrainer {
             batch -> new BatchTask(lossFunction(batch, graph, features), weights, tolerance)
         );
 
-        double initialLoss = evaluateLoss(batchTasks);
-
-        epochLosses.add(0, initialLoss);
-        double previousLoss = initialLoss;
+        double previousLoss = Double.MAX_VALUE;
         boolean converged = false;
+        var epochLosses = new ArrayList<Double>();
         for (int epoch = 1; epoch <= epochs; epoch++) {
             var epochMessage = ":: Epoch " + epoch;
             progressLogger.logStart(epochMessage);
 
             double newLoss = trainEpoch(batchTasks, epoch);
-            epochLosses.add(epoch, newLoss);
+            epochLosses.add(newLoss);
             progressLogger.logFinish(epochMessage);
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
                 converged = true;
@@ -142,7 +139,7 @@ public class GraphSageModelTrainer {
         }
         progressLogger.logFinish();
 
-        return ModelTrainResult.of(initialLoss, epochLosses, converged, this.layers);
+        return ModelTrainResult.of(epochLosses, converged, this.layers);
     }
 
     private double trainEpoch(List<BatchTask> batchTasks, int epoch) {
@@ -219,13 +216,6 @@ public class GraphSageModelTrainer {
             }
         }
 
-        Runnable forwardTask() {
-            return () -> {
-                var localCtx = new ComputationContext();
-                prevLoss = localCtx.forward(lossFunction).value();
-            };
-        }
-
         public boolean converged() {
             return converged;
         }
@@ -237,18 +227,6 @@ public class GraphSageModelTrainer {
         List<? extends Tensor<?>> weightGradients() {
             return weightGradients;
         }
-    }
-
-    private double evaluateLoss(List<BatchTask> batchTasks) {
-
-        ParallelUtil.run(
-            batchTasks.stream().map(BatchTask::forwardTask).collect(Collectors.toList()),
-            executor
-        );
-
-        var lossValue = batchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
-        progressLogger.getLog().debug("Initial Loss: %s", lossValue);
-        return lossValue;
     }
 
     private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features) {
@@ -345,10 +323,9 @@ public class GraphSageModelTrainer {
 
         @Value.Derived
         default int ranEpochs() {
-            // Exclude the `initialLoss`
             return epochLosses().isEmpty()
                 ? 0
-                : epochLosses().size() - 1;
+                : epochLosses().size();
         }
 
         @Override
@@ -372,7 +349,6 @@ public class GraphSageModelTrainer {
         Layer[] layers();
 
         static ModelTrainResult of(
-            double startLoss,
             List<Double> epochLosses,
             boolean converged,
             Layer[] layers
