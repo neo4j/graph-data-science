@@ -3,25 +3,31 @@
 
 [abstract]
 --
-This chapter contains details for functionality available in the Neo4j Graph Data Science Library that doesn't belong in any of the other categories.
+This section describes logging features in the Neo4j Graph Data Science Library.
 --
 
-== Utility procedures
+In the GDS library there are generally two types of logging: debug logging and progress logging.
+
+*Debug logging* is performed as part of any operation, detailing activities or events that are deemed interesting for analysis purpose.
+This includes troubleshooting after an unexpected error as well as system administrator monitoring.
+
+*Progress logging* is performed to track the progress of operations that are expected to take a long time.
+This includes graph projections, algorithm computation, and result writing.
+
+All log entries are written to the physical logs configured by the database configuration.
+For more information on configuring physical logs, please refer to the https://neo4j.com/docs/operations-manual/current/monitoring/logging/#logging[Neo4j Operations Manual].
+
 
 [.beta]
-=== Progress Logging Procedure
+== Progress Logging Procedure
 
-This is a procedure that can show the log entries of a long-running task or algorithm.
+Progress logging events may also be maintained by the GDS library itself.
+To enable this, the Neo4j configuration must include the entry `gds.progress_tracking_enabled=true`.
+This enables a procedure that can show the log entries of a long-running task or algorithm.
 
-[NOTE]
-====
-In order to use the Progress Logging feature, you must first enable it via Neo4j configuration,
-by setting `gds.progress_tracking_enabled=true` in the `neo4j.conf` configuration file of your Neo4j installation.
-====
+=== Syntax
 
-==== Syntax
-
-.Getting the proggress of tasks:
+.Getting the progress of tasks:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.listProgress()
@@ -36,7 +42,7 @@ YIELD
 * `taskName`: the name of the running task, i.e. `Node2Vec`.
 * `message`: the progress log message, same as what is logged to the `debug.log` file.
 
-==== Examples
+=== Examples
 
 Assuming we just started `gds.beta.node2vec.stream` procedure.
 
