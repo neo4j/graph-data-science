@@ -122,10 +122,7 @@ public class GraphSageModelTrainer {
             batch -> new BatchTask(lossFunction(batch, graph, features), weights, tolerance)
         );
 
-        double initialLoss = evaluateLoss(batchTasks.stream().map(BatchTask::forwardTask).collect(Collectors.toList()));
-
-        // Propagate the initial loss to the batch tasks
-        batchTasks.forEach(batchTask -> batchTask.initLoss(initialLoss));
+        double initialLoss = evaluateLoss(batchTasks);
 
         epochLosses.add(0, initialLoss);
         double previousLoss = initialLoss;
@@ -152,8 +149,6 @@ public class GraphSageModelTrainer {
         List<Weights<? extends Tensor<?>>> weights = getWeights();
 
         var updater = new AdamOptimizer(weights, learningRate);
-
-        // Change: no generateNewRandomState for each batch
 
         double totalLoss = Double.NaN;
         int iteration = 1;
@@ -209,7 +204,6 @@ public class GraphSageModelTrainer {
             this.lossFunction = lossFunction;
             this.weightVariables = weightVariables;
             this.tolerance = tolerance;
-            this.prevLoss = Double.MAX_VALUE;
         }
 
         @Override
@@ -225,6 +219,13 @@ public class GraphSageModelTrainer {
             }
         }
 
+        Runnable forwardTask() {
+            return () -> {
+                var localCtx = new ComputationContext();
+                prevLoss = localCtx.forward(lossFunction).value();
+            };
+        }
+
         public boolean converged() {
             return converged;
         }
@@ -233,45 +234,19 @@ public class GraphSageModelTrainer {
             return prevLoss;
         }
 
-        void initLoss(double initialLoss) {
-            prevLoss = initialLoss;
-        }
-
         List<? extends Tensor<?>> weightGradients() {
             return weightGradients;
         }
-
-        BatchForwardTask forwardTask() {
-            return new BatchForwardTask(lossFunction);
-        }
     }
 
-    static class BatchForwardTask implements Runnable {
+    private double evaluateLoss(List<BatchTask> batchTasks) {
 
-        private final Variable<Scalar> lossFunction;
-        private double loss;
+        ParallelUtil.run(
+            batchTasks.stream().map(BatchTask::forwardTask).collect(Collectors.toList()),
+            executor
+        );
 
-        BatchForwardTask(Variable<Scalar> lossFunction) {
-            this.lossFunction = lossFunction;
-            this.loss = Double.MAX_VALUE;
-        }
-
-        @Override
-        public void run() {
-            var localCtx = new ComputationContext();
-            loss = localCtx.forward(lossFunction).value();
-        }
-
-        public double loss() {
-            return loss;
-        }
-    }
-
-    private double evaluateLoss(List<BatchForwardTask> batchTasks) {
-
-        ParallelUtil.run(batchTasks, executor);
-
-        var lossValue = batchTasks.stream().mapToDouble(BatchForwardTask::loss).average().orElseThrow();
+        var lossValue = batchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
         progressLogger.getLog().debug("Initial Loss: %s", lossValue);
         return lossValue;
     }
