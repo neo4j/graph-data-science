@@ -22,8 +22,77 @@ To disambiguate between these graphs, the `username` configuration parameter can
 
 == Examples
 
-.Running the WCC algorithm using the graph `g` from the user `alice`
-[source,cypher]
+We will illustrate the administrator capabilities using a small example.
+In this example we have three users where one is an administrator.
+We create the users and set up the roles using the following Cypher commands:
+
+[source, cypher, role=noplay]
 ----
-CALL gds.wcc.stream('g', { username: 'alice'})
+CREATE USER alice SET PASSWORD $alice_pw CHANGE NOT REQUIRED;
+CREATE USER bob SET PASSWORD $bob_pw CHANGE NOT REQUIRED;
+CREATE USER carol SET PASSWORD $carol_pw CHANGE NOT REQUIRED;
+
+GRANT ROLE reader TO alice;
+GRANT ROLE reader TO bob;
+GRANT ROLE admin TO carol;
+----
+
+As we can see, `alice` and `bob` are standard users with read access to the database.
+`carol` is an administrator by virtue of being granted the `admin` role (for more information about this role see the https://neo4j.com/docs/cypher-manual/current/administration/security/administration/#administration-security-administration-introduction[Cypher manual]).
+
+Now `alice` and `bob` each create a few graphs.
+They both create a graph called `graphA` and `bob` also creates a graph called `graphB`.
+
+
+=== Listing
+
+To list all graphs from all users, `carol` simply uses the graph list procedure.
+
+.Listing all graphs as administrator user:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.list('graphB')
+YIELD graphName
+----
+
+.Results
+[opts="header"]
+|===
+| graphName
+| "graphA"
+| "graphA"
+| "graphB"
+|===
+
+Notice that all graphs from all users are visible to `carol` since they are considered a GDS admin.
+
+
+=== Running algorithms with other users' graphs
+
+`carol` may use `graphB` by simply naming it.
+
+.`carol` can run WCC on the `graphB` graph owned by `bob`:
+[source, cypher, role=noplay]
+----
+CALL gds.wcc.stats('graphB')
+YIELD componentCount
+----
+
+To use the `graphA` owned by `alice`, `carol` must use the `username` override.
+
+.`carol` can run WCC on `graphA` owned by `alice`:
+[source, cypher, role=noplay]
+----
+CALL gds.wcc.stats('graphA', { username: 'alice' })
+YIELD componentCount
+----
+
+
+=== Dropping other users' graphs
+
+Similar to listing, to drop `graphA` owned by `bob`, `carol` can run the following:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.drop('graphA', { username: 'bob' })
+YIELD graphName
 ----
