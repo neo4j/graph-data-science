@@ -157,7 +157,7 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, 
 [[estimate-heap-control]]
 == Automatic estimation and execution blocking
 
-All algorithm procedures in the GDS library, including graph creation, will do an estimation check at the beginning of their execution.
+All procedures in the GDS library that support estimation, including graph creation, will do an estimation check at the beginning of their execution.
 This includes all execution modes, but not the `estimate` procedures themselves.
 
 If the estimation check can determine that the current amount of free memory is insufficient to carry through the operation, the operation will be aborted and an error will be reported.
