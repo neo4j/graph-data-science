@@ -27,8 +27,9 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Vector extends Tensor<Vector> {
 
-    public Vector(double[] data) {
-        super(data, Dimensions.vector(data.length));
+    public Vector(double... elements) {
+        super(elements, Dimensions.vector(elements.length));
+
     }
 
     public Vector(int size) {

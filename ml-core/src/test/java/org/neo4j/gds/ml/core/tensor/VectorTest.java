@@ -35,12 +35,12 @@ class VectorTest {
 
         assertThat(zeros)
             .isNotSameAs(vector)
-            .isEqualTo(new Vector(new double[] {0, 0, 0, 0, 0}));
+            .isEqualTo(new Vector(0, 0, 0, 0, 0));
     }
 
     @Test
     void copiesVector() {
-        Vector vector = new Vector(new double[] { 3D, 2D, 1D});
+        Vector vector = new Vector(3D, 2D, 1D);
 
         Vector copy = vector.copy();
 
@@ -55,7 +55,7 @@ class VectorTest {
 
     @Test
     void copiesEmptyVector() {
-        Vector vector = new Vector(new double[0]);
+        Vector vector = new Vector();
 
         Vector copy = vector.copy();
 
@@ -66,21 +66,21 @@ class VectorTest {
 
     @Test
     void addsVector() {
-        Vector vector = new Vector(new double[] { 3D, 2D, 1D});
-        Vector vectorToAdd = new Vector(new double[] { 4D, 6D, 8D});
+        Vector vector = new Vector(3D, 2D, 1D);
+        Vector vectorToAdd = new Vector(4D, 6D, 8D);
 
         Vector sum = vector.add(vectorToAdd);
 
         assertThat(sum)
             .isNotSameAs(vector)
             .isNotSameAs(vectorToAdd)
-            .isEqualTo(new Vector(new double[]{7D, 8D, 9D}));
+            .isEqualTo(new Vector(7D, 8D, 9D));
     }
 
     @Test
     void failsOnDimensionsMismatch() {
-        Vector vector = new Vector(new double[] { 3D, 2D, 1D});
-        Vector vectorToAdd = new Vector(new double[] { 4D });
+        Vector vector = new Vector(3D, 2D, 1D);
+        Vector vectorToAdd = new Vector(4D);
 
         assertThrows(ArithmeticException.class, () -> vector.add(vectorToAdd));
     }
