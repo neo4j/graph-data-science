@@ -123,6 +123,10 @@ public class GraphSageModelTrainer {
         );
 
         double initialLoss = evaluateLoss(batchTasks.stream().map(BatchTask::forwardTask).collect(Collectors.toList()));
+
+        // Propagate the initial loss to the batch tasks
+        batchTasks.forEach(batchTask -> batchTask.initLoss(initialLoss));
+
         epochLosses.add(0, initialLoss);
         double previousLoss = initialLoss;
         boolean converged = false;
@@ -229,7 +233,11 @@ public class GraphSageModelTrainer {
             return prevLoss;
         }
 
-        public List<? extends Tensor<?>> weightGradients() {
+        void initLoss(double initialLoss) {
+            prevLoss = initialLoss;
+        }
+
+        List<? extends Tensor<?>> weightGradients() {
             return weightGradients;
         }
 
