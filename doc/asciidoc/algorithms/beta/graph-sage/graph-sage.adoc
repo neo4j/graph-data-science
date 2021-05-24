@@ -4,6 +4,7 @@
 :entity: node
 :result: embedding
 :modelType: GraphSAGE
+:algorithm: GraphSAGE
 
 [abstract]
 --
@@ -212,8 +213,12 @@ The results are the same as for running write mode with a named graph, see the <
 [[algorithms-embeddings-graph-sage-examples]]
 == Examples
 
-Consider the graph created by the following Cypher statement:
+:algorithm-name: {algorithm}
+:graph-description: friends network
+:image-file: graph-sage-graph.svg
+include::../../shared/examples-intro.adoc[]
 
+.The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
@@ -327,14 +332,22 @@ In the multi-label mode, it is no longer required that all labels have all the s
 
 In order to demonstrate GraphSAGE with multiple labels, we need to add a few more nodes and relationships to the example Graph.
 
+image::example-graphs/graph-sage-multi-label-graph.svg[Visualization of the multi-label example graph,align="center"]
+
+.The following Cypher statement will extend the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
+MATCH
+  (dan:Person {name: "Dan"}),
+  (annie:Person {name: "Annie"}),
+  (matt:Person {name: "Matt"}),
+  (brie:Person {name: "Brie"}),
+  (john:Person {name: "John"})
 CREATE
   (guitar:Instrument {name: 'Guitar', cost: 1337.0}),
   (synth:Instrument {name: 'Synthesizer', cost: 1337.0}),
   (bongos:Instrument {name: 'Bongos', cost: 42.0}),
   (trumpet:Instrument {name: 'Trumpet', cost: 1337.0}),
-
   (dan)-[:LIKES]->(guitar),
   (dan)-[:LIKES]->(synth),
   (dan)-[:LIKES]->(bongos),
