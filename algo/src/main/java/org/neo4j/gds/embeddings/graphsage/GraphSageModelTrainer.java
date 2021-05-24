@@ -205,15 +205,18 @@ public class GraphSageModelTrainer {
 
         @Override
         public void run() {
+            if(converged) { // Don't try to go further
+                return;
+            }
+
             var localCtx = new ComputationContext();
             var loss = localCtx.forward(lossFunction).value();
 
             converged = Math.abs(prevLoss - loss) < tolerance;
             prevLoss = loss;
-            if (!converged) {
-                localCtx.backward(lossFunction);
-                weightGradients = weightVariables.stream().map(localCtx::gradient).collect(Collectors.toList());
-            }
+
+            localCtx.backward(lossFunction);
+            weightGradients = weightVariables.stream().map(localCtx::gradient).collect(Collectors.toList());
         }
 
         public boolean converged() {
