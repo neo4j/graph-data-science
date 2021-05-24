@@ -23,6 +23,9 @@
             <d:tocentry linkend="running-algos">
                 <?dbhtml filename="common-usage/running-algos/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="logging">
+                <?dbhtml filename="common-usage/logging/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="management-ops"><?dbhtml filename="management-ops/index.html"?>
@@ -37,8 +40,6 @@
             <d:tocentry linkend="node-properties"><?dbhtml filename="management-ops/node-properties/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="utility-functions"><?dbhtml filename="management-ops/utility-functions/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="miscellaneous"><?dbhtml filename="management-ops/miscellaneous/index.html"?>
             </d:tocentry>
         </d:tocentry>
 
