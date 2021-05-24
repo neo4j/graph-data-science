@@ -19,6 +19,7 @@ The model contains three types of data:
 
 Memory configuration depends on the graph projection that we're using.
 
+
 [[estimate-procedure-algo]]
 == Estimating memory requirements for algorithms
 
@@ -27,38 +28,49 @@ To do this the `.estimate` mode can be used, which returns an estimate of the am
 Note that only algorithms in the production-ready tier are guaranteed to have an `.estimate` mode.
 For more details please refer to <<algorithms-syntax>>.
 
-.Syntax
+.Syntax outline:
 [source, cypher, role=noplay]
 ----
-CALL gds.<ALGO>.<MODE>.estimate(graphNameOrConfig: String|Map, configuration: Map)
-YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
+CALL gds[.<tier>].<algorithm>.<execution-mode>.estimate(
+  graphNameOrConfig: String or Map, configuration: Map
+) YIELD
+  nodeCount: Integer,
+  relationshipCount: Integer,
+  requiredMemory: String,
+  treeView: String,
+  mapView: Map,
+  bytesMin: Integer,
+  bytesMax: Integer,
+  heapPercentageMin: Float,
+  heapPercentageMax: Float
 ----
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type          | Default   | Optional  | Description
-| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or the algorithm configuration in case of implicit loading.
+| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or the algorithm configuration in the case of an anonymous graph.
 | configuration     | Map           | {}        | yes       | If the first parameter is the name of a projected graph, this parameter is the algorithm config, otherwise it needs to be null or an empty map.
 |===
 
-The configuration parameter accepts the same configuration parameters as the estimated algorithm.
-See the algorithm documentation for more information.
+The configuration map accepts the same configuration parameters as the estimated algorithm.
+See the specific algorithm documentation for more information.
 
 .Results
-[opts="header",cols="1,1,6"]
+[opts="header",cols="1m,1,6"]
 |===
 | Name                  | Type      | Description
+| nodeCount             | Integer   | The number of nodes in the graph.
+| relationshipCount     | Integer   | The number of relationships in the graph.
 | requiredMemory        | String    | An estimation of the required memory in a human readable format.
-| treeView              | String    | A more detailed, human readable representation of the required memory, including estimates of the different components.
-| mapView               | String    | A more detailed representation of the required memory, including estimates of the different components.
+| treeView              | String    | A more detailed representation of the required memory, including estimates of the different components in human readable format.
+| mapView               | Map       | A more detailed representation of the required memory, including estimates of the different components in structured format.
 | bytesMin              | Integer   | The minimum number of bytes required.
 | bytesMax              | Integer   | The maximum number of bytes required.
 | heapPercentageMin     | Float     | The minimum percentage of the configured maximum heap required.
 | heapPercentageMax     | Float     | The maximum percentage of the configured maximum heap required.
-| nodeCount             | Integer   | The estimated number of nodes in the graph
-| relationshipCount     | Integer   | The estimated number of relationships in the graph
 |===
+
 
 [[estimate-procedure-graph]]
 == Estimating memory requirements for graphs
