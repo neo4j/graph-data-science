@@ -1,10 +1,29 @@
+[.enterprise-edition]
 [[administration]]
 = Administration
 
 [abstract]
 --
-TODO
-
+This section explains administration capabilities in the Neo4j Graph Data Science library.
 --
 
+The GDS catalog offers elevated access to administrator users.
+Any user granted a role with the name `admin` is considered an administrator by GDS.
 
+A GDS administrator has access to graphs created by any other user.
+This includes the ability to list, drop and run algorithms over these graphs.
+
+
+== Disambiguating identically named graphs
+
+Sometimes, several users (including the admin user themselves) could have a graph with the same name.
+To disambiguate between these graphs, the `username` configuration parameter can be used.
+
+
+== Examples
+
+.Running the WCC algorithm using the graph `g` from the user `alice`
+[source,cypher]
+----
+CALL gds.wcc.stream('g', { username: 'alice'})
+----
