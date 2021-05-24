@@ -59,6 +59,7 @@ import java.util.stream.LongStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddings;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
+import static org.neo4j.gds.ml.core.tensor.TensorFunctions.averageTensors;
 
 public class GraphSageModelTrainer {
     private final long randomSeed;
@@ -165,7 +166,14 @@ public class GraphSageModelTrainer {
                 break;
             }
 
-            batchTasks.forEach(task -> updater.update(task.weightGradients()));
+            var batchedGradients = batchTasks
+                .stream()
+                .map(BatchTask::weightGradients)
+                .collect(Collectors.toList());
+
+            var meanGradients = averageTensors(batchedGradients);
+
+            updater.update(meanGradients);
 
             progressLogger.getLog().debug(
                 "Epoch %d LOSS: %.10f at iteration %d",
