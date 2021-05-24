@@ -42,6 +42,7 @@ import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -165,6 +166,14 @@ public final class Neo4jProxy {
 
     public static Path pagedFile(PagedFile pagedFile) {
         return IMPL.pagedFile(pagedFile);
+    }
+
+    public static Scan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
+        return IMPL.entityCursorScan(transaction, labelId);
+    }
+
+    public static List<Scan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
+        return IMPL.entityCursorScan(transaction, labelIds);
     }
 
     public static PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {

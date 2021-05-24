@@ -53,6 +53,7 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.TokenPredicate;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -114,6 +115,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class Neo4jProxyAura implements Neo4jProxyApi {
 
@@ -177,6 +179,23 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
     @Override
     public Path pagedFile(PagedFile pagedFile) {
         return pagedFile.path();
+    }
+
+    @Override
+    public Scan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
+        var read = transaction.dataRead();
+        read.prepareForLabelScans();
+        return read.nodeLabelScan(labelId);
+    }
+
+    @Override
+    public List<Scan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
+        var read = transaction.dataRead();
+        read.prepareForLabelScans();
+        return Arrays
+            .stream(labelIds)
+            .mapToObj(read::nodeLabelScan)
+            .collect(Collectors.toList());
     }
 
     @Override
