@@ -19,45 +19,10 @@
  */
 package org.neo4j.gds.paths;
 
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphdb.Node;
+import org.neo4j.graphalgo.config.SourceNodeConfig;
+import org.neo4j.graphalgo.config.TargetNodeConfig;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-
-public interface ShortestPathBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, TrackRelationshipsConfig {
-
-    String SOURCE_NODE_KEY = "sourceNode";
-    String TARGET_NODE_KEY = "targetNode";
-
-    @Configuration.ConvertWith("org.neo4j.gds.paths.ShortestPathBaseConfig#parseSourceNodeId")
-    long sourceNode();
-
-    @Configuration.ConvertWith("org.neo4j.gds.paths.ShortestPathBaseConfig#parseTargetNodeId")
-    long targetNode();
-
-    @SuppressWarnings("unused")
-    static long parseSourceNodeId(Object input) {
-        return parseNodeId(input, SOURCE_NODE_KEY);
-    }
-
-    @SuppressWarnings("unused")
-    static long parseTargetNodeId(Object input) {
-        return parseNodeId(input, TARGET_NODE_KEY);
-    }
-
-    static long parseNodeId(Object input, String field) {
-        if (input instanceof Node) {
-            return ((Node) input).getId();
-        } else if (input instanceof Number) {
-            return ((Number) input).longValue();
-        }
-
-        throw new IllegalArgumentException(formatWithLocale(
-            "Expected a node or a node id for `%s`. Got %s.",
-            field,
-            input.getClass().getSimpleName()
-        ));
-    }
+public interface ShortestPathBaseConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodeConfig, RelationshipWeightConfig, TrackRelationshipsConfig {
 }
