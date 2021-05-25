@@ -17,15 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43;
+package org.neo4j.graphalgo.compat._43;
 
-import org.neo4j.graphalgo.compat.CompatIndexQuery;
-import org.neo4j.internal.kernel.api.PropertyIndexQuery;
+import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
+import org.neo4j.memory.MemoryTracker;
 
-final class CompatIndexQueryImpl implements CompatIndexQuery {
-    final PropertyIndexQuery indexQuery;
+final class AllocationTrackerAdapterImpl implements AllocationTrackerAdapter {
 
-    CompatIndexQueryImpl(PropertyIndexQuery indexQuery) {
-        this.indexQuery = indexQuery;
+    private final MemoryTracker memoryTracker;
+
+    AllocationTrackerAdapterImpl(MemoryTracker memoryTracker) {
+        this.memoryTracker = memoryTracker;
+    }
+
+    @Override
+    public void add(long bytes) {
+        memoryTracker.allocateHeap(bytes);
+    }
+
+    @Override
+    public void remove(long bytes) {
+        memoryTracker.releaseHeap(bytes);
+    }
+
+    @Override
+    public long trackedBytes() {
+        return memoryTracker.estimatedHeapMemory();
     }
 }

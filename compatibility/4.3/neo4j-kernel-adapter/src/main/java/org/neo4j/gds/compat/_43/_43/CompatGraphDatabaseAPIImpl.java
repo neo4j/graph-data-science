@@ -17,16 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43;
+package org.neo4j.graphalgo.compat._43;
 
-import org.neo4j.graphalgo.compat.CompositeNodeCursor;
-import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
+import org.neo4j.kernel.impl.factory.DbmsInfo;
 
-import java.util.List;
+import java.nio.file.Path;
 
-public final class CompositeNodeCursorImpl extends CompositeNodeCursor {
+final class CompatGraphDatabaseAPIImpl extends GdsGraphDatabaseAPI {
 
-    CompositeNodeCursorImpl(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
-        super(cursors, labelIds);
+    CompatGraphDatabaseAPIImpl(DatabaseManagementService dbms) {
+        super(dbms);
+    }
+
+    @Override
+    public Path dbHome(Path workingDir) {
+        return api.databaseLayout().getNeo4jLayout().homeDirectory();
+    }
+
+    @Override
+    public DbmsInfo dbmsInfo() {
+        return api.dbmsInfo();
     }
 }
