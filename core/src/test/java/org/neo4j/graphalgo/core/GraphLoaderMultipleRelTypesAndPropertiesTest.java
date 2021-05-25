@@ -341,11 +341,11 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
             rel2
         )));
 
-        assertTrue(graphStore.hasRelationshipProperty(Collections.singletonList(rel1), prop1));
-        assertFalse(graphStore.hasRelationshipProperty(Collections.singletonList(rel1), prop2));
+        assertTrue(graphStore.hasRelationshipProperty(rel1, prop1));
+        assertFalse(graphStore.hasRelationshipProperty(rel1, prop2));
 
-        assertTrue(graphStore.hasRelationshipProperty(Collections.singletonList(rel2), prop2));
-        assertFalse(graphStore.hasRelationshipProperty(Collections.singletonList(rel2), prop1));
+        assertTrue(graphStore.hasRelationshipProperty(rel2, prop2));
+        assertFalse(graphStore.hasRelationshipProperty(rel2, prop1));
     }
 
 

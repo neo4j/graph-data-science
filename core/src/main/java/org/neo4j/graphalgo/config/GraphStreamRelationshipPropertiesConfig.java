@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
@@ -73,7 +72,7 @@ public interface GraphStreamRelationshipPropertiesConfig extends BaseConfig {
             // validate that all given labels have all the properties
             relationshipTypeIdentifiers(graphStore).forEach(relationshipType ->
                 relationshipProperties().forEach(relationshipProperty -> {
-                    if (!graphStore.hasRelationshipProperty(singletonList(relationshipType), relationshipProperty)) {
+                    if (!graphStore.hasRelationshipProperty(relationshipType, relationshipProperty)) {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Relationship projection '%s' does not have property key '%s'. Available keys: %s.",
                             relationshipType.name,
@@ -86,7 +85,7 @@ public interface GraphStreamRelationshipPropertiesConfig extends BaseConfig {
             // validate that at least one label has all the properties
             boolean hasValidType = relationshipTypeIdentifiers(graphStore).stream()
                 .anyMatch(relationshipType -> relationshipProperties().stream()
-                    .allMatch(relationshipProperty -> graphStore.hasRelationshipProperty(singletonList(relationshipType), relationshipProperty)));
+                    .allMatch(relationshipProperty -> graphStore.hasRelationshipProperty(relationshipType, relationshipProperty)));
 
             if (!hasValidType) {
                 throw new IllegalArgumentException(formatWithLocale(

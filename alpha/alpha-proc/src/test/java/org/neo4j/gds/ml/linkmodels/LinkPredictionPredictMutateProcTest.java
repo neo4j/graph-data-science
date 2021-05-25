@@ -117,7 +117,7 @@ class LinkPredictionPredictMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        assertTrue(graphStore.hasRelationshipProperty(List.of(RelationshipType.of("PREDICTED")), "probability"));
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED"), "probability"));
     }
 
     @Test
