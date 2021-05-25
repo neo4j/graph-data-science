@@ -3,27 +3,30 @@
 
 [abstract]
 --
-This section describes logging features in the Neo4j Graph Data Science Library.
+This section describes logging features in the Neo4j Graph Data Science library.
 --
 
 In the GDS library there are generally two types of logging: debug logging and progress logging.
 
-*Debug logging* is performed as part of any operation, detailing activities or events that are deemed interesting for analysis purpose.
-This includes troubleshooting after an unexpected error as well as system administrator monitoring.
+*Debug logging* provides information about events in the system.
+For example, when an algorithm computation completes, the amount of memory used and the total runtime may be logged.
+Exceptional events, when an operation fails to complete normally, are also logged.
+The debug log information is useful for understanding events in the system, especially when troubleshooting a problem.
 
 *Progress logging* is performed to track the progress of operations that are expected to take a long time.
 This includes graph projections, algorithm computation, and result writing.
 
-All log entries are written to the physical logs configured by the database configuration.
-For more information on configuring physical logs, please refer to the https://neo4j.com/docs/operations-manual/current/monitoring/logging/#logging[Neo4j Operations Manual].
+All log entries are written to the log files configured for the Neo4j database.
+For more information on configuring Neo4j logs, please refer to the https://neo4j.com/docs/operations-manual/current/monitoring/logging/#logging[Neo4j Operations Manual].
 
 
 [.beta]
-== Progress Logging Procedure
+== Progress-logging procedure
 
-Progress logging events may also be maintained by the GDS library itself.
-To enable this, the Neo4j configuration must include the entry `gds.progress_tracking_enabled=true`.
-This enables a procedure that can show the log entries of a long-running task or algorithm.
+Progress events may also be tracked by the GDS library itself.
+This makes it possible to inspect progress via Cypher, in addition to looking in the log files.
+To enable this feature, the Neo4j configuration must include the entry `gds.progress_tracking_enabled=true`.
+When the feature is enabled, a procedure is loaded that can be called to show progress events for currently running tasks.
 
 === Syntax
 
@@ -41,6 +44,7 @@ YIELD
 * `id`: generated identifier of the running task.
 * `taskName`: the name of the running task, i.e. `Node2Vec`.
 * `message`: the progress log message, same as what is logged to the `debug.log` file.
+
 
 === Examples
 
