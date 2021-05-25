@@ -38,6 +38,8 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
+import org.neo4j.graphalgo.SourceNodeConfigTest;
+import org.neo4j.graphalgo.TargetNodeConfigTest;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -62,7 +64,9 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     AlgoBaseProcTest<AStar, CONFIG, DijkstraResult>,
     MemoryEstimateTest<AStar, CONFIG, DijkstraResult>,
     HeapControlTest<AStar, CONFIG, DijkstraResult>,
-    RelationshipWeightConfigTest<AStar, CONFIG, DijkstraResult> {
+    RelationshipWeightConfigTest<AStar, CONFIG, DijkstraResult>,
+    SourceNodeConfigTest<AStar, CONFIG, DijkstraResult>,
+    TargetNodeConfigTest<AStar, CONFIG, DijkstraResult> {
 
     private static final String NODE_QUERY = "MATCH (n) RETURN id(n) AS id, n.latitude AS latitude, n.longitude AS longitude";
 

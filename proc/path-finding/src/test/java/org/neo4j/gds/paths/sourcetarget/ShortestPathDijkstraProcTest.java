@@ -30,6 +30,8 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
+import org.neo4j.graphalgo.SourceNodeConfigTest;
+import org.neo4j.graphalgo.TargetNodeConfigTest;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -44,7 +46,9 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
     AlgoBaseProcTest<Dijkstra, CONFIG, DijkstraResult>,
     MemoryEstimateTest<Dijkstra, CONFIG, DijkstraResult>,
     HeapControlTest<Dijkstra, CONFIG, DijkstraResult>,
-    RelationshipWeightConfigTest<Dijkstra, CONFIG, DijkstraResult> {
+    RelationshipWeightConfigTest<Dijkstra, CONFIG, DijkstraResult>,
+    SourceNodeConfigTest<Dijkstra, CONFIG, DijkstraResult>,
+    TargetNodeConfigTest<Dijkstra, CONFIG, DijkstraResult> {
 
     protected static final String GRAPH_NAME = "graph";
     long idA, idC, idD, idE, idF;
