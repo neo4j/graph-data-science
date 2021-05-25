@@ -1,5 +1,5 @@
 .General configuration for algorithm execution on a named graph.
-[opts="header",cols="1,1,1m,1,4"]
+[opts="header",cols="2,1,1m,1,4"]
 |===
 | Name                                                          | Type     | Default | Optional | Description
 
