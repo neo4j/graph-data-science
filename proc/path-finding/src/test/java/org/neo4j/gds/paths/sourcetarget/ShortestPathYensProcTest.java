@@ -22,6 +22,8 @@ package org.neo4j.gds.paths.sourcetarget;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
@@ -127,4 +129,44 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
     public void assertResultEquals(DijkstraResult result1, DijkstraResult result2) {
         Assertions.assertEquals(result1.pathSet(), result2.pathSet());
     }
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunOnEmptyGraph() {
+        // graph must not be empty
+    }
+
+    // disabling tests from org.neo4j.graphalgo.RelationshipWeightConfigTest
+
+    // The following tests are disabled since we have no means of
+    // setting a valid source and/or target node id to succeed in
+    // graphstore+config validation.
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunUnweightedOnWeightedNoRelTypeGraph() {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunUnweightedOnWeightedMultiRelTypeGraph(String relType, String expectedGraph) {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testFilteringOnRelationshipPropertiesOnLoadedGraph(String propertyName, double expectedWeight) {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testFilteringOnRelTypesOnLoadedGraph() {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunUnweightedOnWeightedImplicitlyLoadedGraph() {}
+
+    // end of disabled tests from org.neo4j.graphalgo.RelationshipWeightConfigTest
 }

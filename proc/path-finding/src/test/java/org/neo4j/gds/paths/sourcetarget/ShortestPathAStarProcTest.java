@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
@@ -227,16 +228,50 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
         return createMinimalConfig(baseMap);
     }
 
+    @Test
     @Disabled
     @Override
     public void testMemoryEstimateOnExplicitDimensions() {
         // test assumes one node property, we load two
     }
 
+    @Test
     @Disabled
     @Override
     public void testFailOnMissingNodeLabel() {
         // test adds a node projection to the minimal config input
         // we override this with our own node projection
     }
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunOnEmptyGraph() {
+        // graph must not be empty
+    }
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunUnweightedOnWeightedNoRelTypeGraph() {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunUnweightedOnWeightedMultiRelTypeGraph(String relType, String expectedGraph) {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testFilteringOnRelationshipPropertiesOnLoadedGraph(String propertyName, double expectedWeight) {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testFilteringOnRelTypesOnLoadedGraph() {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunUnweightedOnWeightedImplicitlyLoadedGraph() {}
 }
