@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.catalog;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.jupiter.api.condition.DisabledOnJre;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -43,10 +42,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.condition.JRE.JAVA_15;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-@DisabledOnJre(JAVA_15)
 final class GraphInfoTest {
 
     @ParameterizedTest(name = "{1}")
