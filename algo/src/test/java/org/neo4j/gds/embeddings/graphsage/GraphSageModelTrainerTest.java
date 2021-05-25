@@ -332,8 +332,7 @@ class GraphSageModelTrainerTest {
         var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
         var otherTrainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
 
-        var partitions = PartitionUtils.rangePartition(
-            config.concurrency(),
+        var partitions = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
             Function.identity()
@@ -361,8 +360,7 @@ class GraphSageModelTrainerTest {
         var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
         var otherTrainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
 
-        var partitions = PartitionUtils.rangePartition(
-            config.concurrency(),
+        var partitions = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
             Function.identity()
