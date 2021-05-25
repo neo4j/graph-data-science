@@ -51,7 +51,7 @@ include::../../common-configuration/common-stream-stats-configuration-named-grap
 include::specific-train-configuration.adoc[]
 
 .Results
-[opts="header",cols="1m,1,6"]
+[opts="header",cols="2m,1,6"]
 |===
 | Name          | Type    | Description
 | graphName     | String  | The name of the in-memory graph used during training.
@@ -70,7 +70,7 @@ include::specific-train-configuration.adoc[]
 |===
 
 .Metrics collected during training
-[opts="header",cols="1m,1,6"]
+[opts="header",cols="2m,1,6"]
 |===
 | Name        | Type    | Description
 | ranEpochs   | Integer | The number of ran epochs during training.
@@ -289,7 +289,7 @@ RETURN
   info.metrics.epochLosses as epochLosses
 ----
 
-[opts=header]
+[opts="header",cols="2,1,1,4"]
 .Results
 |===
 | modelName         | didConverge | ranEpochs | epochLosses
@@ -513,7 +513,7 @@ CALL gds.beta.graphSage.stream(
 YIELD nodeId, embedding
 ----
 
-[opts=header]
+[opts="header",cols="1,5"]
 .Results
 |===
 | nodeId | embedding
