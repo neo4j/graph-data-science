@@ -31,11 +31,13 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 
@@ -103,6 +105,16 @@ public interface GraphStore {
 
     boolean hasRelationshipType(RelationshipType relationshipType);
 
+    default Set<RelationshipType> withoutRelationshipProperty(
+        Collection<RelationshipType> relTypes,
+        String propertyKey
+    ) {
+        return relTypes
+            .stream()
+            .filter(relType -> !hasRelationshipProperty(List.of(relType), propertyKey))
+            .collect(Collectors.toSet());
+    }
+
     boolean hasRelationshipProperty(Collection<RelationshipType> relTypes, String propertyKey);
 
     default Collection<String> relationshipPropertyKeys(Collection<RelationshipType> relTypes) {
@@ -111,12 +123,12 @@ public interface GraphStore {
         }
         // intersection of propertyKeys
         Iterator<RelationshipType> iterator = relTypes.iterator();
-        Set<String> result = relationshipPropertyKeys(iterator.next());
+        var result = new HashSet<>(relationshipPropertyKeys(iterator.next()));
         while (iterator.hasNext()) {
             result.retainAll(relationshipPropertyKeys(iterator.next()));
         }
 
-        return result;
+        return Collections.unmodifiableSet(result);
     }
 
 

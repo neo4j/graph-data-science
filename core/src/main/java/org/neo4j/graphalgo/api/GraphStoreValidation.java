@@ -111,13 +111,16 @@ public final class GraphStoreValidation {
         if (config instanceof RelationshipWeightConfig) {
             String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
             Collection<RelationshipType> internalRelationshipTypes = config.internalRelationshipTypes(graphStore);
-            if (weightProperty != null && !graphStore.hasRelationshipProperty(internalRelationshipTypes, weightProperty)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Relationship weight property `%s` not found in graph with relationship properties: %s in all relationship types: %s",
-                    weightProperty,
-                    graphStore.relationshipPropertyKeys(internalRelationshipTypes),
-                    StringJoining.join(internalRelationshipTypes.stream().map(RelationshipType::name))
-                ));
+            if (weightProperty != null) {
+                var relTypesWithoutProperty = graphStore.withoutRelationshipProperty(internalRelationshipTypes, weightProperty);
+                if (!relTypesWithoutProperty.isEmpty()) {
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Relationship weight property `%s` not found in relationship types %s. Properties existing on all relationship types: %s",
+                        weightProperty,
+                        StringJoining.join(relTypesWithoutProperty.stream().map(RelationshipType::name)),
+                        StringJoining.join(graphStore.relationshipPropertyKeys(internalRelationshipTypes))
+                    ));
+                }
             }
         }
 

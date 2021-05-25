@@ -39,6 +39,9 @@ public final class StringJoining {
     }
 
     public static String join(Collection<String> alternatives) {
+        if (alternatives.isEmpty()) {
+            return "[]";
+        }
         return join(alternatives, "', '", "['", "']");
     }
 
