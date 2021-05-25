@@ -23,6 +23,8 @@ import com.carrotsearch.hppc.LongHashSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -228,6 +230,7 @@ class GraphSageModelTrainerTest {
         trainer.train(arrayGraph, arrayFeatures);
     }
 
+    @Disabled("Not fully deterministic yet")
     @Test
     void testLosses() {
         var config = configBuilder
