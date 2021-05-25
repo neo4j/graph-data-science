@@ -165,6 +165,7 @@ The corresponding k-Nearest Neighbors Graph can then be used as part of recommen
    data: data,
    algorithm: 'jaccard',
    similarityCutoff: 0.1,
+   randomSeed: 1,
    concurrency: 1
  })
  YIELD item1, item2, similarity
@@ -206,6 +207,7 @@ We'd probably want to filter those out, which we can do by passing in the `simil
   data: data,
   similarityCutoff: 0.1,
   showComputations: true,
+  randomSeed: 1,
   concurrency: 1
  })
  YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95

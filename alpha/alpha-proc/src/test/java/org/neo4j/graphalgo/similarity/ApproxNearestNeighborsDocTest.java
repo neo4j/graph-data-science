@@ -86,7 +86,8 @@ public class ApproxNearestNeighborsDocTest extends BaseProcTest {
                        "   data: data," +
                        "   algorithm: 'jaccard'," +
                        "   similarityCutoff: 0.1," +
-                       "   concurrency: 1" +
+                       "   concurrency: 1," +
+                       "   randomSeed: 1" +
                        " }) " +
                        " YIELD item1, item2, similarity " +
                        " RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity " +
@@ -123,6 +124,7 @@ public class ApproxNearestNeighborsDocTest extends BaseProcTest {
             "  data: data, " +
             "  similarityCutoff: 0.1, " +
             "  showComputations: true," +
+            "  randomSeed: 1," +
             "  concurrency: 1" +
             " }) " +
             " YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95 " +
