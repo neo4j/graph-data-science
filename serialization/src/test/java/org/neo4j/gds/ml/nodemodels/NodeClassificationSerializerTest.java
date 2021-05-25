@@ -50,7 +50,7 @@ class NodeClassificationSerializerTest {
             .build();
 
         var serializer = new NodeClassificationSerializer();
-        var serializedData = serializer.toSerializable(modelData);
+        var serializedData = (NodeClassificationProto.NodeClassificationModelData) serializer.toSerializable(modelData);
 
         var serializedWeights = serializedData.getWeights();
         var serializedArray = serializedWeights.getDataList().stream().mapToDouble(Double::doubleValue).toArray();
@@ -82,7 +82,7 @@ class NodeClassificationSerializerTest {
                 .build();
 
         var serializer = new NodeClassificationSerializer();
-        var data = serializer.deserializeModelData(serialized);
+        var data = (NodeLogisticRegressionData) serializer.deserializeModelData(serialized);
 
         assertThat(data).isNotNull();
 

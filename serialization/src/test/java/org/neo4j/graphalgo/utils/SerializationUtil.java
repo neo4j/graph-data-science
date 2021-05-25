@@ -29,7 +29,7 @@ public final class SerializationUtil {
 
     private SerializationUtil() {}
 
-    public static <T extends GeneratedMessageV3> T serializationRoundTrip(T message, Parser<T> parser) throws IOException {
+    public static <T extends GeneratedMessageV3> T serializationRoundTrip(GeneratedMessageV3 message, Parser<T> parser) throws IOException {
         var output = new ByteArrayOutputStream();
         message.writeTo(output);
         return parser.parseFrom(output.toByteArray());

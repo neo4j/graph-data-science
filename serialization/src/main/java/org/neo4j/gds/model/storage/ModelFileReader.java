@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.model.storage;
 
-import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Parser;
-import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.model.ModelSupport;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
@@ -46,9 +44,9 @@ public class ModelFileReader {
         return ModelProto.ModelMetaData.parseFrom(readDataFromFile(file));
     }
 
-    public <D, PD extends GeneratedMessageV3> D readData(String algoType) throws IOException {
+    public Object readData(String algoType) throws IOException {
         return ModelSupport.onValidAlgoType(algoType, () -> {
-            ModelSerializer<D, PD> serializer = ModelSerializerFactory.serializer(algoType);
+            var serializer = ModelSerializerFactory.serializer(algoType);
             var parser = serializer.modelParser();
             var modelProto = readModelData(persistenceDir, parser);
             return serializer.deserializeModelData(modelProto);

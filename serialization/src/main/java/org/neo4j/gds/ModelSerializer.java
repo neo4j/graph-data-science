@@ -25,12 +25,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-public interface ModelSerializer<DATA, PROTO_DATA extends GeneratedMessageV3> {
+public interface ModelSerializer {
 
-    PROTO_DATA toSerializable(DATA modelData) throws IOException;
+    GeneratedMessageV3 toSerializable(Object modelData) throws IOException;
 
     @NotNull
-    DATA deserializeModelData(PROTO_DATA protoModel) throws IOException;
+    Object deserializeModelData(GeneratedMessageV3 protoModel) throws IOException;
 
-    Parser<PROTO_DATA> modelParser();
+    Parser<? extends GeneratedMessageV3> modelParser();
 }

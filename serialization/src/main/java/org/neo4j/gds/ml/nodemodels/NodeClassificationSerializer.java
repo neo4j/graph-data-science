@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.nodemodels;
 
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Parser;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
@@ -32,10 +34,12 @@ import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.ml.model.proto.NodeClassificationProto;
 
-public class NodeClassificationSerializer implements ModelSerializer<NodeLogisticRegressionData, NodeClassificationProto.NodeClassificationModelData> {
+@SuppressFBWarnings("BC_UNCONFIRMED_CAST")
+public class NodeClassificationSerializer implements ModelSerializer {
 
     @Override
-    public NodeClassificationProto.NodeClassificationModelData toSerializable(NodeLogisticRegressionData modelData) {
+    public GeneratedMessageV3 toSerializable(Object data) {
+        var modelData = (NodeLogisticRegressionData) data;
         var weightsMatrix = modelData.weights().data();
         var serializableWeightsMatrix = TensorSerializer.toSerializable(weightsMatrix);
         return NodeClassificationProto.NodeClassificationModelData.newBuilder()
@@ -48,7 +52,8 @@ public class NodeClassificationSerializer implements ModelSerializer<NodeLogisti
 
     @Override
     @NotNull
-    public NodeLogisticRegressionData deserializeModelData(NodeClassificationProto.NodeClassificationModelData serializedData) {
+    public NodeLogisticRegressionData deserializeModelData(GeneratedMessageV3 generatedMessageV3) {
+        var serializedData = (NodeClassificationProto.NodeClassificationModelData) generatedMessageV3;
         var weights = new Weights<>(TensorSerializer.fromSerializable(serializedData.getWeights()));
 
         var localIdMap = new LocalIdMap();
@@ -69,10 +74,10 @@ public class NodeClassificationSerializer implements ModelSerializer<NodeLogisti
 
     @TestOnly
     Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> fromSerializable(
-        NodeClassificationProto.NodeClassificationModelData serializedData,
+        GeneratedMessageV3 generatedMessageV3,
         ModelProto.ModelMetaData modelMetaData
     ) {
-
+        var serializedData = (NodeClassificationProto.NodeClassificationModelData) generatedMessageV3;
         var weights = new Weights<>(TensorSerializer.fromSerializable(serializedData.getWeights()));
 
         var localIdMap = new LocalIdMap();

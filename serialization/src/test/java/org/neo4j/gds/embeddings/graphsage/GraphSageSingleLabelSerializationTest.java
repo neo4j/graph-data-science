@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
-import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -95,7 +94,7 @@ class GraphSageSingleLabelSerializationTest {
         var serializer = new GraphSageModelSerializer();
         var protoGraphSageModel = serializationRoundTrip(
             serializer.toSerializable(model.data()),
-            GraphSageProto.GraphSageModel.parser()
+            serializer.modelParser()
         );
 
         var deserializedModel = serializer.fromSerializable(

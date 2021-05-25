@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.model.storage;
 
-import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.ModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionSerializer;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionTrain;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationSerializer;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.graphalgo.utils.StringJoining;
 
 import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;
@@ -36,14 +35,14 @@ public final class ModelSerializerFactory {
 
     private ModelSerializerFactory() {}
 
-    public static <D, PD extends GeneratedMessageV3, R extends ModelSerializer<D, PD>> R serializer(String algoType) {
+    public static ModelSerializer serializer(String algoType) {
         switch (algoType) {
             case GraphSage.MODEL_TYPE:
-                return (R) new GraphSageModelSerializer();
+                return new GraphSageModelSerializer();
             case NodeClassificationTrain.MODEL_TYPE:
-                return (R) new NodeClassificationSerializer();
+                return new NodeClassificationSerializer();
             case LinkPredictionTrain.MODEL_TYPE:
-                return (R) new LinkPredictionSerializer();
+                return new LinkPredictionSerializer();
 
             default:
                 throw new IllegalArgumentException(formatWithLocale(

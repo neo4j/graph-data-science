@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Parser;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
@@ -31,10 +33,12 @@ import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.IOException;
 
-public final class GraphSageModelSerializer implements ModelSerializer<ModelData, GraphSageProto.GraphSageModel> {
+@SuppressFBWarnings("BC_UNCONFIRMED_CAST")
+public final class GraphSageModelSerializer implements ModelSerializer {
 
     @Override
-    public GraphSageProto.GraphSageModel toSerializable(ModelData modelData) throws IOException {
+    public GeneratedMessageV3 toSerializable(Object data) throws IOException {
+        var modelData = (ModelData) data;
         var modelDataBuilder = GraphSageProto.ModelData.newBuilder();
         for (int i = 0; i < modelData.layers().length; i++) {
             GraphSageProto.Layer layer = LayerSerializer.toSerializable(modelData.layers()[i]);
@@ -49,7 +53,8 @@ public final class GraphSageModelSerializer implements ModelSerializer<ModelData
 
     @Override
     @NotNull
-    public ModelData deserializeModelData(GraphSageProto.GraphSageModel protoModel) throws IOException {
+    public ModelData deserializeModelData(GeneratedMessageV3 generatedMessageV3) throws IOException {
+        var protoModel = (GraphSageProto.GraphSageModel) generatedMessageV3;
         return ModelData.of(
             LayerSerializer.fromSerializable(protoModel.getData().getLayersList()),
             FeatureFunctionSerializer.fromSerializable(protoModel.getFeatureFunction())
@@ -63,7 +68,7 @@ public final class GraphSageModelSerializer implements ModelSerializer<ModelData
 
     @TestOnly
     Model<ModelData, GraphSageTrainConfig> fromSerializable(
-        GraphSageProto.GraphSageModel protoModel,
+        GeneratedMessageV3 protoModel,
         ModelProto.ModelMetaData modelMetaData
     ) throws IOException {
         return ModelMetaDataSerializer

@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Parser;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
-import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
+import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData;
 import org.neo4j.graphalgo.core.model.Model;
@@ -33,10 +36,12 @@ import org.neo4j.graphalgo.ml.model.proto.LinkPredictionProto;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class LinkPredictionSerializer implements ModelSerializer<LinkLogisticRegressionData, LinkPredictionProto.LinkPredictionModelData> {
+@SuppressFBWarnings("BC_UNCONFIRMED_CAST")
+public class LinkPredictionSerializer implements ModelSerializer {
 
     @Override
-    public LinkPredictionProto.LinkPredictionModelData toSerializable(LinkLogisticRegressionData modelData) {
+    public GeneratedMessageV3 toSerializable(Object data) {
+        LinkLogisticRegressionData modelData = (LinkLogisticRegressionData) data;
         var weightsMatrix = modelData.weights().data();
         var linkFeatureCombiner = modelData.linkFeatureCombiner();
         if (!(linkFeatureCombiner instanceof LinkFeatureCombiners)) {
@@ -52,7 +57,9 @@ public class LinkPredictionSerializer implements ModelSerializer<LinkLogisticReg
     }
 
     @Override
-    public LinkLogisticRegressionData deserializeModelData(LinkPredictionProto.LinkPredictionModelData protoModel) {
+    @NotNull
+    public LinkLogisticRegressionData deserializeModelData(GeneratedMessageV3 generatedMessageV3) {
+        var protoModel = (LinkPredictionProto.LinkPredictionModelData) generatedMessageV3;
         var weights = new Weights<>(TensorSerializer.fromSerializable(protoModel.getWeights()));
         var linkFeatureCombiner = LinkFeatureCombiners.valueOf(protoModel.getLinkFeatureCombiner().name());
         var nodeFeatureDimension = protoModel.getNodeFeatureDimension();
@@ -71,10 +78,10 @@ public class LinkPredictionSerializer implements ModelSerializer<LinkLogisticReg
 
     @TestOnly
     Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> fromSerializable(
-        LinkPredictionProto.LinkPredictionModelData serializedData,
+        GeneratedMessageV3 generatedMessageV3,
         ModelProto.ModelMetaData modelMetaData
     ) {
-
+        var serializedData = (LinkPredictionProto.LinkPredictionModelData) generatedMessageV3;
         var weights = new Weights<>(TensorSerializer.fromSerializable(serializedData.getWeights()));
 
         return ModelMetaDataSerializer

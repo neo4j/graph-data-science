@@ -53,7 +53,7 @@ class LinkPredictionSerializerTest {
             .build();
 
         var serializer = new LinkPredictionSerializer();
-        var serializedData = serializer.toSerializable(modelData);
+        var serializedData = (LinkPredictionProto.LinkPredictionModelData) serializer.toSerializable(modelData);
 
         var serializedWeights = serializedData.getWeights();
         var serializedArray = serializedWeights.getDataList().stream().mapToDouble(Double::doubleValue).toArray();
@@ -79,7 +79,7 @@ class LinkPredictionSerializerTest {
                 .build();
 
         var serializer = new LinkPredictionSerializer();
-        var deserializedModelData = serializer.deserializeModelData(serialized);
+        var deserializedModelData = (LinkLogisticRegressionData) serializer.deserializeModelData(serialized);
 
         assertThat(deserializedModelData).isNotNull();
 
