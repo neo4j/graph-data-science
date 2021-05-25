@@ -162,7 +162,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
                 () -> proc.compute(graphName, config)
             );
             assertThat(e.getMessage(), containsString("foo"));
-            assertThat(e.getMessage(), containsString("[a]"));
+            assertThat(e.getMessage(), containsString("['a']"));
         });
     }
 
@@ -181,8 +181,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
                 "___THIS_PROPERTY_SHOULD_NOT_EXIST___"
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Relationship weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found in graph " +
-                           "with relationship properties: [] in all relationship types: ['__ALL__']";
+            String error = "Relationship weight property `___THIS_PROPERTY_SHOULD_NOT_EXIST___` not found in relationship types ['__ALL__']. Properties existing on all relationship types: []";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap
@@ -229,7 +228,7 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
                 "relationshipTypes", List.of("Type")
             ));
             Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            String error = "Relationship weight property `foo` not found in graph with relationship properties: [] in all relationship types: ['Type']";
+            String error = "Relationship weight property `foo` not found in relationship types ['Type']. Properties existing on all relationship types: []";
             assertMissingProperty(error, () -> proc.compute(
                 loadedGraphName,
                 configMap
@@ -242,6 +241,48 @@ public interface RelationshipWeightConfigTest<ALGORITHM extends Algorithm<ALGORI
                     Collections.emptyMap()
                 ));
             }
+        });
+    }
+
+    @Test
+    default void shouldIndicateWhichRelationshipHasAMissingProperty() {
+        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
+
+        runQuery(graphDb(), "CREATE" +
+                            "  (a:Node)" +
+                            ", (b:Node)" +
+                            ", (a)-[:Type {t: 3} ]->(b)" +
+                            ", (a)-[:TypeWithProp {t: 4, prop: 42}]->(b)");
+
+        String loadedGraphName = "loadedGraph";
+
+        GraphLoader graphLoader = new StoreLoaderBuilder()
+            .api(graphDb())
+            .graphName(loadedGraphName)
+            .addRelationshipProjection(RelationshipProjection.builder()
+                .type("Type")
+                .addProperty("t", "t", DefaultValue.of(0))
+                .build())
+            .addRelationshipProjection(RelationshipProjection.builder()
+                .type("TypeWithProp")
+                .addProperty("prop", "prop", DefaultValue.of(0))
+                .addProperty("t", "t", DefaultValue.of(0))
+                .build()
+            ).build();
+
+        GraphStoreCatalog.set(graphLoader.createConfig(), graphLoader.graphStore());
+
+        applyOnProcedure((proc) -> {
+
+            CypherMapWrapper mapWrapper = CypherMapWrapper.create(map(
+                "relationshipWeightProperty", "prop"
+            ));
+            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
+            String error = "Relationship weight property `prop` not found in relationship types ['Type']. Properties existing on all relationship types: ['t']";
+            assertMissingProperty(error, () -> proc.compute(
+                loadedGraphName,
+                configMap
+            ));
         });
     }
 
