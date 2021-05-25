@@ -88,7 +88,9 @@ public final class ApproxNearestNeighborsAlgorithm<INPUT extends SimilarityInput
 
         this.nodeQueue = new AtomicLong();
         this.actualIterations = new AtomicInteger();
-        this.random = new Random(config.randomSeed());
+        this.random = new Random();
+
+        config.randomSeed().ifPresent(random::setSeed);
     }
 
     @Override

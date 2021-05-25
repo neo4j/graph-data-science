@@ -37,7 +37,7 @@ If algorithm is `jaccard`, a list of maps of the following structure: `{item: no
 Otherwise a list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
 | top                   | Integer   | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
 | topK                  | Integer   | 3                      | yes      | The number of similar values to return per node.
-| randomSeed            | Integer   | 1                      | yes      | The random-seed used for neighbor-sampling.
+| randomSeed            | Integer   | n/a                    | yes      | The random-seed used for neighbor-sampling.
 | sampling              | Boolean   | true                   | yes      | Whether the potential neighbors should be sampled.
 | p                     | Float     | 0.5                    | yes      | Influences the sample size: `min(1.0, p) * \|topK\|`.
 | similarityCutoff      | Integer   | -1                     | yes      | The threshold for similarity. Values below this will not be returned.

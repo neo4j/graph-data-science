@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.IterationsConfig;
+import org.neo4j.graphalgo.config.RandomSeedConfig;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +32,7 @@ import java.util.Map;
 @ValueClass
 @Configuration
 @SuppressWarnings({"immutables:subtype", "immutables:from"})
-public interface ApproximateNearestNeighborsConfig extends SimilarityConfig, IterationsConfig {
+public interface ApproximateNearestNeighborsConfig extends SimilarityConfig, IterationsConfig, RandomSeedConfig {
 
     @Configuration.ConvertWith("similarityAlgorithm")
     SimilarityAlgorithm algorithm();
@@ -62,11 +63,6 @@ public interface ApproximateNearestNeighborsConfig extends SimilarityConfig, Ite
     @Value.Default
     default double p() {
         return 0.5;
-    }
-
-    @Value.Default
-    default long randomSeed() {
-        return 1;
     }
 
     @Value.Default
