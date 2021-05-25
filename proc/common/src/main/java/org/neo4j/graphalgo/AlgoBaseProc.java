@@ -94,13 +94,20 @@ public abstract class AlgoBaseProc<
             config = configWithoutCreateKeys;
         }
         CONFIG algoConfig = newConfig(username(), graphName, maybeImplicitCreate, config);
+        setAlgorithmMetaDataToTransaction(algoConfig);
+        allowedKeys.addAll(algoConfig.configKeys());
+        validateConfig(config, allowedKeys);
+        return algoConfig;
+    }
+
+    private void setAlgorithmMetaDataToTransaction(CONFIG algoConfig) {
+        if (transaction == null) {
+            return;
+        }
         var metaData = transaction.getMetaData();
         if (metaData instanceof AlgorithmMetaData) {
             ((AlgorithmMetaData) metaData).set(algoConfig);
         }
-        allowedKeys.addAll(algoConfig.configKeys());
-        validateConfig(config, allowedKeys);
-        return algoConfig;
     }
 
     private Map<String, Class<?>> allSharedConfigKeys() {
