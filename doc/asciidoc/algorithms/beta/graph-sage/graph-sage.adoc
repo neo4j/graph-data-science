@@ -265,7 +265,7 @@ NOTE: The algorithm is defined for UNDIRECTED graphs.
 
 === Train
 
-Before we are able to generate node embeddings we need to train a model.
+Before we are able to generate node embeddings we need to train a model and store it in the model catalog.
 Below is an example of how to do that.
 
 NOTE: The names specified in the `featureProperties` configuration parameter must exist in the in-memory graph.
@@ -300,6 +300,10 @@ NOTE: Due to the random initialisation of the weight variables the results may v
 
 Looking at the results we can draw the following conclusions, the training converged after a single epoch, the losses are almost identical.
 Tuning the algorithm parameters, such as trying out different `sampleSizes`, `searchDepth`, `embeddingDimension` or `batchSize` can improve the losses.
+For different datasets, GraphSAGE may require different train parameters for producing good models.
+
+The trained model is automatically registered in the <<model-catalog-ops, model catalog>>.
+
 
 === Train with multiple node labels
 
@@ -330,7 +334,7 @@ In the multi-label mode, it is no longer required that all labels have all the s
 
 ==== Examples
 
-In order to demonstrate GraphSAGE with multiple labels, we need to add a few more nodes and relationships to the example Graph.
+In order to demonstrate GraphSAGE with multiple labels, we add instruments and relationships of type `LIKE` between person and instrument to the example graph.
 
 image::example-graphs/graph-sage-multi-label-graph.svg[Visualization of the multi-label example graph,align="center"]
 
@@ -386,6 +390,10 @@ CALL gds.graph.create(
 ----
 
 We can now run GraphSAGE in multi-label mode on that graph by specifying the `projectedFeatureDimension` parameter.
+Multi-label GraphSAGE removes the requirement, that each node in the in-memory graph must have all `featureProperties`.
+However, the algorithm collects the `featureProperties` per label into a `feature` list with its length defined by the `projectedFeatureDimension`.
+The `projectedFeatureDimension` equals the maximum length of the feature-array, i.e., `age` and `cost` both are scalar features plus the list feature `heightAndWeight` which has a length of two.
+Note that the `cost` feature is only defined for the instrument nodes, while `age` and `heightAndWeight` are only defined for persons.
 
 [source, cypher, role=noplay query-example, no-result=true]
 ----
@@ -405,6 +413,7 @@ CALL gds.beta.graphSage.train(
 The GraphSAGE implementation supports training using relationship weights.
 Greater relationship weight between nodes signifies that the nodes should have more similar embedding values.
 
+.The following Cypher query trains a GraphSAGE model using relationship weights
 [source, cypher, role=noplay query-example, no-result=true]
 ----
 CALL gds.beta.graphSage.train(
@@ -412,18 +421,12 @@ CALL gds.beta.graphSage.train(
   {
     modelName: 'weightedTrainedModel',
     featureProperties: ['age', 'heightAndWeight'],
-    aggregator: 'mean',
-    activationFunction: 'sigmoid',
-    sampleSizes: [25, 10],
     relationshipWeightProperty: 'relWeight',
     nodeLabels: ['Person'],
     relationshipTypes: ['KNOWS']
   }
 )
 ----
-
-Relationship weights are only used during GraphSAGE training.
-The trained models can then be used to stream or write back the generated node embeddings.
 
 
 === Train when there are no node properties present in the graph
