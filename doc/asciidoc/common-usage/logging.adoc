@@ -6,7 +6,7 @@
 This section describes logging features in the Neo4j Graph Data Science library.
 --
 
-In the GDS library there are generally two types of logging: debug logging and progress logging.
+In the GDS library there are two types of logging: debug logging and progress logging.
 
 *Debug logging* provides information about events in the system.
 For example, when an algorithm computation completes, the amount of memory used and the total runtime may be logged.
@@ -20,6 +20,7 @@ All log entries are written to the log files configured for the Neo4j database.
 For more information on configuring Neo4j logs, please refer to the https://neo4j.com/docs/operations-manual/current/monitoring/logging/#logging[Neo4j Operations Manual].
 
 
+[[logging-progress-logging]]
 [.beta]
 == Progress-logging procedure
 
@@ -28,6 +29,8 @@ This makes it possible to inspect progress via Cypher, in addition to looking in
 To enable this feature, the Neo4j configuration must include the entry `gds.progress_tracking_enabled=true`.
 When the feature is enabled, a procedure is loaded that can be called to show progress events for currently running tasks.
 
+
+[[logging-progress-logging-syntax]]
 === Syntax
 
 .Getting the progress of tasks:
@@ -46,6 +49,7 @@ YIELD
 * `message`: the progress log message, same as what is logged to the `debug.log` file.
 
 
+[[logging-progress-logging-examples]]
 === Examples
 
 Assuming we just started `gds.beta.node2vec.stream` procedure.
