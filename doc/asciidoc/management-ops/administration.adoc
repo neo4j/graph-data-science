@@ -51,7 +51,7 @@ To list all graphs from all users, `carol` simply uses the graph list procedure.
 .Listing all graphs as administrator user:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.list('graphB')
+CALL gds.graph.list()
 YIELD graphName
 ----
 
@@ -90,9 +90,14 @@ YIELD componentCount
 
 === Dropping other users' graphs
 
-Similar to listing, to drop `graphA` owned by `bob`, `carol` can run the following:
+Unlike for listing, the full procedure signature must be used when using the `username` override to disambiguate.
+In the query below we have used the default values for the second and third parameter for the drop procedure.
+`username` is the fourth parameter.
+For more details see <<catalog-graph-drop>>.
+
+.To drop `graphA` owned by `bob`, `carol` can run the following:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.drop('graphA', { username: 'bob' })
+CALL gds.graph.drop('graphA', true, '', 'bob')
 YIELD graphName
 ----
