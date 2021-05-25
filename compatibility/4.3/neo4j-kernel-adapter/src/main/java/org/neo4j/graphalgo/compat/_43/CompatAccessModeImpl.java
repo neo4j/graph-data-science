@@ -17,31 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43;
 
-import org.neo4j.scheduler.Group;
-import org.neo4j.scheduler.JobHandle;
-import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.graphalgo.compat.CompatAccessMode;
+import org.neo4j.graphalgo.compat.CustomAccessMode;
+import org.neo4j.internal.kernel.api.RelTypeSupplier;
+import org.neo4j.internal.kernel.api.TokenSet;
 
-import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
-final class JobRunner43 implements JobRunner {
-    private final JobScheduler scheduler;
-    private final Group group;
+public final class CompatAccessModeImpl extends CompatAccessMode {
 
-    JobRunner43(JobScheduler scheduler, Group group) {
-        this.group = group;
-        this.scheduler = scheduler;
+    CompatAccessModeImpl(CustomAccessMode custom) {
+        super(custom);
     }
 
     @Override
-    public JobPromise scheduleAtInterval(
-        Runnable runnable,
-        long initialDelay,
-        long rate,
-        TimeUnit timeUnit
-    ) {
-        JobHandle<?> jobHandle = this.scheduler.scheduleRecurring(group, runnable, initialDelay, rate, timeUnit);
-        return jobHandle::cancel;
+    public boolean allowsReadNodeProperty(Supplier<TokenSet> labels, int propertyKey) {
+        return custom.allowsReadNodeProperty(propertyKey);
+    }
+
+    @Override
+    public boolean allowsReadRelationshipProperty(RelTypeSupplier relType, int propertyKey) {
+        return custom.allowsReadRelationshipProperty(propertyKey);
     }
 }

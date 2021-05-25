@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43;
 
 import org.neo4j.common.EntityType;
 import org.neo4j.internal.kernel.api.InternalIndexState;
@@ -28,10 +28,10 @@ import org.neo4j.internal.schema.IndexType;
 import org.neo4j.internal.schema.SchemaDescriptor;
 import org.neo4j.kernel.api.KernelTransaction;
 
-final class NodeLabelIndexLookup43 {
+final class NodeLabelIndexLookupImpl {
 
     static boolean hasNodeLabelIndex(KernelTransaction transaction) {
-        return NodeLabelIndexLookup43.findUsableMatchingIndex(
+        return NodeLabelIndexLookupImpl.findUsableMatchingIndex(
             transaction,
             SchemaDescriptor.forAnyEntityTokens(EntityType.NODE)
         ) != IndexDescriptor.NO_INDEX;
@@ -63,5 +63,5 @@ final class NodeLabelIndexLookup43 {
         return state == InternalIndexState.ONLINE;
     }
 
-    private NodeLabelIndexLookup43() {}
+    private NodeLabelIndexLookupImpl() {}
 }

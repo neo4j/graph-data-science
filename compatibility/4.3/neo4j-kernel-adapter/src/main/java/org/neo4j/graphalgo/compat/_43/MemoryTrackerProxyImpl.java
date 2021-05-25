@@ -17,15 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43;
 
+import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
+import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.MemoryTracker;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-final class MemoryTrackerProxy43 implements MemoryTrackerProxy {
+final class MemoryTrackerProxyImpl implements MemoryTrackerProxy {
 
     private final AllocationTrackerAdapter allocationTracker;
 
@@ -33,10 +35,10 @@ final class MemoryTrackerProxy43 implements MemoryTrackerProxy {
         if (memoryTracker instanceof EmptyMemoryTracker) {
             return MemoryTrackerProxy.EMPTY;
         }
-        return new MemoryTrackerProxy43(new AllocationTrackerAdapter43(memoryTracker));
+        return new MemoryTrackerProxyImpl(new AllocationTrackerAdapterImpl(memoryTracker));
     }
 
-    private MemoryTrackerProxy43(AllocationTrackerAdapter allocationTracker) {
+    private MemoryTrackerProxyImpl(AllocationTrackerAdapter allocationTracker) {
         this.allocationTracker = allocationTracker;
     }
 

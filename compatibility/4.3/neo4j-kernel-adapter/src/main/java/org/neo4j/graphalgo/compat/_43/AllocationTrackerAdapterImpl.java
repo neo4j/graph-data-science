@@ -17,15 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43;
 
+import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
 import org.neo4j.memory.MemoryTracker;
 
-final class AllocationTrackerAdapter43 implements AllocationTrackerAdapter {
+final class AllocationTrackerAdapterImpl implements AllocationTrackerAdapter {
 
     private final MemoryTracker memoryTracker;
 
-    AllocationTrackerAdapter43(MemoryTracker memoryTracker) {
+    AllocationTrackerAdapterImpl(MemoryTracker memoryTracker) {
         this.memoryTracker = memoryTracker;
     }
 

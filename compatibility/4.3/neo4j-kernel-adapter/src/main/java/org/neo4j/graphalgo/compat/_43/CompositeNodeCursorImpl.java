@@ -17,26 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43;
 
-import org.neo4j.internal.kernel.api.RelTypeSupplier;
-import org.neo4j.internal.kernel.api.TokenSet;
+import org.neo4j.graphalgo.compat.CompositeNodeCursor;
+import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 
-import java.util.function.Supplier;
+import java.util.List;
 
-public final class CompatAccessMode43 extends CompatAccessMode {
+public final class CompositeNodeCursorImpl extends CompositeNodeCursor {
 
-    CompatAccessMode43(CustomAccessMode custom) {
-        super(custom);
-    }
-
-    @Override
-    public boolean allowsReadNodeProperty(Supplier<TokenSet> labels, int propertyKey) {
-        return custom.allowsReadNodeProperty(propertyKey);
-    }
-
-    @Override
-    public boolean allowsReadRelationshipProperty(RelTypeSupplier relType, int propertyKey) {
-        return custom.allowsReadRelationshipProperty(propertyKey);
+    CompositeNodeCursorImpl(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+        super(cursors, labelIds);
     }
 }

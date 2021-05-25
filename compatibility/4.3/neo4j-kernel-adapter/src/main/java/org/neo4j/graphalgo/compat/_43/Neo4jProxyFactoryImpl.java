@@ -17,14 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43;
 
-import org.neo4j.internal.kernel.api.PropertyIndexQuery;
+import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.graphalgo.compat.Neo4jProxyApi;
+import org.neo4j.graphalgo.compat.Neo4jProxyFactory;
+import org.neo4j.graphalgo.compat.Neo4jVersion;
 
-final class CompatIndexQuery43 implements CompatIndexQuery {
-    final PropertyIndexQuery indexQuery;
+@ServiceProvider
+public final class Neo4jProxyFactoryImpl implements Neo4jProxyFactory {
 
-    CompatIndexQuery43(PropertyIndexQuery indexQuery) {
-        this.indexQuery = indexQuery;
+    @Override
+    public boolean canLoad(Neo4jVersion version) {
+        return version == Neo4jVersion.V_4_3;
+    }
+
+    @Override
+    public Neo4jProxyApi load() {
+        return new Neo4jProxyImpl();
     }
 }
