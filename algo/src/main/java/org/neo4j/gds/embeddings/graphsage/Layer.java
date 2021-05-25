@@ -36,7 +36,7 @@ public interface Layer {
     }
 
     default void generateNewRandomState() {
-        sampler().generateNewRandomState();
+        sampler().updateRandomSeed();
     }
 
     NeighborhoodSampler sampler();

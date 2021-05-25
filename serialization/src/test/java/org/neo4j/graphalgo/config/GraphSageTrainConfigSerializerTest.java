@@ -39,7 +39,7 @@ class GraphSageTrainConfigSerializerTest {
         var trainConfigBuilder = ImmutableGraphSageTrainConfig.builder()
             .modelName("MODEL_NAME")
             .aggregator(aggregator)
-            .randomSeed(10L)
+            .randomSeed(19L)
             .activationFunction(activationFunction)
             .featureProperties(List.of("age", "birth_year", "death_year"));
 

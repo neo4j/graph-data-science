@@ -68,7 +68,7 @@ public class NeighborhoodSampler {
         return this.randomSeed;
     }
 
-    void generateNewRandomState() {
+    void updateRandomSeed() {
         this.randomSeed = new Random(randomSeed).nextLong();
     }
 
