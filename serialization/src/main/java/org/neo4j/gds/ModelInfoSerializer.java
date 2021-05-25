@@ -35,14 +35,15 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public interface ModelInfoSerializer<MODEL_INFO extends Model.Mappable, PROTO_MODEL_INFO extends GeneratedMessageV3> {
-    PROTO_MODEL_INFO toSerializable(MODEL_INFO modelInfo);
+public interface ModelInfoSerializer {
 
-    MODEL_INFO fromSerializable(PROTO_MODEL_INFO protoModelInfo);
+    GeneratedMessageV3 toSerializable(Model.Mappable mappable);
 
-    Class<PROTO_MODEL_INFO> serializableClass();
+    Model.Mappable fromSerializable(GeneratedMessageV3 generatedMessageV3);
 
-    default MODEL_INFO fromSerializable(Any protoModelInfo) {
+    Class<? extends GeneratedMessageV3> serializableClass();
+
+    default Model.Mappable fromSerializable(Any protoModelInfo) {
         try {
             var unpacked = protoModelInfo.unpack(serializableClass());
             return fromSerializable(unpacked);
@@ -50,6 +51,7 @@ public interface ModelInfoSerializer<MODEL_INFO extends Model.Mappable, PROTO_MO
             throw new RuntimeException(e);
         }
     }
+
 
     static <M, C extends TrainingConfig> void serializeMetrics(
         Map<M, MetricData<C>> metrics,

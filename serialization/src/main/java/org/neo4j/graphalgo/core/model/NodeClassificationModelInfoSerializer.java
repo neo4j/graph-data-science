@@ -19,25 +19,30 @@
  */
 package org.neo4j.graphalgo.core.model;
 
+import com.google.protobuf.GeneratedMessageV3;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.neo4j.gds.ModelInfoSerializer;
 import org.neo4j.gds.ml.nodemodels.ImmutableMetricData;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationModelInfo;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationModelInfo;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.metrics.Metric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
-import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.graphalgo.ml.model.proto.CommonML;
 
 import java.util.function.BiConsumer;
 
 import static org.neo4j.graphalgo.config.ConfigSerializers.multiClassNLRTrainConfig;
 
-public final class NodeClassificationModelInfoSerializer implements ModelInfoSerializer<NodeClassificationModelInfo, CommonML.NodeClassificationModelInfo> {
+@SuppressFBWarnings("BC_UNCONFIRMED_CAST")
+public final class NodeClassificationModelInfoSerializer implements ModelInfoSerializer {
 
     public NodeClassificationModelInfoSerializer() {}
 
-    public CommonML.NodeClassificationModelInfo toSerializable(NodeClassificationModelInfo modelInfo) {
+
+    public GeneratedMessageV3 toSerializable(Model.Mappable mappable) {
+        var modelInfo = (NodeClassificationModelInfo) mappable;
         var builder = CommonML.NodeClassificationModelInfo.newBuilder()
             .addAllClasses(modelInfo.classes())
             .setBestParameters(multiClassNLRTrainConfig(modelInfo.bestParameters()));
@@ -53,7 +58,8 @@ public final class NodeClassificationModelInfoSerializer implements ModelInfoSer
         return builder.build();
     }
 
-    public NodeClassificationModelInfo fromSerializable(CommonML.NodeClassificationModelInfo protoModelInfo) {
+    public Model.Mappable fromSerializable(GeneratedMessageV3 generatedMessageV3) {
+        var protoModelInfo = (CommonML.NodeClassificationModelInfo) generatedMessageV3;
         var builder = ImmutableNodeClassificationModelInfo.builder()
             .classes(protoModelInfo.getClassesList())
             .bestParameters(multiClassNLRTrainConfig(protoModelInfo.getBestParameters()));

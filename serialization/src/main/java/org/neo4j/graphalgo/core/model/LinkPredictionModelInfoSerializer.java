@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.model;
 
+import com.google.protobuf.GeneratedMessageV3;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.neo4j.gds.ModelInfoSerializer;
 import org.neo4j.gds.ml.linkmodels.ImmutableLinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionModelInfo;
@@ -32,9 +34,11 @@ import java.util.function.BiConsumer;
 
 import static org.neo4j.graphalgo.config.ConfigSerializers.linkLogisticRegressionTrainConfig;
 
-public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer<LinkPredictionModelInfo, CommonML.LinkPredictionModelInfo> {
-    @Override
-    public CommonML.LinkPredictionModelInfo toSerializable(LinkPredictionModelInfo linkPredictionModelInfo) {
+@SuppressFBWarnings("BC_UNCONFIRMED_CAST")
+public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer/*<LinkPredictionModelInfo, CommonML.LinkPredictionModelInfo>*/ {
+
+    public GeneratedMessageV3 toSerializable(Model.Mappable mappable) {
+        LinkPredictionModelInfo linkPredictionModelInfo = (LinkPredictionModelInfo) mappable;
         var builder = CommonML.LinkPredictionModelInfo.newBuilder()
             .setBestParameters(linkLogisticRegressionTrainConfig(linkPredictionModelInfo.bestParameters()));
 
@@ -48,8 +52,8 @@ public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer<Li
         return builder.build();
     }
 
-    @Override
-    public LinkPredictionModelInfo fromSerializable(CommonML.LinkPredictionModelInfo linkPredictionModelInfo) {
+    public Model.Mappable fromSerializable(GeneratedMessageV3 generatedMessageV3) {
+        var linkPredictionModelInfo = (CommonML.LinkPredictionModelInfo) generatedMessageV3;
         var builder = ImmutableLinkPredictionModelInfo.builder()
             .bestParameters(linkLogisticRegressionTrainConfig(linkPredictionModelInfo.getBestParameters()));
 

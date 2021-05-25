@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.model.storage;
 
-import com.google.protobuf.GeneratedMessageV3;
 import org.neo4j.gds.ModelInfoSerializer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionTrain;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.graphalgo.core.model.GraphSageTrainModelInfoSerializer;
 import org.neo4j.graphalgo.core.model.LinkPredictionModelInfoSerializer;
-import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.NodeClassificationModelInfoSerializer;
 import org.neo4j.graphalgo.utils.StringJoining;
 
@@ -37,14 +35,14 @@ public final class ModelInfoSerializerFactory {
 
     private ModelInfoSerializerFactory() {}
 
-    public static <TC extends Model.Mappable, PD extends GeneratedMessageV3, R extends ModelInfoSerializer<TC, PD>> R modelInfoSerializer(String algoType) {
+    public static ModelInfoSerializer modelInfoSerializer(String algoType) {
         switch (algoType) {
             case GraphSage.MODEL_TYPE:
-                return (R) new GraphSageTrainModelInfoSerializer();
+                return new GraphSageTrainModelInfoSerializer();
             case NodeClassificationTrain.MODEL_TYPE:
-                return (R) new NodeClassificationModelInfoSerializer();
+                return new NodeClassificationModelInfoSerializer();
             case LinkPredictionTrain.MODEL_TYPE:
-                return (R) new LinkPredictionModelInfoSerializer();
+                return new LinkPredictionModelInfoSerializer();
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Unknown model type '%s', supported model types are: %s.",

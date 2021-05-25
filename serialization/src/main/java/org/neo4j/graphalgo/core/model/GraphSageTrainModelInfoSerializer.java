@@ -19,23 +19,26 @@
  */
 package org.neo4j.graphalgo.core.model;
 
+import com.google.protobuf.GeneratedMessageV3;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.neo4j.gds.ModelInfoSerializer;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ImmutableGraphSageTrainMetrics;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 
-public class GraphSageTrainModelInfoSerializer implements ModelInfoSerializer<GraphSageModelTrainer.GraphSageTrainMetrics, GraphSageProto.GraphSageMetrics> {
+@SuppressFBWarnings("BC_UNCONFIRMED_CAST")
+public class GraphSageTrainModelInfoSerializer implements ModelInfoSerializer {
 
-    @Override
-    public GraphSageProto.GraphSageMetrics toSerializable(GraphSageModelTrainer.GraphSageTrainMetrics modelInfo) {
+    public GeneratedMessageV3 toSerializable(Model.Mappable mappable) {
+        var modelInfo = (GraphSageModelTrainer.GraphSageTrainMetrics) mappable;
         return GraphSageProto.GraphSageMetrics.newBuilder()
             .addAllEpochLosses(modelInfo.epochLosses())
             .setDidConverge(modelInfo.didConverge())
             .build();
     }
 
-    @Override
-    public GraphSageModelTrainer.GraphSageTrainMetrics fromSerializable(GraphSageProto.GraphSageMetrics protoModelInfo) {
+    public Model.Mappable fromSerializable(GeneratedMessageV3 generatedMessageV3) {
+        var protoModelInfo = (GraphSageProto.GraphSageMetrics) generatedMessageV3;
         return ImmutableGraphSageTrainMetrics.builder()
             .didConverge(protoModelInfo.getDidConverge())
             .epochLosses(protoModelInfo.getEpochLossesList())
