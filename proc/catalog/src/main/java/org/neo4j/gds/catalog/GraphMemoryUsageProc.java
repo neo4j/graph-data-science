@@ -99,8 +99,6 @@ public class GraphMemoryUsageProc extends CatalogProc {
             if (MemoryUsage.sizeOf(DUMMY) == -1L) {
                 return Map.of();
             }
-            var graphWalker = new GraphWalker(graphStore);
-
             var mappingSparseLongArray = new MutableLong();
             var mappingForward = new MutableLong();
             var mappingBackward = new MutableLong();
@@ -110,7 +108,7 @@ public class GraphMemoryUsageProc extends CatalogProc {
             var adjacencyLists = new MutableLong();
             var relationshipsTotal = new MutableLong();
 
-            graphWalker.addVisitor(gpr -> {
+            var graphWalker = new GraphWalker(gpr -> {
                 var size = gpr.size();
                 var path = gpr.path();
 
@@ -146,7 +144,8 @@ public class GraphMemoryUsageProc extends CatalogProc {
 
                 totalSize.add(size);
             });
-            graphWalker.walk();
+
+            graphWalker.walk(graphStore);
 
             var mappingTotal = mappingSparseLongArray.longValue() + mappingForward.longValue() + mappingBackward.longValue();
             var adjacencyTotal = adjacencyDegrees.longValue() + adjacencyOffsets.longValue() + adjacencyLists.longValue();

@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.ObjectLongIdentityHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.io.NullOutputStream;
@@ -297,11 +296,7 @@ public final class MemoryUsage {
         if (!VM_INFO_AVAILABLE) {
             return -1L;
         }
-        var totalSize = new MutableLong();
-        var graphWalker = new GraphWalker(thing);
-        graphWalker.addVisitor(gpr -> totalSize.add(gpr.size()));
-        graphWalker.walk();
-        return totalSize.longValue();
+        return new GraphWalker().walk(thing).totalSize();
     }
 
     /**
