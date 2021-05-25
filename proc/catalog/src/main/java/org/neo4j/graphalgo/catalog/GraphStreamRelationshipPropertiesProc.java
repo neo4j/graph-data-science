@@ -115,7 +115,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
             .stream()
             .flatMap(relType -> config.relationshipProperties()
                 .stream()
-                .filter(propertyKey -> graphStore.hasRelationshipProperty(List.of(relType), propertyKey))
+                .filter(propertyKey -> graphStore.hasRelationshipProperty(relType, propertyKey))
                 .map(propertyKey -> Triple.of(relType, propertyKey, graphStore.getGraph(relType, Optional.of(propertyKey))))
             )
             .collect(Collectors.toList());

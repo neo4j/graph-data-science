@@ -111,11 +111,11 @@ public interface GraphStore {
     ) {
         return relTypes
             .stream()
-            .filter(relType -> !hasRelationshipProperty(List.of(relType), propertyKey))
+            .filter(relType -> !hasRelationshipProperty(relType, propertyKey))
             .collect(Collectors.toSet());
     }
 
-    boolean hasRelationshipProperty(Collection<RelationshipType> relTypes, String propertyKey);
+    boolean hasRelationshipProperty(RelationshipType relType, String propertyKey);
 
     default Collection<String> relationshipPropertyKeys(Collection<RelationshipType> relTypes) {
         if (relTypes.isEmpty()) {

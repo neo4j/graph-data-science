@@ -161,7 +161,7 @@ public class NullGraphStore implements GraphStore {
     }
 
     @Override
-    public boolean hasRelationshipProperty(Collection<RelationshipType> relTypes, String propertyKey) {
+    public boolean hasRelationshipProperty(RelationshipType relType, String propertyKey) {
         return false;
     }
 

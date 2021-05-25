@@ -68,7 +68,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.singletonList;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -278,12 +277,10 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public boolean hasRelationshipProperty(Collection<RelationshipType> relTypes, String propertyKey) {
-        return relTypes
-            .stream()
-            .allMatch(relType -> relationshipProperties.containsKey(relType) && relationshipProperties
-                .get(relType)
-                .containsKey(propertyKey));
+    public boolean hasRelationshipProperty(RelationshipType relType, String propertyKey) {
+        return relationshipProperties.containsKey(relType) && relationshipProperties
+            .get(relType)
+            .containsKey(propertyKey);
     }
 
     @Override
@@ -665,7 +662,7 @@ public class CSRGraphStore implements GraphStore {
             }
 
             maybeRelationshipProperty.ifPresent(relationshipProperty -> {
-                if (!hasRelationshipProperty(singletonList(relationshipType), relationshipProperty)) {
+                if (!hasRelationshipProperty(relationshipType, relationshipProperty)) {
                     throw new IllegalArgumentException(formatWithLocale(
                         "Property '%s' does not exist for relationships with type '%s'.",
                         maybeRelationshipProperty.get(),
