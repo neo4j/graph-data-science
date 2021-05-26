@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo.compat._43drop02;
 
 import org.neo4j.graphalgo.compat.CompatIndexQuery;
-import org.neo4j.internal.kernel.api.PropertyIndexQuery;
+import org.neo4j.internal.kernel.api.IndexQuery;
 
 final class CompatIndexQueryImpl implements CompatIndexQuery {
-    final PropertyIndexQuery indexQuery;
+    final IndexQuery indexQuery;
 
-    CompatIndexQueryImpl(PropertyIndexQuery indexQuery) {
+    CompatIndexQueryImpl(IndexQuery indexQuery) {
         this.indexQuery = indexQuery;
     }
 }
