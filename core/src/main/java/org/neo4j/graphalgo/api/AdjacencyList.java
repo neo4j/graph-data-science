@@ -91,6 +91,13 @@ public interface AdjacencyList extends AutoCloseable {
     }
 
     /**
+     * Create a new uninitialized cursor.
+     *
+     * NOTE: In order to use the returned cursor {@link AdjacencyCursor#init} must be called.
+     */
+    AdjacencyCursor rawAdjacencyCursor();
+
+    /**
      * Create a new cursor for the properties of the relationships of a given {@code node}.
      * The cursor is expected to produce property values.
      *
