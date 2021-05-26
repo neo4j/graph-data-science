@@ -64,19 +64,19 @@ public class UnionNodeProperties implements NodeProperties {
 
         switch(valueType) {
             case LONG:
-                this.valueProducer = (nodeId -> Values.longValue(longValue(nodeId)));
+                this.valueProducer = ((unp, nodeId) -> Values.longValue(unp.longValue(nodeId)));
                 break;
             case DOUBLE:
-                this.valueProducer = (nodeId -> Values.doubleValue(doubleValue(nodeId)));
+                this.valueProducer = ((unp, nodeId) -> Values.doubleValue(unp.doubleValue(nodeId)));
                 break;
             case LONG_ARRAY:
-                this.valueProducer = (nodeId -> Values.longArray(longArrayValue(nodeId)));
+                this.valueProducer = ((unp, nodeId) -> Values.longArray(unp.longArrayValue(nodeId)));
                 break;
             case FLOAT_ARRAY:
-                this.valueProducer = (nodeId -> Values.floatArray(floatArrayValue(nodeId)));
+                this.valueProducer = ((unp, nodeId) -> Values.floatArray(unp.floatArrayValue(nodeId)));
                 break;
             case DOUBLE_ARRAY:
-                this.valueProducer = (nodeId -> Values.doubleArray(doubleArrayValue(nodeId)));
+                this.valueProducer = ((unp, nodeId) -> Values.doubleArray(unp.doubleArrayValue(nodeId)));
                 break;
             default:
                 throw new UnsupportedOperationException(formatWithLocale("No value converter for ValueType %s", valueTypes));
@@ -156,7 +156,7 @@ public class UnionNodeProperties implements NodeProperties {
 
     @Override
     public Value value(long nodeId) {
-        return valueProducer.getValue(nodeId);
+        return valueProducer.getValue(this, nodeId);
     }
 
     @Override
@@ -196,7 +196,7 @@ public class UnionNodeProperties implements NodeProperties {
 
     @FunctionalInterface
     private interface ValueProducer {
-        Value getValue(long nodeId);
+        Value getValue(UnionNodeProperties unionNodeProperties, long nodeId);
     }
 
     @Override
