@@ -86,6 +86,15 @@ public class CompositeAdjacencyList implements AdjacencyList {
     }
 
     @Override
+    public AdjacencyCursor rawAdjacencyCursor() {
+        var cursors = new ArrayList<AdjacencyCursor>(adjacencyLists.size());
+        for (var adjacency : adjacencyLists) {
+            cursors.add(adjacency.rawAdjacencyCursor());
+        }
+        return new CompositeAdjacencyCursor(cursors);
+    }
+
+    @Override
     public PropertyCursor propertyCursor(long node, double fallbackValue) {
         throw new UnsupportedOperationException("CompositeAdjacencyList#propertyCursor is not supported");
     }
