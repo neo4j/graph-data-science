@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipCursor;
 
 import java.util.OptionalLong;
-import java.util.Random;
 import java.util.stream.LongStream;
 
 public class NeighborhoodSampler {
@@ -66,10 +65,6 @@ public class NeighborhoodSampler {
 
     long randomState() {
         return this.randomSeed;
-    }
-
-    void updateRandomSeed() {
-        this.randomSeed = new Random(randomSeed).nextLong();
     }
 
     OptionalLong sampleOne(Graph graph, long nodeId) {

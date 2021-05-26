@@ -35,10 +35,6 @@ public interface Layer {
         return sampler().randomState();
     }
 
-    default void generateNewRandomState() {
-        sampler().updateRandomSeed();
-    }
-
     NeighborhoodSampler sampler();
 
     default List<Weights<? extends Tensor<?>>> weights() {
