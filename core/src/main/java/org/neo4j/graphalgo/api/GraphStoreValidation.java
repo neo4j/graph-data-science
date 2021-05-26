@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.utils.StringJoining;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -110,7 +111,7 @@ public final class GraphStoreValidation {
             String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
             Collection<RelationshipType> internalRelationshipTypes = config.internalRelationshipTypes(graphStore);
             if (weightProperty != null) {
-                var relTypesWithoutProperty = graphStore.withoutRelationshipProperty(internalRelationshipTypes, weightProperty);
+                var relTypesWithoutProperty = typesWithoutRelationshipProperty(graphStore, internalRelationshipTypes, weightProperty);
                 if (!relTypesWithoutProperty.isEmpty()) {
                     throw new IllegalArgumentException(formatWithLocale(
                         "Relationship weight property `%s` not found in relationship types %s. Properties existing on all relationship types: %s",
@@ -159,6 +160,17 @@ public final class GraphStoreValidation {
                 ));
             }
         }
+    }
+
+    private static Set<RelationshipType> typesWithoutRelationshipProperty(
+        GraphStore graphStore,
+        Collection<RelationshipType> relTypes,
+        String propertyKey
+    ) {
+        return relTypes
+            .stream()
+            .filter(relType -> !graphStore.hasRelationshipProperty(relType, propertyKey))
+            .collect(Collectors.toSet());
     }
 
     private GraphStoreValidation() {}
