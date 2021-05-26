@@ -198,6 +198,8 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
                 GdsCypher.call()
                     .withNodeLabel("Label1")
                     .withRelationshipType("TYPE1")
+                    .withRelationshipProperty("equalWeight")
+                    .withRelationshipProperty("weight")
                     .algo("pageRank"),
                 "implicit graph"
             )

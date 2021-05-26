@@ -208,7 +208,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
                     RelationshipProjections.fromString(PROJECT_ALL)
                 ),
                 List.of("age", "birth_year", "death_year"),
-                List.of(""),
+                List.of(),
                 List.of("__ALL__")
             )
         );
