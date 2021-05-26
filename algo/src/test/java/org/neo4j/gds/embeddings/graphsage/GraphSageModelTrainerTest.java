@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.LongHashSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -94,7 +94,7 @@ class GraphSageModelTrainerTest {
         long nodeCount = graph.nodeCount();
         features = HugeObjectArray.newArray(double[].class, nodeCount, AllocationTracker.empty());
 
-        Random random = new Random();
+        Random random = new Random(19L);
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
         configBuilder = ImmutableGraphSageTrainConfig.builder()
             .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
@@ -229,8 +229,7 @@ class GraphSageModelTrainerTest {
         trainer.train(arrayGraph, arrayFeatures);
     }
 
-    @Disabled("Not fully deterministic yet")
-    @Test
+    @RepeatedTest(value = 25, name = RepeatedTest.LONG_DISPLAY_NAME)
     void testLosses() {
         var config = configBuilder
             .modelName("randomSeed2")
@@ -240,6 +239,7 @@ class GraphSageModelTrainerTest {
             .addSampleSizes(5, 3)
             .batchSize(5)
             .maxIterations(100)
+            .randomSeed(42L)
             .build();
 
         var trainer = new GraphSageModelTrainer(
@@ -261,8 +261,18 @@ class GraphSageModelTrainerTest {
         assertThat(epochLosses)
             .isInstanceOf(List.class)
             .asList()
-            // TODO: losses are still not deterministic, find out what's happening and assert with real values.
-            .containsExactlyElementsOf(metrics.epochLosses());
+            .containsExactly(
+                89.89507983622258,
+                84.71357307588974,
+                84.18589853328612,
+                84.10179444143131,
+                84.07430575768018,
+                80.97075806917714,
+                80.96268919745964,
+                81.02599920488873,
+                80.99105515654075,
+                80.95808277983977
+            );
     }
 
     @Test
