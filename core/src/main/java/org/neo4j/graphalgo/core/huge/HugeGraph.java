@@ -158,7 +158,7 @@ public class HugeGraph implements CSRGraph {
         this.properties = properties;
         this.orientation = orientation;
         this.hasRelationshipProperty = hasRelationshipProperty;
-        this.cursorCache = AdjacencyCursor.empty();
+        this.cursorCache = adjacency.rawAdjacencyCursor();
     }
 
     @Override
