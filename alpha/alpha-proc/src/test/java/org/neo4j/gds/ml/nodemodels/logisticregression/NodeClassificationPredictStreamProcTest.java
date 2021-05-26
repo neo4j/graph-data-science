@@ -121,29 +121,29 @@ class NodeClassificationPredictStreamProcTest extends BaseProcTest {
             .addParameter("includePredictedProbabilities", true)
             .addParameter("modelName", MODEL_NAME)
             .yields("nodeId", "predictedClass", "predictedProbabilities")
-            + " RETURN nodeId, predictedClass, [x IN predictedProbabilities | round(x, 11)] as predictedProbabilities";
+            + " RETURN nodeId, predictedClass, [x IN predictedProbabilities | floor(x * 1e11) / 1e11] as predictedProbabilities";
 
         assertCypherResult(query, List.of(
             Map.of(
                 "nodeId", 0L,
                 "predictedClass", 1L,
-                "predictedProbabilities", List.of(0.00962357825, 0.99037642175)
+                "predictedProbabilities", List.of(0.00962357825, 0.99037642174)
             ), Map.of(
                 "nodeId", 1L,
                 "predictedClass", 0L,
-                "predictedProbabilities", List.of(0.62022348503, 0.37977651497)
+                "predictedProbabilities", List.of(0.62022348502, 0.37977651497)
             ), Map.of(
                 "nodeId", 2L,
                 "predictedClass", 0L,
-                "predictedProbabilities", List.of(0.91558971962, 0.08441028038)
+                "predictedProbabilities", List.of(0.91558971961, 0.08441028038)
             ), Map.of(
                 "nodeId", 3L,
                 "predictedClass", 1L,
-                "predictedProbabilities", List.of(0.10339691434, 0.89660308566)
+                "predictedProbabilities", List.of(0.10339691434, 0.89660308565)
             ), Map.of(
                 "nodeId", 4L,
                 "predictedClass", 0L,
-                "predictedProbabilities", List.of(0.66191855278, 0.33808144722)
+                "predictedProbabilities", List.of(0.66191855278, 0.33808144721)
             )
         ));
     }
