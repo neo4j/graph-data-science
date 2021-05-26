@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.extension.Neo4jGraph;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,12 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig> {
-
-    @Neo4jGraph
-    private static final String DB_CYPHER = "CREATE " +
-           "  (a:Label1 {name: 'a'})" +
-           ", (b:Label1 {name: 'b'})" +
-           ", (a)-[:TYPE1]->(b)";
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -73,6 +66,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
             .withAnyRelationshipType()
             .algo("pageRank")
             .statsMode()
+            .addParameter("tolerance", 0.1)
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
@@ -80,7 +74,7 @@ public class PageRankStatsProcTest extends PageRankProcTest<PageRankStatsConfig>
             "computeMillis", greaterThan(-1L),
             "postProcessingMillis", greaterThan(-1L),
             "didConverge", true,
-            "ranIterations", 2L,
+            "ranIterations", 13L,
             "centralityDistribution", isA(Map.class),
             "configuration", isA(Map.class)
         )));
