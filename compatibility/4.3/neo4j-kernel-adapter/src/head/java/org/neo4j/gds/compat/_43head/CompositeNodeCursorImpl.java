@@ -17,31 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat._43;
+package org.neo4j.gds.compat._43head;
 
-import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
-import org.neo4j.memory.MemoryTracker;
+import org.neo4j.graphalgo.compat.CompositeNodeCursor;
+import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 
-final class AllocationTrackerAdapterImpl implements AllocationTrackerAdapter {
+import java.util.List;
 
-    private final MemoryTracker memoryTracker;
+public final class CompositeNodeCursorImpl extends CompositeNodeCursor {
 
-    AllocationTrackerAdapterImpl(MemoryTracker memoryTracker) {
-        this.memoryTracker = memoryTracker;
-    }
-
-    @Override
-    public void add(long bytes) {
-        memoryTracker.allocateHeap(bytes);
-    }
-
-    @Override
-    public void remove(long bytes) {
-        memoryTracker.releaseHeap(bytes);
-    }
-
-    @Override
-    public long trackedBytes() {
-        return memoryTracker.estimatedHeapMemory();
+    CompositeNodeCursorImpl(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+        super(cursors, labelIds);
     }
 }
