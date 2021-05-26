@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -76,13 +77,11 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
             .addParameter("relationshipWeightProperty", "does_not_exist")
             .yields("nodeId", "score");
 
-        QueryExecutionException exception = assertThrows(QueryExecutionException.class, () -> {
+        assertThatThrownBy(() -> {
             runQueryWithRowConsumer(query, row -> {});
-        });
-        Throwable rootCause = ExceptionUtil.rootCause(exception);
-        assertTrue(
-            rootCause.getMessage().contains("Relationship weight property `does_not_exist` not found in graph") ||
-            rootCause.getMessage().contains("No graph was loaded for property does_not_exist"));
+        }).isInstanceOf(QueryExecutionException.class)
+            .hasMessageContaining("Relationship weight property `does_not_exist` not found in relationship types ['TYPE1']")
+            .hasMessageContaining("Properties existing on all relationship types: ['equalWeight', 'weight']");
     }
 
     @ParameterizedTest(name = "{1}")
