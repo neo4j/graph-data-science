@@ -102,8 +102,8 @@ task versionsJson {
 
 task distZip(type: Zip) {
     description 'Create a ZIP archive of the main distribution JAR.'
-    archiveBaseName = shadowJar.archiveBaseName
-    archiveClassifier = shadowJar.archiveClassifier
+    archiveBaseName.set(shadowJar.archiveBaseName)
+    archiveClassifier.set(shadowJar.archiveClassifier)
     from shadowJar
     destinationDirectory.set(file(distributionDir))
 }
