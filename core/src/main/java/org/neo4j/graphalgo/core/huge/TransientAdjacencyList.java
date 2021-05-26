@@ -178,6 +178,11 @@ public final class TransientAdjacencyList implements AdjacencyList {
     }
 
     @Override
+    public AdjacencyCursor rawAdjacencyCursor() {
+        return new DecompressingCursor(pages);
+    }
+
+    @Override
     public PropertyCursor propertyCursor(long node, double fallbackValue) {
         var offset = offsets.get(node);
         if (offset == 0) {
