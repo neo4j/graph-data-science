@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 
@@ -105,16 +104,6 @@ public interface GraphStore {
 
     boolean hasRelationshipType(RelationshipType relationshipType);
 
-    default Set<RelationshipType> withoutRelationshipProperty(
-        Collection<RelationshipType> relTypes,
-        String propertyKey
-    ) {
-        return relTypes
-            .stream()
-            .filter(relType -> !hasRelationshipProperty(relType, propertyKey))
-            .collect(Collectors.toSet());
-    }
-
     boolean hasRelationshipProperty(RelationshipType relType, String propertyKey);
 
     default Collection<String> relationshipPropertyKeys(Collection<RelationshipType> relTypes) {
@@ -128,7 +117,7 @@ public interface GraphStore {
             result.retainAll(relationshipPropertyKeys(iterator.next()));
         }
 
-        return Collections.unmodifiableSet(result);
+        return result;
     }
 
 
