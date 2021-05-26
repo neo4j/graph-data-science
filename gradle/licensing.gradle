@@ -73,6 +73,7 @@ def whitelist = [
         [name: 'GNU General Public License (GPL), version 2, with the Classpath exception', url: 'http://openjdk.java.net/legal/gplv2+ce.html', aliases: [
                 [name: 'GPL-2.0']
         ]],
+        [name: 'GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1', url: 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html'],
         [name: 'Public Domain, per Creative Commons CC0', url: 'http://creativecommons.org/publicdomain/zero/1.0/', aliases: [
                 [name: 'CC0']
         ]],
