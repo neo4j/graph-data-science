@@ -52,7 +52,6 @@ public interface ModelInfoSerializer {
         }
     }
 
-
     static <M, C extends TrainingConfig> void serializeMetrics(
         Map<M, MetricData<C>> metrics,
         Function<M, String> metricNameFunction,

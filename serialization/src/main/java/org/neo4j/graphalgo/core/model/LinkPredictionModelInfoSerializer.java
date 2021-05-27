@@ -35,7 +35,7 @@ import java.util.function.BiConsumer;
 import static org.neo4j.graphalgo.config.ConfigSerializers.linkLogisticRegressionTrainConfig;
 
 @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
-public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer/*<LinkPredictionModelInfo, CommonML.LinkPredictionModelInfo>*/ {
+public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer {
 
     public GeneratedMessageV3 toSerializable(Model.Mappable mappable) {
         LinkPredictionModelInfo linkPredictionModelInfo = (LinkPredictionModelInfo) mappable;
