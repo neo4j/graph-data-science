@@ -109,6 +109,10 @@ public final class HugeArrays {
         }
     }
 
+    public static int oversizeInt(int minTargetSize, int bytesPerElement) {
+        return Math.toIntExact(oversize(minTargetSize, bytesPerElement));
+    }
+
     private HugeArrays() {
         throw new UnsupportedOperationException("No instances");
     }

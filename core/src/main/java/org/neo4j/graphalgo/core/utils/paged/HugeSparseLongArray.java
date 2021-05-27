@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.utils.paged;
 
 import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
@@ -30,6 +29,8 @@ import java.lang.invoke.VarHandle;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.oversizeInt;
 
 
 public final class HugeSparseLongArray {
@@ -277,7 +278,7 @@ public final class HugeSparseLongArray {
                     return;
                 }
 
-                AtomicReferenceArray<long[]> newPages = new AtomicReferenceArray<>(BitUtil.nextHighestPowerOfTwo(newSize));
+                AtomicReferenceArray<long[]> newPages = new AtomicReferenceArray<>(oversizeInt(newSize, MemoryUsage.BYTES_OBJECT_REF));
                 for (int pageIndex = 0; pageIndex < pages.length(); pageIndex++) {
                     long[] page = pages.get(pageIndex);
                     if (page != null) {
