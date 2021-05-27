@@ -22,7 +22,12 @@ dependencies {
     api project(':neo4j-kernel-adapter-api')
 
     compatibilityModules.'kernel-adapter'.each { dep ->
-        implementation dep
+        if (dep.name.contains('4.3')) {
+            implementation files(dep.sourceSets.drop2.output.files)
+            implementation files(dep.sourceSets.head.output.files)
+        } else {
+            implementation dep
+        }
     }
 
     testImplementation project(":test-utils")
