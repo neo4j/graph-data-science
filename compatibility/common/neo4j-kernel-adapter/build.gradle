@@ -2,6 +2,8 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Neo4j Kernel Adapter'
 
+evaluationDependsOn(':neo4j-kernel-adapter-4.3')
+
 dependencies {
     annotationProcessor group: 'org.immutables', name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
@@ -19,8 +21,15 @@ dependencies {
     api project(':neo4j-adapter')
     api project(':neo4j-kernel-adapter-api')
 
-    compatibilityModules.'kernel-adapter'.each {
-        implementation it
+    compatibilityModules.'kernel-adapter'.each { dep ->
+        if (dep.name.contains('4.3')) {
+            implementation files(dep.sourceSets.drop2.output.files)
+            implementation files(dep.sourceSets.head.output.files)
+        } else {
+            implementation dep
+        }
     }
+
+    testImplementation project(":test-utils")
 }
 
