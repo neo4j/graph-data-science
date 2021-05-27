@@ -16,6 +16,7 @@ This chapter is divided into the following sections:
 * <<anonymous-graph>>
 * <<node-properties>>
 * <<utility-functions>>
+* <<administration>>
 
 include::graph-catalog/graph-catalog.adoc[leveloffset=+1]
 include::native-projection.adoc[leveloffset=+1]
@@ -23,3 +24,4 @@ include::cypher-projection.adoc[tag=overview,leveloffset=+1]
 include::anonymous-graph.adoc[leveloffset=+1]
 include::node-properties.adoc[leveloffset=+1]
 include::utility-functions.adoc[leveloffset=+1]
+include::administration.adoc[leveloffset=+1]

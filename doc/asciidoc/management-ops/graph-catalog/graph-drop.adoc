@@ -26,3 +26,14 @@ This will yield an empty result for non-existing graphs.
 ----
 CALL gds.graph.drop('my-fictive-graph', false, 'my-other-db') YIELD graphName;
 ----
+
+If we are a GDS administrator and want to drop a graph that belongs to another user we can set the username as the fourth parameter to the procedure.
+This is useful if there are multiple users with graphs of the same name.
+
+.Remove a graph from a specific user's graph catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.drop('my-fictive-graph', false, '', 'another-user') YIELD graphName;
+----
+
+See <<administration>> for more details on this.

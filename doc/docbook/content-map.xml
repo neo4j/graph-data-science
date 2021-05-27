@@ -41,6 +41,8 @@
             </d:tocentry>
             <d:tocentry linkend="utility-functions"><?dbhtml filename="management-ops/utility-functions/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="administration"><?dbhtml filename="management-ops/administration/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="model-catalog-ops">
