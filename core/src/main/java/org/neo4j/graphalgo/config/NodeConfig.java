@@ -17,11 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths;
+package org.neo4j.graphalgo.config;
 
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.SourceNodeConfig;
+import org.neo4j.graphdb.Node;
 
-public interface AllShortestPathsBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig, TrackRelationshipsConfig {
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
+public interface NodeConfig {
+
+    static long parseNodeId(Object input, String field) {
+        if (input instanceof Node) {
+            return ((Node) input).getId();
+        } else if (input instanceof Number) {
+            return ((Number) input).longValue();
+        }
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "Expected a node or a node id for `%s`. Got %s.",
+            field,
+            input.getClass().getSimpleName()
+        ));
+    }
 }

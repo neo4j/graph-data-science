@@ -17,11 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths;
+package org.neo4j.graphalgo.config;
 
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.SourceNodeConfig;
+import org.neo4j.graphalgo.annotation.Configuration;
 
-public interface AllShortestPathsBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig, TrackRelationshipsConfig {
+public interface TargetNodeConfig extends NodeConfig {
+
+    String TARGET_NODE_KEY = "targetNode";
+
+    @Configuration.ConvertWith("org.neo4j.graphalgo.config.TargetNodeConfig#parseTargetNodeId")
+    long targetNode();
+
+    static long parseTargetNodeId(Object input) {
+        return NodeConfig.parseNodeId(input, TARGET_NODE_KEY);
+    }
 }

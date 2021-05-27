@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
@@ -38,6 +39,8 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
+import org.neo4j.graphalgo.SourceNodeConfigTest;
+import org.neo4j.graphalgo.TargetNodeConfigTest;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -62,7 +65,9 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     AlgoBaseProcTest<AStar, CONFIG, DijkstraResult>,
     MemoryEstimateTest<AStar, CONFIG, DijkstraResult>,
     HeapControlTest<AStar, CONFIG, DijkstraResult>,
-    RelationshipWeightConfigTest<AStar, CONFIG, DijkstraResult> {
+    RelationshipWeightConfigTest<AStar, CONFIG, DijkstraResult>,
+    SourceNodeConfigTest<AStar, CONFIG, DijkstraResult>,
+    TargetNodeConfigTest<AStar, CONFIG, DijkstraResult> {
 
     private static final String NODE_QUERY = "MATCH (n) RETURN id(n) AS id, n.latitude AS latitude, n.longitude AS longitude";
 
@@ -223,16 +228,50 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
         return createMinimalConfig(baseMap);
     }
 
+    @Test
     @Disabled
     @Override
     public void testMemoryEstimateOnExplicitDimensions() {
         // test assumes one node property, we load two
     }
 
+    @Test
     @Disabled
     @Override
     public void testFailOnMissingNodeLabel() {
         // test adds a node projection to the minimal config input
         // we override this with our own node projection
     }
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunOnEmptyGraph() {
+        // graph must not be empty
+    }
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunUnweightedOnWeightedNoRelTypeGraph() {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunUnweightedOnWeightedMultiRelTypeGraph(String relType, String expectedGraph) {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testFilteringOnRelationshipPropertiesOnLoadedGraph(String propertyName, double expectedWeight) {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testFilteringOnRelTypesOnLoadedGraph() {}
+
+    @Test
+    @Disabled
+    @Override
+    public void testRunUnweightedOnWeightedImplicitlyLoadedGraph() {}
 }

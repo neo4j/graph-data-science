@@ -17,11 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths;
+package org.neo4j.graphalgo;
 
+import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.RelationshipWeightConfig;
-import org.neo4j.graphalgo.config.SourceNodeConfig;
+import org.neo4j.graphalgo.config.TargetNodeConfig;
 
-public interface AllShortestPathsBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig, TrackRelationshipsConfig {
+public interface TargetNodeConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends TargetNodeConfig & AlgoBaseConfig, RESULT> extends NodeConfigTest<ALGORITHM, CONFIG, RESULT> {
+
+    @Test
+    default void testTargetNodeValidation() {
+        testNodeValidation(TargetNodeConfig.TARGET_NODE_KEY, "Target node", "does not exist");
+    }
 }

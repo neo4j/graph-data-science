@@ -29,7 +29,9 @@ import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
+import org.neo4j.graphalgo.config.SourceNodeConfig;
 import org.neo4j.graphalgo.config.SourceNodesConfig;
+import org.neo4j.graphalgo.config.TargetNodeConfig;
 import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.ArrayList;
@@ -157,6 +159,28 @@ public final class GraphStoreValidation {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Source nodes do not exist in the in-memory graph: %s",
                     StringJoining.join(missingNodes)
+                ));
+            }
+        }
+
+        if (config instanceof SourceNodeConfig) {
+            var sourceNodeId = ((SourceNodeConfig) config).sourceNode();
+
+            if (graphStore.nodes().toMappedNodeId(sourceNodeId) == NodeMapping.NOT_FOUND) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Source node does not exist in the in-memory graph: `%d`",
+                    sourceNodeId
+                ));
+            }
+        }
+
+        if (config instanceof TargetNodeConfig) {
+            var targetNodeId = ((TargetNodeConfig) config).targetNode();
+
+            if (graphStore.nodes().toMappedNodeId(targetNodeId) == NodeMapping.NOT_FOUND) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Target node does not exist in the in-memory graph: `%d`",
+                    targetNodeId
                 ));
             }
         }
