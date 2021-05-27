@@ -13,6 +13,7 @@
 *** xref:management-ops/anonymous-graph/index.adoc[]
 *** xref:management-ops/node-properties/index.adoc[]
 *** xref:management-ops/utility-functions/index.adoc[]
+*** xref:management-ops/administration/index.adoc[]
 ** xref:model-catalog/model-catalog/index.adoc[]
 ** xref:algorithms/index.adoc[]
 *** xref:algorithms/syntax/index.adoc[]
