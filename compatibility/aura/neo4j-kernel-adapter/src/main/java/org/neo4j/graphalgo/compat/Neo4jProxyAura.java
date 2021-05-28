@@ -55,7 +55,6 @@ import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.TokenPredicate;
-import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -73,14 +72,13 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.PageCursor;
 import org.neo4j.io.pagecache.PagedFile;
-import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.io.pagecache.tracing.cursor.PageCursorTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.api.query.ExecutingQuery;
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
-import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
@@ -144,12 +142,7 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
         AccessMode mode,
         String databaseName
     ) {
-        return new SecurityContext(
-            new CompatUsernameAuthSubjectAura(username, authSubject),
-            mode,
-            // GDS is always operating from an embedded context
-            ClientConnectionInfo.EMBEDDED_CONNECTION
-        );
+        return new SecurityContext(new CompatUsernameAuthSubjectAura(username, authSubject), mode);
     }
 
     @Override
@@ -157,12 +150,12 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
         RecordStore<? extends AbstractBaseRecord> recordStore,
         KernelTransaction kernelTransaction
     ) {
-        return recordStore.getHighestPossibleIdInUse(kernelTransaction.cursorContext());
+        return recordStore.getHighestPossibleIdInUse(kernelTransaction.pageCursorTracer());
     }
 
     @Override
     public PageCursor pageFileIO(PagedFile pagedFile, long pageId, int pageFileFlags) throws IOException {
-        return pagedFile.io(pageId, pageFileFlags, CursorContext.NULL);
+        return pagedFile.io(pageId, pageFileFlags, PageCursorTracer.NULL);
     }
 
     @Override
@@ -202,29 +195,29 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
     public PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
         return kernelTransaction
             .cursors()
-            .allocatePropertyCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
+            .allocatePropertyCursor(kernelTransaction.pageCursorTracer(), kernelTransaction.memoryTracker());
     }
 
     @Override
     public NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction) {
-        return kernelTransaction.cursors().allocateNodeCursor(kernelTransaction.cursorContext());
+        return kernelTransaction.cursors().allocateNodeCursor(kernelTransaction.pageCursorTracer());
     }
 
     @Override
     public RelationshipScanCursor allocateRelationshipScanCursor(KernelTransaction kernelTransaction) {
-        return kernelTransaction.cursors().allocateRelationshipScanCursor(kernelTransaction.cursorContext());
+        return kernelTransaction.cursors().allocateRelationshipScanCursor(kernelTransaction.pageCursorTracer());
     }
 
     @Override
     public NodeLabelIndexCursor allocateNodeLabelIndexCursor(KernelTransaction kernelTransaction) {
-        return kernelTransaction.cursors().allocateNodeLabelIndexCursor(kernelTransaction.cursorContext());
+        return kernelTransaction.cursors().allocateNodeLabelIndexCursor(kernelTransaction.pageCursorTracer());
     }
 
     @Override
     public NodeValueIndexCursor allocateNodeValueIndexCursor(KernelTransaction kernelTransaction) {
         return kernelTransaction
             .cursors()
-            .allocateNodeValueIndexCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
+            .allocateNodeValueIndexCursor(kernelTransaction.pageCursorTracer(), kernelTransaction.memoryTracker());
     }
 
     @Override
@@ -396,11 +389,6 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
             public boolean highIO() {
                 return false;
             }
-
-            @Override
-            public boolean populateNodeIndex() {
-                return true;
-            }
         };
         return factory.instantiate(
             directoryStructure,
@@ -416,7 +404,6 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
             jobScheduler,
             badCollector,
             TransactionLogInitializer.getLogFilesInitializer(),
-            new IndexImporterFactoryImpl(dbConfig),
             EmptyMemoryTracker.INSTANCE
         );
     }
@@ -598,7 +585,7 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
         public Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) throws IOException {
             return delegate.calculateEstimates((values, kernelTransaction) -> propertySizeCalculator.calculateSize(
                 values,
-                kernelTransaction.cursorContext(),
+                kernelTransaction.pageCursorTracer(),
                 kernelTransaction.memoryTracker()
             ));
         }
