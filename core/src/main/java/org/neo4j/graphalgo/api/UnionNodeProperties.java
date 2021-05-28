@@ -42,10 +42,12 @@ public class UnionNodeProperties implements NodeProperties {
     private final NodeMapping nodeMapping;
     private final Map<NodeLabel, NodeProperties> labelToNodePropertiesMap;
     private final ValueProducer valueProducer;
+    private final NodeLabel[] availableNodeLabels;
 
     public UnionNodeProperties(NodeMapping nodeMapping, Map<NodeLabel, NodeProperties> labelToNodePropertiesMap) {
         this.nodeMapping = nodeMapping;
         this.labelToNodePropertiesMap = labelToNodePropertiesMap;
+        this.availableNodeLabels = nodeMapping.availableNodeLabels().toArray(NodeLabel[]::new);
 
         var valueTypes = labelToNodePropertiesMap.values()
             .stream()
@@ -170,7 +172,7 @@ public class UnionNodeProperties implements NodeProperties {
     }
 
     private NodeProperties getPropertiesForNodeId(long nodeId) {
-        for (NodeLabel label : nodeMapping.availableNodeLabels()) {
+        for (NodeLabel label : availableNodeLabels) {
             if (nodeMapping.hasLabel(nodeId, label)) {
                 NodeProperties nodeProperties = labelToNodePropertiesMap.get(label);
                 if (nodeProperties != null) {
