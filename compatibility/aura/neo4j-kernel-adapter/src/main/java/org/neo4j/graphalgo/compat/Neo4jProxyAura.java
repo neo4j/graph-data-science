@@ -232,27 +232,7 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
 
     @Override
     public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
-        var nodeLabelIndexDescriptor = NodeLabelIndexLookupAura.findUsableMatchingIndex(
-            kernelTransaction,
-            SchemaDescriptor.forAnyEntityTokens(EntityType.NODE)
-        );
-
-        if (nodeLabelIndexDescriptor == IndexDescriptor.NO_INDEX) {
-            throw new IllegalStateException("There is no index that can back a node label scan.");
-        }
-
-        try {
-            var read = kernelTransaction.dataRead();
-            var session = read.tokenReadSession(nodeLabelIndexDescriptor);
-            read.nodeLabelScan(
-                session,
-                cursor,
-                IndexQueryConstraints.unordered(true),
-                new TokenPredicate(label)
-            );
-        } catch (KernelException e) {
-            throw new RuntimeException(e);
-        }
+        kernelTransaction.dataRead().nodeLabelScan(label, cursor, IndexOrder.NONE);
     }
 
     @Override
