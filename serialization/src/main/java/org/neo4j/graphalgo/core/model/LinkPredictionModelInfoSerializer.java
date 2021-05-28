@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.core.model;
 
 import com.google.protobuf.GeneratedMessageV3;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.neo4j.gds.ModelInfoSerializer;
 import org.neo4j.gds.ml.linkmodels.ImmutableLinkPredictionModelInfo;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionModelInfo;
@@ -34,7 +33,6 @@ import java.util.function.BiConsumer;
 
 import static org.neo4j.graphalgo.config.ConfigSerializers.linkLogisticRegressionTrainConfig;
 
-@SuppressFBWarnings("BC_UNCONFIRMED_CAST")
 public class LinkPredictionModelInfoSerializer implements ModelInfoSerializer {
 
     public GeneratedMessageV3 toSerializable(Model.Mappable mappable) {

@@ -21,20 +21,18 @@ package org.neo4j.gds.ml.nodemodels;
 
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Parser;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
+import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.ml.model.proto.NodeClassificationProto;
 
-@SuppressFBWarnings("BC_UNCONFIRMED_CAST")
 public class NodeClassificationSerializer implements ModelSerializer {
 
     @Override

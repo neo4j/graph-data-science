@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels;
 
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Parser;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
@@ -36,7 +35,6 @@ import org.neo4j.graphalgo.ml.model.proto.LinkPredictionProto;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-@SuppressFBWarnings("BC_UNCONFIRMED_CAST")
 public class LinkPredictionSerializer implements ModelSerializer {
 
     @Override
