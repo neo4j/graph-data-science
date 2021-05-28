@@ -31,7 +31,6 @@ dependencies {
     annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
 
     implementation      group: 'com.google.protobuf',        name: 'protobuf-java',        version: ver.'protobuf'
-    implementation      group: 'com.github.spotbugs',        name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
     implementation      group: 'com.fasterxml.jackson.core', name: 'jackson-databind',     version: '2.9.10.6'
 
     compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'

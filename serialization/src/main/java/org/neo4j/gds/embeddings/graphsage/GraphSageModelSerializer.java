@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Parser;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ModelSerializer;
@@ -33,7 +32,6 @@ import org.neo4j.graphalgo.core.model.proto.ModelProto;
 
 import java.io.IOException;
 
-@SuppressFBWarnings("BC_UNCONFIRMED_CAST")
 public final class GraphSageModelSerializer implements ModelSerializer {
 
     @Override
