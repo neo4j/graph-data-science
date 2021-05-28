@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.compat.CompositeNodeCursor;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -37,7 +37,7 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractCursorBasedScanne
 
     private final int[] labelIds;
 
-    MultipleNodeLabelIndexBasedScanner(int[] labelIds, int prefetchSize, SecureTransaction transaction) {
+    MultipleNodeLabelIndexBasedScanner(int[] labelIds, int prefetchSize, TransactionContext transaction) {
         super(prefetchSize, transaction, labelIds);
         this.labelIds = labelIds;
     }

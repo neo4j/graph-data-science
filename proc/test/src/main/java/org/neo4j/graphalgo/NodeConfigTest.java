@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.NodeConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.SecureTransaction;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,13 +42,10 @@ public interface NodeConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
             RelationshipProjections.all()
         );
 
-        long nodeId;
-
-        try (var tx = graphDb().beginTx()) {
-            var ktx = SecureTransaction.of(graphDb(), tx).topLevelKernelTransaction();
+        long nodeId = TestSupport.fullAccessTransaction(graphDb()).apply((tx, ktx) -> {
             var nodeStore = GraphDatabaseApiProxy.neoStores(graphDb()).getNodeStore();
-            nodeId = Neo4jProxy.getHighestPossibleIdInUse(nodeStore, ktx);
-        }
+            return Neo4jProxy.getHighestPossibleIdInUse(nodeStore, ktx);
+        });
 
         GraphStoreCatalog.set(graphCreateConfig, graphLoader(graphCreateConfig).graphStore());
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
 public interface StoreScanner<Reference> extends AutoCloseable {
@@ -35,7 +35,7 @@ public interface StoreScanner<Reference> extends AutoCloseable {
     }
 
     interface Factory<Reference> {
-        StoreScanner<Reference> newScanner(int prefetchSize, SecureTransaction transaction);
+        StoreScanner<Reference> newScanner(int prefetchSize, TransactionContext transaction);
     }
 
     interface ScanCursor<Reference> extends AutoCloseable {

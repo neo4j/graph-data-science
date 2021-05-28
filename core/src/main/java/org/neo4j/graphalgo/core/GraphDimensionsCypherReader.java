@@ -31,7 +31,7 @@ import static org.neo4j.graphalgo.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
 
 public class GraphDimensionsCypherReader extends GraphDimensionsReader<GraphCreateFromCypherConfig> {
 
-    public GraphDimensionsCypherReader(SecureTransaction tx, GraphCreateFromCypherConfig config) {
+    public GraphDimensionsCypherReader(TransactionContext tx, GraphCreateFromCypherConfig config) {
         super(tx, config);
     }
 

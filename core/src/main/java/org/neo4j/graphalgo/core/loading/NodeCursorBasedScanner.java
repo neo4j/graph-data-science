@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -29,7 +29,7 @@ import org.neo4j.kernel.impl.store.NodeStore;
 
 final class NodeCursorBasedScanner extends AbstractCursorBasedScanner<NodeReference, NodeCursor, NodeStore, Void> {
 
-    NodeCursorBasedScanner(int prefetchSize, SecureTransaction transaction) {
+    NodeCursorBasedScanner(int prefetchSize, TransactionContext transaction) {
         super(prefetchSize, transaction, null);
     }
 

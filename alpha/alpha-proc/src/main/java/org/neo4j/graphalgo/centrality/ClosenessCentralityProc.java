@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
@@ -104,7 +104,7 @@ public class ClosenessCentralityProc extends AlgoBaseProc<MSClosenessCentrality,
 
         try(ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
             NodePropertyExporter exporter = NodePropertyExporter
-                .builder(SecureTransaction.of(api, procedureTransaction), graph, algorithm.getTerminationFlag())
+                .builder(TransactionContext.of(api, procedureTransaction), graph, algorithm.getTerminationFlag())
                 .withLog(log)
                 .parallel(Pools.DEFAULT, computationResult.config().writeConcurrency())
                 .build();

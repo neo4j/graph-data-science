@@ -36,7 +36,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsCypherReader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -70,7 +70,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
             graphCreateConfig,
             loadingContext,
             new GraphDimensionsCypherReader(
-                loadingContext.secureTransaction().withRestrictedAccess(READ),
+                loadingContext.transactionContext().withRestrictedAccess(READ),
                 graphCreateConfig
             ).call()
         );
@@ -220,8 +220,8 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphCreateFromCypherCon
         );
     }
 
-    private SecureTransaction readOnlyTransaction() {
-        return loadingContext.secureTransaction().withRestrictedAccess(READ);
+    private TransactionContext readOnlyTransaction() {
+        return loadingContext.transactionContext().withRestrictedAccess(READ);
     }
 
     private EstimationResult getNodeEstimation() {

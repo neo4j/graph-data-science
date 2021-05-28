@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.LongSet;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
@@ -34,7 +34,7 @@ import java.util.Collections;
 public final class NodesScanner extends StatementAction implements RecordScanner {
 
     public static InternalImporter.CreateScanner of(
-        SecureTransaction tx,
+        TransactionContext tx,
         StoreScanner<NodeReference> scanner,
         LongSet labels,
         ProgressLogger progressLogger,
@@ -53,7 +53,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
     }
 
     static final class Creator implements InternalImporter.CreateScanner {
-        private final SecureTransaction tx;
+        private final TransactionContext tx;
         private final StoreScanner<NodeReference> scanner;
         private final LongSet labels;
         private final ProgressLogger progressLogger;
@@ -62,7 +62,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         private final TerminationFlag terminationFlag;
 
         Creator(
-            SecureTransaction tx,
+            TransactionContext tx,
             StoreScanner<NodeReference> scanner,
             LongSet labels,
             ProgressLogger progressLogger,
@@ -111,7 +111,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
     private long nodesImported;
 
     private NodesScanner(
-        SecureTransaction tx,
+        TransactionContext tx,
         TerminationFlag terminationFlag,
         StoreScanner<NodeReference> scanner,
         LongSet labels,

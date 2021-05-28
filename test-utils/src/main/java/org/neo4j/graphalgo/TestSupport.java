@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -45,6 +45,7 @@ import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
@@ -414,9 +415,7 @@ public final class TestSupport {
         return formatWithLocale(cypherAggregation, property);
     }
 
-    public static SecureTransaction fullAccessTransaction(GraphDatabaseAPI api) {
-        try (var tx = api.beginTx()) {
-            return SecureTransaction.of(api, tx);
-        }
+    public static TransactionContext fullAccessTransaction(GraphDatabaseAPI api) {
+        return TransactionContext.of(api, SecurityContext.AUTH_DISABLED);
     }
 }

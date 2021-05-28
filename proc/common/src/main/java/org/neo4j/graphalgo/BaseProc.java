@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.loading.CatalogRequest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
@@ -158,7 +158,7 @@ public abstract class BaseProc {
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .secureTransaction(SecureTransaction.of(api, procedureTransaction))
+                .transactionContext(TransactionContext.of(api, procedureTransaction))
                 .log(log)
                 .tracker(tracker)
                 .terminationFlag(TerminationFlag.wrap(transaction))

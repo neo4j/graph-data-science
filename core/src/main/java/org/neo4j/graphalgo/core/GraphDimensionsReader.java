@@ -57,7 +57,7 @@ public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends
 
     protected T graphCreateConfig;
 
-    public GraphDimensionsReader(SecureTransaction tx, T graphCreateConfig) {
+    public GraphDimensionsReader(TransactionContext tx, T graphCreateConfig) {
         super(tx);
         this.graphCreateConfig = graphCreateConfig;
     }

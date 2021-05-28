@@ -624,7 +624,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
         return ImmutableGraphLoader
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .secureTransaction(TestSupport.fullAccessTransaction(db))
+                .transactionContext(TestSupport.fullAccessTransaction(db))
                 .log(new TestLog())
                 .build())
             .username("")

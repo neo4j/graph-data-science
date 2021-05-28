@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
@@ -82,7 +82,7 @@ public abstract class WriteRelationshipsProc<
             TerminationFlag terminationFlag = computationResult.algorithm().getTerminationFlag();
             RelationshipStreamExporter exporter = RelationshipStreamExporter
                 .builder(
-                    SecureTransaction.of(api, procedureTransaction),
+                    TransactionContext.of(api, procedureTransaction),
                     graph.cloneIdMapping(),
                     computationResult.result().relationshipStream(),
                     terminationFlag

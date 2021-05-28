@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.WriteProc;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
 
@@ -79,7 +79,7 @@ public abstract class SimilarityWriteProc<
                         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
                             RelationshipExporter exporter = RelationshipExporter
                                 .of(
-                                    SecureTransaction.of(api, procedureTransaction),
+                                    TransactionContext.of(api, procedureTransaction),
                                     similarityGraph,
                                     algorithm.getTerminationFlag()
                                 )

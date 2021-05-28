@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.CompatIndexQuery;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
@@ -65,7 +65,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
 
     IndexedNodePropertyImporter(
         int concurrency,
-        SecureTransaction tx,
+        TransactionContext tx,
         NodeLabel nodeLabel,
         PropertyMapping mapping,
         IndexDescriptor index,
@@ -114,7 +114,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
 
     private IndexedNodePropertyImporter(
         int concurrency,
-        SecureTransaction tx,
+        TransactionContext tx,
         NodeLabel nodeLabel,
         PropertyMapping mapping,
         IndexDescriptor index,

@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -31,7 +31,7 @@ public final class RelationshipScanCursorBasedScanner extends AbstractCursorBase
 
     public static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipScanCursorBasedScanner::new;
 
-    private RelationshipScanCursorBasedScanner(int prefetchSize, SecureTransaction transaction) {
+    private RelationshipScanCursorBasedScanner(int prefetchSize, TransactionContext transaction) {
         super(prefetchSize, transaction, null);
     }
 

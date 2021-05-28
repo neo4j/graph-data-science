@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphLoader;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -56,7 +56,7 @@ public final class GraphLoaderBuilders {
     static GraphLoader storeLoader(
         // GraphLoader parameters
         GraphDatabaseAPI api,
-        Optional<SecureTransaction> secureTransaction,
+        Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
         Optional<AllocationTracker> tracker,
         Optional<TerminationFlag> terminationFlag,
@@ -79,11 +79,7 @@ public final class GraphLoaderBuilders {
     ) {
 
         GraphCreateFromStoreConfig graphCreateConfig = GraphCreateConfigBuilders.storeConfig(
-            userName.or(() -> secureTransaction.map(s -> s
-                .topLevelKernelTransaction()
-                .securityContext()
-                .subject()
-                .username())),
+            userName.or(() -> transactionContext.map(TransactionContext::username)),
             graphName,
             nodeLabels,
             relationshipTypes,
@@ -101,7 +97,7 @@ public final class GraphLoaderBuilders {
 
         return createGraphLoader(
             api,
-            secureTransaction,
+            transactionContext,
             executorService,
             tracker,
             terminationFlag,
@@ -115,7 +111,7 @@ public final class GraphLoaderBuilders {
     static GraphLoader storeLoaderWithConfig(
         // GraphLoader parameters
         GraphDatabaseAPI api,
-        Optional<SecureTransaction> secureTransaction,
+        Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
         Optional<AllocationTracker> tracker,
         Optional<TerminationFlag> terminationFlag,
@@ -125,7 +121,7 @@ public final class GraphLoaderBuilders {
     ) {
         return createGraphLoader(
             api,
-            secureTransaction,
+            transactionContext,
             executorService,
             tracker,
             terminationFlag,
@@ -144,7 +140,7 @@ public final class GraphLoaderBuilders {
     static GraphLoader cypherLoader(
         // GraphLoader parameters
         GraphDatabaseAPI api,
-        Optional<SecureTransaction> secureTransaction,
+        Optional<TransactionContext> transactionContext,
         Optional<AllocationTracker> tracker,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
@@ -158,7 +154,7 @@ public final class GraphLoaderBuilders {
         Optional<Map<String, Object>> parameters
     ) {
         GraphCreateFromCypherConfig graphCreateConfig = GraphCreateConfigBuilders.cypherConfig(
-            userName.or(() -> secureTransaction.map(s -> s.topLevelKernelTransaction().securityContext().subject().username())),
+            userName.or(() -> transactionContext.map(TransactionContext::username)),
             graphName,
             nodeQuery,
             relationshipQuery,
@@ -169,7 +165,7 @@ public final class GraphLoaderBuilders {
 
         return createGraphLoader(
             api,
-            secureTransaction,
+            transactionContext,
             Optional.empty(),
             tracker,
             terminationFlag,
@@ -182,7 +178,7 @@ public final class GraphLoaderBuilders {
     @NotNull
     public static GraphLoader createGraphLoader(
         GraphDatabaseAPI api,
-        Optional<SecureTransaction> secureTransaction,
+        Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
         Optional<AllocationTracker> tracker,
         Optional<TerminationFlag> terminationFlag,
@@ -192,18 +188,14 @@ public final class GraphLoaderBuilders {
     ) {
         return ImmutableGraphLoader.builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .secureTransaction(secureTransaction.orElseGet(() -> TestSupport.fullAccessTransaction(api)))
+                .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(api)))
                 .executor(executorService.orElse(Pools.DEFAULT))
                 .tracker(tracker.orElse(AllocationTracker.empty()))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
                 .log(log.orElse(NullLog.getInstance()))
                 .build())
             .username(userName
-                .or(() -> secureTransaction.map(s -> s
-                    .topLevelKernelTransaction()
-                    .securityContext()
-                    .subject()
-                    .username()))
+                .or(() -> transactionContext.map(TransactionContext::username))
                 .orElse(""))
             .createConfig(graphCreateConfig)
             .build();

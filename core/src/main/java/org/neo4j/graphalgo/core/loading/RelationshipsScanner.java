@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.StatementAction;
@@ -51,7 +51,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
             return InternalImporter.createEmptyScanner();
         }
         return new RelationshipsScanner.Creator(
-            loadingContext.secureTransaction(),
+            loadingContext.transactionContext(),
             progressLogger,
             idMap,
             scanner,
@@ -61,7 +61,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
     }
 
     static final class Creator implements InternalImporter.CreateScanner {
-        private final SecureTransaction tx;
+        private final TransactionContext tx;
         private final ProgressLogger progressLogger;
         private final IdMapping idMap;
         private final StoreScanner<RelationshipReference> scanner;
@@ -69,7 +69,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
         private final TerminationFlag terminationFlag;
 
         Creator(
-                SecureTransaction tx,
+                TransactionContext tx,
                 ProgressLogger progressLogger,
                 IdMapping idMap,
                 StoreScanner<RelationshipReference> scanner,
@@ -115,7 +115,7 @@ public final class RelationshipsScanner extends StatementAction implements Recor
     private long weightsImported;
 
     private RelationshipsScanner(
-            SecureTransaction tx,
+            TransactionContext tx,
             TerminationFlag terminationFlag,
             ProgressLogger progressLogger,
             IdMapping idMap,

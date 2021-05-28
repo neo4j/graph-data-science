@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -80,7 +80,7 @@ public abstract class WriteProc<
             Graph graph = computationResult.graph();
             TerminationFlag terminationFlag = computationResult.algorithm().getTerminationFlag();
             NodePropertyExporter exporter = NodePropertyExporter
-                .builder(SecureTransaction.of(api, procedureTransaction), graph, terminationFlag)
+                .builder(TransactionContext.of(api, procedureTransaction), graph, terminationFlag)
                 .withLog(log)
                 .parallel(Pools.DEFAULT, writePropertyConfig.writeConcurrency())
                 .build();

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.utils;
 
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
 
@@ -35,9 +35,9 @@ public abstract class StatementApi {
         T apply(KernelTransaction transaction) throws Exception;
     }
 
-    protected final SecureTransaction tx;
+    protected final TransactionContext tx;
 
-    protected StatementApi(SecureTransaction tx) {
+    protected StatementApi(TransactionContext tx) {
         this.tx = tx;
     }
 

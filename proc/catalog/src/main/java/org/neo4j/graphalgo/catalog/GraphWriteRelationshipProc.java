@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.GraphWriteRelationshipConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -85,7 +85,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
     private long writeRelationshipType(GraphStore graphStore, GraphWriteRelationshipConfig config) {
         RelationshipExporter.Builder builder = RelationshipExporter
             .of(
-                SecureTransaction.of(api, procedureTransaction),
+                TransactionContext.of(api, procedureTransaction),
                 graphStore.getGraph(RelationshipType.of(config.relationshipType()), config.relationshipProperty()),
                 TerminationFlag.wrap(transaction)
             );

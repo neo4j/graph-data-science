@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -32,7 +32,7 @@ final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeRe
 
     private final int labelId;
 
-    NodeLabelIndexBasedScanner(int labelId, int prefetchSize, SecureTransaction transaction) {
+    NodeLabelIndexBasedScanner(int labelId, int prefetchSize, TransactionContext transaction) {
         super(prefetchSize, transaction, labelId);
         this.labelId = labelId;
     }

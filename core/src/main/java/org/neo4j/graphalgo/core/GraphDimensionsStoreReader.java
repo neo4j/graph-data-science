@@ -34,7 +34,7 @@ import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE
 
 public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphCreateFromStoreConfig> {
 
-    public GraphDimensionsStoreReader(SecureTransaction tx, GraphCreateFromStoreConfig config) {
+    public GraphDimensionsStoreReader(TransactionContext tx, GraphCreateFromStoreConfig config) {
         super(tx, config);
     }
 

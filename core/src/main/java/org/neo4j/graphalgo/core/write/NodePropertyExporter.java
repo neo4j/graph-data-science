@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.write;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -53,7 +53,7 @@ public class NodePropertyExporter extends StatementApi {
     protected final LongUnaryOperator toOriginalId;
     protected final LongAdder propertiesWritten;
 
-    public static Builder builder(SecureTransaction tx, IdMapping idMapping, TerminationFlag terminationFlag) {
+    public static Builder builder(TransactionContext tx, IdMapping idMapping, TerminationFlag terminationFlag) {
         return new Builder(tx, idMapping, terminationFlag);
     }
 
@@ -91,7 +91,7 @@ public class NodePropertyExporter extends StatementApi {
 
     public static class Builder extends ExporterBuilder<NodePropertyExporter> {
 
-        Builder(SecureTransaction tx, IdMapping idMapping, TerminationFlag terminationFlag) {
+        Builder(TransactionContext tx, IdMapping idMapping, TerminationFlag terminationFlag) {
             super(tx, idMapping, terminationFlag);
         }
 
@@ -124,7 +124,7 @@ public class NodePropertyExporter extends StatementApi {
     }
 
     protected NodePropertyExporter(
-        SecureTransaction tx,
+        TransactionContext tx,
         long nodeCount,
         LongUnaryOperator toOriginalId,
         TerminationFlag terminationFlag,

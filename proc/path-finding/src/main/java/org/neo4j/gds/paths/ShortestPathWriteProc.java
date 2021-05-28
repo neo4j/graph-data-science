@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.ImmutableRelationship;
 import org.neo4j.graphalgo.core.write.RelationshipStreamExporter;
@@ -75,7 +75,7 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
 
             var exporter = RelationshipStreamExporter
                 .builder(
-                    SecureTransaction.of(api, procedureTransaction),
+                    TransactionContext.of(api, procedureTransaction),
                     computationResult.graph(),
                     relationshipStream,
                     algorithm.getTerminationFlag()

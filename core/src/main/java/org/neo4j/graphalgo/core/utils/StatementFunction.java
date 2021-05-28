@@ -19,14 +19,14 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.utils.StatementApi;
 
 import java.util.concurrent.Callable;
 
 public abstract class StatementFunction<T> extends StatementApi implements RenamesCurrentThread, Callable<T>, StatementApi.TxFunction<T> {
 
-    protected StatementFunction(SecureTransaction tx) {
+    protected StatementFunction(TransactionContext tx) {
         super(tx);
     }
 

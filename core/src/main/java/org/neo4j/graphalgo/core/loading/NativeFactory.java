@@ -58,7 +58,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         this(
             graphCreateConfig,
             loadingContext,
-            new GraphDimensionsStoreReader(loadingContext.secureTransaction(), graphCreateConfig).call()
+            new GraphDimensionsStoreReader(loadingContext.transactionContext(), graphCreateConfig).call()
         );
     }
 
@@ -161,7 +161,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         var properties = IndexPropertyMappings.prepareProperties(
             graphCreateConfig,
             dimensions,
-            loadingContext.secureTransaction()
+            loadingContext.transactionContext()
         );
 
         var scanningNodesImporter = IdMapImplementations.useBitIdMap()

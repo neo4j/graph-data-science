@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.loading.InternalImporter.ImportResult;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.logging.Log;
@@ -42,7 +42,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
     private final String label;
 
     protected final ExecutorService threadPool;
-    protected final SecureTransaction transaction;
+    protected final TransactionContext transaction;
     protected final GraphDimensions dimensions;
     protected final AllocationTracker tracker;
     protected final int concurrency;
@@ -56,7 +56,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
     ) {
         this.factory = factory;
         this.label = label;
-        this.transaction = loadingContext.secureTransaction();
+        this.transaction = loadingContext.transactionContext();
         this.dimensions = dimensions;
         this.threadPool = loadingContext.executor();
         this.tracker = loadingContext.tracker();

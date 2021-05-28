@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.schema.Schema;
 import org.neo4j.internal.helpers.collection.Iterators;
@@ -52,7 +52,7 @@ final class IndexPropertyMappings {
     static LoadablePropertyMappings prepareProperties(
         GraphCreateFromStoreConfig graphCreateConfig,
         GraphDimensions graphDimensions,
-        SecureTransaction transaction
+        TransactionContext transaction
     ) {
         Map<NodeLabel, PropertyMappings> storeLoadedProperties = graphCreateConfig
             .nodeProjections()
@@ -69,7 +69,7 @@ final class IndexPropertyMappings {
 
     private static LoadablePropertyMappings prepareLoadableProperties(
         GraphDimensions dimensions,
-        SecureTransaction transaction,
+        TransactionContext transaction,
         Map<NodeLabel, PropertyMappings> storeLoadedProperties
     ) {
         if (dimensions.tokenNodeLabelMapping() == null || !GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.isEnabled()) {

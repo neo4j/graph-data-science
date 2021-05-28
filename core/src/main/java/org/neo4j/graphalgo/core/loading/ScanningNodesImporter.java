@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.IndexPropertyMappings.LoadablePropertyMappings;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -77,7 +77,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
         NodeMappingBuilder<BUILDER> nodeMappingBuilder
     ) {
         super(
-            scannerFactory(loadingContext.secureTransaction(), dimensions, loadingContext.log()),
+            scannerFactory(loadingContext.transactionContext(), dimensions, loadingContext.log()),
             "Node",
             loadingContext,
             dimensions,
@@ -93,7 +93,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
     }
 
     private static StoreScanner.Factory<NodeReference> scannerFactory(
-        SecureTransaction transaction,
+        TransactionContext transaction,
         GraphDimensions dimensions,
         Log log
     ) {

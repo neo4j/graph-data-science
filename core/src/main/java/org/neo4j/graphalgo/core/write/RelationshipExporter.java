@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -51,12 +51,12 @@ public final class RelationshipExporter extends StatementApi {
     private final ExecutorService executorService;
 
     public static RelationshipExporter.Builder of(
-        SecureTransaction secureTransaction,
+        TransactionContext transactionContext,
         Graph graph,
         TerminationFlag terminationFlag
     ) {
         return new RelationshipExporter.Builder(
-            secureTransaction,
+            transactionContext,
             graph,
             terminationFlag
         );
@@ -67,7 +67,7 @@ public final class RelationshipExporter extends StatementApi {
         private final Graph graph;
         private RelationshipPropertyTranslator propertyTranslator;
 
-        Builder(SecureTransaction tx, Graph graph, TerminationFlag terminationFlag) {
+        Builder(TransactionContext tx, Graph graph, TerminationFlag terminationFlag) {
             super(tx, graph, terminationFlag);
             this.graph = graph;
             this.propertyTranslator = Values::doubleValue;
@@ -101,7 +101,7 @@ public final class RelationshipExporter extends StatementApi {
     }
 
     private RelationshipExporter(
-        SecureTransaction tx,
+        TransactionContext tx,
         Graph graph,
         RelationshipPropertyTranslator propertyTranslator,
         TerminationFlag terminationFlag,

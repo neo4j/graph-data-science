@@ -30,12 +30,13 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 /**
  * Manage transactions by making sure that the correct {@link SecurityContext} is applied.
  */
-public final class SecureTransaction {
+public final class TransactionContext {
 
     public interface TxConsumer<E extends Exception> {
 
         /**
          * Run some code within a transaction.
+         *
          * @throws E
          */
         void accept(Transaction tx, KernelTransaction ktx) throws E;
@@ -45,45 +46,53 @@ public final class SecureTransaction {
 
         /**
          * Calculate some result within a new transaction.
+         *
          * @throws E
          */
         T apply(Transaction tx, KernelTransaction ktx) throws E;
     }
 
     /**
-     * Creates a new {@code SecureTransaction} with the same {@link SecurityContext} as the provided {@link Transaction}.
-     * If this instance is {@link #close() closed}, the supplied transaction will be {@link Transaction#close() closed} as well.
+     * Creates a new {@code TransactionContext} with the same {@link SecurityContext} as the provided {@link Transaction}.
      */
-    public static SecureTransaction of(GraphDatabaseAPI api, Transaction top) {
+    public static TransactionContext of(GraphDatabaseAPI api, Transaction top) {
         var internalTransaction = (InternalTransaction) top;
-        return ofEdition(
-            api,
-            internalTransaction,
-            internalTransaction.securityContext()
-        );
+        return of(api, internalTransaction);
     }
 
-    private static SecureTransaction ofEdition(
-        GraphDatabaseAPI api,
-        InternalTransaction top,
-        SecurityContext securityContext
-    ) {
-        securityContext = GdsEdition.instance().isOnEnterpriseEdition() ? securityContext : SecurityContext.AUTH_DISABLED;
-        return new SecureTransaction(api, top, securityContext);
+    /**
+     * Creates a new {@code TransactionContext} with the same {@link SecurityContext} as the provided {@link InternalTransaction}.
+     */
+    public static TransactionContext of(GraphDatabaseAPI api, InternalTransaction top) {
+        return of(api, top.securityContext());
+    }
+
+    /**
+     * Creates a new {@code TransactionContext} with the provided {@link SecurityContext}.
+     */
+    public static TransactionContext of(GraphDatabaseAPI api, SecurityContext securityContext) {
+        securityContext = GdsEdition.instance().isOnEnterpriseEdition()
+            ? securityContext
+            : SecurityContext.AUTH_DISABLED;
+        return new TransactionContext(api, securityContext);
     }
 
     private final GraphDatabaseAPI api;
-    private final InternalTransaction topTx;
     private final SecurityContext securityContext;
 
-    private SecureTransaction(
+    private TransactionContext(
         GraphDatabaseAPI api,
-        InternalTransaction top,
         SecurityContext securityContext
     ) {
         this.api = api;
-        this.topTx = top;
         this.securityContext = securityContext;
+    }
+
+    /**
+     * @return The username associated with the current {@link SecurityContext}.
+     */
+    public String username() {
+        return securityContext.subject().username();
     }
 
     /**
@@ -124,46 +133,55 @@ public final class SecureTransaction {
     }
 
     /**
-     * Returns the {@link KernelTransaction} for the provided top-level {@code Transaction}.
-     */
-    public KernelTransaction topLevelKernelTransaction() {
-        return topTx.kernelTransaction();
-    }
-
-    /**
-     * Returns a <strong>new</strong> {@link SecureTransaction} restricted by the provided {@link AccessMode}.
+     * Returns a <strong>new</strong> {@link TransactionContext} restricted by the provided {@link AccessMode}.
      * The mode only restricts but does not override the given {@code SecurityContext}, i.e. you cannot grant more access.
      * <p>
      * One use-case is to restrict the access to {@link AccessMode.Static#READ} to make sure that only read-only
      * queries can be executed.
      * <p>
-     * A new instance is returned, {@code this} instance remains untouched. However, the new instance has ownership
-     * of the same top-level {@code Transaction} within {@code this} instance. Closing it would also close {@code this}
-     * instance's top-level transaction. To decouple the transaction, call {@link #fork()} on the returned instance.
+     * A new instance is returned, {@code this} instance remains untouched.
      */
-    public SecureTransaction withRestrictedAccess(AccessMode.Static accessMode) {
+    public TransactionContext withRestrictedAccess(AccessMode.Static accessMode) {
         var restrictedMode = Neo4jProxy.newRestrictedAccessMode(securityContext.mode(), accessMode);
         var newContext = securityContext.withMode(restrictedMode);
-        return new SecureTransaction(api, topTx, newContext);
+        return new TransactionContext(api, newContext);
     }
 
     /**
      * Return a new {@link SecureTransaction} that owns a newly created top-level {@code Transaction}.
-     * The returned instance will operate under the same {@code SecurityContext} as {@code this} instance.
+     * The returned instance will operate under the {@code SecurityContext} as provided by this {@code TransactionContext}.
+     * <p>
+     * For shorter tasks, consider using {@link #accept(TransactionContext.TxConsumer)} or {@link #apply(TransactionContext.TxFunction)}
+     * which make sure that the created transaction is closed.
      * <p>
      * This is intended for when you need to keep track of a new transaction for a longer time, in which case you can
-     * use {@link #topLevelKernelTransaction()} to get the underlying transaction.
+     * use {@link SecureTransaction#kernelTransaction()} to get the underlying transaction.
      */
     public SecureTransaction fork() {
         InternalTransaction tx = (InternalTransaction) api.beginTx();
         tx.kernelTransaction().overrideWith(securityContext);
-        return new SecureTransaction(api, tx, securityContext);
+        return new SecureTransaction(tx);
     }
 
-    /**
-     * Closes the underlying transaction.
-     */
-    public void close() {
-        topTx.close();
+    public static final class SecureTransaction implements AutoCloseable {
+        private final InternalTransaction tx;
+
+        SecureTransaction(InternalTransaction tx) {
+            this.tx = tx;
+        }
+
+        /**
+         * @return The current {@link org.neo4j.kernel.api.KernelTransaction}.
+         */
+        public KernelTransaction kernelTransaction() {
+            return tx.kernelTransaction();
+        }
+
+        /**
+         * Closes the underlying transaction.
+         */
+        public void close() {
+            tx.close();
+        }
     }
 }

@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.api;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutorService;
 @ValueClass
 public interface GraphLoaderContext {
 
-    SecureTransaction secureTransaction();
+    TransactionContext transactionContext();
 
     Log log();
 
@@ -54,7 +54,7 @@ public interface GraphLoaderContext {
 
     GraphLoaderContext NULL_CONTEXT = new GraphLoaderContext() {
         @Override
-        public SecureTransaction secureTransaction() {
+        public TransactionContext transactionContext() {
             return null;
         }
 

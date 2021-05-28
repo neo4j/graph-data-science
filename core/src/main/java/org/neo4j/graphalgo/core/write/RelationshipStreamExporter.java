@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -59,13 +59,13 @@ public final class RelationshipStreamExporter extends StatementApi {
     }
 
     public static RelationshipStreamExporter.Builder builder(
-        SecureTransaction secureTransaction,
+        TransactionContext transactionContext,
         IdMapping idMapping,
         Stream<Relationship> relationships,
         TerminationFlag terminationFlag
     ) {
         return new RelationshipStreamExporter.Builder(
-            secureTransaction,
+            transactionContext,
             idMapping,
             relationships,
             terminationFlag
@@ -78,7 +78,7 @@ public final class RelationshipStreamExporter extends StatementApi {
         private int batchSize;
 
         Builder(
-            SecureTransaction tx,
+            TransactionContext tx,
             IdMapping idMapping,
             Stream<Relationship> relationships,
             TerminationFlag terminationFlag
@@ -120,7 +120,7 @@ public final class RelationshipStreamExporter extends StatementApi {
     }
 
     private RelationshipStreamExporter(
-        SecureTransaction tx,
+        TransactionContext tx,
         LongUnaryOperator toOriginalId,
         Stream<Relationship> relationships,
         int batchSize,
@@ -201,7 +201,7 @@ public final class RelationshipStreamExporter extends StatementApi {
         private long written;
 
         Writer(
-            SecureTransaction tx,
+            TransactionContext tx,
             LongUnaryOperator toOriginalId,
             BlockingQueue<Buffer> writeQueue,
             BlockingQueue<Buffer> bufferPool,

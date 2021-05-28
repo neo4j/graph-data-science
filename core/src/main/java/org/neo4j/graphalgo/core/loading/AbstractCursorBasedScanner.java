@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.Scan;
@@ -121,7 +121,7 @@ abstract class AbstractCursorBasedScanner<
     // how many records are there in a single page
     private final int recordsPerPage;
 
-    private final SecureTransaction transaction;
+    private final TransactionContext.SecureTransaction transaction;
     // global cursor pool to return this one to
     private final ThreadLocal<StoreScanner.ScanCursor<Reference>> cursors;
 
@@ -130,7 +130,7 @@ abstract class AbstractCursorBasedScanner<
 
     private final Store store;
 
-    AbstractCursorBasedScanner(int prefetchSize, SecureTransaction transaction, Attachment attachment) {
+    AbstractCursorBasedScanner(int prefetchSize, TransactionContext transaction, Attachment attachment) {
         var neoStores = GraphDatabaseApiProxy.neoStores(transaction.api());
         var store = store(neoStores);
         int recordSize = store.getRecordSize();
@@ -138,7 +138,7 @@ abstract class AbstractCursorBasedScanner<
 
         this.transaction = transaction.fork();
         this.prefetchSize = prefetchSize;
-        this.kernelTransaction = this.transaction.topLevelKernelTransaction();
+        this.kernelTransaction = this.transaction.kernelTransaction();
         this.entityCursorScan = entityCursorScan(kernelTransaction, attachment);
         this.cursors = new ThreadLocal<>();
         this.recordSize = recordSize;

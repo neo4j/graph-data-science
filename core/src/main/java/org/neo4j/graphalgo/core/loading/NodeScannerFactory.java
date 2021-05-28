@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.logging.Log;
 
 import java.util.Arrays;
@@ -32,11 +32,11 @@ public final class NodeScannerFactory {
     private NodeScannerFactory() {}
 
     public static StoreScanner.Factory<NodeReference> create(
-        SecureTransaction secureTransaction,
+        TransactionContext transactionContext,
         int[] labelIds,
         Log log
     ) {
-        var hasNodeLabelIndex = hasNodeLabelIndex(secureTransaction);
+        var hasNodeLabelIndex = hasNodeLabelIndex(transactionContext);
 
         if (!hasNodeLabelIndex && labelIds.length > 0) {
             log.info("Attempted to use node label index, but no index was found. Falling back to node store scan.");
@@ -51,13 +51,7 @@ public final class NodeScannerFactory {
         }
     }
 
-    private static boolean hasNodeLabelIndex(SecureTransaction secureTransaction) {
-        var tx = secureTransaction.fork();
-        var ktx = tx.topLevelKernelTransaction();
-        try {
-            return Neo4jProxy.hasNodeLabelIndex(ktx);
-        } finally {
-            tx.close();
-        }
+    private static boolean hasNodeLabelIndex(TransactionContext transactionContext) {
+        return transactionContext.apply((tx, ktx) -> Neo4jProxy.hasNodeLabelIndex(ktx));
     }
 }

@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.write;
 
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
 
 public abstract class ExporterBuilder<T> {
-    final SecureTransaction tx;
+    final TransactionContext tx;
     final LongUnaryOperator toOriginalId;
     final long nodeCount;
     final TerminationFlag terminationFlag;
@@ -44,7 +44,7 @@ public abstract class ExporterBuilder<T> {
     ProgressEventTracker eventTracker;
     int writeConcurrency;
 
-    ExporterBuilder(SecureTransaction tx, IdMapping idMapping, TerminationFlag terminationFlag) {
+    ExporterBuilder(TransactionContext tx, IdMapping idMapping, TerminationFlag terminationFlag) {
         Objects.requireNonNull(idMapping);
         this.tx = Objects.requireNonNull(tx);
         this.nodeCount = idMapping.nodeCount();

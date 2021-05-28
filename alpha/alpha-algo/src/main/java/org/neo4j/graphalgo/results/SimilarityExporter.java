@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.results;
 
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -41,7 +41,7 @@ public class SimilarityExporter extends StatementApi {
     private final TerminationFlag terminationFlag;
 
     public SimilarityExporter(
-        SecureTransaction tx,
+        TransactionContext tx,
         String relationshipType,
         String propertyName,
         TerminationFlag terminationFlag

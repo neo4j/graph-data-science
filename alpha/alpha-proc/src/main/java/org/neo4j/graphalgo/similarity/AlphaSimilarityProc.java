@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.SecureTransaction;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.loading.CatalogRequest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
@@ -219,7 +219,7 @@ abstract class AlphaSimilarityProc
         };
 
         SimilarityExporter similarityExporter = new SimilarityExporter(
-            SecureTransaction.of(api, procedureTransaction),
+            TransactionContext.of(api, procedureTransaction),
             config.writeRelationshipType(),
             config.writeProperty(),
             terminationFlag
