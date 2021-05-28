@@ -26,11 +26,12 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
+import org.neo4j.graphalgo.config.RandomSeedConfig;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWeightConfig {
+public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWeightConfig, RandomSeedConfig {
 
     @NotNull
     @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
@@ -71,11 +72,6 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, NodeWei
     @Configuration.IntegerRange(min = 0)
     default int randomJoins() {
         return 10;
-    }
-
-    @Value.Default
-    default long randomSeed() {
-        return -1;
     }
 
     @Configuration.Ignore

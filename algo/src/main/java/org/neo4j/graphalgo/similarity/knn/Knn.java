@@ -69,9 +69,11 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
         this.config = config;
         this.context = context;
         this.computer = similarityComputer;
-        this.random = this.config.randomSeed() == -1L
-            ? new SplittableRandom()
-            : new SplittableRandom(this.config.randomSeed());
+
+        this.random = this.config.randomSeed().isPresent()
+            ? new SplittableRandom(this.config.randomSeed().get())
+            : new SplittableRandom();
+
         this.progressLogger = new BatchingProgressLogger(
             context.log(),
             (long) Math.ceil(config.sampleRate() * config.topK() * nodeCount),
