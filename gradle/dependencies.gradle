@@ -39,7 +39,7 @@ ext {
             'hamcrest':                     '2.1',
             'HdrHistogram':                 '2.1.9',
             'hppc':                         '0.7.3',
-            'immutables':                   '2.8.1',
+            'immutables':                   '2.8.8',
             'jackson':                      '2.11.1',
             'javapoet':                     '1.11.1',
             'jctools-core':                 '3.1.0',
