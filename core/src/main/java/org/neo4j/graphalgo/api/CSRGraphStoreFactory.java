@@ -89,7 +89,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
         });
 
         return CSRGraphStore.of(
-            loadingContext.transactionContext().api().databaseId(),
+            loadingContext.api().databaseId(),
             idsAndProperties.idMap(),
             idsAndProperties.properties(),
             relationships,

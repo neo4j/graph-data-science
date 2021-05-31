@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -34,6 +35,8 @@ import java.util.concurrent.ExecutorService;
 public interface GraphLoaderContext {
 
     TransactionContext transactionContext();
+
+    GraphDatabaseAPI api();
 
     Log log();
 
@@ -55,6 +58,11 @@ public interface GraphLoaderContext {
     GraphLoaderContext NULL_CONTEXT = new GraphLoaderContext() {
         @Override
         public TransactionContext transactionContext() {
+            return null;
+        }
+
+        @Override
+        public GraphDatabaseAPI api() {
             return null;
         }
 

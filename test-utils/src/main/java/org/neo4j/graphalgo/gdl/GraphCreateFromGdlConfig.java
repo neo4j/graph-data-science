@@ -48,7 +48,7 @@ public interface GraphCreateFromGdlConfig extends GraphCreateConfig {
         return loaderContext -> GdlFactory
             .builder()
             .createConfig(this)
-            .namedDatabaseId(loaderContext.transactionContext().api().databaseId())
+            .namedDatabaseId(loaderContext.api().databaseId())
             .build();
     }
 
