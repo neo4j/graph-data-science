@@ -65,7 +65,13 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
  * Implementation is similar to the AtomicLongArray, based on sun.misc.Unsafe
  * https://hg.openjdk.java.net/jdk/jdk13/file/9e0c80381e32/jdk/src/java.base/share/classes/java/util/concurrent/atomic/AtomicLongArray.java
  */
-public abstract class HugeAtomicLongArray {
+public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public abstract HugeCursor<long[]> newCursor();
 
     /**
      * @return the long value at the given index
@@ -277,6 +283,11 @@ public abstract class HugeAtomicLongArray {
         }
 
         @Override
+        public HugeCursor<long[]> newCursor() {
+            return new HugeCursor.SinglePageCursor<>(page);
+        }
+
+        @Override
         public long get(long index) {
             return (long) ARRAY_HANDLE.getVolatile(page, (int) index);
         }
@@ -445,6 +456,11 @@ public abstract class HugeAtomicLongArray {
                 }
                 prev = current;
             }
+        }
+
+        @Override
+        public HugeCursor<long[]> newCursor() {
+            return new HugeCursor.PagedCursor<>(size, pages);
         }
 
         @Override
