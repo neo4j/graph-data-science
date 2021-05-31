@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
+import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.TokenRead;
 import org.neo4j.kernel.api.StatementConstants;
 
@@ -34,8 +35,12 @@ import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE
 
 public class GraphDimensionsStoreReader extends GraphDimensionsReader<GraphCreateFromStoreConfig> {
 
-    public GraphDimensionsStoreReader(TransactionContext tx, GraphCreateFromStoreConfig config) {
-        super(tx, config);
+    public GraphDimensionsStoreReader(
+        TransactionContext tx,
+        GraphCreateFromStoreConfig config,
+        IdGeneratorFactory idGeneratorFactory
+    ) {
+        super(tx, config, idGeneratorFactory);
     }
 
     @Override

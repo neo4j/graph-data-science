@@ -19,36 +19,32 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.exceptions.UnsatisfiedDependencyException;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.id.IdType;
+import org.neo4j.internal.kernel.api.Read;
 
 import java.util.OptionalLong;
 
 public final class InternalReadOps {
 
-    public static long getHighestPossibleNodeCount(org.neo4j.internal.kernel.api.Read read, GraphDatabaseService api) {
-        return countByIdGenerator(api, IdType.NODE).orElseGet(read::nodesGetCount);
+    public static long getHighestPossibleNodeCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory) {
+        return countByIdGenerator(idGeneratorFactory, IdType.NODE).orElseGet(read::nodesGetCount);
     }
 
-    public static long getHighestPossibleRelationshipCount(org.neo4j.internal.kernel.api.Read read, GraphDatabaseService api) {
-        return countByIdGenerator(api, IdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
+    public static long getHighestPossibleRelationshipCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory) {
+        return countByIdGenerator(idGeneratorFactory, IdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
     }
 
-    private static OptionalLong countByIdGenerator(GraphDatabaseService api, IdType idType) {
-        if (api != null) {
+    private static OptionalLong countByIdGenerator(@Nullable IdGeneratorFactory idGeneratorFactory, IdType idType) {
+        if (idGeneratorFactory != null) {
             try {
-                IdGeneratorFactory idGeneratorFactory =
-                    GraphDatabaseApiProxy.resolveDependency(api, IdGeneratorFactory.class);
-                if (idGeneratorFactory != null) {
-                    final IdGenerator idGenerator = idGeneratorFactory.get(idType);
-                    if (idGenerator != null) {
-                        return OptionalLong.of(idGenerator.getHighId());
-                    }
+                final IdGenerator idGenerator = idGeneratorFactory.get(idType);
+                if (idGenerator != null) {
+                    return OptionalLong.of(idGenerator.getHighId());
                 }
-            } catch (IllegalArgumentException | UnsatisfiedDependencyException ignored) {
+            } catch (Exception ignored) {
             }
         }
         return OptionalLong.empty();

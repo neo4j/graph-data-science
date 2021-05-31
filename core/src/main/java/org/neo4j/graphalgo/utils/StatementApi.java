@@ -20,7 +20,6 @@
 package org.neo4j.graphalgo.utils;
 
 import org.neo4j.graphalgo.core.TransactionContext;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
@@ -39,10 +38,6 @@ public abstract class StatementApi {
 
     protected StatementApi(TransactionContext tx) {
         this.tx = tx;
-    }
-
-    protected GraphDatabaseService api() {
-        return tx.api();
     }
 
     protected final <T> T applyInTransaction(TxFunction<T> fun) {

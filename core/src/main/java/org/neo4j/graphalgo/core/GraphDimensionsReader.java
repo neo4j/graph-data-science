@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.compat.InternalReadOps;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.utils.StatementFunction;
+import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenRead;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -55,11 +56,17 @@ import static org.neo4j.graphalgo.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE
 
 public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends StatementFunction<GraphDimensions> {
 
+    private final IdGeneratorFactory idGeneratorFactory;
     protected T graphCreateConfig;
 
-    public GraphDimensionsReader(TransactionContext tx, T graphCreateConfig) {
+    GraphDimensionsReader(
+        TransactionContext tx,
+        T graphCreateConfig,
+        IdGeneratorFactory idGeneratorFactory
+    ) {
         super(tx);
         this.graphCreateConfig = graphCreateConfig;
+        this.idGeneratorFactory = idGeneratorFactory;
     }
 
     @Override
@@ -77,7 +84,7 @@ public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends
         long nodeCount = labelTokenNodeLabelMappings.keyStream()
             .mapToLong(dataRead::countsForNode)
             .sum();
-        final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, api());
+        final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(dataRead, idGeneratorFactory);
         long finalNodeCount = labelTokenNodeLabelMappings.keys().contains(ANY_LABEL)
             ? allNodesCount
             : Math.min(nodeCount, allNodesCount);
@@ -89,7 +96,7 @@ public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends
             typeTokenRelTypeMappings
         );
         long maxRelCount = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
-        long allRelationshipsCount = InternalReadOps.getHighestPossibleRelationshipCount(dataRead, api());
+        long allRelationshipsCount = InternalReadOps.getHighestPossibleRelationshipCount(dataRead, idGeneratorFactory);
 
         return ImmutableGraphDimensions.builder()
             .nodeCount(finalNodeCount)

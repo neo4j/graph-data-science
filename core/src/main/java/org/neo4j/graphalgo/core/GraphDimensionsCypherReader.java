@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
+import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.TokenRead;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
@@ -31,8 +32,12 @@ import static org.neo4j.graphalgo.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
 
 public class GraphDimensionsCypherReader extends GraphDimensionsReader<GraphCreateFromCypherConfig> {
 
-    public GraphDimensionsCypherReader(TransactionContext tx, GraphCreateFromCypherConfig config) {
-        super(tx, config);
+    public GraphDimensionsCypherReader(
+        TransactionContext tx,
+        GraphCreateFromCypherConfig config,
+        IdGeneratorFactory idGeneratorFactory
+    ) {
+        super(tx, config, idGeneratorFactory);
     }
 
     @Override

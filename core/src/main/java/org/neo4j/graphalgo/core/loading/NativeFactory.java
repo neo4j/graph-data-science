@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CSRGraphStoreFactory;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
@@ -39,6 +40,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.internal.id.IdGeneratorFactory;
 
 import java.util.Map;
 import java.util.Optional;
@@ -58,7 +60,11 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
         this(
             graphCreateConfig,
             loadingContext,
-            new GraphDimensionsStoreReader(loadingContext.transactionContext(), graphCreateConfig).call()
+            new GraphDimensionsStoreReader(
+                loadingContext.transactionContext(),
+                graphCreateConfig,
+                GraphDatabaseApiProxy.resolveDependency(loadingContext.api(), IdGeneratorFactory.class)
+            ).call()
         );
     }
 

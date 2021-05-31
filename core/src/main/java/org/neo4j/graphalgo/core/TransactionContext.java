@@ -126,13 +126,6 @@ public final class TransactionContext {
     }
 
     /**
-     * Returns the {@link GraphDatabaseAPI} provided to this instance.
-     */
-    public GraphDatabaseAPI api() {
-        return api;
-    }
-
-    /**
      * Returns a <strong>new</strong> {@link TransactionContext} restricted by the provided {@link AccessMode}.
      * The mode only restricts but does not override the given {@code SecurityContext}, i.e. you cannot grant more access.
      * <p>
