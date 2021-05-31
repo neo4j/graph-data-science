@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.function.LongFunction;
 
-public abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> {
+public abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, Self>> implements HugeCursorSupport<Array> {
 
     /**
      * Copies the content of this array into the target array.
@@ -65,54 +65,6 @@ public abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, S
      * @return the amount of memory freed, in bytes.
      */
     public abstract long release();
-
-    /**
-     * Returns a new {@link HugeCursor} for this array. The cursor is not positioned and in an invalid state.
-     *
-     * To position the cursor you must call {@link #initCursor(HugeCursor)} or {@link #initCursor(HugeCursor, long, long)}.
-     * Then the cursor needs to be put in a valid state by calling {@link HugeCursor#next()}.
-     *
-     * Obtaining a {@link HugeCursor} for an empty array (where {@link #size()} returns {@code 0}) is undefined and
-     * might result in a {@link NullPointerException} or another {@link RuntimeException}.
-     */
-    public abstract HugeCursor<Array> newCursor();
-
-    /**
-     * Resets the {@link HugeCursor} to range from index 0 until {@link #size()}.
-     *
-     * The returned cursor is not positioned and in an invalid state.
-     * You must call {@link HugeCursor#next()} first to position the cursor to a valid state.
-     *
-     * The returned cursor is the reference-same ({@code ==}) one as the provided one.
-     *
-     * Resetting the {@link HugeCursor} of an empty array (where {@link #size()} returns {@code 0}) is undefined and
-     * might result in a {@link NullPointerException} or another {@link RuntimeException}.
-     */
-    public final HugeCursor<Array> initCursor(HugeCursor<Array> cursor) {
-        cursor.setRange();
-        return cursor;
-    }
-
-    /**
-     * Resets the {@link HugeCursor} to range from index {@code start} (inclusive, the first index to be contained)
-     * until {@code end} (exclusive, the first index not to be contained).
-     *
-     * The returned cursor is not positioned and in an invalid state.
-     * You must call {@link HugeCursor#next()} first to position the cursor to a valid state.
-     *
-     * The returned cursor is the reference-same ({@code ==}) one as the provided one.
-     *
-     * Resetting the {@link HugeCursor} of an empty array (where {@link #size()} returns {@code 0}) is undefined and
-     * might result in a {@link NullPointerException} or another {@link RuntimeException}.
-     *
-     * @see HugeIntArray#initCursor(HugeCursor)
-     */
-    public final HugeCursor<Array> initCursor(HugeCursor<Array> cursor, long start, long end) {
-        assert start >= 0L && start <= size() : "start expected to be in [0 : " + size() + "] but got " + start;
-        assert end >= start && end <= size() : "end expected to be in [" + start + " : " + size() + "] but got " + end;
-        cursor.setRange(start, end);
-        return cursor;
-    }
 
     /**
      * @return the value at the given index
