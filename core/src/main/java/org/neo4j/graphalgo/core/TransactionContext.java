@@ -166,7 +166,7 @@ public final class TransactionContext {
     public static final class SecureTransaction implements AutoCloseable {
         private final InternalTransaction tx;
 
-        SecureTransaction(InternalTransaction tx) {
+        private SecureTransaction(InternalTransaction tx) {
             this.tx = tx;
         }
 
