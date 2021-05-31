@@ -159,6 +159,7 @@ public abstract class BaseProc {
             .builder()
             .context(ImmutableGraphLoaderContext.builder()
                 .transactionContext(TransactionContext.of(api, procedureTransaction))
+                .api(api)
                 .log(log)
                 .tracker(tracker)
                 .terminationFlag(TerminationFlag.wrap(transaction))

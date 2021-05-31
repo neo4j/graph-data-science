@@ -27,11 +27,9 @@ import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.TransactionFailureException;
-import org.neo4j.internal.recordstorage.RecordStorageEngine;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-import org.neo4j.kernel.impl.store.NeoStores;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
@@ -85,10 +83,6 @@ public final class GraphDatabaseApiProxy {
 
     public static Node getNodeById(KernelTransaction tx, long id) {
         return getNodeById(tx.internalTransaction(), id);
-    }
-
-    public static NeoStores neoStores(GraphDatabaseService db) {
-        return resolveDependency(db, RecordStorageEngine.class).testAccessNeoStores();
     }
 
     public static Result runQueryWithoutClosingTheResult(Transaction tx, String query, Map<String, Object> params) {

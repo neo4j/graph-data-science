@@ -89,12 +89,14 @@ public abstract class GraphDimensionsReader<T extends GraphCreateConfig> extends
             typeTokenRelTypeMappings
         );
         long maxRelCount = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
+        long allRelationshipsCount = InternalReadOps.getHighestPossibleRelationshipCount(dataRead, api());
 
         return ImmutableGraphDimensions.builder()
             .nodeCount(finalNodeCount)
             .highestNeoId(allNodesCount)
             .maxRelCount(maxRelCount)
             .relationshipCounts(relationshipCounts)
+            .highestRelationshipId(allRelationshipsCount)
             .nodeLabelTokens(labelTokenNodeLabelMappings.keys())
             .relationshipTypeTokens(typeTokenRelTypeMappings.keys())
             .tokenNodeLabelMapping(labelTokenNodeLabelMappings.mappings())

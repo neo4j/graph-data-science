@@ -189,6 +189,7 @@ public final class GraphLoaderBuilders {
         return ImmutableGraphLoader.builder()
             .context(ImmutableGraphLoaderContext.builder()
                 .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(api)))
+                .api(api)
                 .executor(executorService.orElse(Pools.DEFAULT))
                 .tracker(tracker.orElse(AllocationTracker.empty()))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))

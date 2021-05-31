@@ -66,6 +66,11 @@ public interface GraphDimensions {
         return Collections.emptyMap();
     }
 
+    @Value.Default
+    default long highestRelationshipId() {
+        return maxRelCount();
+    }
+
     @Nullable
     LongSet nodeLabelTokens();
 

@@ -33,6 +33,10 @@ public final class InternalReadOps {
         return countByIdGenerator(api, IdType.NODE).orElseGet(read::nodesGetCount);
     }
 
+    public static long getHighestPossibleRelationshipCount(org.neo4j.internal.kernel.api.Read read, GraphDatabaseService api) {
+        return countByIdGenerator(api, IdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
+    }
+
     private static OptionalLong countByIdGenerator(GraphDatabaseService api, IdType idType) {
         if (api != null) {
             try {

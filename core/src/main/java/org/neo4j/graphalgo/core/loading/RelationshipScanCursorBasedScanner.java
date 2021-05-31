@@ -20,14 +20,15 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
+import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.store.NeoStores;
-import org.neo4j.kernel.impl.store.RelationshipStore;
+import org.neo4j.kernel.impl.store.format.standard.RelationshipRecordFormat;
 
-public final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanner<RelationshipReference, RelationshipScanCursor, RelationshipStore, Void> {
+public final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanner<RelationshipReference, RelationshipScanCursor, Void> {
 
     public static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipScanCursorBasedScanner::new;
 
@@ -36,8 +37,15 @@ public final class RelationshipScanCursorBasedScanner extends AbstractCursorBase
     }
 
     @Override
-    RelationshipStore store(NeoStores neoStores) {
-        return neoStores.getRelationshipStore();
+    int recordsPerPage() {
+        return PageCache.PAGE_SIZE / RelationshipRecordFormat.RECORD_SIZE;
+    }
+
+    @Override
+    public long storeSize(GraphDimensions graphDimensions) {
+        long recordsInUse = 1L + graphDimensions.highestRelationshipId();
+        long idsInPages = ((recordsInUse + (recordsPerPage() - 1L)) / recordsPerPage()) * recordsPerPage();
+        return idsInPages * (long) RelationshipRecordFormat.RECORD_SIZE;
     }
 
     @Override

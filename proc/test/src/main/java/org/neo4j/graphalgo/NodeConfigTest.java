@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.NodeConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.internal.recordstorage.RecordStorageEngine;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.graphalgo.QueryRunner.runQuery;
@@ -43,7 +44,10 @@ public interface NodeConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, 
         );
 
         long nodeId = TestSupport.fullAccessTransaction(graphDb()).apply((tx, ktx) -> {
-            var nodeStore = GraphDatabaseApiProxy.neoStores(graphDb()).getNodeStore();
+            var nodeStore = GraphDatabaseApiProxy
+                .resolveDependency(graphDb(), RecordStorageEngine.class)
+                .testAccessNeoStores()
+                .getNodeStore();
             return Neo4jProxy.getHighestPossibleIdInUse(nodeStore, ktx);
         });
 

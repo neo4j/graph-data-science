@@ -75,7 +75,7 @@ public abstract class ScanningRecordsImporter<Record, T> {
             InternalImporter importer = new InternalImporter(numberOfThreads, creator);
             ImportResult importResult = importer.runImport(threadPool);
 
-            long requiredBytes = scanner.storeSize();
+            long requiredBytes = scanner.storeSize(dimensions);
             long recordsImported = importResult.recordsImported;
             long propertiesImported = importResult.propertiesImported;
             BigInteger bigNanos = BigInteger.valueOf(importResult.tookNanos);

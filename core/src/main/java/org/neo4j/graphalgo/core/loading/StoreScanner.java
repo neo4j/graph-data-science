@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
@@ -53,7 +54,7 @@ public interface StoreScanner<Reference> extends AutoCloseable {
 
     ScanCursor<Reference> getCursor(KernelTransaction transaction);
 
-    long storeSize();
+    long storeSize(GraphDimensions graphDimensions);
 
     @Override
     void close();

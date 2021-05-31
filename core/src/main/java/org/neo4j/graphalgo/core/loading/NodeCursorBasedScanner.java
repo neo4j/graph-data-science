@@ -24,18 +24,11 @@ import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.store.NeoStores;
-import org.neo4j.kernel.impl.store.NodeStore;
 
-final class NodeCursorBasedScanner extends AbstractCursorBasedScanner<NodeReference, NodeCursor, NodeStore, Void> {
+final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCursor, Void> {
 
     NodeCursorBasedScanner(int prefetchSize, TransactionContext transaction) {
         super(prefetchSize, transaction, null);
-    }
-
-    @Override
-    NodeStore store(NeoStores neoStores) {
-        return neoStores.getNodeStore();
     }
 
     @Override

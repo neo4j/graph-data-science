@@ -19,23 +19,14 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.store.NeoStores;
-import org.neo4j.kernel.impl.store.RecordStore;
-import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 
-abstract class AbstractCursorBasedScanner<
-    Reference,
-    EntityCursor extends Cursor,
-    Store extends RecordStore<? extends AbstractBaseRecord>,
-    Attachment
-    > implements StoreScanner<Reference> {
+abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor, Attachment>
+    implements StoreScanner<Reference> {
 
     private final class ScanCursor implements StoreScanner.ScanCursor<Reference> {
 
@@ -116,8 +107,6 @@ abstract class AbstractCursorBasedScanner<
 
     // fetch this many pages at once
     private final int prefetchSize;
-    // size in bytes of a single record - advance the offset by this much
-    private final int recordSize;
     // how many records are there in a single page
     private final int recordsPerPage;
 
@@ -125,25 +114,14 @@ abstract class AbstractCursorBasedScanner<
     // global cursor pool to return this one to
     private final ThreadLocal<StoreScanner.ScanCursor<Reference>> cursors;
 
-    private final KernelTransaction kernelTransaction;
     private final Scan<EntityCursor> entityCursorScan;
 
-    private final Store store;
-
     AbstractCursorBasedScanner(int prefetchSize, TransactionContext transactionContext, Attachment attachment) {
-        var neoStores = GraphDatabaseApiProxy.neoStores(transactionContext.api());
-        var store = store(neoStores);
-        int recordSize = store.getRecordSize();
-        int recordsPerPage = store.getRecordsPerPage();
-
         this.transaction = transactionContext.fork();
         this.prefetchSize = prefetchSize;
-        this.kernelTransaction = this.transaction.kernelTransaction();
-        this.entityCursorScan = entityCursorScan(kernelTransaction, attachment);
+        this.entityCursorScan = entityCursorScan(this.transaction.kernelTransaction(), attachment);
         this.cursors = new ThreadLocal<>();
-        this.recordSize = recordSize;
-        this.recordsPerPage = recordsPerPage;
-        this.store = store;
+        this.recordsPerPage = recordsPerPage();
     }
 
     @Override
@@ -170,14 +148,7 @@ abstract class AbstractCursorBasedScanner<
         return scanCursor;
     }
 
-    @Override
-    public final long storeSize() {
-        long recordsInUse = 1L + Neo4jProxy.getHighestPossibleIdInUse(store, kernelTransaction);
-        long idsInPages = ((recordsInUse + (recordsPerPage - 1L)) / recordsPerPage) * recordsPerPage;
-        return idsInPages * (long) recordSize;
-    }
-
-    abstract Store store(NeoStores neoStores);
+    abstract int recordsPerPage();
 
     abstract EntityCursor entityCursor(KernelTransaction transaction);
 

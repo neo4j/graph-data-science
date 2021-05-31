@@ -25,21 +25,14 @@ import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.store.NeoStores;
-import org.neo4j.kernel.impl.store.NodeStore;
 
-final class NodeLabelIndexBasedScanner extends AbstractCursorBasedScanner<NodeReference, NodeLabelIndexCursor, NodeStore, Integer> {
+final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<NodeLabelIndexCursor, Integer> {
 
     private final int labelId;
 
     NodeLabelIndexBasedScanner(int labelId, int prefetchSize, TransactionContext transaction) {
         super(prefetchSize, transaction, labelId);
         this.labelId = labelId;
-    }
-
-    @Override
-    NodeStore store(NeoStores neoStores) {
-        return neoStores.getNodeStore();
     }
 
     @Override
