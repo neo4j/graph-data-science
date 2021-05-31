@@ -150,7 +150,7 @@ CALL gds.labelPropagation.mutate(
 YIELD
   createMillis: Integer,
   computeMillis: Integer,
-  writeMillis: Integer,
+  mutateMillis: Integer,
   postProcessingMillis: Integer,
   nodePropertiesWritten: Integer,
   communityCount: Integer,
@@ -172,7 +172,7 @@ include::specific-configuration.adoc[]
 | Name                  | Type    | Description
 | createMillis          | Integer | Milliseconds for loading data.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
-| writeMillis           | Integer | Milliseconds for writing result data back.
+| mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
 | postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
 | nodePropertiesWritten | Integer | The number of node properties written.
 | communityCount        | Integer | The number of communities found.
