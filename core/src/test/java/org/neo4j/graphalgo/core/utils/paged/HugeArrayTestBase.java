@@ -418,13 +418,13 @@ abstract class HugeArrayTestBase<Array, Box, Huge extends HugeArray<Array, Box, 
     final void shouldNotCopyIntoLargerSlice() {
         testArray(10, 20, (array, size) -> {
             int targetSize = size + 5;
-            AssertionError assertionError = assertThrows(AssertionError.class, () -> {
+            var illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
                 Array source = newUnderlyingArray(size);
                 array.copyFromArrayIntoSlice(source, 0, targetSize);
             });
             assertEquals(
                     formatWithLocale("end expected to be in [0 : %d] but got %d", size, targetSize),
-                    assertionError.getMessage()
+                    illegalArgumentException.getMessage()
             );
         });
     }

@@ -72,8 +72,12 @@ public interface HugeCursorSupport<Array> {
      * @see HugeIntArray#initCursor(HugeCursor)
      */
     default HugeCursor<Array> initCursor(HugeCursor<Array> cursor, long start, long end) {
-        assert start >= 0L && start <= size() : "start expected to be in [0 : " + size() + "] but got " + start;
-        assert end >= start && end <= size() : "end expected to be in [" + start + " : " + size() + "] but got " + end;
+        if (start < 0L || start > size()) {
+            throw new IllegalArgumentException("start expected to be in [0 : " + size() + "] but got " + start);
+        }
+        if (end < start || end > size()) {
+            throw new IllegalArgumentException("end expected to be in [" + start + " : " + size() + "] but got " + end);
+        }
         cursor.setRange(start, end);
         return cursor;
     }
