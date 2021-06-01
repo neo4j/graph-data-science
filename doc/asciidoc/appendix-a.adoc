@@ -398,7 +398,7 @@ The following table lists all functions in the GDS library:
 | `<<utility-functions, gds.version>>`
 | `gds.debug.sysInfo`
 | `gds.list`
-| `gds.beta.listProgress`
+| `<<logging-progress-logging, gds.beta.listProgress>>`
 |Graph Operations | `gds.graph.exists`
 .7+<.^| Utilities
 | `<<utility-functions-node-path, gds.util.asNode>>`
