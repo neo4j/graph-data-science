@@ -27,6 +27,10 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictStreamProc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictWriteProc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraMutateProc;
 import org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraStreamProc;
@@ -61,6 +65,7 @@ import org.neo4j.graphalgo.betweenness.BetweennessCentralityWriteProc;
 import org.neo4j.graphalgo.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.degree.DegreeCentralityMutateProc;
 import org.neo4j.graphalgo.degree.DegreeCentralityStatsProc;
 import org.neo4j.graphalgo.degree.DegreeCentralityStreamProc;
@@ -158,6 +163,11 @@ final class EstimationCliTest {
         "gds.allShortestPaths.dijkstra.mutate.estimate",
         "gds.allShortestPaths.dijkstra.stream.estimate",
         "gds.allShortestPaths.dijkstra.write.estimate",
+
+        "gds.alpha.ml.nodeClassification.predict.mutate.estimate",
+        "gds.alpha.ml.nodeClassification.predict.stream.estimate",
+        "gds.alpha.ml.nodeClassification.predict.write.estimate",
+        "gds.alpha.ml.nodeClassification.train.estimate",
 
         "gds.articleRank.mutate.estimate",
         "gds.articleRank.stats.estimate",
@@ -507,7 +517,8 @@ final class EstimationCliTest {
     }
 
     private static Stream<MemoryEstimateResult> allEstimations() {
-        return Stream.of(
+        EstimationCli.addModelWithFeatures("", "model", List.of("a", "b"));
+        var result = Stream.of(
 
             runEstimation(new AllShortestPathsDijkstraStreamProc()::streamEstimate, "sourceNode", 0L),
             runEstimation(new AllShortestPathsDijkstraWriteProc()::writeEstimate,
@@ -518,6 +529,22 @@ final class EstimationCliTest {
                 "sourceNode", 0L,
                 MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
             ),
+
+            runEstimation(
+                new NodeClassificationTrainProc()::estimate,
+                "holdoutFraction", 0.2,
+                "validationFolds", 5,
+                "params", List.of(
+                    Map.of("penalty", 0.0625),
+                    Map.of("penalty", 0.125)
+                ),
+                "metrics", List.of("F1_MACRO"),
+                "targetProperty", "target",
+                "modelName", "model"
+            ),
+            runEstimation(new NodeClassificationPredictStreamProc()::estimate, "modelName", "model"),
+            runEstimation(new NodeClassificationPredictWriteProc()::estimate, "modelName", "model", "writeProperty", "foo"),
+            runEstimation(new NodeClassificationPredictMutateProc()::estimate, "modelName", "model", "mutateProperty", "foo"),
 
             runEstimation(new ArticleRankMutateProc()::estimate, "mutateProperty", "foo"),
             runEstimation(new ArticleRankStatsProc()::estimateStats),
@@ -704,6 +731,8 @@ final class EstimationCliTest {
             runEstimation(new WccStreamProc()::streamEstimate),
             runEstimation(new WccWriteProc()::writeEstimate, "writeProperty", "foo")
         );
+        ModelCatalog.removeAllLoadedModels();
+        return result;
     }
 
     private static final class ExecutionFailed extends RuntimeException {

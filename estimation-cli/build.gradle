@@ -10,6 +10,7 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
     implementation project(':proc')
+    implementation project(':alpha-proc')
     implementation group: 'info.picocli',       name: 'picocli',             version: ver.'picocli'
     implementation group: 'org.reflections',    name: 'reflections',         version: ver.doc.'reflections'
     neodeps.each {

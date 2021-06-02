@@ -26,14 +26,22 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.nodemodels.ImmutableNodeClassificationTrainConfig;
+import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.graphalgo.ElementProjection;
 import org.neo4j.graphalgo.annotation.SuppressForbidden;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
 import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -58,6 +66,7 @@ import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
+import static org.neo4j.gds.ml.nodemodels.NodeClassificationTrain.MODEL_TYPE;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.NODE_COUNT_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
@@ -87,6 +96,7 @@ public class EstimationCli implements Runnable {
     public static final List<String> EXCLUDED_PROCEDURE_PREFIXES = List.of(
         "gds.testProc.test.estimate",
         "gds.beta.graphSage",
+        "gds.alpha.ml.linkPrediction",
         "gds.beta.graph.export.csv"
     );
 
@@ -329,6 +339,25 @@ public class EstimationCli implements Runnable {
                 actualConfig.put(MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "ESTIMATE_FAKE_WRITE_RELATIONSHIP_PROPERTY");
                 actualConfig.remove(MUTATE_PROPERTY_KEY);
             }
+            if (
+                procedureName.matches("^.+\\.predict\\.(mutate|stream|write)\\.estimate$") ||
+                procedureName.endsWith(".train.estimate")
+            ) {
+                actualConfig.put("modelName", "model");
+            }
+            if (procedureName.startsWith("gds.alpha.ml.nodeClassification.predict")) {
+                addModelWithFeatures("", "model", List.of("a", "b"));
+            }
+            if (procedureName.startsWith("gds.alpha.ml.nodeClassification.train")) {
+                actualConfig.put("holdoutFraction", 0.2);
+                actualConfig.put("validationFolds", 5);
+                actualConfig.put("params", List.of(
+                    Map.of("penalty", 0.065),
+                    Map.of("penalty", 0.125)
+                ));
+                actualConfig.put("metrics", List.of("F1_MACRO"));
+                actualConfig.put("targetProperty", "target");
+            }
             return actualConfig;
         }
 
@@ -417,7 +446,8 @@ public class EstimationCli implements Runnable {
     private static final List<String> PACKAGES_TO_SCAN = List.of(
         "org.neo4j.graphalgo",
         "org.neo4j.gds.paths",
-        "org.neo4j.gds.embeddings"
+        "org.neo4j.gds.embeddings",
+        "org.neo4j.gds.ml"
     );
 
     private Method findProcedure(String procedure) {
@@ -472,6 +502,7 @@ public class EstimationCli implements Runnable {
     ) throws Exception {
         var config = counts.procedureConfig(procedureName);
         var estimateResult = runProcedure(procedure, config);
+        ModelCatalog.removeAllLoadedModels();
         return ImmutableEstimatedProcedure.of(procedureName, estimateResult);
     }
 
@@ -602,6 +633,34 @@ public class EstimationCli implements Runnable {
             .build();
     }
 
+    static void addModelWithFeatures(String username, String modelName, List<String> properties) {
+        var classIdMap = new LocalIdMap();
+        classIdMap.toMapped(0);
+        classIdMap.toMapped(1);
+        var model = Model.of(
+            username,
+            modelName,
+            MODEL_TYPE,
+            GraphSchema.empty(),
+            NodeLogisticRegressionData.builder()
+                .weights(new Weights<>(new Matrix(new double[]{
+                    1.12730619, -0.84532386, 0.93216654,
+                    -1.12730619, 0.84532386, 0.0
+                }, 2, 3)))
+                .classIdMap(classIdMap)
+                .build(),
+            ImmutableNodeClassificationTrainConfig
+                .builder()
+                .modelName(modelName)
+                .targetProperty("foo")
+                .holdoutFraction(0.25)
+                .validationFolds(4)
+                .featureProperties(properties)
+                .addParam(Map.of("penalty", 1.0))
+                .build()
+        );
+        ModelCatalog.set(model);
+    }
     @ValueClass
     interface ProcedureMethod {
         String name();
