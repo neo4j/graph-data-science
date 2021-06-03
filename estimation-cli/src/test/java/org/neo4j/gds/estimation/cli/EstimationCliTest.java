@@ -65,6 +65,8 @@ import org.neo4j.graphalgo.degree.DegreeCentralityMutateProc;
 import org.neo4j.graphalgo.degree.DegreeCentralityStatsProc;
 import org.neo4j.graphalgo.degree.DegreeCentralityStreamProc;
 import org.neo4j.graphalgo.degree.DegreeCentralityWriteProc;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
@@ -127,6 +129,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIO
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
+@GdsEditionTest(value = Edition.EE)
 final class EstimationCliTest {
 
     private static final String PR_ESTIMATE = "gds.pageRank.stream.estimate";
