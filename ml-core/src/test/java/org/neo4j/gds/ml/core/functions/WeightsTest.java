@@ -45,9 +45,9 @@ class WeightsTest {
 
     private static Stream<Arguments> renderSources() {
         return Stream.of(
-            Arguments.of(new Scalar(0D), "Weights: 0.0, requireGradient: true" + System.lineSeparator()),
-            Arguments.of(new Vector(new double[]{0, 2, 4}), "Weights: Vector(3), requireGradient: true" + System.lineSeparator()),
-            Arguments.of(new Matrix(new double[]{0, 2, 4, 2}, 2, 2), "Weights: Matrix(2, 2), requireGradient: true" + System.lineSeparator())
+            Arguments.of(new Scalar(0D), "Weights: Scalar: [0.0], requireGradient: true" + System.lineSeparator()),
+            Arguments.of(new Vector(new double[]{0, 2, 4}), "Weights: Vector(3): [0.0, 2.0, 4.0], requireGradient: true" + System.lineSeparator()),
+            Arguments.of(new Matrix(new double[]{0, 2, 4, 2}, 2, 2), "Weights: Matrix(2, 2): [0.0, 2.0, 4.0, 2.0], requireGradient: true" + System.lineSeparator())
         );
     }
 

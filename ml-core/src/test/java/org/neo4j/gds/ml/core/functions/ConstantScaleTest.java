@@ -58,7 +58,7 @@ class ConstantScaleTest extends ComputationContextBaseTest implements FiniteDiff
         assertThat(new ConstantScale<>(parent, 4).render()).isEqualTo(
             "ConstantScale: scale by 4.0, requireGradient: false" +
             System.lineSeparator() +
-            "|-- Constant: 1.0, requireGradient: false" +
+            "|-- Constant: Scalar: [1.0], requireGradient: false" +
             System.lineSeparator());
     }
 

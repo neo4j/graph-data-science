@@ -23,6 +23,7 @@ import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
+import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -97,7 +98,7 @@ public class Matrix extends Tensor<Matrix> {
     }
 
     @Override
-    public String toString() {
+    public String shortDescription() {
         return formatWithLocale("Matrix(%d, %d)", rows(), cols());
     }
 
