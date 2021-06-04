@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.ComputationContextBaseTest;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.helper.L2Norm;
@@ -33,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class MatrixMultiplyWithTransposedSecondOperandTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
+class MatrixMultiplyWithTransposedSecondOperandTest extends ComputationGraphBaseTest implements FiniteDifferenceTest {
 
     @Override
     public double epsilon() {

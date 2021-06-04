@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.ComputationContextBaseTest;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
@@ -28,7 +27,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MultiMeanTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
+class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifferenceTest {
     @Test
     void shouldAverage() {
         // a    a

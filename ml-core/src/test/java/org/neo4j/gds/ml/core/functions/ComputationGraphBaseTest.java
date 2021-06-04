@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core;
+package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.ml.core.ComputationContext;
 
-public class ComputationContextBaseTest {
+public class ComputationGraphBaseTest {
     protected ComputationContext ctx;
 
     @BeforeEach
