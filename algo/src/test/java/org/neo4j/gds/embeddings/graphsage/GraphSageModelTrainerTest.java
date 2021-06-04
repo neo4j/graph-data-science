@@ -158,10 +158,10 @@ class GraphSageModelTrainerTest {
         var firstLayerSelfWeights = firstWeights.get(1).dimensions();
         var firstLayerNeighborsWeights = firstWeights.get(2).dimensions();
         var firstLayerBias = firstWeights.get(3).dimensions();
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, FEATURES_COUNT}, firstLayerPoolWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, FEATURES_COUNT}, firstLayerSelfWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, firstLayerNeighborsWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION}, firstLayerBias);
+        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT), firstLayerPoolWeights);
+        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT), firstLayerSelfWeights);
+        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION), firstLayerNeighborsWeights);
+        assertArrayEquals(Dimensions.vector(EMBEDDING_DIMENSION), firstLayerBias);
 
         Layer second = layers[1];
         var secondWeights = second.weights();
@@ -172,10 +172,10 @@ class GraphSageModelTrainerTest {
         var secondLayerSelfWeights = secondWeights.get(1).dimensions();
         var secondLayerNeighborsWeights = secondWeights.get(2).dimensions();
         var secondLayerBias = secondWeights.get(3).dimensions();
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerPoolWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerSelfWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerNeighborsWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION}, secondLayerBias);
+        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION), secondLayerPoolWeights);
+        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION), secondLayerSelfWeights);
+        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION), secondLayerNeighborsWeights);
+        assertArrayEquals(Dimensions.vector(EMBEDDING_DIMENSION), secondLayerBias);
     }
 
     @Test
