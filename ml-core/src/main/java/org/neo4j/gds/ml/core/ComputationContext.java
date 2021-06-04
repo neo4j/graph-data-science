@@ -29,6 +29,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class ComputationContext {
     private final Map<Variable<?>, Tensor<?>> data;
@@ -108,6 +109,42 @@ public class ComputationContext {
     private void updateGradient(Variable<?> variable, Tensor<?> gradient) {
         gradients.putIfAbsent(variable, TensorFactory.constant(0D, variable.dimensions()));
         gradients.get(variable).addInPlace(gradient);
+    }
+
+    public String render() {
+        StringBuilder result = new StringBuilder();
+
+        data.forEach((variable, dataEntry) -> {
+            result.append(variable.toString())
+                .append(System.lineSeparator())
+                .append(" \t data: ")
+                .append(dataEntry.toString())
+                .append(System.lineSeparator());
+
+            Tensor<?> gradient = gradients.get(variable);
+            if (gradient != null) {
+                result.append("\t gradient: " + gradient + System.lineSeparator());
+            }
+        });
+
+        var expectedVariables = data.keySet();
+        var unmatchedGradients = gradients
+            .entrySet()
+            .stream()
+            .filter(entry -> !expectedVariables.contains(entry.getKey()))
+            .collect(Collectors.toList());
+
+        if (!unmatchedGradients.isEmpty()) {
+            result.append("Found gradients but no data for: ");
+            unmatchedGradients.forEach(entry -> result
+                .append(System.lineSeparator())
+                .append(entry.getKey().toString())
+                .append(entry.getValue().toString())
+            );
+        }
+
+        return result.toString();
+
     }
 
     static class BackPropTask {
