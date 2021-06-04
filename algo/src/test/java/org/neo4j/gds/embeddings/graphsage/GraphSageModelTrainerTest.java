@@ -23,15 +23,14 @@ import com.carrotsearch.hppc.LongHashSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.Dimensions;
+import org.neo4j.gds.ml.core.helper.TensorTestUtils;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
@@ -118,18 +117,19 @@ class GraphSageModelTrainerTest {
 
         Layer[] layers = result.layers();
         assertEquals(2, layers.length);
+
         Layer first = layers[0];
-        List<Weights<? extends Tensor<?>>> firstWeights = first.weights();
+        var firstWeights = first.weights();
         assertEquals(1, firstWeights.size());
-
         // First layer is (embeddingDimension x features.length)
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, FEATURES_COUNT}, firstWeights.get(0).dimensions());
-        Layer second = layers[1];
-        List<Weights<? extends Tensor<?>>> secondWeights = second.weights();
-        assertEquals(1, secondWeights.size());
+        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT), firstWeights.get(0).dimensions());
 
+        Layer second = layers[1];
+        var secondWeights = second.weights();
+        assertEquals(1, secondWeights.size());
         // Second layer weights (embeddingDimension x embeddingDimension)
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondWeights.get(0).dimensions());
+        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION), secondWeights.get(0).dimensions());
+        assertThat(secondWeights).noneMatch(weights -> TensorTestUtils.containsNaN(weights.data()));
     }
 
     @ParameterizedTest
@@ -150,8 +150,9 @@ class GraphSageModelTrainerTest {
         assertEquals(2, layers.length);
 
         Layer first = layers[0];
-        List<Weights<? extends Tensor<?>>> firstWeights = first.weights();
+        var firstWeights = first.weights();
         assertEquals(4, firstWeights.size());
+        assertThat(firstWeights).noneMatch(weights -> TensorTestUtils.containsNaN(weights.data()));
 
         var firstLayerPoolWeights = firstWeights.get(0).dimensions();
         var firstLayerSelfWeights = firstWeights.get(1).dimensions();
@@ -163,8 +164,9 @@ class GraphSageModelTrainerTest {
         assertArrayEquals(new int[]{EMBEDDING_DIMENSION}, firstLayerBias);
 
         Layer second = layers[1];
-        List<Weights<? extends Tensor<?>>> secondWeights = second.weights();
+        var secondWeights = second.weights();
         assertEquals(4, secondWeights.size());
+        assertThat(secondWeights).noneMatch(weights -> TensorTestUtils.containsNaN(weights.data()));
 
         var secondLayerPoolWeights = secondWeights.get(0).dimensions();
         var secondLayerSelfWeights = secondWeights.get(1).dimensions();
@@ -226,10 +228,14 @@ class GraphSageModelTrainerTest {
 
         var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
 
-        trainer.train(arrayGraph, arrayFeatures);
+        var result = trainer.train(arrayGraph, arrayFeatures);
+
+        assertThat(result.layers())
+            .allSatisfy(layer -> assertThat(layer.weights())
+                .noneMatch(weights -> TensorTestUtils.containsNaN(weights.data())));
     }
 
-    @RepeatedTest(value = 25, name = RepeatedTest.LONG_DISPLAY_NAME)
+    @Test
     void testLosses() {
         var config = configBuilder
             .modelName("randomSeed2")
