@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Collection;
 import java.util.List;
@@ -134,4 +135,47 @@ class UnionGraphTest {
             Arguments.of("a", Set.of(), List.of("b", "c"))
         );
     }
+
+    private static Stream<Arguments> relationshipPropertyGraphs() {
+        return Stream.of(
+            Arguments.of(
+                "  (a)-[:FIRST { times: 5 }]->(b)" +
+                ", (a)-[:SECOND]->(b)",
+                "first defines property"
+            ),
+            Arguments.of(
+                "  (a)-[:FIRST]->(b)" +
+                ", (a)-[:SECOND { times: 5 }]->(b)",
+                "second defines property"
+            ),
+            Arguments.of(
+                "  (a)-[:FIRST { times: 3 }]->(b)" +
+                ", (a)-[:SECOND { times: 5 }]->(b)",
+                "both define property"
+            )
+        );
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("relationshipPropertyGraphs")
+    void relationshipProperty(String gdlGraph, String desc) {
+        var graphFactory = GdlFactory.of(gdlGraph);
+        var graph = graphFactory.build().graphStore().getUnion();
+        var a = graphFactory.nodeId("a");
+        var b = graphFactory.nodeId("b");
+
+        assertThat(graph.relationshipProperty(a, b)).isEqualTo(5D);
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("relationshipPropertyGraphs")
+    void relationshipPropertyWithFallBack(String gdlGraph, String desc) {
+        var graphFactory = GdlFactory.of(gdlGraph);
+        var graph = graphFactory.build().graphStore().getUnion();
+        var a = graphFactory.nodeId("a");
+        var b = graphFactory.nodeId("b");
+
+        assertThat(graph.relationshipProperty(a, b, -1)).isEqualTo(5D);
+    }
+
 }
