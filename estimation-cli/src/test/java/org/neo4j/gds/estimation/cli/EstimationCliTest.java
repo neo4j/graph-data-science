@@ -23,7 +23,9 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
@@ -132,6 +134,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
@@ -332,6 +335,18 @@ final class EstimationCliTest {
         "gds.pageRank.write.estimate"
     );
 
+    private static final List<String> SIMILARITY_PROCEDURES = List.of(
+        "gds.beta.knn.mutate.estimate",
+        "gds.beta.knn.stats.estimate",
+        "gds.beta.knn.stream.estimate",
+        "gds.beta.knn.write.estimate",
+
+        "gds.nodeSimilarity.mutate.estimate",
+        "gds.nodeSimilarity.stats.estimate",
+        "gds.nodeSimilarity.stream.estimate",
+        "gds.nodeSimilarity.write.estimate"
+    );
+
     @ParameterizedTest
     @CsvSource({
         "--nodes, --relationships",
@@ -462,42 +477,52 @@ final class EstimationCliTest {
         assertEquals("gds.graph.create.cypher.estimate," + expected.bytesMin + "," + expected.bytesMax, actual);
     }
 
-    @Test
-    void estimatesCommunityDetectionCategory() {
-        var expectedEstimations = communityDetectionEstimations();
-        var expectedProcedureNames = COMMUNITY_DETECTION_PROCEDURES.iterator();
+    @ParameterizedTest(name = "{2}")
+    @MethodSource("categoryInputs")
+    void estimatesCategory(
+        Stream<MemoryEstimateResult> expectedEstimations,
+        Stream<String> expectedProcedureNames,
+        List<String> categories
+    ) {
+        var procedureNames = expectedProcedureNames.iterator();
         var expected = expectedEstimations
-            .map(e -> expectedJson(e,  expectedProcedureNames.next()))
-            .collect(joining(", ", "[ ", " ]"));
-
-        var actual = run("--nodes", 42, "--relationships", 1337, "--json", "--category", "community-detection");
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void estimatesCentralityCategory() {
-        var expectedEstimations = centralityEstimations();
-        var expectedProcedureNames = CENTRALITY_PROCEDURES.iterator();
-        var expected = expectedEstimations
-            .map(e -> expectedJson(e,  expectedProcedureNames.next()))
-            .collect(joining(", ", "[ ", " ]"));
-
-        var actual = run("--nodes", 42, "--relationships", 1337, "--json", "--category", "centrality");
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    void estimatesCommunityDetectionAndCentralityCategory() {
-        var expectedEstimations = Stream.concat(communityDetectionEstimations(), centralityEstimations());
-        var expectedProcedureNames = Stream.concat(COMMUNITY_DETECTION_PROCEDURES.stream(), CENTRALITY_PROCEDURES.stream()).iterator();
-        var expected = expectedEstimations
-            .map(e -> Tuples.pair(expectedProcedureNames.next(), e))
+            .map(e -> Tuples.pair(procedureNames.next(), e))
             .sorted(Comparator.comparing(Pair::getOne, String.CASE_INSENSITIVE_ORDER))
-            .map(t -> expectedJson(t.getTwo(),  t.getOne()))
+            .map(t -> expectedJson(t.getTwo(), t.getOne()))
             .collect(joining(", ", "[ ", " ]"));
 
-        var actual = run("--nodes", 42, "--relationships", 1337, "--json", "--category", "community-detection", "--category", "centrality");
+        var args = Stream.<Object>concat(
+            Stream.of("--nodes", 42, "--relationships", 1337, "--json"),
+            categories.stream().flatMap(category -> Stream.of("--category", category))
+        );
+
+        var actual = run(args.toArray());
         assertEquals(expected, actual);
+    }
+
+    static Stream<Arguments> categoryInputs() {
+        return Stream.of(
+            arguments(
+                communityDetectionEstimations(),
+                COMMUNITY_DETECTION_PROCEDURES.stream(),
+                List.of("community-detection")
+            ),
+            arguments(
+                centralityEstimations(),
+                CENTRALITY_PROCEDURES.stream(),
+                List.of("centrality")
+            ),
+            arguments(
+                similarityEstimations(),
+                SIMILARITY_PROCEDURES.stream(),
+                List.of("similarity")
+            ),
+            arguments(
+                Stream.concat(communityDetectionEstimations(), centralityEstimations()),
+                Stream.concat(COMMUNITY_DETECTION_PROCEDURES.stream(), CENTRALITY_PROCEDURES.stream()),
+                List.of("community-detection", "centrality")
+            )
+        );
     }
 
     @Test
@@ -633,9 +658,21 @@ final class EstimationCliTest {
                 MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
             ),
 
-            runEstimation(new NodeClassificationPredictMutateProc()::estimate, "modelName", "model", "mutateProperty", "foo"),
+            runEstimation(
+                new NodeClassificationPredictMutateProc()::estimate,
+                "modelName",
+                "model",
+                "mutateProperty",
+                "foo"
+            ),
             runEstimation(new NodeClassificationPredictStreamProc()::estimate, "modelName", "model"),
-            runEstimation(new NodeClassificationPredictWriteProc()::estimate, "modelName", "model", "writeProperty", "foo"),
+            runEstimation(
+                new NodeClassificationPredictWriteProc()::estimate,
+                "modelName",
+                "model",
+                "writeProperty",
+                "foo"
+            ),
             runEstimation(
                 new NodeClassificationTrainProc()::estimate,
                 "holdoutFraction", 0.2,
@@ -876,33 +913,83 @@ final class EstimationCliTest {
         );
     }
 
-        private static Stream<MemoryEstimateResult> centralityEstimations() {
-            return Stream.of(
-                runEstimation(new ArticleRankMutateProc()::estimate, "mutateProperty", "foo"),
-                runEstimation(new ArticleRankStatsProc()::estimateStats),
-                runEstimation(new ArticleRankStreamProc()::estimate),
-                runEstimation(new ArticleRankWriteProc()::estimate, "writeProperty", "foo"),
+    private static Stream<MemoryEstimateResult> centralityEstimations() {
+        return Stream.of(
+            runEstimation(new ArticleRankMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new ArticleRankStatsProc()::estimateStats),
+            runEstimation(new ArticleRankStreamProc()::estimate),
+            runEstimation(new ArticleRankWriteProc()::estimate, "writeProperty", "foo"),
 
-                runEstimation(new BetweennessCentralityMutateProc()::estimate, "mutateProperty", "foo"),
-                runEstimation(new BetweennessCentralityStatsProc()::estimate),
-                runEstimation(new BetweennessCentralityStreamProc()::estimate),
-                runEstimation(new BetweennessCentralityWriteProc()::estimate, "writeProperty", "foo"),
+            runEstimation(new BetweennessCentralityMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new BetweennessCentralityStatsProc()::estimate),
+            runEstimation(new BetweennessCentralityStreamProc()::estimate),
+            runEstimation(new BetweennessCentralityWriteProc()::estimate, "writeProperty", "foo"),
 
-                runEstimation(new DegreeCentralityMutateProc()::estimate, "mutateProperty", "foo"),
-                runEstimation(new DegreeCentralityStatsProc()::estimate),
-                runEstimation(new DegreeCentralityStreamProc()::estimate),
-                runEstimation(new DegreeCentralityWriteProc()::estimate, "writeProperty", "foo"),
+            runEstimation(new DegreeCentralityMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new DegreeCentralityStatsProc()::estimate),
+            runEstimation(new DegreeCentralityStreamProc()::estimate),
+            runEstimation(new DegreeCentralityWriteProc()::estimate, "writeProperty", "foo"),
 
-                runEstimation(new EigenvectorMutateProc()::estimate, "mutateProperty", "foo"),
-                runEstimation(new EigenvectorStatsProc()::estimateStats),
-                runEstimation(new EigenvectorStreamProc()::estimate),
-                runEstimation(new EigenvectorWriteProc()::estimate, "writeProperty", "foo"),
+            runEstimation(new EigenvectorMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new EigenvectorStatsProc()::estimateStats),
+            runEstimation(new EigenvectorStreamProc()::estimate),
+            runEstimation(new EigenvectorWriteProc()::estimate, "writeProperty", "foo"),
 
-                runEstimation(new PageRankMutateProc()::estimate, "mutateProperty", "foo"),
-                runEstimation(new PageRankStatsProc()::estimateStats),
-                runEstimation(new PageRankStreamProc()::estimate),
-                runEstimation(new PageRankWriteProc()::estimate, "writeProperty", "foo")
-            );
+            runEstimation(new PageRankMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new PageRankStatsProc()::estimateStats),
+            runEstimation(new PageRankStreamProc()::estimate),
+            runEstimation(new PageRankWriteProc()::estimate, "writeProperty", "foo")
+        );
+    }
+
+    private static Stream<MemoryEstimateResult> similarityEstimations() {
+        return Stream.of(
+            runEstimation(
+                new KnnMutateProc()::estimateMutate,
+                "nodeWeightProperty",
+                "foo",
+                "mutateProperty",
+                "foo",
+                "mutateRelationshipType",
+                "bar"
+            ),
+            runEstimation(
+                new KnnStatsProc()::estimateStats,
+                "nodeWeightProperty",
+                "foo"
+            ),
+            runEstimation(
+                new KnnStreamProc()::estimate,
+                "nodeWeightProperty",
+                "foo"
+            ),
+            runEstimation(
+                new KnnWriteProc()::estimateWrite,
+                "nodeWeightProperty",
+                "foo",
+                "writeProperty",
+                "foo",
+                "writeRelationshipType",
+                "bar"
+            ),
+
+            runEstimation(
+                new NodeSimilarityMutateProc()::estimateMutate,
+                "mutateProperty",
+                "foo",
+                "mutateRelationshipType",
+                "bar"
+            ),
+            runEstimation(new NodeSimilarityStatsProc()::estimateStats),
+            runEstimation(new NodeSimilarityStreamProc()::estimate),
+            runEstimation(
+                new NodeSimilarityWriteProc()::estimateWrite,
+                "writeProperty",
+                "foo",
+                "writeRelationshipType",
+                "bar"
+            )
+        );
     }
 
     private static final class ExecutionFailed extends RuntimeException {

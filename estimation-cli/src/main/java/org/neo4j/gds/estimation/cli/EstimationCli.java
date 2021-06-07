@@ -93,14 +93,15 @@ public class EstimationCli implements Runnable {
 
     private static final double GRAPH_CREATE_PEAK_MEMORY_FACTOR = 1.5;
     private static final double DEFAULT_PEAK_MEMORY_FACTOR = 1.0;
-    public static final List<String> EXCLUDED_PROCEDURE_PREFIXES = List.of(
+
+    private static final List<String> EXCLUDED_PROCEDURE_PREFIXES = List.of(
         "gds.testProc.test.estimate",
         "gds.beta.graphSage",
         "gds.alpha.ml.linkPrediction",
         "gds.beta.graph.export.csv"
     );
 
-    public static final List<String> COMMUNITY_DETECTION_PREFIXES = List.of(
+    private static final List<String> COMMUNITY_DETECTION_PREFIXES = List.of(
         "gds.beta.k1coloring",
         "gds.beta.modularityOptimization",
         "gds.labelPropagation",
@@ -110,12 +111,17 @@ public class EstimationCli implements Runnable {
         "gds.wcc"
     );
 
-    public static final List<String> CENTRALITY_PREFIXES = List.of(
+    private static final List<String> CENTRALITY_PREFIXES = List.of(
         "gds.articleRank",
         "gds.betweenness",
         "gds.degree",
         "gds.eigenvector",
         "gds.pageRank"
+    );
+
+    private static final List<String> SIMILARITY_PREFIXES = List.of(
+        "gds.beta.knn",
+        "gds.nodeSimilarity"
     );
 
     @CommandLine.Spec
@@ -174,6 +180,8 @@ public class EstimationCli implements Runnable {
                             return COMMUNITY_DETECTION_PREFIXES.stream();
                         case "centrality":
                             return CENTRALITY_PREFIXES.stream();
+                        case "similarity":
+                            return SIMILARITY_PREFIXES.stream();
                         default:
                             throw new IllegalArgumentException("Unknown category: " + category);
                     }
