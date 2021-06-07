@@ -54,6 +54,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -101,39 +102,63 @@ public class EstimationCli implements Runnable {
         "gds.beta.graph.export.csv"
     );
 
-    private static final List<String> COMMUNITY_DETECTION_PREFIXES = List.of(
-        "gds.beta.k1coloring",
-        "gds.beta.modularityOptimization",
-        "gds.labelPropagation",
-        "gds.localClusteringCoefficient",
-        "gds.louvain",
-        "gds.triangleCount",
-        "gds.wcc"
-    );
+    public enum Category {
+        COMMUNITY_DETECTION("community-detection"),
+        CENTRALITY("centrality"),
+        SIMILARITY("similarity"),
+        PATH_FINDING("path-finding"),
+        NODE_EMBEDDING("node-embedding"),
+        MACHINE_LEARNING("machine-learning"),
+        ;
 
-    private static final List<String> CENTRALITY_PREFIXES = List.of(
-        "gds.articleRank",
-        "gds.betweenness",
-        "gds.degree",
-        "gds.eigenvector",
-        "gds.pageRank"
-    );
+        private final String slug;
 
-    private static final List<String> SIMILARITY_PREFIXES = List.of(
-        "gds.beta.knn",
-        "gds.nodeSimilarity"
-    );
+        Category(String slug) {
+            this.slug = slug;
+        }
 
-    private static final List<String> PATH_FINDING_PREFIXES = List.of(
-        "gds.allShortestPaths",
-        "gds.shortestPath"
-    );
+        @Override
+        public String toString() {
+            return slug;
+        }
+    }
 
-    private static final List<String> NODE_EMBEDDING_PREFIXES = List.of(
-        "gds.beta.fastRPExtended",
-        "gds.beta.node2vec",
-        "gds.fastRP"
-    );
+    private static final Map<Category, List<String>> PROCEDURE_PREFIXES = mapCategoriesToProcedures();
+
+    private static Map<Category, List<String>> mapCategoriesToProcedures() {
+        var map = new EnumMap<Category, List<String>>(Category.class);
+        map.put(Category.COMMUNITY_DETECTION, List.of(
+            "gds.beta.k1coloring",
+            "gds.beta.modularityOptimization",
+            "gds.labelPropagation",
+            "gds.localClusteringCoefficient",
+            "gds.louvain",
+            "gds.triangleCount",
+            "gds.wcc"
+        ));
+        map.put(Category.CENTRALITY, List.of(
+            "gds.articleRank",
+            "gds.betweenness",
+            "gds.degree",
+            "gds.eigenvector",
+            "gds.pageRank"
+        ));
+        map.put(Category.SIMILARITY, List.of(
+            "gds.beta.knn",
+            "gds.nodeSimilarity"
+        ));
+        map.put(Category.PATH_FINDING, List.of(
+            "gds.allShortestPaths",
+            "gds.shortestPath"
+        ));
+        map.put(Category.NODE_EMBEDDING, List.of(
+            "gds.beta.fastRPExtended",
+            "gds.beta.node2vec",
+            "gds.fastRP"
+        ));
+        map.put(Category.MACHINE_LEARNING, List.of());
+        return map;
+    }
 
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
@@ -168,9 +193,9 @@ public class EstimationCli implements Runnable {
 
         @CommandLine.Option(
             names = {"--category"},
-            description = "Filter algorithms to estimate based on the category",
+            description = "Filter algorithms to estimate based on the category. Valid values (case-insensitive): ${COMPLETION-CANDIDATES}",
             arity = "*"
-        ) List<String> categories
+        ) List<Category> categories
     ) throws Exception {
         GdsEdition.instance().setToEnterpriseEdition();
         var printOpts = printOptions == null ? new PrintOptions() : printOptions;
@@ -185,29 +210,14 @@ public class EstimationCli implements Runnable {
                 throw new IllegalArgumentException("--category and explicit algo is not allowed");
             }
 
-            if (categories.contains("machine-learning")) {
+            if (categories.contains(Category.MACHINE_LEARNING)) {
                 procedureMethods = findAvailableMethods();
             } else {
                 var includePrefixes = categories.stream()
-                .flatMap(category -> {
-                    switch (category.toLowerCase(Locale.ENGLISH)) {
-                        case "community-detection":
-                            return COMMUNITY_DETECTION_PREFIXES.stream();
-                        case "centrality":
-                            return CENTRALITY_PREFIXES.stream();
-                        case "similarity":
-                            return SIMILARITY_PREFIXES.stream();
-                        case "path-finding":
-                            return PATH_FINDING_PREFIXES.stream();
-                        case "node-embedding":
-                            return NODE_EMBEDDING_PREFIXES.stream();
-                        case "machine-learning":
-                            return Stream.empty();
-                        default:
-                            throw new IllegalArgumentException("Unknown category: " + category);
-                    }
-                })
-                .collect(Collectors.toList());
+                    .flatMap(category -> Optional.ofNullable(PROCEDURE_PREFIXES.get(category))
+                        .orElseThrow(() -> new IllegalArgumentException("Unknown category: " + category))
+                        .stream())
+                    .collect(Collectors.toList());
                 procedureMethods = findAvailableMethods(includePrefixes);
             }
         }
@@ -496,7 +506,8 @@ public class EstimationCli implements Runnable {
 
     static int runWithArgs(String... args) {
         var commandLine = new CommandLine(new EstimationCli())
-            .registerConverter(Number.class, new NumberParser());
+            .registerConverter(Number.class, new NumberParser())
+            .setCaseInsensitiveEnumValuesAllowed(true);
 
         boolean parsed;
         try {
