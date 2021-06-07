@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.core.tensor.TensorFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -117,16 +118,21 @@ public class ComputationContext {
         data.forEach((variable, dataEntry) -> {
             result.append(variable.toString())
                 .append(System.lineSeparator())
-                .append(" \t data: ")
+                .append("\t data: ")
                 .append(dataEntry.toString())
                 .append(System.lineSeparator());
 
-            Tensor<?> gradient = gradients.get(variable);
-            if (gradient != null) {
-                result.append("\t gradient: " + gradient + System.lineSeparator());
-            }
+            var gradient = Optional.ofNullable(gradients.get(variable)).map(Tensor::toString);
+            result.append("\t gradient: " + gradient.orElse("None") + System.lineSeparator());
         });
 
+        renderOrphanGradients(result);
+
+        return result.toString();
+
+    }
+
+    private void renderOrphanGradients(StringBuilder result) {
         var expectedVariables = data.keySet();
         var unmatchedGradients = gradients
             .entrySet()
@@ -142,9 +148,6 @@ public class ComputationContext {
                 .append(entry.getValue().toString())
             );
         }
-
-        return result.toString();
-
     }
 
     static class BackPropTask {

@@ -46,33 +46,39 @@ public class ComputationContextTest {
         assertThat(ctx.render())
             .contains(
                 "ConstantScale: scale by 3.0, requireGradient: false" + System.lineSeparator() +
-                " \t data: Scalar: [6.0]" + System.lineSeparator())
+                "\t data: Scalar: [6.0]" + System.lineSeparator() +
+                "\t gradient: None" + System.lineSeparator())
             .contains(
                 "Weights: Scalar: [4.0], requireGradient: true" + System.lineSeparator() +
-                " \t data: Scalar: [4.0]" + System.lineSeparator())
+                "\t data: Scalar: [4.0]" + System.lineSeparator() +
+                "\t gradient: None" + System.lineSeparator())
             .contains(
                 "Constant: Scalar: [2.0], requireGradient: false" + System.lineSeparator() +
-                " \t data: Scalar: [2.0]" + System.lineSeparator())
+                "\t data: Scalar: [2.0]" + System.lineSeparator()+
+                "\t gradient: None" + System.lineSeparator())
             .contains(
                 "ElementSum: Vector(1), requireGradient: true" + System.lineSeparator() +
-                " \t data: Scalar: [12.0]" + System.lineSeparator());
+                "\t data: Scalar: [12.0]" + System.lineSeparator() +
+                "\t gradient: None" + System.lineSeparator());
 
         ctx.backward(d);
 
         assertThat(ctx.render())
             .contains(
                 "ConstantScale: scale by 3.0, requireGradient: false" + System.lineSeparator() +
-                " \t data: Scalar: [6.0]" + System.lineSeparator())
+                "\t data: Scalar: [6.0]" + System.lineSeparator() +
+                "\t gradient: None" + System.lineSeparator())
             .contains(
                 "Weights: Scalar: [4.0], requireGradient: true" + System.lineSeparator() +
-                " \t data: Scalar: [4.0]" + System.lineSeparator() +
+                "\t data: Scalar: [4.0]" + System.lineSeparator() +
                 "\t gradient: Scalar: [1.0]" + System.lineSeparator())
             .contains(
                 "Constant: Scalar: [2.0], requireGradient: false" + System.lineSeparator() +
-                " \t data: Scalar: [2.0]" + System.lineSeparator())
+                "\t data: Scalar: [2.0]" + System.lineSeparator() +
+                "\t gradient: None" + System.lineSeparator())
             .contains(
                 "ElementSum: Vector(1), requireGradient: true" + System.lineSeparator() +
-                " \t data: Scalar: [12.0]" + System.lineSeparator() +
+                "\t data: Scalar: [12.0]" + System.lineSeparator() +
                 "\t gradient: Scalar: [1.0]" + System.lineSeparator());
     }
 }
