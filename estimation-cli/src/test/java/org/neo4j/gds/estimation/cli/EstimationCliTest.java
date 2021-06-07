@@ -414,7 +414,10 @@ final class EstimationCliTest {
     void failsForMultipleBlockSizeOptions(String option1, String option2) {
         var nodeCount = 42;
         var relationshipCount = 1337;
-        var actual = assertThrows(ExecutionFailed.class, () -> run(PR_ESTIMATE, "--nodes", nodeCount, "--relationships", relationshipCount, option1, option2));
+        var actual = assertThrows(
+            ExecutionFailed.class,
+            () -> run(PR_ESTIMATE, "--nodes", nodeCount, "--relationships", relationshipCount, option1, option2)
+        );
 
         assertEquals(2, actual.exitCode);
         assertEquals(
