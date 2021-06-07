@@ -67,7 +67,7 @@ public class SubGraph {
         return result;
     }
 
-    static SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph) {
+    public static SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph) {
         return buildSubGraph(nodeIds, neighborhoodFunction, graph, relationshipWeightFunction(graph, false));
     }
 
