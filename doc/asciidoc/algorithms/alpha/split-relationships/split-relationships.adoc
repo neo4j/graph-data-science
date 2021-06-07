@@ -128,7 +128,7 @@ CALL gds.alpha.ml.splitRelationships.mutate('graph', {
     holdoutRelationshipType: 'TYPE_HOLDOUT',
     remainingRelationshipType: 'TYPE_REMAINING',
     holdoutFraction: 0.2,
-    negativeSamplingRatio: 2.0,
+    negativeSamplingRatio: 1.0,
     randomSeed: 1337
 }) YIELD relationshipsWritten
 ----
@@ -137,14 +137,14 @@ CALL gds.alpha.ml.splitRelationships.mutate('graph', {
 .Results
 |===
 | relationshipsWritten
-| 11
+| 10
 |===
 --
 
 The input graph consists of 5 relationships.
 We use 20% (1 relationship) of the relationships to create the 'TYPE_HOLDOUT' relationship type (holdout set).
 This creates 1 relationship with positive label.
-Because of the `negativeSamplingRatio`, 2 relationships with negative label are also created.
+Because of the `negativeSamplingRatio`, 1 relationship with negative label are also created.
 Finally, the `TYPE_REMAINING` relationship type is formed with the remaining 80% (4 relationships).
 These are written as orientation `UNDIRECTED` which counts as writing 8 relationships.
 
