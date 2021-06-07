@@ -117,9 +117,14 @@ import org.neo4j.graphalgo.wcc.WccMutateProc;
 import org.neo4j.graphalgo.wcc.WccStatsProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
+import org.neo4j.procedure.Procedure;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -130,6 +135,7 @@ import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -164,222 +170,6 @@ final class EstimationCliTest {
         "  \"bytes_max_peak\" : %d,\n" +
         "  \"max_memory_peak\" : \"%s\"\n" +
         "}";
-
-    private static final List<String> PROCEDURES = List.of(
-        "gds.allShortestPaths.dijkstra.mutate.estimate",
-        "gds.allShortestPaths.dijkstra.stream.estimate",
-        "gds.allShortestPaths.dijkstra.write.estimate",
-
-        "gds.alpha.ml.nodeClassification.predict.mutate.estimate",
-        "gds.alpha.ml.nodeClassification.predict.stream.estimate",
-        "gds.alpha.ml.nodeClassification.predict.write.estimate",
-        "gds.alpha.ml.nodeClassification.train.estimate",
-
-        "gds.articleRank.mutate.estimate",
-        "gds.articleRank.stats.estimate",
-        "gds.articleRank.stream.estimate",
-        "gds.articleRank.write.estimate",
-
-        "gds.beta.fastRPExtended.mutate.estimate",
-        "gds.beta.fastRPExtended.stats.estimate",
-        "gds.beta.fastRPExtended.stream.estimate",
-        "gds.beta.fastRPExtended.write.estimate",
-
-        "gds.beta.k1coloring.mutate.estimate",
-        "gds.beta.k1coloring.stats.estimate",
-        "gds.beta.k1coloring.stream.estimate",
-        "gds.beta.k1coloring.write.estimate",
-
-        "gds.beta.knn.mutate.estimate",
-        "gds.beta.knn.stats.estimate",
-        "gds.beta.knn.stream.estimate",
-        "gds.beta.knn.write.estimate",
-
-        "gds.beta.modularityOptimization.mutate.estimate",
-        "gds.beta.modularityOptimization.stream.estimate",
-        "gds.beta.modularityOptimization.write.estimate",
-
-        "gds.beta.node2vec.mutate.estimate",
-        "gds.beta.node2vec.stream.estimate",
-        "gds.beta.node2vec.write.estimate",
-
-        "gds.betweenness.mutate.estimate",
-        "gds.betweenness.stats.estimate",
-        "gds.betweenness.stream.estimate",
-        "gds.betweenness.write.estimate",
-
-        "gds.degree.mutate.estimate",
-        "gds.degree.stats.estimate",
-        "gds.degree.stream.estimate",
-        "gds.degree.write.estimate",
-
-        "gds.eigenvector.mutate.estimate",
-        "gds.eigenvector.stats.estimate",
-        "gds.eigenvector.stream.estimate",
-        "gds.eigenvector.write.estimate",
-
-        "gds.fastRP.mutate.estimate",
-        "gds.fastRP.stats.estimate",
-        "gds.fastRP.stream.estimate",
-        "gds.fastRP.write.estimate",
-
-        "gds.graph.create.cypher.estimate",
-        "gds.graph.create.estimate",
-
-        "gds.labelPropagation.mutate.estimate",
-        "gds.labelPropagation.stats.estimate",
-        "gds.labelPropagation.stream.estimate",
-        "gds.labelPropagation.write.estimate",
-
-        "gds.localClusteringCoefficient.mutate.estimate",
-        "gds.localClusteringCoefficient.stats.estimate",
-        "gds.localClusteringCoefficient.stream.estimate",
-        "gds.localClusteringCoefficient.write.estimate",
-
-        "gds.louvain.mutate.estimate",
-        "gds.louvain.stats.estimate",
-        "gds.louvain.stream.estimate",
-        "gds.louvain.write.estimate",
-
-        "gds.nodeSimilarity.mutate.estimate",
-        "gds.nodeSimilarity.stats.estimate",
-        "gds.nodeSimilarity.stream.estimate",
-        "gds.nodeSimilarity.write.estimate",
-
-        "gds.pageRank.mutate.estimate",
-        "gds.pageRank.stats.estimate",
-        "gds.pageRank.stream.estimate",
-        "gds.pageRank.write.estimate",
-
-        "gds.shortestPath.astar.mutate.estimate",
-        "gds.shortestPath.astar.stream.estimate",
-        "gds.shortestPath.astar.write.estimate",
-        "gds.shortestPath.dijkstra.mutate.estimate",
-        "gds.shortestPath.dijkstra.stream.estimate",
-        "gds.shortestPath.dijkstra.write.estimate",
-        "gds.shortestPath.yens.mutate.estimate",
-        "gds.shortestPath.yens.stream.estimate",
-        "gds.shortestPath.yens.write.estimate",
-
-        "gds.triangleCount.mutate.estimate",
-        "gds.triangleCount.stats.estimate",
-        "gds.triangleCount.stream.estimate",
-        "gds.triangleCount.write.estimate",
-
-        "gds.wcc.mutate.estimate",
-        "gds.wcc.stats.estimate",
-        "gds.wcc.stream.estimate",
-        "gds.wcc.write.estimate"
-    );
-
-    private static final List<String> COMMUNITY_DETECTION_PROCEDURES = List.of(
-        "gds.beta.k1coloring.mutate.estimate",
-        "gds.beta.k1coloring.stats.estimate",
-        "gds.beta.k1coloring.stream.estimate",
-        "gds.beta.k1coloring.write.estimate",
-
-        "gds.beta.modularityOptimization.mutate.estimate",
-        "gds.beta.modularityOptimization.stream.estimate",
-        "gds.beta.modularityOptimization.write.estimate",
-
-        "gds.labelPropagation.mutate.estimate",
-        "gds.labelPropagation.stats.estimate",
-        "gds.labelPropagation.stream.estimate",
-        "gds.labelPropagation.write.estimate",
-
-        "gds.localClusteringCoefficient.mutate.estimate",
-        "gds.localClusteringCoefficient.stats.estimate",
-        "gds.localClusteringCoefficient.stream.estimate",
-        "gds.localClusteringCoefficient.write.estimate",
-
-        "gds.louvain.mutate.estimate",
-        "gds.louvain.stats.estimate",
-        "gds.louvain.stream.estimate",
-        "gds.louvain.write.estimate",
-
-        "gds.triangleCount.mutate.estimate",
-        "gds.triangleCount.stats.estimate",
-        "gds.triangleCount.stream.estimate",
-        "gds.triangleCount.write.estimate",
-
-        "gds.wcc.mutate.estimate",
-        "gds.wcc.stats.estimate",
-        "gds.wcc.stream.estimate",
-        "gds.wcc.write.estimate"
-    );
-
-    private static final List<String> CENTRALITY_PROCEDURES = List.of(
-        "gds.articleRank.mutate.estimate",
-        "gds.articleRank.stats.estimate",
-        "gds.articleRank.stream.estimate",
-        "gds.articleRank.write.estimate",
-
-        "gds.betweenness.mutate.estimate",
-        "gds.betweenness.stats.estimate",
-        "gds.betweenness.stream.estimate",
-        "gds.betweenness.write.estimate",
-
-        "gds.degree.mutate.estimate",
-        "gds.degree.stats.estimate",
-        "gds.degree.stream.estimate",
-        "gds.degree.write.estimate",
-
-        "gds.eigenvector.mutate.estimate",
-        "gds.eigenvector.stats.estimate",
-        "gds.eigenvector.stream.estimate",
-        "gds.eigenvector.write.estimate",
-
-        "gds.pageRank.mutate.estimate",
-        "gds.pageRank.stats.estimate",
-        "gds.pageRank.stream.estimate",
-        "gds.pageRank.write.estimate"
-    );
-
-    private static final List<String> SIMILARITY_PROCEDURES = List.of(
-        "gds.beta.knn.mutate.estimate",
-        "gds.beta.knn.stats.estimate",
-        "gds.beta.knn.stream.estimate",
-        "gds.beta.knn.write.estimate",
-
-        "gds.nodeSimilarity.mutate.estimate",
-        "gds.nodeSimilarity.stats.estimate",
-        "gds.nodeSimilarity.stream.estimate",
-        "gds.nodeSimilarity.write.estimate"
-    );
-
-    private static final List<String> PATH_FINDING_PROCEDURES = List.of(
-        "gds.allShortestPaths.dijkstra.mutate.estimate",
-        "gds.allShortestPaths.dijkstra.stream.estimate",
-        "gds.allShortestPaths.dijkstra.write.estimate",
-
-        "gds.shortestPath.astar.mutate.estimate",
-        "gds.shortestPath.astar.stream.estimate",
-        "gds.shortestPath.astar.write.estimate",
-
-        "gds.shortestPath.dijkstra.mutate.estimate",
-        "gds.shortestPath.dijkstra.stream.estimate",
-        "gds.shortestPath.dijkstra.write.estimate",
-
-        "gds.shortestPath.yens.mutate.estimate",
-        "gds.shortestPath.yens.stream.estimate",
-        "gds.shortestPath.yens.write.estimate"
-    );
-
-    private static final List<String> NODE_EMBEDDING_PROCEDURES = List.of(
-        "gds.beta.fastRPExtended.mutate.estimate",
-        "gds.beta.fastRPExtended.stats.estimate",
-        "gds.beta.fastRPExtended.stream.estimate",
-        "gds.beta.fastRPExtended.write.estimate",
-
-        "gds.beta.node2vec.mutate.estimate",
-        "gds.beta.node2vec.stream.estimate",
-        "gds.beta.node2vec.write.estimate",
-
-        "gds.fastRP.mutate.estimate",
-        "gds.fastRP.stats.estimate",
-        "gds.fastRP.stream.estimate",
-        "gds.fastRP.write.estimate"
-    );
 
     @ParameterizedTest
     @CsvSource({
@@ -514,17 +304,13 @@ final class EstimationCliTest {
         assertEquals("gds.graph.create.cypher.estimate," + expected.bytesMin + "," + expected.bytesMax, actual);
     }
 
-    @ParameterizedTest(name = "{2}")
+    @ParameterizedTest(name = "{1}")
     @MethodSource("categoryInputs")
     void estimatesCategory(
-        Stream<MemoryEstimateResult> expectedEstimations,
-        Stream<String> expectedProcedureNames,
+        Stream<Pair<String, MemoryEstimateResult>> expectedEstimations,
         List<String> categories
     ) {
-        var procedureNames = expectedProcedureNames.iterator();
         var expected = expectedEstimations
-            .map(e -> Tuples.pair(procedureNames.next(), e))
-            .sorted(Comparator.comparing(Pair::getOne, String.CASE_INSENSITIVE_ORDER))
             .map(t -> expectedJson(t.getTwo(), t.getOne()))
             .collect(joining(", ", "[ ", " ]"));
 
@@ -541,42 +327,34 @@ final class EstimationCliTest {
         return Stream.of(
             arguments(
                 communityDetectionEstimations(),
-                COMMUNITY_DETECTION_PROCEDURES.stream(),
                 List.of("community-detection")
             ),
             arguments(
                 centralityEstimations(),
-                CENTRALITY_PROCEDURES.stream(),
                 List.of("centrality")
             ),
             arguments(
                 similarityEstimations(),
-                SIMILARITY_PROCEDURES.stream(),
                 List.of("similarity")
             ),
             arguments(
                 pathFindingEstimations(),
-                PATH_FINDING_PROCEDURES.stream(),
                 List.of("path-finding")
             ),
             arguments(
                 nodeEmbeddingEstimations(),
-                NODE_EMBEDDING_PROCEDURES.stream(),
                 List.of("node-embedding")
             ),
             arguments(
                 allEstimations(),
-                PROCEDURES.stream(),
                 List.of("machine-learning")
             ),
             arguments(
-                Stream.concat(communityDetectionEstimations(), centralityEstimations()),
-                Stream.concat(COMMUNITY_DETECTION_PROCEDURES.stream(), CENTRALITY_PROCEDURES.stream()),
+                sorted(communityDetectionEstimations(), centralityEstimations()),
                 List.of("community-detection", "centrality")
             ),
             arguments(
                 allEstimations(),
-                PROCEDURES.stream(),
                 List.of("community-detection", "machine-learning", "path-finding")
             )
         );
@@ -638,18 +416,16 @@ final class EstimationCliTest {
     @Test
     void listAllAvailableProcedures() {
         var actual = run("list-available");
-        var expected = PROCEDURES.stream().collect(joining(System.lineSeparator()));
+        var expected = allEstimations().map(Pair::getOne).collect(joining(System.lineSeparator()));
 
         assertEquals(expected, actual);
     }
 
     @Test
     void estimateAllAvailableProcedures() {
-        Stream<MemoryEstimateResult> expectedEstimations = allEstimations();
-
-        var expectedProcedureNames = PROCEDURES.iterator();
+        var expectedEstimations = allEstimations();
         var expected = expectedEstimations
-            .map(e -> expectedProcedureNames.next() + "," + e.bytesMin + "," + e.bytesMax)
+            .map(e -> e.getOne() + "," + e.getTwo().bytesMin + "," + e.getTwo().bytesMax)
             .collect(joining(System.lineSeparator()));
 
         var actual = run("-n", 42, "-r", 1337);
@@ -658,11 +434,9 @@ final class EstimationCliTest {
 
     @Test
     void estimateAllAvailableProceduresInTreeMode() {
-        Stream<MemoryEstimateResult> expectedEstimations = allEstimations();
-
-        var expectedProcedureNames = PROCEDURES.iterator();
+        var expectedEstimations = allEstimations();
         var expected = expectedEstimations
-            .map(e -> expectedProcedureNames.next() + "," + e.treeView)
+            .map(e -> e.getOne() + "," + e.getTwo().treeView)
             .collect(joining(System.lineSeparator()));
 
         var actual = run("-n", 42, "-r", 1337, "--tree");
@@ -671,11 +445,9 @@ final class EstimationCliTest {
 
     @Test
     void estimateAllAvailableProceduresInTreeInJsonMode() {
-        Stream<MemoryEstimateResult> expectedEstimations = allEstimations();
-
-        var expectedProcedureNames = PROCEDURES.iterator();
+        var expectedEstimations = allEstimations();
         var expected = expectedEstimations
-            .map(e -> expectedJson(e, expectedProcedureNames.next()))
+            .map(e -> expectedJson(e.getTwo(), e.getOne()))
             .collect(joining(", ", "[ ", " ]"));
 
         var actual = run("-n", 42, "-r", 1337, "--json");
@@ -701,37 +473,246 @@ final class EstimationCliTest {
         );
     }
 
-    private static Stream<MemoryEstimateResult> allEstimations() {
-        EstimationCli.addModelWithFeatures("", "model", List.of("a", "b"));
-        var result = Stream.of(
+    private static Stream<Pair<String, MemoryEstimateResult>> communityDetectionEstimations() {
+        return sorted(Stream.of(
+            runEstimation(K1ColoringMutateProc.class, "mutateEstimate", "mutateProperty", "foo"),
+            runEstimation(K1ColoringStatsProc.class, "estimate"),
+            runEstimation(K1ColoringStreamProc.class, "estimate"),
+            runEstimation(K1ColoringWriteProc.class, "estimate", "writeProperty", "foo"),
 
-            runEstimation(new AllShortestPathsDijkstraStreamProc()::streamEstimate, "sourceNode", 0L),
-            runEstimation(new AllShortestPathsDijkstraWriteProc()::writeEstimate,
+            runEstimation(ModularityOptimizationMutateProc.class, "mutateEstimate", "mutateProperty", "foo"),
+            runEstimation(ModularityOptimizationStreamProc.class, "estimate"),
+            runEstimation(ModularityOptimizationWriteProc.class, "estimate", "writeProperty", "foo"),
+
+            runEstimation(LabelPropagationMutateProc.class, "mutateEstimate", "mutateProperty", "foo"),
+            runEstimation(LabelPropagationStatsProc.class, "estimateStats"),
+            runEstimation(LabelPropagationStreamProc.class, "estimate"),
+            runEstimation(LabelPropagationWriteProc.class, "estimate", "writeProperty", "foo"),
+
+            runEstimation(LocalClusteringCoefficientMutateProc.class, "estimate", "mutateProperty", "foo"),
+            runEstimation(LocalClusteringCoefficientStatsProc.class, "estimateStats"),
+            runEstimation(LocalClusteringCoefficientStreamProc.class, "estimateStats"),
+            runEstimation(LocalClusteringCoefficientWriteProc.class, "estimateStats", "writeProperty", "foo"),
+
+            runEstimation(LouvainMutateProc.class, "estimate", "mutateProperty", "foo"),
+            runEstimation(LouvainStatsProc.class, "estimateStats"),
+            runEstimation(LouvainStreamProc.class, "estimate"),
+            runEstimation(LouvainWriteProc.class, "estimate", "writeProperty", "foo"),
+
+            runEstimation(TriangleCountMutateProc.class, "estimate", "mutateProperty", "foo"),
+            runEstimation(TriangleCountStatsProc.class, "estimateStats"),
+            runEstimation(TriangleCountStreamProc.class, "estimateStats"),
+            runEstimation(TriangleCountWriteProc.class, "estimate", "writeProperty", "foo"),
+
+            runEstimation(WccMutateProc.class, "mutateEstimate", "mutateProperty", "foo"),
+            runEstimation(WccStatsProc.class, "statsEstimate"),
+            runEstimation(WccStreamProc.class, "streamEstimate"),
+            runEstimation(WccWriteProc.class, "writeEstimate", "writeProperty", "foo")
+        ));
+    }
+
+    private static Stream<Pair<String, MemoryEstimateResult>> centralityEstimations() {
+        return sorted(Stream.of(
+            runEstimation(ArticleRankMutateProc.class, "estimate", "mutateProperty", "foo"),
+            runEstimation(ArticleRankStatsProc.class, "estimateStats"),
+            runEstimation(ArticleRankStreamProc.class, "estimate"),
+            runEstimation(ArticleRankWriteProc.class, "estimate", "writeProperty", "foo"),
+
+            runEstimation(BetweennessCentralityMutateProc.class, "estimate", "mutateProperty", "foo"),
+            runEstimation(BetweennessCentralityStatsProc.class, "estimate"),
+            runEstimation(BetweennessCentralityStreamProc.class, "estimate"),
+            runEstimation(BetweennessCentralityWriteProc.class, "estimate", "writeProperty", "foo"),
+
+            runEstimation(DegreeCentralityMutateProc.class, "estimate", "mutateProperty", "foo"),
+            runEstimation(DegreeCentralityStatsProc.class, "estimate"),
+            runEstimation(DegreeCentralityStreamProc.class, "estimate"),
+            runEstimation(DegreeCentralityWriteProc.class, "estimate", "writeProperty", "foo"),
+
+            runEstimation(EigenvectorMutateProc.class, "estimate", "mutateProperty", "foo"),
+            runEstimation(EigenvectorStatsProc.class, "estimateStats"),
+            runEstimation(EigenvectorStreamProc.class, "estimate"),
+            runEstimation(EigenvectorWriteProc.class, "estimate", "writeProperty", "foo"),
+
+            runEstimation(PageRankMutateProc.class, "estimate", "mutateProperty", "foo"),
+            runEstimation(PageRankStatsProc.class, "estimateStats"),
+            runEstimation(PageRankStreamProc.class, "estimate"),
+            runEstimation(PageRankWriteProc.class, "estimate", "writeProperty", "foo")
+        ));
+    }
+
+    private static Stream<Pair<String, MemoryEstimateResult>> similarityEstimations() {
+        return sorted(Stream.of(
+            runEstimation(
+                KnnMutateProc.class, "estimateMutate",
+                "nodeWeightProperty",
+                "foo",
+                "mutateProperty",
+                "foo",
+                "mutateRelationshipType",
+                "bar"
+            ),
+            runEstimation(
+                KnnStatsProc.class, "estimateStats",
+                "nodeWeightProperty",
+                "foo"
+            ),
+            runEstimation(
+                KnnStreamProc.class, "estimate",
+                "nodeWeightProperty",
+                "foo"
+            ),
+            runEstimation(
+                KnnWriteProc.class, "estimateWrite",
+                "nodeWeightProperty",
+                "foo",
+                "writeProperty",
+                "foo",
+                "writeRelationshipType",
+                "bar"
+            ),
+
+            runEstimation(
+                NodeSimilarityMutateProc.class, "estimateMutate",
+                "mutateProperty",
+                "foo",
+                "mutateRelationshipType",
+                "bar"
+            ),
+            runEstimation(NodeSimilarityStatsProc.class, "estimateStats"),
+            runEstimation(NodeSimilarityStreamProc.class, "estimate"),
+            runEstimation(
+                NodeSimilarityWriteProc.class, "estimateWrite",
+                "writeProperty",
+                "foo",
+                "writeRelationshipType",
+                "bar"
+            )
+        ));
+    }
+
+    private static Stream<Pair<String, MemoryEstimateResult>> pathFindingEstimations() {
+        return sorted(Stream.of(
+            runEstimation(AllShortestPathsDijkstraStreamProc.class, "streamEstimate",
+                "sourceNode", 0L
+            ),
+            runEstimation(AllShortestPathsDijkstraWriteProc.class, "writeEstimate",
                 "sourceNode", 0L,
                 WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
             ),
-            runEstimation(new AllShortestPathsDijkstraMutateProc()::mutateEstimate,
+            runEstimation(AllShortestPathsDijkstraMutateProc.class, "mutateEstimate",
                 "sourceNode", 0L,
                 MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
             ),
 
+            runEstimation(ShortestPathAStarStreamProc.class, "streamEstimate",
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON"
+            ),
+            runEstimation(ShortestPathAStarWriteProc.class, "writeEstimate",
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(ShortestPathAStarMutateProc.class, "mutateEstimate",
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
+                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+
+            runEstimation(ShortestPathDijkstraStreamProc.class, "streamEstimate",
+                "sourceNode", 0L,
+                "targetNode", 1L
+            ),
+            runEstimation(ShortestPathDijkstraWriteProc.class, "writeEstimate",
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(ShortestPathDijkstraMutateProc.class, "mutateEstimate",
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(ShortestPathYensStreamProc.class, "streamEstimate",
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                "k", 3
+            ),
+            runEstimation(ShortestPathYensWriteProc.class, "writeEstimate",
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                "k", 3,
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(ShortestPathYensMutateProc.class, "mutateEstimate",
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                "k", 3,
+                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
+            )
+        ));
+    }
+
+    private static Stream<Pair<String, MemoryEstimateResult>> nodeEmbeddingEstimations() {
+        return sorted(Stream.of(
             runEstimation(
-                new NodeClassificationPredictMutateProc()::estimate,
+                FastRPExtendedMutateProc.class, "estimate",
+                "mutateProperty",
+                "foo",
+                "embeddingDimension",
+                128,
+                "propertyDimension",
+                64
+            ),
+            runEstimation(FastRPExtendedStatsProc.class, "estimate", "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(FastRPExtendedStreamProc.class, "estimate", "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(
+                FastRPExtendedWriteProc.class, "estimate",
+                "writeProperty",
+                "foo",
+                "embeddingDimension",
+                128,
+                "propertyDimension",
+                64
+            ),
+
+            runEstimation(Node2VecMutateProc.class, "estimate", "mutateProperty", "foo"),
+            runEstimation(Node2VecStreamProc.class, "estimate"),
+            runEstimation(Node2VecWriteProc.class, "estimate", "writeProperty", "foo"),
+
+            runEstimation(FastRPMutateProc.class, "estimate", "mutateProperty", "foo", "embeddingDimension", 128),
+            runEstimation(FastRPStatsProc.class, "estimate", "embeddingDimension", 128),
+            runEstimation(FastRPStreamProc.class, "estimate", "embeddingDimension", 128),
+            runEstimation(FastRPWriteProc.class, "estimate", "writeProperty", "foo", "embeddingDimension", 128)
+        ));
+    }
+
+    private static Stream<Pair<String, MemoryEstimateResult>> machineLearningEstimations() {
+        EstimationCli.addModelWithFeatures("", "model", List.of("a", "b"));
+        var result = Stream.of(
+            runEstimation(
+                NodeClassificationPredictMutateProc.class, "estimate",
                 "modelName",
                 "model",
                 "mutateProperty",
                 "foo"
             ),
-            runEstimation(new NodeClassificationPredictStreamProc()::estimate, "modelName", "model"),
+            runEstimation(NodeClassificationPredictStreamProc.class, "estimate", "modelName", "model"),
             runEstimation(
-                new NodeClassificationPredictWriteProc()::estimate,
+                NodeClassificationPredictWriteProc.class, "estimate",
                 "modelName",
                 "model",
                 "writeProperty",
                 "foo"
             ),
             runEstimation(
-                new NodeClassificationTrainProc()::estimate,
+                NodeClassificationTrainProc.class, "estimate",
                 "holdoutFraction", 0.2,
                 "validationFolds", 5,
                 "params", List.of(
@@ -741,407 +722,36 @@ final class EstimationCliTest {
                 "metrics", List.of("F1_MACRO"),
                 "targetProperty", "target",
                 "modelName", "model"
-            ),
-
-            runEstimation(new ArticleRankMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new ArticleRankStatsProc()::estimateStats),
-            runEstimation(new ArticleRankStreamProc()::estimate),
-            runEstimation(new ArticleRankWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(
-                new FastRPExtendedMutateProc()::estimate,
-                "mutateProperty",
-                "foo",
-                "embeddingDimension",
-                128,
-                "propertyDimension",
-                64
-            ),
-            runEstimation(new FastRPExtendedStatsProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
-            runEstimation(new FastRPExtendedStreamProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
-            runEstimation(
-                new FastRPExtendedWriteProc()::estimate,
-                "writeProperty",
-                "foo",
-                "embeddingDimension",
-                128,
-                "propertyDimension",
-                64
-            ),
-
-            runEstimation(new K1ColoringMutateProc()::mutateEstimate, "mutateProperty", "foo"),
-            runEstimation(new K1ColoringStatsProc()::estimate),
-            runEstimation(new K1ColoringStreamProc()::estimate),
-            runEstimation(new K1ColoringWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(
-                new KnnMutateProc()::estimateMutate,
-                "nodeWeightProperty",
-                "foo",
-                "mutateProperty",
-                "foo",
-                "mutateRelationshipType",
-                "bar"
-            ),
-            runEstimation(
-                new KnnStatsProc()::estimateStats,
-                "nodeWeightProperty",
-                "foo"
-            ),
-            runEstimation(
-                new KnnStreamProc()::estimate,
-                "nodeWeightProperty",
-                "foo"
-            ),
-            runEstimation(
-                new KnnWriteProc()::estimateWrite,
-                "nodeWeightProperty",
-                "foo",
-                "writeProperty",
-                "foo",
-                "writeRelationshipType",
-                "bar"
-            ),
-
-            runEstimation(new ModularityOptimizationMutateProc()::mutateEstimate, "mutateProperty", "foo"),
-            runEstimation(new ModularityOptimizationStreamProc()::estimate),
-            runEstimation(new ModularityOptimizationWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new Node2VecMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new Node2VecStreamProc()::estimate),
-            runEstimation(new Node2VecWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new BetweennessCentralityMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new BetweennessCentralityStatsProc()::estimate),
-            runEstimation(new BetweennessCentralityStreamProc()::estimate),
-            runEstimation(new BetweennessCentralityWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new DegreeCentralityMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new DegreeCentralityStatsProc()::estimate),
-            runEstimation(new DegreeCentralityStreamProc()::estimate),
-            runEstimation(new DegreeCentralityWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new EigenvectorMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new EigenvectorStatsProc()::estimateStats),
-            runEstimation(new EigenvectorStreamProc()::estimate),
-            runEstimation(new EigenvectorWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new FastRPMutateProc()::estimate, "mutateProperty", "foo", "embeddingDimension", 128),
-            runEstimation(new FastRPStatsProc()::estimate, "embeddingDimension", 128),
-            runEstimation(new FastRPStreamProc()::estimate, "embeddingDimension", 128),
-            runEstimation(new FastRPWriteProc()::estimate, "writeProperty", "foo", "embeddingDimension", 128),
-
-
-            graphCreateEstimate(false),
-            graphCreateEstimate(true),
-
-            runEstimation(new LabelPropagationMutateProc()::mutateEstimate, "mutateProperty", "foo"),
-            runEstimation(new LabelPropagationStatsProc()::estimateStats),
-            runEstimation(new LabelPropagationStreamProc()::estimate),
-            runEstimation(new LabelPropagationWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new LocalClusteringCoefficientMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new LocalClusteringCoefficientStatsProc()::estimateStats),
-            runEstimation(new LocalClusteringCoefficientStreamProc()::estimateStats),
-            runEstimation(new LocalClusteringCoefficientWriteProc()::estimateStats, "writeProperty", "foo"),
-
-            runEstimation(new LouvainMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new LouvainStatsProc()::estimateStats),
-            runEstimation(new LouvainStreamProc()::estimate),
-            runEstimation(new LouvainWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(
-                new NodeSimilarityMutateProc()::estimateMutate,
-                "mutateProperty",
-                "foo",
-                "mutateRelationshipType",
-                "bar"
-            ),
-            runEstimation(new NodeSimilarityStatsProc()::estimateStats),
-            runEstimation(new NodeSimilarityStreamProc()::estimate),
-            runEstimation(
-                new NodeSimilarityWriteProc()::estimateWrite,
-                "writeProperty",
-                "foo",
-                "writeRelationshipType",
-                "bar"
-            ),
-
-            runEstimation(new PageRankMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new PageRankStatsProc()::estimateStats),
-            runEstimation(new PageRankStreamProc()::estimate),
-            runEstimation(new PageRankWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new ShortestPathAStarStreamProc()::streamEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
-                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON"
-            ),
-            runEstimation(new ShortestPathAStarWriteProc()::writeEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
-                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
-                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathAStarMutateProc()::mutateEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
-                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
-                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-
-            runEstimation(new ShortestPathDijkstraStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L),
-            runEstimation(new ShortestPathDijkstraWriteProc()::writeEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathDijkstraMutateProc()::mutateEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathYensStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L, "k", 3),
-            runEstimation(new ShortestPathYensWriteProc()::writeEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                "k", 3,
-                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathYensMutateProc()::mutateEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                "k", 3,
-                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-
-            runEstimation(new TriangleCountMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new TriangleCountStatsProc()::estimateStats),
-            runEstimation(new TriangleCountStreamProc()::estimateStats),
-            runEstimation(new TriangleCountWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new WccMutateProc()::mutateEstimate, "mutateProperty", "foo"),
-            runEstimation(new WccStatsProc()::statsEstimate),
-            runEstimation(new WccStreamProc()::streamEstimate),
-            runEstimation(new WccWriteProc()::writeEstimate, "writeProperty", "foo")
+            )
         );
         ModelCatalog.removeAllLoadedModels();
-        return result;
+        return sorted(result);
     }
 
-    private static Stream<MemoryEstimateResult> communityDetectionEstimations() {
-        return Stream.of(
-            runEstimation(new K1ColoringMutateProc()::mutateEstimate, "mutateProperty", "foo"),
-            runEstimation(new K1ColoringStatsProc()::estimate),
-            runEstimation(new K1ColoringStreamProc()::estimate),
-            runEstimation(new K1ColoringWriteProc()::estimate, "writeProperty", "foo"),
+    private static Stream<Pair<String, MemoryEstimateResult>> uncategorizedEstimations() {
+        return sorted(Stream.of(
+            Tuples.pair("gds.graph.create.estimate", graphCreateEstimate(false)),
+            Tuples.pair("gds.graph.create.cypher.estimate", graphCreateEstimate(true))
+        ));
+    }
 
-            runEstimation(new ModularityOptimizationMutateProc()::mutateEstimate, "mutateProperty", "foo"),
-            runEstimation(new ModularityOptimizationStreamProc()::estimate),
-            runEstimation(new ModularityOptimizationWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new LabelPropagationMutateProc()::mutateEstimate, "mutateProperty", "foo"),
-            runEstimation(new LabelPropagationStatsProc()::estimateStats),
-            runEstimation(new LabelPropagationStreamProc()::estimate),
-            runEstimation(new LabelPropagationWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new LocalClusteringCoefficientMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new LocalClusteringCoefficientStatsProc()::estimateStats),
-            runEstimation(new LocalClusteringCoefficientStreamProc()::estimateStats),
-            runEstimation(new LocalClusteringCoefficientWriteProc()::estimateStats, "writeProperty", "foo"),
-
-            runEstimation(new LouvainMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new LouvainStatsProc()::estimateStats),
-            runEstimation(new LouvainStreamProc()::estimate),
-            runEstimation(new LouvainWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new TriangleCountMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new TriangleCountStatsProc()::estimateStats),
-            runEstimation(new TriangleCountStreamProc()::estimateStats),
-            runEstimation(new TriangleCountWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new WccMutateProc()::mutateEstimate, "mutateProperty", "foo"),
-            runEstimation(new WccStatsProc()::statsEstimate),
-            runEstimation(new WccStreamProc()::streamEstimate),
-            runEstimation(new WccWriteProc()::writeEstimate, "writeProperty", "foo")
+    private static Stream<Pair<String, MemoryEstimateResult>> allEstimations() {
+        return sorted(
+            communityDetectionEstimations(),
+            centralityEstimations(),
+            similarityEstimations(),
+            pathFindingEstimations(),
+            nodeEmbeddingEstimations(),
+            machineLearningEstimations(),
+            uncategorizedEstimations()
         );
     }
 
-    private static Stream<MemoryEstimateResult> centralityEstimations() {
-        return Stream.of(
-            runEstimation(new ArticleRankMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new ArticleRankStatsProc()::estimateStats),
-            runEstimation(new ArticleRankStreamProc()::estimate),
-            runEstimation(new ArticleRankWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new BetweennessCentralityMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new BetweennessCentralityStatsProc()::estimate),
-            runEstimation(new BetweennessCentralityStreamProc()::estimate),
-            runEstimation(new BetweennessCentralityWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new DegreeCentralityMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new DegreeCentralityStatsProc()::estimate),
-            runEstimation(new DegreeCentralityStreamProc()::estimate),
-            runEstimation(new DegreeCentralityWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new EigenvectorMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new EigenvectorStatsProc()::estimateStats),
-            runEstimation(new EigenvectorStreamProc()::estimate),
-            runEstimation(new EigenvectorWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new PageRankMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new PageRankStatsProc()::estimateStats),
-            runEstimation(new PageRankStreamProc()::estimate),
-            runEstimation(new PageRankWriteProc()::estimate, "writeProperty", "foo")
-        );
-    }
-
-    private static Stream<MemoryEstimateResult> similarityEstimations() {
-        return Stream.of(
-            runEstimation(
-                new KnnMutateProc()::estimateMutate,
-                "nodeWeightProperty",
-                "foo",
-                "mutateProperty",
-                "foo",
-                "mutateRelationshipType",
-                "bar"
-            ),
-            runEstimation(
-                new KnnStatsProc()::estimateStats,
-                "nodeWeightProperty",
-                "foo"
-            ),
-            runEstimation(
-                new KnnStreamProc()::estimate,
-                "nodeWeightProperty",
-                "foo"
-            ),
-            runEstimation(
-                new KnnWriteProc()::estimateWrite,
-                "nodeWeightProperty",
-                "foo",
-                "writeProperty",
-                "foo",
-                "writeRelationshipType",
-                "bar"
-            ),
-
-            runEstimation(
-                new NodeSimilarityMutateProc()::estimateMutate,
-                "mutateProperty",
-                "foo",
-                "mutateRelationshipType",
-                "bar"
-            ),
-            runEstimation(new NodeSimilarityStatsProc()::estimateStats),
-            runEstimation(new NodeSimilarityStreamProc()::estimate),
-            runEstimation(
-                new NodeSimilarityWriteProc()::estimateWrite,
-                "writeProperty",
-                "foo",
-                "writeRelationshipType",
-                "bar"
-            )
-        );
-    }
-
-    private static Stream<MemoryEstimateResult> pathFindingEstimations() {
-        return Stream.of(
-
-            runEstimation(new AllShortestPathsDijkstraStreamProc()::streamEstimate, "sourceNode", 0L),
-            runEstimation(new AllShortestPathsDijkstraWriteProc()::writeEstimate,
-                "sourceNode", 0L,
-                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new AllShortestPathsDijkstraMutateProc()::mutateEstimate,
-                "sourceNode", 0L,
-                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-
-            runEstimation(new ShortestPathAStarStreamProc()::streamEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
-                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON"
-            ),
-            runEstimation(new ShortestPathAStarWriteProc()::writeEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
-                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
-                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathAStarMutateProc()::mutateEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
-                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
-                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-
-            runEstimation(new ShortestPathDijkstraStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L),
-            runEstimation(new ShortestPathDijkstraWriteProc()::writeEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathDijkstraMutateProc()::mutateEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathYensStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L, "k", 3),
-            runEstimation(new ShortestPathYensWriteProc()::writeEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                "k", 3,
-                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
-            ),
-            runEstimation(new ShortestPathYensMutateProc()::mutateEstimate,
-                "sourceNode", 0L,
-                "targetNode", 1L,
-                "k", 3,
-                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
-            )
-        );
-    }
-
-    private static Stream<MemoryEstimateResult> nodeEmbeddingEstimations() {
-        return Stream.of(
-            runEstimation(
-                new FastRPExtendedMutateProc()::estimate,
-                "mutateProperty",
-                "foo",
-                "embeddingDimension",
-                128,
-                "propertyDimension",
-                64
-            ),
-            runEstimation(new FastRPExtendedStatsProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
-            runEstimation(new FastRPExtendedStreamProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
-            runEstimation(
-                new FastRPExtendedWriteProc()::estimate,
-                "writeProperty",
-                "foo",
-                "embeddingDimension",
-                128,
-                "propertyDimension",
-                64
-            ),
-
-            runEstimation(new Node2VecMutateProc()::estimate, "mutateProperty", "foo"),
-            runEstimation(new Node2VecStreamProc()::estimate),
-            runEstimation(new Node2VecWriteProc()::estimate, "writeProperty", "foo"),
-
-            runEstimation(new FastRPMutateProc()::estimate, "mutateProperty", "foo", "embeddingDimension", 128),
-            runEstimation(new FastRPStatsProc()::estimate, "embeddingDimension", 128),
-            runEstimation(new FastRPStreamProc()::estimate, "embeddingDimension", 128),
-            runEstimation(new FastRPWriteProc()::estimate, "writeProperty", "foo", "embeddingDimension", 128)
-        );
+    @SafeVarargs
+    private static Stream<Pair<String, MemoryEstimateResult>> sorted(Stream<Pair<String, MemoryEstimateResult>>... estimations) {
+        return Stream.of(estimations)
+            .flatMap(identity())
+            .sorted(Comparator.comparing(Pair::getOne, String.CASE_INSENSITIVE_ORDER));
     }
 
     private static final class ExecutionFailed extends RuntimeException {
@@ -1207,6 +817,58 @@ final class EstimationCliTest {
             configMap.put(String.valueOf(config[i]), config[i + 1]);
         }
         return proc.apply(configMap, Map.of()).iterator().next();
+    }
+
+    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
+    private static final MethodType ESTIMATE_TYPE = MethodType.methodType(Stream.class, Object.class, Map.class);
+
+    private static Pair<String, MemoryEstimateResult> runEstimation(
+        Class<?> procClass,
+        String methodName,
+        Object... config
+    ) {
+        try {
+            var handle = LOOKUP.findVirtual(procClass, methodName, ESTIMATE_TYPE);
+            return runEstimation(handle, config);
+        } catch (Throwable e) {
+            throw new IllegalArgumentException(
+                "Cannot access the underlying @Procedure annotated method of the provided method handle. It needs to be a direct handle. " +
+                "See https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/invoke/MethodHandleInfo.html#directmh",
+                e
+            );
+        }
+    }
+
+    private static Pair<String, MemoryEstimateResult> runEstimation(
+        MethodHandle estimationMethod,
+        Object... config
+    ) throws Throwable {
+        Map<String, Object> configMap = new HashMap<>(Map.of(
+            "nodeCount", 42L,
+            "relationshipCount", 1337L,
+            "nodeProjection", "*",
+            "relationshipProjection", "*"
+        ));
+        for (int i = 0; i < config.length; i += 2) {
+            configMap.put(String.valueOf(config[i]), config[i + 1]);
+        }
+        var info = LOOKUP.revealDirect(estimationMethod);
+        var method = info.reflectAs(Method.class, LOOKUP);
+        var procClass = info.getDeclaringClass();
+        var procedure = method.getAnnotation(Procedure.class);
+        if (procedure == null) {
+            throw new IllegalArgumentException("Method " + info.getName() + "is not annotated with @Procedure");
+        }
+        var procName = procedure.name();
+        if (procName.isEmpty()) {
+            procName = procedure.value();
+        }
+
+        var instance = procClass.getDeclaredConstructor().newInstance();
+        var result = (Stream<MemoryEstimateResult>) estimationMethod.invoke(instance, configMap, Map.of());
+        var estimation = result.iterator().next();
+
+        return Tuples.pair(procName, estimation);
     }
 
     private static MemoryEstimateResult graphCreateEstimate(boolean cypher) {
