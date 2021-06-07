@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.ComputationContextBaseTest;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
@@ -38,7 +37,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class WeightedMultiMeanTest extends ComputationContextBaseTest implements FiniteDifferenceTest {
+class WeightedMultiMeanTest extends ComputationGraphBaseTest implements FiniteDifferenceTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =

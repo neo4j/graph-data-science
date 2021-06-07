@@ -177,4 +177,12 @@ class MatrixTest {
         assertThat(matrix.dataAt(1, 1)).isEqualTo(2);
         assertThat(matrix.dataAt(1, 2)).isEqualTo(10);
     }
+
+    @Test
+    void testToString() {
+        Matrix matrix = new Matrix(new double[]{1, 2, 3, 4}, 2, 2);
+
+        assertThat(matrix.shortDescription()).isEqualTo("Matrix(2, 2)");
+        assertThat(matrix.toString()).isEqualTo("Matrix(2, 2): [1.0, 2.0, 3.0, 4.0]");
+    }
 }

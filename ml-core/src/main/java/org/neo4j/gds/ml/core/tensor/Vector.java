@@ -67,7 +67,7 @@ public class Vector extends Tensor<Vector> {
     }
 
     @Override
-    public String toString() {
+    public String shortDescription() {
         return formatWithLocale("Vector(%d)", length());
     }
 

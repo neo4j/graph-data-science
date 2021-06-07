@@ -38,8 +38,8 @@ public class RenderTest {
         assertThat(sigmoid.render()).isEqualTo(
             "Sigmoid: Matrix(2, 2), requireGradient: false" + System.lineSeparator() +
             "|-- MatrixSum: Matrix(2, 2), requireGradient: false" + System.lineSeparator() +
-            "\t|-- Constant: Matrix(2, 2), requireGradient: false" + System.lineSeparator() +
-            "\t|-- Constant: Matrix(2, 2), requireGradient: false" + System.lineSeparator()
+            "\t|-- Constant: Matrix(2, 2): [0.0, 1.0, 0.0, 1.0], requireGradient: false" + System.lineSeparator() +
+            "\t|-- Constant: Matrix(2, 2): [1.0, 0.0, 1.0, 0.0], requireGradient: false" + System.lineSeparator()
         );
     }
 }

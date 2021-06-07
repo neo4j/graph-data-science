@@ -25,10 +25,12 @@ import org.neo4j.gds.ml.core.tensor.TensorFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class ComputationContext {
     private final Map<Variable<?>, Tensor<?>> data;
@@ -62,7 +64,7 @@ public class ComputationContext {
     }
 
     public void backward(Variable<?> function) {
-        assert (function.dimensions().length == 1 && data(function).totalSize() == 1) : "Root variable must be scalar.";
+        assert (Dimensions.isScalar(function.dimensions())) : "Root variable must be scalar.";
         assert function.requireGradient() : "Root variable must have requireGradient==true";
 
         gradients.clear();
@@ -108,6 +110,44 @@ public class ComputationContext {
     private void updateGradient(Variable<?> variable, Tensor<?> gradient) {
         gradients.putIfAbsent(variable, TensorFactory.constant(0D, variable.dimensions()));
         gradients.get(variable).addInPlace(gradient);
+    }
+
+    public String render() {
+        StringBuilder result = new StringBuilder();
+
+        data.forEach((variable, dataEntry) -> {
+            result.append(variable.toString())
+                .append(System.lineSeparator())
+                .append("\t data: ")
+                .append(dataEntry.toString())
+                .append(System.lineSeparator());
+
+            var gradient = Optional.ofNullable(gradients.get(variable)).map(Tensor::toString);
+            result.append("\t gradient: " + gradient.orElse("None") + System.lineSeparator());
+        });
+
+        renderOrphanGradients(result);
+
+        return result.toString();
+
+    }
+
+    private void renderOrphanGradients(StringBuilder result) {
+        var expectedVariables = data.keySet();
+        var unmatchedGradients = gradients
+            .entrySet()
+            .stream()
+            .filter(entry -> !expectedVariables.contains(entry.getKey()))
+            .collect(Collectors.toList());
+
+        if (!unmatchedGradients.isEmpty()) {
+            result.append("Found gradients but no data for: ");
+            unmatchedGradients.forEach(entry -> result
+                .append(System.lineSeparator())
+                .append(entry.getKey().toString())
+                .append(entry.getValue().toString())
+            );
+        }
     }
 
     static class BackPropTask {

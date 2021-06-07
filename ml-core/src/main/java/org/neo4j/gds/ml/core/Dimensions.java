@@ -55,6 +55,10 @@ public final class Dimensions {
         return dimLargerOne <= 1;
     }
 
+    public static boolean isScalar(int[] dimensions) {
+        return totalSize(dimensions) == 1;
+    }
+
     public static int totalSize(int[] dimensions) {
         if (dimensions.length == 0) {
             return 0;

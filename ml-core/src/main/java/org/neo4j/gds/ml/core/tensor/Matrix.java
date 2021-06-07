@@ -97,7 +97,7 @@ public class Matrix extends Tensor<Matrix> {
     }
 
     @Override
-    public String toString() {
+    public String shortDescription() {
         return formatWithLocale("Matrix(%d, %d)", rows(), cols());
     }
 

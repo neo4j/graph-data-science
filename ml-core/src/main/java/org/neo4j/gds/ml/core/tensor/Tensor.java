@@ -35,7 +35,11 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
     }
 
     @Override
-    public abstract String toString();
+    public String toString() {
+        return shortDescription() + ": " + Arrays.toString(data);
+    }
+
+    protected abstract String shortDescription();
 
     public abstract SELF zeros();
 

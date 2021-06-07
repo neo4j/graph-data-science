@@ -43,8 +43,8 @@ public class Scalar extends Tensor<Scalar> {
     }
 
     @Override
-    public String toString() {
-        return Double.toString(value());
+    protected String shortDescription() {
+        return "Scalar";
     }
 
     public double value() {
