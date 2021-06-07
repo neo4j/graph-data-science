@@ -565,6 +565,11 @@ final class EstimationCliTest {
                 List.of("node-embedding")
             ),
             arguments(
+                allEstimations(),
+                PROCEDURES.stream(),
+                List.of("machine-learning")
+            ),
+            arguments(
                 Stream.concat(communityDetectionEstimations(), centralityEstimations()),
                 Stream.concat(COMMUNITY_DETECTION_PROCEDURES.stream(), CENTRALITY_PROCEDURES.stream()),
                 List.of("community-detection", "centrality")

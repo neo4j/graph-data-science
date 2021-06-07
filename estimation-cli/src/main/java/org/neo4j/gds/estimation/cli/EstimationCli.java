@@ -197,6 +197,8 @@ public class EstimationCli implements Runnable {
                             return PATH_FINDING_PREFIXES.stream();
                         case "node-embedding":
                             return NODE_EMBEDDING_PREFIXES.stream();
+                        case "machine-learning":
+                            return Stream.empty();
                         default:
                             throw new IllegalArgumentException("Unknown category: " + category);
                     }
