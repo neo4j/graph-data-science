@@ -573,6 +573,11 @@ final class EstimationCliTest {
                 Stream.concat(communityDetectionEstimations(), centralityEstimations()),
                 Stream.concat(COMMUNITY_DETECTION_PROCEDURES.stream(), CENTRALITY_PROCEDURES.stream()),
                 List.of("community-detection", "centrality")
+            ),
+            arguments(
+                allEstimations(),
+                PROCEDURES.stream(),
+                List.of("community-detection", "machine-learning", "path-finding")
             )
         );
     }
@@ -1224,5 +1229,4 @@ final class EstimationCliTest {
             .mapToObj(i -> String.valueOf((char) ('A' + i)))
             .collect(toList());
     }
-
 }

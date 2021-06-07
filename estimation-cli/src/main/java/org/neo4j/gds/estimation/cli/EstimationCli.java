@@ -184,7 +184,11 @@ public class EstimationCli implements Runnable {
             if (!procedureName.isEmpty()) {
                 throw new IllegalArgumentException("--category and explicit algo is not allowed");
             }
-            var includePrefixes = categories.stream()
+
+            if (categories.contains("machine-learning")) {
+                procedureMethods = findAvailableMethods();
+            } else {
+                var includePrefixes = categories.stream()
                 .flatMap(category -> {
                     switch (category.toLowerCase(Locale.ENGLISH)) {
                         case "community-detection":
@@ -204,7 +208,8 @@ public class EstimationCli implements Runnable {
                     }
                 })
                 .collect(Collectors.toList());
-            procedureMethods = findAvailableMethods(includePrefixes);
+                procedureMethods = findAvailableMethods(includePrefixes);
+            }
         }
 
         var estimations = procedureMethods
