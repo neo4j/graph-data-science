@@ -124,6 +124,17 @@ public class EstimationCli implements Runnable {
         "gds.nodeSimilarity"
     );
 
+    private static final List<String> PATH_FINDING_PREFIXES = List.of(
+        "gds.allShortestPaths",
+        "gds.shortestPath"
+    );
+
+    private static final List<String> NODE_EMBEDDING_PREFIXES = List.of(
+        "gds.beta.fastRPExtended",
+        "gds.beta.node2vec",
+        "gds.fastRP"
+    );
+
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
 
@@ -182,6 +193,10 @@ public class EstimationCli implements Runnable {
                             return CENTRALITY_PREFIXES.stream();
                         case "similarity":
                             return SIMILARITY_PREFIXES.stream();
+                        case "path-finding":
+                            return PATH_FINDING_PREFIXES.stream();
+                        case "node-embedding":
+                            return NODE_EMBEDDING_PREFIXES.stream();
                         default:
                             throw new IllegalArgumentException("Unknown category: " + category);
                     }

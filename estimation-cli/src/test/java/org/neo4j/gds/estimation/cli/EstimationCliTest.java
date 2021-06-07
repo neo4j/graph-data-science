@@ -347,6 +347,40 @@ final class EstimationCliTest {
         "gds.nodeSimilarity.write.estimate"
     );
 
+    private static final List<String> PATH_FINDING_PROCEDURES = List.of(
+        "gds.allShortestPaths.dijkstra.mutate.estimate",
+        "gds.allShortestPaths.dijkstra.stream.estimate",
+        "gds.allShortestPaths.dijkstra.write.estimate",
+
+        "gds.shortestPath.astar.mutate.estimate",
+        "gds.shortestPath.astar.stream.estimate",
+        "gds.shortestPath.astar.write.estimate",
+
+        "gds.shortestPath.dijkstra.mutate.estimate",
+        "gds.shortestPath.dijkstra.stream.estimate",
+        "gds.shortestPath.dijkstra.write.estimate",
+
+        "gds.shortestPath.yens.mutate.estimate",
+        "gds.shortestPath.yens.stream.estimate",
+        "gds.shortestPath.yens.write.estimate"
+    );
+
+    private static final List<String> NODE_EMBEDDING_PROCEDURES = List.of(
+        "gds.beta.fastRPExtended.mutate.estimate",
+        "gds.beta.fastRPExtended.stats.estimate",
+        "gds.beta.fastRPExtended.stream.estimate",
+        "gds.beta.fastRPExtended.write.estimate",
+
+        "gds.beta.node2vec.mutate.estimate",
+        "gds.beta.node2vec.stream.estimate",
+        "gds.beta.node2vec.write.estimate",
+
+        "gds.fastRP.mutate.estimate",
+        "gds.fastRP.stats.estimate",
+        "gds.fastRP.stream.estimate",
+        "gds.fastRP.write.estimate"
+    );
+
     @ParameterizedTest
     @CsvSource({
         "--nodes, --relationships",
@@ -519,6 +553,16 @@ final class EstimationCliTest {
                 similarityEstimations(),
                 SIMILARITY_PROCEDURES.stream(),
                 List.of("similarity")
+            ),
+            arguments(
+                pathFindingEstimations(),
+                PATH_FINDING_PROCEDURES.stream(),
+                List.of("path-finding")
+            ),
+            arguments(
+                nodeEmbeddingEstimations(),
+                NODE_EMBEDDING_PROCEDURES.stream(),
+                List.of("node-embedding")
             ),
             arguments(
                 Stream.concat(communityDetectionEstimations(), centralityEstimations()),
@@ -992,6 +1036,101 @@ final class EstimationCliTest {
                 "writeRelationshipType",
                 "bar"
             )
+        );
+    }
+
+    private static Stream<MemoryEstimateResult> pathFindingEstimations() {
+        return Stream.of(
+
+            runEstimation(new AllShortestPathsDijkstraStreamProc()::streamEstimate, "sourceNode", 0L),
+            runEstimation(new AllShortestPathsDijkstraWriteProc()::writeEstimate,
+                "sourceNode", 0L,
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(new AllShortestPathsDijkstraMutateProc()::mutateEstimate,
+                "sourceNode", 0L,
+                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+
+            runEstimation(new ShortestPathAStarStreamProc()::streamEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON"
+            ),
+            runEstimation(new ShortestPathAStarWriteProc()::writeEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(new ShortestPathAStarMutateProc()::mutateEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                ShortestPathAStarBaseConfig.LATITUDE_PROPERTY_KEY, "LAT",
+                ShortestPathAStarBaseConfig.LONGITUDE_PROPERTY_KEY, "LON",
+                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+
+            runEstimation(new ShortestPathDijkstraStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L),
+            runEstimation(new ShortestPathDijkstraWriteProc()::writeEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(new ShortestPathDijkstraMutateProc()::mutateEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(new ShortestPathYensStreamProc()::streamEstimate, "sourceNode", 0L, "targetNode", 1L, "k", 3),
+            runEstimation(new ShortestPathYensWriteProc()::writeEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                "k", 3,
+                WriteRelationshipConfig.WRITE_RELATIONSHIP_TYPE_KEY, "FOO"
+            ),
+            runEstimation(new ShortestPathYensMutateProc()::mutateEstimate,
+                "sourceNode", 0L,
+                "targetNode", 1L,
+                "k", 3,
+                MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
+            )
+        );
+    }
+
+    private static Stream<MemoryEstimateResult> nodeEmbeddingEstimations() {
+        return Stream.of(
+            runEstimation(
+                new FastRPExtendedMutateProc()::estimate,
+                "mutateProperty",
+                "foo",
+                "embeddingDimension",
+                128,
+                "propertyDimension",
+                64
+            ),
+            runEstimation(new FastRPExtendedStatsProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(new FastRPExtendedStreamProc()::estimate, "embeddingDimension", 128, "propertyDimension", 64),
+            runEstimation(
+                new FastRPExtendedWriteProc()::estimate,
+                "writeProperty",
+                "foo",
+                "embeddingDimension",
+                128,
+                "propertyDimension",
+                64
+            ),
+
+            runEstimation(new Node2VecMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new Node2VecStreamProc()::estimate),
+            runEstimation(new Node2VecWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new FastRPMutateProc()::estimate, "mutateProperty", "foo", "embeddingDimension", 128),
+            runEstimation(new FastRPStatsProc()::estimate, "embeddingDimension", 128),
+            runEstimation(new FastRPStreamProc()::estimate, "embeddingDimension", 128),
+            runEstimation(new FastRPWriteProc()::estimate, "writeProperty", "foo", "embeddingDimension", 128)
         );
     }
 
