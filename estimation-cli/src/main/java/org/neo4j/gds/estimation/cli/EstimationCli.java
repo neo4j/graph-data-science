@@ -176,7 +176,7 @@ public class EstimationCli implements Runnable {
         var printOpts = printOptions == null ? new PrintOptions() : printOptions;
 
         Stream<ProcedureMethod> procedureMethods;
-        if (categories.isEmpty()) {
+        if (categories == null || categories.isEmpty()) {
             procedureMethods = procedureName.isBlank()
               ? findAvailableMethods()
               : Stream.of(ImmutableProcedureMethod.of(procedureName, findProcedure(procedureName)));
