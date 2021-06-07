@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.estimation.cli;
 
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -118,6 +120,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -266,6 +269,68 @@ final class EstimationCliTest {
         "gds.wcc.write.estimate"
     );
 
+    private static final List<String> COMMUNITY_DETECTION_PROCEDURES = List.of(
+        "gds.beta.k1coloring.mutate.estimate",
+        "gds.beta.k1coloring.stats.estimate",
+        "gds.beta.k1coloring.stream.estimate",
+        "gds.beta.k1coloring.write.estimate",
+
+        "gds.beta.modularityOptimization.mutate.estimate",
+        "gds.beta.modularityOptimization.stream.estimate",
+        "gds.beta.modularityOptimization.write.estimate",
+
+        "gds.labelPropagation.mutate.estimate",
+        "gds.labelPropagation.stats.estimate",
+        "gds.labelPropagation.stream.estimate",
+        "gds.labelPropagation.write.estimate",
+
+        "gds.localClusteringCoefficient.mutate.estimate",
+        "gds.localClusteringCoefficient.stats.estimate",
+        "gds.localClusteringCoefficient.stream.estimate",
+        "gds.localClusteringCoefficient.write.estimate",
+
+        "gds.louvain.mutate.estimate",
+        "gds.louvain.stats.estimate",
+        "gds.louvain.stream.estimate",
+        "gds.louvain.write.estimate",
+
+        "gds.triangleCount.mutate.estimate",
+        "gds.triangleCount.stats.estimate",
+        "gds.triangleCount.stream.estimate",
+        "gds.triangleCount.write.estimate",
+
+        "gds.wcc.mutate.estimate",
+        "gds.wcc.stats.estimate",
+        "gds.wcc.stream.estimate",
+        "gds.wcc.write.estimate"
+    );
+
+    private static final List<String> CENTRALITY_PROCEDURES = List.of(
+        "gds.articleRank.mutate.estimate",
+        "gds.articleRank.stats.estimate",
+        "gds.articleRank.stream.estimate",
+        "gds.articleRank.write.estimate",
+
+        "gds.betweenness.mutate.estimate",
+        "gds.betweenness.stats.estimate",
+        "gds.betweenness.stream.estimate",
+        "gds.betweenness.write.estimate",
+
+        "gds.degree.mutate.estimate",
+        "gds.degree.stats.estimate",
+        "gds.degree.stream.estimate",
+        "gds.degree.write.estimate",
+
+        "gds.eigenvector.mutate.estimate",
+        "gds.eigenvector.stats.estimate",
+        "gds.eigenvector.stream.estimate",
+        "gds.eigenvector.write.estimate",
+
+        "gds.pageRank.mutate.estimate",
+        "gds.pageRank.stats.estimate",
+        "gds.pageRank.stream.estimate",
+        "gds.pageRank.write.estimate"
+    );
 
     @ParameterizedTest
     @CsvSource({
@@ -395,6 +460,44 @@ final class EstimationCliTest {
         var expected = graphCreateEstimate(true);
 
         assertEquals("gds.graph.create.cypher.estimate," + expected.bytesMin + "," + expected.bytesMax, actual);
+    }
+
+    @Test
+    void estimatesCommunityDetectionCategory() {
+        var expectedEstimations = communityDetectionEstimations();
+        var expectedProcedureNames = COMMUNITY_DETECTION_PROCEDURES.iterator();
+        var expected = expectedEstimations
+            .map(e -> expectedJson(e,  expectedProcedureNames.next()))
+            .collect(joining(", ", "[ ", " ]"));
+
+        var actual = run("--nodes", 42, "--relationships", 1337, "--json", "--category", "community-detection");
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void estimatesCentralityCategory() {
+        var expectedEstimations = centralityEstimations();
+        var expectedProcedureNames = CENTRALITY_PROCEDURES.iterator();
+        var expected = expectedEstimations
+            .map(e -> expectedJson(e,  expectedProcedureNames.next()))
+            .collect(joining(", ", "[ ", " ]"));
+
+        var actual = run("--nodes", 42, "--relationships", 1337, "--json", "--category", "centrality");
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void estimatesCommunityDetectionAndCentralityCategory() {
+        var expectedEstimations = Stream.concat(communityDetectionEstimations(), centralityEstimations());
+        var expectedProcedureNames = Stream.concat(COMMUNITY_DETECTION_PROCEDURES.stream(), CENTRALITY_PROCEDURES.stream()).iterator();
+        var expected = expectedEstimations
+            .map(e -> Tuples.pair(expectedProcedureNames.next(), e))
+            .sorted(Comparator.comparing(Pair::getOne, String.CASE_INSENSITIVE_ORDER))
+            .map(t -> expectedJson(t.getTwo(),  t.getOne()))
+            .collect(joining(", ", "[ ", " ]"));
+
+        var actual = run("--nodes", 42, "--relationships", 1337, "--json", "--category", "community-detection", "--category", "centrality");
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -530,6 +633,9 @@ final class EstimationCliTest {
                 MutateRelationshipConfig.MUTATE_RELATIONSHIP_TYPE_KEY, "FOO"
             ),
 
+            runEstimation(new NodeClassificationPredictMutateProc()::estimate, "modelName", "model", "mutateProperty", "foo"),
+            runEstimation(new NodeClassificationPredictStreamProc()::estimate, "modelName", "model"),
+            runEstimation(new NodeClassificationPredictWriteProc()::estimate, "modelName", "model", "writeProperty", "foo"),
             runEstimation(
                 new NodeClassificationTrainProc()::estimate,
                 "holdoutFraction", 0.2,
@@ -542,9 +648,6 @@ final class EstimationCliTest {
                 "targetProperty", "target",
                 "modelName", "model"
             ),
-            runEstimation(new NodeClassificationPredictStreamProc()::estimate, "modelName", "model"),
-            runEstimation(new NodeClassificationPredictWriteProc()::estimate, "modelName", "model", "writeProperty", "foo"),
-            runEstimation(new NodeClassificationPredictMutateProc()::estimate, "modelName", "model", "mutateProperty", "foo"),
 
             runEstimation(new ArticleRankMutateProc()::estimate, "mutateProperty", "foo"),
             runEstimation(new ArticleRankStatsProc()::estimateStats),
@@ -733,6 +836,73 @@ final class EstimationCliTest {
         );
         ModelCatalog.removeAllLoadedModels();
         return result;
+    }
+
+    private static Stream<MemoryEstimateResult> communityDetectionEstimations() {
+        return Stream.of(
+            runEstimation(new K1ColoringMutateProc()::mutateEstimate, "mutateProperty", "foo"),
+            runEstimation(new K1ColoringStatsProc()::estimate),
+            runEstimation(new K1ColoringStreamProc()::estimate),
+            runEstimation(new K1ColoringWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new ModularityOptimizationMutateProc()::mutateEstimate, "mutateProperty", "foo"),
+            runEstimation(new ModularityOptimizationStreamProc()::estimate),
+            runEstimation(new ModularityOptimizationWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new LabelPropagationMutateProc()::mutateEstimate, "mutateProperty", "foo"),
+            runEstimation(new LabelPropagationStatsProc()::estimateStats),
+            runEstimation(new LabelPropagationStreamProc()::estimate),
+            runEstimation(new LabelPropagationWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new LocalClusteringCoefficientMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new LocalClusteringCoefficientStatsProc()::estimateStats),
+            runEstimation(new LocalClusteringCoefficientStreamProc()::estimateStats),
+            runEstimation(new LocalClusteringCoefficientWriteProc()::estimateStats, "writeProperty", "foo"),
+
+            runEstimation(new LouvainMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new LouvainStatsProc()::estimateStats),
+            runEstimation(new LouvainStreamProc()::estimate),
+            runEstimation(new LouvainWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new TriangleCountMutateProc()::estimate, "mutateProperty", "foo"),
+            runEstimation(new TriangleCountStatsProc()::estimateStats),
+            runEstimation(new TriangleCountStreamProc()::estimateStats),
+            runEstimation(new TriangleCountWriteProc()::estimate, "writeProperty", "foo"),
+
+            runEstimation(new WccMutateProc()::mutateEstimate, "mutateProperty", "foo"),
+            runEstimation(new WccStatsProc()::statsEstimate),
+            runEstimation(new WccStreamProc()::streamEstimate),
+            runEstimation(new WccWriteProc()::writeEstimate, "writeProperty", "foo")
+        );
+    }
+
+        private static Stream<MemoryEstimateResult> centralityEstimations() {
+            return Stream.of(
+                runEstimation(new ArticleRankMutateProc()::estimate, "mutateProperty", "foo"),
+                runEstimation(new ArticleRankStatsProc()::estimateStats),
+                runEstimation(new ArticleRankStreamProc()::estimate),
+                runEstimation(new ArticleRankWriteProc()::estimate, "writeProperty", "foo"),
+
+                runEstimation(new BetweennessCentralityMutateProc()::estimate, "mutateProperty", "foo"),
+                runEstimation(new BetweennessCentralityStatsProc()::estimate),
+                runEstimation(new BetweennessCentralityStreamProc()::estimate),
+                runEstimation(new BetweennessCentralityWriteProc()::estimate, "writeProperty", "foo"),
+
+                runEstimation(new DegreeCentralityMutateProc()::estimate, "mutateProperty", "foo"),
+                runEstimation(new DegreeCentralityStatsProc()::estimate),
+                runEstimation(new DegreeCentralityStreamProc()::estimate),
+                runEstimation(new DegreeCentralityWriteProc()::estimate, "writeProperty", "foo"),
+
+                runEstimation(new EigenvectorMutateProc()::estimate, "mutateProperty", "foo"),
+                runEstimation(new EigenvectorStatsProc()::estimateStats),
+                runEstimation(new EigenvectorStreamProc()::estimate),
+                runEstimation(new EigenvectorWriteProc()::estimate, "writeProperty", "foo"),
+
+                runEstimation(new PageRankMutateProc()::estimate, "mutateProperty", "foo"),
+                runEstimation(new PageRankStatsProc()::estimateStats),
+                runEstimation(new PageRankStreamProc()::estimate),
+                runEstimation(new PageRankWriteProc()::estimate, "writeProperty", "foo")
+            );
     }
 
     private static final class ExecutionFailed extends RuntimeException {

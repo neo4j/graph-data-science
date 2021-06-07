@@ -100,6 +100,24 @@ public class EstimationCli implements Runnable {
         "gds.beta.graph.export.csv"
     );
 
+    public static final List<String> COMMUNITY_DETECTION_PREFIXES = List.of(
+        "gds.beta.k1coloring",
+        "gds.beta.modularityOptimization",
+        "gds.labelPropagation",
+        "gds.localClusteringCoefficient",
+        "gds.louvain",
+        "gds.triangleCount",
+        "gds.wcc"
+    );
+
+    public static final List<String> CENTRALITY_PREFIXES = List.of(
+        "gds.articleRank",
+        "gds.betweenness",
+        "gds.degree",
+        "gds.eigenvector",
+        "gds.pageRank"
+    );
+
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
 
@@ -125,20 +143,44 @@ public class EstimationCli implements Runnable {
         @CommandLine.Mixin
             CountOptions counts,
 
-
         @CommandLine.ArgGroup(exclusive = true)
             BlockSizeOptions blockSizeOptions,
 
         @CommandLine.ArgGroup(exclusive = true)
-            PrintOptions printOptions
+            PrintOptions printOptions,
 
+        @CommandLine.Option(
+            names = {"--category"},
+            description = "Filter algorithms to estimate based on the category",
+            arity = "*"
+        ) List<String> categories
     ) throws Exception {
         GdsEdition.instance().setToEnterpriseEdition();
         var printOpts = printOptions == null ? new PrintOptions() : printOptions;
 
-        var procedureMethods = procedureName.isBlank()
-            ? findAvailableMethods()
-            : Stream.of(ImmutableProcedureMethod.of(procedureName, findProcedure(procedureName)));
+        Stream<ProcedureMethod> procedureMethods;
+        if (categories.isEmpty()) {
+            procedureMethods = procedureName.isBlank()
+              ? findAvailableMethods()
+              : Stream.of(ImmutableProcedureMethod.of(procedureName, findProcedure(procedureName)));
+        } else {
+            if (!procedureName.isEmpty()) {
+                throw new IllegalArgumentException("--category and explicit algo is not allowed");
+            }
+            var includePrefixes = categories.stream()
+                .flatMap(category -> {
+                    switch (category.toLowerCase(Locale.ENGLISH)) {
+                        case "community-detection":
+                            return COMMUNITY_DETECTION_PREFIXES.stream();
+                        case "centrality":
+                            return CENTRALITY_PREFIXES.stream();
+                        default:
+                            throw new IllegalArgumentException("Unknown category: " + category);
+                    }
+                })
+                .collect(Collectors.toList());
+            procedureMethods = findAvailableMethods(includePrefixes);
+        }
 
         var estimations = procedureMethods
             .map(function(proc -> estimateProcedure(proc.name(), proc.method(), counts)))
@@ -477,6 +519,10 @@ public class EstimationCli implements Runnable {
     }
 
     private Stream<ProcedureMethod> findAvailableMethods() {
+        return findAvailableMethods(List.of());
+    }
+
+    private Stream<ProcedureMethod> findAvailableMethods(List<String> inclusionFilter) {
         return PACKAGES_TO_SCAN.stream()
             .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
             .flatMap(reflections -> reflections
@@ -489,6 +535,7 @@ public class EstimationCli implements Runnable {
                 var procName = definedName.trim().isEmpty() ? valueName : definedName;
                 return Stream.of(procName)
                     .filter(name -> name.endsWith(".estimate"))
+                    .filter(name -> inclusionFilter.isEmpty() || inclusionFilter.stream().anyMatch(name::startsWith))
                     .filter(not(name -> EXCLUDED_PROCEDURE_PREFIXES.stream().anyMatch(name::startsWith)))
                     .map(name -> ImmutableProcedureMethod.of(name, method));
             })
