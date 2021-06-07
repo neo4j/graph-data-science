@@ -43,6 +43,8 @@ import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.huge.HugeGraph.NO_PROPERTY_VALUE;
+
 public final class UnionGraph implements CSRGraph {
 
     private final CSRGraph first;
@@ -142,12 +144,26 @@ public final class UnionGraph implements CSRGraph {
 
     @Override
     public double relationshipProperty(final long sourceNodeId, final long targetNodeId, double fallbackValue) {
-        return first.relationshipProperty(sourceNodeId, targetNodeId, fallbackValue);
+        for(Graph graph: graphs) {
+            var property = graph.relationshipProperty(sourceNodeId, targetNodeId, fallbackValue);
+            if (!(Double.isNaN(property) || property == fallbackValue)) {
+                return property;
+            }
+        }
+
+        return fallbackValue;
     }
 
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId) {
-        return first.relationshipProperty(sourceNodeId, targetNodeId);
+        for(Graph graph: graphs) {
+            var property = graph.relationshipProperty(sourceNodeId, targetNodeId);
+            if (!Double.isNaN(property)) {
+                return property;
+            }
+        }
+
+        return NO_PROPERTY_VALUE;
     }
 
     @Override
