@@ -27,8 +27,4 @@ final class CompatUsernameAuthSubjectAura extends CompatUsernameAuthSubject {
         super(username, authSubject);
     }
 
-    @Override
-    public void setPasswordChangeNoLongerRequired() {
-        authSubject.setPasswordChangeNoLongerRequired();
-    }
 }

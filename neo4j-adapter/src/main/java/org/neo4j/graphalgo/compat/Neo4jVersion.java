@@ -89,7 +89,7 @@ public enum Neo4jVersion {
         //
         // TODO: Having to fall back to matching the physical version because the version override isn't working the
         //       way it was intended.
-        if (version.endsWith("-aura") || version.equals("4.3.0-drop03.1")) {
+        if (version.endsWith("-aura") || version.equals("4.3.0-drop04.0")) {
             return Neo4jVersion.V_Aura;
         }
         var majorVersion = Pattern.compile("[.-]")
