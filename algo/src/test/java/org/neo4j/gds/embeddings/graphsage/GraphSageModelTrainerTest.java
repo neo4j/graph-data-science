@@ -29,6 +29,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.helper.TensorTestUtils;
 import org.neo4j.graphalgo.Orientation;
@@ -55,8 +56,6 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 import static org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph.DUMMY_PROPERTY;
@@ -116,20 +115,21 @@ class GraphSageModelTrainerTest {
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
 
         Layer[] layers = result.layers();
-        assertEquals(2, layers.length);
+        assertThat(layers)
+            .hasSize(2)
+            .allSatisfy(layer -> assertThat(layer.weights())
+                .hasSize(1)
+                .noneMatch(weights -> TensorTestUtils.containsNaN(weights.data())));
 
-        Layer first = layers[0];
-        var firstWeights = first.weights();
-        assertEquals(1, firstWeights.size());
         // First layer is (embeddingDimension x features.length)
-        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT), firstWeights.get(0).dimensions());
+        assertThat(layers[0].weights())
+            .map(AbstractVariable::dimensions)
+            .containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT));
 
-        Layer second = layers[1];
-        var secondWeights = second.weights();
-        assertEquals(1, secondWeights.size());
         // Second layer weights (embeddingDimension x embeddingDimension)
-        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION), secondWeights.get(0).dimensions());
-        assertThat(secondWeights).noneMatch(weights -> TensorTestUtils.containsNaN(weights.data()));
+        assertThat(layers[1].weights())
+            .map(AbstractVariable::dimensions)
+            .containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
     }
 
     @ParameterizedTest
@@ -147,35 +147,35 @@ class GraphSageModelTrainerTest {
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
         Layer[] layers = result.layers();
-        assertEquals(2, layers.length);
 
-        Layer first = layers[0];
-        var firstWeights = first.weights();
-        assertEquals(4, firstWeights.size());
-        assertThat(firstWeights).noneMatch(weights -> TensorTestUtils.containsNaN(weights.data()));
+        assertThat(layers)
+            .hasSize(2)
+            .allSatisfy(layer -> assertThat(layer.weights())
+                .hasSize(4)
+                .noneMatch(weights -> TensorTestUtils.containsNaN(weights.data()))
+            );
 
+        var firstWeights = layers[0].weights();
         var firstLayerPoolWeights = firstWeights.get(0).dimensions();
         var firstLayerSelfWeights = firstWeights.get(1).dimensions();
         var firstLayerNeighborsWeights = firstWeights.get(2).dimensions();
         var firstLayerBias = firstWeights.get(3).dimensions();
-        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT), firstLayerPoolWeights);
-        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT), firstLayerSelfWeights);
-        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION), firstLayerNeighborsWeights);
-        assertArrayEquals(Dimensions.vector(EMBEDDING_DIMENSION), firstLayerBias);
 
-        Layer second = layers[1];
-        var secondWeights = second.weights();
-        assertEquals(4, secondWeights.size());
-        assertThat(secondWeights).noneMatch(weights -> TensorTestUtils.containsNaN(weights.data()));
+        assertThat(firstLayerPoolWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT));
+        assertThat(firstLayerSelfWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT));
+        assertThat(firstLayerNeighborsWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
+        assertThat(firstLayerBias).containsExactly(Dimensions.vector(EMBEDDING_DIMENSION));
 
+        var secondWeights = layers[1].weights();
         var secondLayerPoolWeights = secondWeights.get(0).dimensions();
         var secondLayerSelfWeights = secondWeights.get(1).dimensions();
         var secondLayerNeighborsWeights = secondWeights.get(2).dimensions();
         var secondLayerBias = secondWeights.get(3).dimensions();
-        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION), secondLayerPoolWeights);
-        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION), secondLayerSelfWeights);
-        assertArrayEquals(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION), secondLayerNeighborsWeights);
-        assertArrayEquals(Dimensions.vector(EMBEDDING_DIMENSION), secondLayerBias);
+
+        assertThat(secondLayerPoolWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
+        assertThat(secondLayerSelfWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
+        assertThat(secondLayerNeighborsWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
+        assertThat(secondLayerBias).containsExactly(Dimensions.vector(EMBEDDING_DIMENSION));
     }
 
     @Test
@@ -232,7 +232,8 @@ class GraphSageModelTrainerTest {
 
         assertThat(result.layers())
             .allSatisfy(layer -> assertThat(layer.weights())
-                .noneMatch(weights -> TensorTestUtils.containsNaN(weights.data())));
+                .noneMatch(weights -> TensorTestUtils.containsNaN(weights.data()))
+            );
     }
 
     @Test
