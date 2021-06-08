@@ -43,6 +43,14 @@ public final class PartitionUtils {
         return tasks(nodeCount, batchSize, taskCreator);
     }
 
+    /*
+     * Permits running in parallel even for small node counts.
+     */
+    public static <TASK> List<TASK> rangePartitionWithMinBatchSize(long nodeCount, int concurrency, long minBatchSize, Function<Partition, TASK> taskCreator) {
+    long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, minBatchSize);
+        return tasks(nodeCount, batchSize, taskCreator);
+    }
+
     public static List<Partition> numberAlignedPartitioning(
         int concurrency,
         long nodeCount,
@@ -78,6 +86,14 @@ public final class PartitionUtils {
     }
 
     public static <TASK> List<TASK> degreePartitionWithBatchSize(Graph graph, long batchSize, Function<Partition, TASK> taskCreator) {
+        return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
+    }
+
+    /*
+     * Permits running in parallel even for small graphs.
+     */
+    public static <TASK> List<TASK> degreePartitionWithMinBatchSize(Graph graph, int concurrency, long minBatchSize, Function<Partition, TASK> taskCreator) {
+        var batchSize = Math.max(minBatchSize, BitUtil.ceilDiv(graph.relationshipCount(), concurrency));
         return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
     }
 

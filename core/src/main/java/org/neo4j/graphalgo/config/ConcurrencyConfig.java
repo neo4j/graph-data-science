@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.config;
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.core.GdsEdition;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -35,6 +36,12 @@ public interface ConcurrencyConfig {
     @Configuration.Key(CONCURRENCY_KEY)
     default int concurrency() {
         return DEFAULT_CONCURRENCY;
+    }
+
+    @Value.Default
+    @Configuration.Ignore
+    default int minBatchSize() {
+        return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
 
     @Value.Check
