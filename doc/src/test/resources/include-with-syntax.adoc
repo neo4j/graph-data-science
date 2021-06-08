@@ -1,0 +1,30 @@
+[.include-with-stream]
+======
+.Run Louvain in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.louvain.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  communityId: Integer,
+  intermediateCommunityIds: Integer[]
+----
+
+include::common-parameters-named-graph.adoc[]
+
+include::common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type      | Description
+| nodeId                    | Integer   | Node ID.
+| communityId               | Integer   | The community ID of the final level.
+| intermediateCommunityIds  | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
+|===
+======
