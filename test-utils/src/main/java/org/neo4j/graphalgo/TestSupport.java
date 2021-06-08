@@ -105,6 +105,10 @@ public final class TestSupport {
         return () -> fn.get().map(Arguments::of);
     }
 
+    public static <T> Supplier<Stream<Arguments>> toArgumentsFlat(Supplier<Stream<List<T>>> fn) {
+        return () -> fn.get().map(List::toArray).map(Arguments::of);
+    }
+
     @SafeVarargs
     public static Stream<Arguments> crossArguments(Supplier<Stream<Arguments>> firstFn, Supplier<Stream<Arguments>>... otherFns) {
         return Arrays
