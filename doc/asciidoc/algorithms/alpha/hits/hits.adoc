@@ -41,10 +41,7 @@ CALL gds.alpha.hits.stream(
 )
 YIELD
   nodeId: Integer,
-  values: Map {
-    hub: Float,
-    auth: Float
-  }
+  values: Map
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
