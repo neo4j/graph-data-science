@@ -1,0 +1,35 @@
+[.include-with-stream]
+======
+// intentionally removed `intermediateCommunityIds` and `communityId`
+.Run Louvain in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.louvain.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  communityId: Integer,
+  intermediateCommunityIds: Integer[]
+----
+
+// This table is only here to make sure we will really pick the `.Results` one
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                       | Type     | Default | Optional | Description
+| relationshipWeightProperty | String   | null    | yes      | Relationship Weight.
+| seedProperty               | String   | n/a     | yes      | Seed Property.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type      | Description
+| nodeId                    | Integer   | Node ID.
+| communityId               | Integer   | The community ID of the final level.
+| intermediateCommunityIds  | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
+| bogusResultColumn         | Double    | I am a rogue result table row :)
+|===
+======
