@@ -23,12 +23,12 @@ import org.neo4j.graphalgo.beta.pregel.PregelStreamResult;
 
 import java.util.Map;
 
-import static org.neo4j.graphalgo.doc.syntax.GenericSyntaxTreeProcessor.SyntaxMode.STREAM;
+import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.STREAM;
 
 public class HitsSyntaxTest extends SyntaxTestBase {
 
     @Override
-    protected Map<GenericSyntaxTreeProcessor.SyntaxMode, Class<?>> syntaxModes() {
+    protected Map<ProcedureSyntaxChecker.SyntaxMode, Class<?>> syntaxModes() {
         return Map.of(
             STREAM, PregelStreamResult.class
         );

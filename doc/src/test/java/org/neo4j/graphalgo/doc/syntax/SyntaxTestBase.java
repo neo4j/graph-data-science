@@ -50,11 +50,11 @@ abstract class SyntaxTestBase {
         softAssertions.assertAll();
     }
 
-    abstract Map<GenericSyntaxTreeProcessor.SyntaxMode, Class<?>> syntaxModes();
+    abstract Map<ProcedureSyntaxChecker.SyntaxMode, Class<?>> syntaxModes();
 
     abstract String adocFile();
 
-    private GenericSyntaxTreeProcessor syntaxTreeProcessor(SoftAssertions softAssertions) {
-        return new GenericSyntaxTreeProcessor(syntaxModes(), softAssertions);
+    private ProcedureSyntaxChecker syntaxTreeProcessor(SoftAssertions softAssertions) {
+        return new ProcedureSyntaxChecker(syntaxModes(), softAssertions);
     }
 }

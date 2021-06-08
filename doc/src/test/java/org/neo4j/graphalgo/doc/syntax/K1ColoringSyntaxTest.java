@@ -26,15 +26,15 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
 
 import java.util.Map;
 
-import static org.neo4j.graphalgo.doc.syntax.GenericSyntaxTreeProcessor.SyntaxMode.MUTATE;
-import static org.neo4j.graphalgo.doc.syntax.GenericSyntaxTreeProcessor.SyntaxMode.STATS;
-import static org.neo4j.graphalgo.doc.syntax.GenericSyntaxTreeProcessor.SyntaxMode.STREAM;
-import static org.neo4j.graphalgo.doc.syntax.GenericSyntaxTreeProcessor.SyntaxMode.WRITE;
+import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.MUTATE;
+import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.STATS;
+import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.STREAM;
+import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.WRITE;
 
 class K1ColoringSyntaxTest extends SyntaxTestBase {
 
     @Override
-    protected Map<GenericSyntaxTreeProcessor.SyntaxMode, Class<?>> syntaxModes() {
+    protected Map<ProcedureSyntaxChecker.SyntaxMode, Class<?>> syntaxModes() {
         return Map.of(
             STREAM, K1ColoringStreamProc.StreamResult.class,
             STATS, K1ColoringStatsProc.StatsResult.class,
