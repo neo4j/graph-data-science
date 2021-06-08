@@ -34,15 +34,15 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SoftAssertionsExtension.class)
-class GenericSyntaxTreeProcessorTest {
+class ProcedureSyntaxCheckerTest {
 
     @Test
-    void testGenericSyntaxTreeProcessor(SoftAssertions softAssertions) throws URISyntaxException {
+    void correctSyntaxSectionTest(SoftAssertions softAssertions) throws URISyntaxException {
         var asciidoctor = Asciidoctor.Factory.create();
         asciidoctor.javaExtensionRegistry()
             .treeprocessor(
-                new GenericSyntaxTreeProcessor(
-                    Map.of(GenericSyntaxTreeProcessor.SyntaxMode.STREAM, LouvainStreamProc.StreamResult.class),
+                new ProcedureSyntaxChecker(
+                    Map.of(ProcedureSyntaxChecker.SyntaxMode.STREAM, LouvainStreamProc.StreamResult.class),
                     softAssertions
                 ));
 

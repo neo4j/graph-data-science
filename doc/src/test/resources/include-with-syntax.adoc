@@ -13,11 +13,14 @@ YIELD
   intermediateCommunityIds: Integer[]
 ----
 
-include::common-parameters-named-graph.adoc[]
-
-include::common-stream-stats-configuration-named-graph.adoc[]
-
-include::specific-configuration.adoc[]
+// This table is only here to make sure we will really pick the `.Results` one
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                       | Type     | Default | Optional | Description
+| relationshipWeightProperty | String   | null    | yes      | Relationship Weight.
+| seedProperty               | String   | n/a     | yes      | Seed Property.
+|===
 
 .Results
 [opts="header",cols="1,1,6"]
