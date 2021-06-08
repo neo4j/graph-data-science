@@ -39,6 +39,7 @@ CALL gds.beta.graphSage.train(
   configuration: Map
 ) YIELD
   graphName: String,
+  graphCreateConfig: Map,
   modelInfo: Map,
   configuration: Map,
   trainMillis: Integer
@@ -53,11 +54,12 @@ include::specific-train-configuration.adoc[]
 .Results
 [opts="header",cols="2m,1,6"]
 |===
-| Name          | Type    | Description
-| graphName     | String  | The name of the in-memory graph used during training.
-| modelInfo     | Map     | Details of the trained model.
-| configuration | Map     | The configuration used to run the procedure.
-| trainMillis   | Integer | Milliseconds to train the model.
+| Name              | Type    | Description
+| graphName         | String  | The name of the in-memory graph used during training.
+| graphCreateConfig | Map     | Configuration used to create in-memory graph. Only has value if `anonymous graph` was used.
+| modelInfo         | Map     | Details of the trained model.
+| configuration     | Map     | The configuration used to run the procedure.
+| trainMillis       | Integer | Milliseconds to train the model.
 |===
 
 .Details on `modelInfo`
@@ -90,7 +92,7 @@ CALL gds.beta.graphSage.stream(
   configuration: Map
 ) YIELD
   nodeId: Integer,
-  embedding: List<Float>
+  embedding: List
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
@@ -136,7 +138,7 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type                 | Description
-| nodesCount            | Integer              | The number of nodes processed.
+| nodeCount             | Integer              | The number of nodes processed.
 | nodePropertiesWritten | Integer              | The number of node properties written.
 | createMillis          | Integer              | Milliseconds for loading data.
 | computeMillis         | Integer              | Milliseconds for running the algorithm.
@@ -173,7 +175,7 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type                 | Description
-| nodesCount            | Integer              | The number of nodes processed.
+| nodeCount             | Integer              | The number of nodes processed.
 | nodePropertiesWritten | Integer              | The number of node properties written.
 | createMillis          | Integer              | Milliseconds for loading data.
 | computeMillis         | Integer              | Milliseconds for running the algorithm.
