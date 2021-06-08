@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.proc;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.SetMultimap;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.JavaFile;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.annotation.Configuration;
@@ -32,10 +32,9 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.tools.Diagnostic;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.util.Set;
 
-public final class ConfigurationProcessingStep implements BasicAnnotationProcessor.ProcessingStep {
+public final class ConfigurationProcessingStep implements BasicAnnotationProcessor.Step {
 
     private static final Class<Configuration> ANNOTATION_CLASS = Configuration.class;
     private static final String CONFIG_CLASS_SUFFIX = "Impl";
@@ -58,13 +57,13 @@ public final class ConfigurationProcessingStep implements BasicAnnotationProcess
     }
 
     @Override
-    public Set<? extends Class<? extends Annotation>> annotations() {
-        return ImmutableSet.of(ANNOTATION_CLASS);
+    public Set<String> annotations() {
+        return Set.of(ANNOTATION_CLASS.getCanonicalName());
     }
 
     @Override
-    public Set<? extends Element> process(SetMultimap<Class<? extends Annotation>, Element> elementsByAnnotation) {
-        Set<Element> elements = elementsByAnnotation.get(ANNOTATION_CLASS);
+    public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
+        Set<Element> elements = elementsByAnnotation.get(ANNOTATION_CLASS.getCanonicalName());
         ImmutableSet.Builder<Element> elementsToRetry = ImmutableSet.builder();
         for (Element element : elements) {
             ProcessResult result = process(element);

@@ -35,7 +35,7 @@ public final class ConfigurationProcessor extends BasicAnnotationProcessor {
     }
 
     @Override
-    protected Iterable<? extends ProcessingStep> initSteps() {
+    protected Iterable<? extends Step> steps() {
         ConfigParser configParser = new ConfigParser(
             processingEnv.getMessager(),
             processingEnv.getElementUtils(),
@@ -47,7 +47,7 @@ public final class ConfigurationProcessor extends BasicAnnotationProcessor {
             processingEnv.getTypeUtils(),
             getSupportedSourceVersion()
         );
-        ProcessingStep configStep = new ConfigurationProcessingStep(
+        Step configStep = new ConfigurationProcessingStep(
             processingEnv.getMessager(),
             processingEnv.getFiler(),
             configParser,
