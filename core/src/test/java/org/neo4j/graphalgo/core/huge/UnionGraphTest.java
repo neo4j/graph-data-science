@@ -147,11 +147,6 @@ class UnionGraphTest {
                 "  (a)-[:FIRST]->(b)" +
                 ", (a)-[:SECOND { times: 5 }]->(b)",
                 "second defines property"
-            ),
-            Arguments.of(
-                "  (a)-[:FIRST { times: 3 }]->(b)" +
-                ", (a)-[:SECOND { times: 5 }]->(b)",
-                "both define property"
             )
         );
     }
@@ -176,6 +171,19 @@ class UnionGraphTest {
         var b = graphFactory.nodeId("b");
 
         assertThat(graph.relationshipProperty(a, b, -1)).isEqualTo(5D);
+    }
+
+    @Test
+    void overlappingRelationshipProperty() {
+        var graphFactory = GdlFactory.of(
+            "  (a)-[:FIRST { times: 3 }]->(b)" +
+            ", (a)-[:SECOND { times: 5 }]->(b)");
+        var graph = graphFactory.build().graphStore().getUnion();
+        var a = graphFactory.nodeId("a");
+        var b = graphFactory.nodeId("b");
+
+        assertThat(graph.relationshipProperty(a, b)).isIn(3D, 5D);
+        assertThat(graph.relationshipProperty(a, b, -1)).isIn(3D, 5D);
     }
 
 }
