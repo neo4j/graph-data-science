@@ -93,47 +93,94 @@ final class DegreeCentralityTest {
             Arguments.of(
                 false,
                 Orientation.NATURAL,
-                Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D)
+                Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D),
+                1
             ),
             Arguments.of(
                 true,
                 Orientation.NATURAL,
-                Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D)
+                Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D),
+                1
+            ),
+            Arguments.of(
+                false,
+                Orientation.NATURAL,
+                Map.of("a", 0.0D, "b", 1.0D, "c", 1.0D, "d", 2.0D, "e", 3.0D, "f", 2.0D),
+                4
+            ),
+            Arguments.of(
+                true,
+                Orientation.NATURAL,
+                Map.of("a", 0.0D, "b", 2.0D, "c", 2.0D, "d", 4.0D, "e", 6.0D, "f", 4.0D),
+                4
             ),
             // Orientation REVERSE
             Arguments.of(
                 false,
                 Orientation.REVERSE,
-                Map.of("a", 1.0D, "b", 4.0D, "c", 1.0D, "d", 1.0D, "e", 1.0D, "f", 1.0D)
+                Map.of("a", 1.0D, "b", 4.0D, "c", 1.0D, "d", 1.0D, "e", 1.0D, "f", 1.0D),
+                1
             ),
             Arguments.of(
                 true,
                 Orientation.REVERSE,
-                Map.of("a", 2.0D, "b", 10.0D, "c", 2.0D, "d", 2.0D, "e", 0.0D, "f", 2.0D)
+                Map.of("a", 2.0D, "b", 10.0D, "c", 2.0D, "d", 2.0D, "e", 0.0D, "f", 2.0D),
+                1
+            ),
+            Arguments.of(
+                false,
+                Orientation.REVERSE,
+                Map.of("a", 1.0D, "b", 4.0D, "c", 1.0D, "d", 1.0D, "e", 1.0D, "f", 1.0D),
+                4
+            ),
+            Arguments.of(
+                true,
+                Orientation.REVERSE,
+                Map.of("a", 2.0D, "b", 10.0D, "c", 2.0D, "d", 2.0D, "e", 0.0D, "f", 2.0D),
+                4
             ),
             // Orientation UNDIRECTED
             Arguments.of(
                 false,
                 Orientation.UNDIRECTED,
-                Map.of("a", 1.0D, "b", 5.0D, "c", 2.0D, "d", 3.0D, "e", 4.0D, "f", 3.0D)
+                Map.of("a", 1.0D, "b", 5.0D, "c", 2.0D, "d", 3.0D, "e", 4.0D, "f", 3.0D),
+                1
             ),
             Arguments.of(
                 true,
                 Orientation.UNDIRECTED,
-                Map.of("a", 2.0D, "b", 12.0D, "c", 4.0D, "d", 6.0D, "e", 6.0D, "f", 6.0D)
+                Map.of("a", 2.0D, "b", 12.0D, "c", 4.0D, "d", 6.0D, "e", 6.0D, "f", 6.0D),
+                1
+            ),
+            Arguments.of(
+                false,
+                Orientation.UNDIRECTED,
+                Map.of("a", 1.0D, "b", 5.0D, "c", 2.0D, "d", 3.0D, "e", 4.0D, "f", 3.0D),
+                4
+            ),
+            Arguments.of(
+                true,
+                Orientation.UNDIRECTED,
+                Map.of("a", 2.0D, "b", 12.0D, "c", 4.0D, "d", 6.0D, "e", 6.0D, "f", 6.0D),
+                4
             )
         );
     }
 
     @ParameterizedTest
     @MethodSource("degreeCentralityParameters")
-    void shouldComputeCorrectResults(boolean weighted, Orientation orientation, Map<String, Double> expected) {
+    void shouldComputeCorrectResults(boolean weighted, Orientation orientation, Map<String, Double> expected, int concurrency) {
         var configBuilder = ImmutableDegreeCentralityConfig.builder()
-            .concurrency(1)
+            .concurrency(concurrency)
             .orientation(orientation);
 
         if (weighted) {
             configBuilder.relationshipWeightProperty("weight");
+        }
+
+        // Permit the algo to use a smaller batch size to really run in parallel.
+        if (concurrency > 1) {
+            configBuilder.minBatchSize(1);
         }
 
         var config = configBuilder.build();
@@ -158,48 +205,6 @@ final class DegreeCentralityTest {
             toArguments(() -> Arrays.stream(Orientation.values())),
             toArguments(() -> Stream.of(true, false))
         );
-    }
-
-    @ParameterizedTest
-    @MethodSource("parallelInput")
-    void shouldComputeParallel(Orientation orientation, boolean weighted) {
-        var concurrency = 4;
-        var averageDegree = 4;
-        var propertyKey = "foo";
-        var relationshipProperty = 2.0;
-
-        var graph = RandomGraphGenerator.builder()
-            .nodeCount(10_000)
-            .averageDegree(averageDegree)
-            .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .relationshipPropertyProducer(PropertyProducer.fixedDouble(propertyKey, relationshipProperty))
-            .seed(42)
-            .allocationTracker(AllocationTracker.empty())
-            .build()
-            .generate();
-
-        var configBuilder = ImmutableDegreeCentralityConfig.builder()
-            .concurrency(concurrency)
-            .orientation(Orientation.NATURAL);
-
-        if (weighted) {
-            configBuilder.relationshipWeightProperty(propertyKey);
-        }
-
-        var degreeCentrality = new DegreeCentrality(
-            graph,
-            Pools.DEFAULT,
-            configBuilder.build(),
-            ProgressLogger.NULL_LOGGER,
-            AllocationTracker.empty()
-        );
-
-        var degreeFunction = degreeCentrality.compute();
-
-        graph.forEachNode(node -> {
-            assertThat(degreeFunction.get(node)).isEqualTo((weighted ? relationshipProperty : 1) * averageDegree);
-            return true;
-        });
     }
 
     static Stream<Arguments> configParamsAndExpectedMemory() {

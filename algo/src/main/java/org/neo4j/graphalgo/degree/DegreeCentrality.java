@@ -157,9 +157,10 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
     private DegreeFunction computeDegree(TaskFunction taskFunction) {
         var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
-        var tasks = PartitionUtils.degreePartition(
+        var tasks = PartitionUtils.degreePartitionWithMinBatchSize(
             graph,
             config.concurrency(),
+            config.minBatchSize(),
             partition -> taskFunction.apply(partition, degrees)
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
@@ -168,9 +169,10 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
     private DegreeFunction computeDegreeAtomic(TaskFunctionAtomic taskFunction) {
         var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
-        var tasks = PartitionUtils.degreePartition(
+        var tasks = PartitionUtils.degreePartitionWithMinBatchSize(
             graph,
             config.concurrency(),
+            config.minBatchSize(),
             partition -> taskFunction.apply(partition, degrees)
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
