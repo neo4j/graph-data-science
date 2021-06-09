@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.pregel;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -43,6 +44,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -166,6 +168,59 @@ class PregelTest {
                 "TestPregelComputation :: Iteration 2/2 :: Master Compute :: Finished",
                 "TestPregelComputation :: Iteration 2/2 :: Finished"
             );
+    }
+
+    @Test
+    void cleanupProgressLogging() {
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(42)
+            .averageDegree(2)
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .seed(1337L)
+            .allocationTracker(AllocationTracker.empty())
+            .build()
+            .generate();
+
+        var config = ImmutablePregelConfig.builder()
+            .username("")
+            .maxIterations(2)
+            .isAsynchronous(false)
+            .build();
+
+        var eventTracker = new ProgressEventTracker() {
+            private int releaseCalls = 0;
+
+            @Override
+            public void addLogEvent(String taskName, String message) {
+            }
+
+            @Override
+            public void release() {
+                releaseCalls++;
+            }
+        };
+        var computation = new TestPregelComputation();
+
+        var progressLogger =  new TestProgressLogger(
+            graph.nodeCount(),
+            computation.getClass().getSimpleName(),
+            config.concurrency(),
+            eventTracker
+        );
+
+        var pregelAlgo = Pregel.create(
+            graph,
+            config,
+            computation,
+            Pools.DEFAULT,
+            AllocationTracker.empty(),
+            progressLogger
+        );
+
+        pregelAlgo.run();
+        pregelAlgo.release();
+
+        assertThat(eventTracker.releaseCalls).isEqualTo(1);
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {
