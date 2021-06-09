@@ -37,12 +37,15 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
+import org.neo4j.graphalgo.test.TestPregelConfig;
 import org.neo4j.logging.Log;
+import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -54,9 +57,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class PregelProcTest extends BaseProcTest {
@@ -196,7 +201,87 @@ public class PregelProcTest extends BaseProcTest {
         );
     }
 
-    public static class MutateProc extends PregelMutateProc<CompositeTestAlgorithm, PregelProcedureConfig> {
+    @Test
+    void cleanupEventTrackerWhenTheAlgorithmFailsInStreamMode() {
+        var eventTracker = new TestProgressEventTracker();
+        try (var transactions = newKernelTransaction(db)) {
+            var proc = new StreamProc();
+            proc.progressTracker = eventTracker;
+            proc.api = db;
+            proc.transaction = transactions.ktx();
+            proc.procedureTransaction = transactions.tx();
+            proc.log = NullLog.getInstance();
+            Map<String, Object> config = Map.of(
+                "nodeProjection", "RealNode",
+                "relationshipProjection", "*",
+                "maxIterations", 20,
+                "throwInCompute", true
+            );
+
+            assertThatThrownBy(() -> proc.stream(config, Map.of())).isNotNull();
+            assertThat(eventTracker.releaseCalls).isEqualTo(1);
+        }
+    }
+
+    @Test
+    void cleanupEventTrackerWhenTheAlgorithmFailsInWriteMode() {
+        var eventTracker = new TestProgressEventTracker();
+        try (var transactions = newKernelTransaction(db)) {
+            var proc = new WriteProc();
+            proc.progressTracker = eventTracker;
+            proc.api = db;
+            proc.transaction = transactions.ktx();
+            proc.procedureTransaction = transactions.tx();
+            proc.log = NullLog.getInstance();
+            Map<String, Object> config = Map.of(
+                "nodeProjection", "RealNode",
+                "relationshipProjection", "*",
+                "maxIterations", 20,
+                "throwInCompute", true
+            );
+
+            assertThatThrownBy(() -> proc.write(config, Map.of())).isNotNull();
+            assertThat(eventTracker.releaseCalls).isEqualTo(1);
+        }
+    }
+
+    @Test
+    void cleanupEventTrackerWhenTheAlgorithmFailsInMutateMode() {
+        var graphName = "testGraph";
+        runQuery(GdsCypher.call().withNodeLabel("RealNode").withAnyRelationshipType().graphCreate(graphName).yields());
+
+        var eventTracker = new TestProgressEventTracker();
+        try (var transactions = newKernelTransaction(db)) {
+            var proc = new MutateProc();
+            proc.progressTracker = eventTracker;
+            proc.api = db;
+            proc.transaction = transactions.ktx();
+            proc.procedureTransaction = transactions.tx();
+            proc.log = NullLog.getInstance();
+            Map<String, Object> config = Map.of(
+                "maxIterations", 20,
+                "throwInCompute", true
+            );
+
+            assertThatThrownBy(() -> proc.mutate(graphName, config)).isNotNull();
+            assertThat(eventTracker.releaseCalls).isEqualTo(1);
+        }
+    }
+
+    private static final class TestProgressEventTracker implements ProgressEventTracker {
+        private int releaseCalls = 0;
+
+        @Override
+        public void addLogEvent(String taskName, String message) {
+        }
+
+        @Override
+        public void release() {
+            releaseCalls++;
+        }
+    }
+
+    public static class MutateProc extends PregelMutateProc<CompositeTestAlgorithm, TestPregelConfig> {
 
         @Procedure(
             name = "example.pregel.test.mutate",
@@ -211,43 +296,50 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AbstractResultBuilder<PregelMutateResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, PregelResult, PregelProcedureConfig> computeResult) {
+        protected AbstractResultBuilder<PregelMutateResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, PregelResult, TestPregelConfig> computeResult) {
             var ranIterations = computeResult.result().ranIterations();
             var didConverge = computeResult.result().didConverge();
             return new PregelMutateResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
         }
 
         @Override
-        protected PregelProcedureConfig newConfig(
+        protected TestPregelConfig newConfig(
             String username,
             Optional<String> graphName,
             Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper config
         ) {
-            return PregelProcedureConfig.of(username, graphName, maybeImplicitCreate, config);
+            return TestPregelConfig.of(username, graphName, maybeImplicitCreate, config);
         }
 
         @Override
-        protected AlgorithmFactory<CompositeTestAlgorithm, PregelProcedureConfig> algorithmFactory() {
+        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
             return new AlgorithmFactory<>() {
                 @Override
                 public CompositeTestAlgorithm build(
                     Graph graph,
-                    PregelProcedureConfig configuration, AllocationTracker tracker, Log log,
+                    TestPregelConfig configuration, AllocationTracker tracker, Log log,
                     ProgressEventTracker eventTracker
                 ) {
-                    return new CompositeTestAlgorithm(graph, configuration, tracker);
+                    return new CompositeTestAlgorithm(
+                        graph,
+                        configuration,
+                        tracker,
+                        log,
+                        eventTracker,
+                        configuration.throwInCompute()
+                    );
                 }
 
                 @Override
-                public MemoryEstimation memoryEstimation(PregelProcedureConfig configuration) {
+                public MemoryEstimation memoryEstimation(TestPregelConfig configuration) {
                     return MemoryEstimations.empty();
                 }
             };
         }
     }
 
-    public static class WriteProc extends PregelWriteProc<CompositeTestAlgorithm, PregelProcedureConfig> {
+    public static class WriteProc extends PregelWriteProc<CompositeTestAlgorithm, TestPregelConfig> {
 
         @Procedure(
             name = "example.pregel.test.write",
@@ -262,43 +354,50 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected AbstractResultBuilder<PregelWriteResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, PregelResult, PregelProcedureConfig> computeResult) {
+        protected AbstractResultBuilder<PregelWriteResult> resultBuilder(ComputationResult<CompositeTestAlgorithm, PregelResult, TestPregelConfig> computeResult) {
             var ranIterations = computeResult.result().ranIterations();
             var didConverge = computeResult.result().didConverge();
             return new PregelWriteResult.Builder().withRanIterations(ranIterations).didConverge(didConverge);
         }
 
         @Override
-        protected PregelProcedureConfig newConfig(
+        protected TestPregelConfig newConfig(
             String username,
             Optional<String> graphName,
             Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper config
         ) {
-            return PregelProcedureConfig.of(username, graphName, maybeImplicitCreate, config);
+            return TestPregelConfig.of(username, graphName, maybeImplicitCreate, config);
         }
 
         @Override
-        protected AlgorithmFactory<CompositeTestAlgorithm, PregelProcedureConfig> algorithmFactory() {
+        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
             return new AlgorithmFactory<>() {
                 @Override
                 public CompositeTestAlgorithm build(
                     Graph graph,
-                    PregelProcedureConfig configuration, AllocationTracker tracker, Log log,
+                    TestPregelConfig configuration, AllocationTracker tracker, Log log,
                     ProgressEventTracker eventTracker
                 ) {
-                    return new CompositeTestAlgorithm(graph, configuration, tracker);
+                    return new CompositeTestAlgorithm(
+                        graph,
+                        configuration,
+                        tracker,
+                        log,
+                        eventTracker,
+                        configuration.throwInCompute()
+                    );
                 }
 
                 @Override
-                public MemoryEstimation memoryEstimation(PregelProcedureConfig configuration) {
+                public MemoryEstimation memoryEstimation(TestPregelConfig configuration) {
                     return MemoryEstimations.empty();
                 }
             };
         }
     }
 
-    public static class StreamProc extends PregelStreamProc<CompositeTestAlgorithm, PregelProcedureConfig> {
+    public static class StreamProc extends PregelStreamProc<CompositeTestAlgorithm, TestPregelConfig> {
 
         @Procedure(
             name = "example.pregel.test.stream",
@@ -319,29 +418,38 @@ public class PregelProcTest extends BaseProcTest {
         }
 
         @Override
-        protected PregelProcedureConfig newConfig(
+        protected TestPregelConfig newConfig(
             String username,
             Optional<String> graphName,
             Optional<GraphCreateConfig> maybeImplicitCreate,
             CypherMapWrapper config
         ) {
-            return PregelProcedureConfig.of(username, graphName, maybeImplicitCreate, config);
+            return TestPregelConfig.of(username, graphName, maybeImplicitCreate, config);
         }
 
         @Override
-        protected AlgorithmFactory<CompositeTestAlgorithm, PregelProcedureConfig> algorithmFactory() {
+        protected AlgorithmFactory<CompositeTestAlgorithm, TestPregelConfig> algorithmFactory() {
             return new AlgorithmFactory<>() {
                 @Override
                 public CompositeTestAlgorithm build(
                     Graph graph,
-                    PregelProcedureConfig configuration, AllocationTracker tracker, Log log,
+                    TestPregelConfig configuration,
+                    AllocationTracker tracker,
+                    Log log,
                     ProgressEventTracker eventTracker
                 ) {
-                    return new CompositeTestAlgorithm(graph, configuration, tracker);
+                    return new CompositeTestAlgorithm(
+                        graph,
+                        configuration,
+                        tracker,
+                        log,
+                        eventTracker,
+                        configuration.throwInCompute()
+                    );
                 }
 
                 @Override
-                public MemoryEstimation memoryEstimation(PregelProcedureConfig configuration) {
+                public MemoryEstimation memoryEstimation(TestPregelConfig configuration) {
                     return MemoryEstimations.empty();
                 }
             };
@@ -358,7 +466,15 @@ public class PregelProcTest extends BaseProcTest {
 
         private final Pregel<PregelProcedureConfig> pregelJob;
 
-        CompositeTestAlgorithm(Graph graph, PregelProcedureConfig configuration, AllocationTracker tracker) {
+        CompositeTestAlgorithm(
+            Graph graph,
+            PregelProcedureConfig configuration,
+            AllocationTracker tracker,
+            Log log,
+            ProgressEventTracker eventTracker,
+            boolean throwInCompute
+        ) {
+            this.progressLogger = new BatchingProgressLogger(log, 42, "test", 1, eventTracker);
             this.pregelJob = Pregel.create(graph, configuration, new PregelComputation<>() {
 
                 @Override
@@ -374,6 +490,9 @@ public class PregelProcTest extends BaseProcTest {
 
                 @Override
                 public void compute(ComputeContext<PregelProcedureConfig> context, Messages messages) {
+                    if (throwInCompute) {
+                        throw new IllegalStateException("boo");
+                    }
                     context.setNodeValue(LONG_KEY, 42L);
                     context.setNodeValue(DOUBLE_KEY, 42.0D);
                     context.setNodeValue(LONG_ARRAY_KEY, new long[]{1, 3, 3, 7});
