@@ -40,6 +40,11 @@ public interface TestConfig extends AlgoBaseConfig, WriteConfig, WritePropertyCo
         return 20;
     }
 
+    @Value.Default
+    default boolean throwInCompute() {
+        return false;
+    }
+
     static TestConfig of(
         String username,
         Optional<String> graphName,
