@@ -21,16 +21,13 @@ package org.neo4j.gds.ml.core.helper;
 
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
+import java.util.function.DoublePredicate;
+
 public final class TensorTestUtils {
     private TensorTestUtils() {}
 
     public static boolean containsNaN(Tensor<?> tensor) {
-        for (int idx = 0; idx < tensor.totalSize(); idx++) {
-            if (Double.isNaN(tensor.dataAt(idx))) {
-                return true;
-            }
-        }
-        return false;
+        return anyMatch(tensor, Double::isNaN);
     }
 
     public static boolean containsValidValues(Tensor<?> tensor) {
@@ -39,8 +36,12 @@ public final class TensorTestUtils {
     }
 
     private static boolean containsInfinity(Tensor<?> tensor) {
+        return anyMatch(tensor, Double::isInfinite);
+    }
+
+    public static boolean anyMatch(Tensor<?> tensor, DoublePredicate predicate) {
         for (int idx = 0; idx < tensor.totalSize(); idx++) {
-            if (Double.isInfinite(tensor.dataAt(idx))) {
+            if (predicate.test(tensor.dataAt(idx))) {
                 return true;
             }
         }
