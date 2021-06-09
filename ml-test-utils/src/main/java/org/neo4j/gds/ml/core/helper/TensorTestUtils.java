@@ -21,10 +21,26 @@ package org.neo4j.gds.ml.core.helper;
 
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
-public class TensorTestUtils {
+public final class TensorTestUtils {
+    private TensorTestUtils() {}
+
     public static boolean containsNaN(Tensor<?> tensor) {
         for (int idx = 0; idx < tensor.totalSize(); idx++) {
             if (Double.isNaN(tensor.dataAt(idx))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean containsValidValues(Tensor<?> tensor) {
+        return !containsInfinity(tensor)
+               && !containsNaN(tensor);
+    }
+
+    private static boolean containsInfinity(Tensor<?> tensor) {
+        for (int idx = 0; idx < tensor.totalSize(); idx++) {
+            if (Double.isInfinite(tensor.dataAt(idx))) {
                 return true;
             }
         }

@@ -31,6 +31,9 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import java.util.List;
 
 public class CrossEntropyLoss extends AbstractVariable<Scalar> {
+
+    private static final double PREDICTED_PROBABILITY_THRESHOLD = 1e-50;
+
     private final Variable<Matrix> predictions;
     private final Variable<Vector> targets;
 
@@ -73,7 +76,9 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
             for (int row = 0; row < gradient.rows(); row++) {
                 var trueClass = (int) targetsVector.dataAt(row);
                 var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row * predictionsMatrix.cols() + trueClass);
-                if (predictedProbabilityForTrueClass > 0) {
+
+                // Compare to a threshold value rather than `0`, very small probability can result in setting infinite gradient values.
+                if (predictedProbabilityForTrueClass > PREDICTED_PROBABILITY_THRESHOLD) {
                     gradient.setDataAt(
                         row * predictionsMatrix.cols() + trueClass,
                         multiplier / predictedProbabilityForTrueClass

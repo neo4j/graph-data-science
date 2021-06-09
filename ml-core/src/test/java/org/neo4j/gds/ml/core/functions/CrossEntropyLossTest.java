@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
-import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
+import org.neo4j.gds.ml.core.helper.TensorTestUtils;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CrossEntropyLossTest implements FiniteDifferenceTest {
 
@@ -51,7 +53,7 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
 
         var expected = 1.0 / 3 * (p1 + p2 + p3);
 
-        Assertions.assertThat(lossValue).isCloseTo(expected, Offset.offset(1e-8));
+        assertThat(lossValue).isCloseTo(expected, Offset.offset(1e-8));
     }
 
     @Test
@@ -71,6 +73,23 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
         var loss = new CrossEntropyLoss(predictions, targets);
 
         finiteDifferenceShouldApproximateGradient(predictions, loss);
+    }
+
+    @Test
+    void infiniteSmallProbabilities() {
+
+        var predictions = new Weights<>(new Matrix(new double[]{5.277E-321, 5.277E-321}, 1, 2));
+        var targets = Constant.vector(new double[]{1});
+
+        var ctx = new ComputationContext();
+        var crossEntropyLoss = new CrossEntropyLoss(predictions, targets);
+
+        ctx.forward(crossEntropyLoss);
+
+        ctx.backward(crossEntropyLoss);
+        var actualGradient = ctx.gradient(predictions);
+
+        assertThat(actualGradient).matches(TensorTestUtils::containsValidValues);
     }
 
     @Override
