@@ -221,17 +221,16 @@ public abstract class AlgoBaseProc<
             () -> {
                 try (ProgressTimer ignored = ProgressTimer.start(builder::computeMillis)) {
                     return algo.compute();
+                } finally {
+                    algo.releaseAll(releaseAlgorithm);
+                    if (releaseTopology) {
+                        graph.releaseTopology();
+                    }
                 }
             }
         );
 
         log.info(algoName() + ": overall memory usage %s", tracker.getUsageString());
-
-        algo.releaseAll(releaseAlgorithm);
-
-        if (releaseTopology) {
-            graph.releaseTopology();
-        }
 
         return builder
             .graph(graph)

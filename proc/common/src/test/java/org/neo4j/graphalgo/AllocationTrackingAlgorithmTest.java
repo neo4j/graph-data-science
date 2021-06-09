@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.test.TestAlgorithm;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Transaction;
@@ -65,7 +66,14 @@ public class AllocationTrackingAlgorithmTest extends AlgoTestBase {
                     var ktx = ((InternalTransaction) tx).kernelTransaction();
                     var memoryTrackerProxy = Neo4jProxy.memoryTrackerProxy(ktx);
                     tracker = AllocationTracker.create(memoryTrackerProxy);
-                    algorithm = new TestAlgorithm(graph, tracker, MEMORY_LIMIT);
+                    algorithm = new TestAlgorithm(
+                        graph,
+                        tracker,
+                        MEMORY_LIMIT,
+                        new TestLog(),
+                        EmptyProgressEventTracker.INSTANCE,
+                        false
+                    );
                     tx.commit();
                 }
                 var exception = rootCause(assertThrows(Exception.class, algorithm::compute));
