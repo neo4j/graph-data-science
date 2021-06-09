@@ -45,14 +45,6 @@ public class SubGraph {
     public static List<SubGraph> buildSubGraphs(
         long[] nodeIds,
         List<NeighborhoodFunction> neighborhoodFunctions,
-        Graph graph
-    ) {
-        return buildSubGraphs(nodeIds, neighborhoodFunctions, graph, false);
-    }
-
-    public static List<SubGraph> buildSubGraphs(
-        long[] nodeIds,
-        List<NeighborhoodFunction> neighborhoodFunctions,
         Graph graph,
         boolean useWeights
     ) {
@@ -60,18 +52,18 @@ public class SubGraph {
         long[] previousNodes = nodeIds;
 
         for (NeighborhoodFunction neighborhoodFunction : neighborhoodFunctions) {
-            SubGraph lastGraph = buildSubGraph(previousNodes, neighborhoodFunction, graph, relationshipWeightFunction(graph, useWeights));
+            SubGraph lastGraph = buildSubGraph(previousNodes, neighborhoodFunction, graph, useWeights);
             result.add(lastGraph);
             previousNodes = lastGraph.nextNodes;
         }
         return result;
     }
 
-    static SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph) {
-        return buildSubGraph(nodeIds, neighborhoodFunction, graph, relationshipWeightFunction(graph, false));
+    public static SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph) {
+        return buildSubGraph(nodeIds, neighborhoodFunction, graph, false);
     }
 
-    static SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph, Optional<RelationshipWeights> maybeRelationshipWeightsFunction) {
+    public static SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph, boolean useWeights) {
         int[][] adjacency = new int[nodeIds.length][];
         int[] selfAdjacency = new int[nodeIds.length];
         LocalIdMap idmap = new LocalIdMap();
@@ -89,7 +81,7 @@ public class SubGraph {
                 .toArray();
             adjacency[internalId] = neighborInternalIds;
         });
-        return new SubGraph(adjacency, selfAdjacency, idmap.originalIds(), maybeRelationshipWeightsFunction);
+        return new SubGraph(adjacency, selfAdjacency, idmap.originalIds(), relationshipWeightFunction(graph, useWeights));
     }
 
     private static Optional<RelationshipWeights> relationshipWeightFunction(Graph graph, boolean useWeights) {

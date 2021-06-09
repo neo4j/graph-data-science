@@ -91,6 +91,21 @@
         <property name="message" value="Line has trailing spaces."/>
     </module>
 
+    <!-- See https://checkstyle.sourceforge.io/config_regexp.html#RegexpMultiline -->
+    <!-- Don't allow Windows line endings -->
+    <module name="RegexpMultiline">
+        <property name="id" value="noWindowsLineEnding"/>
+        <property name="format" value="\r\n$"/>
+        <property name="message" value="Do not use Windows line endings"/>
+    </module>
+
+    <!-- Don't allow classic MacOS line endings -->
+    <module name="RegexpMultiline">
+        <property name="id" value="noClassicMacOSLineEnding"/>
+        <property name="format" value="\r$"/>
+        <property name="message" value="Do not use classic MacOS line endings"/>
+    </module>
+
     <!-- Checks for Headers                                -->
     <!-- See https://checkstyle.org/config_header.html   -->
     <!-- <module name="Header"> -->

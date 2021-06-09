@@ -25,12 +25,11 @@ import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipCursor;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.List;
 
@@ -55,35 +54,30 @@ class WeightedElementwiseMaxTest extends ComputationGraphBaseTest implements Fin
         ", (u2)-[:ORDERED {times: 3}]->(d4)";
 
     @Inject
-    Graph graph;
-
-    @Inject
-    private IdFunction idFunction;
+    TestGraph graph;
 
     @Test
     void shouldApplyWeightsToEmbeddings() {
         long[] ids = new long[]{
-            idFunction.of("d1"),
-            idFunction.of("d2"),
-            idFunction.of("d3"),
-            idFunction.of("d4"),
+            graph.toMappedNodeId("d1"),
+            graph.toMappedNodeId("d2"),
+            graph.toMappedNodeId("d3"),
+            graph.toMappedNodeId("d4"),
         };
         NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
             .streamRelationships(nodeId, 0.0D)
             .mapToLong(RelationshipCursor::targetId);
-        SubGraph subGraph = SubGraph.buildSubGraphs(ids, List.of(neighborhoodFunction), graph).get(0);
+        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph);
 
-        double[] userEmbeddingsData = new double[] {
+        var userEmbeddings = Constant.matrix(new double[] {
             1, 1, 1, // u1
             1, 1, 1, // u2
             1, 1, 1, // d1
             3, 3, 3, // d2
             1, 1, 1, // d3
             1, 1, 1 // d4
-        };
+        }, 6, 3);
 
-        var userEmbeddings = Constant.matrix(userEmbeddingsData, 6, 3);
-        ctx.forward(userEmbeddings);
         WeightedElementwiseMax weightedEmbeddings = new WeightedElementwiseMax(
             userEmbeddings,
             graph::relationshipProperty,
@@ -97,32 +91,32 @@ class WeightedElementwiseMaxTest extends ComputationGraphBaseTest implements Fin
             3.0, 3.0, 3.0, // d4
         }, 4, 3);
 
+        // Add userEmbeddings to context's data
+        ctx.forward(userEmbeddings);
         assertThat(weightedEmbeddings.apply(ctx)).isEqualTo(expected);
     }
 
     @Test
     void testGradient() {
         long[] ids = new long[]{
-            idFunction.of("d1"),
-            idFunction.of("d2"),
-            idFunction.of("d3"),
-            idFunction.of("d4"),
+            graph.toMappedNodeId("d1"),
+            graph.toMappedNodeId("d2"),
+            graph.toMappedNodeId("d3"),
+            graph.toMappedNodeId("d4"),
         };
         NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
             .streamRelationships(nodeId, 0.0D)
             .mapToLong(RelationshipCursor::targetId);
-        SubGraph subGraph = SubGraph.buildSubGraphs(ids, List.of(neighborhoodFunction), graph).get(0);
+        SubGraph subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph);
 
-        double[] userEmbeddingsData = new double[] {
+        var weights = new Weights<>(new Matrix(new double[] {
             1, 1, 1, // u1
             2, 2, 2, // u2
             3, 3, 3, // d1
             4, 4, 4, // d2
             5, 5, 5, // d3
             6, 6, 6 // d4
-        };
-
-        Weights<Matrix> weights = new Weights<>(new Matrix(userEmbeddingsData, 6, 3));
+        }, 6, 3));
 
         finiteDifferenceShouldApproximateGradient(
             weights,

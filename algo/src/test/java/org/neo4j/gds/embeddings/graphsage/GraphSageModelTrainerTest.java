@@ -23,15 +23,15 @@ import com.carrotsearch.hppc.LongHashSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.AbstractVariable;
+import org.neo4j.gds.ml.core.Dimensions;
+import org.neo4j.gds.ml.core.helper.TensorTestUtils;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
@@ -56,8 +56,6 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 import static org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph.DUMMY_PROPERTY;
@@ -117,19 +115,21 @@ class GraphSageModelTrainerTest {
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
 
         Layer[] layers = result.layers();
-        assertEquals(2, layers.length);
-        Layer first = layers[0];
-        List<Weights<? extends Tensor<?>>> firstWeights = first.weights();
-        assertEquals(1, firstWeights.size());
+        assertThat(layers)
+            .hasSize(2)
+            .allSatisfy(layer -> assertThat(layer.weights())
+                .hasSize(1)
+                .noneMatch(weights -> TensorTestUtils.containsNaN(weights.data())));
 
         // First layer is (embeddingDimension x features.length)
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, FEATURES_COUNT}, firstWeights.get(0).dimensions());
-        Layer second = layers[1];
-        List<Weights<? extends Tensor<?>>> secondWeights = second.weights();
-        assertEquals(1, secondWeights.size());
+        assertThat(layers[0].weights())
+            .map(AbstractVariable::dimensions)
+            .containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT));
 
         // Second layer weights (embeddingDimension x embeddingDimension)
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondWeights.get(0).dimensions());
+        assertThat(layers[1].weights())
+            .map(AbstractVariable::dimensions)
+            .containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
     }
 
     @ParameterizedTest
@@ -147,33 +147,35 @@ class GraphSageModelTrainerTest {
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
         Layer[] layers = result.layers();
-        assertEquals(2, layers.length);
 
-        Layer first = layers[0];
-        List<Weights<? extends Tensor<?>>> firstWeights = first.weights();
-        assertEquals(4, firstWeights.size());
+        assertThat(layers)
+            .hasSize(2)
+            .allSatisfy(layer -> assertThat(layer.weights())
+                .hasSize(4)
+                .noneMatch(weights -> TensorTestUtils.containsNaN(weights.data()))
+            );
 
+        var firstWeights = layers[0].weights();
         var firstLayerPoolWeights = firstWeights.get(0).dimensions();
         var firstLayerSelfWeights = firstWeights.get(1).dimensions();
         var firstLayerNeighborsWeights = firstWeights.get(2).dimensions();
         var firstLayerBias = firstWeights.get(3).dimensions();
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, FEATURES_COUNT}, firstLayerPoolWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, FEATURES_COUNT}, firstLayerSelfWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, firstLayerNeighborsWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION}, firstLayerBias);
 
-        Layer second = layers[1];
-        List<Weights<? extends Tensor<?>>> secondWeights = second.weights();
-        assertEquals(4, secondWeights.size());
+        assertThat(firstLayerPoolWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT));
+        assertThat(firstLayerSelfWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, FEATURES_COUNT));
+        assertThat(firstLayerNeighborsWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
+        assertThat(firstLayerBias).containsExactly(Dimensions.vector(EMBEDDING_DIMENSION));
 
+        var secondWeights = layers[1].weights();
         var secondLayerPoolWeights = secondWeights.get(0).dimensions();
         var secondLayerSelfWeights = secondWeights.get(1).dimensions();
         var secondLayerNeighborsWeights = secondWeights.get(2).dimensions();
         var secondLayerBias = secondWeights.get(3).dimensions();
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerPoolWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerSelfWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION, EMBEDDING_DIMENSION}, secondLayerNeighborsWeights);
-        assertArrayEquals(new int[]{EMBEDDING_DIMENSION}, secondLayerBias);
+
+        assertThat(secondLayerPoolWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
+        assertThat(secondLayerSelfWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
+        assertThat(secondLayerNeighborsWeights).containsExactly(Dimensions.matrix(EMBEDDING_DIMENSION, EMBEDDING_DIMENSION));
+        assertThat(secondLayerBias).containsExactly(Dimensions.vector(EMBEDDING_DIMENSION));
     }
 
     @Test
@@ -226,10 +228,15 @@ class GraphSageModelTrainerTest {
 
         var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
 
-        trainer.train(arrayGraph, arrayFeatures);
+        var result = trainer.train(arrayGraph, arrayFeatures);
+
+        assertThat(result.layers())
+            .allSatisfy(layer -> assertThat(layer.weights())
+                .noneMatch(weights -> TensorTestUtils.containsNaN(weights.data()))
+            );
     }
 
-    @RepeatedTest(value = 25, name = RepeatedTest.LONG_DISPLAY_NAME)
+    @Test
     void testLosses() {
         var config = configBuilder
             .modelName("randomSeed2")
