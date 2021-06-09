@@ -165,6 +165,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     public void release() {
+        progressLogger.release();
         messenger.release();
     }
 
