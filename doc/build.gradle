@@ -4,7 +4,9 @@ description = 'Neo4j Graph Data Science :: Docs'
 
 dependencies {
     implementation     project(':test-utils')
+    implementation     project(':proc-common')
     implementation     group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.doc.'asciidoctorj'
+    implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 
     testImplementation project(':proc')
     testImplementation project(':pregel-example')
