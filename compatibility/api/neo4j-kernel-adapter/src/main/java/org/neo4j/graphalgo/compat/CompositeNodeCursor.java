@@ -43,7 +43,7 @@ public abstract class CompositeNodeCursor extends DefaultCloseListenable impleme
 
     private boolean closed = false;
 
-    CompositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+     protected CompositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
         this.cursors = cursors;
         this.cursorQueue = new PriorityQueue<>(
             cursors.size(),

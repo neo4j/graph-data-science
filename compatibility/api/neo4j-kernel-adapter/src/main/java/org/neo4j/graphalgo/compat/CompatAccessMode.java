@@ -29,9 +29,9 @@ import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
  * then call the {@link Neo4jProxyApi#accessMode(CustomAccessMode)} method to get the actual access mode.
  */
 public abstract class CompatAccessMode extends RestrictedAccessMode {
-    final CustomAccessMode custom;
+    protected final CustomAccessMode custom;
 
-    CompatAccessMode(CustomAccessMode custom) {
+    protected CompatAccessMode(CustomAccessMode custom) {
         super(Static.FULL, Static.FULL);
         this.custom = custom;
     }
