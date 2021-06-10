@@ -98,8 +98,8 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
                     )
                 )
             ),
-            "name", "model",
-            "type", "nodeLogisticRegression"
+            "modelName", "model",
+            "modelType", "nodeLogisticRegression"
         );
         assertCypherResult(query, List.of(Map.of(
             "trainMillis", greaterThan(0L),

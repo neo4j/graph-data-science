@@ -25,8 +25,8 @@ public interface ModelConfig extends Serializable, BaseConfig {
 
     long serialVersionUID = 0x42L;
 
-    String MODEL_NAME_KEY = "name";
-    String MODEL_TYPE_KEY = "type";
+    String MODEL_NAME_KEY = "modelName";
+    String MODEL_TYPE_KEY = "modelType";
 
     String modelName();
 }

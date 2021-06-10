@@ -192,8 +192,8 @@ class LinkPredictionTrainProcTest extends BaseProcTest {
                     )
                 )
             ),
-            "name", "model",
-            "type", "Link Prediction"
+            "modelName", "model",
+            "modelType", "Link Prediction"
         );
         assertCypherResult(query, List.of(Map.of(
             "trainMillis", greaterThan(0L),
