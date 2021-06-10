@@ -166,7 +166,7 @@ For more details on the `stream` mode in general, see <<running-algos-stream>>.
 .The following will run the algorithm, and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.influenceMaximization.greedy.stream('myGraph', {seedSetSize: 3, concurrency: 4})
+CALL gds.alpha.influenceMaximization.celf.stream('myGraph', {seedSetSize: 3, concurrency: 4})
 YIELD nodeId, spread
 RETURN gds.util.asNode(nodeId).name AS Name, spread
 ORDER BY spread ASC
