@@ -30,6 +30,7 @@ public enum Neo4jVersion {
     V_4_1,
     V_4_2,
     V_4_3,
+    V_Dev,
     V_Aura;
 
     @Override
@@ -43,6 +44,8 @@ public enum Neo4jVersion {
                 return "4.2";
             case V_4_3:
                 return "4.3";
+            case V_Dev:
+                return "dev";
             case V_Aura:
                 return "aura";
             default:
@@ -104,8 +107,10 @@ public enum Neo4jVersion {
             case "4.2":
                 return Neo4jVersion.V_4_2;
             case "4.3":
-            case "dev":
                 return Neo4jVersion.V_4_3;
+            case "4.4":
+            case "dev":
+                return Neo4jVersion.V_Dev;
             default:
                 throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);
         }
