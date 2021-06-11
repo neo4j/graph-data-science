@@ -55,6 +55,22 @@ class FloatVectorOperationsTest {
     }
 
     @Test
+    void addWeighted() {
+        float[] a = {3.5f, -2f, 1f};
+        float[] expected = a.clone();
+        float[] b = {5f, 2f, 2.6f};
+        float scalar = 42.42f;
+
+
+        FloatVectorOperations.addWeightedInPlace(a, b, scalar);
+
+        FloatVectorOperations.scale(b, scalar);
+        FloatVectorOperations.addInPlace(expected, b);
+
+        assertThat(a).containsExactly(expected);
+    }
+
+    @Test
     void l2Normalize() {
         float[] a = {4f, -2.5f, 3.3f};
 

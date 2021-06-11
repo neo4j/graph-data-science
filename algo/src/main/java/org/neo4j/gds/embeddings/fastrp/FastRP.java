@@ -43,6 +43,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.addInPlace;
+import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.addWeightedInPlace;
 import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.l2Normalize;
 import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.scale;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -187,7 +188,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
             var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
             var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
-            double iterationWeight = iterationWeights.get(i).doubleValue();
+            float iterationWeight = iterationWeights.get(i).floatValue();
             final boolean firstIteration = i == 0;
 
             List<Runnable> tasks = PartitionUtils.rangePartitionWithBatchSize(
@@ -222,12 +223,6 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     private void addArrayValuesWeighted(float[] lhs, float[] rhs, double weight) {
         for (int i = 0; i < lhs.length; i++) {
             lhs[i] = (float) Math.fma(rhs[i], weight, lhs[i]);
-        }
-    }
-
-    private static void updateEmbeddings(double weight, float[] embedding, float[] newEmbedding) {
-        for (int i = 0; i < embedding.length; i++) {
-            embedding[i] += weight * newEmbedding[i];
         }
     }
 
@@ -367,7 +362,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         private final Partition partition;
         private final HugeObjectArray<float[]> localCurrent;
         private final HugeObjectArray<float[]> localPrevious;
-        private final double iterationWeight;
+        private final float iterationWeight;
         private final Graph concurrentGraph;
         private final boolean firstIteration;
 
@@ -375,7 +370,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
             Partition partition,
             HugeObjectArray<float[]> localCurrent,
             HugeObjectArray<float[]> localPrevious,
-            double iterationWeight,
+            float iterationWeight,
             boolean firstIteration
         ) {
             this.partition = partition;
@@ -415,7 +410,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                 l2Normalize(currentEmbedding);
 
                 // Update the result embedding
-                updateEmbeddings(iterationWeight, embedding, currentEmbedding);
+                addWeightedInPlace(embedding, currentEmbedding, iterationWeight);
                 degrees.add(degree);
             });
             progressLogger.logProgress(degrees.longValue());

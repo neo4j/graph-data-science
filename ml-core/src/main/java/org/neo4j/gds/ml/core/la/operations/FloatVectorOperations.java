@@ -31,6 +31,14 @@ public final class FloatVectorOperations {
         }
     }
 
+    public static void addWeightedInPlace(float[] lhs, float[] rhs, float weight) {
+        var length = Math.min(lhs.length, rhs.length);
+
+        for (int i = 0; i < length; i++) {
+            lhs[i] += weight * rhs[i];
+        }
+    }
+
     public static void scale(float[] lhs, float scalar) {
         int length = lhs.length;
         for (int i = 0; i < length; i++) {
