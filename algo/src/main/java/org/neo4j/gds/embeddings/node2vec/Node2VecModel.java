@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.ml.core.la.operations.FloatVectorOperations;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -35,6 +34,8 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Random;
 
+import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.addInPlace;
+import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.scale;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Node2VecModel {
@@ -204,11 +205,11 @@ public class Node2VecModel {
                 ? 1 / (Math.exp(affinity) + 1)
                 : -1 / (Math.exp(affinity) + 1));
 
-            centerGradientBuffer.scalarMultiply(contextEmbedding, scalar * learningRate);
-            contextGradientBuffer.scalarMultiply(centerEmbedding, scalar * learningRate);
+            scale(contextEmbedding.data(), scalar * learningRate, centerGradientBuffer.data());
+            scale(centerEmbedding.data(), scalar * learningRate, contextGradientBuffer.data());
 
-            FloatVectorOperations.addInPlace(centerEmbedding.data(), centerGradientBuffer.data());
-            FloatVectorOperations.addInPlace(contextEmbedding.data(), contextGradientBuffer.data());
+            addInPlace(centerEmbedding.data(), centerGradientBuffer.data());
+            addInPlace(contextEmbedding.data(), contextGradientBuffer.data());
         }
     }
 

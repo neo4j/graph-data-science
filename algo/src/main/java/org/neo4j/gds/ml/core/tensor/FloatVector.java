@@ -34,12 +34,6 @@ public class FloatVector {
         return data;
     }
 
-    public void scalarMultiply(FloatVector other, float scalar) {
-        for (int pos = 0; pos < data.length; pos++) {
-            data[pos] = other.data[pos] * scalar;
-        }
-    }
-
     public float innerProduct(FloatVector other) {
         float result = 0;
         for (int i = 0; i < data.length; i++) {
