@@ -41,6 +41,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addWeightedInPlace;
@@ -182,6 +184,8 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
     void propagateEmbeddings() {
         long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
+        var partitions = PartitionUtils.degreePartitionWithBatchSize(graph, batchSize, Function.identity());
+
         for (int i = 0; i < iterationWeights.size(); i++) {
             progressLogger.reset(graph.relationshipCount());
             progressLogger.logMessage(formatWithLocale("Iteration %s :: Start", i + 1));
@@ -191,17 +195,15 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
             var iterationWeight = iterationWeights.get(i).floatValue();
             boolean firstIteration = i == 0;
 
-            var tasks = PartitionUtils.rangePartitionWithBatchSize(
-                graph.nodeCount(),
-                batchSize,
-                partition -> new PropagateEmbeddingsTask(
-                    partition,
-                    currentEmbeddings,
-                    previousEmbeddings,
-                    iterationWeight,
-                    firstIteration
-                )
-            );
+            var tasks = partitions.stream()
+                .map(partition -> new PropagateEmbeddingsTask(
+                        partition,
+                        currentEmbeddings,
+                        previousEmbeddings,
+                        iterationWeight,
+                        firstIteration
+                    )
+                ).collect(Collectors.toList());
             ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
             progressLogger.logMessage(formatWithLocale("Iteration %s :: Finished", i + 1));
