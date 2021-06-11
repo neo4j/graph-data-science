@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
@@ -153,6 +154,8 @@ public abstract class HugeAtomicDoubleArray {
      *     This should be the same as returned from {@link #release()} without actually releasing the array.
      */
     public abstract long sizeOf();
+
+    public abstract void setAll(double value);
 
     /**
      * Destroys the data, allowing the underlying storage arrays to be collected as garbage.
@@ -321,6 +324,12 @@ public abstract class HugeAtomicDoubleArray {
         }
 
         @Override
+        public void setAll(double value) {
+            Arrays.fill(page, value);
+            VarHandle.storeStoreFence();
+        }
+
+        @Override
         public long release() {
             if (page != null) {
                 page = null;
@@ -452,6 +461,14 @@ public abstract class HugeAtomicDoubleArray {
         @Override
         public long sizeOf() {
             return memoryUsed;
+        }
+
+        @Override
+        public void setAll(double value) {
+            for (double[] page : pages) {
+                Arrays.fill(page, value);
+            }
+            VarHandle.storeStoreFence();
         }
 
         @Override
