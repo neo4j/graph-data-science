@@ -79,5 +79,4 @@ class FloatVectorOperationsTest {
 
         assertThat(a).containsExactly(4f / l2, -2.5f / l2, 3.3f / l2);
     }
-
 }
