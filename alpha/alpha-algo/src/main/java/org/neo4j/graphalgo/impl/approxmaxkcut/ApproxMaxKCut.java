@@ -124,6 +124,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.SetFun
         byte currIdx = 0, bestIdx = 1;
 
         // Used by `localSearch()` to keep track of the costs for swapping a node to another set.
+        // TODO: If we had pull-based traversal we could have a |V| sized int array here instead of the |V|*k sized
+        //  double array.
         var improvementCosts = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k(), tracker);
 
         // Used by `localSearch()` to keep track of whether we can swap a node into another set or not.
@@ -363,19 +365,30 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.SetFun
 
         @Override
         public void run() {
+            // We keep a local tab to minimize atomic accesses.
+            var outgoingImprovementCosts = new double[k];
+
             partition.consume(nodeId -> {
+                Arrays.fill(outgoingImprovementCosts, 0.0D);
+
                 graph.forEachRelationship(
                     nodeId,
                     DEFAULT_WEIGHT,
                     (sourceNodeId, targetNodeId, weight) -> {
                         double delta = getDelta.accept(weight);
 
-                        improvementCosts.getAndAdd(sourceNodeId * k + setFunction.get(targetNodeId), delta);
+                        outgoingImprovementCosts[setFunction.get(targetNodeId)] += delta;
+                        // TODO: We could avoid these cache-unfriendly accesses of the outgoing relationships if we had
+                        //  a way to traverse incoming relationships (pull-based traversal).
                         improvementCosts.getAndAdd(targetNodeId * k + setFunction.get(sourceNodeId), delta);
 
                         return true;
                     }
                 );
+
+                for (int i = 0; i < k; i++) {
+                    improvementCosts.getAndAdd(nodeId * k + i, outgoingImprovementCosts[i]);
+                }
             });
 
             progressLogger.logProgress(partition.nodeCount());
