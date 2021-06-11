@@ -20,11 +20,15 @@
 package org.neo4j.graphalgo.wcc;
 
 import com.carrotsearch.hppc.BitSet;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -34,16 +38,23 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.graphalgo.extension.GdlExtension;
+import org.neo4j.graphalgo.extension.GdlGraph;
+import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.logging.NullLog;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.TestSupport.toArguments;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 class WccTest {
@@ -255,5 +266,114 @@ class WccTest {
             ProgressLogger.NULL_LOGGER,
             AllocationTracker.empty()
         ).compute();
+    }
+
+    @Nested
+    @GdlExtension
+    @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)
+    class Gdl {
+
+        @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "natural")
+        private static final String TEST_GRAPH =
+            "CREATE" +
+            "  (a:Node)" +
+            ", (b:Node)" +
+            ", (c:Node)" +
+            ", (d:Node)" +
+            ", (e:Node)" +
+            ", (f:Node)" +
+            ", (g:Node)" +
+            ", (h:Node)" +
+            ", (i:Node)" +
+            // {J}
+            ", (j:Node)" +
+            // {A, B, C, D}
+            ", (a)-[:TYPE]->(b)" +
+            ", (b)-[:TYPE]->(c)" +
+            ", (c)-[:TYPE]->(d)" +
+            ", (d)-[:TYPE]->(a)" +
+            // {E, F, G}
+            ", (e)-[:TYPE]->(f)" +
+            ", (f)-[:TYPE]->(g)" +
+            ", (g)-[:TYPE]->(e)" +
+            // {H, I}
+            ", (i)-[:TYPE]->(h)" +
+            ", (h)-[:TYPE]->(i)";
+
+
+        @GdlGraph(orientation = Orientation.REVERSE, graphNamePrefix = "reverse")
+        private static final String REVERSE = TEST_GRAPH;
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "undirected")
+        private static final String UNDIRECTED = TEST_GRAPH;
+
+        @Inject
+        private TestGraph naturalGraph;
+
+        @Inject
+        private TestGraph reverseGraph;
+
+        @Inject
+        private TestGraph undirectedGraph;
+
+        Stream<Arguments> input() {
+            return TestSupport.crossArguments(
+                toArguments(() -> Stream.of(naturalGraph, reverseGraph, undirectedGraph)),
+                toArguments(() -> Arrays.stream(Orientation.values()))
+            );
+        }
+
+        @Test
+        void computeNatural() {
+            assertResults(naturalGraph);
+        }
+
+        @Test
+        void computeReverse() {
+            assertResults(reverseGraph);
+        }
+
+        @Test
+        void computeUndirected() {
+            assertResults(undirectedGraph);
+        }
+
+        private void assertResults(TestGraph graph) {
+            var config = ImmutableWccStreamConfig.builder().build();
+
+            var c0 = minId(graph, "a", "b", "c", "d");
+            var c1 = minId(graph, "e", "f", "g");
+            var c2 = minId(graph, "h", "i");
+            var c3 = minId(graph, "j");
+
+            var expected = Map.of(
+                graph.toOriginalNodeId("a"), c0,
+                graph.toOriginalNodeId("b"), c0,
+                graph.toOriginalNodeId("c"), c0,
+                graph.toOriginalNodeId("d"), c0,
+                graph.toOriginalNodeId("e"), c1,
+                graph.toOriginalNodeId("f"), c1,
+                graph.toOriginalNodeId("g"), c1,
+                graph.toOriginalNodeId("h"), c2,
+                graph.toOriginalNodeId("i"), c2,
+                graph.toOriginalNodeId("j"), c3
+            );
+
+            var dss = new WccAlgorithmFactory<>()
+                .build(
+                    graph,
+                    config,
+                    AllocationTracker.empty(),
+                    ProgressLogger.NULL_LOGGER
+                ).compute();
+
+            for (long nodeId = 0; nodeId < dss.size(); nodeId++) {
+                assertThat(dss.setIdOf(nodeId)).isEqualTo(expected.get(nodeId));
+            }
+        }
+
+        long minId(TestGraph graph, String... ids) {
+            return Arrays.stream(ids).map(graph::toMappedNodeId).mapToLong(id -> id).min().orElse(-1);
+        }
     }
 }
