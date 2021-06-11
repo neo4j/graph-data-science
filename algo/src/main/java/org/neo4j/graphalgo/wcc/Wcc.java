@@ -32,10 +32,11 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -112,14 +113,11 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, tracker, config.concurrency())
             : new HugeAtomicDisjointSetStruct(nodeCount, tracker, config.concurrency());
 
-        final Collection<Runnable> tasks = new ArrayList<>(threadSize);
-        for (long i = 0L; i < this.nodeCount; i += batchSize) {
-            WCCTask wccTask = Double.isNaN(threshold()) || threshold() == 0
-                ? new WCCTask(dss, i)
-                : new WCCWithThresholdTask(threshold(), dss, i);
-            tasks.add(wccTask);
+        if (graph.isUndirected()) {
+            computeUndirected(dss);
+        } else {
+            computeDirected(dss);
         }
-        ParallelUtil.run(tasks, executor);
 
         progressLogger.logMessage(":: Finished");
         return dss;
@@ -137,6 +135,32 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
 
     public double threshold() {
         return config.threshold();
+    }
+
+    private void computeDirected(DisjointSetStruct dss) {
+        var tasks = new ArrayList<Runnable>(threadSize);
+        for (long i = 0L; i < this.nodeCount; i += batchSize) {
+            var wccTask = Double.isNaN(threshold()) || threshold() == 0
+                ? new WCCTask(dss, i)
+                : new WCCWithThresholdTask(threshold(), dss, i);
+            tasks.add(wccTask);
+        }
+        ParallelUtil.run(tasks, executor);
+    }
+
+    private void computeUndirected(DisjointSetStruct components) {
+        var partitions = PartitionUtils.rangePartition(config.concurrency(), graph.nodeCount(), Function.identity());
+
+        // Process a sparse sampled subgraph first for approximating components.
+        // Sample by processing a fixed number of neighbors for each node (see paper)
+        Afforest.sampleSubgraph(graph, components, partitions, executor);
+
+        // Sample 'comp' to find the most frequent element -- due to prior
+        // compression, this value represents the largest intermediate component
+        var largestComponent = Afforest.sampleFrequentElement(nodeCount, components);
+
+        // Final 'link' phase over remaining edges (excluding largest component)
+        Afforest.linkRemaining(graph, components, largestComponent, partitions, executor);
     }
 
     private static double defaultWeight(double threshold) {
