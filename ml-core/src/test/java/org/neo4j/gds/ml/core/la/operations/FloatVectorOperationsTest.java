@@ -79,4 +79,13 @@ class FloatVectorOperationsTest {
 
         assertThat(a).containsExactly(4f / l2, -2.5f / l2, 3.3f / l2);
     }
+
+    @Test
+    void l2NormalizeZeroVector() {
+        float[] a = {0f, 0f, 0f};
+
+        FloatVectorOperations.l2Normalize(a);
+
+        assertThat(a).containsOnly(0f);
+    }
 }

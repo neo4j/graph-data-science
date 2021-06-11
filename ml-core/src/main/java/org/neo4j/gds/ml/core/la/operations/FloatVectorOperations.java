@@ -53,6 +53,8 @@ public final class FloatVectorOperations {
         }
 
         float euclideanLength = (float) Math.sqrt(sum);
-        scale(array, 1 / euclideanLength);
+        if (euclideanLength > 0) {
+            scale(array, 1 / euclideanLength);
+        }
     }
 }
