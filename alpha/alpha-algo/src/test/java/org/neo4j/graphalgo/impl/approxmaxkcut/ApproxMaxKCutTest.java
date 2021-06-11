@@ -85,7 +85,8 @@ final class ApproxMaxKCutTest {
                     Map.of("a", 0L, "b", 1L, "c", 0L, "d", 1L, "e", 1L, "f", 1L, "g", 1L)
                 )
             ),
-            () -> Stream.of(Arguments.of(1), Arguments.of(4))
+            () -> Stream.of(Arguments.of(0), Arguments.of(4)), // VNS max neighborhood order
+            () -> Stream.of(Arguments.of(1), Arguments.of(4))  // concurrency
         );
     }
 
@@ -94,12 +95,15 @@ final class ApproxMaxKCutTest {
     void shouldComputeCorrectResults(
         boolean weighted,
         Map<String, Long> expected,
+        int vnsMaxNeighborhoodOrder,
         int concurrency
     ) {
         var configBuilder = ImmutableApproxMaxKCutConfig.builder()
             .concurrency(concurrency)
             .k(2)
-            .iterations(40); // 40 iterations is more than enough to get the optimal cut for our input.
+            .vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder)
+            // We should not need as many iterations if we do VNS.
+            .iterations(vnsMaxNeighborhoodOrder > 0 ? 80 : 20);
 
         if (weighted) {
             configBuilder.relationshipWeightProperty("weight");
