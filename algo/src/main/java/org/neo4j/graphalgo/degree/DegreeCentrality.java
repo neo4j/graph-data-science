@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
@@ -157,11 +158,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
     private DegreeFunction computeDegree(TaskFunction taskFunction) {
         var degrees = HugeDoubleArray.newArray(graph.nodeCount(), tracker);
-        var tasks = PartitionUtils.degreePartitionWithMinBatchSize(
+        var tasks = PartitionUtils.degreePartition(
             graph,
             config.concurrency(),
-            config.minBatchSize(),
-            partition -> taskFunction.apply(partition, degrees)
+            partition -> taskFunction.apply(partition, degrees),
+            Optional.of(config.minBatchSize())
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
         return degrees::get;
@@ -169,11 +170,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
     private DegreeFunction computeDegreeAtomic(TaskFunctionAtomic taskFunction) {
         var degrees = HugeAtomicDoubleArray.newArray(graph.nodeCount(), tracker);
-        var tasks = PartitionUtils.degreePartitionWithMinBatchSize(
+        var tasks = PartitionUtils.degreePartition(
             graph,
             config.concurrency(),
-            config.minBatchSize(),
-            partition -> taskFunction.apply(partition, degrees)
+            partition -> taskFunction.apply(partition, degrees),
+            Optional.of(config.minBatchSize())
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
         return degrees::get;

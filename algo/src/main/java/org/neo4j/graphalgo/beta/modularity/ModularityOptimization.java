@@ -44,6 +44,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
@@ -217,14 +218,16 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.communityWeights = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
         this.communityWeightUpdates = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
 
-        var initTasks = PartitionUtils.rangePartition(concurrency, nodeCount, (partition) -> new InitTask(
-            graph.concurrentCopy(),
-            currentCommunities,
-            communityWeights,
-            cumulativeNodeWeights,
-            seedProperty != null,
-            partition
-        ));
+        var initTasks = PartitionUtils.rangePartition(concurrency, nodeCount, (partition) ->
+            new InitTask(
+                graph.concurrentCopy(),
+                currentCommunities,
+                communityWeights,
+                cumulativeNodeWeights,
+                seedProperty != null,
+                partition
+            ),
+            Optional.empty());
 
         ParallelUtil.run(initTasks, executor);
 

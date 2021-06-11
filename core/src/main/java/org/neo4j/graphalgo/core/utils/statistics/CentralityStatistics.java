@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongToDoubleFunction;
 
@@ -48,7 +49,8 @@ public final class CentralityStatistics {
             var tasks = PartitionUtils.rangePartition(
                 concurrency,
                 nodeCount,
-                partition -> new RecordTask(partition, centralityFunction)
+                partition -> new RecordTask(partition, centralityFunction),
+                Optional.empty()
             );
 
             ParallelUtil.run(tasks, executorService);

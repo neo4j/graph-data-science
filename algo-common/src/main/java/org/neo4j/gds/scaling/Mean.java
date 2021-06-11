@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 final class Mean extends ScalarScaler {
@@ -41,7 +42,8 @@ final class Mean extends ScalarScaler {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new ComputeMaxMinSum(partition, properties)
+            partition -> new ComputeMaxMinSum(partition, properties),
+            Optional.empty()
         );
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 

@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeSparseLongArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
 
@@ -110,7 +111,8 @@ public final class CommunityStatistics {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             capacity,
-            partition -> new CountTask(communitySizes, partition)
+            partition -> new CountTask(communitySizes, partition),
+            Optional.empty()
         );
 
         ParallelUtil.run(tasks, executorService);
@@ -165,7 +167,8 @@ public final class CommunityStatistics {
             var tasks = PartitionUtils.rangePartition(
                 concurrency,
                 capacity,
-                partition -> new CountAndRecordTask(communitySizes, partition)
+                partition -> new CountAndRecordTask(communitySizes, partition),
+                Optional.empty()
             );
 
             ParallelUtil.run(tasks, executorService);

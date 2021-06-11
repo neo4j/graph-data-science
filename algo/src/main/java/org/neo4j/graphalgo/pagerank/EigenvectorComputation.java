@@ -152,7 +152,8 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
                     RANK,
                     normalizedNextRank
                 );
-            })
+            }),
+            Optional.empty()
         );
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, context.executorService());

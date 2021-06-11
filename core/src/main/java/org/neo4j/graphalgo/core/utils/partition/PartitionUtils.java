@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static org.neo4j.graphalgo.core.utils.partition.Partition.MAX_NODE_COUNT;
@@ -34,20 +35,21 @@ public final class PartitionUtils {
 
     private PartitionUtils() {}
 
-    public static <TASK> List<TASK> rangePartition(int concurrency, long nodeCount, Function<Partition, TASK> taskCreator) {
-        long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, ParallelUtil.DEFAULT_BATCH_SIZE);
+    public static <TASK> List<TASK> rangePartition(
+        int concurrency,
+        long nodeCount,
+        Function<Partition, TASK> taskCreator,
+        Optional<Integer> minBatchSize
+    ) {
+        long batchSize = ParallelUtil.adjustedBatchSize(
+            nodeCount,
+            concurrency,
+            minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE)
+        );
         return rangePartitionWithBatchSize(nodeCount, batchSize, taskCreator);
     }
 
     public static <TASK> List<TASK> rangePartitionWithBatchSize(long nodeCount, long batchSize, Function<Partition, TASK> taskCreator) {
-        return tasks(nodeCount, batchSize, taskCreator);
-    }
-
-    /*
-     * Permits running in parallel even for small node counts.
-     */
-    public static <TASK> List<TASK> rangePartitionWithMinBatchSize(long nodeCount, int concurrency, long minBatchSize, Function<Partition, TASK> taskCreator) {
-    long batchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, minBatchSize);
         return tasks(nodeCount, batchSize, taskCreator);
     }
 
@@ -80,20 +82,20 @@ public final class PartitionUtils {
         return tasks(nodeCount, adjustedBatchSize, taskCreator);
     }
 
-    public static <TASK> List<TASK> degreePartition(Graph graph, int concurrency, Function<Partition, TASK> taskCreator) {
-        var batchSize = Math.max(ParallelUtil.DEFAULT_BATCH_SIZE, BitUtil.ceilDiv(graph.relationshipCount(), concurrency));
+    public static <TASK> List<TASK> degreePartition(
+        Graph graph,
+        int concurrency,
+        Function<Partition, TASK> taskCreator,
+        Optional<Integer> minBatchSize
+    ) {
+        var batchSize = Math.max(
+            minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
+            BitUtil.ceilDiv(graph.relationshipCount(), concurrency)
+        );
         return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
     }
 
     public static <TASK> List<TASK> degreePartitionWithBatchSize(Graph graph, long batchSize, Function<Partition, TASK> taskCreator) {
-        return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
-    }
-
-    /*
-     * Permits running in parallel even for small graphs.
-     */
-    public static <TASK> List<TASK> degreePartitionWithMinBatchSize(Graph graph, int concurrency, long minBatchSize, Function<Partition, TASK> taskCreator) {
-        var batchSize = Math.max(minBatchSize, BitUtil.ceilDiv(graph.relationshipCount(), concurrency));
         return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
     }
 

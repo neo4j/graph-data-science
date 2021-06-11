@@ -93,7 +93,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
             (partition) -> (Runnable) () -> partition.consume((nodeId) -> scaledProperties.set(
                 nodeId,
                 new double[propertyCount]
-            ))
+            )),
+            Optional.empty()
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
     }
@@ -103,7 +104,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties, ScaleProperties.
         var tasks = PartitionUtils.rangePartition(
             config.concurrency(),
             graph.nodeCount(),
-            partition -> (Runnable) () -> partition.consume(strategy)
+            partition -> (Runnable) () -> partition.consume(strategy),
+            Optional.empty()
         );
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
     }

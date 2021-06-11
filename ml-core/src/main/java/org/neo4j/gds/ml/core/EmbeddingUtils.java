@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -87,7 +88,8 @@ public final class EmbeddingUtils {
                         }
                     );
                 });
-            }
+            },
+            Optional.empty()
         );
 
         ParallelUtil.run(tasks, executorService);

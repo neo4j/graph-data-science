@@ -228,7 +228,8 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
                     modularityOptimization,
                     workingGraph.concurrentCopy(),
                     partition
-                )
+                ),
+            Optional.empty()
         );
 
         ParallelUtil.run(relationshipCreators, executorService);

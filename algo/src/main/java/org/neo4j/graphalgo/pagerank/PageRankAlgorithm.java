@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 import static org.neo4j.gds.scaling.ScalarScaler.Variant.L2NORM;
@@ -90,7 +91,8 @@ public class PageRankAlgorithm extends Algorithm<PageRankAlgorithm, PageRankResu
         );
 
         var tasks = PartitionUtils.rangePartition(config.concurrency(), graph.nodeCount(),
-            partition -> (Runnable) () -> partition.consume(nodeId -> scores.set(nodeId, scaler.scaleProperty(nodeId)))
+            partition -> (Runnable) () -> partition.consume(nodeId -> scores.set(nodeId, scaler.scaleProperty(nodeId))),
+            Optional.empty()
         );
 
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executorService);

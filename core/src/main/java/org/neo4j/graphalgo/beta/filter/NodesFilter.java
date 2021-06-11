@@ -51,6 +51,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -181,7 +182,8 @@ final class NodesFilter {
             partition -> (Runnable) () -> partition.consume(node -> originalIds.set(
                 node,
                 graphStore.nodes().toOriginalNodeId(node)
-            ))
+            )),
+            Optional.empty()
         );
         ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
         progressLogger.finishSubTask("Create id array");

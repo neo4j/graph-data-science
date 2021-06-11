@@ -43,6 +43,7 @@ import org.neo4j.values.storable.NumberType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -182,7 +183,8 @@ final class RelationshipsFilter {
                 relType,
                 propertyIndices,
                 progressLogger
-            )
+            ),
+            Optional.empty()
         );
 
         ParallelUtil.runWithConcurrency(concurrency, relationshipFilterTasks, executorService);

@@ -28,6 +28,7 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
@@ -98,9 +99,14 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
 
         switch (config.partitioning()) {
             case RANGE:
-                return PartitionUtils.rangePartition(concurrency, graph.nodeCount(), partitionFunction);
+                return PartitionUtils.rangePartition(
+                    concurrency,
+                    graph.nodeCount(),
+                    partitionFunction,
+                    Optional.empty()
+                );
             case DEGREE:
-                return PartitionUtils.degreePartition(graph, concurrency, partitionFunction);
+                return PartitionUtils.degreePartition(graph, concurrency, partitionFunction, Optional.empty());
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Unsupported partitioning `%s`",

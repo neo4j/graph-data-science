@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 final class L1Norm extends ScalarScaler {
@@ -39,7 +40,8 @@ final class L1Norm extends ScalarScaler {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new ComputeAbsoluteSum(partition, properties)
+            partition -> new ComputeAbsoluteSum(partition, properties),
+            Optional.empty()
         );
         ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
