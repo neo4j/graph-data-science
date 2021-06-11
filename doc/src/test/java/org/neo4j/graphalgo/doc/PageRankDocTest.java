@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
@@ -47,4 +47,3 @@ class PageRankDocTest extends DocTestBase {
     }
 
 }
-

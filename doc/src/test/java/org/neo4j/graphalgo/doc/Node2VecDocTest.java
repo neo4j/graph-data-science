@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.graphalgo.beta.node2vec.Node2VecStreamProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 
 import java.util.List;
 

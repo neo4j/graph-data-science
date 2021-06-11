@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;

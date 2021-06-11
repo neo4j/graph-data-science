@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.assertj.ConditionFactory;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;

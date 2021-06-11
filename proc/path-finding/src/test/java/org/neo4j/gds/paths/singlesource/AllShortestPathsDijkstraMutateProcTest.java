@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateRelationshipWithPropertyTest;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 

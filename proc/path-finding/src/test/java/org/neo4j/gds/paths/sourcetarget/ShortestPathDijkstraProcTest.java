@@ -34,7 +34,7 @@ import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SourceNodeConfigTest;
 import org.neo4j.graphalgo.TargetNodeConfigTest;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
@@ -160,4 +160,3 @@ abstract class ShortestPathDijkstraProcTest<CONFIG extends ShortestPathBaseConfi
 
     // end of disabled tests from org.neo4j.graphalgo.RelationshipWeightConfigTest
 }
-

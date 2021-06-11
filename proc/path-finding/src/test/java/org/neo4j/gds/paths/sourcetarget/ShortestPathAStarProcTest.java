@@ -42,7 +42,7 @@ import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SourceNodeConfigTest;
 import org.neo4j.graphalgo.TargetNodeConfigTest;
 import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;

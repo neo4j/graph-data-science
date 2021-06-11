@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphalgo.functions.IsFiniteFunc;
 import org.neo4j.graphalgo.functions.NodePropertyFunc;
@@ -47,4 +47,3 @@ class UtilityDocTest extends DocTestBase {
     }
 
 }
-

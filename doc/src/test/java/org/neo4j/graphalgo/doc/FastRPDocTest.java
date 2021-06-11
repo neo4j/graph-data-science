@@ -24,7 +24,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
 import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedStreamProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,4 +49,3 @@ class FastRPDocTest extends DocTestBase {
     }
 
 }
-

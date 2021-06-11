@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 
 import java.util.Collections;
 import java.util.List;

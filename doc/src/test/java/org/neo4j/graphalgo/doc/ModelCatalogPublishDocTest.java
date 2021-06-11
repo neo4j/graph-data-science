@@ -35,7 +35,7 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
-import org.neo4j.graphalgo.model.catalog.ModelPublishProc;
+import org.neo4j.gds.model.catalog.ModelPublishProc;
 
 import java.nio.file.Path;
 import java.util.List;

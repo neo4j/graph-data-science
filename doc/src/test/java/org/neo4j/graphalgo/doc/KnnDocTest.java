@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.similarity.knn.KnnMutateProc;
 import org.neo4j.graphalgo.similarity.knn.KnnStatsProc;
 import org.neo4j.graphalgo.similarity.knn.KnnStreamProc;
@@ -46,4 +46,3 @@ class KnnDocTest extends DocTestBase {
         return "algorithms/beta/knn.adoc";
     }
 }
-

@@ -23,8 +23,8 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictStreamProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictWriteProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 
 import java.util.List;
 

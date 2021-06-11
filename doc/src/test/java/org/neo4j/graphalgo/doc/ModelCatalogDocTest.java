@@ -27,9 +27,9 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
-import org.neo4j.graphalgo.model.catalog.ModelDropProc;
-import org.neo4j.graphalgo.model.catalog.ModelExistsProc;
-import org.neo4j.graphalgo.model.catalog.ModelListProc;
+import org.neo4j.gds.model.catalog.ModelDropProc;
+import org.neo4j.gds.model.catalog.ModelExistsProc;
+import org.neo4j.gds.model.catalog.ModelListProc;
 
 import java.util.List;
 
@@ -71,4 +71,3 @@ class ModelCatalogDocTest extends DocTestBase {
     }
 
 }
-

@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.impl.core.NodeEntity;
 

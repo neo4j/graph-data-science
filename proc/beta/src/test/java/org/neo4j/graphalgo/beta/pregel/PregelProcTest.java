@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.assertj.ConditionFactory;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;

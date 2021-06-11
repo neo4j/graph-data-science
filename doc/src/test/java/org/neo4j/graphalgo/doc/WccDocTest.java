@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 import org.neo4j.graphalgo.wcc.WccStatsProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
@@ -47,4 +47,3 @@ class WccDocTest extends DocTestBase {
     }
 
 }
-

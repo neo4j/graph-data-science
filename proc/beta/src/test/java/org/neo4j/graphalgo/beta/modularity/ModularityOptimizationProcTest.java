@@ -23,8 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 

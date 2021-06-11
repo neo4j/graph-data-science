@@ -26,7 +26,7 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 

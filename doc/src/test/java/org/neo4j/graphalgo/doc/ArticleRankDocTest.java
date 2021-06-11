@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.pagerank.ArticleRankMutateProc;
 import org.neo4j.graphalgo.pagerank.ArticleRankStatsProc;
 import org.neo4j.graphalgo.pagerank.ArticleRankStreamProc;
@@ -46,4 +46,3 @@ class ArticleRankDocTest extends DocTestBase {
         return "algorithms/article-rank/article-rank.adoc";
     }
 }
-

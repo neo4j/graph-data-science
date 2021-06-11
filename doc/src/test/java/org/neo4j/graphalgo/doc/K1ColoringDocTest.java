@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.beta.k1coloring.K1ColoringMutateProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStatsProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStreamProc;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,4 +47,3 @@ class K1ColoringDocTest extends DocTestBase {
     }
 
 }
-

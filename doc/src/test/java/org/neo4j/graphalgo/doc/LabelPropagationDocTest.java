@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
@@ -45,4 +45,3 @@ class LabelPropagationDocTest extends DocTestBase {
     }
 
 }
-

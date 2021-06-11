@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 

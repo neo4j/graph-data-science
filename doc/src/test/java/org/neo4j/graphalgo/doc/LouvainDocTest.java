@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.louvain.LouvainMutateProc;
 import org.neo4j.graphalgo.louvain.LouvainStatsProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
@@ -47,4 +47,3 @@ class LouvainDocTest extends DocTestBase {
     }
 
 }
-

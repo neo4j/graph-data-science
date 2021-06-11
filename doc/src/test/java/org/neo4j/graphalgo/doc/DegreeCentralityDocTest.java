@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.degree.DegreeCentralityMutateProc;
 import org.neo4j.graphalgo.degree.DegreeCentralityStatsProc;
 import org.neo4j.graphalgo.degree.DegreeCentralityStreamProc;

@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;

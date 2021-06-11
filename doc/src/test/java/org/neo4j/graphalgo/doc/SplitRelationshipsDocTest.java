@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.catalog.GraphStreamRelationshipPropertiesProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,4 +43,3 @@ class SplitRelationshipsDocTest extends DocTestBase {
     }
 
 }
-

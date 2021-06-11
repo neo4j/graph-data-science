@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;

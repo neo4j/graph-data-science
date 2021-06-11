@@ -27,15 +27,15 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.graphalgo.QueryRunner;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.datasets.CommunityDbCreator;
 import org.neo4j.graphalgo.datasets.Cora;
 import org.neo4j.graphalgo.datasets.DatasetManager;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
-import org.neo4j.graphalgo.model.catalog.ModelListProc;
+import org.neo4j.gds.model.catalog.ModelListProc;
 
 import java.nio.file.Path;
 import java.util.HashMap;

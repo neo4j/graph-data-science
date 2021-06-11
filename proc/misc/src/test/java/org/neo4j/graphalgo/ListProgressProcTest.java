@@ -30,7 +30,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.beta.generator.GraphGenerateProc;
+import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.RenamesCurrentThread;

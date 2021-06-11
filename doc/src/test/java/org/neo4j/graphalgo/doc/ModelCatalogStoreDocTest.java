@@ -36,9 +36,9 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
-import org.neo4j.graphalgo.model.catalog.ModelDeleteProc;
-import org.neo4j.graphalgo.model.catalog.ModelLoadProc;
-import org.neo4j.graphalgo.model.catalog.ModelStoreProc;
+import org.neo4j.gds.model.catalog.ModelDeleteProc;
+import org.neo4j.gds.model.catalog.ModelLoadProc;
+import org.neo4j.gds.model.catalog.ModelStoreProc;
 
 import java.nio.file.Path;
 import java.util.List;

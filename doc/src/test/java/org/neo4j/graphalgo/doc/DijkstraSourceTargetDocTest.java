@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.doc;
 import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraMutateProc;
 import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraStreamProc;
 import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraWriteProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 
 import java.util.Arrays;
 import java.util.List;

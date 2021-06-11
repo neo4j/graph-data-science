@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;

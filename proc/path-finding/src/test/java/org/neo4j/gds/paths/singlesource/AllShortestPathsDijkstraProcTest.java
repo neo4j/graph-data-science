@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SourceNodeConfigTest;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;

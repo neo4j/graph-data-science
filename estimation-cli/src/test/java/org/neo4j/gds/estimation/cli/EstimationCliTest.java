@@ -66,7 +66,7 @@ import org.neo4j.graphalgo.betweenness.BetweennessCentralityMutateProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityWriteProc;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
