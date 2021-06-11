@@ -35,21 +35,42 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 /**
- * This CC implementation makes use of the Afforest subgraph sampling algorithm [1],
- * which restructures and extends the Shiloach-Vishkin algorithm [2].
+ * The subgraph sampling optimization has been introduced in [1].
+ *
+ * The idea is to identify the largest component using a sampled subgraph.
+ * Relationships of nodes that are already contained in the largest component are
+ * not iterated.
+ *
+ * This approach requires the relationships to be undirected to make sure that
+ * skipped nodes are eventually assigned to the correct component in case the
+ * sampled one was not representing the largest component.
+ *
+ * In contrast to [1], this implementation uses a {@link DisjointSetStruct} to
+ * represent the mapping between nodes and components. The compression step
+ * described in [1], is contained in {@link DisjointSetStruct#setIdOf}.
  *
  * [1] Michael Sutton, Tal Ben-Nun, and Amnon Barak. "Optimizing Parallel
  * Graph Connectivity Computation via Subgraph Sampling" Symposium on
  * Parallel and Distributed Processing, IPDPS 2018.
- * [2] Yossi Shiloach and Uzi Vishkin. "An o(logn) parallel connectivity algorithm"
- * Journal of Algorithms, 3(1):57–67, 1982.
  */
-final class Afforest {
+final class SubgraphSampling {
 
+    /**
+     * The number of relationships of each node that
+     * we look at during the initial sampling round.
+     */
     private static final int NEIGHBOR_ROUNDS = 2;
 
+    /**
+     * The number of samples we draw from the node
+     * space to identify the largest component.
+     */
     private static final int SAMPLING_SIZE = 1024;
 
+    /**
+     * Processes a sparse samples subgraph first for approximating components.
+     * Samples by processing a fixed number of neighbors for each node.
+     */
     static void sampleSubgraph(
         Graph graph,
         DisjointSetStruct components,
@@ -58,11 +79,9 @@ final class Afforest {
     ) {
         var tasks = partitions
             .stream()
-            .map(partition -> new Afforest.SampleSubgraphTask(graph, partition, components))
+            .map(partition -> new SubgraphSampling.SampleSubgraphTask(graph, partition, components))
             .collect(Collectors.toList());
 
-        // Process a sparse sampled subgraph first for approximating components.
-        // Sample by processing a fixed number of neighbors for each node (see paper)
         for (int r = 0; r < NEIGHBOR_ROUNDS; r++) {
             for (var task : tasks) {
                 task.setTargetIndex(r);
@@ -71,16 +90,18 @@ final class Afforest {
         }
     }
 
-    static long sampleFrequentElement(long nodeCount, DisjointSetStruct components) {
+    /**
+     * Finds the most frequent component by sampling a fixed number of nodes.
+     */
+    static long sampleFrequentElement(DisjointSetStruct components, long nodeCount) {
         var random = new SplittableRandom();
         var sampleCounts = new LongIntHashMap();
 
-        // Sample elements from 'comp'
         for (int i = 0; i < SAMPLING_SIZE; i++) {
             var node = random.nextLong(nodeCount);
             sampleCounts.addTo(components.setIdOf(node), 1);
         }
-        // Find most frequent element in samples (estimate of most frequent overall)
+
         var max = new MutableInt(-1);
         var mostFrequent = new MutableLong(-1L);
 
@@ -94,6 +115,12 @@ final class Afforest {
         return mostFrequent.longValue();
     }
 
+    /**
+     * Processes the remaining relationships that were
+     * not processed during the initial sampling.
+     *
+     * Skips nodes that are already contained in the largest component.
+     */
     static void linkRemaining(
         Graph graph,
         DisjointSetStruct components,
@@ -216,5 +243,5 @@ final class Afforest {
         }
     }
 
-    private Afforest() {}
+    private SubgraphSampling() {}
 }
