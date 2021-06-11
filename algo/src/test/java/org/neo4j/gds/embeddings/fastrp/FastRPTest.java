@@ -53,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.embeddings.fastrp.FastRP.l2Normalize;
+import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.l2Normalize;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class FastRPTest extends AlgoTestBase {

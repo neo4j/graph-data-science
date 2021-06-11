@@ -42,6 +42,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.addInPlace;
+import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.l2Normalize;
+import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.scale;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
@@ -121,7 +124,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         this.concurrency = config.concurrency();
         this.embeddingCombiner = graph.hasRelationshipProperty()
             ? this::addArrayValuesWeighted
-            : (lhs, rhs, ignoreWeight) -> addArrayValues(lhs, rhs);
+            : (lhs, rhs, ignoreWeight) -> addInPlace(lhs, rhs);
         this.embeddings.setAll((i) -> new float[embeddingDimension]);
     }
 
@@ -216,33 +219,9 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         return embeddings;
     }
 
-    private void addArrayValues(float[] lhs, float[] rhs) {
-        for (int i = 0; i < lhs.length; i++) {
-            lhs[i] += rhs[i];
-        }
-    }
-
     private void addArrayValuesWeighted(float[] lhs, float[] rhs, double weight) {
         for (int i = 0; i < lhs.length; i++) {
             lhs[i] = (float) Math.fma(rhs[i], weight, lhs[i]);
-        }
-    }
-
-    private static void multiplyArrayValues(float[] lhs, double scalar) {
-        for (int i = 0; i < lhs.length; i++) {
-            lhs[i] *= scalar;
-        }
-    }
-
-    static void l2Normalize(float[] array) {
-        double sum = 0.0f;
-        for (double value : array) {
-            sum += value * value;
-        }
-        double sqrtSum = sum == 0 ? 1 : Math.sqrt(sum);
-        double scaling = 1 / sqrtSum;
-        for (int i = 0; i < array.length; i++) {
-            array[i] *= scaling;
         }
     }
 
@@ -353,8 +332,8 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
             float[] features = features(nodeId);
 
             for (int j = 0; j < features.length; j++) {
-                double featureValue = features[j];
-                if (featureValue != 0.0D) {
+                float featureValue = features[j];
+                if (featureValue != 0.0f) {
                     for (int i = baseEmbeddingDimension; i < embeddingDimension; i++) {
                         randomVector[i] += featureValue * propertyVectors[j][i - baseEmbeddingDimension];
                     }
@@ -431,8 +410,8 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                 // Normalize neighbour embeddings
                 var degree = graph.degree(nodeId);
                 int adjustedDegree = degree == 0 ? 1 : degree;
-                double degreeScale = 1.0f / adjustedDegree;
-                multiplyArrayValues(currentEmbedding, degreeScale);
+                float degreeScale = 1.0f / adjustedDegree;
+                scale(currentEmbedding, degreeScale);
                 l2Normalize(currentEmbedding);
 
                 // Update the result embedding
