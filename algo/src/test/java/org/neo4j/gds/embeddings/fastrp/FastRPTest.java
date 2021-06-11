@@ -49,10 +49,8 @@ import org.neo4j.graphalgo.extension.Inject;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -113,7 +111,8 @@ class FastRPTest extends AlgoTestBase {
 
         float[] expected = randomVectors.get(1);
         l2Normalize(expected);
-        assertArrayEquals(expected, embeddings.get(0));
+
+        assertThat(embeddings.get(0)).isEqualTo(expected);
     }
 
     @Test
@@ -147,7 +146,8 @@ class FastRPTest extends AlgoTestBase {
             expected[i] = (randomVectors.get(1)[i] + randomVectors.get(2)[i]) / 2.0f;
         }
         l2Normalize(expected);
-        assertArrayEquals(expected, embeddings.get(0));
+
+        assertThat(embeddings.get(0)).containsExactly(expected);
     }
 
     @Test
@@ -190,9 +190,10 @@ class FastRPTest extends AlgoTestBase {
         sequentialFastRP.compute();
         HugeObjectArray<float[]> sequentialEmbeddings = sequentialFastRP.embeddings();
 
-        for (int i = 0; i < graph.nodeCount(); i++) {
-            assertArrayEquals(sequentialEmbeddings.get(i), concurrentEmbeddings.get(i));
-        }
+        graph.forEachNode(nodeId -> {
+            assertThat(concurrentEmbeddings.get(nodeId)).containsExactly(sequentialEmbeddings.get(nodeId));
+            return true;
+        });
     }
 
     @Test
@@ -235,7 +236,7 @@ class FastRPTest extends AlgoTestBase {
         }
         l2Normalize(expected);
 
-        assertArrayEquals(expected, embeddings.get(0));
+        assertThat(embeddings.get(0)).containsExactly(expected);
     }
 
     @Test
@@ -280,8 +281,9 @@ class FastRPTest extends AlgoTestBase {
             }
 
             int numNegative = 512 - numZeros - numPositive;
-            assertTrue(numPositive >= minNumPositive && numPositive <= maxNumPositive);
-            assertTrue(numNegative >= minNumPositive && numNegative <= maxNumPositive);
+
+            assertThat(numPositive >= minNumPositive && numPositive <= maxNumPositive).isTrue();
+            assertThat(numNegative >= minNumPositive && numNegative <= maxNumPositive).isTrue();
         }
     }
 
@@ -306,12 +308,10 @@ class FastRPTest extends AlgoTestBase {
             AllocationTracker.empty()
         );
 
-        HugeObjectArray<float[]> embeddings = fastRP.embeddings();
+        var embeddings = fastRP.embeddings();
+
         for (int i = 0; i < embeddings.size(); i++) {
-            float[] embedding = embeddings.get(i);
-            for (double embeddingValue : embedding) {
-                assertEquals(0.0f, embeddingValue);
-            }
+            assertThat(embeddings.get(i)).containsOnly(0f);
         }
     }
 
@@ -326,8 +326,9 @@ class FastRPTest extends AlgoTestBase {
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
-        assertEquals(estimate.min, estimate.max);
-        assertEquals(159_832, estimate.min);
+        assertThat(estimate.min)
+            .isEqualTo(estimate.max)
+            .isEqualTo(159_832);
     }
 
     @Test
@@ -341,8 +342,9 @@ class FastRPTest extends AlgoTestBase {
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
-        assertEquals(estimate.min, estimate.max);
-        assertEquals(159_832, estimate.min);
+        assertThat(estimate.min)
+            .isEqualTo(estimate.max)
+            .isEqualTo(159_832);
     }
 
     @Test
@@ -371,16 +373,20 @@ class FastRPTest extends AlgoTestBase {
 
         new FastRP(graph, config, List.of(), logger, AllocationTracker.empty()).compute();
 
-        assertTrue(logger.containsMessage(TestProgressLogger.INFO, ":: Start"));
-        assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 1 :: Start"));
-        assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 1 :: Finished"));
-        assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 2 :: Start"));
-        assertTrue(logger.containsMessage(TestProgressLogger.INFO, "Iteration 2 :: Finished"));
-        assertTrue(logger.containsMessage(TestProgressLogger.INFO, ":: Finished"));
-        assertEquals(
-            3,
-            logger.getMessages(TestProgressLogger.INFO).stream().filter(message -> message.contains("100%")).count()
+        var expectedMessages = List.of(
+            "FastRP :: Start",
+            "Iteration 1 :: Start",
+            "Iteration 2 :: Finished",
+            "Iteration 2 :: Start",
+            "Iteration 2 :: Finished",
+            "FastRP :: Finished"
         );
+
+        expectedMessages.forEach(msg -> logger.containsMessage(TestProgressLogger.INFO, msg));
+
+        assertThat(logger.getMessages(TestProgressLogger.INFO))
+            .filteredOn(msg -> msg.contains("100%"))
+            .hasSize(3);
     }
 
     private List<FeatureExtractor> defaultFeatureExtractors(Graph graph) {
@@ -393,14 +399,15 @@ class FastRPTest extends AlgoTestBase {
     class MissingProperties {
 
         @GdlGraph
-        private static final String DB_CYPHER = "CREATE" +
-                                                "  (a:N { prop: 1 })" +
-                                                ", (b:N)" +
-                                                ", (c:NaNRelWeight)" +
-                                                ", (d:NaNRelWeight)" +
-                                                ", (a)-[:REL]->(b)" +
-                                                ", (c)-[:REL]->(d)" +
-                                                ", (d)-[:REL {weight: 1.0}]->(d)";
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a:N { prop: 1 })" +
+            ", (b:N)" +
+            ", (c:NaNRelWeight)" +
+            ", (d:NaNRelWeight)" +
+            ", (a)-[:REL]->(b)" +
+            ", (c)-[:REL]->(d)" +
+            ", (d)-[:REL {weight: 1.0}]->(d)";
 
         @Inject
         GraphStore graphStore;
@@ -425,7 +432,10 @@ class FastRPTest extends AlgoTestBase {
 
             assertThatThrownBy(fastRP::initRandomVectors)
                 .hasMessageContaining(
-                    formatWithLocale("Missing node property for property key `prop` on node with id `%s`.", idFunction.of("b"))
+                    formatWithLocale(
+                        "Missing node property for property key `prop` on node with id `%s`.",
+                        idFunction.of("b")
+                    )
                 );
         }
 
