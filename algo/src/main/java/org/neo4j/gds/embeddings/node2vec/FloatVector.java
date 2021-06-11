@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-public class Vector {
+public class FloatVector {
     private final float[] data;
 
-    Vector(int size) {
+    FloatVector(int size) {
         this(new float[size]);
     }
 
-    Vector(float[] data) {
+    FloatVector(float[] data) {
         this.data = data;
     }
 
@@ -34,19 +34,19 @@ public class Vector {
         return data;
     }
 
-    void addMutable(Vector other) {
+    void addMutable(FloatVector other) {
         for (int pos = 0; pos < data.length; pos++) {
             data[pos] += other.data[pos];
         }
     }
 
-    void scalarMultiply(Vector other, float scalar) {
+    void scalarMultiply(FloatVector other, float scalar) {
         for (int pos = 0; pos < data.length; pos++) {
             data[pos] = other.data[pos] * scalar;
         }
     }
 
-    float innerProduct(Vector other) {
+    float innerProduct(FloatVector other) {
         float result = 0;
         for (int i = 0; i < data.length; i++) {
             result += data[i] * other.data[i];

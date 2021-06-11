@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.beta.node2vec;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.embeddings.node2vec.FloatVector;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
-import org.neo4j.gds.embeddings.node2vec.Vector;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -53,7 +53,7 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<Vector>, Node2VecStreamConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamConfig>> getProcedureClazz() {
         return Node2VecStreamProc.class;
     }
 

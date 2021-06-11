@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
+public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> {
 
     private final Graph graph;
     private final Node2VecBaseConfig config;
@@ -54,7 +54,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
     }
 
     @Override
-    public HugeObjectArray<Vector> compute() {
+    public HugeObjectArray<FloatVector> compute() {
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config.walkLength(),

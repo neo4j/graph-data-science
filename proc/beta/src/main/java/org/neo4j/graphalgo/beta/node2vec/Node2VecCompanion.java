@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.beta.node2vec;
 
+import org.neo4j.gds.embeddings.node2vec.FloatVector;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
-import org.neo4j.gds.embeddings.node2vec.Vector;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.FloatArrayNodeProperties;
@@ -32,7 +32,7 @@ final class Node2VecCompanion {
     static final String DESCRIPTION = "The Node2Vec algorithm computes embeddings for nodes based on random walks.";
 
     static <CONFIG extends Node2VecBaseConfig> NodeProperties nodeProperties(
-        AlgoBaseProc.ComputationResult<Node2Vec, HugeObjectArray<Vector>, CONFIG> computationResult
+        AlgoBaseProc.ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, CONFIG> computationResult
     ) {
         var size = computationResult.graph().nodeCount();
         var embeddings = computationResult.result();

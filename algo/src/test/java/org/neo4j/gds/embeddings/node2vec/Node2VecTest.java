@@ -73,7 +73,7 @@ class Node2VecTest extends AlgoTestBase {
             .graph();
 
         int embeddingDimension = 128;
-        HugeObjectArray<Vector> node2Vec = new Node2Vec(
+        HugeObjectArray<FloatVector> node2Vec = new Node2Vec(
             graph,
             ImmutableNode2VecStreamConfig.builder().embeddingDimension(embeddingDimension).build(),
             progressLogger,
