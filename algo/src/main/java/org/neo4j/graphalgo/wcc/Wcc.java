@@ -113,7 +113,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, tracker, config.concurrency())
             : new HugeAtomicDisjointSetStruct(nodeCount, tracker, config.concurrency());
 
-        if (graph.isUndirected()) {
+        if (graph.isUndirected() && !config.hasThreshold()) {
             computeUndirected(dss);
         } else {
             computeDirected(dss);
@@ -140,7 +140,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
     private void computeDirected(DisjointSetStruct dss) {
         var tasks = new ArrayList<Runnable>(threadSize);
         for (long i = 0L; i < this.nodeCount; i += batchSize) {
-            var wccTask = Double.isNaN(threshold()) || threshold() == 0
+            var wccTask = !config.hasThreshold()
                 ? new WCCTask(dss, i)
                 : new WCCWithThresholdTask(threshold(), dss, i);
             tasks.add(wccTask);
