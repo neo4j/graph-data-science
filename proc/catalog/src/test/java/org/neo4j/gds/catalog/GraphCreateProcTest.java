@@ -28,7 +28,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
@@ -1239,7 +1238,7 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest(name = "Invalid Graph Name: `{0}`")
-    @MethodSource("org.neo4j.graphalgo.catalog.GraphCreateProcTest#invalidGraphNames")
+    @MethodSource("org.neo4j.gds.catalog.GraphCreateProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
             "CALL gds.graph.create($graphName, {}, {})",

@@ -24,9 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphExistsFunc;
-import org.neo4j.gds.catalog.GraphExistsProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
@@ -82,7 +79,7 @@ class GraphExistsProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.catalog.GraphCreateProcTest#invalidGraphNames")
+    @MethodSource("org.neo4j.gds.catalog.GraphCreateProcTest#invalidGraphNames")
     void failsOnInvalidGraphName(String invalidName) {
         assertError(
             "CALL gds.graph.exists($graphName)",
