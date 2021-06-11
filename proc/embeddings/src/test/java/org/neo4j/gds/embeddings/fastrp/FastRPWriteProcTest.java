@@ -32,8 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.anyMatch;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 
 class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
     implements WritePropertyConfigTest<FastRP, FastRPWriteConfig, FastRP.FastRPResult> {
@@ -82,16 +83,10 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
         runQuery(writeQuery);
 
         runQueryWithRowConsumer("MATCH (n:Node) RETURN n.embedding as embedding", row -> {
-            float[] embeddings = (float[]) row.get("embedding");
-            assertEquals(embeddingDimension, embeddings.length);
-            boolean allMatch = true;
-            for (float embedding : embeddings) {
-                if (Float.compare(embedding, 0.0F) != 0) {
-                    allMatch = false;
-                    break;
-                }
-            }
-            assertFalse(allMatch);
+            var embedding = (float[]) row.get("embedding");
+            assertThat(embedding)
+                .hasSize(embeddingDimension)
+                .matches(vector -> anyMatch(vector, v -> v != 0.0));
         });
     }
 
@@ -119,8 +114,8 @@ class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
             embeddings.put(row.getString("name"), (float[]) row.get("embedding"));
         });
 
-        for (int i = 0; i < 128; i++) {
-            assertEquals(embeddings.get("b")[i], embeddings.get("e")[i] * 2);
-        }
+        float[] embeddingOfE = embeddings.get("e");
+        scale(embeddingOfE, 2);
+        assertThat(embeddings.get("b")).containsExactly(embeddingOfE);
     }
 }

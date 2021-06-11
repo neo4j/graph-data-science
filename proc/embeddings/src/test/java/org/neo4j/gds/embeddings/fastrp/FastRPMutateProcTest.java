@@ -23,19 +23,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.functions.NodePropertyFunc;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
@@ -125,16 +125,9 @@ class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
         );
 
         runQueryWithRowConsumer(expectedResultQuery, row -> {
-            float[] embeddings = (float[]) row.get("embedding");
-            assertEquals(embeddingDimension, embeddings.length);
-            boolean allMatch = true;
-            for (float embedding : embeddings) {
-                if (Float.compare(embedding, 0.0F) != 0) {
-                    allMatch = false;
-                    break;
-                }
-            }
-            assertFalse(allMatch);
+            assertThat((float[]) row.get("embedding"))
+                .hasSize(embeddingDimension)
+                .matches(vector -> FloatVectorOperations.anyMatch(vector, v -> v != 0.0));
         });
     }
 }
