@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.beta.node2vec;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.gds.embeddings.node2vec.FloatVector;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.HeapControlTest;

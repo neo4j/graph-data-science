@@ -19,10 +19,10 @@
  */
 package org.neo4j.graphalgo.beta.node2vec;
 
-import org.neo4j.gds.embeddings.node2vec.FloatVector;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.MutatePropertyProc;
