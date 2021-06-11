@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
@@ -66,7 +66,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final HugeIntArray[] candidateSolutions;
     private final AtomicDoubleArray[] costs;
     private final HugeAtomicDoubleArray nodeToCommunityWeights;
-    private final HugeAtomicLongArray swapStatus;
+    private final HugeAtomicByteArray swapStatus;
     private HugeIntArray neighboringSolution;
 
     public ApproxMaxKCut(
@@ -102,8 +102,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         nodeToCommunityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k(), tracker);
 
         // Used by `localSearch()` to keep track of whether we can swap a node into another community or not.
-        // TODO: Add HugeAtomicByteArray and use that instead to save memory.
-        swapStatus = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
+        swapStatus = HugeAtomicByteArray.newArray(graph.nodeCount(), tracker);
     }
 
     @ValueClass
@@ -131,16 +130,14 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
     /*
      * Used to improve readability of `localSearch()`.
-     *
-     * TODO: Swap `long` for `byte`.
      */
     private static final class NodeSwapStatus {
         // No thread has tried to swap the node yet, and no incoming neighbor has tried to mark it.
-        static final long UNTOUCHED = 0;
+        static final byte UNTOUCHED = 0;
         // The node has been swapped to another community, or a thread is currently attempting to swap it.
-        static final long SWAPPING = 1;
+        static final byte SWAPPING = 1;
         // The node has had one of its incoming neighbors swapped (or at least attempted) so the improvement costs may be invalid.
-        static final long NEIGHBOR = 2;
+        static final byte NEIGHBOR = 2;
 
         private NodeSwapStatus() {}
     }
@@ -155,7 +152,6 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         // Keep track of which candidate solution is currently being used and which is best.
         byte currIdx = 0, bestIdx = 1;
 
-        // Used with VNS to define the neighboring candidate solution.
         if (config.vnsMaxNeighborhoodOrder() > 0) {
             neighboringSolution = HugeIntArray.newArray(graph.nodeCount(), tracker);
         }
