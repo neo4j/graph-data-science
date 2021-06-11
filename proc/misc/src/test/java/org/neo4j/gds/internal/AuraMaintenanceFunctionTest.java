@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.BaseTest;
-import org.neo4j.graphalgo.ListProgressProc;
+import org.neo4j.gds.ListProgressProc;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
