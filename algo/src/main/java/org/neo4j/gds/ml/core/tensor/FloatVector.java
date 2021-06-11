@@ -34,12 +34,6 @@ public class FloatVector {
         return data;
     }
 
-    public void addMutable(FloatVector other) {
-        for (int pos = 0; pos < data.length; pos++) {
-            data[pos] += other.data[pos];
-        }
-    }
-
     public void scalarMultiply(FloatVector other, float scalar) {
         for (int pos = 0; pos < data.length; pos++) {
             data[pos] = other.data[pos] * scalar;

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.neo4j.gds.ml.core.la.operations.FloatVectorOperations;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -206,8 +207,8 @@ public class Node2VecModel {
             centerGradientBuffer.scalarMultiply(contextEmbedding, scalar * learningRate);
             contextGradientBuffer.scalarMultiply(centerEmbedding, scalar * learningRate);
 
-            centerEmbedding.addMutable(centerGradientBuffer);
-            contextEmbedding.addMutable(contextGradientBuffer);
+            FloatVectorOperations.addInPlace(centerEmbedding.data(), centerGradientBuffer.data());
+            FloatVectorOperations.addInPlace(contextEmbedding.data(), contextGradientBuffer.data());
         }
     }
 
