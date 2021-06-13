@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.core.la.operations;
+package org.neo4j.gds.ml.core.tensor.operations;
 
 public final class FloatVectorOperations {
 

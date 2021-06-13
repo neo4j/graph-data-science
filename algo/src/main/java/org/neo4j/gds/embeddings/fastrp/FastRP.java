@@ -42,10 +42,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.addInPlace;
-import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.addWeightedInPlace;
-import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.l2Normalize;
-import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.scale;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addWeightedInPlace;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
