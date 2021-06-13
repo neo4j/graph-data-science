@@ -34,8 +34,8 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Random;
 
-import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.addInPlace;
-import static org.neo4j.gds.ml.core.la.operations.FloatVectorOperations.scale;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Node2VecModel {
