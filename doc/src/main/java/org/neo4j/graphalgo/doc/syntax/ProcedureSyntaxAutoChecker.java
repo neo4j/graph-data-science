@@ -45,7 +45,7 @@ public class ProcedureSyntaxAutoChecker extends Treeprocessor {
     private static final String CONTEXT_SELECTOR = "context";
     private static final String TABLE_CONTEXT_VALUE = ":table";
     private static final String RESULTS_TABLE_TITLE = "Results";
-    private static final String RESULT_FIELD_TYPE_REGEX = "(: |:)[A-Za-z]+|([\\[\\]])";
+    private static final String RESULT_FIELD_TYPE_REGEX = "(: |:)\\w+|([\\[\\]])";
     private static final String YIELD_KEYWORD = "YIELD";
 
     private static final String ROLE_SELECTOR = "role";
