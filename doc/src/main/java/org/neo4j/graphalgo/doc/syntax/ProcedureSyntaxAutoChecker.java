@@ -51,20 +51,20 @@ class ProcedureSyntaxAutoChecker extends Treeprocessor {
     private static final String ROLE_SELECTOR = "role";
 
 
-    private final Iterable<SyntaxMode> resultClasses;
+    private final Iterable<SyntaxMode> syntaxModes;
     private final SoftAssertions syntaxAssertions;
 
     public ProcedureSyntaxAutoChecker(
         Iterable<SyntaxMode> syntaxModes,
         SoftAssertions syntaxAssertions
     ) {
-        this.resultClasses = syntaxModes;
+        this.syntaxModes = syntaxModes;
         this.syntaxAssertions = syntaxAssertions;
     }
 
     @Override
     public Document process(Document document) {
-        resultClasses.forEach(mode -> {
+        syntaxModes.forEach(mode -> {
 
             var allSyntaxSectionsForMode = document.findBy(Map.of(ROLE_SELECTOR, mode.mode()));
 

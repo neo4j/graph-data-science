@@ -35,7 +35,7 @@ final class ProcedureNameExtractor {
             return matcher.group().trim();
         }
 
-        throw new IllegalArgumentException(formatWithLocale("No procedure names found in: \n$s", codeSnippet));
+        throw new IllegalArgumentException(formatWithLocale("No procedure names found in: \n%s", codeSnippet));
     }
 
 }

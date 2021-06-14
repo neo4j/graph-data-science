@@ -57,7 +57,10 @@ final class ProcedureLookup {
                 return annotation.name().equals(fullyQualifiedProcedureName) || annotation.value().equals(fullyQualifiedProcedureName);
             })
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException(fullyQualifiedProcedureName));
+            .orElseThrow(() -> new IllegalArgumentException(formatWithLocale(
+                "Unknown procedure: `%s`",
+                fullyQualifiedProcedureName
+            )));
     }
 
     static Class<?> findResultType(String fullyQualifiedProcedureName) {
