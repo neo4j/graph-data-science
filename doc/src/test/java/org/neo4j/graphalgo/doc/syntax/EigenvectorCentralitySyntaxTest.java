@@ -19,28 +19,18 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
-import org.neo4j.graphalgo.common.CentralityStreamResult;
-import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
-import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
-import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
+import java.util.List;
 
-import java.util.Map;
-
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.MUTATE;
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.STATS;
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.STREAM;
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.WRITE;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.WRITE;
 
 class EigenvectorCentralitySyntaxTest extends SyntaxTestBase {
 
     @Override
-    protected Map<ProcedureSyntaxChecker.SyntaxMode, Class<?>> syntaxModes() {
-        return Map.of(
-            STREAM, CentralityStreamResult.class,
-            MUTATE, PageRankMutateProc.MutateResult.class,
-            STATS, PageRankStatsProc.StatsResult.class,
-            WRITE, PageRankWriteProc.WriteResult.class
-        );
+    protected Iterable<SyntaxMode> syntaxModes() {
+        return List.of(STREAM, MUTATE, WRITE, STATS);
     }
 
     @Override

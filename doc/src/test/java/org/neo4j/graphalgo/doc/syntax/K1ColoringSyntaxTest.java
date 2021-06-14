@@ -19,28 +19,18 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
-import org.neo4j.graphalgo.beta.k1coloring.K1ColoringMutateProc;
-import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStatsProc;
-import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStreamProc;
-import org.neo4j.graphalgo.beta.k1coloring.K1ColoringWriteProc;
+import java.util.List;
 
-import java.util.Map;
-
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.MUTATE;
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.STATS;
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.STREAM;
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.WRITE;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.WRITE;
 
 class K1ColoringSyntaxTest extends SyntaxTestBase {
 
     @Override
-    protected Map<ProcedureSyntaxChecker.SyntaxMode, Class<?>> syntaxModes() {
-        return Map.of(
-            STREAM, K1ColoringStreamProc.StreamResult.class,
-            STATS, K1ColoringStatsProc.StatsResult.class,
-            MUTATE, K1ColoringMutateProc.MutateResult.class,
-            WRITE, K1ColoringWriteProc.WriteResult.class
-        );
+    protected Iterable<SyntaxMode> syntaxModes() {
+        return List.of(STREAM, MUTATE, WRITE, STATS);
     }
 
     @Override

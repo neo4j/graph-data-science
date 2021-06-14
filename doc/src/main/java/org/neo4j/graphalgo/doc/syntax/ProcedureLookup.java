@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.doc.syntax.auto;
+package org.neo4j.graphalgo.doc.syntax;
 
 import org.neo4j.procedure.Procedure;
 import org.reflections.Reflections;
@@ -57,7 +57,7 @@ final class ProcedureLookup {
                 return annotation.name().equals(fullyQualifiedProcedureName) || annotation.value().equals(fullyQualifiedProcedureName);
             })
             .findFirst()
-            .orElseThrow();
+            .orElseThrow(() -> new IllegalArgumentException(fullyQualifiedProcedureName));
     }
 
     static Class<?> findResultType(String fullyQualifiedProcedureName) {

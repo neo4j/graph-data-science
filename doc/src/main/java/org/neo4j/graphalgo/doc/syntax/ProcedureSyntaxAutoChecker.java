@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.doc.syntax.auto;
+package org.neo4j.graphalgo.doc.syntax;
 
 import org.asciidoctor.ast.Cell;
 import org.asciidoctor.ast.Document;
@@ -48,33 +48,14 @@ public class ProcedureSyntaxAutoChecker extends Treeprocessor {
     private static final String RESULT_FIELD_TYPE_REGEX = "(: |:)[A-Za-z]+|([\\[\\]])";
     private static final String YIELD_KEYWORD = "YIELD";
 
-
-    public enum SyntaxMode {
-        STATS("include-with-stats"),
-        STREAM("include-with-stream"),
-        MUTATE("include-with-mutate"),
-        WRITE("include-with-write"),
-        TRAIN("include-with-train");
-
-        private final String mode;
-
-        SyntaxMode(String mode) {
-            this.mode = mode;
-        }
-
-        String mode() {
-            return mode;
-        }
-    }
-
     private static final String ROLE_SELECTOR = "role";
 
 
-    private final Collection<SyntaxMode> resultClasses;
+    private final Iterable<SyntaxMode> resultClasses;
     private final SoftAssertions syntaxAssertions;
 
     public ProcedureSyntaxAutoChecker(
-        Collection<SyntaxMode> syntaxModes,
+        Iterable<SyntaxMode> syntaxModes,
         SoftAssertions syntaxAssertions
     ) {
         this.resultClasses = syntaxModes;

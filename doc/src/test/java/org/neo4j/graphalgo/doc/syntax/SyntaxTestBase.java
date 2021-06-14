@@ -28,7 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.Map;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,11 +49,11 @@ abstract class SyntaxTestBase {
         softAssertions.assertAll();
     }
 
-    abstract Map<ProcedureSyntaxChecker.SyntaxMode, Class<?>> syntaxModes();
+    abstract Iterable<SyntaxMode> syntaxModes();
 
     abstract String adocFile();
 
-    private ProcedureSyntaxChecker syntaxTreeProcessor(SoftAssertions softAssertions) {
-        return new ProcedureSyntaxChecker(syntaxModes(), softAssertions);
+    private ProcedureSyntaxAutoChecker syntaxTreeProcessor(SoftAssertions syntaxAssertions) {
+        return new ProcedureSyntaxAutoChecker(syntaxModes(), syntaxAssertions);
     }
 }

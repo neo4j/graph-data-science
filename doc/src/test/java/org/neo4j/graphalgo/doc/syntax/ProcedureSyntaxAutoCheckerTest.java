@@ -24,11 +24,11 @@ import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.neo4j.graphalgo.louvain.LouvainStreamProc;
 
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SoftAssertionsExtension.class)
-class ProcedureSyntaxCheckerTest {
+class ProcedureSyntaxAutoCheckerTest {
 
     @Test
     void correctSyntaxSectionTest(SoftAssertions softAssertions) throws URISyntaxException {
@@ -121,12 +121,12 @@ class ProcedureSyntaxCheckerTest {
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
-        .allSatisfy(assertionError -> {
-            assertThat(assertionError)
-                .hasMessageContaining("Asserting YIELD result columns for `include-with-stream`")
-                .hasMessageContaining("could not find the following elements:\n" +
-                                      "  [\"communityId\", \"intermediateCommunityIds\"]");
-        });
+            .allSatisfy(assertionError -> {
+                assertThat(assertionError)
+                    .hasMessageContaining("Asserting YIELD result columns for `include-with-stream`")
+                    .hasMessageContaining("could not find the following elements:\n" +
+                                          "  [\"communityId\", \"intermediateCommunityIds\"]");
+            });
     }
 
     @Test
@@ -145,12 +145,12 @@ class ProcedureSyntaxCheckerTest {
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
-        .allSatisfy(assertionError -> {
-            assertThat(assertionError)
-                .hasMessageContaining("Asserting YIELD result columns for `include-with-stream`")
-                .hasMessageContaining("the following elements were unexpected:\n" +
-                                      "  [\"bogusResultColumn\"]");
-        });
+            .allSatisfy(assertionError -> {
+                assertThat(assertionError)
+                    .hasMessageContaining("Asserting YIELD result columns for `include-with-stream`")
+                    .hasMessageContaining("the following elements were unexpected:\n" +
+                                          "  [\"bogusResultColumn\"]");
+            });
     }
 
     @Test
@@ -169,12 +169,12 @@ class ProcedureSyntaxCheckerTest {
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
-        .allSatisfy(assertionError -> {
-            assertThat(assertionError)
-                .hasMessageContaining("Asserting result table for `include-with-stream`")
-                .hasMessageContaining("could not find the following elements:\n" +
-                                      "  [\"intermediateCommunityIds\"]");
-        });
+            .allSatisfy(assertionError -> {
+                assertThat(assertionError)
+                    .hasMessageContaining("Asserting result table for `include-with-stream`")
+                    .hasMessageContaining("could not find the following elements:\n" +
+                                          "  [\"intermediateCommunityIds\"]");
+            });
     }
 
     @Test
@@ -193,20 +193,20 @@ class ProcedureSyntaxCheckerTest {
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
-        .allSatisfy(assertionError -> {
-            assertThat(assertionError)
-                .hasMessageContaining("Asserting result table for `include-with-stream`")
-                .hasMessageContaining("the following elements were unexpected:\n" +
-                                      "  [\"bogusResultColumn\"]");
-        });
+            .allSatisfy(assertionError -> {
+                assertThat(assertionError)
+                    .hasMessageContaining("Asserting result table for `include-with-stream`")
+                    .hasMessageContaining("the following elements were unexpected:\n" +
+                                          "  [\"bogusResultColumn\"]");
+            });
     }
 
     private Asciidoctor createAsciidoctor(SoftAssertions softAssertions) {
         var asciidoctor = Asciidoctor.Factory.create();
         asciidoctor.javaExtensionRegistry()
             .treeprocessor(
-                new ProcedureSyntaxChecker(
-                    Map.of(ProcedureSyntaxChecker.SyntaxMode.STREAM, LouvainStreamProc.StreamResult.class),
+                new ProcedureSyntaxAutoChecker(
+                    List.of(SyntaxMode.STREAM),
                     softAssertions
                 ));
         return asciidoctor;

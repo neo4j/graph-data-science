@@ -19,22 +19,20 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
-import java.util.List;
+public enum SyntaxMode {
+    STATS("include-with-stats"),
+    STREAM("include-with-stream"),
+    MUTATE("include-with-mutate"),
+    WRITE("include-with-write"),
+    TRAIN("include-with-train");
 
-import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.MUTATE;
-import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STATS;
-import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STREAM;
-import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.WRITE;
+    private final String mode;
 
-class DegreeCentralitySyntaxTest extends SyntaxTestBase {
-
-    @Override
-    protected Iterable<SyntaxMode> syntaxModes() {
-        return List.of(STREAM, MUTATE, WRITE, STATS);
+    SyntaxMode(String mode) {
+        this.mode = mode;
     }
 
-    @Override
-    String adocFile() {
-        return "algorithms/degree-centrality/degree-centrality.adoc";
+    public String mode() {
+        return mode;
     }
 }

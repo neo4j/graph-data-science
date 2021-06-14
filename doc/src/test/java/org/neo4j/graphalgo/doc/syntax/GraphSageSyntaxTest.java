@@ -19,28 +19,18 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
-import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
-import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
-import org.neo4j.gds.embeddings.graphsage.GraphSageWriteProc;
-import org.neo4j.graphalgo.TrainProc;
+import java.util.List;
 
-import java.util.Map;
-
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.MUTATE;
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.STREAM;
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.TRAIN;
-import static org.neo4j.graphalgo.doc.syntax.ProcedureSyntaxChecker.SyntaxMode.WRITE;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.TRAIN;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.WRITE;
 
 class GraphSageSyntaxTest extends SyntaxTestBase {
 
     @Override
-    protected Map<ProcedureSyntaxChecker.SyntaxMode, Class<?>> syntaxModes() {
-        return Map.of(
-            STREAM, GraphSageStreamProc.GraphSageStreamResult.class,
-            MUTATE, GraphSageMutateProc.MutateResult.class,
-            WRITE, GraphSageWriteProc.GraphSageWriteResult.class,
-            TRAIN, TrainProc.TrainResult.class
-        );
+    protected Iterable<SyntaxMode> syntaxModes() {
+        return List.of(STREAM, MUTATE, WRITE, TRAIN);
     }
 
     @Override
