@@ -81,6 +81,13 @@ class ProcedureNameExtractorTest {
                 "gds.louvain.write"
             ),
             Arguments.of(
+                "CALL gds.beta.k1coloring.write(\n" +
+                "  graphName: String,\n" +
+                "  configuration: Map\n" +
+                ")",
+                "gds.beta.k1coloring.write"
+            ),
+            Arguments.of(
                 "CALL gds.beta.graphSage.train(\n" +
                 "  graphName: String,\n" +
                 "  configuration: Map\n" +

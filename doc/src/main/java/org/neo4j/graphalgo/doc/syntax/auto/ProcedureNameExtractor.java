@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ProcedureNameExtractor {
-    private static final Pattern PATTERN = Pattern.compile("(\\sgds\\.)([A-Za-z]+\\.)+([A-Za-z]+)");
+    private static final Pattern PATTERN = Pattern.compile("(\\sgds\\.)([A-Za-z0-9]+\\.)+([A-Za-z]+)");
 
     private ProcedureNameExtractor() {}
 
