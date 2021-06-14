@@ -42,11 +42,15 @@ public abstract class MutatePropertyProc<
 
     @Override
     protected NodeProperties nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        throw new UnsupportedOperationException("Mutate procedures must implement either `nodeProperties` or `nodePropertyList`.");
+        throw new UnsupportedOperationException(
+            "Mutate procedures must implement either `nodeProperties` or `nodePropertyList`.");
     }
 
     protected List<NodePropertyExporter.NodeProperty> nodePropertyList(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
-        return List.of(ImmutableNodeProperty.of(computationResult.config().mutateProperty(), nodeProperties(computationResult)));
+        return List.of(ImmutableNodeProperty.of(
+            computationResult.config().mutateProperty(),
+            nodeProperties(computationResult)
+        ));
     }
 
     @Override
@@ -62,7 +66,10 @@ public abstract class MutatePropertyProc<
             nodeProperties = nodeProperties.stream().map(nodeProperty ->
                 ImmutableNodeProperty.of(
                     nodeProperty.propertyKey(),
-                    new ReverseFilteredNodeProperties(nodeProperty.properties(), (NodeFilteredGraph) graph)
+                    new FilteredNodeProperties.OriginalToFilteredNodeProperties(
+                        nodeProperty.properties(),
+                        (NodeFilteredGraph) graph
+                    )
                 )
             )
                 .collect(Collectors.toList());
@@ -86,17 +93,6 @@ public abstract class MutatePropertyProc<
             });
 
             resultBuilder.withNodePropertiesWritten(nodeProperties.size() * computationResult.graph().nodeCount());
-        }
-    }
-
-    static class ReverseFilteredNodeProperties extends FilteredNodeProperties {
-        ReverseFilteredNodeProperties(NodeProperties properties, NodeFilteredGraph idMap) {
-            super(properties, idMap);
-        }
-
-        @Override
-        protected long translateId(long nodeId) {
-            return graph.getFilteredMappedNodeId(nodeId);
         }
     }
 }
