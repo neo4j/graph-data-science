@@ -78,14 +78,16 @@ final class ApproxMaxKCutTest {
             () -> Stream.of(
                 Arguments.of(
                     false,
-                    Map.of("a", 0L, "b", 0L, "c", 0L, "d", 1L, "e", 1L, "f", 1L, "g", 1L)
+                    Map.of("a", 0L, "b", 0L, "c", 0L, "d", 1L, "e", 1L, "f", 1L, "g", 1L),
+                    13.0D
                 ),
                 Arguments.of(
                     true,
-                    Map.of("a", 0L, "b", 1L, "c", 0L, "d", 1L, "e", 1L, "f", 1L, "g", 1L)
+                    Map.of("a", 0L, "b", 1L, "c", 0L, "d", 1L, "e", 1L, "f", 1L, "g", 1L),
+                    146.0D
                 )
             ),
-            () -> Stream.of(Arguments.of(0), Arguments.of(4)), // VNS max neighborhood order
+            () -> Stream.of(Arguments.of(0), Arguments.of(4)), // VNS max neighborhood order (0 means VNS not used)
             () -> Stream.of(Arguments.of(1), Arguments.of(4))  // concurrency
         );
     }
@@ -94,7 +96,8 @@ final class ApproxMaxKCutTest {
     @MethodSource("maxKCutParameters")
     void shouldComputeCorrectResults(
         boolean weighted,
-        Map<String, Long> expected,
+        Map<String, Long> expectedMapping,
+        double expectedCost,
         int vnsMaxNeighborhoodOrder,
         int concurrency
     ) {
@@ -123,12 +126,16 @@ final class ApproxMaxKCutTest {
             AllocationTracker.empty()
         );
 
-        var setFunction = approxMaxKCut.compute();
+        var result = approxMaxKCut.compute();
 
-        expected.forEach((outerVar, outerExpectedSet) -> {
+        assertEquals(result.cutCost(), expectedCost);
+
+        var setFunction = result.setFunction();
+
+        expectedMapping.forEach((outerVar, outerExpectedSet) -> {
             long outerNodeId = graph.toMappedNodeId(outerVar);
 
-            expected.forEach((innerVar, innerExpectedSet) -> {
+            expectedMapping.forEach((innerVar, innerExpectedSet) -> {
                 long innerNodeId = graph.toMappedNodeId(innerVar);
 
                 if (outerExpectedSet.equals(innerExpectedSet)) {

@@ -22,7 +22,9 @@ package org.neo4j.graphalgo.impl.approxmaxkcut;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.graphalgo.Algorithm;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.AtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -53,7 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * [1]: Festa et al. Randomized Heuristics for the Max-Cut Problem, 2002.
  * [2]: Dunning et al. What Works Best When? A Systematic Evaluation of Heuristics for Max-Cut and QUBO, 2018.
  */
-public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.SetFunction> {
+public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutResult> {
 
     private static final double DEFAULT_WEIGHT = 0.0D;
 
@@ -76,8 +78,27 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.SetFun
         this.tracker = tracker;
     }
 
-    public interface SetFunction {
-        long get(long nodeId);
+    @ValueClass
+    public interface CutResult {
+        // Value at index `i` is the idx of the set to which node with id `i` belongs.
+        HugeIntArray setFunction();
+
+        double cutCost();
+
+        static CutResult of(
+            HugeIntArray setFunction,
+            double cutCost
+        ) {
+            return ImmutableCutResult
+                .builder()
+                .setFunction(setFunction)
+                .cutCost(cutCost)
+                .build();
+        }
+
+        default LongNodeProperties asNodeProperties() {
+            return setFunction().asNodeProperties();
+        }
     }
 
     /*
@@ -102,7 +123,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.SetFun
     }
 
     @Override
-    public SetFunction compute() {
+    public CutResult compute() {
         // We allocate two arrays in order to be able to compare results between iterations "GRASP style".
         var setFuncs = new LinkedList<>(
             Arrays.asList(
@@ -176,7 +197,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.SetFun
 
         progressLogger.logFinish();
 
-        return setFuncs.get(bestIdx)::get;
+        return CutResult.of(setFuncs.get(bestIdx), costs.get(bestIdx).get(0));
     }
 
     private void placeNodesRandomly(HugeIntArray setFunc) {
