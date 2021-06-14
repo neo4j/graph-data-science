@@ -19,19 +19,7 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
-import java.util.List;
-
-import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.MUTATE;
-import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STATS;
-import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STREAM;
-import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.WRITE;
-
 class KnnSyntaxTest extends SyntaxTestBase {
-
-    @Override
-    protected Iterable<SyntaxMode> syntaxModes() {
-        return List.of(STREAM, MUTATE, WRITE, STATS);
-    }
 
     @Override
     String adocFile() {

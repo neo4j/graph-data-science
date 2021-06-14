@@ -28,9 +28,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.List;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.WRITE;
 
 @ExtendWith(SoftAssertionsExtension.class)
 abstract class SyntaxTestBase {
@@ -49,7 +54,9 @@ abstract class SyntaxTestBase {
         softAssertions.assertAll();
     }
 
-    abstract Iterable<SyntaxMode> syntaxModes();
+    protected Iterable<SyntaxMode> syntaxModes() {
+        return List.of(STREAM, MUTATE, WRITE, STATS);
+    }
 
     abstract String adocFile();
 
