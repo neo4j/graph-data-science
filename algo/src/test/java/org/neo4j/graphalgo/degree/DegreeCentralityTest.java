@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
@@ -252,8 +253,8 @@ final class DegreeCentralityTest {
         assertEquals(1, progresses.size());
         assertEquals(graph.nodeCount(), progresses.get(0).longValue());
 
-        progressLogger.containsMessage(TestLog.INFO, ":: Start");
-        progressLogger.containsMessage(TestLog.INFO, ":: Finish");
+        assertTrue(progressLogger.containsMessage(TestLog.INFO, ":: Start"));
+        assertTrue(progressLogger.containsMessage(TestLog.INFO, ":: Finish"));
     }
 
     @ParameterizedTest
