@@ -183,7 +183,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
         if (properties == null) {
             return null;
         }
-        return new FilteredNodeProperties(properties, this);
+        return new FilteredNodeProperties.FilteredToOriginalNodeProperties(properties, this);
     }
 
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {
