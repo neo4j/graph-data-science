@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ProcedureSyntaxAutoChecker extends Treeprocessor {
+class ProcedureSyntaxAutoChecker extends Treeprocessor {
 
     private static final String STYLE_SELECTOR = "style";
     private static final String STYLE_SELECTOR_VALUE = "source";

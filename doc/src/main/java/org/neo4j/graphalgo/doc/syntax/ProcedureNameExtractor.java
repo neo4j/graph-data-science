@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class ProcedureNameExtractor {
+final class ProcedureNameExtractor {
     private static final Pattern PATTERN = Pattern.compile("(\\sgds\\.)(\\w+\\.)+(\\w+)");
 
     private ProcedureNameExtractor() {}
