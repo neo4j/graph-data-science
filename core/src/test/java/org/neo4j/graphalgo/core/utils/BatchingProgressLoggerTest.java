@@ -24,13 +24,12 @@ import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.neo4j.gds.TestProgressEventTracker;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -140,36 +139,25 @@ class BatchingProgressLoggerTest {
     @Test
     void shouldSendMessageOnlyLogsToProgressTracker(SoftAssertions softly) {
         try (var ignored = RenamesCurrentThread.renameThread("log-test")) {
-            var messages = new ArrayList<String>();
-            var logger = new TestProgressLogger(1, "Test", 1, new ProgressEventTracker() {
-                @Override
-                public void addLogEvent(String taskName, String message) {
-                    softly.assertThat(taskName).isEqualTo("Test");
-                    messages.add(message);
-                }
-
-                @Override
-                public void release() {
-                }
-            });
+            var tracker = new TestProgressEventTracker();
+            var logger = new TestProgressLogger(1, "Test", 1, tracker);
 
             logger.logMessage(() -> "supplied message");
-            softly.assertThat(messages).hasSize(1).last().isEqualTo("[log-test] Test supplied message");
-
             logger.logMessage("direct message");
-            softly.assertThat(messages).hasSize(2).last().isEqualTo("[log-test] Test direct message");
-
             logger.logStart();
-            softly.assertThat(messages).hasSize(3).last().isEqualTo("[log-test] Test :: Start");
-
             logger.logStart("start message");
-            softly.assertThat(messages).hasSize(4).last().isEqualTo("[log-test] Test start message :: Start");
-
             logger.logFinish();
-            softly.assertThat(messages).hasSize(5).last().isEqualTo("[log-test] Test :: Finished");
-
             logger.logFinish("finish message");
-            softly.assertThat(messages).hasSize(6).last().isEqualTo("[log-test] Test finish message :: Finished");
+
+            softly.assertThat(tracker.taskNames()).hasSize(6).containsOnly("Test");
+            softly.assertThat(tracker.messages()).hasSize(6).containsExactly(
+                "[log-test] Test supplied message",
+                "[log-test] Test direct message",
+                "[log-test] Test :: Start",
+                "[log-test] Test start message :: Start",
+                "[log-test] Test :: Finished",
+                "[log-test] Test finish message :: Finished"
+            );
         }
     }
 

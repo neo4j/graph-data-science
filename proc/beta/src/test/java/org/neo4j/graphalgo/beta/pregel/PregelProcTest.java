@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.gds.TestProgressEventTracker;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -219,7 +220,7 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.stream(config, Map.of())).isNotNull();
-            assertThat(eventTracker.releaseCalls).isEqualTo(1);
+            assertThat(eventTracker.releaseCalls()).isEqualTo(1);
         }
     }
 
@@ -241,7 +242,7 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.write(config, Map.of())).isNotNull();
-            assertThat(eventTracker.releaseCalls).isEqualTo(1);
+            assertThat(eventTracker.releaseCalls()).isEqualTo(1);
         }
     }
 
@@ -264,20 +265,7 @@ public class PregelProcTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> proc.mutate(graphName, config)).isNotNull();
-            assertThat(eventTracker.releaseCalls).isEqualTo(1);
-        }
-    }
-
-    private static final class TestProgressEventTracker implements ProgressEventTracker {
-        private int releaseCalls = 0;
-
-        @Override
-        public void addLogEvent(String taskName, String message) {
-        }
-
-        @Override
-        public void release() {
-            releaseCalls++;
+            assertThat(eventTracker.releaseCalls()).isEqualTo(1);
         }
     }
 

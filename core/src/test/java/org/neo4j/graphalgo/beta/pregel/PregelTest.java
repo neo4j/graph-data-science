@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.TestProgressEventTracker;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
@@ -44,7 +45,6 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -187,18 +187,7 @@ class PregelTest {
             .isAsynchronous(false)
             .build();
 
-        var eventTracker = new ProgressEventTracker() {
-            private int releaseCalls = 0;
-
-            @Override
-            public void addLogEvent(String taskName, String message) {
-            }
-
-            @Override
-            public void release() {
-                releaseCalls++;
-            }
-        };
+        var eventTracker = new TestProgressEventTracker();
         var computation = new TestPregelComputation();
 
         var progressLogger =  new TestProgressLogger(
@@ -220,7 +209,7 @@ class PregelTest {
         pregelAlgo.run();
         pregelAlgo.release();
 
-        assertThat(eventTracker.releaseCalls).isEqualTo(1);
+        assertThat(eventTracker.releaseCalls()).isEqualTo(1);
     }
 
     static Stream<Arguments> forkJoinAndPartitioning() {
