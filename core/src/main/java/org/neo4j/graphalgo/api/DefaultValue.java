@@ -38,9 +38,9 @@ public final class DefaultValue {
     public static final long LONG_DEFAULT_FALLBACK = Long.MIN_VALUE;
     public static final float FLOAT_DEFAULT_FALLBACK = Float.NaN;
     public static final double DOUBLE_DEFAULT_FALLBACK = Double.NaN;
-    static final double[] DOUBLE_ARRAY_DEFAULT_FALLBACK = DEFAULT.doubleArrayValue();
-    static final long[] LONG_ARRAY_DEFAULT_FALLBACK = DEFAULT.longArrayValue();
-    static final float[] FLOAT_ARRAY_DEFAULT_FALLBACK = DEFAULT.floatArrayValue();
+    public static final double[] DOUBLE_ARRAY_DEFAULT_FALLBACK = DEFAULT.doubleArrayValue();
+    public static final long[] LONG_ARRAY_DEFAULT_FALLBACK = DEFAULT.longArrayValue();
+    public static final float[] FLOAT_ARRAY_DEFAULT_FALLBACK = DEFAULT.floatArrayValue();
 
     @Nullable
     private final Object defaultValue;
