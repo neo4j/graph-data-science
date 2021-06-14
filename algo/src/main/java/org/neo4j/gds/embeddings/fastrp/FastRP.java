@@ -166,7 +166,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         progressLogger.logMessage("Initialising Random Vectors :: Start");
 
         long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
-        float sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
+        var sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
         List<Runnable> tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
@@ -186,18 +186,18 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
             progressLogger.reset(graph.relationshipCount());
             progressLogger.logMessage(formatWithLocale("Iteration %s :: Start", i + 1));
 
-            var localCurrent = i % 2 == 0 ? embeddingA : embeddingB;
-            var localPrevious = i % 2 == 0 ? embeddingB : embeddingA;
-            float iterationWeight = iterationWeights.get(i).floatValue();
-            final boolean firstIteration = i == 0;
+            HugeObjectArray<float[]> currentEmbeddings = i % 2 == 0 ? embeddingA : embeddingB;
+            HugeObjectArray<float[]> previousEmbeddings = i % 2 == 0 ? embeddingB : embeddingA;
+            var iterationWeight = iterationWeights.get(i).floatValue();
+            boolean firstIteration = i == 0;
 
-            List<Runnable> tasks = PartitionUtils.rangePartitionWithBatchSize(
+            var tasks = PartitionUtils.rangePartitionWithBatchSize(
                 graph.nodeCount(),
                 batchSize,
                 partition -> new PropagateEmbeddingsTask(
                     partition,
-                    localCurrent,
-                    localPrevious,
+                    currentEmbeddings,
+                    previousEmbeddings,
                     iterationWeight,
                     firstIteration
                 )
@@ -311,7 +311,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
                 float entryValue = scaling * sqrtSparsity / sqrtEmbeddingDimension;
                 random.reseed(randomSeed ^ nodeId);
-                float[] randomVector = computeRandomVector(nodeId, random, entryValue);
+                var randomVector = computeRandomVector(nodeId, random, entryValue);
                 embeddingB.set(nodeId, randomVector);
                 embeddingA.set(nodeId, new float[embeddingDimension]);
             });
@@ -319,7 +319,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         }
 
         private float[] computeRandomVector(long nodeId, Random random, float entryValue) {
-            float[] randomVector = new float[embeddingDimension];
+            var randomVector = new float[embeddingDimension];
             for (int i = 0; i < baseEmbeddingDimension; i++) {
                 randomVector[i] = computeRandomEntry(random, entryValue);
             }
@@ -360,22 +360,22 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     private final class PropagateEmbeddingsTask implements Runnable {
 
         private final Partition partition;
-        private final HugeObjectArray<float[]> localCurrent;
-        private final HugeObjectArray<float[]> localPrevious;
+        private final HugeObjectArray<float[]> currentEmbeddings;
+        private final HugeObjectArray<float[]> previousEmbeddings;
         private final float iterationWeight;
         private final Graph concurrentGraph;
         private final boolean firstIteration;
 
         private PropagateEmbeddingsTask(
             Partition partition,
-            HugeObjectArray<float[]> localCurrent,
-            HugeObjectArray<float[]> localPrevious,
+            HugeObjectArray<float[]> currentEmbeddings,
+            HugeObjectArray<float[]> previousEmbeddings,
             float iterationWeight,
             boolean firstIteration
         ) {
             this.partition = partition;
-            this.localCurrent = localCurrent;
-            this.localPrevious = localPrevious;
+            this.currentEmbeddings = currentEmbeddings;
+            this.previousEmbeddings = previousEmbeddings;
             this.iterationWeight = iterationWeight;
             this.concurrentGraph = graph.concurrentCopy();
             this.firstIteration = firstIteration;
@@ -385,8 +385,8 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         public void run() {
             MutableLong degrees = new MutableLong(0);
             partition.consume(nodeId -> {
-                float[] embedding = embeddings.get(nodeId);
-                float[] currentEmbedding = localCurrent.get(nodeId);
+                var embedding = embeddings.get(nodeId);
+                var currentEmbedding = currentEmbeddings.get(nodeId);
                 Arrays.fill(currentEmbedding, 0.0f);
 
                 // Collect and combine the neighbour embeddings
@@ -398,7 +398,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                             graph.toOriginalNodeId(source), graph.toOriginalNodeId(target)
                         ));
                     }
-                    embeddingCombiner.combine(currentEmbedding, localPrevious.get(target), weight);
+                    embeddingCombiner.combine(currentEmbedding, previousEmbeddings.get(target), weight);
                     return true;
                 });
 
