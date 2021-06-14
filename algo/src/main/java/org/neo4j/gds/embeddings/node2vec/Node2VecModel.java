@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BitUtil;
@@ -33,14 +34,16 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Random;
 
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
+import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Node2VecModel {
 
     private final NegativeSampleProducer negativeSamples;
 
-    private final HugeObjectArray<Vector> centerEmbeddings;
-    private final HugeObjectArray<Vector> contextEmbeddings;
+    private final HugeObjectArray<FloatVector> centerEmbeddings;
+    private final HugeObjectArray<FloatVector> contextEmbeddings;
     private final Node2VecBaseConfig config;
     private final CompressedRandomWalks walks;
     private final RandomWalkProbabilities randomWalkProbabilities;
@@ -124,13 +127,13 @@ public class Node2VecModel {
         progressLogger.logMessage(":: Training :: Finished");
     }
 
-    public HugeObjectArray<Vector> getEmbeddings() {
+    public HugeObjectArray<FloatVector> getEmbeddings() {
         return centerEmbeddings;
     }
 
-    private HugeObjectArray<Vector> initializeEmbeddings(long nodeCount, int embeddingDimensions) {
-        HugeObjectArray<Vector> embeddings = HugeObjectArray.newArray(
-            Vector.class,
+    private HugeObjectArray<FloatVector> initializeEmbeddings(long nodeCount, int embeddingDimensions) {
+        HugeObjectArray<FloatVector> embeddings = HugeObjectArray.newArray(
+            FloatVector.class,
             nodeCount,
             tracker
         );
@@ -142,25 +145,25 @@ public class Node2VecModel {
                     FloatConsumer::add,
                     FloatConsumer::addAll
                 ).values;
-            embeddings.set(i, new Vector(data));
+            embeddings.set(i, new FloatVector(data));
         }
         return embeddings;
     }
 
     private static final class TrainingTask implements Runnable {
-        private final HugeObjectArray<Vector> centerEmbeddings;
-        private final HugeObjectArray<Vector> contextEmbeddings;
+        private final HugeObjectArray<FloatVector> centerEmbeddings;
+        private final HugeObjectArray<FloatVector> contextEmbeddings;
 
         private final PositiveSampleProducer positiveSampleProducer;
         private final NegativeSampleProducer negativeSampleProducer;
-        private final Vector centerGradientBuffer;
-        private final Vector contextGradientBuffer;
+        private final FloatVector centerGradientBuffer;
+        private final FloatVector contextGradientBuffer;
         private final int negativeSamplingRate;
         private final float learningRate;
 
         private TrainingTask(
-            HugeObjectArray<Vector> centerEmbeddings,
-            HugeObjectArray<Vector> contextEmbeddings,
+            HugeObjectArray<FloatVector> centerEmbeddings,
+            HugeObjectArray<FloatVector> contextEmbeddings,
             PositiveSampleProducer positiveSampleProducer,
             NegativeSampleProducer negativeSampleProducer,
             float learningRate,
@@ -174,8 +177,8 @@ public class Node2VecModel {
             this.learningRate = learningRate;
             this.negativeSamplingRate = negativeSamplingRate;
 
-            this.centerGradientBuffer = new Vector(embeddingDimensions);
-            this.contextGradientBuffer = new Vector(embeddingDimensions);
+            this.centerGradientBuffer = new FloatVector(embeddingDimensions);
+            this.contextGradientBuffer = new FloatVector(embeddingDimensions);
         }
 
         @Override
@@ -202,11 +205,11 @@ public class Node2VecModel {
                 ? 1 / (Math.exp(affinity) + 1)
                 : -1 / (Math.exp(affinity) + 1));
 
-            centerGradientBuffer.scalarMultiply(contextEmbedding, scalar * learningRate);
-            contextGradientBuffer.scalarMultiply(centerEmbedding, scalar * learningRate);
+            scale(contextEmbedding.data(), scalar * learningRate, centerGradientBuffer.data());
+            scale(centerEmbedding.data(), scalar * learningRate, contextGradientBuffer.data());
 
-            centerEmbedding.addMutable(centerGradientBuffer);
-            contextEmbedding.addMutable(contextGradientBuffer);
+            addInPlace(centerEmbedding.data(), centerGradientBuffer.data());
+            addInPlace(contextEmbedding.data(), contextGradientBuffer.data());
         }
     }
 

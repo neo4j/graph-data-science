@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.node2vec;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
-import org.neo4j.gds.embeddings.node2vec.Vector;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -64,7 +64,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
         );
     }
 
-    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig>> getProcedureClazz() {
         return Node2VecWriteProc.class;
     }
 

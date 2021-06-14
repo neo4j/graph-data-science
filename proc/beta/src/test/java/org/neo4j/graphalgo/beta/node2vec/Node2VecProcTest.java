@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.node2vec;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
-import org.neo4j.gds.embeddings.node2vec.Vector;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.HeapControlTest;
@@ -36,10 +36,10 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extends
-    BaseProcTest implements AlgoBaseProcTest<Node2Vec, CONFIG, HugeObjectArray<Vector>>,
-    MemoryEstimateTest<Node2Vec, CONFIG, HugeObjectArray<Vector>>,
-    HeapControlTest<Node2Vec, CONFIG, HugeObjectArray<Vector>>,
-    RelationshipWeightConfigTest<Node2Vec, CONFIG, HugeObjectArray<Vector>>{
+    BaseProcTest implements AlgoBaseProcTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>,
+    MemoryEstimateTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>,
+    HeapControlTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>,
+    RelationshipWeightConfigTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>{
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
@@ -67,7 +67,7 @@ public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extend
         return db;
     }
 
-    public void assertResultEquals(HugeObjectArray<Vector> result1, HugeObjectArray<Vector> result2) {
+    public void assertResultEquals(HugeObjectArray<FloatVector> result1, HugeObjectArray<FloatVector> result2) {
         // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
         assertEquals(result1.get(0).data().length, result2.get(0).data().length);
     }

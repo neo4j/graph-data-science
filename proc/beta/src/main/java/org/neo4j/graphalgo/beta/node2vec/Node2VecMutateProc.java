@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.node2vec;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
-import org.neo4j.gds.embeddings.node2vec.Vector;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.MutatePropertyProc;
@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectArray<Vector>, Node2VecMutateProc.MutateResult, Node2VecMutateConfig> {
+public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateProc.MutateResult, Node2VecMutateConfig> {
 
     @Procedure(value = "gds.beta.node2vec.mutate", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)
@@ -51,7 +51,7 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecMutateConfig> computationResult = compute(
+        ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -84,12 +84,12 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecMutateConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig> computationResult) {
         return Node2VecCompanion.nodeProperties(computationResult);
     }
 
     @Override
-    protected MutateResult.Builder resultBuilder(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecMutateConfig> computeResult) {
+    protected MutateResult.Builder resultBuilder(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig> computeResult) {
         return new MutateResult.Builder();
     }
 

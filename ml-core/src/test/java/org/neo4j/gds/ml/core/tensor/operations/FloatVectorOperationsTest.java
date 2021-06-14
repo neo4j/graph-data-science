@@ -48,10 +48,11 @@ class FloatVectorOperationsTest {
     @Test
     void scale() {
         float[] a = {2f, 4.2f};
+        var result = new float[a.length];
 
-        FloatVectorOperations.scale(a, 2.5f);
+        FloatVectorOperations.scale(a, 2.5f, result);
 
-        assertThat(a).containsExactly(5f, 10.5f);
+        assertThat(result).containsExactly(5f, 10.5f);
     }
 
     @Test

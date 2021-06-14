@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.node2vec;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
-import org.neo4j.gds.embeddings.node2vec.Vector;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.WriteProc;
@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteProc.WriteResult, Node2VecWriteConfig> {
+public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteProc.WriteResult, Node2VecWriteConfig> {
 
     @Procedure(value = "gds.beta.node2vec.write", mode = WRITE)
     @Description(Node2VecCompanion.DESCRIPTION)
@@ -51,7 +51,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computationResult = compute(
+        ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -83,12 +83,12 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Vecto
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig> computationResult) {
         return Node2VecCompanion.nodeProperties(computationResult);
     }
 
     @Override
-    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecWriteConfig> computeResult) {
+    protected AbstractResultBuilder<WriteResult> resultBuilder(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig> computeResult) {
         return new WriteResult.Builder();
     }
 

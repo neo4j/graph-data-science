@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.node2vec;
+package org.neo4j.gds.ml.core.tensor;
 
-public class Vector {
+public class FloatVector {
     private final float[] data;
 
-    Vector(int size) {
+    public FloatVector(int size) {
         this(new float[size]);
     }
 
-    Vector(float[] data) {
+    public FloatVector(float[] data) {
         this.data = data;
     }
 
@@ -34,19 +34,7 @@ public class Vector {
         return data;
     }
 
-    void addMutable(Vector other) {
-        for (int pos = 0; pos < data.length; pos++) {
-            data[pos] += other.data[pos];
-        }
-    }
-
-    void scalarMultiply(Vector other, float scalar) {
-        for (int pos = 0; pos < data.length; pos++) {
-            data[pos] = other.data[pos] * scalar;
-        }
-    }
-
-    float innerProduct(Vector other) {
+    public float innerProduct(FloatVector other) {
         float result = 0;
         for (int i = 0; i < data.length; i++) {
             result += data[i] * other.data[i];

@@ -40,9 +40,15 @@ public final class FloatVectorOperations {
     }
 
     public static void scale(float[] lhs, float scalar) {
+        scale(lhs, scalar, lhs);
+    }
+
+    public static void scale(float[] lhs, float scalar, float[] out) {
+        assert out.length == lhs.length;
+
         int length = lhs.length;
         for (int i = 0; i < length; i++) {
-            lhs[i] *= scalar;
+            out[i] = lhs[i] * scalar;
         }
     }
 

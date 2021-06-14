@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
@@ -73,7 +74,7 @@ class Node2VecTest extends AlgoTestBase {
             .graph();
 
         int embeddingDimension = 128;
-        HugeObjectArray<Vector> node2Vec = new Node2Vec(
+        HugeObjectArray<FloatVector> node2Vec = new Node2Vec(
             graph,
             ImmutableNode2VecStreamConfig.builder().embeddingDimension(embeddingDimension).build(),
             progressLogger,

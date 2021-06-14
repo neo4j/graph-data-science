@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
-import org.neo4j.gds.embeddings.node2vec.Vector;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.MutateNodePropertyTest;
@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class Node2VecMutateProcTest
     extends Node2VecProcTest<Node2VecMutateConfig>
-    implements MutateNodePropertyTest<Node2Vec, Node2VecMutateConfig, HugeObjectArray<Vector>> {
+    implements MutateNodePropertyTest<Node2Vec, Node2VecMutateConfig, HugeObjectArray<FloatVector>> {
 
     @BeforeEach
     void loadProcedures() throws Exception {
@@ -56,7 +56,7 @@ class Node2VecMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<Vector>, Node2VecMutateConfig>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig>> getProcedureClazz() {
         return Node2VecMutateProc.class;
     }
 

@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.beta.node2vec;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
-import org.neo4j.gds.embeddings.node2vec.Vector;
+import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.StreamProc;
@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vector>, Node2VecStreamProc.StreamResult, Node2VecStreamConfig> {
+public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamProc.StreamResult, Node2VecStreamConfig> {
 
     @Procedure(value = "gds.beta.node2vec.stream", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)
@@ -51,7 +51,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecStreamConfig> computationResult = compute(
+        ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamConfig> computationResult = compute(
             graphNameOrConfig,
             configuration
         );
@@ -84,7 +84,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Vec
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<Vector>, Node2VecStreamConfig> computationResult) {
+    protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamConfig> computationResult) {
         return Node2VecCompanion.nodeProperties(computationResult);
     }
 
