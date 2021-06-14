@@ -140,7 +140,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.SetFun
 
         progressLogger.logStart();
 
-        for (int i = 0; i < config.iterations(); i++) {
+        for (int i = 0; (i < config.iterations()) && running(); i++) {
             var currSetFunc = setFuncs.get(currIdx);
             var currCost = costs.get(currIdx);
 
@@ -150,7 +150,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.SetFun
 
             computeCost(currSetFunc, currCost);
 
-            if (config.vnsMaxNeighborhoodOrder() > 0) {
+            if ((config.vnsMaxNeighborhoodOrder() > 0) && running()) {
                 var improvedCurrSetFunc = variableNeighborhoodSearch(
                     currSetFunc,
                     currCost,
@@ -224,7 +224,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.SetFun
     ) {
         var change = new AtomicBoolean(true);
 
-        while (change.get()) {
+        while (change.get() && running()) {
             improvementCosts.setAll(0.0D);
             var searchTasks = PartitionUtils.degreePartition(
                 graph,
@@ -274,7 +274,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.SetFun
         var neighborCost = new AtomicDoubleArray(1);
         var order = 1;
 
-        while (order < config.vnsMaxNeighborhoodOrder()) {
+        while ((order < config.vnsMaxNeighborhoodOrder()) && running()) {
             bestSetFunc.copyTo(neighborFunc, graph.nodeCount());
 
             // Generate a neighboring set function of the current order.
