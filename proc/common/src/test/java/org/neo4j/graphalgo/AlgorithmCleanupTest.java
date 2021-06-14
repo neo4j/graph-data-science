@@ -22,9 +22,9 @@ package org.neo4j.graphalgo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.catalog.GraphCreateProc;
+import org.neo4j.gds.TestProgressEventTracker;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.logging.NullLog;
 
@@ -59,8 +59,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
         Map<String, Object> config = Map.of("writeProperty", "test");
 
         assertThatCode(() -> proc.stats("g", config)).doesNotThrowAnyException();
-
-        assertThat(eventTracker.releaseCalls).isEqualTo(1);
+        assertThat(eventTracker.releaseCalls()).isEqualTo(1);
     }
 
     @Test
@@ -74,20 +73,6 @@ class AlgorithmCleanupTest extends BaseProcTest {
         Map<String, Object> config = Map.of("writeProperty", "test", "throwInCompute", true);
 
         assertThatThrownBy(() -> proc.stats("g", config)).isNotNull();
-
-        assertThat(eventTracker.releaseCalls).isEqualTo(1);
-    }
-
-    private static final class TestProgressEventTracker implements ProgressEventTracker {
-        private int releaseCalls = 0;
-
-        @Override
-        public void addLogEvent(String taskName, String message) {
-        }
-
-        @Override
-        public void release() {
-            releaseCalls++;
-        }
+        assertThat(eventTracker.releaseCalls()).isEqualTo(1);
     }
 }
