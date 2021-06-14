@@ -23,6 +23,7 @@ import org.neo4j.collection.RawIterator;
 import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.graphalgo.core.loading.CatalogRequest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreExporterUtil;
@@ -167,6 +168,7 @@ public class AuraShutdownProc implements CallableProcedure {
                         log,
                         allocationTracker
                     );
+                    GraphStoreCatalog.remove(CatalogRequest.of(store.userName(), graphStore.databaseId()), store.config().graphName(), graph -> {}, false);
                     return Stream.empty();
                 } catch (Exception e) {
                     return Stream.of(ImmutableFailedExport.of(e, store.userName(), createConfig.graphName()));

@@ -175,4 +175,17 @@ public class AuraShutdownProcTest extends BaseProcTest {
             .isDirectoryContaining("glob:**/relationships_REL2_header.csv")
             .isDirectoryContaining("regex:.+/relationships_REL2_\\d+.csv");
     }
+
+    @Test
+    void should() throws Exception {
+        GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class).register(new AuraMaintenanceFunction());
+        var pollQuery = "RETURN gds.internal.safeToRestart() AS safeToRestart";
+        var shutdownQuery = "CALL gds.internal.shutdown()";
+
+        assertCypherResult(pollQuery, List.of(Map.of("safeToRestart", false)));
+
+        runQuery(shutdownQuery);
+
+        assertCypherResult(pollQuery, List.of(Map.of("safeToRestart", true)));
+    }
 }
