@@ -29,10 +29,8 @@ import org.neo4j.values.storable.Values;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
-import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_ARRAY_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.api.DefaultValue.DEFAULT;
 import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
-import static org.neo4j.graphalgo.api.DefaultValue.FLOAT_ARRAY_DEFAULT_FALLBACK;
-import static org.neo4j.graphalgo.api.DefaultValue.LONG_ARRAY_DEFAULT_FALLBACK;
 import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
 
 public abstract class FilteredNodeProperties implements NodeProperties {
@@ -198,7 +196,7 @@ public abstract class FilteredNodeProperties implements NodeProperties {
             long translatedId = translateId(nodeId);
 
             if (translatedId < 0) {
-                return FLOAT_ARRAY_DEFAULT_FALLBACK;
+                return DEFAULT.floatArrayValue();
             }
 
             return properties.floatArrayValue(translatedId);
@@ -209,7 +207,7 @@ public abstract class FilteredNodeProperties implements NodeProperties {
             long translatedId = translateId(nodeId);
 
             if (translatedId < 0) {
-                return DOUBLE_ARRAY_DEFAULT_FALLBACK;
+                return DEFAULT.doubleArrayValue();
             }
 
             return properties.doubleArrayValue(translatedId);
@@ -220,7 +218,7 @@ public abstract class FilteredNodeProperties implements NodeProperties {
             long translatedId = translateId(nodeId);
 
             if (translatedId < 0) {
-                return LONG_ARRAY_DEFAULT_FALLBACK;
+                return DEFAULT.longArrayValue();
             }
 
             return properties.longArrayValue(translatedId);
