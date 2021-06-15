@@ -241,16 +241,16 @@ class FastRPTest extends AlgoTestBase {
 
     @Test
     void shouldDistributeValuesCorrectly() {
-        GraphLoader graphLoader = new StoreLoaderBuilder()
+        var graphLoader = new StoreLoaderBuilder()
             .api(db)
             .addNodeLabel("Node1")
             .addNodeLabel("Node2")
             .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
             .build();
 
-        Graph graph = graphLoader.graph();
+        var graph = graphLoader.graph();
 
-        FastRP fastRP = new FastRP(
+        var fastRP = new FastRP(
             graph,
             FastRPBaseConfig.builder()
                 .embeddingDimension(512)
@@ -263,10 +263,8 @@ class FastRPTest extends AlgoTestBase {
 
         fastRP.initPropertyVectors();
         fastRP.initRandomVectors();
-        double p = 1D / 6D;
-        int maxNumPositive = (int) ((p + 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D); // 1:30.000.000 chance of failing :P
-        int minNumPositive = (int) ((p - 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D);
         HugeObjectArray<float[]> randomVectors = fastRP.currentEmbedding(-1);
+
         for (int i = 0; i < graph.nodeCount(); i++) {
             float[] embedding = randomVectors.get(i);
             int numZeros = 0;
@@ -282,8 +280,17 @@ class FastRPTest extends AlgoTestBase {
 
             int numNegative = 512 - numZeros - numPositive;
 
-            assertThat(numPositive >= minNumPositive && numPositive <= maxNumPositive).isTrue();
-            assertThat(numNegative >= minNumPositive && numNegative <= maxNumPositive).isTrue();
+            double p = 1D / 6D;
+            int maxNumPositive = (int) ((p + 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D); // 1:30.000.000 chance of failing :P
+            int minNumPositive = (int) ((p - 5D * Math.sqrt((p * (1 - p)) / 512D)) * 512D);
+
+            assertThat(numPositive)
+                .isGreaterThanOrEqualTo(minNumPositive)
+                .isLessThanOrEqualTo(maxNumPositive);
+
+            assertThat(numNegative)
+                .isGreaterThanOrEqualTo(minNumPositive)
+                .isLessThanOrEqualTo(maxNumPositive);
         }
     }
 
