@@ -68,6 +68,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> {
             .addParameter("sudo", true)
             .addParameter("nodeWeightProperty", "knn")
             .addParameter("topK", 1)
+            .addParameter("randomSeed", 42)
             .addParameter("writeRelationshipType", "SIMILAR")
             .addParameter("writeProperty", "score")
             .yields(
