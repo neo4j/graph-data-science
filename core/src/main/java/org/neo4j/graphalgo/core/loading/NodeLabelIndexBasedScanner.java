@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
-import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
 
 final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<NodeLabelIndexCursor, Integer> {
@@ -41,8 +40,8 @@ final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<No
     }
 
     @Override
-    Scan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
-        return Neo4jProxy.entityCursorScan(transaction, labelId);
+    StoreScan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
+        return new ScanBasedStoreScan<>(Neo4jProxy.entityCursorScan(transaction, labelId));
     }
 
     @Override

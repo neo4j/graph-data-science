@@ -39,6 +39,11 @@ public interface StoreScanner<Reference> extends AutoCloseable {
         StoreScanner<Reference> newScanner(int prefetchSize, TransactionContext transaction);
     }
 
+    interface StoreScan<Cursor extends org.neo4j.internal.kernel.api.Cursor> {
+
+        boolean scanBatch(Cursor cursor, int data);
+    }
+
     interface ScanCursor<Reference> extends AutoCloseable {
         default int bufferSize() {
             return bulkSize();

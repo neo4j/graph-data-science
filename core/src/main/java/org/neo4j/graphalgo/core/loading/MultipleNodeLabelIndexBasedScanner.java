@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
-import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Arrays;
@@ -50,7 +49,7 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractNodeCursorBasedSc
     }
 
     @Override
-    Scan<CompositeNodeCursor> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
+    StoreScan<CompositeNodeCursor> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
         var scans = Neo4jProxy.entityCursorScan(transaction, labelIds);
         return new CompositeNodeScan(scans);
     }

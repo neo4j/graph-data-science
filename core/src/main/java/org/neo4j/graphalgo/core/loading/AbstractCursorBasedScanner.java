@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.internal.kernel.api.Cursor;
-import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
 
 abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor, Attachment>
@@ -30,7 +29,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
     private final class ScanCursor implements StoreScanner.ScanCursor<Reference> {
 
-        private final Scan<EntityCursor> scan;
+        private final StoreScan<EntityCursor> scan;
         private final boolean patchForLabelScanAlignment;
 
         private EntityCursor cursor;
@@ -40,7 +39,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
         ScanCursor(
             EntityCursor cursor,
             Reference reference,
-            Scan<EntityCursor> entityCursorScan,
+            StoreScan<EntityCursor> entityCursorScan,
             boolean patchForLabelScanAlignment
         ) {
             this.cursor = cursor;
@@ -75,7 +74,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
         @Override
         public boolean bulkNext(RecordConsumer<Reference> consumer) {
-            boolean hasNextBatch = scan.reserveBatch(cursor, bulkSize());
+            boolean hasNextBatch = scan.scanBatch(cursor, bulkSize());
 
             if (!hasNextBatch) {
                 return false;
@@ -114,7 +113,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
     // global cursor pool to return this one to
     private final ThreadLocal<StoreScanner.ScanCursor<Reference>> cursors;
 
-    private final Scan<EntityCursor> entityCursorScan;
+    private final StoreScan<EntityCursor> entityCursorScan;
 
     AbstractCursorBasedScanner(int prefetchSize, TransactionContext transactionContext, Attachment attachment) {
         this.transaction = transactionContext.fork();
@@ -152,7 +151,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
     abstract EntityCursor entityCursor(KernelTransaction transaction);
 
-    abstract Scan<EntityCursor> entityCursorScan(KernelTransaction transaction, Attachment attachment);
+    abstract StoreScan<EntityCursor> entityCursorScan(KernelTransaction transaction, Attachment attachment);
 
     abstract Reference cursorReference(KernelTransaction transaction, EntityCursor cursor);
 

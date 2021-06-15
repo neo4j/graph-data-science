@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
-import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.format.standard.RelationshipRecordFormat;
@@ -54,8 +53,8 @@ public final class RelationshipScanCursorBasedScanner extends AbstractCursorBase
     }
 
     @Override
-    Scan<RelationshipScanCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
-        return transaction.dataRead().allRelationshipsScan();
+    StoreScan<RelationshipScanCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
+        return new ScanBasedStoreScan<>(transaction.dataRead().allRelationshipsScan());
     }
 
     @Override

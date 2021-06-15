@@ -25,7 +25,7 @@ import org.neo4j.internal.kernel.api.Scan;
 
 import java.util.List;
 
-public class CompositeNodeScan implements Scan<CompositeNodeCursor> {
+public class CompositeNodeScan implements StoreScanner.StoreScan<CompositeNodeCursor> {
 
     private final List<Scan<NodeLabelIndexCursor>> scans;
 
@@ -35,7 +35,7 @@ public class CompositeNodeScan implements Scan<CompositeNodeCursor> {
 
     // This method needs to be synchronized as we need to make sure that every subscan is processing the same batch
     @Override
-    public synchronized boolean reserveBatch(CompositeNodeCursor cursor, int sizeHint) {
+    public synchronized boolean scanBatch(CompositeNodeCursor cursor, int sizeHint) {
         boolean result = false;
         for (int i = 0; i < scans.size(); i++) {
             NodeLabelIndexCursor indexCursor = cursor.getCursor(i);

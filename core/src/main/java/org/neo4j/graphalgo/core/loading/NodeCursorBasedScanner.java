@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeCursor;
-import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
 
 final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCursor, Void> {
@@ -37,8 +36,8 @@ final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCu
     }
 
     @Override
-    Scan<NodeCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
-        return transaction.dataRead().allNodesScan();
+    StoreScan<NodeCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
+        return new ScanBasedStoreScan<>(transaction.dataRead().allNodesScan());
     }
 
     @Override
