@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 
+import javax.management.relation.Relation;
 import java.util.Collection;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
@@ -132,11 +133,12 @@ final class SubgraphSampling {
         ParallelUtil.run(tasks, executor);
     }
 
-    static final class SampleSubgraphTask implements Runnable {
+    static final class SampleSubgraphTask implements Runnable, RelationshipConsumer {
 
         private final Graph graph;
         private final Partition partition;
         private final DisjointSetStruct components;
+        private long limit;
 
         SampleSubgraphTask(Graph graph, Partition partition, DisjointSetStruct components) {
             this.graph = graph.concurrentCopy();
@@ -148,21 +150,33 @@ final class SubgraphSampling {
         public void run() {
             var startNode = partition.startNode();
             var endNode = startNode + partition.nodeCount();
-            var consumer = new LimitConsumer(components);
 
             for (long node = startNode; node < endNode; node++) {
-                consumer.reset();
-                graph.forEachRelationship(node, consumer);
+                reset();
+                graph.forEachRelationship(node, this);
             }
         }
+
+        @Override
+        public boolean accept(long s, long t) {
+            components.union(s, t);
+            limit--;
+            return limit != 0;
+        }
+
+        public void reset() {
+            limit = NEIGHBOR_ROUNDS;
+        }
+
     }
 
-    static final class LinkTask implements Runnable {
+    static final class LinkTask implements Runnable, RelationshipConsumer {
 
         private final Graph graph;
         private final long skipComponent;
         private final Partition partition;
         private final DisjointSetStruct components;
+        private long skip;
 
         LinkTask(
             Graph graph,
@@ -181,49 +195,15 @@ final class SubgraphSampling {
             var startNode = partition.startNode();
             var endNode = startNode + partition.nodeCount();
 
-            var linkConsumer = new SkipConsumer(components);
             for (long node = startNode; node < endNode; node++) {
                 if (components.setIdOf(node) == skipComponent) {
                     continue;
                 }
                 if (graph.degree(node) > NEIGHBOR_ROUNDS) {
-                    linkConsumer.reset();
-                    graph.forEachRelationship(node, linkConsumer);
+                    reset();
+                    graph.forEachRelationship(node, this);
                 }
             }
-        }
-    }
-
-    static class LimitConsumer implements RelationshipConsumer {
-        private final DisjointSetStruct dss;
-        private long limit;
-
-        LimitConsumer(DisjointSetStruct dss) {
-            this.dss = dss;
-        }
-
-        public void reset() {
-            limit = NEIGHBOR_ROUNDS;
-        }
-
-        @Override
-        public boolean accept(long s, long t) {
-            dss.union(s, t);
-            limit--;
-            return limit != 0;
-        }
-    }
-
-    static class SkipConsumer implements RelationshipConsumer {
-        final DisjointSetStruct components;
-        private long skip;
-
-        SkipConsumer(DisjointSetStruct components) {
-            this.components = components;
-        }
-
-        public void reset() {
-            skip = 0;
         }
 
         @Override
@@ -234,6 +214,11 @@ final class SubgraphSampling {
             }
             return true;
         }
+
+        public void reset() {
+            skip = 0;
+        }
+
     }
 
     private SubgraphSampling() {}
