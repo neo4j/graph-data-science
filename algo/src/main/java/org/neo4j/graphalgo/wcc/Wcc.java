@@ -153,14 +153,14 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
 
         // Process a sparse sampled subgraph first for approximating components.
         // Sample by processing a fixed number of neighbors for each node (see paper)
-        SubgraphSampling.sampleSubgraph(graph, components, partitions, executor);
+        SubgraphSampling.sampleSubgraph(graph, components, partitions, executor, progressLogger, this);
 
         // Sample 'comp' to find the most frequent element -- due to prior
         // compression, this value represents the largest intermediate component
         var largestComponent = SubgraphSampling.sampleFrequentElement(components, nodeCount);
 
         // Final 'link' phase over remaining edges (excluding largest component)
-        SubgraphSampling.linkRemaining(graph, components, largestComponent, partitions, executor);
+        SubgraphSampling.linkRemaining(graph, components, largestComponent, partitions, executor, progressLogger, this);
     }
 
     private static double defaultWeight(double threshold) {

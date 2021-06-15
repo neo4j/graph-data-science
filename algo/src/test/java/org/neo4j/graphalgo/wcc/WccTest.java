@@ -114,9 +114,10 @@ class WccTest {
         });
     }
 
-    @Test
-    void shouldLogProgress() {
-        var graph = createTestGraph(Orientation.NATURAL);
+    @ParameterizedTest
+    @EnumSource(Orientation.class)
+    void shouldLogProgress(Orientation orientation) {
+        var graph = createTestGraph(orientation);
 
         var wcc = new WccAlgorithmFactory<>(TestProgressLogger.FACTORY).build(
             graph,

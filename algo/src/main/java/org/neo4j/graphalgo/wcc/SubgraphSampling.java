@@ -26,6 +26,8 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 
@@ -34,6 +36,8 @@ import java.util.Collection;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.core.utils.TerminationFlag.RUN_CHECK_NODE_COUNT;
 
 /**
  * The subgraph sampling optimization has been introduced in [1].
@@ -76,11 +80,13 @@ final class SubgraphSampling {
         Graph graph,
         DisjointSetStruct components,
         Collection<Partition> partitions,
-        ExecutorService executor
+        ExecutorService executor,
+        ProgressLogger progressLogger,
+        TerminationFlag terminationFlag
     ) {
         var tasks = partitions
             .stream()
-            .map(partition -> new SubgraphSampling.SampleSubgraphTask(graph, partition, components))
+            .map(partition -> new SubgraphSampling.SampleSubgraphTask(graph, partition, components, progressLogger, terminationFlag))
             .collect(Collectors.toList());
 
         ParallelUtil.run(tasks, executor);
@@ -124,11 +130,13 @@ final class SubgraphSampling {
         DisjointSetStruct components,
         long largestComponent,
         Collection<Partition> partitions,
-        ExecutorService executor
+        ExecutorService executor,
+        ProgressLogger progressLogger,
+        TerminationFlag terminationFlag
     ) {
         var tasks = partitions
             .stream()
-            .map(partition -> new LinkTask(graph, partition, largestComponent, components))
+            .map(partition -> new LinkTask(graph, partition, largestComponent, components, progressLogger, terminationFlag))
             .collect(Collectors.toList());
         ParallelUtil.run(tasks, executor);
     }
@@ -138,12 +146,22 @@ final class SubgraphSampling {
         private final Graph graph;
         private final Partition partition;
         private final DisjointSetStruct components;
+        private final ProgressLogger progressLogger;
+        private final TerminationFlag terminationFlag;
         private long limit;
 
-        SampleSubgraphTask(Graph graph, Partition partition, DisjointSetStruct components) {
+        SampleSubgraphTask(
+            Graph graph,
+            Partition partition,
+            DisjointSetStruct components,
+            ProgressLogger progressLogger,
+            TerminationFlag terminationFlag
+        ) {
             this.graph = graph.concurrentCopy();
             this.partition = partition;
             this.components = components;
+            this.progressLogger = progressLogger;
+            this.terminationFlag = terminationFlag;
         }
 
         @Override
@@ -154,6 +172,11 @@ final class SubgraphSampling {
             for (long node = startNode; node < endNode; node++) {
                 reset();
                 graph.forEachRelationship(node, this);
+
+                if (node % RUN_CHECK_NODE_COUNT == 0) {
+                    terminationFlag.assertRunning();
+                }
+                progressLogger.logProgress(Math.min(NEIGHBOR_ROUNDS, graph.degree(node)));
             }
         }
 
@@ -176,18 +199,24 @@ final class SubgraphSampling {
         private final long skipComponent;
         private final Partition partition;
         private final DisjointSetStruct components;
+        private final ProgressLogger progressLogger;
+        private final TerminationFlag terminationFlag;
         private long skip;
 
         LinkTask(
             Graph graph,
             Partition partition,
             long skipComponent,
-            DisjointSetStruct components
+            DisjointSetStruct components,
+            ProgressLogger progressLogger,
+            TerminationFlag terminationFlag
         ) {
             this.graph = graph.concurrentCopy();
             this.skipComponent = skipComponent;
             this.partition = partition;
             this.components = components;
+            this.progressLogger = progressLogger;
+            this.terminationFlag = terminationFlag;
         }
 
         @Override
@@ -199,9 +228,15 @@ final class SubgraphSampling {
                 if (components.setIdOf(node) == skipComponent) {
                     continue;
                 }
-                if (graph.degree(node) > NEIGHBOR_ROUNDS) {
+                var degree = graph.degree(node);
+                if (degree > NEIGHBOR_ROUNDS) {
                     reset();
                     graph.forEachRelationship(node, this);
+
+                    progressLogger.logProgress(degree - NEIGHBOR_ROUNDS);
+                    if (node % RUN_CHECK_NODE_COUNT == 0) {
+                        terminationFlag.assertRunning();
+                    }
                 }
             }
         }
