@@ -177,7 +177,7 @@ public class AuraShutdownProcTest extends BaseProcTest {
     }
 
     @Test
-    void should() throws Exception {
+    void shouldBringTheDatabaseIntoAStateThatIsSafeToRestart() throws Exception {
         GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class).register(new AuraMaintenanceFunction());
         var pollQuery = "RETURN gds.internal.safeToRestart() AS safeToRestart";
         var shutdownQuery = "CALL gds.internal.shutdown()";
