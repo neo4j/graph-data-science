@@ -19,6 +19,10 @@
  */
 package org.neo4j.graphalgo.wcc;
 
+import com.carrotsearch.hppc.LongIntHashMap;
+import com.carrotsearch.hppc.cursors.LongIntCursor;
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -27,16 +31,21 @@ import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -46,8 +55,29 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
  *
  * @see HugeAtomicDisjointSetStruct
  * @see <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.56.8354&rep=rep1&type=pdf">the paper</a>
+ *
+ * For the undirected case we do subgraph sampling, as introduced in [1].
+ *
+ * The idea is to identify the largest component using a sampled subgraph.
+ * Relationships of nodes that are already contained in the largest component are
+ * not iterated. The compression step described in [1], is contained in
+ * {@link DisjointSetStruct#setIdOf}.
+ *
+ * [1] Michael Sutton, Tal Ben-Nun, and Amnon Barak. "Optimizing Parallel
+ * Graph Connectivity Computation via Subgraph Sampling" Symposium on
+ * Parallel and Distributed Processing, IPDPS 2018.
  */
 public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
+
+    /**
+     * The number of relationships of each node to sample during subgraph sampling.
+     */
+    private static final int NEIGHBOR_ROUNDS = 2;
+
+    /**
+     * The number of samples from the DSS to find the largest component.
+     */
+    private static final int SAMPLING_SIZE = 1024;
 
     private final WccBaseConfig config;
     private final NodeProperties initialComponents;
@@ -151,16 +181,73 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
     private void computeUndirected(DisjointSetStruct components) {
         var partitions = PartitionUtils.rangePartition(config.concurrency(), graph.nodeCount(), Function.identity());
 
-        // Process a sparse sampled subgraph first for approximating components.
-        // Sample by processing a fixed number of neighbors for each node (see paper)
-        SubgraphSampling.sampleSubgraph(graph, components, partitions, executor, progressLogger, this);
+        sampleSubgraph(components, partitions);
+        long largestComponent = findLargestComponent(components);
+        linkRemaining(components, partitions, largestComponent);
+    }
 
-        // Sample 'comp' to find the most frequent element -- due to prior
-        // compression, this value represents the largest intermediate component
-        var largestComponent = SubgraphSampling.sampleFrequentElement(components, nodeCount);
+    /**
+     * Processes a sparse samples subgraph first for approximating components.
+     * Samples by processing a fixed number of neighbors for each node.
+     */
+    private void sampleSubgraph(DisjointSetStruct components, List<Partition> partitions) {
+        var tasks = partitions
+            .stream()
+            .map(partition -> new SampleSubgraphTask(
+                graph, partition,
+                components,
+                progressLogger,
+                this
+            ))
+            .collect(Collectors.toList());
 
-        // Final 'link' phase over remaining edges (excluding largest component)
-        SubgraphSampling.linkRemaining(graph, components, largestComponent, partitions, executor, progressLogger, this);
+        ParallelUtil.run(tasks, executor);
+    }
+
+    /**
+     * Approximates the largest component by sampling a fixed number of nodes.
+     */
+    private long findLargestComponent(DisjointSetStruct components) {
+        var random = new SplittableRandom();
+        var sampleCounts = new LongIntHashMap();
+
+        for (int i = 0; i < SAMPLING_SIZE; i++) {
+            var node = random.nextLong(nodeCount);
+            sampleCounts.addTo(components.setIdOf(node), 1);
+        }
+
+        var max = new MutableInt(-1);
+        var mostFrequent = new MutableLong(-1L);
+        for (LongIntCursor entry : sampleCounts) {
+            var component = entry.key;
+            var count = entry.value;
+
+            if (count > max.intValue()) {
+                max.setValue(count);
+                mostFrequent.setValue(component);
+            }
+        }
+
+        return mostFrequent.longValue();
+    }
+
+    /**
+     * Processes the remaining relationships that were not processed during the initial sampling.
+     *
+     * Skips nodes that are already contained in the largest component.
+     */
+    private void linkRemaining(DisjointSetStruct components, List<Partition> partitions, long largestComponent) {
+        var tasks = partitions
+            .stream()
+            .map(partition -> new LinkTask(
+                graph, partition,
+                largestComponent,
+                components,
+                progressLogger,
+                this
+            ))
+            .collect(Collectors.toList());
+        ParallelUtil.run(tasks, executor);
     }
 
     private static double defaultWeight(double threshold) {
@@ -189,7 +276,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
                     assertRunning();
                 }
 
-                getProgressLogger().logProgress(graph.degree(node));
+                progressLogger.logProgress(graph.degree(node));
             }
         }
 
@@ -225,5 +312,120 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             }
             return true;
         }
+    }
+
+    static final class SampleSubgraphTask implements Runnable, RelationshipConsumer {
+
+        private final Graph graph;
+        private final Partition partition;
+        private final DisjointSetStruct components;
+        private final ProgressLogger progressLogger;
+        private final TerminationFlag terminationFlag;
+        private long limit;
+
+        SampleSubgraphTask(
+            Graph graph,
+            Partition partition,
+            DisjointSetStruct components,
+            ProgressLogger progressLogger,
+            TerminationFlag terminationFlag
+        ) {
+            this.graph = graph.concurrentCopy();
+            this.partition = partition;
+            this.components = components;
+            this.progressLogger = progressLogger;
+            this.terminationFlag = terminationFlag;
+        }
+
+        @Override
+        public void run() {
+            var startNode = partition.startNode();
+            var endNode = startNode + partition.nodeCount();
+
+            for (long node = startNode; node < endNode; node++) {
+                reset();
+                graph.forEachRelationship(node, this);
+
+                if (node % RUN_CHECK_NODE_COUNT == 0) {
+                    terminationFlag.assertRunning();
+                }
+                progressLogger.logProgress(Math.min(NEIGHBOR_ROUNDS, graph.degree(node)));
+            }
+        }
+
+        @Override
+        public boolean accept(long s, long t) {
+            components.union(s, t);
+            limit--;
+            return limit != 0;
+        }
+
+        public void reset() {
+            limit = NEIGHBOR_ROUNDS;
+        }
+
+    }
+
+    static final class LinkTask implements Runnable, RelationshipConsumer {
+
+        private final Graph graph;
+        private final long skipComponent;
+        private final Partition partition;
+        private final DisjointSetStruct components;
+        private final ProgressLogger progressLogger;
+        private final TerminationFlag terminationFlag;
+        private long skip;
+
+        LinkTask(
+            Graph graph,
+            Partition partition,
+            long skipComponent,
+            DisjointSetStruct components,
+            ProgressLogger progressLogger,
+            TerminationFlag terminationFlag
+        ) {
+            this.graph = graph.concurrentCopy();
+            this.skipComponent = skipComponent;
+            this.partition = partition;
+            this.components = components;
+            this.progressLogger = progressLogger;
+            this.terminationFlag = terminationFlag;
+        }
+
+        @Override
+        public void run() {
+            var startNode = partition.startNode();
+            var endNode = startNode + partition.nodeCount();
+
+            for (long node = startNode; node < endNode; node++) {
+                if (components.setIdOf(node) == skipComponent) {
+                    continue;
+                }
+                var degree = graph.degree(node);
+                if (degree > NEIGHBOR_ROUNDS) {
+                    reset();
+                    graph.forEachRelationship(node, this);
+
+                    progressLogger.logProgress(degree - NEIGHBOR_ROUNDS);
+                    if (node % RUN_CHECK_NODE_COUNT == 0) {
+                        terminationFlag.assertRunning();
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean accept(long source, long target) {
+            skip++;
+            if (skip > NEIGHBOR_ROUNDS) {
+                components.union(source, target);
+            }
+            return true;
+        }
+
+        public void reset() {
+            skip = 0;
+        }
+
     }
 }
