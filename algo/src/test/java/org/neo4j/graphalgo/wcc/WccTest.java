@@ -24,11 +24,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.neo4j.graphalgo.CommunityHelper;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -44,17 +43,16 @@ import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 import org.neo4j.logging.NullLog;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
-import static org.neo4j.graphalgo.TestSupport.toArguments;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 class WccTest {
@@ -317,13 +315,6 @@ class WccTest {
         @Inject
         private TestGraph undirectedGraph;
 
-        Stream<Arguments> input() {
-            return TestSupport.crossArguments(
-                toArguments(() -> Stream.of(naturalGraph, reverseGraph, undirectedGraph)),
-                toArguments(() -> Arrays.stream(Orientation.values()))
-            );
-        }
-
         @Test
         void computeNatural() {
             assertResults(naturalGraph);
@@ -342,24 +333,6 @@ class WccTest {
         private void assertResults(TestGraph graph) {
             var config = ImmutableWccStreamConfig.builder().build();
 
-            var c0 = minId(graph, "a", "b", "c", "d");
-            var c1 = minId(graph, "e", "f", "g");
-            var c2 = minId(graph, "h", "i");
-            var c3 = minId(graph, "j");
-
-            var expected = Map.of(
-                graph.toOriginalNodeId("a"), c0,
-                graph.toOriginalNodeId("b"), c0,
-                graph.toOriginalNodeId("c"), c0,
-                graph.toOriginalNodeId("d"), c0,
-                graph.toOriginalNodeId("e"), c1,
-                graph.toOriginalNodeId("f"), c1,
-                graph.toOriginalNodeId("g"), c1,
-                graph.toOriginalNodeId("h"), c2,
-                graph.toOriginalNodeId("i"), c2,
-                graph.toOriginalNodeId("j"), c3
-            );
-
             var dss = new WccAlgorithmFactory<>()
                 .build(
                     graph,
@@ -368,13 +341,22 @@ class WccTest {
                     ProgressLogger.NULL_LOGGER
                 ).compute();
 
-            for (long nodeId = 0; nodeId < dss.size(); nodeId++) {
-                assertThat(dss.setIdOf(nodeId)).isEqualTo(expected.get(nodeId));
-            }
+
+            var actualCommunities = new ArrayList<Long>();
+            graph.forEachNode(node -> actualCommunities.add(dss.setIdOf(node)));
+            CommunityHelper.assertCommunities(
+                actualCommunities,
+                List.of(
+                    ids( graph, "a", "b", "c", "d"),
+                    ids( graph, "e", "f", "g"),
+                    ids( graph, "h", "i"),
+                    ids( graph, "j")
+                )
+            );
         }
 
-        long minId(TestGraph graph, String... ids) {
-            return Arrays.stream(ids).map(graph::toMappedNodeId).mapToLong(id -> id).min().orElse(-1);
+        private List<Long> ids(TestGraph graph, String... nodes) {
+            return Arrays.stream(nodes).map(graph::toOriginalNodeId).collect(Collectors.toList());
         }
     }
 }

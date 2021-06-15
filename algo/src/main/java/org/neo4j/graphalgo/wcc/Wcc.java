@@ -194,7 +194,8 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         var tasks = partitions
             .stream()
             .map(partition -> new UndirectedSamplingTask(
-                graph, partition,
+                graph,
+                partition,
                 components,
                 progressLogger,
                 this
