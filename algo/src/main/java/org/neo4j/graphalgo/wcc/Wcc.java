@@ -171,8 +171,8 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         var tasks = new ArrayList<Runnable>(threadSize);
         for (long i = 0L; i < this.nodeCount; i += batchSize) {
             var wccTask = !config.hasThreshold()
-                ? new WCCTask(dss, i)
-                : new WCCWithThresholdTask(threshold(), dss, i);
+                ? new DirectedUnionTask(dss, i)
+                : new DirectedUnionWithThresholdTask(threshold(), dss, i);
             tasks.add(wccTask);
         }
         ParallelUtil.run(tasks, executor);
@@ -193,7 +193,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
     private void sampleSubgraph(DisjointSetStruct components, List<Partition> partitions) {
         var tasks = partitions
             .stream()
-            .map(partition -> new SampleSubgraphTask(
+            .map(partition -> new UndirectedSamplingTask(
                 graph, partition,
                 components,
                 progressLogger,
@@ -239,7 +239,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
     private void linkRemaining(DisjointSetStruct components, List<Partition> partitions, long largestComponent) {
         var tasks = partitions
             .stream()
-            .map(partition -> new LinkTask(
+            .map(partition -> new UndirectedUnionTask(
                 graph, partition,
                 largestComponent,
                 components,
@@ -254,14 +254,14 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         return threshold + 1;
     }
 
-    private class WCCTask implements Runnable, RelationshipConsumer {
+    private class DirectedUnionTask implements Runnable, RelationshipConsumer {
 
         final DisjointSetStruct struct;
         final RelationshipIterator rels;
         private final long offset;
         private final long end;
 
-        WCCTask(DisjointSetStruct struct, long offset) {
+        DirectedUnionTask(DisjointSetStruct struct, long offset) {
             this.struct = struct;
             this.rels = graph.concurrentCopy();
             this.offset = offset;
@@ -291,11 +291,11 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         }
     }
 
-    private class WCCWithThresholdTask extends WCCTask implements RelationshipWithPropertyConsumer {
+    private class DirectedUnionWithThresholdTask extends DirectedUnionTask implements RelationshipWithPropertyConsumer {
 
         private final double threshold;
 
-        WCCWithThresholdTask(double threshold, DisjointSetStruct struct, long offset) {
+        DirectedUnionWithThresholdTask(double threshold, DisjointSetStruct struct, long offset) {
             super(struct, offset);
             this.threshold = threshold;
         }
@@ -314,7 +314,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         }
     }
 
-    static final class SampleSubgraphTask implements Runnable, RelationshipConsumer {
+    static final class UndirectedSamplingTask implements Runnable, RelationshipConsumer {
 
         private final Graph graph;
         private final Partition partition;
@@ -323,7 +323,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         private final TerminationFlag terminationFlag;
         private long limit;
 
-        SampleSubgraphTask(
+        UndirectedSamplingTask(
             Graph graph,
             Partition partition,
             DisjointSetStruct components,
@@ -366,7 +366,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
 
     }
 
-    static final class LinkTask implements Runnable, RelationshipConsumer {
+    static final class UndirectedUnionTask implements Runnable, RelationshipConsumer {
 
         private final Graph graph;
         private final long skipComponent;
@@ -376,7 +376,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         private final TerminationFlag terminationFlag;
         private long skip;
 
-        LinkTask(
+        UndirectedUnionTask(
             Graph graph,
             Partition partition,
             long skipComponent,
