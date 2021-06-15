@@ -32,7 +32,7 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
-import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
@@ -42,8 +42,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<FastRP, CONFIG, FastRP.FastRPResult>,
@@ -84,7 +83,8 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
         FastRP.FastRPResult result1, FastRP.FastRPResult result2
     ) {
         // TODO: This just tests that the dimensions are the same for node 0, it's not a very good equality test
-        assertEquals(result1.embeddings().get(0).length, result1.embeddings().get(0).length);
+        assertThat(result1.embeddings().get(0))
+            .hasSameSizeAs(result2.embeddings().get(0));
     }
 
     private static Stream<Arguments> weights() {
@@ -142,11 +142,10 @@ public abstract class FastRPProcTest<CONFIG extends FastRPBaseConfig> extends Ba
             .addPlaceholder("iterationWeights", "iterationWeights")
             .yields();
 
-        var exception = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(query, Map.of("iterationWeights", iterationWeights))
-        );
-        assertThat(exception).getRootCause().isInstanceOf(IllegalArgumentException.class).hasMessageContaining(messagePart);
+        assertThatThrownBy(() -> runQuery(query, Map.of("iterationWeights", iterationWeights)))
+            .hasCauseInstanceOf(QueryExecutionKernelException.class)
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(messagePart);
     }
 
     private static Stream<Arguments> invalidWeights() {

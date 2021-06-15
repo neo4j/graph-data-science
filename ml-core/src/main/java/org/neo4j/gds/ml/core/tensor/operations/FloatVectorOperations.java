@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.core.tensor.operations;
 
+import com.carrotsearch.hppc.predicates.FloatPredicate;
+
 public final class FloatVectorOperations {
 
     private FloatVectorOperations() {}
@@ -62,5 +64,16 @@ public final class FloatVectorOperations {
         if (euclideanLength > 0) {
             scale(array, 1 / euclideanLength);
         }
+    }
+
+    public static boolean anyMatch(float[] vector, FloatPredicate predicate) {
+        boolean anyMatch = false;
+        for (float v : vector) {
+            if (predicate.apply(v)) {
+                anyMatch = true;
+                break;
+            }
+        }
+        return anyMatch;
     }
 }

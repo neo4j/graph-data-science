@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -67,9 +68,9 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         String query = queryBuilder.yields();
 
         runQueryWithRowConsumer(query, row -> {
-            List<Float> embeddings = (List<Float>) row.get("embedding");
-            assertEquals(embeddingDimension, embeddings.size());
-            assertFalse(embeddings.stream().allMatch(value -> value == 0.0));
+            assertThat((List<Float>) row.get("embedding"))
+                .hasSize(embeddingDimension)
+                .anyMatch(value -> value != 0.0);
         });
     }
 

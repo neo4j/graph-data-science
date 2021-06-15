@@ -89,4 +89,13 @@ class FloatVectorOperationsTest {
 
         assertThat(a).containsOnly(0f);
     }
+
+    @Test
+    void anyMatch() {
+        float[] a = {4f, -2.5f, 3.3f};
+
+        assertThat(FloatVectorOperations.anyMatch(a, v -> v == 4f)).isTrue();
+        assertThat(FloatVectorOperations.anyMatch(a, v -> v > 5f)).isFalse();
+        assertThat(FloatVectorOperations.anyMatch(a, v -> v > 0f)).isTrue();
+    }
 }
