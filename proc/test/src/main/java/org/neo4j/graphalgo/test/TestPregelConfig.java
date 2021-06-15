@@ -21,36 +21,26 @@ package org.neo4j.graphalgo.test;
 
 import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.config.AlgoBaseConfig;
+import org.neo4j.graphalgo.beta.pregel.PregelProcedureConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.config.WriteConfig;
-import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
-public interface TestConfig extends AlgoBaseConfig, WriteConfig, WritePropertyConfig {
-
-    @Value.Default
-    default int maxIterations() {
-        return 20;
-    }
+public interface TestPregelConfig extends PregelProcedureConfig {
 
     @Value.Default
     default boolean throwInCompute() {
         return false;
     }
 
-    static TestConfig of(
+    static TestPregelConfig of(
         String username,
         Optional<String> graphName,
         Optional<GraphCreateConfig> maybeImplicitCreate,
-        CypherMapWrapper config
+        CypherMapWrapper userInput
     ) {
-        return new TestConfigImpl(graphName, maybeImplicitCreate, username, config);
+        return new TestPregelConfigImpl(graphName, maybeImplicitCreate, username, userInput);
     }
 }
