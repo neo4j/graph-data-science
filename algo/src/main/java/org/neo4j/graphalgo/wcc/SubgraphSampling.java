@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.wcc;
 
 import com.carrotsearch.hppc.LongIntHashMap;
-import com.carrotsearch.hppc.procedures.LongIntProcedure;
+import com.carrotsearch.hppc.cursors.LongIntCursor;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.Graph;
@@ -82,12 +82,7 @@ final class SubgraphSampling {
             .map(partition -> new SubgraphSampling.SampleSubgraphTask(graph, partition, components))
             .collect(Collectors.toList());
 
-        for (int r = 0; r < NEIGHBOR_ROUNDS; r++) {
-            for (var task : tasks) {
-                task.setTargetIndex(r);
-            }
-            ParallelUtil.run(tasks, executor);
-        }
+        ParallelUtil.run(tasks, executor);
     }
 
     /**
@@ -104,13 +99,15 @@ final class SubgraphSampling {
 
         var max = new MutableInt(-1);
         var mostFrequent = new MutableLong(-1L);
+        for (LongIntCursor entry : sampleCounts) {
+            var component = entry.key;
+            var count = entry.value;
 
-        sampleCounts.forEach((LongIntProcedure) (component, count) -> {
             if (count > max.intValue()) {
                 max.setValue(count);
                 mostFrequent.setValue(component);
             }
-        });
+        }
 
         return mostFrequent.longValue();
     }
@@ -141,30 +138,21 @@ final class SubgraphSampling {
         private final Partition partition;
         private final DisjointSetStruct components;
 
-        private int targetIndex;
-
         SampleSubgraphTask(Graph graph, Partition partition, DisjointSetStruct components) {
             this.graph = graph.concurrentCopy();
             this.partition = partition;
             this.components = components;
         }
 
-        void setTargetIndex(int targetIndex) {
-            this.targetIndex = targetIndex;
-        }
-
         @Override
         public void run() {
             var startNode = partition.startNode();
             var endNode = startNode + partition.nodeCount();
-            var consumer = new GetTargetConsumer(0);
+            var consumer = new LimitConsumer(components);
 
             for (long node = startNode; node < endNode; node++) {
-                if (graph.degree(node) > targetIndex) {
-                    consumer.count = targetIndex;
-                    graph.forEachRelationship(node, consumer);
-                    components.union(node, consumer.target);
-                }
+                consumer.reset();
+                graph.forEachRelationship(node, consumer);
             }
         }
     }
@@ -193,50 +181,55 @@ final class SubgraphSampling {
             var startNode = partition.startNode();
             var endNode = startNode + partition.nodeCount();
 
-            var linkConsumer = new LinkConsumer(0, components);
+            var linkConsumer = new SkipConsumer(components);
             for (long node = startNode; node < endNode; node++) {
                 if (components.setIdOf(node) == skipComponent) {
                     continue;
                 }
                 if (graph.degree(node) > NEIGHBOR_ROUNDS) {
-                    // link remaining relationships
-                    linkConsumer.skip = NEIGHBOR_ROUNDS;
+                    linkConsumer.reset();
                     graph.forEachRelationship(node, linkConsumer);
                 }
             }
         }
     }
 
-    static class GetTargetConsumer implements RelationshipConsumer {
-        long count;
-        long target;
+    static class LimitConsumer implements RelationshipConsumer {
+        private final DisjointSetStruct dss;
+        private long limit;
 
-        GetTargetConsumer(long count) {
-            this.count = count;
+        LimitConsumer(DisjointSetStruct dss) {
+            this.dss = dss;
+        }
+
+        public void reset() {
+            limit = NEIGHBOR_ROUNDS;
         }
 
         @Override
         public boolean accept(long s, long t) {
-            if (count-- == 0) {
-                target = t;
-                return false;
-            }
-            return true;
+            dss.union(s, t);
+            limit--;
+            return limit != 0;
         }
     }
 
-    static class LinkConsumer implements RelationshipConsumer {
+    static class SkipConsumer implements RelationshipConsumer {
         final DisjointSetStruct components;
-        long skip;
+        private long skip;
 
-        LinkConsumer(long skip, DisjointSetStruct components) {
-            this.skip = skip;
+        SkipConsumer(DisjointSetStruct components) {
             this.components = components;
+        }
+
+        public void reset() {
+            skip = 0;
         }
 
         @Override
         public boolean accept(long source, long target) {
-            if (skip-- <= 0) {
+            skip++;
+            if (skip > NEIGHBOR_ROUNDS) {
                 components.union(source, target);
             }
             return true;
