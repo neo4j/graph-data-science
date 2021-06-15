@@ -21,7 +21,10 @@ package org.neo4j.graphalgo.test;
 
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.logging.Log;
 
 public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
 
@@ -29,15 +32,28 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
     private final AllocationTracker allocationTracker;
     private long relationshipCount = 0;
     private final long memoryLimit;
+    private final boolean throwInCompute;
 
-    public TestAlgorithm(Graph graph, AllocationTracker allocationTracker, long memoryLimit) {
+    public TestAlgorithm(
+        Graph graph,
+        AllocationTracker allocationTracker,
+        long memoryLimit,
+        Log log,
+        ProgressEventTracker eventTracker,
+        boolean throwInCompute
+    ) {
         this.graph = graph;
         this.allocationTracker = allocationTracker;
         this.memoryLimit = memoryLimit;
+        this.throwInCompute = throwInCompute;
+        this.progressLogger = new BatchingProgressLogger(log, 42, "test", 1, eventTracker);
     }
 
     @Override
     public TestAlgorithm compute() {
+        if (throwInCompute) {
+            throw new IllegalStateException("boo");
+        }
         relationshipCount = graph.relationshipCount();
         allocationTracker.add(memoryLimit * 2);
         return this;
