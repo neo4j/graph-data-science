@@ -233,7 +233,7 @@ public class GraphSageModelTrainer {
     }
 
     private Variable<Scalar> lossFunction(Partition batch, Graph graph, HugeObjectArray<double[]> features) {
-        var batchLocalRandomSeed = getBatchIndex(batch) + randomSeed;
+        var batchLocalRandomSeed = getBatchIndex(batch, graph.nodeCount()) + randomSeed;
 
         var neighbours = neighborBatch(graph, batch, batchLocalRandomSeed).toArray();
 
@@ -308,8 +308,8 @@ public class GraphSageModelTrainer {
         return weights;
     }
 
-    private static int getBatchIndex(Partition partition) {
-        return Math.toIntExact(Math.floorDiv(partition.startNode(), partition.nodeCount()));
+    private static int getBatchIndex(Partition partition, long nodeCount) {
+        return Math.toIntExact(Math.floorDiv(partition.startNode(), nodeCount));
     }
 
     private int firstLayerColumns(GraphSageTrainConfig config, Graph graph) {
