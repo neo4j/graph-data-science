@@ -67,7 +67,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         String query = queryBuilder.yields();
 
         runQueryWithRowConsumer(query, row -> {
-            List<Float> embeddings = (List<Float>) row.get("embedding");
+            List<Double> embeddings = (List<Double>) row.get("embedding");
             assertEquals(embeddingDimension, embeddings.size());
             assertFalse(embeddings.stream().allMatch(value -> value == 0.0));
         });
@@ -76,7 +76,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
     @Test
     void shouldComputeNonZeroEmbeddingsWhenFirstWeightIsZero() {
         int embeddingDimension = 128;
-        List<Float> weights = List.of(0.0f, 1.0f, 2.0f, 4.0f);
+        var weights = List.of(0.0D, 1.0D, 2.0D, 4.0D);
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call()
             .explicitCreation(FASTRP_GRAPH)
             .algo("fastRP")
@@ -88,7 +88,7 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
         String query = queryBuilder.yields();
 
         runQueryWithRowConsumer(query, row -> {
-            List<Float> embeddings = (List<Float>) row.get("embedding");
+            var embeddings = (List<Double>) row.get("embedding");
             assertFalse(embeddings.stream().allMatch(value -> value == 0.0));
         });
     }
@@ -107,10 +107,8 @@ class FastRPStreamProcTest extends FastRPProcTest<FastRPStreamConfig> {
             .addParameter("relationshipWeightProperty", "weight")
             .yields();
 
-        List<List<Float>> embeddings = new ArrayList<>(3);
-        runQueryWithRowConsumer(query, row -> {
-            embeddings.add((List<Float>) row.get("embedding"));
-        });
+        List<List<Double>> embeddings = new ArrayList<>(3);
+        runQueryWithRowConsumer(query, row -> embeddings.add((List<Double>) row.get("embedding")));
 
         for (int i = 0; i < 128; i++) {
             assertEquals(embeddings.get(1).get(i), embeddings.get(2).get(i) * 2);

@@ -92,19 +92,14 @@ public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, Fa
     @SuppressWarnings("unused")
     public static final class StreamResult {
         public final long nodeId;
-        public final List<Number> embedding;
+        public final List<Double> embedding;
 
         StreamResult(long nodeId, float[] embedding) {
             this.nodeId = nodeId;
-            this.embedding = arrayToList(embedding);
-        }
-
-        static List<Number> arrayToList(float[] values) {
-            var floats = new ArrayList<Number>(values.length);
-            for (float value : values) {
-                floats.add(value);
+            this.embedding = new ArrayList<>(embedding.length);
+            for (var f : embedding) {
+                this.embedding.add((double) f);
             }
-            return floats;
         }
     }
 }
