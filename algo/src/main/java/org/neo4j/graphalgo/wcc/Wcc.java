@@ -21,8 +21,6 @@ package org.neo4j.graphalgo.wcc;
 
 import com.carrotsearch.hppc.LongIntHashMap;
 import com.carrotsearch.hppc.cursors.LongIntCursor;
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -217,19 +215,19 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             sampleCounts.addTo(components.setIdOf(node), 1);
         }
 
-        var max = new MutableInt(-1);
-        var mostFrequent = new MutableLong(-1L);
+        var max = -1;
+        var mostFrequent = -1L;
         for (LongIntCursor entry : sampleCounts) {
             var component = entry.key;
             var count = entry.value;
 
-            if (count > max.intValue()) {
-                max.setValue(count);
-                mostFrequent.setValue(component);
+            if (count > max) {
+                max = count;
+                mostFrequent = component;
             }
         }
 
-        return mostFrequent.longValue();
+        return mostFrequent;
     }
 
     /**
@@ -241,7 +239,8 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         var tasks = partitions
             .stream()
             .map(partition -> new UndirectedUnionTask(
-                graph, partition,
+                graph,
+                partition,
                 largestComponent,
                 components,
                 progressLogger,
