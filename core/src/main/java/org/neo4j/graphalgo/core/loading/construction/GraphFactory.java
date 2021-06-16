@@ -112,16 +112,20 @@ public final class GraphFactory {
         NodeMappingBuilder.Capturing nodeMappingBuilder;
         InternalIdMappingBuilder<? extends IdMappingAllocator> internalIdMappingBuilder;
 
-        if (useBitIdMap && disjointPartitions) {
+        boolean maxOriginalIdKnown = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID;
+        if (useBitIdMap && disjointPartitions && maxOriginalIdKnown) {
             var idMappingBuilder = InternalBitIdMappingBuilder.of(maxOriginalId + 1, tracker);
             nodeMappingBuilder = IdMapImplementations.bitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
-        } else if (useBitIdMap && !labelInformation) {
+        } else if (useBitIdMap && !labelInformation && maxOriginalIdKnown) {
             var idMappingBuilder = InternalSequentialBitIdMappingBuilder.of(maxOriginalId + 1, tracker);
             nodeMappingBuilder = IdMapImplementations.sequentialBitIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
         } else {
-            var idMappingBuilder = InternalHugeIdMappingBuilder.of(maxOriginalId + 1, tracker);
+            long length = maxOriginalIdKnown
+                ? maxOriginalId + 1
+                : nodeCount.orElseThrow(() -> new IllegalArgumentException("Either `maxOriginalId` or `nodeCount` must be set"));
+            var idMappingBuilder = InternalHugeIdMappingBuilder.of(length, tracker);
             nodeMappingBuilder = IdMapImplementations.hugeIdMapBuilder(idMappingBuilder);
             internalIdMappingBuilder = idMappingBuilder;
         }
