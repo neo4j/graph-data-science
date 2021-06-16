@@ -29,7 +29,7 @@ public final class IdMapImplementations {
     }
 
     public static NodeMappingBuilder<InternalBitIdMappingBuilder> bitIdMapBuilder() {
-        return (idMapBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
+        return (idMapBuilder, labelInformation, graphDimensions, concurrency, checkDuplicateIds, tracker) -> IdMapBuilder.build(
             idMapBuilder,
             labelInformation,
             tracker
@@ -41,7 +41,7 @@ public final class IdMapImplementations {
     }
 
     public static NodeMappingBuilder<InternalSequentialBitIdMappingBuilder> sequentialBitIdMapBuilder() {
-        return (idMapBuilder, labelInformation, graphDimensions, concurrency, tracker) -> IdMapBuilder.build(
+        return (idMapBuilder, labelInformation, graphDimensions, concurrency, checkDuplicateIds, tracker) -> IdMapBuilder.build(
             idMapBuilder,
             labelInformation,
             tracker
@@ -53,7 +53,9 @@ public final class IdMapImplementations {
     }
 
     public static NodeMappingBuilder<InternalHugeIdMappingBuilder> hugeIdMapBuilder() {
-        return IdMapBuilder::build;
+        return (idMapBuilder, labelInformation, graphDimensions, concurrency, checkDuplicateIds, tracker) -> checkDuplicateIds
+            ? IdMapBuilder.buildChecked(idMapBuilder, labelInformation, graphDimensions, concurrency, tracker)
+            : IdMapBuilder.build(idMapBuilder, labelInformation, graphDimensions, concurrency, tracker);
     }
 
     public static NodeMappingBuilder.Capturing hugeIdMapBuilder(InternalHugeIdMappingBuilder idMapBuilder) {

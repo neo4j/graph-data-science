@@ -33,15 +33,17 @@ public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? e
         Map<NodeLabel, HugeAtomicBitSet> labelInformation,
         long highestNodeId,
         int concurrency,
+        boolean checkDuplicateIds,
         AllocationTracker tracker
     );
 
     default Capturing capture(BUILDER idMapBuilder) {
-        return ((labelInformation, highestNodeId, concurrency, tracker) -> this.build(
+        return ((labelInformation, highestNodeId, concurrency, checkDuplicateIds, tracker) -> this.build(
             idMapBuilder,
             labelInformation,
             highestNodeId,
             concurrency,
+            checkDuplicateIds,
             tracker
         ));
     }
@@ -52,6 +54,7 @@ public interface NodeMappingBuilder<BUILDER extends InternalIdMappingBuilder<? e
             Map<NodeLabel, HugeAtomicBitSet> labelInformation,
             long highestNodeId,
             int concurrency,
+            boolean checkDuplicateIds,
             AllocationTracker tracker
         );
     }

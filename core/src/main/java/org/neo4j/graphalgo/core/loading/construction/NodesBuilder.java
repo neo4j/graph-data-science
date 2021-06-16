@@ -157,16 +157,21 @@ public final class NodesBuilder {
     }
 
     public NodeMappingAndProperties build() {
-        return build(maxOriginalId);
+        return build(maxOriginalId, false);
     }
 
-    public NodeMappingAndProperties build(long highestNeoId) {
+    public NodeMappingAndProperties buildChecked(long highestNeoId) {
+        return build(highestNeoId, true);
+    }
+
+    public NodeMappingAndProperties build(long highestNeoId, boolean checkDuplicateIds) {
         this.threadLocalBuilder.close();
 
         var nodeMapping = this.nodeMappingBuilder.build(
             nodeLabelBitSetMap,
             highestNeoId,
             concurrency,
+            checkDuplicateIds,
             tracker
         );
 

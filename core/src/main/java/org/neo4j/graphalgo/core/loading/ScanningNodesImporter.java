@@ -146,6 +146,7 @@ public final class ScanningNodesImporter<BUILDER extends InternalIdMappingBuilde
             nodeLabelBitSetMapping,
             dimensions.highestNeoId(),
             concurrency,
+            false,
             tracker
         );
 
