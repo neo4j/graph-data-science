@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
@@ -38,6 +39,7 @@ import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -184,6 +186,26 @@ class UnionGraphTest {
 
         assertThat(graph.relationshipProperty(a, b)).isIn(3D, 5D);
         assertThat(graph.relationshipProperty(a, b, -1)).isIn(3D, 5D);
+    }
+
+    @Test
+    void filteredGraphRootNodeCountShouldAgreeWithUnfilteredGraph() {
+        // A graph that is both label filtered and has multiple relationship types
+        var graphStore = GdlFactory.of(
+            "CREATE " +
+            "  (a:A)" +
+            ", (b:B)" +
+            ", (a)-[:R1]->(b)" +
+            ", (b)-[:R2]->(a)"
+        ).build().graphStore();
+
+        var unionGraph = graphStore.getGraph(
+            List.of(NodeLabel.of("A")),
+            List.of(RelationshipType.of("R1"), RelationshipType.of("R2")),
+            Optional.empty()
+        );
+
+        assertThat(unionGraph.rootNodeCount()).isEqualTo(graphStore.nodeCount());
     }
 
 }

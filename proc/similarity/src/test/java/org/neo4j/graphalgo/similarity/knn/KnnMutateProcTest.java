@@ -141,6 +141,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
         });
     }
 
+
     @Override
     @Test
     @Disabled("This test does not work for KNN")

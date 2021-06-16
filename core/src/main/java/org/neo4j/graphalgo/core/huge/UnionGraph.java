@@ -75,7 +75,7 @@ public final class UnionGraph implements CSRGraph {
 
     @Override
     public long rootNodeCount() {
-        return first.nodeCount();
+        return first.rootNodeCount();
     }
 
     @Override
