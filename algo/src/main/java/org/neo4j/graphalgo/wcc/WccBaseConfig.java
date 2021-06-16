@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.wcc;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.RelationshipWeightConfig;
@@ -30,6 +31,12 @@ public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, ConsecutiveId
     @Value.Default
     default double threshold() {
         return 0D;
+    }
+
+    @Value.Default
+    @Configuration.Ignore
+    default boolean hasThreshold() {
+        return !Double.isNaN(threshold()) && threshold() > 0;
     }
 
     @Value.Check
