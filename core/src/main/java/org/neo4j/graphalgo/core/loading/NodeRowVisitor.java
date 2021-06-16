@@ -31,13 +31,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
+
     private static final String ID_COLUMN = "id";
+    private static final NodeLabel[] ALL_NODES_LABEL_ARRAY = new NodeLabel[]{ ALL_NODES };
+
     static final String LABELS_COLUMN = "labels";
     static final Set<String> RESERVED_COLUMNS = Set.of(ID_COLUMN, LABELS_COLUMN);
     static final Set<String> REQUIRED_COLUMNS = Set.of(ID_COLUMN);
@@ -67,13 +69,13 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
         }
         rows++;
 
-        var labels = getLabels(row, neoId).toArray(NodeLabel[]::new);
+        var labels = getLabels(row, neoId);
         var properties = getProperties(row);
         nodesBuilder.addNode(neoId, properties, labels);
         return true;
     }
 
-    private List<NodeLabel> getLabels(Result.ResultRow row, long neoId) {
+    private NodeLabel[] getLabels(Result.ResultRow row, long neoId) {
         if (hasLabelInformation) {
             Object labelsObject = row.get(LABELS_COLUMN);
             if (!(labelsObject instanceof List)) {
@@ -94,9 +96,9 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 ));
             }
 
-            return labels.stream().map(NodeLabel::of).collect(Collectors.toList());
+            return labels.stream().map(NodeLabel::of).toArray(NodeLabel[]::new);
         } else {
-            return List.of(ALL_NODES);
+            return ALL_NODES_LABEL_ARRAY;
         }
     }
 
