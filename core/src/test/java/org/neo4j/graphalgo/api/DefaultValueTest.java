@@ -35,10 +35,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_ARRAY_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.api.DefaultValue.DEFAULT;
 import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
-import static org.neo4j.graphalgo.api.DefaultValue.FLOAT_ARRAY_DEFAULT_FALLBACK;
-import static org.neo4j.graphalgo.api.DefaultValue.LONG_ARRAY_DEFAULT_FALLBACK;
 import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -158,12 +156,12 @@ class DefaultValueTest {
             Arguments.of(null, ValueType.LONG, (Function<DefaultValue, ?>) DefaultValue::longValue, LONG_DEFAULT_FALLBACK),
             Arguments.of("", ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, DOUBLE_DEFAULT_FALLBACK),
             Arguments.of(null, ValueType.DOUBLE, (Function<DefaultValue, ?>) DefaultValue::doubleValue, DOUBLE_DEFAULT_FALLBACK),
-            Arguments.of("", ValueType.DOUBLE_ARRAY, (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue, DOUBLE_ARRAY_DEFAULT_FALLBACK),
-            Arguments.of(null, ValueType.DOUBLE_ARRAY, (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue, DOUBLE_ARRAY_DEFAULT_FALLBACK),
-            Arguments.of("", ValueType.LONG_ARRAY, (Function<DefaultValue, ?>) DefaultValue::longArrayValue, LONG_ARRAY_DEFAULT_FALLBACK),
-            Arguments.of(null, ValueType.LONG_ARRAY, (Function<DefaultValue, ?>) DefaultValue::longArrayValue, LONG_ARRAY_DEFAULT_FALLBACK),
-            Arguments.of("", ValueType.FLOAT_ARRAY, (Function<DefaultValue, ?>) DefaultValue::floatArrayValue, FLOAT_ARRAY_DEFAULT_FALLBACK),
-            Arguments.of(null, ValueType.FLOAT_ARRAY, (Function<DefaultValue, ?>) DefaultValue::floatArrayValue, FLOAT_ARRAY_DEFAULT_FALLBACK)
+            Arguments.of("", ValueType.DOUBLE_ARRAY, (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue, DEFAULT.doubleArrayValue()),
+            Arguments.of(null, ValueType.DOUBLE_ARRAY, (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue, DEFAULT.doubleArrayValue()),
+            Arguments.of("", ValueType.LONG_ARRAY, (Function<DefaultValue, ?>) DefaultValue::longArrayValue, DEFAULT.longArrayValue()),
+            Arguments.of(null, ValueType.LONG_ARRAY, (Function<DefaultValue, ?>) DefaultValue::longArrayValue, DEFAULT.longArrayValue()),
+            Arguments.of("", ValueType.FLOAT_ARRAY, (Function<DefaultValue, ?>) DefaultValue::floatArrayValue, DEFAULT.floatArrayValue()),
+            Arguments.of(null, ValueType.FLOAT_ARRAY, (Function<DefaultValue, ?>) DefaultValue::floatArrayValue, DEFAULT.floatArrayValue())
         );
     }
 }

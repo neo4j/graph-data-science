@@ -24,15 +24,22 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
-public class FilteredNodeProperties implements NodeProperties {
+import static org.neo4j.graphalgo.api.DefaultValue.DEFAULT;
+import static org.neo4j.graphalgo.api.DefaultValue.DOUBLE_DEFAULT_FALLBACK;
+import static org.neo4j.graphalgo.api.DefaultValue.LONG_DEFAULT_FALLBACK;
+
+public abstract class FilteredNodeProperties implements NodeProperties {
     protected final NodeProperties properties;
     protected NodeFilteredGraph graph;
 
-    public FilteredNodeProperties(NodeProperties properties, NodeFilteredGraph graph) {
+    protected abstract long translateId(long nodeId);
+
+    FilteredNodeProperties(NodeProperties properties, NodeFilteredGraph graph) {
         this.properties = properties;
         this.graph = graph;
     }
@@ -143,7 +150,104 @@ public class FilteredNodeProperties implements NodeProperties {
         return Math.min(properties.size(), graph.nodeCount());
     }
 
-    protected long translateId(long nodeId) {
-        return graph.getIntermediateOriginalNodeId(nodeId);
+    // This class is used when the ID space of the wrapped properties is wider than the id space used to retrieved node properties.
+    public static class FilteredToOriginalNodeProperties extends FilteredNodeProperties {
+
+        public FilteredToOriginalNodeProperties(NodeProperties properties, NodeFilteredGraph graph) {
+            super(properties, graph);
+        }
+
+        @Override
+        protected long translateId(long nodeId) {
+            return graph.getIntermediateOriginalNodeId(nodeId);
+        }
+    }
+
+    // This class is used when the ID space of the wrapped properties is smaller than the id space used to retrieved node properties.
+    public static class OriginalToFilteredNodeProperties extends FilteredNodeProperties {
+
+        public OriginalToFilteredNodeProperties(NodeProperties properties, NodeFilteredGraph graph) {
+            super(properties, graph);
+        }
+
+        @Override
+        public double doubleValue(long nodeId) {
+            long translatedId = translateId(nodeId);
+
+            if (translatedId < 0) {
+                return DOUBLE_DEFAULT_FALLBACK;
+            }
+
+            return properties.doubleValue(translatedId);
+        }
+
+        @Override
+        public long longValue(long nodeId) {
+            long translatedId = translateId(nodeId);
+
+            if (translatedId < 0) {
+                return LONG_DEFAULT_FALLBACK;
+            }
+            return properties.longValue(translatedId);
+        }
+
+        @Override
+        public float[] floatArrayValue(long nodeId) {
+            long translatedId = translateId(nodeId);
+
+            if (translatedId < 0) {
+                return DEFAULT.floatArrayValue();
+            }
+
+            return properties.floatArrayValue(translatedId);
+        }
+
+        @Override
+        public double[] doubleArrayValue(long nodeId) {
+            long translatedId = translateId(nodeId);
+
+            if (translatedId < 0) {
+                return DEFAULT.doubleArrayValue();
+            }
+
+            return properties.doubleArrayValue(translatedId);
+        }
+
+        @Override
+        public long[] longArrayValue(long nodeId) {
+            long translatedId = translateId(nodeId);
+
+            if (translatedId < 0) {
+                return DEFAULT.longArrayValue();
+            }
+
+            return properties.longArrayValue(translatedId);
+        }
+
+        @Override
+        public Object getObject(long nodeId) {
+            long translatedId = translateId(nodeId);
+
+            if (translatedId < 0) {
+                return null;
+            }
+
+            return properties.getObject(translatedId);
+        }
+
+        @Override
+        public Value value(long nodeId) {
+            long translatedId = translateId(nodeId);
+
+            if (translatedId < 0) {
+                return Values.NO_VALUE;
+            }
+            return properties.value(translatedId);
+        }
+
+        @Override
+        protected long translateId(long nodeId) {
+            return graph.getFilteredMappedNodeId(nodeId);
+        }
     }
 }
