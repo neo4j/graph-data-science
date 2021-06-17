@@ -1,5 +1,5 @@
 [[algorithms-ml-models]]
-= Machine Learning Models
+= Machine learning models
 
 [abstract]
 --
@@ -7,7 +7,7 @@ This chapter provides explanations and examples for the supervised machine learn
 --
 
 The machine learning procedures in Neo4j GDS allow you to train supervised machine learning models.
-Models can then be accessed via the <<model-catalog-ops, Model Catalog>> and used to make predictions about your graph.
+Models can then be accessed via the <<model-catalog-ops, Model catalog>> and used to make predictions about your graph.
 
 To help with working with the ML models, there are additional guides for pre-processing and hyperparameter tuning available in:
 

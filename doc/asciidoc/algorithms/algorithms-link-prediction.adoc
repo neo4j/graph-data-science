@@ -1,5 +1,5 @@
 [[algorithms-linkprediction]]
-= Link Prediction algorithms
+= Link prediction algorithms
 
 [abstract]
 --
