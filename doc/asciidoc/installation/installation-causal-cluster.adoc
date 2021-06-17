@@ -1,0 +1,25 @@
+[[installation-causal-cluster]]
+= Neo4j Causal Cluster
+
+A Neo4j Causal Cluster consists of multiple machines that together support a highly available database management system.
+The GDS library uses main memory on a single machine for hosting graphs in the graph catalog and computing algorithms over these.
+These two architectures are not compatible and should not be used in conjunction.
+A GDS workload will attempt to consume most of the system resources of the machine during runtime, which may make the machine unresponsive for extended periods of time.
+For these reasons, we strongly advise against running GDS in a cluster as this potentially leads to data corruption or cluster outage.
+
+To make use of GDS on graphs hosted by a Neo4j Causal Cluster deployment, these graphs should be detached from the running cluster.
+This can be accomplished in several ways, including:
+
+1. Dumping a snapshot of the Neo4j store and importing it in a separate standalone Neo4j server.
+2. Adding a Read Replica to the Neo4j Causal Cluster and then detaching it to safely operate GDS on a snapshot in separation from the Neo4j Causal Cluster.
+3. Adding a Read Replica to the Neo4j Causal Cluster and configuring it for GDS workloads.
+Be aware that the in-memory graph and the underlying database will eventually become out of sync due to updates to the Read Replica.
+Since GDS can consume all available resources, responsiveness of the Read Replica might decrease and its state might fall behind the cluster.
+Using GDS in this scenario requires:
+** installing GDS on the Read Replica
+** using mutate or stream invocation modes
+** consuming results from GDS workloads directly via Cypher (see <<utility-functions-catalog, Utility functions>>)
+** *not using GDS write-back features* (writing triggers many large transactions and will potentially terminate the cluster)
+
+After the GDS workload has finished on a detached machine (for cases 1. and 2.) it now contains out-of-sync results written to its copied version of the graph from the Neo4j Causal Cluster.
+To integrate these results back to the cluster, custom programs are necessary.

@@ -10,6 +10,30 @@
 
         <d:tocentry linkend="installation">
             <?dbhtml filename="installation/index.html"?>
+            <d:tocentry linkend="supported-neo4j-versions">
+                <?dbhtml filename="installation/supported-neo4j-versions/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="neo4j-desktop">
+                <?dbhtml filename="installation/neo4j-desktop/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="neo4j-server">
+                <?dbhtml filename="installation/neo4j-server/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="installation-enterprise-edition">
+                <?dbhtml filename="installation/installation-enterprise-edition/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="installation-docker">
+                <?dbhtml filename="installation/installation-docker/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="installation-causal-cluster">
+                <?dbhtml filename="installation/installation-causal-cluster/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="additional-config-parameters">
+                <?dbhtml filename="installation/additional-config-parameters/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="System-requirements">
+                <?dbhtml filename="installation/System-requirements/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="common-usage">
