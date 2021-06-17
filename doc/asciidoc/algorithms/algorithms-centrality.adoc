@@ -1,5 +1,5 @@
 [[algorithms-centrality]]
-= Centrality algorithms
+= Centrality
 
 [abstract]
 --

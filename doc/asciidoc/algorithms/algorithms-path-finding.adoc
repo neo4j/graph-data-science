@@ -1,5 +1,5 @@
 [[algorithms-path-finding]]
-= Path finding algorithms
+= Path finding
 
 [abstract]
 --
