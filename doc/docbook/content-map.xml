@@ -70,9 +70,24 @@
         </d:tocentry>
     </d:tocentry>
 
-    <d:tocentry linkend="model-catalog-ops">
-        <?dbhtml filename="model-catalog/model-catalog/index.html"?>
-    </d:tocentry>
+        <d:tocentry linkend="model-catalog-ops">
+            <?dbhtml filename="model-catalog/model-catalog/index.html"?>
+            <d:tocentry linkend="catalog-model-exists">
+                <?dbhtml filename="model-catalog/catalog-model-exists/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="catalog-model-list">
+                <?dbhtml filename="model-catalog/catalog-model-list/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="catalog-model-drop">
+                <?dbhtml filename="model-catalog/catalog-model-drop/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="catalog-model-store">
+                <?dbhtml filename="model-catalog/catalog-model-store/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="catalog-model-publish">
+                <?dbhtml filename="model-catalog/catalog-model-publish/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
 
     <d:tocentry linkend="algorithms">
         <?dbhtml filename="algorithms/index.html"?>

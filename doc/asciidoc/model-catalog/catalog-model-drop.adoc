@@ -1,30 +1,28 @@
-[.alpha]
-[.enterprise-edition]
-[[catalog-model-publish]]
-= Publishing models
+[.beta]
+[[catalog-model-drop]]
+= Removing models from the catalog
 
-[.alpha-symbol]
-[.tier-note]
-Publishing models is an alpha tier feature.
+If we no longer need a trained model we can remove it from the catalog.
 
-By default, a trained model is visible to the user that created it.
-Making a model accessible to other users can be achieved by publishing it.
-
-[role=query-example, no-result=true]
+[role=query-example]
 --
-.Publishing trained model:
+.Remove a model from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.model.publish('my-model')
+CALL gds.beta.model.drop('my-model')
 YIELD
   modelInfo,
-  trainConfig,
-  graphSchema,
-  stored,
   loaded,
-  creationTime,
+  stored,
   shared
 ----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m"]
+|===
+| modelInfo                                          | loaded  | stored | shared
+| {modelName=my-model, modelType=example-model-type} |  true   | false  | false
+|===
 --
 
 The full set of fields returned from this procedure are:
@@ -39,3 +37,5 @@ The full set of fields returned from this procedure are:
 * `loaded`: True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
 * `creationTime`: the time at which the model was registered in the catalog.
 * `shared`: a boolean flag indicating if the model is published.
+
+NOTE: If the model name does not exist, an error will be raised.

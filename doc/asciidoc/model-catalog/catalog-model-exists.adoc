@@ -1,0 +1,21 @@
+[.beta]
+[[catalog-model-exists]]
+= Check if a model exists in the catalog
+
+We can check if a model is available in the catalog by looking up its name.
+
+[role=query-example]
+--
+.Check if a model exists in the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.model.exists('my-model') YIELD exists;
+----
+
+.Results
+[opts="header",cols="1m"]
+|===
+| exists
+| true
+|===
+--
