@@ -1,0 +1,28 @@
+[[appendix-a-graph-ops]]
+= Graph Operations
+
+The following table lists all production-quality graph operations in the GDS library:
+
+[role=procedure-listing]
+[opts=header,cols="1, 1"]
+|===
+|Operation | Procedure
+.4+<.^|<<catalog-graph-create, Create Graph>>
+| `gds.graph.create`
+| `gds.graph.create.estimate`
+| `gds.graph.create.cypher`
+| `gds.graph.create.cypher.estimate`
+|<<catalog-graph-create-subgraph, Create a graph from a named graph>> | `gds.beta.graph.create.subgraph`
+|<<catalog-graph-exists, Check if a named graph exists>> | `gds.graph.exists`
+|<<catalog-graph-list, List graphs>> | `gds.graph.list`
+|<<catalog-graph-write-node-properties, Remove node properties from a named graph>> | `gds.graph.removeNodeProperties`
+|<<catalog-graph-delete-rel-type, Delete relationships from a named graph>> | `gds.graph.deleteRelationships`
+|<<catalog-graph-drop, Remove a named graph from memory>> | `gds.graph.drop`
+|<<catalog-graph-stream-node-properties, Stream a single node property to the procedure caller>> | `gds.graph.streamNodeProperty`
+|<<catalog-graph-stream-node-properties, Stream node properties to the procedure caller>> | `gds.graph.streamNodeProperties`
+|<<catalog-graph-stream-relationship-properties, Stream a single relationship property to the procedure caller>> | `gds.graph.streamRelationshipProperty`
+|<<catalog-graph-stream-relationship-properties, Stream relationship properties to the procedure caller>> | `gds.graph.streamRelationshipProperties`
+|<<catalog-graph-write-node-properties, Write node properties to Neo4j>> | `gds.graph.writeNodeProperties`
+|<<catalog-graph-write-relationship, Write relationships to Neo4j>> | `gds.graph.writeRelationship`
+|<<catalog-graph-export-database, Graph Export>> | `gds.graph.export`
+|===

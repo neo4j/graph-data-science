@@ -1,0 +1,40 @@
+[[function-references]]
+= Function references
+
+The following table lists all functions in the GDS library:
+
+[[table-functions]]
+[role=procedure-listing]
+[opts=header,cols="1, 1"]
+|===
+|Group | Function
+.4+<.^| Miscellaneous
+| `<<utility-functions, gds.version>>`
+| `gds.debug.sysInfo`
+| `gds.list`
+| `<<logging-progress-logging, gds.beta.listProgress>>`
+|Graph Operations | `gds.graph.exists`
+.7+<.^| Utilities
+| `<<utility-functions-node-path, gds.util.asNode>>`
+| `<<utility-functions-node-path, gds.util.asNodes>>`
+| `<<utility-functions-catalog, gds.util.nodeProperty>>`
+| `<<utility-functions-numeric, gds.util.NaN>>`
+| `<<utility-functions-numeric, gds.util.infinity>>`
+| `<<utility-functions-numeric, gds.util.isFinite>>`
+| `<<utility-functions-numeric, gds.util.isInfinite>>`
+.6+<.^| Link Prediction
+| `<<algorithms-linkprediction-adamic-adar-syntax, gds.alpha.linkprediction.adamicAdar>>`
+| `<<algorithms-linkprediction-common-neighbors-syntax, gds.alpha.linkprediction.commonNeighbors>>`
+| `<<algorithms-linkprediction-preferential-attachment-syntax, gds.alpha.linkprediction.preferentialAttachment>>`
+| `<<algorithms-linkprediction-resource-allocation-syntax, gds.alpha.linkprediction.resourceAllocation>>`
+| `<<algorithms-linkprediction-same-community-syntax, gds.alpha.linkprediction.sameCommunity>>`
+| `<<algorithms-linkprediction-total-neighbors-syntax, gds.alpha.linkprediction.totalNeighbors>>`
+|Encoding | `<<alpha-algorithms-one-hot-encoding, gds.alpha.ml.oneHotEncoding>>`
+.6+<.^| Similarity Functions
+| `gds.alpha.similarity.cosine`
+| `gds.alpha.similarity.euclidean`
+| `gds.alpha.similarity.jaccard`
+| `gds.alpha.similarity.euclideanDistance`
+| `gds.alpha.similarity.overlap`
+| `gds.alpha.similarity.pearson`
+|===
