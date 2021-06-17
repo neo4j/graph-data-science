@@ -116,28 +116,28 @@ The following table lists all production-quality procedures in the GDS library:
 | `gds.eigenvector.stream.estimate`
 | `gds.eigenvector.stats`
 | `gds.eigenvector.stats.estimate`
-.6+<.^| Shortest Path Dijkstra
+.6+<.^| <<algorithms-dijkstra-source-target, Shortest Path Dijkstra>>
 | `gds.shortestPath.dijkstra.stream`
 | `gds.shortestPath.dijkstra.stream.estimate`
 | `gds.shortestPath.dijkstra.write`
 | `gds.shortestPath.dijkstra.write.estimate`
 | `gds.shortestPath.dijkstra.mutate`
 | `gds.shortestPath.dijkstra.mutate.estimate`
-.6+<.^| All Shortest Paths Dijkstra
+.6+<.^| <<algorithms-dijkstra-single-source, All Shortest Paths Dijkstra>>
 | `gds.allShortestPaths.dijkstra.stream`
 | `gds.allShortestPaths.dijkstra.stream.estimate`
 | `gds.allShortestPaths.dijkstra.write`
 | `gds.allShortestPaths.dijkstra.write.estimate`
 | `gds.allShortestPaths.dijkstra.mutate`
 | `gds.allShortestPaths.dijkstra.mutate.estimate`
-.6+<.^| Shortest Paths Yens
+.6+<.^| <<algorithms-yens, Shortest Paths Yens>>
 | `gds.shortestPath.yens.stream`
 | `gds.shortestPath.yens.stream.estimate`
 | `gds.shortestPath.yens.write`
 | `gds.shortestPath.yens.write.estimate`
 | `gds.shortestPath.yens.mutate`
 | `gds.shortestPath.yens.mutate.estimate`
-.6+<.^| Shortest Path AStar
+.6+<.^| <<algorithms-astar, Shortest Path AStar>>
 | `gds.shortestPath.astar.stream`
 | `gds.shortestPath.astar.stream.estimate`
 | `gds.shortestPath.astar.write`
