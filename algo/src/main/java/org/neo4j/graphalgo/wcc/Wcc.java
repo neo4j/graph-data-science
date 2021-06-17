@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
@@ -177,7 +178,12 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
     }
 
     private void computeUndirected(DisjointSetStruct components) {
-        var partitions = PartitionUtils.rangePartition(config.concurrency(), graph.nodeCount(), Function.identity());
+        var partitions = PartitionUtils.rangePartition(
+            config.concurrency(),
+            graph.nodeCount(),
+            Function.identity(),
+            Optional.empty()
+        );
 
         sampleSubgraph(components, partitions);
         long largestComponent = findLargestComponent(components);
