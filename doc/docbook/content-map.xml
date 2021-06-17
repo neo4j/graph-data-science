@@ -9,9 +9,9 @@
         <?dbhtml filename="introduction/index.html"?>
     </d:tocentry>
 
-    <d:tocentry linkend="installation">
-        <?dbhtml filename="installation/index.html"?>
-    <d:tocentry linkend="supported-neo4j-versions">
+        <d:tocentry linkend="installation">
+            <?dbhtml filename="installation/index.html"?>
+            <d:tocentry linkend="supported-neo4j-versions">
                 <?dbhtml filename="installation/supported-neo4j-versions/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="neo4j-desktop">
