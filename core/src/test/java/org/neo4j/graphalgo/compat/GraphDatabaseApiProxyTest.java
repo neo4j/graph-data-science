@@ -35,7 +35,7 @@ class GraphDatabaseApiProxyTest extends BaseTest {
             GraphDatabaseApiProxy.newKernelTransaction(db).close();
         }
 
-        // now watch it go boom 🙈
+        // now watch it *not* go boom 🎉
         assertThatCode(() -> {
             GraphDatabaseApiProxy.newKernelTransaction(db).close();
         }).doesNotThrowAnyException();
