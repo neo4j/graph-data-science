@@ -173,8 +173,8 @@ class NodesBuilderTest {
 
             var nodeMappingAndProperties = nodesBuilder.build();
             var nodeMapping = nodeMappingAndProperties.nodeMapping();
-            var nodeProperties = nodeMappingAndProperties
-                .unionNodeProperties()
+            var nodeProperties = NodePropertiesTestHelper
+                .unionNodeProperties(nodeMappingAndProperties)
                 .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
 
             assertThat(graph.nodeCount()).isEqualTo(nodeMapping.nodeCount());
@@ -231,7 +231,7 @@ class NodesBuilderTest {
 
             var nodeMappingAndProperties = nodesBuilder.build();
             var nodeMapping = nodeMappingAndProperties.nodeMapping();
-            var nodeProperties = nodeMappingAndProperties.unionNodePropertiesOrThrow();
+            var nodeProperties = NodePropertiesTestHelper.unionNodePropertiesOrThrow(nodeMappingAndProperties);
 
             assertThat(nodeMapping.nodeCount()).isEqualTo(nodeCount);
             assertThat(nodeMapping.availableNodeLabels()).containsExactly(nodeLabel);
@@ -271,8 +271,8 @@ class NodesBuilderTest {
 
             var nodeMappingAndProperties = nodesBuilder.build();
             var nodeMapping = nodeMappingAndProperties.nodeMapping();
-            var nodeProperties = nodeMappingAndProperties
-                .unionNodeProperties()
+            var nodeProperties = NodePropertiesTestHelper
+                .unionNodeProperties(nodeMappingAndProperties)
                 .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
 
             assertThat(graph.nodeCount()).isEqualTo(nodeMapping.nodeCount());

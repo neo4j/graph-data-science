@@ -29,7 +29,6 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.UnionNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.IdMappingAllocator;
 import org.neo4j.graphalgo.core.loading.InternalIdMappingBuilder;
@@ -55,7 +54,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.LongPredicate;
-import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.graphalgo.core.GraphDimensions.IGNORE;
@@ -243,35 +241,6 @@ public final class NodesBuilder {
         NodeMapping nodeMapping();
 
         Optional<Map<NodeLabel, Map<String, NodeProperties>>> nodeProperties();
-
-        default Optional<Map<String, NodeProperties>> unionNodeProperties() {
-            if (nodeProperties().isEmpty()) {
-                return Optional.empty();
-            }
-
-            Map<String, Map<NodeLabel, NodeProperties>> nodePropertiesByKeyAndLabel = new HashMap<>();
-            nodeProperties().get().forEach((nodeLabel, propertiesByKey) -> {
-                propertiesByKey.forEach((propertyKey, propertyValues) -> {
-                    nodePropertiesByKeyAndLabel
-                        .computeIfAbsent(propertyKey, __ -> new HashMap<>())
-                        .put(nodeLabel, propertyValues);
-                });
-            });
-
-            Map<String, NodeProperties> unionNodeProperties = nodePropertiesByKeyAndLabel
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                    Map.Entry::getKey,
-                    entry -> new UnionNodeProperties(nodeMapping(), entry.getValue())
-                ));
-            return Optional.of(unionNodeProperties);
-        }
-
-        default Map<String, NodeProperties> unionNodePropertiesOrThrow() {
-            return unionNodeProperties()
-                .orElseThrow(() -> new IllegalArgumentException("Expected node properties to be present"));
-        }
     }
 
     private static class ThreadLocalBuilder implements AutoCloseable {

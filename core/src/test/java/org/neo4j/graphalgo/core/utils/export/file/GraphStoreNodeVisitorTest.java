@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
+import org.neo4j.graphalgo.core.loading.construction.NodePropertiesTestHelper;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -76,7 +77,7 @@ class GraphStoreNodeVisitorTest {
 
         var nodeMappingAndProperties = nodesBuilder.build();
         var nodeMapping = nodeMappingAndProperties.nodeMapping();
-        var nodeProperties = nodeMappingAndProperties.unionNodePropertiesOrThrow();
+        var nodeProperties = NodePropertiesTestHelper.unionNodePropertiesOrThrow(nodeMappingAndProperties);
         var relationships = GraphFactory.emptyRelationships(nodeMapping, AllocationTracker.empty());
         HugeGraph actualGraph = GraphFactory.create(
             nodeMapping,
