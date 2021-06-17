@@ -75,7 +75,7 @@ The following table lists all alpha procedures in the GDS library:
 .2+<.^|<<alpha-algorithms-approximate-nearest-neighbors, Approximate Nearest Neighbours>>
 | `gds.alpha.ml.ann.stream`
 | `gds.alpha.ml.ann.write`
-.8+<.^| Link Prediction
+.8+<.^| <<algorithms-ml-linkprediction, Link Prediction>>
 | `gds.alpha.ml.linkPrediction.predict.mutate`
 | `gds.alpha.ml.linkPrediction.predict.mutate.estimate`
 | `gds.alpha.ml.linkPrediction.predict.stream`
@@ -84,7 +84,7 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.ml.linkPrediction.predict.write.estimate`
 | `gds.alpha.ml.linkPrediction.train`
 | `gds.alpha.ml.linkPrediction.train.estimate`
-.8+<.^| Node Classification
+.8+<.^| <<algorithms-ml-nodeclassification, Node Classification>>
 | `gds.alpha.ml.nodeClassification.predict.mutate`
 | `gds.alpha.ml.nodeClassification.predict.mutate.estimate`
 | `gds.alpha.ml.nodeClassification.predict.stream`
@@ -93,9 +93,9 @@ The following table lists all alpha procedures in the GDS library:
 | `gds.alpha.ml.nodeClassification.predict.write.estimate`
 | `gds.alpha.ml.nodeClassification.train`
 | `gds.alpha.ml.nodeClassification.train.estimate`
-.1+<.^| Split Relationships
+.1+<.^| <<algorithms-split-relationships, Split Relationships>>
 | `gds.alpha.ml.splitRelationships.mutate`
-.1+<.^| Triangle Finding
+.1+<.^| <<algorithms-triangle-count-examples-triangles-listing, Triangle Listing>>
 | `gds.alpha.triangles`
 .1+<.^| <<algorithms-greedy, Influence Maximization - Greedy>>
 | `gds.alpha.influenceMaximization.greedy.stream`

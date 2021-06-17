@@ -20,7 +20,7 @@ The following table lists all beta procedures in the GDS library:
 [opts=header,cols="1, 1"]
 |===
 |Algorithm | Procedure
-.8+<.^|FastRPExtended
+.8+<.^|<<algorithms-embeddings-fastrp-extended, FastRPExtended>>
 | `gds.beta.fastRPExtended.mutate`
 | `gds.beta.fastRPExtended.mutate.estimate`
 | `gds.beta.fastRPExtended.stats`
