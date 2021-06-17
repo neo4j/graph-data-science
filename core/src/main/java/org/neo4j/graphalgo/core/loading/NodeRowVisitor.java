@@ -96,7 +96,7 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
                 ));
             }
 
-            return labels.stream().map(NodeLabel::of).toArray(NodeLabel[]::new);
+            return nodeLabelArray(labels);
         } else {
             return ALL_NODES_LABEL_ARRAY;
         }
@@ -129,6 +129,15 @@ class NodeRowVisitor implements Result.ResultVisitor<RuntimeException> {
 
     long maxId() {
         return maxNeoId;
+    }
+
+    private static NodeLabel[] nodeLabelArray(List<String> labels) {
+        NodeLabel[] nodeLabels = new NodeLabel[labels.size()];
+        for (int i = 0; i < labels.size(); i++) {
+            String label = labels.get(i);
+            nodeLabels[i] = NodeLabel.of(label);
+        }
+        return nodeLabels;
     }
 
 }
