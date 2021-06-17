@@ -17,14 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43head;
+package org.neo4j.gds.compat._43;
 
-import org.neo4j.graphalgo.compat.CompatUsernameAuthSubject;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
+import org.neo4j.kernel.impl.factory.DbmsInfo;
 
-final class CompatUsernameAuthSubjectImpl extends CompatUsernameAuthSubject {
+import java.nio.file.Path;
 
-    CompatUsernameAuthSubjectImpl(String username, AuthSubject authSubject) {
-        super(username, authSubject);
+final class CompatGraphDatabaseAPIImpl extends GdsGraphDatabaseAPI {
+
+    CompatGraphDatabaseAPIImpl(DatabaseManagementService dbms) {
+        super(dbms);
+    }
+
+    @Override
+    public Path dbHome(Path workingDir) {
+        return api.databaseLayout().getNeo4jLayout().homeDirectory();
+    }
+
+    @Override
+    public DbmsInfo dbmsInfo() {
+        return api.dbmsInfo();
     }
 }

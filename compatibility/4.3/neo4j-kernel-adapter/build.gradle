@@ -2,29 +2,14 @@ apply plugin: 'java-library'
 
 description = 'Neo4j Graph Data Science :: Neo4j Kernel Adapter 4.3'
 
-sourceSets {
-    drop2 {}
-    head {}
-}
-
 dependencies {
-    headImplementation project(':neo4j-kernel-adapter-api')
+    implementation project(':neo4j-kernel-adapter-api')
 
-    headAnnotationProcessor project(':annotations')
-    headAnnotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
-    headAnnotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'4.3'
+    annotationProcessor project(':annotations')
+    annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
+    annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'4.3'
 
-    headCompileOnly project(':annotations')
-    headCompileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
-    headCompileOnly         group: 'org.neo4j',      name: 'neo4j',              version: neos.'4.3'
-
-    drop2Implementation project(':neo4j-kernel-adapter-api')
-
-    drop2AnnotationProcessor project(':annotations')
-    drop2AnnotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
-    drop2AnnotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'4.3-drop2'
-
-    drop2CompileOnly project(':annotations')
-    drop2CompileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
-    drop2CompileOnly         group: 'org.neo4j',      name: 'neo4j',              version: neos.'4.3-drop2'
+    compileOnly project(':annotations')
+    compileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
+    compileOnly         group: 'org.neo4j',      name: 'neo4j',              version: neos.'4.3'
 }

@@ -17,27 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43head;
+package org.neo4j.gds.compat._43;
 
-import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
-import org.neo4j.kernel.impl.factory.DbmsInfo;
+import org.neo4j.graphalgo.compat.CompatAccessMode;
+import org.neo4j.graphalgo.compat.CustomAccessMode;
+import org.neo4j.internal.kernel.api.RelTypeSupplier;
+import org.neo4j.internal.kernel.api.TokenSet;
 
-import java.nio.file.Path;
+import java.util.function.Supplier;
 
-final class CompatGraphDatabaseAPIImpl extends GdsGraphDatabaseAPI {
+public final class CompatAccessModeImpl extends CompatAccessMode {
 
-    CompatGraphDatabaseAPIImpl(DatabaseManagementService dbms) {
-        super(dbms);
+    CompatAccessModeImpl(CustomAccessMode custom) {
+        super(custom);
     }
 
     @Override
-    public Path dbHome(Path workingDir) {
-        return api.databaseLayout().getNeo4jLayout().homeDirectory();
+    public boolean allowsReadNodeProperty(Supplier<TokenSet> labels, int propertyKey) {
+        return custom.allowsReadNodeProperty(propertyKey);
     }
 
     @Override
-    public DbmsInfo dbmsInfo() {
-        return api.dbmsInfo();
+    public boolean allowsReadRelationshipProperty(RelTypeSupplier relType, int propertyKey) {
+        return custom.allowsReadRelationshipProperty(propertyKey);
     }
 }

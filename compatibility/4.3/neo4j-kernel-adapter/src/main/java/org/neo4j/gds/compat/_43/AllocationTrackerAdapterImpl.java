@@ -17,27 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat._43drop02;
+package org.neo4j.gds.compat._43;
 
-import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
-import org.neo4j.kernel.impl.factory.DbmsInfo;
+import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
+import org.neo4j.memory.MemoryTracker;
 
-import java.nio.file.Path;
+final class AllocationTrackerAdapterImpl implements AllocationTrackerAdapter {
 
-final class CompatGraphDatabaseAPIImpl extends GdsGraphDatabaseAPI {
+    private final MemoryTracker memoryTracker;
 
-    CompatGraphDatabaseAPIImpl(DatabaseManagementService dbms) {
-        super(dbms);
+    AllocationTrackerAdapterImpl(MemoryTracker memoryTracker) {
+        this.memoryTracker = memoryTracker;
     }
 
     @Override
-    public Path dbHome(Path workingDir) {
-        return api.databaseLayout().getNeo4jLayout().homeDirectory();
+    public void add(long bytes) {
+        memoryTracker.allocateHeap(bytes);
     }
 
     @Override
-    public DbmsInfo dbmsInfo() {
-        return api.dbmsInfo();
+    public void remove(long bytes) {
+        memoryTracker.releaseHeap(bytes);
+    }
+
+    @Override
+    public long trackedBytes() {
+        return memoryTracker.estimatedHeapMemory();
     }
 }
