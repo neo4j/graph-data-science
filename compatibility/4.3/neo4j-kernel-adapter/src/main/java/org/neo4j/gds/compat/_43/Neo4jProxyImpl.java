@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._43head;
+package org.neo4j.gds.compat._43;
 
 import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.collections.api.factory.Sets;
