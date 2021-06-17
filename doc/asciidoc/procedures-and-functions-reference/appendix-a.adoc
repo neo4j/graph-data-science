@@ -1,0 +1,17 @@
+[appendix]
+[[appendix-a]]
+= Procedures and functions reference
+
+[abstract]
+--
+This chapter contains a reference of all the procedures and functions in the Neo4j Graph Data Science library.
+--
+
+This chapter contains the following sections:
+
+* <<appendix-a-graph-ops>>
+* <<appendix-a-model-ops>>
+* <<production-quality-tier>>
+* <<beta-tier>>
+* <<alpha-tier>>
+

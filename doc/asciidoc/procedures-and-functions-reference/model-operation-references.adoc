@@ -1,0 +1,15 @@
+[[appendix-a-model-ops]]
+= Model Catalog Operations
+
+[role=procedure-listing]
+[opts=header,cols="1, 1"]
+|===
+| Operation                  | Procedure
+| Check if a model exists    | `gds.beta.model.exists`
+| Remove a model from memory | `gds.beta.model.drop`
+| List models                | `gds.beta.model.list`
+| Store a model              | `gds.alpha.model.store`
+| Load a stored model        | `gds.alpha.model.load`
+| Delete a stored model      | `gds.alpha.model.delete`
+| Publish a model            | `gds.alpha.model.publish`
+|===
