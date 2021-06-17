@@ -50,10 +50,11 @@ The concurrency used for the stages of projection, computation and writing is co
 The maximum concurrency that can be used is limited depending on the license under which the library is being used:
 
 * Neo4j Community Edition
-** The maximum concurrency in the library is 4.
+** The default and maximum concurrency in the library is 4.
 
 * Neo4j Enterprise Edition
-** The maximum concurrency in the library is 4.
+** The default concurrency in the library is 4.
+** The maximum concurrency in the library is unlimited.
 
 * Neo4j Graph Data Science Library - Enterprise Edition
 ** The concurrency in the library is unlimited.
