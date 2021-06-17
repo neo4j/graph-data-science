@@ -262,7 +262,7 @@ public final class NodesBuilder {
                 .entrySet()
                 .stream()
                 .collect(Collectors.toMap(
-                    entry -> entry.getKey(),
+                    Map.Entry::getKey,
                     entry -> new UnionNodeProperties(nodeMapping(), entry.getValue())
                 ));
             return Optional.of(unionNodeProperties);
