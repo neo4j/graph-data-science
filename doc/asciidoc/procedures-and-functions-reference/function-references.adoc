@@ -31,10 +31,9 @@ The following table lists all functions in the GDS library:
 | `<<algorithms-linkprediction-total-neighbors-syntax, gds.alpha.linkprediction.totalNeighbors>>`
 |Encoding | `<<alpha-algorithms-one-hot-encoding, gds.alpha.ml.oneHotEncoding>>`
 .6+<.^| Similarity Functions
-| `gds.alpha.similarity.cosine`
-| `gds.alpha.similarity.euclidean`
-| `gds.alpha.similarity.jaccard`
-| `gds.alpha.similarity.euclideanDistance`
-| `gds.alpha.similarity.overlap`
-| `gds.alpha.similarity.pearson`
+| <<alpha-algorithms-similarity-cosine, gds.alpha.similarity.cosine>>
+| <<alpha-algorithms-similarity-jaccard, gds.alpha.similarity.jaccard>>
+| <<alpha-algorithms-similarity-euclidean, gds.alpha.similarity.euclideanDistance>>
+| <<alpha-algorithms-similarity-overlap, gds.alpha.similarity.overlap>>
+| <<alpha-algorithms-similarity-pearson, gds.alpha.similarity.pearson>>
 |===
