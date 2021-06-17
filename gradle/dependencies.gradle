@@ -5,6 +5,7 @@ ext {
         '4.2': properties.getOrDefault('neo4jVersion42', '4.2.7'),
         '4.3': properties.getOrDefault('neo4jVersion43', '4.3.1'),
         '4.3-drop2': properties.getOrDefault('neo4jVersion43drop2', '4.3.0-drop02.0'),
+        '4.3.0-drop03.1': properties.getOrDefault('neo4jVersion43drop3', '4.3.0-drop03.1'),
         'dev': properties.getOrDefault('neo4jVersionDev', '4.4.0-dev'),
     ]
     scalas = [
