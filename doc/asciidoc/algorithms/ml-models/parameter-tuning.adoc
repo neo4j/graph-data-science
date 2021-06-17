@@ -1,5 +1,5 @@
 [[algorithms-ml-models-tuning]]
-= Tuning parameters for training
+= Tuning parameters
 
 Both <<algorithms-ml-nodeclassification, Node Classification>> and <<algorithms-ml-linkprediction, Link Prediction>> have training parameters that can be tuned automatically given a set of allowed values.
 The parameters `maxEpochs`, `tolerance` and `patience` control for how long the training will run until termination.
