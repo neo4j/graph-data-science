@@ -25,7 +25,7 @@ The Greedy algorithm for influence maximization aims to find `k` nodes that maxi
 It simulates the influence spread using the Independent Cascade model, which calculates the expected spread by taking the average spread over the `mc` Monte-Carlo simulations.
 In the propagation process, a node is influenced in case that a uniform random draw is less than the probability `p`.
 
-Kempe et al. 2003 introduced the Greedy algorithm in their study "https://www.cs.cornell.edu/home/kleinber/kdd03-inf.pdf[Maximizing the Spread of Influence through a Social Network]" to deal with the *NP*-hard problem of influence maximization.
+Kempe et al. 2003 introduced the Greedy algorithm in their study https://www.cs.cornell.edu/home/kleinber/kdd03-inf.pdf[Maximizing the Spread of Influence through a Social Network] to deal with the *NP*-hard problem of influence maximization.
 The Greedy algorithm successively selecting the node within the maximum marginal gain approximation in polynomial time.
 For large networks <<algorithms-celf, CELF>> algorithm should be used.
 
