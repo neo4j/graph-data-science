@@ -48,23 +48,23 @@ Graph Algorithms: Practical Examples in Apache Spark and Neo4j, by Mark Needham 
 Download it for free at https://neo4j.com/graph-algorithms-book/[neo4j.com/graph-algorithms-book/].
 ====
 
-include::introduction.adoc[leveloffset=+1]
+include::introduction.adoc[]
 
-include::installation/installation.adoc[leveloffset=+1]
+include::installation/installation.adoc[]
 
-include::common-usage/common-usage.adoc[leveloffset=+1]
+include::common-usage/common-usage.adoc[]
 
-include::management-ops/management-ops.adoc[leveloffset=+1]
+include::management-ops/management-ops.adoc[]
 
-include::model-catalog/model-catalog.adoc[leveloffset=+1]
+include::model-catalog/model-catalog.adoc[]
 
-include::algorithms/algorithms-intro.adoc[leveloffset=+1]
+include::algorithms/algorithms-intro.adoc[]
 
-include::production-deployment/production-deployment.adoc[leveloffset=+1]
+include::production-deployment/production-deployment.adoc[]
 
-include::appendix-a.adoc[leveloffset=+1]
+include::appendix-a.adoc[]
 
-include::migration/appendix-b.adoc[leveloffset=+1]
+include::migration/appendix-b.adoc[]
 
 // ifdef::backend-html5[]
 // ++++

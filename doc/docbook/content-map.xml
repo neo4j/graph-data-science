@@ -4,13 +4,14 @@
        role="chunk-toc">
     <d:tocentry linkend="graph-data-science">
         <?dbhtml filename="index.html"?>
-        <d:tocentry linkend="introduction">
-            <?dbhtml filename="introduction/index.html"?>
-        </d:tocentry>
+    </d:tocentry>
+    <d:tocentry linkend="introduction">
+        <?dbhtml filename="introduction/index.html"?>
+    </d:tocentry>
 
-        <d:tocentry linkend="installation">
-            <?dbhtml filename="installation/index.html"?>
-            <d:tocentry linkend="supported-neo4j-versions">
+    <d:tocentry linkend="installation">
+        <?dbhtml filename="installation/index.html"?>
+    <d:tocentry linkend="supported-neo4j-versions">
                 <?dbhtml filename="installation/supported-neo4j-versions/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="neo4j-desktop">
@@ -36,310 +37,309 @@
             </d:tocentry>
         </d:tocentry>
 
-        <d:tocentry linkend="common-usage">
-            <?dbhtml filename="common-usage/index.html"?>
-            <d:tocentry linkend="memory-estimation">
-                <?dbhtml filename="common-usage/memory-estimation/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="creating-graphs">
-                <?dbhtml filename="common-usage/creating-graphs/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="running-algos">
-                <?dbhtml filename="common-usage/running-algos/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="logging">
-                <?dbhtml filename="common-usage/logging/index.html"?>
-            </d:tocentry>
+    <d:tocentry linkend="common-usage">
+        <?dbhtml filename="common-usage/index.html"?>
+        <d:tocentry linkend="memory-estimation">
+            <?dbhtml filename="common-usage/memory-estimation/index.html"?>
         </d:tocentry>
-
-        <d:tocentry linkend="management-ops"><?dbhtml filename="management-ops/index.html"?>
-            <d:tocentry linkend="graph-catalog-ops"><?dbhtml filename="management-ops/graph-catalog-ops/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="native-projection"><?dbhtml filename="management-ops/native-projection/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="cypher-projection"><?dbhtml filename="management-ops/cypher-projection/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="anonymous-graph"><?dbhtml filename="management-ops/anonymous-graph/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="node-properties"><?dbhtml filename="management-ops/node-properties/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="utility-functions"><?dbhtml filename="management-ops/utility-functions/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="administration"><?dbhtml filename="management-ops/administration/index.html"?>
-            </d:tocentry>
+        <d:tocentry linkend="creating-graphs">
+            <?dbhtml filename="common-usage/creating-graphs/index.html"?>
         </d:tocentry>
-
-        <d:tocentry linkend="model-catalog-ops">
-            <?dbhtml filename="model-catalog/model-catalog/index.html"?>
+        <d:tocentry linkend="running-algos">
+            <?dbhtml filename="common-usage/running-algos/index.html"?>
         </d:tocentry>
-
-        <d:tocentry linkend="algorithms">
-            <?dbhtml filename="algorithms/index.html"?>
-            <d:tocentry linkend="algorithms-syntax">
-                <?dbhtml filename="algorithms/syntax/index.html"?>
-            </d:tocentry>
-
-            <d:tocentry linkend="algorithms-centrality">
-                <?dbhtml filename="algorithms/centrality/index.html"?>
-                <d:tocentry linkend="algorithms-page-rank">
-                    <?dbhtml filename="algorithms/page-rank/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-article-rank">
-                    <?dbhtml filename="algorithms/article-rank/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-eigenvector-centrality">
-                    <?dbhtml filename="algorithms/eigenvector-centrality/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-betweenness-centrality">
-                    <?dbhtml filename="algorithms/betweenness-centrality/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-degree-centrality">
-                    <?dbhtml filename="algorithms/degree-centrality/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-closeness-centrality">
-                    <?dbhtml filename="algorithms/closeness-centrality/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-harmonic-centrality">
-                    <?dbhtml filename="algorithms/harmonic-centrality/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-hits">
-                    <?dbhtml filename="algorithms/hits/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-influence-maximization">
-                    <?dbhtml filename="algorithms/influence-maximization/index.html"?>
-                    <d:tocentry linkend="algorithms-celf">
-                        <?dbhtml filename="algorithms/influence-maximization/celf/index.html"?>
-                    </d:tocentry>
-                    <d:tocentry linkend="algorithms-greedy">
-                        <?dbhtml filename="algorithms/influence-maximization/greedy/index.html"?>
-                    </d:tocentry>
-                </d:tocentry>
-            </d:tocentry>
-            <d:tocentry linkend="algorithms-community">
-                <?dbhtml filename="algorithms/community/index.html"?>
-                <d:tocentry linkend="algorithms-louvain">
-                    <?dbhtml filename="algorithms/louvain/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-label-propagation">
-                    <?dbhtml filename="algorithms/label-propagation/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-wcc">
-                    <?dbhtml filename="algorithms/wcc/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-triangle-count">
-                    <?dbhtml filename="algorithms/triangle-count/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-local-clustering-coefficient">
-                    <?dbhtml filename="algorithms/local-clustering-coefficient/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-k1coloring">
-                    <?dbhtml filename="algorithms/k1coloring/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-modularity-optimization">
-                    <?dbhtml filename="algorithms/modularity-optimization/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-strongly-connected-components">
-                    <?dbhtml filename="algorithms/strongly-connected-components/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-sllpa">
-                    <?dbhtml filename="algorithms/sllpa/index.html"?>
-                </d:tocentry>
-            </d:tocentry>
-
-            <d:tocentry linkend="algorithms-similarity">
-                <?dbhtml filename="algorithms/similarity/index.html"?>
-                <d:tocentry linkend="algorithms-node-similarity">
-                    <?dbhtml filename="algorithms/node-similarity/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-knn">
-                    <?dbhtml filename="algorithms/knn/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-similarity-jaccard">
-                    <?dbhtml filename="alpha-algorithms/jaccard/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-similarity-cosine">
-                    <?dbhtml filename="alpha-algorithms/cosine/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-similarity-pearson">
-                    <?dbhtml filename="alpha-algorithms/pearson/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-similarity-euclidean">
-                    <?dbhtml filename="alpha-algorithms/euclidean/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-similarity-overlap">
-                    <?dbhtml filename="alpha-algorithms/overlap/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-approximate-nearest-neighbors">
-                    <?dbhtml filename="alpha-algorithms/approximate-nearest-neighbors/index.html"?>
-                </d:tocentry>
-            </d:tocentry>
-
-            <d:tocentry linkend="algorithms-path-finding">
-                <?dbhtml filename="algorithms/pathfinding/index.html"?>
-                <d:tocentry linkend="algorithms-dijkstra-source-target">
-                    <?dbhtml filename="algorithms/dijkstra-source-target/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-dijkstra-single-source">
-                    <?dbhtml filename="algorithms/dijkstra-single-source/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-astar">
-                    <?dbhtml filename="algorithms/astar/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-yens">
-                    <?dbhtml filename="algorithms/yens/index.html"?>
-                </d:tocentry>
-
-                <d:tocentry linkend="alpha-algorithms-minimum-weight-spanning-tree">
-                    <?dbhtml filename="alpha-algorithms/minimum-weight-spanning-tree/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-single-source-shortest-path">
-                    <?dbhtml filename="alpha-algorithms/single-source-shortest-path/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithm-all-pairs-shortest-path">
-                    <?dbhtml filename="alpha-algorithms/all-pairs-shortest-path/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-random-walk">
-                    <?dbhtml filename="alpha-algorithms/random-walk/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-bfs">
-                    <?dbhtml filename="algorithms/bfs/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-dfs">
-                    <?dbhtml filename="algorithms/dfs/index.html"?>
-                </d:tocentry>
-            </d:tocentry>
-
-            <d:tocentry linkend="algorithms-linkprediction">
-                <?dbhtml filename="algorithms/linkprediction/index.html"?>
-                <d:tocentry linkend="alpha-algorithms-linkprediction-adamic-adar">
-                    <?dbhtml filename="alpha-algorithms/adamic-adar/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-linkprediction-common-neighbors">
-                    <?dbhtml filename="alpha-algorithms/common-neighbors/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-linkprediction-preferential-attachment">
-                    <?dbhtml filename="alpha-algorithms/preferential-attachment/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-linkprediction-resource-allocation">
-                    <?dbhtml filename="alpha-algorithms/resource-allocation/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-linkprediction-same-community">
-                    <?dbhtml filename="alpha-algorithms/same-community/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-linkprediction-total-neighbors">
-                    <?dbhtml filename="alpha-algorithms/total-neighbors/index.html"?>
-                </d:tocentry>
-            </d:tocentry>
-
-            <d:tocentry linkend="algorithms-node-embeddings"><?dbhtml filename="algorithms/node-embeddings/index.html"?>
-                <d:tocentry linkend="algorithms-embeddings-fastrp"><?dbhtml filename="algorithms/fastrp/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-embeddings-graph-sage"><?dbhtml filename="algorithms/graph-sage/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="beta-algorithms-embeddings-node2vec"><?dbhtml filename="algorithms/node2vec/index.html"?>
-                </d:tocentry>
-            </d:tocentry>
-
-            <d:tocentry linkend="algorithms-ml-models"><?dbhtml filename="algorithms/ml-models/index.html"?>
-                <d:tocentry linkend="algorithms-ml-models-preprocessing"><?dbhtml filename="algorithms/ml-models/pre-processing/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-ml-models-tuning"><?dbhtml filename="algorithms/ml-models/models-tuning/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-ml-nodeclassification"><?dbhtml filename="algorithms/ml-models/node-classification/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-ml-linkprediction"><?dbhtml filename="algorithms/ml-models/linkprediction/index.html"?>
-                </d:tocentry>
-            </d:tocentry>
-
-            <d:tocentry linkend="algorithms-auxiliary">
-                <?dbhtml filename="algorithms/auxiliary/index.html"?>
-                <d:tocentry linkend="graph-generation">
-                    <?dbhtml filename="alpha-algorithms/graph-generation/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-collapse-path">
-                    <?dbhtml filename="alpha-algorithms/collapse-path/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-scale-properties">
-                    <?dbhtml filename="alpha-algorithms/scale-properties/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="alpha-algorithms-one-hot-encoding">
-                    <?dbhtml filename="alpha-algorithms/one-hot-encoding/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="algorithms-split-relationships">
-                    <?dbhtml filename="alpha-algorithms/split-relationships/index.html"?>
-                </d:tocentry>
-            </d:tocentry>
-
-            <d:tocentry linkend="algorithms-pregel-api">
-                <?dbhtml filename="algorithms/pregel-api/index.html"?>
-            </d:tocentry>
+        <d:tocentry linkend="logging">
+            <?dbhtml filename="common-usage/logging/index.html"?>
         </d:tocentry>
-
-        <d:tocentry linkend="production-deployment">
-            <?dbhtml filename="production-deployment/index.html"?>
-            <d:tocentry linkend="transaction-handling">
-                <?dbhtml filename="production-deployment/transaction-handling/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="fabric">
-                <?dbhtml filename="production-deployment/fabric/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="feature-toggles">
-                <?dbhtml filename="production-deployment/feature-toggles/index.html"?>
-            </d:tocentry>
-        </d:tocentry>
-
-        <d:tocentry linkend="appendix-a">
-            <?dbhtml filename="appendix-a/index.html"?>
-        </d:tocentry>
-
-        <d:tocentry linkend="appendix-b">
-            <?dbhtml filename="appendix-b/index.html"?>
-            <d:tocentry linkend="migration-algos-common">
-                <?dbhtml filename="appendix-b/migration-algos-common/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="migration-memory-estimation">
-                <?dbhtml filename="appendix-b/migration-memory-estimation/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="migration-named-graph">
-                <?dbhtml filename="appendix-b/migration-named-graph/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="migration-cypher-projection">
-                <?dbhtml filename="appendix-b/migration-cypher-projection/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="migration-graph-list">
-                <?dbhtml filename="appendix-b/migration-graph-list/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="migration-graph-info">
-                <?dbhtml filename="appendix-b/migration-graph-info/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="migration-graph-remove">
-                <?dbhtml filename="appendix-b/migration-graph-remove/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="migration-product-algos">
-                <?dbhtml filename="appendix-b/migration-product-algos/index.html"?>
-                <d:tocentry linkend="migration-lpa">
-                    <?dbhtml filename="appendix-b/migration-lpa/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="migration-louvain">
-                    <?dbhtml filename="appendix-b/migration-louvain/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="migration-node-sim">
-                    <?dbhtml filename="appendix-b/migration-node-sim/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="migration-page-rank">
-                    <?dbhtml filename="appendix-b/migration-page-rank/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="migration-wcc">
-                    <?dbhtml filename="appendix-b/migration-wcc/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="migration-triangle-count">
-                    <?dbhtml filename="appendix-b/migration-triangle-count/index.html"?>
-                </d:tocentry>
-                <d:tocentry linkend="migration-betweenness-centrality">
-                    <?dbhtml filename="appendix-b/migration-betweenness-centrality/index.html"?>
-                </d:tocentry>
-            </d:tocentry>
-        </d:tocentry>
-
     </d:tocentry>
+
+    <d:tocentry linkend="management-ops"><?dbhtml filename="management-ops/index.html"?>
+        <d:tocentry linkend="graph-catalog-ops"><?dbhtml filename="management-ops/graph-catalog-ops/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="native-projection"><?dbhtml filename="management-ops/native-projection/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="cypher-projection"><?dbhtml filename="management-ops/cypher-projection/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="anonymous-graph"><?dbhtml filename="management-ops/anonymous-graph/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="node-properties"><?dbhtml filename="management-ops/node-properties/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="utility-functions"><?dbhtml filename="management-ops/utility-functions/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="administration"><?dbhtml filename="management-ops/administration/index.html"?>
+        </d:tocentry>
+    </d:tocentry>
+
+    <d:tocentry linkend="model-catalog-ops">
+        <?dbhtml filename="model-catalog/model-catalog/index.html"?>
+    </d:tocentry>
+
+    <d:tocentry linkend="algorithms">
+        <?dbhtml filename="algorithms/index.html"?>
+        <d:tocentry linkend="algorithms-syntax">
+            <?dbhtml filename="algorithms/syntax/index.html"?>
+        </d:tocentry>
+
+        <d:tocentry linkend="algorithms-centrality">
+            <?dbhtml filename="algorithms/centrality/index.html"?>
+            <d:tocentry linkend="algorithms-page-rank">
+                <?dbhtml filename="algorithms/page-rank/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-article-rank">
+                <?dbhtml filename="algorithms/article-rank/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-eigenvector-centrality">
+                <?dbhtml filename="algorithms/eigenvector-centrality/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-betweenness-centrality">
+                <?dbhtml filename="algorithms/betweenness-centrality/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-degree-centrality">
+                <?dbhtml filename="algorithms/degree-centrality/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-closeness-centrality">
+                <?dbhtml filename="algorithms/closeness-centrality/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-harmonic-centrality">
+                <?dbhtml filename="algorithms/harmonic-centrality/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-hits">
+                <?dbhtml filename="algorithms/hits/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-influence-maximization">
+                <?dbhtml filename="algorithms/influence-maximization/index.html"?>
+                <d:tocentry linkend="algorithms-celf">
+                    <?dbhtml filename="algorithms/influence-maximization/celf/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="algorithms-greedy">
+                    <?dbhtml filename="algorithms/influence-maximization/greedy/index.html"?>
+                </d:tocentry>
+            </d:tocentry>
+        </d:tocentry>
+        <d:tocentry linkend="algorithms-community">
+            <?dbhtml filename="algorithms/community/index.html"?>
+            <d:tocentry linkend="algorithms-louvain">
+                <?dbhtml filename="algorithms/louvain/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-label-propagation">
+                <?dbhtml filename="algorithms/label-propagation/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-wcc">
+                <?dbhtml filename="algorithms/wcc/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-triangle-count">
+                <?dbhtml filename="algorithms/triangle-count/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-local-clustering-coefficient">
+                <?dbhtml filename="algorithms/local-clustering-coefficient/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-k1coloring">
+                <?dbhtml filename="algorithms/k1coloring/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-modularity-optimization">
+                <?dbhtml filename="algorithms/modularity-optimization/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-strongly-connected-components">
+                <?dbhtml filename="algorithms/strongly-connected-components/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-sllpa">
+                <?dbhtml filename="algorithms/sllpa/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="algorithms-similarity">
+            <?dbhtml filename="algorithms/similarity/index.html"?>
+            <d:tocentry linkend="algorithms-node-similarity">
+                <?dbhtml filename="algorithms/node-similarity/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-knn">
+                <?dbhtml filename="algorithms/knn/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-similarity-jaccard">
+                <?dbhtml filename="alpha-algorithms/jaccard/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-similarity-cosine">
+                <?dbhtml filename="alpha-algorithms/cosine/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-similarity-pearson">
+                <?dbhtml filename="alpha-algorithms/pearson/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-similarity-euclidean">
+                <?dbhtml filename="alpha-algorithms/euclidean/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-similarity-overlap">
+                <?dbhtml filename="alpha-algorithms/overlap/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-approximate-nearest-neighbors">
+                <?dbhtml filename="alpha-algorithms/approximate-nearest-neighbors/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="algorithms-path-finding">
+            <?dbhtml filename="algorithms/pathfinding/index.html"?>
+            <d:tocentry linkend="algorithms-dijkstra-source-target">
+                <?dbhtml filename="algorithms/dijkstra-source-target/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-dijkstra-single-source">
+                <?dbhtml filename="algorithms/dijkstra-single-source/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-astar">
+                <?dbhtml filename="algorithms/astar/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-yens">
+                <?dbhtml filename="algorithms/yens/index.html"?>
+            </d:tocentry>
+
+            <d:tocentry linkend="alpha-algorithms-minimum-weight-spanning-tree">
+                <?dbhtml filename="alpha-algorithms/minimum-weight-spanning-tree/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-single-source-shortest-path">
+                <?dbhtml filename="alpha-algorithms/single-source-shortest-path/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithm-all-pairs-shortest-path">
+                <?dbhtml filename="alpha-algorithms/all-pairs-shortest-path/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-random-walk">
+                <?dbhtml filename="alpha-algorithms/random-walk/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-bfs">
+                <?dbhtml filename="algorithms/bfs/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-dfs">
+                <?dbhtml filename="algorithms/dfs/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="algorithms-linkprediction">
+            <?dbhtml filename="algorithms/linkprediction/index.html"?>
+            <d:tocentry linkend="alpha-algorithms-linkprediction-adamic-adar">
+                <?dbhtml filename="alpha-algorithms/adamic-adar/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-linkprediction-common-neighbors">
+                <?dbhtml filename="alpha-algorithms/common-neighbors/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-linkprediction-preferential-attachment">
+                <?dbhtml filename="alpha-algorithms/preferential-attachment/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-linkprediction-resource-allocation">
+                <?dbhtml filename="alpha-algorithms/resource-allocation/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-linkprediction-same-community">
+                <?dbhtml filename="alpha-algorithms/same-community/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-linkprediction-total-neighbors">
+                <?dbhtml filename="alpha-algorithms/total-neighbors/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="algorithms-node-embeddings"><?dbhtml filename="algorithms/node-embeddings/index.html"?>
+            <d:tocentry linkend="algorithms-embeddings-fastrp"><?dbhtml filename="algorithms/fastrp/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-embeddings-graph-sage"><?dbhtml filename="algorithms/graph-sage/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="beta-algorithms-embeddings-node2vec"><?dbhtml filename="algorithms/node2vec/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="algorithms-ml-models"><?dbhtml filename="algorithms/ml-models/index.html"?>
+            <d:tocentry linkend="algorithms-ml-models-preprocessing"><?dbhtml filename="algorithms/ml-models/pre-processing/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-ml-models-tuning"><?dbhtml filename="algorithms/ml-models/models-tuning/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-ml-nodeclassification"><?dbhtml filename="algorithms/ml-models/node-classification/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-ml-linkprediction"><?dbhtml filename="algorithms/ml-models/linkprediction/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="algorithms-auxiliary">
+            <?dbhtml filename="algorithms/auxiliary/index.html"?>
+            <d:tocentry linkend="graph-generation">
+                <?dbhtml filename="alpha-algorithms/graph-generation/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-collapse-path">
+                <?dbhtml filename="alpha-algorithms/collapse-path/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-scale-properties">
+                <?dbhtml filename="alpha-algorithms/scale-properties/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-one-hot-encoding">
+                <?dbhtml filename="alpha-algorithms/one-hot-encoding/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-split-relationships">
+                <?dbhtml filename="alpha-algorithms/split-relationships/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+
+        <d:tocentry linkend="algorithms-pregel-api">
+            <?dbhtml filename="algorithms/pregel-api/index.html"?>
+        </d:tocentry>
+    </d:tocentry>
+
+    <d:tocentry linkend="production-deployment">
+        <?dbhtml filename="production-deployment/index.html"?>
+        <d:tocentry linkend="transaction-handling">
+            <?dbhtml filename="production-deployment/transaction-handling/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="fabric">
+            <?dbhtml filename="production-deployment/fabric/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="feature-toggles">
+            <?dbhtml filename="production-deployment/feature-toggles/index.html"?>
+        </d:tocentry>
+    </d:tocentry>
+
+    <d:tocentry linkend="appendix-a">
+        <?dbhtml filename="appendix-a/index.html"?>
+    </d:tocentry>
+
+    <d:tocentry linkend="appendix-b">
+        <?dbhtml filename="appendix-b/index.html"?>
+        <d:tocentry linkend="migration-algos-common">
+            <?dbhtml filename="appendix-b/migration-algos-common/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="migration-memory-estimation">
+            <?dbhtml filename="appendix-b/migration-memory-estimation/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="migration-named-graph">
+            <?dbhtml filename="appendix-b/migration-named-graph/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="migration-cypher-projection">
+            <?dbhtml filename="appendix-b/migration-cypher-projection/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="migration-graph-list">
+            <?dbhtml filename="appendix-b/migration-graph-list/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="migration-graph-info">
+            <?dbhtml filename="appendix-b/migration-graph-info/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="migration-graph-remove">
+            <?dbhtml filename="appendix-b/migration-graph-remove/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="migration-product-algos">
+            <?dbhtml filename="appendix-b/migration-product-algos/index.html"?>
+            <d:tocentry linkend="migration-lpa">
+                <?dbhtml filename="appendix-b/migration-lpa/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="migration-louvain">
+                <?dbhtml filename="appendix-b/migration-louvain/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="migration-node-sim">
+                <?dbhtml filename="appendix-b/migration-node-sim/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="migration-page-rank">
+                <?dbhtml filename="appendix-b/migration-page-rank/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="migration-wcc">
+                <?dbhtml filename="appendix-b/migration-wcc/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="migration-triangle-count">
+                <?dbhtml filename="appendix-b/migration-triangle-count/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="migration-betweenness-centrality">
+                <?dbhtml filename="appendix-b/migration-betweenness-centrality/index.html"?>
+            </d:tocentry>
+        </d:tocentry>
+    </d:tocentry>
+
 </d:toc><!-- vim: set ts=2 sw=2: -->
