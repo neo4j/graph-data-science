@@ -28,10 +28,11 @@ import org.neo4j.procedure.UserFunction;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -79,15 +80,19 @@ class AppendixAProcedureListingTest extends BaseProcTest {
 
     @Test
     void shouldListAll() {
-        AppendixAProcedureListingProcessor procedureListingProcessor = new AppendixAProcedureListingProcessor();
+        var procedureListingProcessor = new AppendixAProcedureListingProcessor();
         asciidoctor.javaExtensionRegistry().treeprocessor(procedureListingProcessor);
 
-        File file = ASCIIDOC_PATH.resolve("appendix-a.adoc").toFile();
-        assertThat(file).exists().canRead();
+        var baseDirectory =  ASCIIDOC_PATH.resolve("procedures-and-functions-reference");
+        var files = baseDirectory.toFile().listFiles();
 
-        asciidoctor.loadFile(file, Collections.emptyMap());
+        assertThat(files)
+            .isNotNull()
+            .allSatisfy(file -> assertThat(file).exists().canRead());
 
-        List<String> registeredProcedures = new LinkedList<>();
+        Arrays.stream(files).forEach(file -> asciidoctor.loadFile(file, Collections.emptyMap()));
+
+        var registeredProcedures = new ArrayList<String>();
         runQueryWithRowConsumer("CALL gds.list() YIELD name", row -> {
             registeredProcedures.add(row.getString("name"));
         });
