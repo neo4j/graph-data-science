@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.matrix;
+package org.neo4j.gds.ml.core.tensor.operations;
 
 import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrix1Row;
 
 import java.util.function.IntPredicate;
 
-public final class MatrixUtil {
+public final class DoubleMatrixOperations {
 
     /**
      * Modified version of Ejml implementation.
@@ -64,5 +64,5 @@ public final class MatrixUtil {
         }
     }
 
-    private MatrixUtil() {}
+    private DoubleMatrixOperations() {}
 }

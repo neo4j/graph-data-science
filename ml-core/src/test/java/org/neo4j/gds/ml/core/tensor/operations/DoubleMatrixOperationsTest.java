@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.utils.la;
+package org.neo4j.gds.ml.core.tensor.operations;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.matrix.MatrixUtil;
 
 import java.util.Arrays;
 import java.util.function.IntPredicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class MatrixUtilTest {
+class DoubleMatrixOperationsTest {
 
     @Test
     void multTransBWithMask() {
@@ -41,7 +40,7 @@ class MatrixUtilTest {
         var matrix = DMatrixRMaj.wrap(size, size, raw);
         var maskedResult = new DMatrixRMaj(size, size);
         IntPredicate mask = index -> index < size / 2;
-        MatrixUtil.multTransB(matrix, matrix, maskedResult, mask);
+        DoubleMatrixOperations.multTransB(matrix, matrix, maskedResult, mask);
 
         var originalResult = maskedResult.createLike();
         MatrixMatrixMult_DDRM.multTransB(matrix, matrix, originalResult);
