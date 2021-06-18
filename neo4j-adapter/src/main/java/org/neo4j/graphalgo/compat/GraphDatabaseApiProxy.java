@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -26,14 +27,12 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.TransactionFailureException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -112,35 +111,23 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
+    @TestOnly
     public static Transactions newKernelTransaction(GraphDatabaseService db) {
         Transaction tx = db.beginTx();
         KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
-        return ImmutableTransactions.of(true, tx, ktx, Optional.empty());
+        return ImmutableTransactions.of(tx, ktx);
     }
 
     @ValueClass
     public interface Transactions extends AutoCloseable {
-        boolean txShouldBeClosed();
-
         Transaction tx();
 
         KernelTransaction ktx();
 
-        Optional<KernelTransaction.Revertable> revertKtx();
-
         @Override
         default void close() {
             tx().commit();
-            if (txShouldBeClosed()) {
-                revertKtx().ifPresent(KernelTransaction.Revertable::close);
-                try {
-                    ktx().close();
-                } catch (TransactionFailureException e) {
-                    throw new RuntimeException(e);
-                } finally {
-                    tx().close();
-                }
-            }
+            tx().close();
         }
     }
 
