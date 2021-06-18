@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.compat._43drop031;
 
 import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.collections.api.factory.Sets;
+import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
-import org.neo4j.configuration.ExternalSettings;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.function.ThrowingFunction;
@@ -50,13 +50,13 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
-import org.neo4j.internal.kernel.api.IndexQuery;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
+import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
@@ -169,7 +169,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         String databaseName,
         OpenOption... openOptions
     ) throws IOException {
-        return pageCache.map(file.toPath(), pageSize, Sets.immutable.of(openOptions));
+        return pageCache.map(file.toPath(), pageSize, databaseName, Sets.immutable.of(openOptions));
     }
 
     @Override
@@ -180,12 +180,14 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public Scan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
         var read = transaction.dataRead();
+        read.prepareForLabelScans();
         return read.nodeLabelScan(labelId);
     }
 
     @Override
     public List<Scan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
         var read = transaction.dataRead();
+        read.prepareForLabelScans();
         return Arrays
             .stream(labelIds)
             .mapToObj(read::nodeLabelScan)
@@ -228,7 +230,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
-        return true;
+        return NodeLabelIndexLookupImpl.hasNodeLabelIndex(kernelTransaction);
     }
 
     @Override
@@ -255,12 +257,12 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         double to,
         boolean toInclusive
     ) {
-        return new CompatIndexQueryImpl(IndexQuery.range(propertyKeyId, from, fromInclusive, to, toInclusive));
+        return new CompatIndexQueryImpl(PropertyIndexQuery.range(propertyKeyId, from, fromInclusive, to, toInclusive));
     }
 
     @Override
     public CompatIndexQuery rangeAllIndexQuery(int propertyKeyId) {
-        return new CompatIndexQueryImpl(IndexQuery.range(propertyKeyId, ValueGroup.NUMBER));
+        return new CompatIndexQueryImpl(PropertyIndexQuery.range(propertyKeyId, ValueGroup.NUMBER));
     }
 
     @Override
@@ -370,12 +372,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             public boolean highIO() {
                 return false;
             }
-
         };
         return factory.instantiate(
             directoryStructure,
             fileSystem,
-            null,
             pageCacheTracer,
             importerConfig,
             logService,
@@ -454,7 +454,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public Setting<String> additionalJvm() {
-        return ExternalSettings.additional_jvm;
+        return BootloaderSettings.additional_jvm;
     }
 
     @Override
