@@ -26,7 +26,7 @@ import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.ast.Table;
 import org.asciidoctor.extension.Treeprocessor;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,7 +39,7 @@ public class AppendixAProcedureListingProcessor extends Treeprocessor {
     public AppendixAProcedureListingProcessor() {
         // Use `List` instead of `Set` because we have procedures and functions that have the same name and namespace,
         // i.e. `gds.graph.exists`
-        procedures = new LinkedList<>();
+        procedures = new ArrayList<>();
     }
 
     @Override
@@ -80,7 +80,6 @@ public class AppendixAProcedureListingProcessor extends Treeprocessor {
         return document
             .getBlocks()
             .stream()
-            .flatMap(it -> it.getBlocks().stream())
             .filter(it -> it instanceof Table)
             .filter(it -> it.getRoles().contains(PROCEDURE_LISTING_ROLE))
             .map(it -> (Table)it)
