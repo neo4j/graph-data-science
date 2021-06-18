@@ -34,6 +34,7 @@ The following table lists all functions in the GDS library:
 | <<alpha-algorithms-similarity-cosine, gds.alpha.similarity.cosine>>
 | <<alpha-algorithms-similarity-jaccard, gds.alpha.similarity.jaccard>>
 | <<alpha-algorithms-similarity-euclidean, gds.alpha.similarity.euclideanDistance>>
+| `gds.alpha.similarity.euclidean`
 | <<alpha-algorithms-similarity-overlap, gds.alpha.similarity.overlap>>
 | <<alpha-algorithms-similarity-pearson, gds.alpha.similarity.pearson>>
 |===
