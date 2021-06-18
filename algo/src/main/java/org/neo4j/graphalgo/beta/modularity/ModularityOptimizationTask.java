@@ -24,18 +24,16 @@ import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 
 final class ModularityOptimizationTask implements Runnable {
 
-    private final Graph graph;
-    private final RelationshipIterator localGraph;
-    private final long batchStart;
-    private final long batchEnd;
+    private final Graph localGraph;
+    private final Partition partition;
     private final long color;
     private final double totalNodeWeight;
     private final HugeLongArray colors;
@@ -49,8 +47,7 @@ final class ModularityOptimizationTask implements Runnable {
 
     ModularityOptimizationTask(
         Graph graph,
-        long batchStart,
-        long batchEnd,
+        Partition partition,
         long color,
         double totalNodeWeight,
         HugeLongArray colors,
@@ -62,9 +59,7 @@ final class ModularityOptimizationTask implements Runnable {
         HugeAtomicDoubleArray communityWeightUpdates,
         ProgressLogger progressLogger
     ) {
-        this.graph = graph;
-        this.batchStart = batchStart;
-        this.batchEnd = batchEnd;
+        this.partition = partition;
         this.color = color;
         this.localGraph = graph.concurrentCopy();
         this.currentCommunities = currentCommunities;
@@ -81,14 +76,13 @@ final class ModularityOptimizationTask implements Runnable {
     @Override
     public void run() {
         LongDoubleMap reuseCommunityInfluences = new LongDoubleHashMap(50);
-        for (long nodeId = batchStart; nodeId < batchEnd; nodeId++) {
-
+        partition.consume(nodeId -> {
             if (colors.get(nodeId) != color) {
-                continue;
+                return;
             }
 
             long currentCommunity = currentCommunities.get(nodeId);
-            final int degree = graph.degree(nodeId);
+            final int degree = localGraph.degree(nodeId);
 
             LongDoubleMap communityInfluences;
             if (degree < 50) {
@@ -144,8 +138,7 @@ final class ModularityOptimizationTask implements Runnable {
             nextCommunities.set(nodeId, nextCommunity);
             communityWeightUpdates.update(currentCommunity, agg -> agg - cumulativeNodeWeight);
             communityWeightUpdates.update(nextCommunity, agg -> agg + cumulativeNodeWeight);
-            progressLogger.logProgress(graph.degree(nodeId));
-        }
-
+            progressLogger.logProgress(degree);
+        });
     }
 }

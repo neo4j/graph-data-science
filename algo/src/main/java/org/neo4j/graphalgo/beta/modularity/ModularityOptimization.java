@@ -42,7 +42,6 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -63,7 +62,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final int concurrency;
     private final int maxIterations;
     private final long nodeCount;
-    private final long batchSize;
+    private final long minBatchSize;
     private final double tolerance;
     private final Graph graph;
     private final NodeProperties seedProperty;
@@ -104,12 +103,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.concurrency = concurrency;
         this.progressLogger = progressLogger;
         this.tracker = tracker;
-        this.batchSize = ParallelUtil.adjustedBatchSize(
-            nodeCount,
-            concurrency,
-            minBatchSize,
-            Integer.MAX_VALUE
-        );
+        this.minBatchSize = minBatchSize;
 
         if (maxIterations < 1) {
             throw new IllegalArgumentException(formatWithLocale(
@@ -167,7 +161,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             .builder()
             .concurrency(concurrency)
             .maxIterations(5)
-            .batchSize((int) batchSize)
+            .batchSize((int) minBatchSize)
             .build();
 
         K1Coloring coloring = new K1ColoringFactory<>()
@@ -227,7 +221,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 seedProperty != null,
                 partition
             ),
-            Optional.empty());
+            Optional.of((int) minBatchSize));
 
         ParallelUtil.run(initTasks, executor);
 
@@ -328,27 +322,25 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private Collection<ModularityOptimizationTask> createModularityOptimizationTasks(long currentColor) {
-        final Collection<ModularityOptimizationTask> tasks = new ArrayList<>(concurrency);
-        for (long i = 0L; i < this.nodeCount; i += batchSize) {
-            tasks.add(
-                new ModularityOptimizationTask(
-                    graph,
-                    i,
-                    Math.min(i + batchSize, nodeCount),
-                    currentColor,
-                    totalNodeWeight,
-                    colors,
-                    currentCommunities,
-                    nextCommunities,
-                    cumulativeNodeWeights,
-                    nodeCommunityInfluences,
-                    communityWeights,
-                    communityWeightUpdates,
-                    getProgressLogger()
-                )
-            );
-        }
-        return tasks;
+        return PartitionUtils.rangePartition(
+            concurrency,
+            nodeCount,
+            partition -> new ModularityOptimizationTask(
+                graph,
+                partition,
+                currentColor,
+                totalNodeWeight,
+                colors,
+                currentCommunities,
+                nextCommunities,
+                cumulativeNodeWeights,
+                nodeCommunityInfluences,
+                communityWeights,
+                communityWeightUpdates,
+                getProgressLogger()
+            ),
+            Optional.of((int) minBatchSize)
+        );
     }
 
     private boolean updateModularity() {
@@ -366,7 +358,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 nodeStream
                     .mapToDouble(nodeCommunityInfluences::get)
                     .reduce(Double::sum)
-                    .orElseThrow(() -> new RuntimeException("Error while comptuing modularity"))
+                    .orElseThrow(() -> new RuntimeException("Error while computing modularity"))
         );
 
         double ax = ParallelUtil.parallelStream(
@@ -376,7 +368,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 nodeStream
                     .mapToDouble(nodeId -> Math.pow(communityWeights.get(nodeId), 2.0))
                     .reduce(Double::sum)
-                    .orElseThrow(() -> new RuntimeException("Error while comptuing modularity"))
+                    .orElseThrow(() -> new RuntimeException("Error while computing modularity"))
         );
 
         return (ex / (2 * totalNodeWeight)) - (ax / (Math.pow(2 * totalNodeWeight, 2)));
