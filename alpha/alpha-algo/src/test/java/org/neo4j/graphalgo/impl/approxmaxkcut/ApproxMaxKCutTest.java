@@ -68,7 +68,8 @@ final class ApproxMaxKCutTest {
         ", (f)-[:TYPE1 {weight: 3.0}]->(a)" +
         ", (f)-[:TYPE1 {weight: 1.0}]->(b)" +
         ", (g)-[:TYPE1 {weight: 1.0}]->(b)" +
-        ", (g)-[:TYPE1 {weight: 4.0}]->(c)";
+        ", (g)-[:TYPE1 {weight: 4.0}]->(c)" +
+        ", (g)-[:TYPE1 {weight: 999.0}]->(g)";
 
     @Inject
     private TestGraph graph;

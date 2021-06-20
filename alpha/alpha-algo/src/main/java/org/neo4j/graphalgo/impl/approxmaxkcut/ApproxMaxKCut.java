@@ -396,6 +396,9 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                     nodeId,
                     DEFAULT_WEIGHT,
                     (sourceNodeId, targetNodeId, weight) -> {
+                        // Loops doesn't affect the cut cost.
+                        if (sourceNodeId == targetNodeId) return true;
+
                         double delta = getDelta.accept(weight);
 
                         outgoingImprovementCosts[setFunction.get(targetNodeId)] += delta;
@@ -470,6 +473,9 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                     nodeId,
                     DEFAULT_WEIGHT,
                     (sourceNodeId, targetNodeId, weight) -> {
+                        // Loops should not stop us.
+                        if (targetNodeId == sourceNodeId) return true;
+
                         // We try to mark the outgoing neighbor as NEIGHBOR to make sure it doesn't swap as well.
                         if (!swapStatus.compareAndSet(
                             targetNodeId,
