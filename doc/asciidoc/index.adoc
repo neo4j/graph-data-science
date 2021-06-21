@@ -62,7 +62,7 @@ include::algorithms/algorithms-intro.adoc[]
 
 include::production-deployment/production-deployment.adoc[]
 
-include::appendix-a.adoc[]
+include::operations-reference/appendix-a.adoc[]
 
 include::migration/appendix-b.adoc[]
 

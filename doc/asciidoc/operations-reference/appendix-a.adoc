@@ -1,0 +1,15 @@
+[appendix]
+[[appendix-a]]
+= Operations reference
+
+[abstract]
+--
+This chapter contains a reference of all the procedures and functions in the Neo4j Graph Data Science library.
+--
+
+The operations in the Graph Data Science library can be divided into the following categories:
+
+* <<appendix-a-graph-ops>>
+* <<appendix-a-model-ops>>
+* <<appendix-a-graph-algos>>
+* <<appendix-a-additional-ops>>

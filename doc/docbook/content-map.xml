@@ -325,21 +325,18 @@
     <d:tocentry linkend="appendix">
 
         <d:tocentry linkend="appendix-a">
-            <?dbhtml filename="procedures-and-functions-reference/appendix-a/index.html"?>
+            <?dbhtml filename="operations-reference/appendix-a/index.html"?>
             <d:tocentry linkend="appendix-a-graph-ops">
-                <?dbhtml filename="procedures-and-functions-reference/graph-operation-references/index.html"?>
+                <?dbhtml filename="operations-reference/graph-operation-references/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="appendix-a-model-ops">
-                <?dbhtml filename="procedures-and-functions-reference/model-operation-references/index.html"?>
+                <?dbhtml filename="operations-reference/model-operation-references/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="appendix-a-graph-algos">
-                <?dbhtml filename="procedures-and-functions-reference/graph-algorithm-references/index.html"?>
+                <?dbhtml filename="operations-reference/algorithm-references/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="appendix-a-additional-ops">
-                <?dbhtml filename="procedures-and-functions-reference/additional-operation-references/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="function-references">
-                <?dbhtml filename="procedures-and-functions-reference/function-references/index.html"?>
+                <?dbhtml filename="operations-reference/additional-operation-references/index.html"?>
             </d:tocentry>
         </d:tocentry>
 

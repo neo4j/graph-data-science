@@ -7,13 +7,12 @@ include::../algorithms/algorithm-tiers.adoc[]
 [[production-quality-tier]]
 == Production-quality tier
 
-The following table lists all production-quality algorithms in the GDS library:
-
+.List of all production-quality algorithms in the GDS library.
 [[table-product]]
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
-| Algorithm | Procedure
+| Algorithm name | Operation
 .8+<.^|<<algorithms-label-propagation-syntax, Label Propagation>>
 | `gds.labelPropagation.mutate`
 | `gds.labelPropagation.mutate.estimate`
@@ -155,13 +154,12 @@ The following table lists all production-quality algorithms in the GDS library:
 [[beta-tier]]
 == Beta tier
 
-The following table lists all beta procedures in the GDS library:
-
+.List of all beta algorithms in the GDS library.
 [[table-beta]]
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
-|Algorithm | Procedure
+|Algorithm name | Operation
 .8+<.^|<<algorithms-embeddings-fastrp-extended, FastRPExtended>>
 | `gds.beta.fastRPExtended.mutate`
 | `gds.beta.fastRPExtended.mutate.estimate`
@@ -217,13 +215,12 @@ The following table lists all beta procedures in the GDS library:
 [[alpha-tier]]
 == Alpha tier
 
-The following table lists all alpha algorithms in the GDS library:
-
+.List of all alpha algorithms in the GDS library.
 [[table-alpha]]
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
-|Algorithm | Procedure
+|Algorithm name | Operation
 .1+<.^|<<alpha-algorithm-all-pairs-shortest-path, All Shortest Paths>>
 | `gds.alpha.allShortestPaths.stream`
 .1+<.^|<<algorithms-bfs, Breadth First Search>>
@@ -257,22 +254,28 @@ The following table lists all alpha algorithms in the GDS library:
 .2+<.^|<<algorithms-scale-properties, Scale Properties>>
 | `gds.alpha.scaleProperties.mutate`
 | `gds.alpha.scaleProperties.stream`
-.3+<.^|<<alpha-algorithms-similarity-cosine, Cosine Similarity>>
+.4+<.^|<<alpha-algorithms-similarity-cosine, Cosine Similarity>>
 | `gds.alpha.similarity.cosine.stats`
 | `gds.alpha.similarity.cosine.stream`
 | `gds.alpha.similarity.cosine.write`
-.3+<.^|<<alpha-algorithms-similarity-euclidean, Euclidean Similarity>>
+| `_gds.alpha.similarity.cosine_`
+.5+<.^|<<alpha-algorithms-similarity-euclidean, Euclidean Similarity>>
 | `gds.alpha.similarity.euclidean.stats`
 | `gds.alpha.similarity.euclidean.stream`
 | `gds.alpha.similarity.euclidean.write`
-.3+<.^|<<alpha-algorithms-similarity-overlap, Overlap Similarity>>
+| `_gds.alpha.similarity.euclidean_`
+| `_gds.alpha.similarity.euclideanDistance_`
+| <<alpha-algorithms-similarity-jaccard>> | `_gds.alpha.similarity.jaccard_`
+.4+<.^|<<alpha-algorithms-similarity-overlap, Overlap Similarity>>
 | `gds.alpha.similarity.overlap.stats`
 | `gds.alpha.similarity.overlap.stream`
 | `gds.alpha.similarity.overlap.write`
-.3+<.^|<<alpha-algorithms-similarity-pearson, Pearson Similarity>>
+| `_gds.alpha.similarity.overlap_`
+.4+<.^|<<alpha-algorithms-similarity-pearson, Pearson Similarity>>
 | `gds.alpha.similarity.pearson.stats`
 | `gds.alpha.similarity.pearson.stream`
 | `gds.alpha.similarity.pearson.write`
+| `_gds.alpha.similarity.pearson_`
 .8+<.^|<<algorithms-sllpa, Speaker-Listener Label Propagation>>
 | `gds.alpha.sllpa.mutate`
 | `gds.alpha.sllpa.mutate.estimate`
@@ -300,6 +303,12 @@ The following table lists all alpha algorithms in the GDS library:
 | `gds.alpha.ml.linkPrediction.predict.write.estimate`
 | `gds.alpha.ml.linkPrediction.train`
 | `gds.alpha.ml.linkPrediction.train.estimate`
+| <<alpha-algorithms-linkprediction-adamic-adar>> | `_gds.alpha.linkprediction.adamicAdar_`
+| <<alpha-algorithms-linkprediction-common-neighbors>> | `_gds.alpha.linkprediction.commonNeighbors_`
+| <<alpha-algorithms-linkprediction-preferential-attachment>> | `_gds.alpha.linkprediction.preferentialAttachment_`
+| <<alpha-algorithms-linkprediction-preferential-attachment>> | `_gds.alpha.linkprediction.resourceAllocation_`
+| <<alpha-algorithms-linkprediction-same-community>> | `_gds.alpha.linkprediction.sameCommunity_`
+| <<alpha-algorithms-linkprediction-total-neighbors>> | `_gds.alpha.linkprediction.totalNeighbors_`
 .8+<.^| <<algorithms-ml-nodeclassification, Node Classification>>
 | `gds.alpha.ml.nodeClassification.predict.mutate`
 | `gds.alpha.ml.nodeClassification.predict.mutate.estimate`
