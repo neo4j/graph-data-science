@@ -7,7 +7,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 [[production-quality-tier]]
 == Production-quality tier
 
-.List of all production-quality algorithms in the GDS library.
+.List of all production-quality algorithms in the GDS library. Functions are written in _italic_.
 [[table-product]]
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
@@ -154,7 +154,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 [[beta-tier]]
 == Beta tier
 
-.List of all beta algorithms in the GDS library.
+.List of all beta algorithms in the GDS library. Functions are written in _italic_.
 [[table-beta]]
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
@@ -215,7 +215,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 [[alpha-tier]]
 == Alpha tier
 
-.List of all alpha algorithms in the GDS library.
+.List of all alpha algorithms in the GDS library. Functions are written in _italic_.
 [[table-alpha]]
 [role=procedure-listing]
 [opts=header,cols="1, 1"]

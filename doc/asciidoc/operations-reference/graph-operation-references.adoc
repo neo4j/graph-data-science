@@ -1,7 +1,7 @@
 [[appendix-a-graph-ops]]
 = Graph Catalog
 
-.List of all production-quality graph operations in the GDS library.
+.List of all production-quality graph operations in the GDS library. Functions are written in _italic_.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
@@ -28,7 +28,7 @@
 |<<catalog-graph-export-database, Graph Export>> | `gds.graph.export`
 |===
 
-.List of all beta graph operations in the GDS library.
+.List of all beta graph operations in the GDS library. Functions are written in _italic_.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
