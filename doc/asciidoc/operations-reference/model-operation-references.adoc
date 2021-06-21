@@ -1,10 +1,11 @@
 [[appendix-a-model-ops]]
-= Model Catalog Operations
+= Model Catalog
 
+.List of all production-quality model catalog operations in the GDS library.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
-| Operation                                          | Procedure
+| Description                                        | Operation
 | <<catalog-model-exists, Check if a model exists>>  | `gds.beta.model.exists`
 | <<catalog-model-drop, Remove a model from memory>> | `gds.beta.model.drop`
 | <<catalog-model-list, List models>>                | `gds.beta.model.list`

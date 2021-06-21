@@ -1,6 +1,7 @@
 [[appendix-a-additional-ops]]
 = Additional Operations
 
+.List of all additional operations.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
@@ -8,14 +9,15 @@
 | <<logging-progress-logging, List all operations in GDS>>        | `_gds.list_`
 | <<logging-progress-logging, List logged progress>>              | `gds.beta.listProgress`
 | <<utility-functions, The version of the installed GDS>>         | `_gds.version_`
-.2+<.^| <<utility-functions-node-path, Node and Path Functions>>
+.2+<.^| <<utility-functions-node-path>>
 | `_gds.util.asNode_`
 | `_gds.util.asNodes_`
-.4+<.^| <<utility-functions-numeric, Numeric Functions>>
+.4+<.^| <<utility-functions-numeric>>
 | `_gds.util.NaN_`
 | `_gds.util.infinity_`
 | `_gds.util.isFinite_`
 | `_gds.util.isInfinite_`
 | <<utility-functions-catalog, Accessing a node property in a named graph>> | `_gds.util.nodeProperty_`
+| <<alpha-algorithms-one-hot-encoding>> | `_gds.alpha.ml.oneHotEncoding_`
 | Status of the system                                                      | `gds.debug.sysInfo`
 |===

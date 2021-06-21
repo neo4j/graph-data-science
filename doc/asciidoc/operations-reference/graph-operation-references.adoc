@@ -1,19 +1,20 @@
 [[appendix-a-graph-ops]]
-= Graph Operations
+= Graph Catalog
 
-The following table lists all production-quality graph operations in the GDS library:
-
+.List of all production-quality graph operations in the GDS library.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
-|Operation | Procedure
+|Description | Operation
 .4+<.^|<<catalog-graph-create, Create Graph>>
 | `gds.graph.create`
 | `gds.graph.create.estimate`
 | `gds.graph.create.cypher`
 | `gds.graph.create.cypher.estimate`
 |<<catalog-graph-create-subgraph, Create a graph from a named graph>> | `gds.beta.graph.create.subgraph`
-|<<catalog-graph-exists, Check if a named graph exists>> | `gds.graph.exists`
+.2+<.^|<<catalog-graph-exists, Check if a named graph exists>>
+| `gds.graph.exists`
+| `_gds.graph.exists_`
 |<<catalog-graph-list, List graphs>> | `gds.graph.list`
 |<<catalog-graph-write-node-properties, Remove node properties from a named graph>> | `gds.graph.removeNodeProperties`
 |<<catalog-graph-delete-rel-type, Delete relationships from a named graph>> | `gds.graph.deleteRelationships`
@@ -27,12 +28,11 @@ The following table lists all production-quality graph operations in the GDS lib
 |<<catalog-graph-export-database, Graph Export>> | `gds.graph.export`
 |===
 
-The following table lists all beta graph operations in the GDS library:
-
+.List of all beta graph operations in the GDS library.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
-|Operation                                  | Procedure
+|Description                                | Operation
 |<<graph-generation, Generate Random Graph>>| `gds.beta.graph.generate`
 .2+<.^|<<catalog-graph-export-csv, CSV Export>>
 | `gds.beta.graph.export.csv`
