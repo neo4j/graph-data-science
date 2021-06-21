@@ -109,7 +109,11 @@
 ** xref:production-deployment/fabric/index.adoc[]
 ** xref:production-deployment/feature-toggles/index.adoc[]
 * Appendix
-** xref:appendix-a/index.adoc[]
+** xref:procedures-and-functions-reference/appendix-a/index.adoc[]
+*** xref:procedures-and-functions-reference/graph-operation-references/index.adoc[]
+*** xref:procedures-and-functions-reference/model-operation-references/index.adoc[]
+*** xref:procedures-and-functions-reference/graph-algorithm-references/index.adoc[]
+*** xref:procedures-and-functions-reference/function-references/index.adoc[]
 ** xref:appendix-b/index.adoc[]
 *** xref:appendix-b/migration-algos-common/index.adoc[]
 *** xref:appendix-b/migration-memory-estimation/index.adoc[]

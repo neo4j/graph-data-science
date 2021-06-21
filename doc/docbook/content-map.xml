@@ -332,14 +332,8 @@
             <d:tocentry linkend="appendix-a-model-ops">
                 <?dbhtml filename="procedures-and-functions-reference/model-operation-references/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="production-quality-tier">
-                <?dbhtml filename="procedures-and-functions-reference/production-quality-tier/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="beta-tier">
-                <?dbhtml filename="procedures-and-functions-reference/beta-tier/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="alpha-tier">
-                <?dbhtml filename="procedures-and-functions-reference/alpha-tier/index.html"?>
+            <d:tocentry linkend="appendix-a-graph-algos">
+                <?dbhtml filename="procedures-and-functions-reference/graph-algorithm-references/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="function-references">
                 <?dbhtml filename="procedures-and-functions-reference/function-references/index.html"?>
