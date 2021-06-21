@@ -94,26 +94,37 @@ GDS supports the following boolean predicates:
   * `n.age = 23 XOR n.age = 42`
   * `n.age IS NOT 23`
 
+Variable names that can be used within predicates are not arbitrary.
+A node predicate must refer to variable `n`.
+A relationship predicate must refer to variable `r`.
+
+
 == Examples
 
 .Example graph with Person nodes connected by KNOWS relationships.
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
-  (a:Person { age: 16 }),
-  (b:Person { age: 18 }),
-  (c:Person { age: 20 }),
-  (a)-[:KNOWS { since: 2010 }]->(b),
-  (a)-[:KNOWS { since: 2018 }]->(c)
+  (p0:Person { age: 16 }),
+  (p1:Person { age: 18 }),
+  (p2:Person { age: 20 }),
+  (b0:Book   { isbn: 1234 }),
+  (b1:Book   { isbn: 4242 }),
+  (p0)-[:KNOWS { since: 2010 }]->(p1),
+  (p0)-[:KNOWS { since: 2018 }]->(p2),
+  (p0)-[:READS]->(b0),
+  (p1)-[:READS]->(b0),
+  (p2)-[:READS]->(b1)
 ----
 
-.Create a graph using a native projection:
+.Create a graph using a Cypher projection:
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create('social-graph', 'Person', 'KNOWS', {
-  nodeProperties: ['age'],
-  relationshipProperties: ['since']
-})
+CALL gds.graph.create.cypher(
+  'social-graph',
+  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels, n.age AS age',
+  'MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target, r.since AS since, type(r) AS type'
+)
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
@@ -147,5 +158,39 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount;
 |===
 | graphName    | fromGraphName    | nodeCount | relationshipCount
 | "teenagers"  | "social-graph"   | 2         | 0
+|===
+--
+
+[role=query-example]
+--
+.Create a new bipartite graph between books and users connected by the `READS` relationship type:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.graph.create.subgraph('teenagers-books', 'social-graph', 'n:Book OR n:Person', 'r:READS')
+YIELD graphName, fromGraphName, nodeCount, relationshipCount;
+----
+
+.Results
+[opts="header"]
+|===
+| graphName    | fromGraphName    | nodeCount | relationshipCount
+| "teenagers-books"  | "social-graph"   | 5         | 3
+|===
+--
+
+[role=query-example]
+--
+.The previous example can be extended with an additional filter applied only to persons:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.graph.create.subgraph('teenagers-books', 'social-graph', 'n:Book OR (n:Person AND n.age > 18)', 'r:READS')
+YIELD graphName, fromGraphName, nodeCount, relationshipCount;
+----
+
+.Results
+[opts="header"]
+|===
+| graphName    | fromGraphName    | nodeCount | relationshipCount
+| "teenagers-books"  | "social-graph"   | 3         | 1
 |===
 --
