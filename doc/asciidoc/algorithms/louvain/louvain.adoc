@@ -132,6 +132,7 @@ YIELD
   ranLevels: Integer,
   modularity: Float,
   modularities: Integer[],
+  nodePropertiesWritten: Integer,
   communityDistribution: Map,
   configuration: Map
 ----
@@ -145,17 +146,18 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                  | Type      | Description
-| createMillis          | Integer   | Milliseconds for loading data.
-| computeMillis         | Integer   | Milliseconds for running the algorithm.
-| mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
-| postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
-| communityCount        | Integer   | The number of communities found.
-| ranLevels             | Integer   | The number of supersteps the algorithm actually ran.
-| modularity            | Float     | The final modularity score.
-| modularities          | Integer[] | The modularity scores for each level.
-| communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
-| configuration         | Map       | The configuration used for running the algorithm.
+| Name                   | Type      | Description
+| createMillis           | Integer   | Milliseconds for loading data.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
+| postProcessingMillis   | Integer   | Milliseconds for computing percentiles and community count.
+| communityCount         | Integer   | The number of communities found.
+| ranLevels              | Integer   | The number of supersteps the algorithm actually ran.
+| modularity             | Float     | The final modularity score.
+| modularities           | Integer[] | The modularity scores for each level.
+| nodePropertiesWritten  | Integer   | Number of properties added to the in-memory graph.
+| communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| configuration          | Map       | The configuration used for running the algorithm.
 |===
 ======
 
