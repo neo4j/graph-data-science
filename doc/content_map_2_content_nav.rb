@@ -21,13 +21,18 @@ def parse_children(node)
 end
 
 def find_filename(node)
-  dbthml = node.xpath(".//processing-instruction('dbhtml')").first
-  dbthml.content.gsub('filename=', '').delete_prefix('"').delete_suffix('"')
+  dbhtml = node.xpath("./processing-instruction('dbhtml')").first
+  if dbhtml.nil?
+    "*Appendix*"
+  else
+    to_write = dbhtml.content.gsub('filename=', '').delete_prefix('"').delete_suffix('"')
+    "xref:#{to_write.gsub('html', 'adoc')}[]"
+  end
 end
 
 def write_content_nav(content_structure, output, depth = 0)
   content_structure.each do |entry|
-    output << "#{'*' * (depth + 1)} xref:#{entry[:filename].gsub('html', 'adoc')}[]\n"
+    output << "#{'*' * (depth + 1)} #{entry[:filename]}\n"
     write_content_nav(entry[:children], output, depth + 1)
   end
 end
@@ -42,4 +47,3 @@ File.delete(output_file_name) if File.exist?(output_file_name)
 File.open(output_file_name, 'w+') do |file|
   write_content_nav(content_structure, file)
 end
-

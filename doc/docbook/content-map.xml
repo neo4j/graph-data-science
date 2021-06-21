@@ -289,55 +289,58 @@
         </d:tocentry>
     </d:tocentry>
 
-    <d:tocentry linkend="appendix-a">
-        <?dbhtml filename="appendix-a/index.html"?>
-    </d:tocentry>
+    <d:tocentry linkend="appendix">
 
-    <d:tocentry linkend="appendix-b">
-        <?dbhtml filename="appendix-b/index.html"?>
-        <d:tocentry linkend="migration-algos-common">
-            <?dbhtml filename="appendix-b/migration-algos-common/index.html"?>
+        <d:tocentry linkend="appendix-a">
+            <?dbhtml filename="appendix-a/index.html"?>
         </d:tocentry>
-        <d:tocentry linkend="migration-memory-estimation">
-            <?dbhtml filename="appendix-b/migration-memory-estimation/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="migration-named-graph">
-            <?dbhtml filename="appendix-b/migration-named-graph/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="migration-cypher-projection">
-            <?dbhtml filename="appendix-b/migration-cypher-projection/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="migration-graph-list">
-            <?dbhtml filename="appendix-b/migration-graph-list/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="migration-graph-info">
-            <?dbhtml filename="appendix-b/migration-graph-info/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="migration-graph-remove">
-            <?dbhtml filename="appendix-b/migration-graph-remove/index.html"?>
-        </d:tocentry>
-        <d:tocentry linkend="migration-product-algos">
-            <?dbhtml filename="appendix-b/migration-product-algos/index.html"?>
-            <d:tocentry linkend="migration-lpa">
-                <?dbhtml filename="appendix-b/migration-lpa/index.html"?>
+
+        <d:tocentry linkend="appendix-b">
+            <?dbhtml filename="appendix-b/index.html"?>
+            <d:tocentry linkend="migration-algos-common">
+                <?dbhtml filename="appendix-b/migration-algos-common/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="migration-louvain">
-                <?dbhtml filename="appendix-b/migration-louvain/index.html"?>
+            <d:tocentry linkend="migration-memory-estimation">
+                <?dbhtml filename="appendix-b/migration-memory-estimation/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="migration-node-sim">
-                <?dbhtml filename="appendix-b/migration-node-sim/index.html"?>
+            <d:tocentry linkend="migration-named-graph">
+                <?dbhtml filename="appendix-b/migration-named-graph/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="migration-page-rank">
-                <?dbhtml filename="appendix-b/migration-page-rank/index.html"?>
+            <d:tocentry linkend="migration-cypher-projection">
+                <?dbhtml filename="appendix-b/migration-cypher-projection/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="migration-wcc">
-                <?dbhtml filename="appendix-b/migration-wcc/index.html"?>
+            <d:tocentry linkend="migration-graph-list">
+                <?dbhtml filename="appendix-b/migration-graph-list/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="migration-triangle-count">
-                <?dbhtml filename="appendix-b/migration-triangle-count/index.html"?>
+            <d:tocentry linkend="migration-graph-info">
+                <?dbhtml filename="appendix-b/migration-graph-info/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="migration-betweenness-centrality">
-                <?dbhtml filename="appendix-b/migration-betweenness-centrality/index.html"?>
+            <d:tocentry linkend="migration-graph-remove">
+                <?dbhtml filename="appendix-b/migration-graph-remove/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="migration-product-algos">
+                <?dbhtml filename="appendix-b/migration-product-algos/index.html"?>
+                <d:tocentry linkend="migration-lpa">
+                    <?dbhtml filename="appendix-b/migration-lpa/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="migration-louvain">
+                    <?dbhtml filename="appendix-b/migration-louvain/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="migration-node-sim">
+                    <?dbhtml filename="appendix-b/migration-node-sim/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="migration-page-rank">
+                    <?dbhtml filename="appendix-b/migration-page-rank/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="migration-wcc">
+                    <?dbhtml filename="appendix-b/migration-wcc/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="migration-triangle-count">
+                    <?dbhtml filename="appendix-b/migration-triangle-count/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="migration-betweenness-centrality">
+                    <?dbhtml filename="appendix-b/migration-betweenness-centrality/index.html"?>
+                </d:tocentry>
             </d:tocentry>
         </d:tocentry>
     </d:tocentry>
