@@ -47,15 +47,15 @@ The library uses multiple CPU cores for graph projections, algorithm computation
 Configuring the workloads to make best use of the available CPU cores in your system is important to achieve maximum performance.
 The concurrency used for the stages of projection, computation and writing is configured per algorithm execution, see <<algorithms-syntax-configuration-parameters>>
 
+The default concurrency used for most operations in the Graph Data Science library is 4.
+
 The maximum concurrency that can be used is limited depending on the license under which the library is being used:
 
-* Neo4j Community Edition
-** The default and maximum concurrency in the library is 4.
-
-* Neo4j Enterprise Edition
-** The default concurrency in the library is 4.
-** The maximum concurrency in the library is unlimited.
+* Neo4j Graph Data Science Library - Community Edition
+** The maximum concurrency in the library is limited to 4.
 
 * Neo4j Graph Data Science Library - Enterprise Edition
-** The concurrency in the library is unlimited.
-   To register for a license, please contact Neo4j at https://neo4j.com/contact-us/?ref=graph-analytics.
+** The maximum concurrency in the library is unlimited.
+To register for a license, please contact Neo4j at https://neo4j.com/contact-us/?ref=graph-analytics.
+
+NOTE: The maximum concurrency in the library is independent of whether you have Neo4j Community Edition or Neo4j Enterprise Edition.
