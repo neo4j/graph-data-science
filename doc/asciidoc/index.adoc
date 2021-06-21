@@ -50,7 +50,7 @@ Download it for free at https://neo4j.com/graph-algorithms-book/[neo4j.com/graph
 
 include::introduction.adoc[leveloffset=+1]
 
-include::installation.adoc[leveloffset=+1]
+include::installation/installation.adoc[leveloffset=+1]
 
 include::common-usage/common-usage.adoc[leveloffset=+1]
 
