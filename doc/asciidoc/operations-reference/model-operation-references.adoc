@@ -1,7 +1,7 @@
 [[appendix-a-model-ops]]
 = Model Catalog
 
-.List of all beta model catalog operations in the GDS library.
+.List of all beta model catalog operations in the GDS library. Functions are written in _italic_.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
@@ -11,7 +11,7 @@
 | <<catalog-model-list, List models>>                | `gds.beta.model.list`
 |===
 
-.List of all alpha model catalog operations in the GDS library.
+.List of all alpha model catalog operations in the GDS library. Functions are written in _italic_.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
