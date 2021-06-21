@@ -1,7 +1,7 @@
 [[appendix-a-model-ops]]
 = Model Catalog
 
-.List of all production-quality model catalog operations in the GDS library.
+.List of all beta model catalog operations in the GDS library.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
@@ -9,6 +9,13 @@
 | <<catalog-model-exists, Check if a model exists>>  | `gds.beta.model.exists`
 | <<catalog-model-drop, Remove a model from memory>> | `gds.beta.model.drop`
 | <<catalog-model-list, List models>>                | `gds.beta.model.list`
+|===
+
+.List of all alpha model catalog operations in the GDS library.
+[role=procedure-listing]
+[opts=header,cols="1, 1"]
+|===
+| Description                                        | Operation
 | <<catalog-model-store, Store a model>>             | `gds.alpha.model.store`
 | <<catalog-model-load, Load a stored model>>        | `gds.alpha.model.load`
 | <<catalog-model-delete, Delete a stored model>>    | `gds.alpha.model.delete`
