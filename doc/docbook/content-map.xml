@@ -275,6 +275,9 @@
             <d:tocentry linkend="appendix-a-graph-algos">
                 <?dbhtml filename="procedures-and-functions-reference/graph-algorithm-references/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="appendix-a-additional-ops">
+                <?dbhtml filename="procedures-and-functions-reference/additional-operation-references/index.html"?>
+            </d:tocentry>
             <d:tocentry linkend="function-references">
                 <?dbhtml filename="procedures-and-functions-reference/function-references/index.html"?>
             </d:tocentry>
