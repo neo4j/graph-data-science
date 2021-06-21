@@ -130,7 +130,7 @@ CALL gds.fastRP.stream(
   configuration: Map
 ) YIELD
   nodeId: Integer,
-  embedding: List<Float>
+  embedding: Float[]
 ----
 
 include::../common-configuration/common-parameters-named-graph.adoc[]
@@ -230,7 +230,7 @@ CALL gds.fastRP.write(
   configuration: Map
 ) YIELD
   nodeCount: Integer,
-  propertiesWritten: Integer,
+  nodePropertiesWritten: Integer,
   createMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
