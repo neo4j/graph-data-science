@@ -128,6 +128,7 @@ include::specific-configuration.adoc[]
 | Name                          | Type      | Description
 | createMillis                  | Integer   | Milliseconds for loading data.
 | computeMillis                 | Integer   | Milliseconds for running the algorithm.
+| nodesCompared                 | Integer   | The number of nodes compared.
 | postProcessingMillis          | Integer   | Milliseconds for computing component count and distribution statistics.
 | similarityPairs               | Integer   | The number of pairs of similar nodes computed.
 | similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
