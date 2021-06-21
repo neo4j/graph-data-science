@@ -20,15 +20,20 @@
 package org.neo4j.graphalgo.doc.syntax;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.OptionsBuilder;
+import org.asciidoctor.SafeMode;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,15 +46,29 @@ import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.WRITE;
 abstract class SyntaxTestBase {
     private static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
 
-    final Asciidoctor asciidoctor = create();
+    private Asciidoctor asciidoctor;
+
+    @BeforeEach
+    void setUp() {
+        asciidoctor = create();
+    }
+
+    @AfterEach
+    void tearDown() {
+        asciidoctor.shutdown();
+    }
 
     @Test
-    void runSyntaxTest(SoftAssertions softAssertions) {
+    void runSyntaxTest(SoftAssertions softAssertions, @TempDir File outputDirectory) {
         asciidoctor.javaExtensionRegistry().postprocessor(syntaxTreeProcessor(softAssertions));
 
         var docFile = ASCIIDOC_PATH.resolve(adocFile()).toFile();
         assertThat(docFile).exists().canRead();
-        asciidoctor.convertFile(docFile, Map.of());
+        var options = OptionsBuilder.options()
+            .toDir(outputDirectory) // Make sure we don't write anything in the project.
+            .safe(SafeMode.UNSAFE); // By default we are forced to use relative path which we don't want.
+
+        asciidoctor.convertFile(docFile, options);
 
         softAssertions.assertAll();
     }
