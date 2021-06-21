@@ -34,8 +34,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -100,7 +102,17 @@ class AppendixAProcedureListingTest extends BaseProcTest {
 
         List<String> documentedProcedures = procedureListingProcessor.procedures();
 
-        assertThat(registeredProcedures).containsExactlyInAnyOrderElementsOf(documentedProcedures);
+        Set<String> undocumentedProcs = new HashSet<>(registeredProcedures);
+        documentedProcedures.forEach(undocumentedProcs::remove);
+
+        Set<String> nonExistingProcs = new HashSet<>(documentedProcedures);
+        registeredProcedures.forEach(nonExistingProcs::remove);
+
+        assertThat(registeredProcedures)
+            .withFailMessage(
+                "Undocumented procedures: " + undocumentedProcs + System.lineSeparator()
+                + "Non existing procedures: " + nonExistingProcs)
+            .containsExactlyInAnyOrderElementsOf(documentedProcedures);
     }
 
     private Reflections createReflections(String pkg) {
