@@ -26,6 +26,7 @@ import org.neo4j.internal.kernel.api.exceptions.schema.IndexNotFoundKernelExcept
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexType;
 import org.neo4j.internal.schema.SchemaDescriptor;
+import org.neo4j.internal.schema.SchemaDescriptors;
 import org.neo4j.kernel.api.KernelTransaction;
 
 final class NodeLabelIndexLookupImpl {
@@ -33,7 +34,7 @@ final class NodeLabelIndexLookupImpl {
     static boolean hasNodeLabelIndex(KernelTransaction transaction) {
         return NodeLabelIndexLookupImpl.findUsableMatchingIndex(
             transaction,
-            SchemaDescriptor.forAnyEntityTokens(EntityType.NODE)
+            SchemaDescriptors.forAnyEntityTokens(EntityType.NODE)
         ) != IndexDescriptor.NO_INDEX;
     }
 

@@ -75,7 +75,7 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexOrder;
-import org.neo4j.internal.schema.SchemaDescriptor;
+import org.neo4j.internal.schema.SchemaDescriptors;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
@@ -248,7 +248,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
         var nodeLabelIndexDescriptor = NodeLabelIndexLookupImpl.findUsableMatchingIndex(
             kernelTransaction,
-            SchemaDescriptor.forAnyEntityTokens(EntityType.NODE)
+            SchemaDescriptors.forAnyEntityTokens(EntityType.NODE)
         );
 
         if (nodeLabelIndexDescriptor == IndexDescriptor.NO_INDEX) {
