@@ -44,7 +44,7 @@ class ProcedureSyntaxAutoCheckerTest {
         var file = Paths.get(getClass().getClassLoader().getResource("include-with-syntax.adoc").toURI()).toFile();
         assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.loadFile(file, Collections.emptyMap());
+        asciidoctor.convertFile(file, Collections.emptyMap());
 
         softAssertions.assertAll();
     }

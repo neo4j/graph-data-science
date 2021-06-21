@@ -27,8 +27,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,7 +49,7 @@ abstract class SyntaxTestBase {
 
         var docFile = ASCIIDOC_PATH.resolve(adocFile()).toFile();
         assertThat(docFile).exists().canRead();
-        asciidoctor.loadFile(docFile, Collections.emptyMap());
+        asciidoctor.convertFile(docFile, Map.of());
 
         softAssertions.assertAll();
     }
