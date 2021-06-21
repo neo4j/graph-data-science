@@ -45,7 +45,7 @@ abstract class SyntaxTestBase {
 
     @Test
     void runSyntaxTest(SoftAssertions softAssertions) {
-        asciidoctor.javaExtensionRegistry().treeprocessor(syntaxTreeProcessor(softAssertions));
+        asciidoctor.javaExtensionRegistry().postprocessor(syntaxTreeProcessor(softAssertions));
 
         var docFile = ASCIIDOC_PATH.resolve(adocFile()).toFile();
         assertThat(docFile).exists().canRead();

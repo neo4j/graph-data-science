@@ -23,7 +23,7 @@ import org.asciidoctor.ast.Cell;
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.ast.StructuralNode;
 import org.asciidoctor.ast.Table;
-import org.asciidoctor.extension.Treeprocessor;
+import org.asciidoctor.extension.Postprocessor;
 import org.assertj.core.api.SoftAssertions;
 
 import java.lang.reflect.Field;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ProcedureSyntaxAutoChecker extends Treeprocessor {
+class ProcedureSyntaxAutoChecker extends Postprocessor {
 
     private static final String STYLE_SELECTOR = "style";
     private static final String STYLE_SELECTOR_VALUE = "source";
@@ -63,7 +63,7 @@ class ProcedureSyntaxAutoChecker extends Treeprocessor {
     }
 
     @Override
-    public Document process(Document document) {
+    public String process(Document document, String output) {
         syntaxModes.forEach(mode -> {
 
             var allSyntaxSectionsForMode = document.findBy(Map.of(ROLE_SELECTOR, mode.mode()));
@@ -88,7 +88,7 @@ class ProcedureSyntaxAutoChecker extends Treeprocessor {
             assertResultsTable(currentSyntaxSection, mode, expectedResultFieldsFromCode);
         });
 
-        return document;
+        return output;
     }
 
     private String extractSyntaxCodeSnippet(
@@ -166,4 +166,5 @@ class ProcedureSyntaxAutoChecker extends Treeprocessor {
             .map(Field::getName)
             .collect(Collectors.toList());
     }
+
 }

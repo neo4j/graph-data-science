@@ -58,7 +58,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.loadFile(file, Map.of()))
+        assertThatThrownBy(() -> asciidoctor.convertFile(file, Map.of()))
             .hasMessageContaining("There is an issue finding the results table for `include-with-stream`")
             .hasMessageContaining("Expected size: 1 but was: 0");
     }
@@ -72,7 +72,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.loadFile(file, Map.of()))
+        assertThatThrownBy(() -> asciidoctor.convertFile(file, Map.of()))
             .hasMessageContaining("There is an issue finding the results table for `include-with-stream`")
             .hasMessageContaining("Expected size: 1 but was: 2");
     }
@@ -86,7 +86,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.loadFile(file, Map.of()))
+        assertThatThrownBy(() -> asciidoctor.convertFile(file, Map.of()))
             .hasMessageContaining("There is an issue finding the code block for `include-with-stream`")
             .hasMessageContaining("Expected size: 1 but was: 0");
     }
@@ -100,7 +100,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.loadFile(file, Map.of()))
+        assertThatThrownBy(() -> asciidoctor.convertFile(file, Map.of()))
             .hasMessageContaining("There is an issue finding the code block for `include-with-stream`")
             .hasMessageContaining("Expected size: 1 but was: 2");
     }
@@ -117,7 +117,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.loadFile(file, Map.of());
+        asciidoctor.convertFile(file, Map.of());
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
@@ -141,7 +141,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.loadFile(file, Map.of());
+        asciidoctor.convertFile(file, Map.of());
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
@@ -165,7 +165,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.loadFile(file, Map.of());
+        asciidoctor.convertFile(file, Map.of());
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
@@ -189,7 +189,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.loadFile(file, Map.of());
+        asciidoctor.convertFile(file, Map.of());
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
@@ -204,7 +204,7 @@ class ProcedureSyntaxAutoCheckerTest {
     private Asciidoctor createAsciidoctor(SoftAssertions softAssertions) {
         var asciidoctor = Asciidoctor.Factory.create();
         asciidoctor.javaExtensionRegistry()
-            .treeprocessor(
+            .postprocessor(
                 new ProcedureSyntaxAutoChecker(
                     List.of(SyntaxMode.STREAM),
                     softAssertions
