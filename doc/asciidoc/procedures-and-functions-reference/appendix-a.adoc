@@ -14,6 +14,7 @@ The procedures in the Graph Data Science library can be divided into the followi
 * <<appendix-a-graph-ops>>
 * <<appendix-a-model-ops>>
 * <<appendix-a-graph-algos>>
+* <<appendix-a-additional-ops>>
 
 == Functions
 
