@@ -33,7 +33,7 @@ import java.util.Optional;
 /**
  * Setting the value for each node to the level/iteration the node is discovered via BFS.
  */
-@PregelProcedure(name = "example.pregel.bfs", modes = {GDSMode.STREAM})
+@PregelProcedure(name = "example.pregel.bfs.level", modes = {GDSMode.STREAM})
 public class BFSLevelPregel implements PregelComputation<BFSPregelConfig> {
 
     private static final long NOT_FOUND = -1;

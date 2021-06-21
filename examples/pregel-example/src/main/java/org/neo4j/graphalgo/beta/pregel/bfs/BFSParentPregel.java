@@ -34,7 +34,7 @@ import java.util.Optional;
  * Setting the value for each node to the node-id of its parent.
  * If there are multiple parents at the discovery level/iteration, the parent with the minimum id is chosen.
  */
-@PregelProcedure(name = "example.pregel.bfs", modes = {GDSMode.STREAM})
+@PregelProcedure(name = "example.pregel.bfs.parent", modes = {GDSMode.STREAM})
 public class BFSParentPregel implements PregelComputation<BFSPregelConfig> {
 
     public static final long NOT_FOUND = Long.MAX_VALUE;
