@@ -155,19 +155,6 @@ The following table lists all production-quality algorithms in the GDS library:
 [[beta-tier]]
 == Beta tier
 
-The following table lists all beta graph algorithms in the GDS library:
-
-// TODO move to Utitlity procs
-[role=procedure-listing]
-[opts=header,cols="1, 1"]
-|===
-|Operation | Procedure
-|<<graph-generation, Generate Random Graph>>| `gds.beta.graph.generate`
-.2+<.^|<<catalog-graph-export-csv, CSV Export>>
-| `gds.beta.graph.export.csv`
-| `gds.beta.graph.export.csv.estimate`
-|===
-
 The following table lists all beta procedures in the GDS library:
 
 [[table-beta]]
