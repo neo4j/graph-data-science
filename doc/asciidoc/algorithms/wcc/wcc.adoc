@@ -120,7 +120,6 @@ CALL gds.wcc.mutate(
 YIELD
   componentCount: Integer,
   nodePropertiesWritten: Integer,
-  relationshipPropertiesWritten: Integer,
   createMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
@@ -141,7 +140,6 @@ include::specific-configuration.adoc[]
 | Name                          | Type    | Description
 | componentCount                | Integer | The number of computed components.
 | nodePropertiesWritten         | Integer | The number of node properties written.
-| relationshipPropertiesWritten | Integer | The number of relationship properties written.
 | createMillis                  | Integer | Milliseconds for loading data.
 | computeMillis                 | Integer | Milliseconds for running the algorithm.
 | mutateMillis                  | Integer | Milliseconds for adding properties to the in-memory graph.
@@ -164,7 +162,6 @@ CALL gds.wcc.write(
 YIELD
   componentCount: Integer,
   nodePropertiesWritten: Integer,
-  relationshipPropertiesWritten: Integer,
   createMillis: Integer,
   computeMillis: Integer,
   writeMillis: Integer,
@@ -185,7 +182,6 @@ include::specific-configuration-write.adoc[]
 | Name                          | Type    | Description
 | componentCount                | Integer | The number of computed components.
 | nodePropertiesWritten         | Integer | The number of node properties written.
-| relationshipPropertiesWritten | Integer | The number of relationship properties written.
 | createMillis                  | Integer | Milliseconds for loading data.
 | computeMillis                 | Integer | Milliseconds for running the algorithm.
 | writeMillis                   | Integer | Milliseconds for writing result back to Neo4j.
