@@ -28,6 +28,7 @@ import org.asciidoctor.extension.Treeprocessor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class AppendixAProcedureListingProcessor extends Treeprocessor {
@@ -78,11 +79,9 @@ public class AppendixAProcedureListingProcessor extends Treeprocessor {
 
     private List<Table> findProcedureListings(StructuralNode document) {
         return document
-            .getBlocks()
+            .findBy(Map.of("role", PROCEDURE_LISTING_ROLE))
             .stream()
-            .filter(it -> it instanceof Table)
-            .filter(it -> it.getRoles().contains(PROCEDURE_LISTING_ROLE))
-            .map(it -> (Table)it)
+            .map(it -> (Table) it)
             .collect(Collectors.toList());
     }
 
