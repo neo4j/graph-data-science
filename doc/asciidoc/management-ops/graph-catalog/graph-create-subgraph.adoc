@@ -1,6 +1,6 @@
 [[catalog-graph-create-subgraph]]
 [.beta]
-= Create a subgraph in the catalog
+= Creating a subgraph
 
 In GDS, algorithms can be executed on a named graph that has been filtered based on its <<common-configuration-node-labels,node labels>> and <<common-configuration-relationship-types, relationship types>>.
 However, that filtered graph only exists during the execution of the algorithm and it is not possible to filter on property values.

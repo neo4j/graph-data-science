@@ -63,6 +63,14 @@
                 </d:tocentry>
                 <d:tocentry linkend="catalog-graph-drop"><?dbhtml filename="graph-drop/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="catalog-graph-create-subgraph"><?dbhtml filename="create-subgraph/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="graph-catalog-node-ops"><?dbhtml filename="graph-catalog-node-ops/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="graph-catalog-relationship-ops"><?dbhtml filename="graph-catalog-relationship-ops/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="graph-catalog-export-ops"><?dbhtml filename="graph-catalog-export-ops/index.html"?>
+                </d:tocentry>
             </d:tocentry>
         <d:tocentry linkend="native-projection"><?dbhtml filename="management-ops/native-projection/index.html"?>
         </d:tocentry>
