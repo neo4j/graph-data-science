@@ -1,0 +1,8 @@
+[[graph-catalog-relationship-ops]]
+= Relationship operations
+
+include::graph-stream-relationship-properties.adoc[leveloffset=+1]
+
+include::graph-delete-relationship-type.adoc[leveloffset=+1]
+
+include::graph-write-relationship.adoc[leveloffset=+1]

@@ -53,22 +53,3 @@ This chapter explains the available graph catalog operations.
 Creating, using, listing, and dropping named graphs are management operations bound to a Neo4j user.
 Graphs created by a different Neo4j user are not accessible at any time.
 ====
-
-
-include::graph-create-subgraph.adoc[leveloffset=+1]
-
-include::graph-remove-node-properties.adoc[leveloffset=+1]
-
-include::graph-delete-relationship-type.adoc[leveloffset=+1]
-
-include::graph-stream-node-properties.adoc[leveloffset=+1]
-
-include::graph-stream-relationship-properties.adoc[leveloffset=+1]
-
-include::graph-write-node-properties.adoc[leveloffset=+1]
-
-include::graph-write-relationship.adoc[leveloffset=+1]
-
-include::graph-export-database.adoc[leveloffset=+1]
-
-include::graph-export-csv.adoc[leveloffset=+1]
