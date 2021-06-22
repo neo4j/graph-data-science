@@ -19,10 +19,31 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BatchSizeConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
+import org.neo4j.graphalgo.config.RelationshipWeightConfig;
+import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 
-public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, ModelConfig {
+public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, ModelConfig, RelationshipWeightConfig {
     long serialVersionUID = 0x42L;
+
+    @Value.Derived
+    @Configuration.Ignore
+    default Model<ModelData, GraphSageTrainConfig> model() {
+        // Need to resolve the model at config-level to reuse the relationship-property
+        return ModelCatalog.get(username(), modelName(), ModelData.class, GraphSageTrainConfig.class);
+    }
+
+    @Override
+    @Value.Derived
+    @Configuration.Ignore
+    default @Nullable String relationshipWeightProperty() {
+        return model().trainConfig().relationshipWeightProperty();
+    }
 }
