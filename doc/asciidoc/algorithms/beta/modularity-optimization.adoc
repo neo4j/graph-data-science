@@ -42,8 +42,10 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .Run Modularity Optimization in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.modularityOptimization.stream(graphNameOrConfig: String|Map, configuration: Map})
-YIELD nodeId, communityId
+CALL gds.beta.modularityOptimization.stream(graphNameOrConfig: String|Map, configuration: Map})
+YIELD
+  nodeId: Integer,
+  communityId: Integer
 ----
 
 include::../common-configuration/common-parameters.adoc[]
@@ -77,18 +79,40 @@ include::../common-configuration/common-configuration.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.mutate(graphName: String|Map, configuration: Map})
-YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, mutateMillis, configuration
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  communityCount: Integer,
+  communityDistribution: Map,
+  modularity: Float,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  nodes: Integer,
+  configuration: Map
 ----
 
 The configuration for the `mutate` mode is similar to the `write` mode.
 Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 
-.The following will run the algorithm and store the results in `myGraph`:
-[source, cypher, role=noplay]
-----
-CALL gds.beta.modularityOptimization.mutate('myGraph', { mutateProperty: 'modularity' })
-----
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| createMillis          | Integer   | Milliseconds for loading data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| mutateMillis          | Integer   | Milliseconds for adding properties to the in-memory graph.
+| postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
+| nodes                 | Integer   | The number of nodes considered.
+| didConverge           | Boolean   | True if the algorithm did converge to a stable modularity score within the provided number of maximum iterations.
+| ranIterations         | Integer   | The number of iterations run.
+| modularity            | Float     | The final modularity score.
+| communityCount        | Integer   | The number of communities found.
+| communityDistribution | Map       | The containing min, max, mean as well as 50, 75, 90, 95, 99 and 999 percentile of community size.
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
 ======
 
 
@@ -98,7 +122,18 @@ CALL gds.beta.modularityOptimization.mutate('myGraph', { mutateProperty: 'modula
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.write(graphName: String|Map, configuration: Map})
-YIELD nodes, ranIterations, didConverge, modularity, createMillis, computeMillis, writeMillis, configuration
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  communityCount: Integer,
+  communityDistribution: Map,
+  modularity: Float,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  nodes: Integer,
+  configuration: Map
 ----
 
 include::../common-configuration/common-parameters.adoc[]
