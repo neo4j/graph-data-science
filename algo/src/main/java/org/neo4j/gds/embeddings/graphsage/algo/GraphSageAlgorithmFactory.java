@@ -60,17 +60,15 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
-        var graphSageModel = configuration.model();
 
         var executorService = Pools.DEFAULT;
-        if(graphSageModel.trainConfig().hasRelationshipWeightProperty()) {
+        if(configuration.model().trainConfig().hasRelationshipWeightProperty()) {
             validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
         }
 
         return new GraphSage(
             graph,
             configuration,
-            graphSageModel,
             executorService,
             tracker,
             progressLogger

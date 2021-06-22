@@ -28,6 +28,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -110,6 +111,9 @@ class GraphSageSingleLabelSerializationTest {
     }
 
     private GraphSage.GraphSageResult produceEmbeddings(Model<ModelData, GraphSageTrainConfig> model) {
+        ModelCatalog.drop("", model.name(), false);
+        ModelCatalog.set(model);
+
         var streamConfig = ImmutableGraphSageStreamConfig
             .builder()
             .modelName(model.name())
@@ -118,7 +122,6 @@ class GraphSageSingleLabelSerializationTest {
         return new GraphSage(
             graph,
             streamConfig,
-            model,
             Pools.DEFAULT,
             AllocationTracker.empty(),
             ProgressLogger.NULL_LOGGER
