@@ -25,13 +25,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
@@ -116,7 +116,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
             .addParameter("modelName", modelName)
             .yields();
 
-        assertError(train, "Found a relationship without the specified property. Consider using `defaultValue` when loading the graph.");
+        assertError(train, "Found a relationship between 10 and 11 with no specified weight. Consider using `defaultValue` when loading the graph.");
     }
 
     @Test
@@ -198,7 +198,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
             .addParameter("modelName", modelName)
             .yields();
 
-        assertError(embeddingQuery, "Found a relationship without the specified property. Consider using `defaultValue` when loading the graph.");
+        assertError(embeddingQuery, "Found a relationship between 10 and 11 with no specified weight. Consider using `defaultValue` when loading the graph.");
     }
 
     private static Stream<Arguments> procQueries() {
