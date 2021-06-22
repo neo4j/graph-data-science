@@ -4,15 +4,15 @@
 include::../beta-aspect-note.adoc[]
 
 Most real-world graphs contain node properties which store information about the nodes and what they represent.
-An embedding algorithm which can process the node properties as features and incorporate them in the embeddings can therefore be advantageous.
+An embedding algorithm which can process the node properties as features and incorporate them in the embeddings can therefore represent the graph more accurately.
 
 The extended FastRP algorithm (FastRPExtended) has the additional configuration parameters `featureProperties` and `propertyDimension`.
 Each node property specified in the former is associated with a randomly generated vector of dimension `propertyDimension`.
 Each node is then initialized with a vector of size `embeddingDimension` formed by concatenation of two parts:
-The first part is formed like in the original algorithm, and the second one is a linear combination of the property vectors, using the property values of the node as weights.
-The algorithm then proceeds with the same logic as the original one.
-Therefore, the algorithm will output arrays of size `embeddingDimension` just like the original algorithm.
-The last `propertyDimension` co-ordinates in the embedding captures information about property values of nearby nodes, and the remaining co-ordinates (`embeddingDimension` - `propertyDimension` of them) captures information about nearby presence of nodes.
+The first part is formed like in the FastRP algorithm, and the second one is a linear combination of the property vectors, using the property values of the node as weights.
+The algorithm then proceeds with the same logic as the FastRP algorithm.
+Therefore, the algorithm will output arrays of size `embeddingDimension`.
+The last `propertyDimension` coordinates in the embedding captures information about property values of nearby nodes, and the remaining coordinates (`embeddingDimension` - `propertyDimension` of them) captures information about nearby presence of nodes.
 
 As other configuration parameters, `propertyDimension` needs to be tuned for optimal performance.
 We suggest keeping the previously selected value for `embeddingDimension` and setting `propertyDimension` to half that value as a starting point for using FastRPExtended.
