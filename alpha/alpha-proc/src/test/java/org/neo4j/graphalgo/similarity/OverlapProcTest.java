@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.similarity;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.impl.similarity.CategoricalInput;
 import org.neo4j.graphalgo.impl.similarity.OverlapAlgorithm;
 import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
@@ -28,16 +30,16 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 class OverlapProcTest extends AlphaSimilarityProcTest<OverlapAlgorithm, CategoricalInput> {
@@ -125,76 +127,31 @@ class OverlapProcTest extends AlphaSimilarityProcTest<OverlapAlgorithm, Categori
         runQuery(statement, singletonMap("size", size));
     }
 
-    @Test
-    void overlapSingleMultiThreadComparison() {
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1})
+    void overlapSingleMultiThreadComparison(int topK) {
         int size = 333;
         buildRandomDB(size);
 
-        int count = applyInTransaction(db, tx -> {
-            try (
-                Result result1 = runQueryWithoutClosingTheResult(
-                    tx,
-                    STATEMENT_STREAM,
-                    map("config", map("similarityCutoff", -0.1, "concurrency", 1, "topK", 0))
-                );
-                Result result2 = runQueryWithoutClosingTheResult(
-                    tx,
-                    STATEMENT_STREAM,
-                    map("config", map("similarityCutoff", -0.1, "concurrency", 2, "topK", 0))
-                );
-                Result result4 = runQueryWithoutClosingTheResult(
-                    tx,
-                    STATEMENT_STREAM,
-                    map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", 0))
-                )
-            ) {
-                int cnt = 0;
-                while (result1.hasNext()) {
-                    Map<String, Object> row1 = result1.next();
-                    assertEquals(row1, result2.next(), row1.toString());
-                    assertEquals(row1, result4.next(), row1.toString());
-                    cnt++;
-                }
-                return cnt;
+        List<Map<String, Object>> expected = new ArrayList<>();
+
+        runQueryWithResultConsumer(STATEMENT_STREAM,
+            map("config", map("similarityCutoff", -0.1, "concurrency", 1, "topK", topK)), result -> {
+                result.stream().forEach(expected::add);
             }
-        });
+        );
 
-        int people = size / 10;
-        assertEquals((people * people - people) / 2, count);
-    }
-
-    @Test
-    void overlapSingleMultiThreadComparisonTopK() {
-        int size = 333;
-        buildRandomDB(size);
-
-        runInTransaction(db, tx -> {
-            try (
-                Result result1 = runQueryWithoutClosingTheResult(
-                    tx,
-                    STATEMENT_STREAM,
-                    map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 1))
-                );
-                Result result2 = runQueryWithoutClosingTheResult(
-                    tx,
-                    STATEMENT_STREAM,
-                    map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 2))
-                );
-                Result result4 = runQueryWithoutClosingTheResult(
-                    tx,
-                    STATEMENT_STREAM,
-                    map("config", map("similarityCutoff", -0.1, "topK", 1, "concurrency", 4))
-                )
-            ) {
-                while (result1.hasNext()) {
-                    Map<String, Object> row1 = result1.next();
-                    assertEquals(row1, result2.next(), row1.toString());
-                    assertEquals(row1, result4.next(), row1.toString());
+        runQueryWithResultConsumer(STATEMENT_STREAM,  map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", topK)),
+            actual -> {
+                var expectedIterator = expected.iterator();
+                while (actual.hasNext()) {
+                    assertThat(actual.next()).isEqualTo(expectedIterator.next());
+                    assertThat(actual.hasNext()).isEqualTo(expectedIterator.hasNext());
                 }
-                assertFalse(result2.hasNext());
-                assertFalse(result4.hasNext());
+
+                assertThat(expectedIterator.hasNext()).isFalse();
             }
-        });
+        );
     }
 
     @Test
