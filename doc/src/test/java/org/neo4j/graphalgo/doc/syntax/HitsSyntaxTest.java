@@ -21,13 +21,13 @@ package org.neo4j.graphalgo.doc.syntax;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STREAM;
-
 public class HitsSyntaxTest extends SyntaxTestBase {
 
     @Override
-    protected Iterable<SyntaxMode> syntaxModes() {
-        return List.of(STREAM);
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(SyntaxMode.STREAM)
+        );
     }
 
     @Override

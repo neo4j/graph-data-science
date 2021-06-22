@@ -20,23 +20,40 @@
 package org.neo4j.graphalgo.doc.syntax;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.OptionsBuilder;
+import org.asciidoctor.SafeMode;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STREAM;
 
 @ExtendWith(SoftAssertionsExtension.class)
 class ProcedureSyntaxAutoCheckerTest {
+
+    @TempDir
+    File outputDirectory;
+    private OptionsBuilder options;
+
+    @BeforeEach
+    void setUp() {
+        // By default we are forced to use relative path which we don't want.
+        options = OptionsBuilder.options()
+            .toDir(outputDirectory) // Make sure we don't write anything in the project.
+            .safe(SafeMode.UNSAFE);
+
+    }
 
     @Test
     void correctSyntaxSectionTest(SoftAssertions softAssertions) throws URISyntaxException {
@@ -44,7 +61,7 @@ class ProcedureSyntaxAutoCheckerTest {
         var file = Paths.get(getClass().getClassLoader().getResource("include-with-syntax.adoc").toURI()).toFile();
         assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.convertFile(file, Collections.emptyMap());
+        asciidoctor.convertFile(file, options);
 
         softAssertions.assertAll();
     }
@@ -58,7 +75,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.convertFile(file, Map.of()))
+        assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
             .hasMessageContaining("There is an issue finding the results table for `include-with-stream`")
             .hasMessageContaining("Expected size: 1 but was: 0");
     }
@@ -72,7 +89,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.convertFile(file, Map.of()))
+        assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
             .hasMessageContaining("There is an issue finding the results table for `include-with-stream`")
             .hasMessageContaining("Expected size: 1 but was: 2");
     }
@@ -86,7 +103,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.convertFile(file, Map.of()))
+        assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
             .hasMessageContaining("There is an issue finding the code block for `include-with-stream`")
             .hasMessageContaining("Expected size: 1 but was: 0");
     }
@@ -100,7 +117,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        assertThatThrownBy(() -> asciidoctor.convertFile(file, Map.of()))
+        assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
             .hasMessageContaining("There is an issue finding the code block for `include-with-stream`")
             .hasMessageContaining("Expected size: 1 but was: 2");
     }
@@ -117,7 +134,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.convertFile(file, Map.of());
+        asciidoctor.convertFile(file, options);
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
@@ -141,7 +158,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.convertFile(file, Map.of());
+        asciidoctor.convertFile(file, options);
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
@@ -165,7 +182,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.convertFile(file, Map.of());
+        asciidoctor.convertFile(file, options);
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
@@ -189,7 +206,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .toFile();
         assertTrue(file.exists() && file.canRead());
 
-        asciidoctor.convertFile(file, Map.of());
+        asciidoctor.convertFile(file, options);
 
         assertThat(syntaxAssertions.assertionErrorsCollected())
             .hasSize(1)
@@ -206,7 +223,7 @@ class ProcedureSyntaxAutoCheckerTest {
         asciidoctor.javaExtensionRegistry()
             .postprocessor(
                 new ProcedureSyntaxAutoChecker(
-                    List.of(SyntaxMode.STREAM),
+                    List.of(SyntaxModeMeta.of(STREAM)),
                     softAssertions
                 ));
         return asciidoctor;

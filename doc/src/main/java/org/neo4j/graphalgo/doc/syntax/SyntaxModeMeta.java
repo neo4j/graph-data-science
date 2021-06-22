@@ -19,22 +19,20 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
-import java.util.List;
+import org.neo4j.graphalgo.annotation.ValueClass;
 
-class GraphSageSyntaxTest extends SyntaxTestBase {
+@ValueClass
+public interface SyntaxModeMeta {
 
-    @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM),
-            SyntaxModeMeta.of(SyntaxMode.TRAIN),
-            SyntaxModeMeta.of(SyntaxMode.MUTATE),
-            SyntaxModeMeta.of(SyntaxMode.WRITE)
-        );
+    SyntaxMode syntaxMode();
+
+    int sectionsOnPage();
+
+    static SyntaxModeMeta of(SyntaxMode mode) {
+        return ImmutableSyntaxModeMeta.of(mode, 1);
     }
 
-    @Override
-    String adocFile() {
-        return "algorithms/beta/graph-sage/graph-sage.adoc";
+    static SyntaxModeMeta of(SyntaxMode mode, int sectionsOnPage) {
+        return ImmutableSyntaxModeMeta.of(mode, sectionsOnPage);
     }
 }

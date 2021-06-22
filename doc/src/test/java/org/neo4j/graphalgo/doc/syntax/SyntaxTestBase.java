@@ -73,8 +73,13 @@ abstract class SyntaxTestBase {
         softAssertions.assertAll();
     }
 
-    protected Iterable<SyntaxMode> syntaxModes() {
-        return List.of(STREAM, MUTATE, WRITE, STATS);
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STREAM),
+            SyntaxModeMeta.of(STATS),
+            SyntaxModeMeta.of(MUTATE),
+            SyntaxModeMeta.of(WRITE)
+        );
     }
 
     abstract String adocFile();

@@ -51,29 +51,29 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
     private static final String ROLE_SELECTOR = "role";
 
 
-    private final Iterable<SyntaxMode> syntaxModes;
+    private final Iterable<SyntaxModeMeta> syntaxModesPerPage;
     private final SoftAssertions syntaxAssertions;
 
     public ProcedureSyntaxAutoChecker(
-        Iterable<SyntaxMode> syntaxModes,
+        Iterable<SyntaxModeMeta> syntaxModesPerPage,
         SoftAssertions syntaxAssertions
     ) {
-        this.syntaxModes = syntaxModes;
+        this.syntaxModesPerPage = syntaxModesPerPage;
         this.syntaxAssertions = syntaxAssertions;
     }
 
     @Override
     public String process(Document document, String output) {
-        syntaxModes.forEach(mode -> {
+        syntaxModesPerPage.forEach(mode -> {
 
-            var allSyntaxSectionsForMode = document.findBy(Map.of(ROLE_SELECTOR, mode.mode()));
+            var allSyntaxSectionsForMode = document.findBy(Map.of(ROLE_SELECTOR,  mode.syntaxMode().mode()));
 
             assertThat(allSyntaxSectionsForMode)
-                .as("There was an issue with `%s`", mode.mode())
-                .hasSize(1);
+                .as("There was an issue with `%s`", mode.syntaxMode().mode())
+                .hasSize( mode.sectionsOnPage());
 
             var currentSyntaxSection = allSyntaxSectionsForMode.get(0);
-            var codeSnippet = extractSyntaxCodeSnippet(currentSyntaxSection, mode);
+            var codeSnippet = extractSyntaxCodeSnippet(currentSyntaxSection,  mode.syntaxMode());
             var procedureName = ProcedureNameExtractor.findProcedureName(codeSnippet);
 
             var resultClass = ProcedureLookup.findResultType(procedureName);
@@ -82,10 +82,10 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
             var yieldResultColumns = extractDocResultFields(codeSnippet);
 
             syntaxAssertions.assertThat(yieldResultColumns)
-                .as("Asserting YIELD result columns for `%s`", mode.mode())
+                .as("Asserting YIELD result columns for `%s`",  mode.syntaxMode().mode())
                 .containsExactlyInAnyOrderElementsOf(expectedResultFieldsFromCode);
 
-            assertResultsTable(currentSyntaxSection, mode, expectedResultFieldsFromCode);
+            assertResultsTable(currentSyntaxSection,  mode.syntaxMode(), expectedResultFieldsFromCode);
         });
 
         return output;

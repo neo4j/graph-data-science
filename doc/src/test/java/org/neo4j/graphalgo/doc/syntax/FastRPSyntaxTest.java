@@ -19,7 +19,24 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
+import java.util.List;
+
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.MUTATE;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STATS;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.WRITE;
+
 class FastRPSyntaxTest extends SyntaxTestBase {
+
+    @Override
+    protected List<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STREAM, 2),
+            SyntaxModeMeta.of(STATS, 2),
+            SyntaxModeMeta.of(MUTATE, 2),
+            SyntaxModeMeta.of(WRITE, 2)
+        );
+    }
 
     @Override
     String adocFile() {
