@@ -22,12 +22,8 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.GraphStoreValidation;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 public final class GraphSageCompanion {
 
@@ -52,22 +48,6 @@ public final class GraphSageCompanion {
                 return embeddings.get(nodeId);
             }
         };
-    }
-
-    /**
-     * Validate the train config that is stored on the model with the graph store that is used to compute embeddings.
-     */
-    static void validateTrainConfig(
-        GraphStore graphStore,
-        GraphSageBaseConfig config
-    ) {
-        var trainConfig = ModelCatalog
-            .get(config.username(), config.modelName(), ModelData.class, GraphSageTrainConfig.class)
-            .trainConfig();
-        GraphStoreValidation.validate(
-            graphStore,
-            trainConfig
-        );
     }
 
 }
