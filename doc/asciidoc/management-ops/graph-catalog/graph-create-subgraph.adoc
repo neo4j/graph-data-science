@@ -173,7 +173,7 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount;
 .Results
 [opts="header"]
 |===
-| graphName    | fromGraphName    | nodeCount | relationshipCount
+| graphName          | fromGraphName    | nodeCount | relationshipCount
 | "teenagers-books"  | "social-graph"   | 5         | 3
 |===
 --
