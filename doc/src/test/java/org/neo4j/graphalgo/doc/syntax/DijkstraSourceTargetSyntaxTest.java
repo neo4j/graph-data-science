@@ -28,10 +28,13 @@ import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.WRITE;
 class DijkstraSourceTargetSyntaxTest extends SyntaxTestBase {
 
     @Override
-    protected Iterable<SyntaxMode> syntaxModes() {
-        return List.of(STREAM, MUTATE, WRITE);
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STREAM),
+            SyntaxModeMeta.of(MUTATE),
+            SyntaxModeMeta.of(WRITE)
+        );
     }
-
     @Override
     String adocFile() {
         return "algorithms/shortest-path/dijkstra-source-target.adoc";

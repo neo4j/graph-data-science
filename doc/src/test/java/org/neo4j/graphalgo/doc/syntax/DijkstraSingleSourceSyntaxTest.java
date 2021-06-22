@@ -28,8 +28,12 @@ import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.WRITE;
 class DijkstraSingleSourceSyntaxTest extends SyntaxTestBase {
 
     @Override
-    protected Iterable<SyntaxMode> syntaxModes() {
-        return List.of(STREAM, MUTATE, WRITE);
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(STREAM),
+            SyntaxModeMeta.of(MUTATE),
+            SyntaxModeMeta.of(WRITE)
+        );
     }
 
     @Override
