@@ -60,7 +60,7 @@ abstract class SyntaxTestBase {
 
     @Test
     void runSyntaxTest(SoftAssertions softAssertions, @TempDir File outputDirectory) {
-        asciidoctor.javaExtensionRegistry().postprocessor(syntaxTreeProcessor(softAssertions));
+        asciidoctor.javaExtensionRegistry().postprocessor(syntaxPostProcessor(softAssertions));
 
         var docFile = ASCIIDOC_PATH.resolve(adocFile()).toFile();
         assertThat(docFile).exists().canRead();
@@ -79,7 +79,7 @@ abstract class SyntaxTestBase {
 
     abstract String adocFile();
 
-    private ProcedureSyntaxAutoChecker syntaxTreeProcessor(SoftAssertions syntaxAssertions) {
+    private ProcedureSyntaxAutoChecker syntaxPostProcessor(SoftAssertions syntaxAssertions) {
         return new ProcedureSyntaxAutoChecker(syntaxModes(), syntaxAssertions);
     }
 }
