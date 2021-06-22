@@ -27,7 +27,7 @@ If you are using Neo4j Desktop you can simply add the Graph Data Science library
 
 |GDS 1.2.x
 |Neo4j 4.0.0 – 4.0.6
-.11+.^|Java 11
+.13+.^|Java 11
 
 .2+<.^|GDS 1.3.x
 |Neo4j 4.0.0 - 4.0.9
