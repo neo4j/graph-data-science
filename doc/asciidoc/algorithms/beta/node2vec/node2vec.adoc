@@ -58,7 +58,7 @@ CALL gds.beta.node2vec.stream(
   configuration: Map
 ) YIELD
   nodeId: Integer,
-  embedding: List<Float>
+  embedding: Float[]
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
@@ -71,9 +71,9 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1m,1,6"]
 |===
-| Name   | Type        | Description
-| nodeId | Integer     | The Neo4j node ID.
-| embedding | List<Float> | The computed node embedding.
+| Name      | Type    | Description
+| nodeId    | Integer | The Neo4j node ID.
+| embedding | Float[] | The computed node embedding.
 |===
 ======
 
@@ -89,6 +89,7 @@ CALL gds.beta.node2vec.mutate(
 YIELD
   createMillis: Integer,
   computeMillis: Integer,
+  postProcessingMillis: Integer,
   mutateMillis: Integer,
   nodeCount: Integer,
   nodePropertiesWritten: Integer,
@@ -106,11 +107,12 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type    | Description
-| nodesCount            | Integer | The number of nodes processed.
+| nodeCount             | Integer | The number of nodes processed.
 | nodePropertiesWritten | Integer | The number of node properties written.
 | createMillis          | Integer | Milliseconds for loading data.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
+| postProcessingMillis  | Integer | Milliseconds for post-processing of the results.
 | configuration         | Map     | The configuration used for running the algorithm.
 |===
 ======
@@ -144,7 +146,7 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type    | Description
-| nodesCount            | Integer | The number of nodes processed.
+| nodeCount             | Integer | The number of nodes processed.
 | nodePropertiesWritten | Integer | The number of node properties written.
 | createMillis          | Integer | Milliseconds for loading data.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
