@@ -19,8 +19,8 @@ YIELD
   sourceNode: Integer,
   targetNode: Integer,
   totalCost: Float,
-  nodeIds: List of Integer,
-  costs: List of Float,
+  nodeIds: Integer[],
+  costs: Float[],
   path: Path
 ----
 
