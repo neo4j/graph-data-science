@@ -141,17 +141,19 @@ class OverlapProcTest extends AlphaSimilarityProcTest<OverlapAlgorithm, Categori
             }
         );
 
-        runQueryWithResultConsumer(STATEMENT_STREAM,  map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", topK)),
-            actual -> {
-                var expectedIterator = expected.iterator();
-                while (actual.hasNext()) {
-                    assertThat(actual.next()).isEqualTo(expectedIterator.next());
-                    assertThat(actual.hasNext()).isEqualTo(expectedIterator.hasNext());
-                }
+        var resultKeys = List.of("item1", "item2", "count1", "count2", "intersection", "similarity");
+        var expectedIterator = expected.iterator();
 
-                assertThat(expectedIterator.hasNext()).isFalse();
+        runQueryWithRowConsumer(
+            STATEMENT_STREAM,
+            map("config", map("similarityCutoff", -0.1, "concurrency", 4, "topK", topK)),
+            actualRow -> {
+                Map<String, Object> expectedRow = expectedIterator.next();
+                resultKeys.forEach(key -> assertThat(actualRow.get(key)).isEqualTo(expectedRow.get(key)));
             }
         );
+
+        assertThat(expectedIterator.hasNext()).isFalse();
     }
 
     @Test
