@@ -1,5 +1,5 @@
 [[catalog-graph-drop]]
-= Removing graphs from the catalog
+= Removing graphs
 
 Once we have finished using the named graph we can remove it from the catalog to free up memory.
 

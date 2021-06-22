@@ -55,19 +55,11 @@ Graphs created by a different Neo4j user are not accessible at any time.
 ====
 
 
-include::graph-create.adoc[leveloffset=+1]
-
 include::graph-create-subgraph.adoc[leveloffset=+1]
-
-include::graph-list.adoc[leveloffset=+1]
-
-include::graph-exists.adoc[leveloffset=+1]
 
 include::graph-remove-node-properties.adoc[leveloffset=+1]
 
 include::graph-delete-relationship-type.adoc[leveloffset=+1]
-
-include::graph-drop.adoc[leveloffset=+1]
 
 include::graph-stream-node-properties.adoc[leveloffset=+1]
 
