@@ -1,5 +1,5 @@
 [[catalog-graph-exists]]
-= Check if a graph exists in the catalog
+= Check if a graph exists
 
 We can check if a graph is stored in the catalog by looking up its name.
 
