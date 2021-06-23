@@ -30,7 +30,6 @@ public enum Neo4jVersion {
     V_4_1,
     V_4_2,
     V_4_3,
-    V_4_3_drop2,
     V_4_3_drop31,
     V_Dev,
     V_Aura;
@@ -46,8 +45,6 @@ public enum Neo4jVersion {
                 return "4.2";
             case V_4_3:
                 return "4.3";
-            case V_4_3_drop2:
-                return "4.3_drop2";
             case V_4_3_drop31:
                 return "4.3.0-drop03.1";
             case V_Dev:
@@ -88,9 +85,6 @@ public enum Neo4jVersion {
     }
 
     static Neo4jVersion parse(String version) {
-        if (version.equals("4.3.0-drop02.0")) {
-            return Neo4jVersion.V_4_3_drop2;
-        }
         if (version.equals("4.3.0-drop03.1")) {
             return Neo4jVersion.V_4_3_drop31;
         }
