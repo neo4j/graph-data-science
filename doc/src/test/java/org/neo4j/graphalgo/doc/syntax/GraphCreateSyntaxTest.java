@@ -19,23 +19,19 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
-enum SyntaxMode {
-    STATS("include-with-stats"),
-    STREAM("include-with-stream"),
-    MUTATE("include-with-mutate"),
-    WRITE("include-with-write"),
-    TRAIN("include-with-train"),
-    GRAPH_CREATE("graph-create-syntax"),
-    GRAPH_EXISTS("graph-exists-syntax"),
-    CREATE_SUBGRAPH("create-subgraph-syntax");
+import java.util.List;
 
-    private final String mode;
+class GraphCreateSyntaxTest extends SyntaxTestBase {
 
-    SyntaxMode(String mode) {
-        this.mode = mode;
+    @Override
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(SyntaxMode.GRAPH_CREATE)
+        );
     }
 
-    public String mode() {
-        return mode;
+    @Override
+    String adocFile() {
+        return "management-ops/graph-catalog/graph-create.adoc";
     }
 }

@@ -24,6 +24,8 @@ In addition, the optional `configuration` parameter allows us to further configu
 [[graph-create-native-syntax]]
 === Syntax
 
+[.graph-create-syntax]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
@@ -32,6 +34,13 @@ CALL gds.graph.create(
     relationshipProjection: String, List or Map,
     configuration: Map
 )
+YIELD
+  graphName: String,
+  nodeProjection: Map,
+  nodeCount: Integer,
+  relationshipProjection: Map,
+  relationshipCount: Integer,
+  createMillis: Integer
 ----
 
 NOTE: To get information about a stored named graph, including its schema, one can use <<catalog-graph-list, gds.graph.list>>.
@@ -55,6 +64,20 @@ NOTE: To get information about a stored named graph, including its schema, one c
 | relationshipProperties | String, List or Map   | {}      | Relationship properties to load for _all_ relationship projections.
 | validateRelationships  | Boolean               | false   | Whether to throw an error if relationships contain nodes not included in the nodeProjection.
 |===
+
+.Results
+[opts="header",cols="2,1,4"]
+|===
+| Name                   | Type     | Description
+| graphName              | String   | The name under which the graph is stored in the catalog.
+| nodeProjection         | Map      | The <<node-projection-syntax, node projections>> used to project the graph.
+| nodeCount              | Integer  | The number of nodes stored in the projected graph.
+| relationshipProjection | Map      | The <<relationship-projection-syntax, relationship projections>> used to project the graph.
+| relationshipCount      | Integer  | The number of relationships stored in the projected graph.
+| createMillis           | Integer  | Milliseconds for creating the graph.
+|===
+--
+
 
 [[node-projection-syntax]]
 ==== Node Projection
@@ -177,6 +200,7 @@ NOTE: To get information about a stored named graph, including its schema, one c
 | property                  | String              |  yes     | `projected-property-key` |The node property key in the Neo4j graph. If not set, uses the `projected-property-key`.
 | defaultValue              | Float or Integer    |  yes     |  `Double.NaN`    | The default value if the property is not defined for a node.
 |===
+
 
 [[graph-create-examples]]
 === Examples
