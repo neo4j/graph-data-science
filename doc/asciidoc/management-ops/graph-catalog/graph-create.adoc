@@ -39,11 +39,11 @@ NOTE: To get information about a stored named graph, including its schema, one c
 .Parameters
 [opts="header",cols="1,1,1, 4"]
 |===
-| Name                  | Type               | Optional | Description
-| graphName             | String             | no       | The name under which the graph is stored in the catalog.
-| nodeProjection        | String\|List\|Map  | no       | One or more <<node-projection-syntax, node projections>>.
-| relationshipProjection| String\|List\|Map | no       | One or more <<native-projection-syntax-relationship-projections, relationship projections>>.
-| configuration         | Map               | yes      | Additional parameters to configure the native projection.
+| Name                  | Type                | Optional | Description
+| graphName             | String              | no       | The name under which the graph is stored in the catalog.
+| nodeProjection        | String, List or Map | no       | One or more <<node-projection-syntax, node projections>>.
+| relationshipProjection| String, List or Map | no       | One or more <<relationship-projection-syntax, relationship projections>>.
+| configuration         | Map                 | yes      | Additional parameters to configure the native projection.
 |===
 
 .Configuration
@@ -74,6 +74,15 @@ NOTE: To get information about a stored named graph, including its schema, one c
 {
     <projected-label>: {
         label: <neo4j-label>,
+        properties: <neo4j-property-key>
+    },
+    <projected-label>: {
+        label: <neo4j-label>,
+        properties: [<neo4j-property-key>, <neo4j-property-key>, ...]
+    },
+    ...
+    <projected-label>: {
+        label: <neo4j-label>,
         properties: {
             <projected-property-key>: {
                 property: <neo4j-property-key>,
@@ -85,25 +94,24 @@ NOTE: To get information about a stored named graph, including its schema, one c
                 defaultValue: <fallback-value>
             }
         }
-    },
-    ...
-    <projected-label>: {
-        label: <neo4j-label>,
-        properties: <node-property-mappings>
     }
 }
 ----
 
-.NodeProjection
-[opts="header",cols="1,1,1,4"]
+.Node Projection fields
+[opts="header",cols="1,1,1,2,4"]
 |===
-| Name             | Type     | Optional | Description
-| projected-label    | String   |  no      | The node label in the projected graph.
-| label            | String   |  yes     | The node label in the Neo4j graph. If not set, uses the `projected-label`.
-| properties       | Map      |  yes     | The projected node properties for the specified `projected-label`.
-| projected-property-key  | String      |  no     | The key for the node property in the projected graph.
-| property  | String      |  yes     | The node property key in the Neo4j graph. If not set, uses the `projected-property-key`.
-| defaultValue  | Float\|Float[]\|Integer\|Integer[]      |  yes     | The default value if the property is not defined for a node. The value type must match the derived type.
+| Name                     | Type                               | Optional | Default                  | Description
+| <projected-label>        | String                             |  no      | n/a                      |The node label in the projected graph.
+| label                    | String                             |  yes     | `projected-label`        |The node label in the Neo4j graph. If not set, uses the `projected-label`.
+| properties               | Map, List or String                |  yes     | {}                       |The projected node properties for the specified `projected-label`.
+| <projected-property-key> | String                             |  no      | n/a                      |The key for the node property in the projected graph.
+| property                 | String                             |  yes     | `projected-property-key` |The node property key in the Neo4j graph. If not set, uses the `projected-property-key`.
+.4+^.^| defaultValue       | Float                        .4+^.^|  yes     | `Double.NaN`          .4+|The default value if the property is not defined for a node.
+|Float[]   | null
+|Integer   |`Integer.MIN_VALUE`
+|Integer[] | null
+
 |===
 
 [[relationship-projection-syntax]]
@@ -156,17 +164,18 @@ NOTE: To get information about a stored named graph, including its schema, one c
 }
 ----
 
-.Relationship Projection
-[opts="header",cols="2,1,1,2,4"]
+.Relationship Projection fields
+[opts="header",cols="2,1,1,3,4"]
 |===
-| Name             | Type           | Optional | Default |Description
-| projected-type   | String         |  no      | -        |The name of the relationship type in the projected graph.
-| type             | String         |  yes     | `projected-type`        |The relationship type in the Neo4j graph.
-| orientation      | String            |  yes     |  `NATURAL`       | Denotes how Neo4j relationships are represented in the projected graph. Allowed values are `NATURAL`, `UNDIRECTED`, `REVERSE`.
-| aggregation      | String         |  no      |  `NONE`       | Handling of parallel relationships. Allowed values are `NONE`, `MIN`, `MAX`, `SUM`, `SINGLE`, `COUNT`.
-| properties       | Map\|List\|String |  yes     |  {}       |The projected relationship properties for the specified `projected-type`.
-| defaultValue     | Float\|Integer    |  yes     |  `Double.NaN` | The default value if the property is not defined for a node.
-// TODO try out long default value for rel properties
+| Name                      | Type                | Optional | Default          | Description
+| <projected-type>          | String              |  no      | n/a              | The name of the relationship type in the projected graph.
+| type                      | String              |  yes     | `projected-type` |The relationship type in the Neo4j graph.
+| orientation               | String              |  yes     |  `NATURAL`       | Denotes how Neo4j relationships are represented in the projected graph. Allowed values are `NATURAL`, `UNDIRECTED`, `REVERSE`.
+| aggregation               | String              |  no      |  `NONE`          | Handling of parallel relationships. Allowed values are `NONE`, `MIN`, `MAX`, `SUM`, `SINGLE`, `COUNT`.
+| properties                | Map, List or String |  yes     |  {}              |The projected relationship properties for the specified `projected-type`.
+| <projected-property-key>  | String              |  no      | n/a              |The key for the relationship property in the projected graph.
+| property                  | String              |  yes     | `projected-property-key` |The node property key in the Neo4j graph. If not set, uses the `projected-property-key`.
+| defaultValue              | Float or Integer    |  yes     |  `Double.NaN`    | The default value if the property is not defined for a node.
 |===
 
 [[graph-create-examples]]
