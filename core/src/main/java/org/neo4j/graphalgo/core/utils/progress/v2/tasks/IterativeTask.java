@@ -19,10 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.progress.v2.tasks;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 public class IterativeTask extends Task {
 
@@ -36,37 +34,7 @@ public class IterativeTask extends Task {
     private final int iterations;
     private final Mode mode;
 
-
-    public static IterativeTask dynamic(
-        String description,
-        Supplier<List<Task>> subTasksSupplier,
-        int iterations
-    ) {
-        List<Task> unwindedTasks = new ArrayList<>();
-        IntStream.range(0, iterations).forEach(i -> unwindedTasks.addAll(subTasksSupplier.get()));
-        return new IterativeTask(
-            description,
-            unwindedTasks,
-            subTasksSupplier,
-            iterations,
-            Mode.DYNAMIC
-        );
-    }
-
-    public static IterativeTask open(
-        String description,
-        Supplier<List<Task>> subTasksSupplier
-    ) {
-        return new IterativeTask(
-            description,
-            new ArrayList<>(),
-            subTasksSupplier,
-            -1,
-            Mode.OPEN
-        );
-    }
-
-    private IterativeTask(
+    IterativeTask(
         String description,
         List<Task> subTasks,
         Supplier<List<Task>> subTasksSupplier,
