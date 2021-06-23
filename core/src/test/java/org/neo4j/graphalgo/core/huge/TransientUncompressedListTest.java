@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_MASK;
 import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_SHIFT;
 
-class TransientAdjacencyPropertiesTest {
+class TransientUncompressedListTest {
 
     @Test
     void shouldPeekValues() {
@@ -59,7 +59,7 @@ class TransientAdjacencyPropertiesTest {
             .maxRelCount(100)
             .build();
 
-        MemoryTree memRec = TransientAdjacencyProperties.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientUncompressedList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long uncompressedAdjacencySize = 1200;
@@ -82,7 +82,7 @@ class TransientAdjacencyPropertiesTest {
             .maxRelCount(100_000_000_000L)
             .build();
 
-        MemoryTree memRec = TransientAdjacencyProperties.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientUncompressedList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
 

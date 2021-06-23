@@ -19,8 +19,12 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyProperties;
 import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
@@ -39,11 +43,11 @@ import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
 
-public final class TransientAdjacencyProperties implements AdjacencyProperties {
+public final class TransientUncompressedList implements AdjacencyList, AdjacencyProperties {
 
     public static MemoryEstimation uncompressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
         return MemoryEstimations
-            .builder(TransientAdjacencyProperties.class)
+            .builder(TransientUncompressedList.class)
             .perGraphDimension("pages", (dimensions, concurrency) -> {
                 long nodeCount = dimensions.nodeCount();
                 long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
@@ -76,10 +80,32 @@ public final class TransientAdjacencyProperties implements AdjacencyProperties {
     private HugeIntArray degrees;
     private HugeLongArray offsets;
 
-    public TransientAdjacencyProperties(long[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+    public TransientUncompressedList(long[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;
+    }
+
+    @Override
+    public int degree(long node) {
+        return degrees.get(node);
+    }
+
+    @Override
+    public AdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
+        var degree = degrees.get(node);
+        if (degree == 0) {
+            return AdjacencyCursor.empty();
+        }
+        var cursor = new UncompressedCursor(pages);
+        var offset = offsets.get(node);
+        cursor.init(offset, degree);
+        return cursor;
+    }
+
+    @Override
+    public AdjacencyCursor rawAdjacencyCursor() {
+        return null;
     }
 
     @Override
@@ -109,7 +135,7 @@ public final class TransientAdjacencyProperties implements AdjacencyProperties {
         return propertyCursor(node, fallbackValue);
     }
 
-    private static final class Cursor extends MutableIntValue implements PropertyCursor {
+    private static final class Cursor implements PropertyCursor {
 
         private long[][] pages;
 
@@ -142,6 +168,107 @@ public final class TransientAdjacencyProperties implements AdjacencyProperties {
         @Override
         public void close() {
             pages = null;
+        }
+    }
+
+    public static final class UncompressedCursor extends MutableIntValue implements AdjacencyCursor {
+
+        private long[][] pages;
+
+        private long[] currentPage;
+        private int degree;
+        private int limit;
+        private int offset;
+
+        private UncompressedCursor(long[][] pages) {
+            this.pages = pages;
+        }
+
+        @Override
+        public void init(long fromIndex, int degree) {
+            currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
+            offset = indexInPage(fromIndex, PAGE_MASK);
+            limit = offset + degree * Long.BYTES;
+            this.degree = degree;
+        }
+
+        @Override
+        public int size() {
+            return degree;
+        }
+
+        @Override
+        public int remaining() {
+            return limit - offset;
+        }
+
+        @Override
+        public boolean hasNextVLong() {
+            return offset < limit;
+        }
+
+        @Override
+        public long nextVLong() {
+            return currentPage[offset++];
+        }
+
+        @Override
+        public long peekVLong() {
+            return currentPage[offset];
+        }
+
+        @Override
+        public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
+            throw new UnsupportedOperationException();
+//            var dest = destination instanceof DecompressingCursor
+//                ? (DecompressingCursor) destination
+//                : new DecompressingCursor(pages);
+//            dest.decompress.copyFrom(this.decompress);
+//            dest.currentPosition = this.currentPosition;
+//            dest.maxTargets = this.maxTargets;
+//            return dest;
+        }
+
+        // TODO: I think this documentation if either out of date or misleading.
+        //  Either we skip all blocks and return -1 or we find a value that is strictly larger.
+        /**
+         * Read and decode target ids until it is strictly larger than ({@literal >}) the provided {@code target}.
+         * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
+         * id that is large enough.
+         * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
+         * will return {@code false}
+         */
+        @Override
+        public long skipUntil(long target) {
+            throw new UnsupportedOperationException();
+//            long value = decompress.skipUntil(target, remaining(), this);
+//            this.currentPosition += this.value;
+//            return value;
+        }
+
+        /**
+         * Read and decode target ids until it is larger than or equal ({@literal >=}) the provided {@code target}.
+         * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
+         * id that is large enough.
+         * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
+         * will return {@code false}
+         */
+        @Override
+        public long advance(long target) {
+            throw new UnsupportedOperationException();
+//            int targetsLeftToBeDecoded = remaining();
+//            if(targetsLeftToBeDecoded <= 0) {
+//                return AdjacencyCursor.NOT_FOUND;
+//            }
+//            long value = decompress.advance(target, targetsLeftToBeDecoded, this);
+//            this.currentPosition += this.value;
+//            return value;
+        }
+
+        @Override
+        public void close() {
+            pages = null;
+            currentPage = null;
         }
     }
 }

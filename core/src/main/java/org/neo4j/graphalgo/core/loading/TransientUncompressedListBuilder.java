@@ -19,8 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyProperties;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyProperties;
+import org.neo4j.graphalgo.core.huge.TransientUncompressedList;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -29,11 +28,11 @@ import java.util.Arrays;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public final class TransientAdjacencyPropertiesBuilder implements AdjacencyPropertiesBuilder {
+public final class TransientUncompressedListBuilder implements AdjacencyPropertiesBuilder {
 
     private final BumpAllocator<long[]> builder;
 
-    TransientAdjacencyPropertiesBuilder(AllocationTracker tracker) {
+    TransientUncompressedListBuilder(AllocationTracker tracker) {
         this.builder = new BumpAllocator<>(tracker, Factory.INSTANCE);
     }
 
@@ -43,8 +42,8 @@ public final class TransientAdjacencyPropertiesBuilder implements AdjacencyPrope
     }
 
     @Override
-    public AdjacencyProperties build(HugeIntArray degrees, HugeLongArray offsets) {
-        return new TransientAdjacencyProperties(builder.intoPages(), degrees, offsets);
+    public TransientUncompressedList build(HugeIntArray degrees, HugeLongArray offsets) {
+        return new TransientUncompressedList(builder.intoPages(), degrees, offsets);
     }
 
     @Override
@@ -80,7 +79,7 @@ public final class TransientAdjacencyPropertiesBuilder implements AdjacencyPrope
         }
     }
 
-    static final class Allocator implements AdjacencyPropertiesAllocator {
+    public static final class Allocator implements AdjacencyPropertiesAllocator {
 
         private final BumpAllocator.LocalAllocator<long[]> allocator;
 

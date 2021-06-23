@@ -36,8 +36,6 @@ import java.util.stream.Stream;
 
 public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
-    private static final AdjacencyPropertiesBuilder[] EMPTY_PROPERTY_BUILDERS = new AdjacencyPropertiesBuilder[0];
-
     public enum Factory implements AdjacencyCompressorFactory {
         INSTANCE;
 
@@ -52,11 +50,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             var adjacencyBuilderFactory = TransientAdjacencyFactory.of(tracker);
             var adjacencyBuilder = adjacencyBuilderFactory.newAdjacencyListBuilder();
 
-            var propertyBuilders = EMPTY_PROPERTY_BUILDERS;
-            if (!propertyMappings.isEmpty()) {
-                propertyBuilders = new AdjacencyPropertiesBuilder[propertyMappings.numberOfMappings()];
-                Arrays.setAll(propertyBuilders, i -> adjacencyBuilderFactory.newAdjacencyPropertiesBuilder());
-            }
+            var propertyBuilders = new AdjacencyPropertiesBuilder[propertyMappings.numberOfMappings()];
+            Arrays.setAll(propertyBuilders, i -> adjacencyBuilderFactory.newAdjacencyPropertiesBuilder());
 
             return new Blueprint(
                 adjacencyBuilder,

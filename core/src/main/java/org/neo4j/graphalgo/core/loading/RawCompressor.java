@@ -33,8 +33,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -51,11 +49,14 @@ public final class RawCompressor implements AdjacencyCompressor {
             boolean noAggregation,
             AllocationTracker tracker
         ) {
-            AdjacencyListBuilder adjacencyListBuilder = null;
-            AdjacencyPropertiesBuilder[] propertyBuilders = null;
+            var adjacencyBuilderFactory = TransientAdjacencyFactory.of(tracker);
+            var adjacencyBuilder = adjacencyBuilderFactory.newAdjacencyPropertiesBuilder();
+
+            var propertyBuilders = new TransientUncompressedListBuilder[propertyMappings.numberOfMappings()];
+            Arrays.setAll(propertyBuilders, i -> adjacencyBuilderFactory.newAdjacencyPropertiesBuilder());
 
             return new Blueprint(
-                adjacencyListBuilder,
+                adjacencyBuilder,
                 propertyBuilders,
                 HugeIntArray.newArray(nodeCount, tracker),
                 HugeLongArray.newArray(nodeCount, tracker),
@@ -70,8 +71,8 @@ public final class RawCompressor implements AdjacencyCompressor {
     }
 
     private static final class Blueprint implements AdjacencyCompressorBlueprint {
-        private final AdjacencyListBuilder adjacencyBuilder;
-        private final AdjacencyPropertiesBuilder[] propertyBuilders;
+        private final TransientUncompressedListBuilder adjacencyBuilder;
+        private final TransientUncompressedListBuilder[] propertyBuilders;
         private final HugeIntArray adjacencyDegrees;
         private final HugeLongArray adjacencyOffsets;
         private final HugeLongArray[] propertyOffsets;
@@ -79,8 +80,8 @@ public final class RawCompressor implements AdjacencyCompressor {
         private final Aggregation[] aggregations;
 
         private Blueprint(
-            AdjacencyListBuilder adjacencyBuilder,
-            AdjacencyPropertiesBuilder[] propertyBuilders,
+            TransientUncompressedListBuilder adjacencyBuilder,
+            TransientUncompressedListBuilder[] propertyBuilders,
             HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
             HugeLongArray[] propertyOffsets,
@@ -115,7 +116,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         @Override
         public boolean supportsProperties() {
             // TODO temporary until Geri does support properties
-            return adjacencyBuilder instanceof TransientAdjacencyListBuilder;
+            return adjacencyBuilder instanceof TransientUncompressedListBuilder;
         }
 
         @Override
@@ -130,9 +131,11 @@ public final class RawCompressor implements AdjacencyCompressor {
 
         @Override
         public AdjacencyListsWithProperties build() {
+            var adjacencyList = adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets);
+
             var builder = ImmutableAdjacencyListsWithProperties
                 .builder()
-                .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets));
+                .adjacency(adjacencyList);
 
             for (int i = 0; i < propertyBuilders.length; i++) {
                 var properties = propertyBuilders[i].build(this.adjacencyDegrees, propertyOffsets[i]);
@@ -143,7 +146,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         }
     }
 
-    private final AdjacencyListAllocator adjacencyAllocator;
+    private final AdjacencyPropertiesAllocator adjacencyAllocator;
     private final AdjacencyPropertiesAllocator[] propertiesAllocators;
     private final HugeIntArray adjacencyDegrees;
     private final HugeLongArray adjacencyOffsets;
@@ -152,7 +155,7 @@ public final class RawCompressor implements AdjacencyCompressor {
     private final Aggregation[] aggregations;
 
     private RawCompressor(
-        AdjacencyListAllocator adjacencyAllocator,
+        AdjacencyPropertiesAllocator adjacencyAllocator,
         AdjacencyPropertiesAllocator[] propertiesAllocators,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
@@ -333,13 +336,6 @@ public final class RawCompressor implements AdjacencyCompressor {
             long address = copy(property, degree, propertiesAllocator);
             offsets[i].set(nodeId, address);
         }
-    }
-
-    private long copy(long[] data, int degree, AdjacencyListAllocator allocator) {
-        var buffer = ByteBuffer.allocate(degree * Long.BYTES).order(ByteOrder.LITTLE_ENDIAN);
-        buffer.asLongBuffer().put(data);
-        var bytes = Arrays.copyOfRange(buffer.array(), buffer.arrayOffset(), buffer.arrayOffset() + buffer.position());
-        return allocator.writeRawTargets(bytes, degree);
     }
 
     private long copy(long[] data, int degree, AdjacencyPropertiesAllocator allocator) {

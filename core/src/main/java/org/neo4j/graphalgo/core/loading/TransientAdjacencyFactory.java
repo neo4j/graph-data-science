@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 public final class TransientAdjacencyFactory implements AdjacencyBuilderFactory {
 
-    public static AdjacencyBuilderFactory of(AllocationTracker tracker) {
+    public static TransientAdjacencyFactory of(AllocationTracker tracker) {
         return new TransientAdjacencyFactory(tracker);
     }
 
@@ -34,12 +34,12 @@ public final class TransientAdjacencyFactory implements AdjacencyBuilderFactory 
     }
 
     @Override
-    public AdjacencyListBuilder newAdjacencyListBuilder() {
+    public TransientAdjacencyListBuilder newAdjacencyListBuilder() {
         return new TransientAdjacencyListBuilder(tracker);
     }
 
     @Override
-    public AdjacencyPropertiesBuilder newAdjacencyPropertiesBuilder() {
-        return new TransientAdjacencyPropertiesBuilder(tracker);
+    public TransientUncompressedListBuilder newAdjacencyPropertiesBuilder() {
+        return new TransientUncompressedListBuilder(tracker);
     }
 }
