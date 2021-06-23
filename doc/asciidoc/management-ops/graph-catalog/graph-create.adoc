@@ -34,6 +34,8 @@ CALL gds.graph.create(
 )
 ----
 
+NOTE: To get information about a stored named graph, including its schema, one can use <<catalog-graph-list, gds.graph.list>>.
+
 .Parameters
 [opts="header",cols="1,1,1, 4"]
 |===
@@ -104,7 +106,68 @@ CALL gds.graph.create(
 | defaultValue  | Float\|Float[]\|Integer\|Integer[]      |  yes     | The default value if the property is not defined for a node. The value type must match the derived type.
 |===
 
-NOTE: To get information about a stored named graph, including its schema, one can use <<catalog-graph-list, gds.graph.list>>.
+[[relationship-projection-syntax]]
+==== Relationship Projection
+
+.Short-hand String-syntax for `relationshipProjection`. The projected graph will contain the given `neo4j-type`.
+----
+<neo4j-type>
+----
+
+.Short-hand List-syntax for `relationshipProjection`. The projected graph will contain the given `neo4j-type`s.
+----
+[<neo4j-type>, ..., <neo4j-type>]
+----
+
+.Extended Map-syntax for `relationshipProjection`.
+----
+{
+    <projected-type>: {
+        type: <neo4j-type>,
+        orientation: <orientation>,
+        aggregation: <aggregation-type>,
+        properties: <neo4j-property-key>
+    },
+    <projected-type>: {
+        type: <neo4j-type>,
+        orientation: <orientation>,
+        aggregation: <aggregation-type>,
+        properties: [<neo4j-property-key>, <neo4j-property-key>]
+    },
+    ...
+    <projected-type>: {
+        type: <neo4j-type>,
+        orientation: <orientation>,
+        aggregation: <aggregation-type>,
+        properties: {
+            <projected-property-key>: {
+                property: <neo4j-property-key>,
+                defaultValue: <fallback-value>,
+                aggregation: <aggregation-type>
+            },
+            ...
+            <projected-property-key>: {
+                property: <neo4j-property-key>,
+                defaultValue: <fallback-value>,
+                aggregation: <aggregation-type>
+            }
+        }
+    }
+}
+----
+
+.Relationship Projection
+[opts="header",cols="2,1,1,2,4"]
+|===
+| Name             | Type           | Optional | Default |Description
+| projected-type   | String         |  no      | -        |The name of the relationship type in the projected graph.
+| type             | String         |  yes     | `projected-type`        |The relationship type in the Neo4j graph.
+| orientation      | String            |  yes     |  `NATURAL`       | Denotes how Neo4j relationships are represented in the projected graph. Allowed values are `NATURAL`, `UNDIRECTED`, `REVERSE`.
+| aggregation      | String         |  no      |  `NONE`       | Handling of parallel relationships. Allowed values are `NONE`, `MIN`, `MAX`, `SUM`, `SINGLE`, `COUNT`.
+| properties       | Map\|List\|String |  yes     |  {}       |The projected relationship properties for the specified `projected-type`.
+| defaultValue     | Float\|Integer    |  yes     |  `Double.NaN` | The default value if the property is not defined for a node.
+// TODO try out long default value for rel properties
+|===
 
 [[graph-create-examples]]
 === Examples
