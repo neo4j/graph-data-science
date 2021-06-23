@@ -88,10 +88,6 @@ public final class TransientCompressedListBuilder implements CsrListBuilder<byte
         }
 
         @Override
-        public void prepare() {
-        }
-
-        @Override
         public void close() {
         }
 

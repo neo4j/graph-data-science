@@ -174,12 +174,6 @@ public final class RawCompressor implements AdjacencyCompressor {
         this.propertyOffsets = propertyOffsets;
         this.noAggregation = noAggregation;
         this.aggregations = aggregations;
-        adjacencyAllocator.prepare();
-        for (var propertiesAllocator : propertiesAllocators) {
-            if (propertiesAllocator != null) {
-                propertiesAllocator.prepare();
-            }
-        }
     }
 
     @Override

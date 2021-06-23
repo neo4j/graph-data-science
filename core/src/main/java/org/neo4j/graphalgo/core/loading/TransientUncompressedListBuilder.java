@@ -88,10 +88,6 @@ public final class TransientUncompressedListBuilder implements CsrListBuilder<lo
         }
 
         @Override
-        public void prepare() {
-        }
-
-        @Override
         public void close() {
         }
 

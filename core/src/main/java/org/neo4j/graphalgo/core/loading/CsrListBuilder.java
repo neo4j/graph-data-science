@@ -32,8 +32,6 @@ public interface CsrListBuilder<PAGE, T> {
 
     interface Allocator<PAGE> extends AutoCloseable {
 
-        void prepare();
-
         long write(PAGE targets, int length);
 
         @Override
