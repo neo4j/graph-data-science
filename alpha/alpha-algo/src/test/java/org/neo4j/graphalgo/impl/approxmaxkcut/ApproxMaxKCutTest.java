@@ -107,7 +107,7 @@ final class ApproxMaxKCutTest {
             .k(2)
             .vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder)
             // We should not need as many iterations if we do VNS.
-            .iterations(vnsMaxNeighborhoodOrder > 0 ? 80 : 20);
+            .iterations(vnsMaxNeighborhoodOrder > 0 ? 100 : 25);
 
         if (weighted) {
             configBuilder.relationshipWeightProperty("weight");
@@ -131,7 +131,7 @@ final class ApproxMaxKCutTest {
 
         assertEquals(result.cutCost(), expectedCost);
 
-        var setFunction = result.setFunction();
+        var setFunction = result.candidateSolution();
 
         expectedMapping.forEach((outerVar, outerExpectedSet) -> {
             long outerNodeId = graph.toMappedNodeId(outerVar);

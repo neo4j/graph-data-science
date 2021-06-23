@@ -36,7 +36,6 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -46,8 +45,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /*
  * Implements a parallelized version of the GRASP (optionally with VNS) maximum k-cut approximation algorithm.
  *
- * A serial version of the algorithm is outlined in [1] as GRASP+VNS for k = 2 and is known as FES02GV in [2] which
- * benchmarks it against a lot of other algorithms, also for k = 2.
+ * A serial version of the algorithm is outlined in [1] as GRASP (GRASP+VNS with VNS) for k = 2 and is known as FES02G
+ * (FES02GV with VNS) in [2] which benchmarks it against a lot of other algorithms, also for k = 2.
  *
  * TODO: Add the path-relinking heuristic for possibly slightly better results when running single-threaded (making the
  *  algorithm GRASP+VNS+PR in [1] and FES02GVP in [2]).
@@ -80,24 +79,24 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
     @ValueClass
     public interface CutResult {
-        // Value at index `i` is the idx of the set to which node with id `i` belongs.
-        HugeIntArray setFunction();
+        // Value at index `i` is the idx of the community to which node with id `i` belongs.
+        HugeIntArray candidateSolution();
 
         double cutCost();
 
         static CutResult of(
-            HugeIntArray setFunction,
+            HugeIntArray candidateSolution,
             double cutCost
         ) {
             return ImmutableCutResult
                 .builder()
-                .setFunction(setFunction)
+                .candidateSolution(candidateSolution)
                 .cutCost(cutCost)
                 .build();
         }
 
         default LongNodeProperties asNodeProperties() {
-            return setFunction().asNodeProperties();
+            return candidateSolution().asNodeProperties();
         }
     }
 
@@ -109,7 +108,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private static final class NodeSwapStatus {
         // No thread has tried to swap the node yet, and no incoming neighbor has tried to mark it.
         static final long UNTOUCHED = 0;
-        // The node has been swapped to another set, or a thread is currently attempting to swap it.
+        // The node has been swapped to another community, or a thread is currently attempting to swap it.
         static final long SWAPPING = 1;
         // The node has had one of its incoming neighbors swapped (or at least attempted) so the improvement costs may be invalid.
         static final long NEIGHBOR = 2;
@@ -118,77 +117,84 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     }
 
     @FunctionalInterface
-    private interface WeightToDeltaConsumer {
+    private interface WeightTransformer {
         double accept(double weight);
     }
 
     @Override
     public CutResult compute() {
         // We allocate two arrays in order to be able to compare results between iterations "GRASP style".
-        var setFuncs = new LinkedList<>(
-            Arrays.asList(
-                HugeIntArray.newArray(graph.nodeCount(), tracker),
-                HugeIntArray.newArray(graph.nodeCount(), tracker)
-            )
-        );
+        var candidateSolutions = new HugeIntArray[]{
+            HugeIntArray.newArray(graph.nodeCount(), tracker),
+            HugeIntArray.newArray(graph.nodeCount(), tracker)
+        };
 
-        var costs = new LinkedList<>(
-            Arrays.asList(
-                // TODO: Should we create a dedicated AtomicDouble class using `AtomicReference` or `VarHandle` to avoid
-                //  the extra indirection of the array?
-                new AtomicDoubleArray(1),
-                new AtomicDoubleArray(1)
-            )
-        );
+        // TODO: Should we create a dedicated AtomicDouble class using `AtomicReference` or `VarHandle` to avoid the
+        //  extra indirection of the array?
+        var costs = new AtomicDoubleArray[]{
+            new AtomicDoubleArray(1),
+            new AtomicDoubleArray(1)
+        };
 
-        // Keep track of which set function is currently being used and which is best.
+        // Keep track of which candidate solution is currently being used and which is best.
         byte currIdx = 0, bestIdx = 1;
 
-        // Used by `localSearch()` to keep track of the costs for swapping a node to another set.
+        // Used by `localSearch()` to keep track of the costs for swapping a node to another community.
         // TODO: If we had pull-based traversal we could have a |V| sized int array here instead of the |V|*k sized
         //  double array.
-        var improvementCosts = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k(), tracker);
+        var nodeToCommunityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k(), tracker);
 
-        // Used by `localSearch()` to keep track of whether we can swap a node into another set or not.
+        // Used by `localSearch()` to keep track of whether we can swap a node into another community or not.
         // TODO: Add HugeAtomicByteArray and use that instead to save memory.
         var swapStatus = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
 
-        // Used with VNS to define the neighboring set function candidates.
-        HugeIntArray neighborFunc = null;
+        // Used with VNS to define the neighboring candidate solution.
+        HugeIntArray neighboringSolution = null;
         if (config.vnsMaxNeighborhoodOrder() > 0) {
-            neighborFunc = HugeIntArray.newArray(graph.nodeCount(), tracker);
+            neighboringSolution = HugeIntArray.newArray(graph.nodeCount(), tracker);
         }
 
         progressLogger.logStart();
 
         for (int i = 0; (i < config.iterations()) && running(); i++) {
-            var currSetFunc = setFuncs.get(currIdx);
-            var currCost = costs.get(currIdx);
+            var currCandidateSolution = candidateSolutions[currIdx];
+            var currCost = costs[currIdx];
 
-            placeNodesRandomly(currSetFunc);
+            progressLogger.startSubTask(String.format("Iteration %d", i));
 
-            localSearch(currSetFunc, improvementCosts, swapStatus);
+            progressLogger.startSubTask("Randomly assigning nodes to communities");
 
-            computeCost(currSetFunc, currCost);
+            placeNodesRandomly(currCandidateSolution);
 
-            if ((config.vnsMaxNeighborhoodOrder() > 0) && running()) {
-                var improvedCurrSetFunc = variableNeighborhoodSearch(
-                    currSetFunc,
+            if (!running()) break;
+
+            if (config.vnsMaxNeighborhoodOrder() > 0) {
+                progressLogger.startSubTask("Variable neighborhood search");
+
+                var improvedCandidateSolution = variableNeighborhoodSearch(
+                    currCandidateSolution,
                     currCost,
-                    neighborFunc,
-                    improvementCosts,
+                    neighboringSolution,
+                    nodeToCommunityWeights,
                     swapStatus
                 );
-                // If we obtained a better set function from VNS, swap with that with the one we used as input.
-                if (improvedCurrSetFunc != currSetFunc) {
-                    setFuncs.set(currIdx, improvedCurrSetFunc);
-                    neighborFunc = currSetFunc;
+                // If we obtained a better candidate solution from VNS, swap with that with the one we used as input.
+                if (improvedCandidateSolution != currCandidateSolution) {
+                    candidateSolutions[currIdx] = improvedCandidateSolution;
+                    neighboringSolution = currCandidateSolution;
                 }
+            } else {
+                progressLogger.startSubTask("Local search");
+
+                localSearch(currCandidateSolution, nodeToCommunityWeights, swapStatus);
+
+                computeCost(currCandidateSolution, currCost);
             }
 
-            // Store the newly computed set function if it was better than the previous. Then reuse the previous data
+
+            // Store the newly computed candidate solution if it was better than the previous. Then reuse the previous data
             // structures to make a new solution candidate if we are doing more iterations.
-            if (currCost.get(0) > costs.get(bestIdx).get(0)) {
+            if (currCost.get(0) > costs[bestIdx].get(0)) {
                 var tmp = bestIdx;
                 bestIdx = currIdx;
                 currIdx = tmp;
@@ -197,32 +203,32 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
         progressLogger.logFinish();
 
-        return CutResult.of(setFuncs.get(bestIdx), costs.get(bestIdx).get(0));
+        return CutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get(0));
     }
 
-    private void placeNodesRandomly(HugeIntArray setFunc) {
-        var placeTasks = PartitionUtils.rangePartition(
+    private void placeNodesRandomly(HugeIntArray candidateSolution) {
+        var tasks = PartitionUtils.rangePartition(
             config.concurrency(),
             graph.nodeCount(),
             partition -> new PlaceNodesRandomly(
-                setFunc,
+                candidateSolution,
                 config.k(),
                 partition,
                 progressLogger
             ),
             Optional.of(config.minBatchSize())
         );
-        ParallelUtil.runWithConcurrency(config.concurrency(), placeTasks, executor);
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
     }
 
-    private void computeCost(HugeIntArray setFunc, AtomicDoubleArray cost) {
+    private void computeCost(HugeIntArray candidateSolution, AtomicDoubleArray cost) {
         cost.set(0, 0);
-        var computeTasks = PartitionUtils.degreePartition(
+        var tasks = PartitionUtils.degreePartition(
             graph,
             config.concurrency(),
             partition -> new ComputeCost(
                 graph.concurrentCopy(),
-                setFunc,
+                candidateSolution,
                 cost,
                 config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D,
                 partition,
@@ -230,30 +236,30 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             ),
             Optional.of(config.minBatchSize())
         );
-        ParallelUtil.runWithConcurrency(config.concurrency(), computeTasks, executor);
+        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
     }
 
     /*
      * This is a Local Search procedure modified to run more efficiently in parallel. Instead of restarting the while
-     * loop whenever anything has changed in the set function we try to continue as long as we can in order to avoid the
+     * loop whenever anything has changed in the candidate solution we try to continue as long as we can in order to avoid the
      * overhead of rescheduling our tasks on threads and possibly losing hot caches.
      */
     private void localSearch(
-        HugeIntArray setFunc,
-        HugeAtomicDoubleArray improvementCosts,
+        HugeIntArray candidateSolution,
+        HugeAtomicDoubleArray nodeToCommunityWeights,
         HugeAtomicLongArray swapStatus
     ) {
         var change = new AtomicBoolean(true);
 
         while (change.get() && running()) {
-            improvementCosts.setAll(0.0D);
-            var searchTasks = PartitionUtils.degreePartition(
+            nodeToCommunityWeights.setAll(0.0D);
+            var computeTasks = PartitionUtils.degreePartition(
                 graph,
                 config.concurrency(),
                 partition -> new ComputeImprovements(
                     graph.concurrentCopy(),
-                    setFunc,
-                    improvementCosts,
+                    candidateSolution,
+                    nodeToCommunityWeights,
                     config.k(),
                     config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D,
                     partition,
@@ -261,17 +267,17 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                 ),
                 Optional.of(config.minBatchSize())
             );
-            ParallelUtil.runWithConcurrency(config.concurrency(), searchTasks, executor);
+            ParallelUtil.runWithConcurrency(config.concurrency(), computeTasks, executor);
 
             swapStatus.setAll(NodeSwapStatus.UNTOUCHED);
             change.set(false);
-            var patchTasks = PartitionUtils.degreePartition(
+            var swapTasks = PartitionUtils.degreePartition(
                 graph,
                 config.concurrency(),
                 partition -> new SwapForImprovements(
                     graph.concurrentCopy(),
-                    setFunc,
-                    improvementCosts,
+                    candidateSolution,
+                    nodeToCommunityWeights,
                     swapStatus,
                     change,
                     partition,
@@ -280,15 +286,15 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                 ),
                 Optional.of(config.minBatchSize())
             );
-            ParallelUtil.runWithConcurrency(config.concurrency(), patchTasks, executor);
+            ParallelUtil.runWithConcurrency(config.concurrency(), swapTasks, executor);
         }
     }
 
     private HugeIntArray variableNeighborhoodSearch(
-        HugeIntArray bestSetFunc,
+        HugeIntArray bestCandidateSolution,
         AtomicDoubleArray bestCost,
-        HugeIntArray neighborFunc,
-        HugeAtomicDoubleArray improvementCosts,
+        HugeIntArray neighboringSolution,
+        HugeAtomicDoubleArray nodeToCommunityWeights,
         HugeAtomicLongArray swapStatus
     ) {
         var random = new Random();
@@ -296,24 +302,25 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         var order = 1;
 
         while ((order < config.vnsMaxNeighborhoodOrder()) && running()) {
-            bestSetFunc.copyTo(neighborFunc, graph.nodeCount());
+            bestCandidateSolution.copyTo(neighboringSolution, graph.nodeCount());
 
-            // Generate a neighboring set function of the current order.
+            // Generate a neighboring candidate solution of the current order.
             for (int i = 0; i < order; i++) {
                 long nodeToFlip = Math.abs(random.nextLong()) % graph.nodeCount();
-                // For `nodeToFlip`, move to a new random set not equal to its current set in the this cut.
-                int rndNewSetIdx = (neighborFunc.get(nodeToFlip) + (random.nextInt(config.k() - 1) + 1)) % config.k();
-                neighborFunc.set(nodeToFlip, rndNewSetIdx);
+                // For `nodeToFlip`, move to a new random community not equal to its current community in the this cut.
+                int rndNewCommunity = (neighboringSolution.get(nodeToFlip) + (random.nextInt(config.k() - 1) + 1)) % config
+                    .k();
+                neighboringSolution.set(nodeToFlip, rndNewCommunity);
             }
 
-            localSearch(neighborFunc, improvementCosts, swapStatus);
+            localSearch(neighboringSolution, nodeToCommunityWeights, swapStatus);
 
-            computeCost(neighborFunc, neighborCost);
+            computeCost(neighboringSolution, neighborCost);
 
             if (neighborCost.get(0) > bestCost.get(0)) {
-                var tmpSetFunc = bestSetFunc;
-                bestSetFunc = neighborFunc;
-                neighborFunc = tmpSetFunc;
+                var tmpCandidateSolution = bestCandidateSolution;
+                bestCandidateSolution = neighboringSolution;
+                neighboringSolution = tmpCandidateSolution;
 
                 bestCost.set(0, neighborCost.get(0));
 
@@ -324,23 +331,23 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             }
         }
 
-        return bestSetFunc;
+        return bestCandidateSolution;
     }
 
     private static class PlaceNodesRandomly implements Runnable {
 
-        private final HugeIntArray setFunction;
+        private final HugeIntArray candidateSolution;
         private final int k;
         private final Partition partition;
         private final ProgressLogger progressLogger;
 
         PlaceNodesRandomly(
-            HugeIntArray setFunction,
+            HugeIntArray candidateSolution,
             int k,
             Partition partition,
             ProgressLogger progressLogger
         ) {
-            this.setFunction = setFunction;
+            this.candidateSolution = candidateSolution;
             this.k = k;
             this.partition = partition;
             this.progressLogger = progressLogger;
@@ -350,7 +357,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         public void run() {
             ThreadLocalRandom random = ThreadLocalRandom.current();
 
-            partition.consume(nodeId -> setFunction.set(nodeId, random.nextInt(k)));
+            partition.consume(nodeId -> candidateSolution.set(nodeId, random.nextInt(k)));
 
             progressLogger.logProgress(partition.nodeCount());
         }
@@ -359,25 +366,25 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private static class ComputeImprovements implements Runnable {
 
         private final Graph graph;
-        private final HugeIntArray setFunction;
-        private final HugeAtomicDoubleArray improvementCosts;
+        private final HugeIntArray candidateSolution;
+        private final HugeAtomicDoubleArray nodeToCommunityWeights;
         private final int k;
-        private final WeightToDeltaConsumer getDelta;
+        private final WeightTransformer getDelta;
         private final Partition partition;
         private final ProgressLogger progressLogger;
 
         ComputeImprovements(
             Graph graph,
-            HugeIntArray setFunction,
-            HugeAtomicDoubleArray improvementCosts,
+            HugeIntArray candidateSolution,
+            HugeAtomicDoubleArray nodeToCommunityWeights,
             int k,
-            WeightToDeltaConsumer getDelta,
+            WeightTransformer getDelta,
             Partition partition,
             ProgressLogger progressLogger
         ) {
             this.graph = graph;
-            this.setFunction = setFunction;
-            this.improvementCosts = improvementCosts;
+            this.candidateSolution = candidateSolution;
+            this.nodeToCommunityWeights = nodeToCommunityWeights;
             this.k = k;
             this.getDelta = getDelta;
             this.partition = partition;
@@ -401,17 +408,20 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
                         double delta = getDelta.accept(weight);
 
-                        outgoingImprovementCosts[setFunction.get(targetNodeId)] += delta;
+                        outgoingImprovementCosts[candidateSolution.get(targetNodeId)] += delta;
+
+                        // This accounts for the `nodeToCommunityWeight` for the incoming relationship
+                        // `sourceNodeId -> targetNodeId` from `targetNodeId`'s point of view.
                         // TODO: We could avoid these cache-unfriendly accesses of the outgoing relationships if we had
                         //  a way to traverse incoming relationships (pull-based traversal).
-                        improvementCosts.getAndAdd(targetNodeId * k + setFunction.get(sourceNodeId), delta);
+                        nodeToCommunityWeights.getAndAdd(targetNodeId * k + candidateSolution.get(sourceNodeId), delta);
 
                         return true;
                     }
                 );
 
                 for (int i = 0; i < k; i++) {
-                    improvementCosts.getAndAdd(nodeId * k + i, outgoingImprovementCosts[i]);
+                    nodeToCommunityWeights.getAndAdd(nodeId * k + i, outgoingImprovementCosts[i]);
                 }
             });
 
@@ -422,8 +432,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private static class SwapForImprovements implements Runnable {
 
         private final Graph graph;
-        private final HugeIntArray setFunction;
-        private final HugeAtomicDoubleArray improvementCosts;
+        private final HugeIntArray candidateSolution;
+        private final HugeAtomicDoubleArray nodeToCommunityWeights;
         private final HugeAtomicLongArray swapStatus;
         private final AtomicBoolean change;
         private final int k;
@@ -432,8 +442,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
         SwapForImprovements(
             Graph graph,
-            HugeIntArray setFunction,
-            HugeAtomicDoubleArray improvementCosts,
+            HugeIntArray candidateSolution,
+            HugeAtomicDoubleArray nodeToCommunityWeights,
             HugeAtomicLongArray swapStatus,
             AtomicBoolean change,
             Partition partition,
@@ -441,8 +451,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             ProgressLogger progressLogger
         ) {
             this.graph = graph;
-            this.setFunction = setFunction;
-            this.improvementCosts = improvementCosts;
+            this.candidateSolution = candidateSolution;
+            this.nodeToCommunityWeights = nodeToCommunityWeights;
             this.swapStatus = swapStatus;
             this.change = change;
             this.partition = partition;
@@ -455,10 +465,10 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
             var failedSwap = new MutableBoolean();
 
             partition.consume(nodeId -> {
-                int currSetIdx = setFunction.get(nodeId);
-                int bestSetIdx = bestSetIdx(nodeId, currSetIdx);
+                int currCommunity = candidateSolution.get(nodeId);
+                int bestCommunity = bestCommunity(nodeId, currCommunity);
 
-                if (bestSetIdx == currSetIdx) return;
+                if (bestCommunity == currCommunity) return;
 
                 change.set(true);
 
@@ -500,47 +510,48 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                     return;
                 }
 
-                setFunction.set(nodeId, bestSetIdx);
+                candidateSolution.set(nodeId, bestCommunity);
             });
 
             progressLogger.logProgress(partition.nodeCount());
         }
 
-        private int bestSetIdx(long nodeId, int currSetIdx) {
+        private int bestCommunity(long nodeId, int currCommunity) {
             final long NODE_OFFSET = nodeId * k;
-            int bestSetIdx = currSetIdx;
-            double bestImprovement = improvementCosts.get(NODE_OFFSET + currSetIdx);
+            int bestCommunity = currCommunity;
+            double smallestCommunityWeight = nodeToCommunityWeights.get(NODE_OFFSET + currCommunity);
 
             for (int i = 0; i < k; i++) {
-                var improvementCost = improvementCosts.get(NODE_OFFSET + i);
-                if (improvementCost < bestImprovement) {
-                    bestSetIdx = i;
-                    bestImprovement = improvementCost;
+                var nodeToCommunityWeight = nodeToCommunityWeights.get(NODE_OFFSET + i);
+                if (nodeToCommunityWeight < smallestCommunityWeight) {
+                    bestCommunity = i;
+                    smallestCommunityWeight = nodeToCommunityWeight;
                 }
             }
-            return bestSetIdx;
+
+            return bestCommunity;
         }
     }
 
     private static class ComputeCost implements Runnable {
 
         private final Graph graph;
-        private final HugeIntArray setFunction;
+        private final HugeIntArray candidateSolution;
         private final AtomicDoubleArray cost;
-        private final WeightToDeltaConsumer getDelta;
+        private final WeightTransformer getDelta;
         private final Partition partition;
         private final ProgressLogger progressLogger;
 
         ComputeCost(
             Graph graph,
-            HugeIntArray setFunction,
+            HugeIntArray candidateSolution,
             AtomicDoubleArray cost,
-            WeightToDeltaConsumer getDelta,
+            WeightTransformer getDelta,
             Partition partition,
             ProgressLogger progressLogger
         ) {
             this.graph = graph;
-            this.setFunction = setFunction;
+            this.candidateSolution = candidateSolution;
             this.cost = cost;
             this.getDelta = getDelta;
             this.partition = partition;
@@ -557,7 +568,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
                     nodeId,
                     DEFAULT_WEIGHT,
                     (sourceNodeId, targetNodeId, weight) -> {
-                        if (setFunction.get(sourceNodeId) != setFunction.get(targetNodeId)) {
+                        if (candidateSolution.get(sourceNodeId) != candidateSolution.get(targetNodeId)) {
                             localCost.add(getDelta.accept(weight));
                         }
                         return true;
