@@ -28,7 +28,7 @@ import java.util.Arrays;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
-public final class TransientUncompressedListBuilder implements AdjacencyPropertiesBuilder {
+public final class TransientUncompressedListBuilder implements CsrListBuilder<long[], TransientUncompressedList> {
 
     private final BumpAllocator<long[]> builder;
 
@@ -79,7 +79,7 @@ public final class TransientUncompressedListBuilder implements AdjacencyProperti
         }
     }
 
-    public static final class Allocator implements AdjacencyPropertiesAllocator {
+    public static final class Allocator implements CsrListBuilder.Allocator<long[]> {
 
         private final BumpAllocator.LocalAllocator<long[]> allocator;
 
@@ -96,7 +96,7 @@ public final class TransientUncompressedListBuilder implements AdjacencyProperti
         }
 
         @Override
-        public long writeRawProperties(long[] properties, int length) {
+        public long write(long[] properties, int length) {
             return allocator.insert(properties, length);
         }
     }

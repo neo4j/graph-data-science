@@ -37,6 +37,7 @@ import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
+import org.neo4j.graphalgo.core.compress.AdjacencyFactory;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphdb.Result;
@@ -262,6 +263,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             AdjacencyListWithPropertiesBuilder builder = AdjacencyListWithPropertiesBuilder.create(
                 nodeMapping.nodeCount(),
+                AdjacencyFactory.transientCompressed(),
                 projection,
                 aggregationsWithDefault,
                 propertyKeyIds,

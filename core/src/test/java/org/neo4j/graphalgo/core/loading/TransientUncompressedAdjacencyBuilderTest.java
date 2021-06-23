@@ -19,15 +19,13 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.compress.AdjacencyFactory;
 
-public interface AdjacencyListBuilder {
+class TransientUncompressedAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
 
-    AdjacencyListAllocator newAllocator();
-
-    AdjacencyList build(HugeIntArray degrees, HugeLongArray offsets);
-
-    void flush();
+    @Test
+    void test() throws Exception {
+        testAdjacencyList(AdjacencyFactory.transientUncompressed());
+    }
 }

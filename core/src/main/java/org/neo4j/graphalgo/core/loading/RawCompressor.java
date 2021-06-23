@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyProperties;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressor;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressorBlueprint;
@@ -38,22 +40,23 @@ import java.util.stream.Stream;
 
 public final class RawCompressor implements AdjacencyCompressor {
 
-    public enum Factory implements AdjacencyCompressorFactory {
+    public enum Factory implements AdjacencyCompressorFactory<long[], long[]> {
         INSTANCE;
 
         @Override
         public AdjacencyCompressorBlueprint create(
             long nodeCount,
+            CsrListBuilderFactory<long[], ? extends AdjacencyList, long[], ? extends AdjacencyProperties> csrListBuilderFactory,
             PropertyMappings propertyMappings,
             Aggregation[] aggregations,
             boolean noAggregation,
             AllocationTracker tracker
         ) {
-            var adjacencyBuilderFactory = TransientAdjacencyFactory.of(tracker);
-            var adjacencyBuilder = adjacencyBuilderFactory.newAdjacencyPropertiesBuilder();
+            var adjacencyBuilder = csrListBuilderFactory.newAdjacencyListBuilder();
 
-            var propertyBuilders = new TransientUncompressedListBuilder[propertyMappings.numberOfMappings()];
-            Arrays.setAll(propertyBuilders, i -> adjacencyBuilderFactory.newAdjacencyPropertiesBuilder());
+            @SuppressWarnings("unchecked")
+            CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new CsrListBuilder[propertyMappings.numberOfMappings()];
+            Arrays.setAll(propertyBuilders, i -> csrListBuilderFactory.newAdjacencyPropertiesBuilder());
 
             return new Blueprint(
                 adjacencyBuilder,
@@ -71,8 +74,8 @@ public final class RawCompressor implements AdjacencyCompressor {
     }
 
     private static final class Blueprint implements AdjacencyCompressorBlueprint {
-        private final TransientUncompressedListBuilder adjacencyBuilder;
-        private final TransientUncompressedListBuilder[] propertyBuilders;
+        private final CsrListBuilder<long[], ? extends AdjacencyList> adjacencyBuilder;
+        private final CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders;
         private final HugeIntArray adjacencyDegrees;
         private final HugeLongArray adjacencyOffsets;
         private final HugeLongArray[] propertyOffsets;
@@ -80,8 +83,8 @@ public final class RawCompressor implements AdjacencyCompressor {
         private final Aggregation[] aggregations;
 
         private Blueprint(
-            TransientUncompressedListBuilder adjacencyBuilder,
-            TransientUncompressedListBuilder[] propertyBuilders,
+            CsrListBuilder<long[], ? extends AdjacencyList> adjacencyBuilder,
+            CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
             HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
             HugeLongArray[] propertyOffsets,
@@ -98,13 +101,14 @@ public final class RawCompressor implements AdjacencyCompressor {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public RawCompressor createCompressor() {
             return new RawCompressor(
                 adjacencyBuilder.newAllocator(),
                 Arrays
                     .stream(propertyBuilders)
-                    .map(AdjacencyPropertiesBuilder::newAllocator)
-                    .toArray(AdjacencyPropertiesAllocator[]::new),
+                    .map(CsrListBuilder::newAllocator)
+                    .toArray(CsrListBuilder.Allocator[]::new),
                 adjacencyDegrees,
                 adjacencyOffsets,
                 propertyOffsets,
@@ -146,8 +150,8 @@ public final class RawCompressor implements AdjacencyCompressor {
         }
     }
 
-    private final AdjacencyPropertiesAllocator adjacencyAllocator;
-    private final AdjacencyPropertiesAllocator[] propertiesAllocators;
+    private final CsrListBuilder.Allocator<long[]> adjacencyAllocator;
+    private final CsrListBuilder.Allocator<long[]>[] propertiesAllocators;
     private final HugeIntArray adjacencyDegrees;
     private final HugeLongArray adjacencyOffsets;
     private final HugeLongArray[] propertyOffsets;
@@ -155,8 +159,8 @@ public final class RawCompressor implements AdjacencyCompressor {
     private final Aggregation[] aggregations;
 
     private RawCompressor(
-        AdjacencyPropertiesAllocator adjacencyAllocator,
-        AdjacencyPropertiesAllocator[] propertiesAllocators,
+        CsrListBuilder.Allocator<long[]> adjacencyAllocator,
+        CsrListBuilder.Allocator<long[]>[] propertiesAllocators,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
         HugeLongArray[] propertyOffsets,
@@ -338,7 +342,7 @@ public final class RawCompressor implements AdjacencyCompressor {
         }
     }
 
-    private long copy(long[] data, int degree, AdjacencyPropertiesAllocator allocator) {
-        return allocator.writeRawProperties(data, degree);
+    private long copy(long[] data, int degree, CsrListBuilder.Allocator<long[]> allocator) {
+        return allocator.write(data, degree);
     }
 }

@@ -20,31 +20,20 @@
 package org.neo4j.graphalgo.core.compress;
 
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyProperties;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.loading.CsrListBuilderFactory;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-import java.util.stream.Stream;
-
-public interface AdjacencyCompressorFactory {
+public interface AdjacencyCompressorFactory<TARGET_PAGE, PROPERTY_PAGE> {
 
     AdjacencyCompressorBlueprint create(
         long nodeCount,
+        CsrListBuilderFactory<TARGET_PAGE, ? extends AdjacencyList, PROPERTY_PAGE, ? extends AdjacencyProperties> csrListBuilderFactory,
         PropertyMappings propertyMappings,
         Aggregation[] aggregations,
         boolean noAggregation,
         AllocationTracker tracker
     );
-
-    default AdjacencyCompressorBlueprint create(
-        long nodeCount,
-        PropertyMappings propertyMappings,
-        Aggregation[] aggregations,
-        AllocationTracker tracker
-    ) {
-        return create(
-            nodeCount, propertyMappings, aggregations,
-            Stream.of(aggregations).allMatch(aggregation -> aggregation == Aggregation.NONE),
-            tracker
-        );
-    }
 }

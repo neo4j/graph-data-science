@@ -19,9 +19,13 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-public interface AdjacencyBuilderFactory {
+import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.compress.AdjacencyFactory;
 
-    AdjacencyListBuilder newAdjacencyListBuilder();
+class TransientCompressedAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
 
-    AdjacencyPropertiesBuilder newAdjacencyPropertiesBuilder();
+    @Test
+    void test() throws Exception {
+        testAdjacencyList(AdjacencyFactory.transientCompressed());
+    }
 }

@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
+import org.neo4j.graphalgo.core.compress.AdjacencyFactory;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientUncompressedList;
@@ -202,6 +203,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
                 Map.Entry::getKey,
                 projectionEntry -> AdjacencyListWithPropertiesBuilder.create(
                     dimensions.nodeCount(),
+                    AdjacencyFactory.transientCompressed(),
                     projectionEntry.getValue(),
                     dimensions.relationshipPropertyTokens(),
                     tracker

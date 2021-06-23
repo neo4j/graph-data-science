@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.api.AdjacencyList;
+import org.neo4j.graphalgo.api.AdjacencyProperties;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressor;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressorBlueprint;
@@ -36,22 +38,23 @@ import java.util.stream.Stream;
 
 public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
-    public enum Factory implements AdjacencyCompressorFactory {
+    public enum Factory implements AdjacencyCompressorFactory<byte[], long[]> {
         INSTANCE;
 
         @Override
         public AdjacencyCompressorBlueprint create(
             long nodeCount,
+            CsrListBuilderFactory<byte[], ? extends AdjacencyList, long[], ? extends AdjacencyProperties> csrListBuilderFactory,
             PropertyMappings propertyMappings,
             Aggregation[] aggregations,
             boolean noAggregation,
             AllocationTracker tracker
         ) {
-            var adjacencyBuilderFactory = TransientAdjacencyFactory.of(tracker);
-            var adjacencyBuilder = adjacencyBuilderFactory.newAdjacencyListBuilder();
+            var adjacencyBuilder = csrListBuilderFactory.newAdjacencyListBuilder();
 
-            var propertyBuilders = new AdjacencyPropertiesBuilder[propertyMappings.numberOfMappings()];
-            Arrays.setAll(propertyBuilders, i -> adjacencyBuilderFactory.newAdjacencyPropertiesBuilder());
+            @SuppressWarnings("unchecked")
+            CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new CsrListBuilder[propertyMappings.numberOfMappings()];
+            Arrays.setAll(propertyBuilders, i -> csrListBuilderFactory.newAdjacencyPropertiesBuilder());
 
             return new Blueprint(
                 adjacencyBuilder,
@@ -69,8 +72,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     }
 
     private static final class Blueprint implements AdjacencyCompressorBlueprint {
-        private final AdjacencyListBuilder adjacencyBuilder;
-        private final AdjacencyPropertiesBuilder[] propertyBuilders;
+        private final CsrListBuilder<byte[], ? extends AdjacencyList> adjacencyBuilder;
+        private final CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders;
         private final HugeIntArray adjacencyDegrees;
         private final HugeLongArray adjacencyOffsets;
         private final HugeLongArray[] propertyOffsets;
@@ -78,8 +81,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         private final Aggregation[] aggregations;
 
         private Blueprint(
-            AdjacencyListBuilder adjacencyBuilder,
-            AdjacencyPropertiesBuilder[] propertyBuilders,
+            CsrListBuilder<byte[], ? extends AdjacencyList> adjacencyBuilder,
+            CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
             HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
             HugeLongArray[] propertyOffsets,
@@ -96,13 +99,14 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public DeltaVarLongCompressor createCompressor() {
             return new DeltaVarLongCompressor(
                 adjacencyBuilder.newAllocator(),
                 Arrays
                     .stream(propertyBuilders)
-                    .map(AdjacencyPropertiesBuilder::newAllocator)
-                    .toArray(AdjacencyPropertiesAllocator[]::new),
+                    .map(CsrListBuilder::newAllocator)
+                    .toArray(CsrListBuilder.Allocator[]::new),
                 adjacencyDegrees,
                 adjacencyOffsets,
                 propertyOffsets,
@@ -114,7 +118,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         @Override
         public boolean supportsProperties() {
             // TODO temporary until Geri does support properties
-            return adjacencyBuilder instanceof TransientAdjacencyListBuilder;
+            return adjacencyBuilder instanceof TransientCompressedListBuilder;
         }
 
         @Override
@@ -142,8 +146,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         }
     }
 
-    private final AdjacencyListAllocator adjacencyAllocator;
-    private final AdjacencyPropertiesAllocator[] propertiesAllocators;
+    private final CsrListBuilder.Allocator<byte[]> adjacencyAllocator;
+    private final CsrListBuilder.Allocator<long[]>[] propertiesAllocators;
     private final HugeIntArray adjacencyDegrees;
     private final HugeLongArray adjacencyOffsets;
     private final HugeLongArray[] propertyOffsets;
@@ -151,8 +155,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     private final Aggregation[] aggregations;
 
     private DeltaVarLongCompressor(
-        AdjacencyListAllocator adjacencyAllocator,
-        AdjacencyPropertiesAllocator[] propertiesAllocators,
+        CsrListBuilder.Allocator<byte[]> adjacencyAllocator,
+        CsrListBuilder.Allocator<long[]>[] propertiesAllocators,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
         HugeLongArray[] propertyOffsets,
@@ -257,19 +261,15 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     }
 
     private long copyIds(byte[] targets, int requiredBytes) {
-        return adjacencyAllocator.writeRawTargets(targets, requiredBytes);
+        return adjacencyAllocator.write(targets, requiredBytes);
     }
 
     private void copyProperties(long[][] properties, int degree, long nodeId, HugeLongArray[] offsets) {
         for (int i = 0; i < properties.length; i++) {
             long[] property = properties[i];
             var propertiesAllocator = propertiesAllocators[i];
-            long address = copyProperties(property, degree, propertiesAllocator);
+            long address = propertiesAllocator.write(property, degree);
             offsets[i].set(nodeId, address);
         }
-    }
-
-    private long copyProperties(long[] properties, int degree, AdjacencyPropertiesAllocator propertiesAllocator) {
-        return propertiesAllocator.writeRawProperties(properties, degree);
     }
 }

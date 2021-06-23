@@ -39,6 +39,7 @@ import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.compress.AdjacencyFactory;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.AdjacencyBuilder;
@@ -291,6 +292,7 @@ public final class GraphFactory {
 
         var adjacencyListWithPropertiesBuilder = AdjacencyListWithPropertiesBuilder.create(
             nodes.rootNodeCount(),
+            AdjacencyFactory.transientCompressed(),
             projection,
             aggregations,
             propertyKeyIds,

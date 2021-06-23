@@ -23,7 +23,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressorBlueprint;
-import org.neo4j.graphalgo.core.compress.AdjacencyCompressorFactory;
+import org.neo4j.graphalgo.core.compress.AdjacencyFactory;
 import org.neo4j.graphalgo.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
@@ -40,6 +40,7 @@ public final class AdjacencyListWithPropertiesBuilder {
 
     public static AdjacencyListWithPropertiesBuilder create(
         long nodeCount,
+        AdjacencyFactory adjacencyFactory,
         RelationshipProjection projection,
         Map<String, Integer> relationshipPropertyTokens,
         AllocationTracker tracker
@@ -50,6 +51,7 @@ public final class AdjacencyListWithPropertiesBuilder {
 
         return create(
             nodeCount,
+            adjacencyFactory,
             projection,
             aggregations,
             propertyKeyIds,
@@ -60,33 +62,14 @@ public final class AdjacencyListWithPropertiesBuilder {
 
     public static AdjacencyListWithPropertiesBuilder create(
         long nodeCount,
+        AdjacencyFactory adjacencyFactory,
         RelationshipProjection projection,
         Aggregation[] aggregations,
         int[] propertyKeyIds,
         double[] defaultValues,
         AllocationTracker tracker
     ) {
-        return create(
-            nodeCount,
-            projection,
-            adjacencyCompressorFactory(),
-            aggregations,
-            propertyKeyIds,
-            defaultValues,
-            tracker
-        );
-    }
-
-    private static AdjacencyListWithPropertiesBuilder create(
-        long nodeCount,
-        RelationshipProjection projection,
-        AdjacencyCompressorFactory adjacencyCompressorFactory,
-        Aggregation[] aggregations,
-        int[] propertyKeyIds,
-        double[] defaultValues,
-        AllocationTracker tracker
-    ) {
-        var adjacencyCompressor = adjacencyCompressorFactory.create(
+        var adjacencyCompressor = adjacencyFactory.create(
             nodeCount,
             projection.properties(),
             aggregations,
@@ -100,10 +83,6 @@ public final class AdjacencyListWithPropertiesBuilder {
             propertyKeyIds,
             defaultValues
         );
-    }
-
-    private static AdjacencyCompressorFactory adjacencyCompressorFactory() {
-        return DeltaVarLongCompressor.Factory.INSTANCE;
     }
 
     private static double[] defaultValues(RelationshipProjection projection) {

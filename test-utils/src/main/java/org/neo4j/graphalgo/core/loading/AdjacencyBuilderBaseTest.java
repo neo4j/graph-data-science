@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.compress.AdjacencyFactory;
 import org.neo4j.graphalgo.core.huge.DirectIdMapping;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
@@ -37,9 +38,10 @@ import static org.neo4j.graphalgo.core.loading.AdjacencyBuilder.IGNORE_VALUE;
 
 public abstract class AdjacencyBuilderBaseTest {
 
-    protected void testAdjacencyList(AdjacencyBuilderFactory listBuilderFactory) {
+    protected void testAdjacencyList(AdjacencyFactory adjacencyFactory) {
         AdjacencyListWithPropertiesBuilder globalBuilder = AdjacencyListWithPropertiesBuilder.create(
             6,
+            adjacencyFactory,
             RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
             new Aggregation[]{Aggregation.NONE},
             new int[0],

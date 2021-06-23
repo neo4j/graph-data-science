@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.TransientAdjacencyFactory;
+import org.neo4j.graphalgo.core.loading.TransientCompressedCsrListFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -100,9 +100,9 @@ class TransientUncompressedListTest {
     }
 
     private PropertyCursor propertyCursorFromTargets(long[] targets) {
-        var builder = TransientAdjacencyFactory.of(AllocationTracker.empty()).newAdjacencyPropertiesBuilder();
+        var builder = TransientCompressedCsrListFactory.of(AllocationTracker.empty()).newAdjacencyPropertiesBuilder();
         var allocator = builder.newAllocator();
-        var offset = allocator.writeRawProperties(targets, targets.length);
+        var offset = allocator.write(targets, targets.length);
         var properties = builder.build(HugeIntArray.of(targets.length), HugeLongArray.of(offset));
         return properties.propertyCursor(0);
     }

@@ -19,15 +19,9 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyProperties;
-import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
-import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+public interface CsrListBuilderFactory<TARGET_PAGE, TARGET_TYPE, PROPERTY_PAGE, PROPERTY_TYPE> {
 
-public interface AdjacencyPropertiesBuilder {
+    CsrListBuilder<TARGET_PAGE, TARGET_TYPE> newAdjacencyListBuilder();
 
-    AdjacencyPropertiesAllocator newAllocator();
-
-    AdjacencyProperties build(HugeIntArray degrees, HugeLongArray offsets);
-
-    void flush();
+    CsrListBuilder<PROPERTY_PAGE, PROPERTY_TYPE> newAdjacencyPropertiesBuilder();
 }

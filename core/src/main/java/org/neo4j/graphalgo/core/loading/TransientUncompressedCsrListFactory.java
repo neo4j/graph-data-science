@@ -19,13 +19,28 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.huge.TransientUncompressedList;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-class TransientAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
+public final class TransientUncompressedCsrListFactory implements CsrListBuilderFactory<long[], TransientUncompressedList, long[], TransientUncompressedList> {
 
-    @Test
-    void test() throws Exception {
-        testAdjacencyList(TransientAdjacencyFactory.of(AllocationTracker.empty()));
+    public static TransientUncompressedCsrListFactory of(AllocationTracker tracker) {
+        return new TransientUncompressedCsrListFactory(tracker);
+    }
+
+    private final AllocationTracker tracker;
+
+    private TransientUncompressedCsrListFactory(AllocationTracker tracker) {
+        this.tracker = tracker;
+    }
+
+    @Override
+    public TransientUncompressedListBuilder newAdjacencyListBuilder() {
+        return new TransientUncompressedListBuilder(tracker);
+    }
+
+    @Override
+    public TransientUncompressedListBuilder newAdjacencyPropertiesBuilder() {
+        return new TransientUncompressedListBuilder(tracker);
     }
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
@@ -29,11 +28,11 @@ import java.util.Arrays;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 
-public final class TransientAdjacencyListBuilder implements AdjacencyListBuilder {
+public final class TransientCompressedListBuilder implements CsrListBuilder<byte[], TransientAdjacencyList> {
 
     private final BumpAllocator<byte[]> builder;
 
-    TransientAdjacencyListBuilder(AllocationTracker tracker) {
+    TransientCompressedListBuilder(AllocationTracker tracker) {
         this.builder = new BumpAllocator<>(tracker, Factory.INSTANCE);
     }
 
@@ -43,7 +42,7 @@ public final class TransientAdjacencyListBuilder implements AdjacencyListBuilder
     }
 
     @Override
-    public AdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
+    public TransientAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
         return new TransientAdjacencyList(builder.intoPages(), degrees, offsets);
     }
 
@@ -80,7 +79,7 @@ public final class TransientAdjacencyListBuilder implements AdjacencyListBuilder
         }
     }
 
-    static final class Allocator implements AdjacencyListAllocator {
+    static final class Allocator implements CsrListBuilder.Allocator<byte[]> {
 
         private final BumpAllocator.LocalAllocator<byte[]> allocator;
 
@@ -97,7 +96,7 @@ public final class TransientAdjacencyListBuilder implements AdjacencyListBuilder
         }
 
         @Override
-        public long writeRawTargets(byte[] targets, int length) {
+        public long write(byte[] targets, int length) {
             return allocator.insert(targets, length);
         }
     }

@@ -19,27 +19,24 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-public final class TransientAdjacencyFactory implements AdjacencyBuilderFactory {
+public interface CsrListBuilder<PAGE, T> {
 
-    public static TransientAdjacencyFactory of(AllocationTracker tracker) {
-        return new TransientAdjacencyFactory(tracker);
-    }
+    Allocator<PAGE> newAllocator();
 
-    private final AllocationTracker tracker;
+    T build(HugeIntArray degrees, HugeLongArray offsets);
 
-    private TransientAdjacencyFactory(AllocationTracker tracker) {
-        this.tracker = tracker;
-    }
+    void flush();
 
-    @Override
-    public TransientAdjacencyListBuilder newAdjacencyListBuilder() {
-        return new TransientAdjacencyListBuilder(tracker);
-    }
+    interface Allocator<PAGE> extends AutoCloseable {
 
-    @Override
-    public TransientUncompressedListBuilder newAdjacencyPropertiesBuilder() {
-        return new TransientUncompressedListBuilder(tracker);
+        void prepare();
+
+        long write(PAGE targets, int length);
+
+        @Override
+        void close();
     }
 }
