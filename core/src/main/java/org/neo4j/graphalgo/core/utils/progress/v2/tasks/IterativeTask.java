@@ -60,6 +60,10 @@ public class IterativeTask extends Task {
 
     @Override
     public Task nextSubtask() {
+        if (subTasks().stream().anyMatch(t -> t.status() == Status.RUNNING)) {
+            throw new IllegalStateException("Cannot move to next subtask, because some subtasks are still running");
+        }
+
         var maybeNextSubtask = subTasks().stream().filter(t -> t.status() == Status.PENDING).findFirst();
 
         if (maybeNextSubtask.isPresent()) {
@@ -69,7 +73,7 @@ public class IterativeTask extends Task {
             subTasks().addAll(newIterationTasks);
             return newIterationTasks.get(0);
         } else {
-            throw new IllegalStateException("There are no more valid operations, this should never happen");
+            throw new IllegalStateException("No more pending subtasks");
         }
     }
 
