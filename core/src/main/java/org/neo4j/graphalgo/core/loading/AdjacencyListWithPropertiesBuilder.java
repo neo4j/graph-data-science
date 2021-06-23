@@ -27,12 +27,9 @@ import org.neo4j.graphalgo.core.compress.AdjacencyCompressorFactory;
 import org.neo4j.graphalgo.core.compress.AdjacencyListsWithProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-import java.util.Arrays;
 import java.util.Map;
 
 public final class AdjacencyListWithPropertiesBuilder {
-
-    private static final AdjacencyPropertiesBuilder[] EMPTY_PROPERTY_BUILDERS = new AdjacencyPropertiesBuilder[0];
 
     private final RelationshipProjection projection;
     private final AdjacencyCompressorBlueprint adjacencyCompressor;
@@ -45,7 +42,6 @@ public final class AdjacencyListWithPropertiesBuilder {
         long nodeCount,
         RelationshipProjection projection,
         Map<String, Integer> relationshipPropertyTokens,
-        AdjacencyBuilderFactory adjacencyBuilderFactory,
         AllocationTracker tracker
     ) {
         var aggregations = aggregations(projection);
@@ -55,7 +51,6 @@ public final class AdjacencyListWithPropertiesBuilder {
         return create(
             nodeCount,
             projection,
-            adjacencyBuilderFactory,
             aggregations,
             propertyKeyIds,
             defaultValues,
@@ -66,7 +61,6 @@ public final class AdjacencyListWithPropertiesBuilder {
     public static AdjacencyListWithPropertiesBuilder create(
         long nodeCount,
         RelationshipProjection projection,
-        AdjacencyBuilderFactory adjacencyBuilderFactory,
         Aggregation[] aggregations,
         int[] propertyKeyIds,
         double[] defaultValues,
@@ -76,7 +70,6 @@ public final class AdjacencyListWithPropertiesBuilder {
             nodeCount,
             projection,
             adjacencyCompressorFactory(),
-            adjacencyBuilderFactory,
             aggregations,
             propertyKeyIds,
             defaultValues,
@@ -88,24 +81,14 @@ public final class AdjacencyListWithPropertiesBuilder {
         long nodeCount,
         RelationshipProjection projection,
         AdjacencyCompressorFactory adjacencyCompressorFactory,
-        AdjacencyBuilderFactory adjacencyBuilderFactory,
         Aggregation[] aggregations,
         int[] propertyKeyIds,
         double[] defaultValues,
         AllocationTracker tracker
     ) {
-        var adjacencyListBuilder = adjacencyBuilderFactory.newAdjacencyListBuilder();
-
-        var propertyBuilders = EMPTY_PROPERTY_BUILDERS;
-        if (!projection.properties().isEmpty()) {
-            propertyBuilders = new AdjacencyPropertiesBuilder[projection.properties().numberOfMappings()];
-            Arrays.setAll(propertyBuilders, i -> adjacencyBuilderFactory.newAdjacencyPropertiesBuilder());
-        }
-
         var adjacencyCompressor = adjacencyCompressorFactory.create(
             nodeCount,
-            adjacencyListBuilder,
-            propertyBuilders,
+            projection.properties(),
             aggregations,
             tracker
         );

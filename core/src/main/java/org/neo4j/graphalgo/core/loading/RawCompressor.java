@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.sorting.IndirectSort;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressor;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressorBlueprint;
@@ -45,14 +46,16 @@ public final class RawCompressor implements AdjacencyCompressor {
         @Override
         public AdjacencyCompressorBlueprint create(
             long nodeCount,
-            AdjacencyListBuilder adjacencyBuilder,
-            AdjacencyPropertiesBuilder[] propertyBuilders,
+            PropertyMappings propertyMappings,
             Aggregation[] aggregations,
             boolean noAggregation,
             AllocationTracker tracker
         ) {
+            AdjacencyListBuilder adjacencyListBuilder = null;
+            AdjacencyPropertiesBuilder[] propertyBuilders = null;
+
             return new Blueprint(
-                adjacencyBuilder,
+                adjacencyListBuilder,
                 propertyBuilders,
                 HugeIntArray.newArray(nodeCount, tracker),
                 HugeLongArray.newArray(nodeCount, tracker),

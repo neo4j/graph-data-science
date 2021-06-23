@@ -54,7 +54,6 @@ import org.neo4j.graphalgo.core.loading.NodeMappingBuilder;
 import org.neo4j.graphalgo.core.loading.RecordsBatchBuffer;
 import org.neo4j.graphalgo.core.loading.RelationshipImporter;
 import org.neo4j.graphalgo.core.loading.SingleTypeRelationshipImporter;
-import org.neo4j.graphalgo.core.loading.TransientAdjacencyFactory;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
@@ -293,7 +292,6 @@ public final class GraphFactory {
         var adjacencyListWithPropertiesBuilder = AdjacencyListWithPropertiesBuilder.create(
             nodes.rootNodeCount(),
             projection,
-            TransientAdjacencyFactory.of(tracker),
             aggregations,
             propertyKeyIds,
             defaultValues,

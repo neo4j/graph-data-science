@@ -41,7 +41,6 @@ public abstract class AdjacencyBuilderBaseTest {
         AdjacencyListWithPropertiesBuilder globalBuilder = AdjacencyListWithPropertiesBuilder.create(
             6,
             RelationshipProjection.of("", Orientation.UNDIRECTED, Aggregation.NONE),
-            listBuilderFactory,
             new Aggregation[]{Aggregation.NONE},
             new int[0],
             new double[0],

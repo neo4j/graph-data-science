@@ -204,7 +204,6 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
                     dimensions.nodeCount(),
                     projectionEntry.getValue(),
                     dimensions.relationshipPropertyTokens(),
-                    TransientAdjacencyFactory.of(tracker),
                     tracker
                 )
             ));

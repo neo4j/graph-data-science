@@ -19,9 +19,8 @@
  */
 package org.neo4j.graphalgo.core.compress;
 
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.loading.AdjacencyListBuilder;
-import org.neo4j.graphalgo.core.loading.AdjacencyPropertiesBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.stream.Stream;
@@ -30,8 +29,7 @@ public interface AdjacencyCompressorFactory {
 
     AdjacencyCompressorBlueprint create(
         long nodeCount,
-        AdjacencyListBuilder adjacencyBuilder,
-        AdjacencyPropertiesBuilder[] propertyBuilders,
+        PropertyMappings propertyMappings,
         Aggregation[] aggregations,
         boolean noAggregation,
         AllocationTracker tracker
@@ -39,13 +37,12 @@ public interface AdjacencyCompressorFactory {
 
     default AdjacencyCompressorBlueprint create(
         long nodeCount,
-        AdjacencyListBuilder adjacencyBuilder,
-        AdjacencyPropertiesBuilder[] propertyBuilders,
+        PropertyMappings propertyMappings,
         Aggregation[] aggregations,
         AllocationTracker tracker
     ) {
         return create(
-            nodeCount, adjacencyBuilder, propertyBuilders, aggregations,
+            nodeCount, propertyMappings, aggregations,
             Stream.of(aggregations).allMatch(aggregation -> aggregation == Aggregation.NONE),
             tracker
         );

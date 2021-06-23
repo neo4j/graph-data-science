@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressor;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressorBlueprint;
@@ -35,18 +36,28 @@ import java.util.stream.Stream;
 
 public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
+    private static final AdjacencyPropertiesBuilder[] EMPTY_PROPERTY_BUILDERS = new AdjacencyPropertiesBuilder[0];
+
     public enum Factory implements AdjacencyCompressorFactory {
         INSTANCE;
 
         @Override
         public AdjacencyCompressorBlueprint create(
             long nodeCount,
-            AdjacencyListBuilder adjacencyBuilder,
-            AdjacencyPropertiesBuilder[] propertyBuilders,
+            PropertyMappings propertyMappings,
             Aggregation[] aggregations,
             boolean noAggregation,
             AllocationTracker tracker
         ) {
+            var adjacencyBuilderFactory = TransientAdjacencyFactory.of(tracker);
+            var adjacencyBuilder = adjacencyBuilderFactory.newAdjacencyListBuilder();
+
+            var propertyBuilders = EMPTY_PROPERTY_BUILDERS;
+            if (!propertyMappings.isEmpty()) {
+                propertyBuilders = new AdjacencyPropertiesBuilder[propertyMappings.numberOfMappings()];
+                Arrays.setAll(propertyBuilders, i -> adjacencyBuilderFactory.newAdjacencyPropertiesBuilder());
+            }
+
             return new Blueprint(
                 adjacencyBuilder,
                 propertyBuilders,
