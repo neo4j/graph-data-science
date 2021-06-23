@@ -20,26 +20,26 @@
 package org.neo4j.graphalgo.core.utils.progress.v2.tasks;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 
 public class LeafTask extends Task {
 
     private final long volume;
-    private final AtomicLong currentProgress;
+    private final LongAdder currentProgress;
 
-    public LeafTask(String description, long volume) {
+    LeafTask(String description, long volume) {
         super(description, List.of());
         this.volume = volume;
-        this.currentProgress = new AtomicLong(0);
+        this.currentProgress = new LongAdder();
     }
 
     @Override
-    public void logProgress() {
-        currentProgress.incrementAndGet();
+    public void logProgress(long value) {
+        currentProgress.add(value);
     }
 
     @Override
     public Progress getProgress() {
-        return ImmutableProgress.of(currentProgress.get(), volume);
+        return ImmutableProgress.of(currentProgress.longValue(), volume);
     }
 }

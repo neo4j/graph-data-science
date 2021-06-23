@@ -20,9 +20,8 @@
 package org.neo4j.graphalgo.core.utils.progress.v2.tasks;
 
 public enum Status {
-    OPEN,
+    PENDING,
     RUNNING,
     FINISHED,
-    FAILED,
     CANCELED
 }

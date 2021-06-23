@@ -60,7 +60,7 @@ public class IterativeTask extends Task {
 
     @Override
     public Task nextSubtask() {
-        var maybeNextSubtask = subTasks().stream().filter(t -> t.status() == Status.OPEN).findFirst();
+        var maybeNextSubtask = subTasks().stream().filter(t -> t.status() == Status.PENDING).findFirst();
 
         if (maybeNextSubtask.isPresent()) {
             return maybeNextSubtask.get();
@@ -77,7 +77,7 @@ public class IterativeTask extends Task {
     public void finish() {
         super.finish();
         subTasks().forEach(t -> {
-            if (t.status() == Status.OPEN) {
+            if (t.status() == Status.PENDING) {
                 t.cancel();
             }
         });

@@ -23,6 +23,8 @@ import org.apache.commons.lang3.mutable.MutableLong;
 
 import java.util.List;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public class Task {
 
     private final String description;
@@ -32,7 +34,64 @@ public class Task {
     Task(String description, List<Task> subTasks) {
         this.description = description;
         this.subTasks = subTasks;
-        this.status = Status.OPEN;
+        this.status = Status.PENDING;
+    }
+
+    public String description() {
+        return description;
+    }
+
+    List<Task> subTasks() {
+        return subTasks;
+    }
+
+    public Status status() {
+        return this.status;
+    }
+
+    public Task nextSubtask() {
+        if (subTasks.stream().anyMatch(t -> t.status == Status.RUNNING)) {
+            throw new IllegalStateException("Cannot move to next subtask, because some subtasks are still running");
+        }
+
+        return subTasks()
+            .stream()
+            .filter(t -> t.status() == Status.PENDING)
+            .findFirst()
+            .orElseThrow(() -> new IllegalStateException("No more pending subtasks"));
+    }
+
+    public void start() {
+        if (this.status != Status.PENDING) {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Task `%s` with state %s cannot be started",
+                this.description,
+                this.status
+            ));
+        }
+        this.status = Status.RUNNING;
+    }
+
+    public void finish() {
+        if (this.status != Status.RUNNING) {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Task `%s` with state %s cannot be finished",
+                this.description,
+                this.status
+            ));
+        }
+        this.status = Status.FINISHED;
+    }
+
+    public void cancel() {
+        if (this.status == Status.FINISHED) {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Task `%s` with state %s cannot be canceled",
+                this.description,
+                this.status
+            ));
+        }
+        this.status = Status.CANCELED;
     }
 
     public Progress getProgress() {
@@ -49,38 +108,17 @@ public class Task {
             progress.add(childProgress.progress());
         });
 
-        return ImmutableProgress.of(volume.getValue(), progress.getValue());
-    }
-
-    public String description() {
-        return description;
-    }
-
-    public Task nextSubtask() {
-        return subTasks().stream().filter(t -> t.status() == Status.OPEN).findFirst().get();
-    }
-
-    List<Task> subTasks() {
-        return subTasks;
-    }
-
-    public Status status() {
-        return this.status;
-    }
-
-    public void start() {
-        this.status = Status.RUNNING;
-    }
-
-    public void finish() {
-        this.status = Status.FINISHED;
-    }
-
-    public void cancel() {
-        this.status = Status.CANCELED;
+        return ImmutableProgress.builder()
+            .volume(volume.getValue())
+            .progress(progress.getValue())
+            .build();
     }
 
     public void logProgress() {
+        logProgress(1);
+    }
+
+    public void logProgress(long value) {
         throw new UnsupportedOperationException("Should only be called on a leave task");
     }
 }
