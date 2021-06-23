@@ -266,30 +266,35 @@ In addition, we can see that only the three `Person` nodes, and the two `KNOWS` 
 // 1. the very simple case, List of Strings --> Labels & Rels, no properties
 ==== Projecting multiple labels and multiple relationship types
 
+// TODO: Add an introductory sentence.
 
-
-
-
-
-
-
-
-
-
-
-
-In the following two examples we show how to create a graph called `my-native-graph` that contains `Person` nodes and `LIKES` relationships.
-
-.Create a graph using a native projection:
+[role=query-example]
+--
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create(
-    'my-native-graph',
-    'Person',
-    'LIKES'
-)
-YIELD graphName, nodeCount, relationshipCount, createMillis;
+CALL gds.graph.create('personsAndBooks', ['Person', 'Book'], ['KNOWS', 'READ'])
+YIELD
+  graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
 ----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph             | nodeProjection                                                           | nodes  | rels
+| "personsAndBooks" | {Book={label=Book, properties={}}, Person={label=Person, properties={}}} | 5      | 6
+|===
+--
+
+// TODO: Add analysis on the results and some explanation to the query.
+
+
+
+
+
+
+
+
+
 
 
 == Cypher Projection
