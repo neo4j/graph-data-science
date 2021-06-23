@@ -1,4 +1,4 @@
-def whitelist = [
+def allowList = [
         [name: 'BSD-2-Clause', url: 'http://opensource.org/licenses/BSD-2-Clause', aliases: [
                 [name: 'BSD-style', url: 'http://www.opensource.org/licenses/bsd-license.php'],
                 [name: 'BSD 2-Clause License'],
@@ -160,7 +160,7 @@ allprojects { proj ->
             // Dependency license reporting
             downloadLicenses {
                 dependencyConfiguration = 'runtimeClasspath'
-                aliases = whitelist.collectEntries { lic ->
+                aliases = allowList.collectEntries { lic ->
                     def actual = license(lic.name, lic.url)
                     def alternatives = lic.aliases.collect { it.url ? license(it.name, it.url) : it.name }
                     [(actual): alternatives]
@@ -183,14 +183,14 @@ allprojects { proj ->
             // Dependency license validation
             task validateLicenses {
                 group 'license'
-                description 'Checks dependency licenses against a whitelist'
+                description 'Checks dependency licenses against an allowlist'
                 dependsOn tasks.downloadLicenses
                 doLast {
-                    def whitelistNames = whitelist.collect { it.name }
+                    def allowListedNames = allowList.collect { it.name }
                     tasks.downloadLicenses.dependencyToLicenseJson().dependencies
-                        .findAll { dep -> whitelistNames.intersect(dep.licenses.collect { it.name }).isEmpty() }
-                        .each { dep -> logger.error("The dependency '$dep.name' has no whitelisted license. Details: ${dep.toMapString()}") }
-                        .each { dep -> throw new GradleException("The dependency '$dep.name' has no whitelisted license") }
+                        .findAll { dep -> allowListedNames.intersect(dep.licenses.collect { it.name }).isEmpty() }
+                        .each { dep -> logger.error("Could not find an allowed license for dependency '$dep.name'. Details: ${dep.toMapString()}") }
+                        .each { dep -> throw new GradleException("The dependency '$dep.name' has no allowed license") }
                 }
             }
             tasks.check.dependsOn tasks.validateLicenses
@@ -207,7 +207,7 @@ allprojects { proj ->
                     licensesFile.createNewFile()
                     licensesFile.text = rootProject.file("$publicDir/etc/licenses/headers/LICENSES-header.txt").text
                     tasks.downloadLicenses.licenseToDependencyJson().licences
-                        .findAll { lic -> whitelist.any { lic.name == it.name }}
+                        .findAll { lic -> allowList.any { lic.name == it.name }}
                         .sort { it.name }.each {
                         licensesFile << '\n\n'
                         licensesFile << "------------------------------------------------------------------------------\n"
