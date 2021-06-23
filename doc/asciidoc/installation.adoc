@@ -7,7 +7,7 @@ This chapter provides instructions for installation and basic usage of the Neo4j
 --
 
 The Neo4j Graph Data Science (GDS) library is delivered as a plugin to the Neo4j Graph Database.
-The plugin needs to be installed into the database and whitelisted in the Neo4j configuration.
+The plugin needs to be installed into the database and added to the allowlist in the Neo4j configuration.
 There are two main ways of achieving this, which we will detail in this chapter.
 
 
@@ -46,11 +46,14 @@ dbms.security.procedures.unrestricted=gds.*
 
 This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
 
-If the procedure whitelist is configured, make sure to also include procedures from the GDS library:
+If the procedure allowlist is configured, make sure to also include procedures from the GDS library:
 
 ----
-dbms.security.procedures.whitelist=gds.*
+dbms.security.procedures.allowlist=gds.*
 ----
+
+NOTE: Before `Neo4j 4.2`, the configuration setting is called `dbms.security.procedures.whitelist`
+
 
 == Neo4j Server
 
@@ -75,12 +78,15 @@ dbms.security.procedures.unrestricted=gds.*
 This configuration entry is necessary because the GDS library accesses low-level components of Neo4j to maximise performance.
 +
 
-3. Check if the procedure whitelist is enabled in the `$NEO4J_HOME/conf/neo4j.conf` file and add the GDS library if necessary:
+3. Check if the procedure allowlist is enabled in the `$NEO4J_HOME/conf/neo4j.conf` file and add the GDS library if necessary:
 +
 ----
-dbms.security.procedures.whitelist=gds.*
+dbms.security.procedures.allowlist=gds.*
 ----
 +
+
+NOTE: Before `Neo4j 4.2`, the configuration setting is called `dbms.security.procedures.whitelist`
+
 
 4. Restart Neo4j
 
