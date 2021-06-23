@@ -1,26 +1,113 @@
 [[catalog-graph-create]]
 = Creating graphs
 
+[abstract]
+--
 A projected graph can be stored in the catalog under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
 This allows multiple algorithms to use the same graph without having to re-create it on each algorithm run.
+--
 
-There are two variants of projecting a graph from the Neo4j database into main memory:
+//[NOTE]
+//====
+//There is also a way to generate a random graph, see <<graph-generation, Graph Generation>> documentation for more details.
+//====
 
-* <<native-projection, Native projection>>
-** Provides the best performance by reading from the Neo4j store files.
+== Native Projection
+
+Provides the best performance by reading from the Neo4j store files.
 Recommended to be used during both the development and the production phase.
-* <<cypher-projection, Cypher projection>>
-** The more flexible, expressive approach with lesser focus on performance.
-Recommended to be primarily used during the development phase.
 
-[NOTE]
-====
-There is also a way to generate a random graph, see <<graph-generation, Graph Generation>> documentation for more details.
-====
+A native projection takes three mandatory arguments: `graphName`, `nodeProjection` and `relationshipProjection`.
+In addition, the optional `configuration` parameter allows us to further configure graph creation.
 
-In this section, we will give brief examples on how to create a graph using either variant.
-For detailed information about the configuration of each variant, we refer to the dedicated sections.
+[[graph-create-native-syntax]]
+=== Syntax
+
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create(
+    graphName: String,
+    nodeProjection: String, List or Map,
+    relationshipProjection: String, List or Map,
+    configuration: Map
+)
+----
+
+.Parameters
+[opts="header",cols="1,1,1, 4"]
+|===
+| Name                  | Type               | Optional | Description
+| graphName             | String             | no       | The name under which the graph is stored in the catalog.
+| nodeProjection        | String\|List\|Map  | no       | One or more <<node-projection-syntax, node projections>>.
+| relationshipProjection| String\|List\|Map | no       | One or more <<native-projection-syntax-relationship-projections, relationship projections>>.
+| configuration         | Map               | yes      | Additional parameters to configure the native projection.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name                   | Type                  | Default | Description
+| readConcurrency        | Integer               | 4       | The number of concurrent threads used for creating the graph.
+| nodeProperties         | String, List or Map   | {}      | Node properties to load for _all_ node projections.
+| relationshipProperties | String, List or Map   | {}      | Relationship properties to load for _all_ relationship projections.
+| validateRelationships  | Boolean               | false   | Whether to throw an error if relationships contain nodes not included in the nodeProjection.
+|===
+
+[[node-projection-syntax]]
+==== Node Projection
+// Node Projection
+.Short-hand String-syntax for `nodeProjection`. The projected graph will contain the given `neo4j-label`.
+----
+<neo4j-label>
+----
+
+.Short-hand List-syntax for `nodeProjection`. The projected graph will contain the given `neo4j-label`s.
+----
+[<neo4j-label>, ..., <neo4j-label>]
+----
+
+.Extended Map-syntax for `nodeProjection`.
+----
+{
+    <projected-label>: {
+        label: <neo4j-label>,
+        properties: {
+            <projected-property-key>: {
+                property: <neo4j-property-key>,
+                defaultValue: <fallback-value>
+            },
+            ...
+            <projected-property-key>: {
+                property: <neo4j-property-key>,
+                defaultValue: <fallback-value>
+            }
+        }
+    },
+    ...
+    <projected-label>: {
+        label: <neo4j-label>,
+        properties: <node-property-mappings>
+    }
+}
+----
+
+.NodeProjection
+[opts="header",cols="1,1,1,4"]
+|===
+| Name             | Type     | Optional | Description
+| projected-label    | String   |  no      | The node label in the projected graph.
+| label            | String   |  yes     | The node label in the Neo4j graph. If not set, uses the `projected-label`.
+| properties       | Map      |  yes     | The projected node properties for the specified `projected-label`.
+| projected-property-key  | String      |  no     | The key for the node property in the projected graph.
+| property  | String      |  yes     | The node property key in the Neo4j graph. If not set, uses the `projected-property-key`.
+| defaultValue  | Float\|Float[]\|Integer\|Integer[]      |  yes     | The default value if the property is not defined for a node. The value type must match the derived type.
+|===
+
+NOTE: To get information about a stored named graph, including its schema, one can use <<catalog-graph-list, gds.graph.list>>.
+
+[[graph-create-examples]]
+=== Examples
 
 In the following two examples we show how to create a graph called `my-native-graph` that contains `Person` nodes and `LIKES` relationships.
 
@@ -35,6 +122,63 @@ CALL gds.graph.create(
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
+
+== Cypher Projection
+
+The more flexible, expressive approach with lesser focus on performance.
+Recommended to be primarily used during the development phase.
+
+[[graph-create-cypher-syntax]]
+=== Syntax
+
+A Cypher projection takes three mandatory arguments: `graphName`, `nodeQuery` and `relationshipQuery`.
+In addition, the optional `configuration` parameter allows us to further configure graph creation.
+
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+    graphName: String,
+    nodeQuery: String,
+    relationshipQuery: String,
+    configuration: Map
+)
+----
+
+.Parameters
+[opts="header",cols="1,1,1"]
+|===
+| Name              | Optional | Description
+| graphName         | no       | The name under which the graph is stored in the catalog.
+| nodeQuery         | no       | Cypher query to project nodes.
+| relationshipQuery | no       | Cypher query to project relationships.
+| configuration     | yes      | Additional parameters to configure the Cypher projection.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name                   | Type    | Default        | Description
+| readConcurrency        | Integer | 4              | The number of concurrent threads used for creating the graph.
+| validateRelationships  | Boolean | true           | Whether to throw an error if relationships contain nodes not included in the nodeQuery.
+| parameters             | Map     | empty map      | A map of user-defined query parameters that are passed into the node and relationship query.
+|===
+
+// TODO put this into a life-cycle subsection
+[NOTE]
+--
+The projected graphs will reside in the catalog until:
+
+- the graph is dropped using <<catalog-graph-drop, gds.graph.drop>>
+- the Neo4j database from which to graph was projected is stopped or dropped
+- the Neo4j database management system is stopped.
+--
+
+NOTE: To get information about a stored named graph, including its schema, one can use <<catalog-graph-list, gds.graph.list>>.
+
+
+[[graph-create-cypher-examples]]
+=== Examples
+
 We can also use Cypher to select the nodes and relationships to be projected into the in-memory graph.
 
 .Create a graph using a Cypher projection:
@@ -48,6 +192,9 @@ CALL gds.graph.create.cypher(
 YIELD graphName, nodeCount, relationshipCount, createMillis;
 ----
 
+
+== Using projected graphs
+
 After creating the graphs in the catalog, we can refer to them in algorithms by using their name.
 
 .Run Page Rank on one of our created graphs:
@@ -55,9 +202,3 @@ After creating the graphs in the catalog, we can refer to them in algorithms by 
 ----
 CALL gds.pageRank.stream('my-native-graph') YIELD nodeId, score;
 ----
-
-The projected graphs will reside in the catalog until:
-
-- the graph is dropped using <<catalog-graph-drop, gds.graph.drop>>
-- the Neo4j database from which to graph was projected is stopped or dropped
-- the Neo4j database management system is stopped.
