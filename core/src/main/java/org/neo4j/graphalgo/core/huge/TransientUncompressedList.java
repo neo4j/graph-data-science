@@ -97,7 +97,7 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
         if (degree == 0) {
             return AdjacencyCursor.empty();
         }
-        var cursor = new UncompressedCursor(pages);
+        var cursor = new Cursor(pages);
         var offset = offsets.get(node);
         cursor.init(offset, degree);
         return cursor;
@@ -105,7 +105,7 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
 
     @Override
     public AdjacencyCursor rawAdjacencyCursor() {
-        return null;
+        return new Cursor(pages);
     }
 
     @Override
@@ -130,21 +130,31 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
     @Override
     public PropertyCursor propertyCursor(PropertyCursor reuse, long node, double fallbackValue) {
         if (reuse instanceof Cursor) {
-            return reuse.init(offsets.get(node), degrees.get(node));
+            reuse.init(offsets.get(node), degrees.get(node));
+            return reuse;
         }
         return propertyCursor(node, fallbackValue);
     }
 
-    private static final class Cursor implements PropertyCursor {
+    public static final class Cursor extends MutableIntValue implements AdjacencyCursor, PropertyCursor {
 
         private long[][] pages;
 
         private long[] currentPage;
-        private int offset;
+        private int degree;
         private int limit;
+        private int offset;
 
         private Cursor(long[][] pages) {
             this.pages = pages;
+        }
+
+        @Override
+        public void init(long fromIndex, int degree) {
+            currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
+            offset = indexInPage(fromIndex, PAGE_MASK);
+            limit = offset + degree;
+            this.degree = degree;
         }
 
         @Override
@@ -155,41 +165,6 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
         @Override
         public long nextLong() {
             return currentPage[offset++];
-        }
-
-        @Override
-        public Cursor init(long fromIndex, int degree) {
-            this.currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
-            this.offset = indexInPage(fromIndex, PAGE_MASK);
-            this.limit = offset + degree;
-            return this;
-        }
-
-        @Override
-        public void close() {
-            pages = null;
-        }
-    }
-
-    public static final class UncompressedCursor extends MutableIntValue implements AdjacencyCursor {
-
-        private long[][] pages;
-
-        private long[] currentPage;
-        private int degree;
-        private int limit;
-        private int offset;
-
-        private UncompressedCursor(long[][] pages) {
-            this.pages = pages;
-        }
-
-        @Override
-        public void init(long fromIndex, int degree) {
-            currentPage = pages[pageIndex(fromIndex, PAGE_SHIFT)];
-            offset = indexInPage(fromIndex, PAGE_MASK);
-            limit = offset + degree * Long.BYTES;
-            this.degree = degree;
         }
 
         @Override

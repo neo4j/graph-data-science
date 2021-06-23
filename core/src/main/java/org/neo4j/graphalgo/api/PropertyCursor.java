@@ -31,7 +31,7 @@ public interface PropertyCursor extends AutoCloseable {
      * The correct value for the index is highly implementation specific.
      * The better way to initialize a cursor is through {@link org.neo4j.graphalgo.api.AdjacencyProperties#propertyCursor(long)} or related.
      */
-    PropertyCursor init(long index, int degree);
+    void init(long index, int degree);
 
     /**
      * Return true iff there is at least one more target to decode.
@@ -59,8 +59,7 @@ public interface PropertyCursor extends AutoCloseable {
         INSTANCE;
 
         @Override
-        public PropertyCursor init(long index, int degree) {
-            return INSTANCE;
+        public void init(long index, int degree) {
         }
 
         @Override
