@@ -205,6 +205,79 @@ NOTE: To get information about a stored named graph, including its schema, one c
 [[graph-create-examples]]
 === Examples
 
+// 1. the very simple case, List of Strings --> Labels & Rels, no properties
+// 2.1. very simple node properties only with String node property
+// 2.2. expanded node properties with default value and different name
+// 3.1. very simple relationship properties only with String relationship property
+// 3.2. expanded relationship properties with default value and different name
+// 3.3 relationship aggregation + orientation
+// 4. Star projection !?
+
+In order to demonstrate the GDS Graph Create capabilities we are going to create a small social network graph in Neo4j.
+The example graph looks like this:
+
+image::example-graphs/graph-create-example.svg[Visualization of the example graph,align="center"]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (florentin:Person { name: 'Florentin', age: 16 }),
+  (adam:Person { name: 'Adam', age: 18 }),
+  (veselin:Person { name: 'Veselin', age: 20 }),
+  (hobbit:Book { name: 'The Hobbit', isbn: 1234, numberOfPages: 310, ratings: [1.0, 2.0, 3.0, 4.5] }),
+  (frankenstein:Book { name: 'Frankenstein', isbn: 4242, price: 19.99 }),
+  (florentin)-[:KNOWS { since: 2010 }]->(adam),
+  (florentin)-[:KNOWS { since: 2018 }]->(veselin),
+  (florentin)-[:READ { numberOfPages: 4 }]->(hobbit),
+  (florentin)-[:READ { numberOfPages: 42 }]->(hobbit),
+  (adam)-[:READ { numberOfPages: 30 }]->(hobbit),
+  (veselin)-[:READ]->(frankenstein)
+----
+
+
+==== Projecting single label and single relationship type
+
+We are going to start with demonstrating how to load just a single `label` and `relationship`.
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('persons', 'Person', 'KNOWS')
+YIELD
+  graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipProjection, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1,3m,1m"]
+|===
+| graph     | nodeProjection                         | nodes  | relationshipProjection                                                        | rels
+| "persons" | {Person={label=Person, properties={}}} | 3      | {KNOWS={orientation=NATURAL, aggregation=DEFAULT, type=KNOWS, properties={}}} | 2
+|===
+--
+
+In the example above we projected an in-memory graph containing only the `Person` nodes with their `KNOWS` relationships.
+We used the `short-hand` syntax to project the Node Label (`Person`) and Relationship Type (`KNOWS`) that we are interested in.
+The used projections have been expanded to the full `Map` syntax as it can be seen from the `Results` table.
+In addition, we can see that only the three `Person` nodes, and the two `KNOWS` relationships have been projected to the in-memory graph.
+
+
+// 1. the very simple case, List of Strings --> Labels & Rels, no properties
+==== Projecting multiple labels and multiple relationship types
+
+
+
+
+
+
+
+
+
+
+
+
+
 In the following two examples we show how to create a graph called `my-native-graph` that contains `Person` nodes and `LIKES` relationships.
 
 .Create a graph using a native projection:
