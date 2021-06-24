@@ -24,6 +24,7 @@ def registerSubModules(File file) {
             .filter { moduleDir -> moduleDir.getParentFile().name != "4.3" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "dev" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "aura" }
+            .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop03.1" }
             .forEach { moduleDir ->
                 def parent = moduleDir.getParentFile();
                 def projectName = ":${moduleDir.name}";
