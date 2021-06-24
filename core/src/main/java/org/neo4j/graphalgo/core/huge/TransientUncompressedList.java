@@ -194,50 +194,45 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
 
         @Override
         public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-            throw new UnsupportedOperationException();
-//            var dest = destination instanceof DecompressingCursor
-//                ? (DecompressingCursor) destination
-//                : new DecompressingCursor(pages);
-//            dest.decompress.copyFrom(this.decompress);
-//            dest.currentPosition = this.currentPosition;
-//            dest.maxTargets = this.maxTargets;
-//            return dest;
+            var dest = destination instanceof Cursor
+                ? (Cursor) destination
+                : new Cursor(pages);
+
+            dest.currentPage = currentPage;
+
+            dest.degree = degree;
+            dest.limit = limit;
+            dest.offset = offset;
+
+            return dest;
         }
 
-        // TODO: I think this documentation if either out of date or misleading.
-        //  Either we skip all blocks and return -1 or we find a value that is strictly larger.
-        /**
-         * Read and decode target ids until it is strictly larger than ({@literal >}) the provided {@code target}.
-         * Might return an id that is less than or equal to {@code target} iff the cursor did exhaust before finding an
-         * id that is large enough.
-         * {@code skipUntil(target) <= target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-         * will return {@code false}
-         */
         @Override
         public long skipUntil(long target) {
-            throw new UnsupportedOperationException();
-//            long value = decompress.skipUntil(target, remaining(), this);
-//            this.currentPosition += this.value;
-//            return value;
+            if (!hasNextVLong()) {
+                return AdjacencyCursor.NOT_FOUND;
+            }
+
+            var value = nextVLong();
+            while (value <= target && hasNextVLong()) {
+                value = nextVLong();
+            }
+
+            return value;
         }
 
-        /**
-         * Read and decode target ids until it is larger than or equal ({@literal >=}) the provided {@code target}.
-         * Might return an id that is less than {@code target} iff the cursor did exhaust before finding an
-         * id that is large enough.
-         * {@code advance(target) < target} can be used to distinguish the no-more-ids case and afterwards {@link #hasNextVLong()}
-         * will return {@code false}
-         */
         @Override
         public long advance(long target) {
-            throw new UnsupportedOperationException();
-//            int targetsLeftToBeDecoded = remaining();
-//            if(targetsLeftToBeDecoded <= 0) {
-//                return AdjacencyCursor.NOT_FOUND;
-//            }
-//            long value = decompress.advance(target, targetsLeftToBeDecoded, this);
-//            this.currentPosition += this.value;
-//            return value;
+            if (!hasNextVLong()) {
+                return AdjacencyCursor.NOT_FOUND;
+            }
+
+            var value = nextVLong();
+            while (value < target && hasNextVLong()) {
+                value = nextVLong();
+            }
+
+            return value;
         }
 
         @Override
