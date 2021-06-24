@@ -26,8 +26,6 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressor;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressorBlueprint;
 import org.neo4j.graphalgo.core.compress.AdjacencyCompressorFactory;
-import org.neo4j.graphalgo.core.compress.AdjacencyListsWithProperties;
-import org.neo4j.graphalgo.core.compress.ImmutableAdjacencyListsWithProperties;
 import org.neo4j.graphalgo.core.compress.LongArrayBuffer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
@@ -69,16 +67,9 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         }
     }
 
-    private static final class Blueprint implements AdjacencyCompressorBlueprint {
-        private final CsrListBuilder<byte[], ? extends AdjacencyList> adjacencyBuilder;
-        private final CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders;
-        private final HugeIntArray adjacencyDegrees;
-        private final HugeLongArray adjacencyOffsets;
-        private final HugeLongArray[] propertyOffsets;
-        private final boolean noAggregation;
-        private final Aggregation[] aggregations;
+    private static final class Blueprint extends AbstractCompressorBlueprint<byte[], long[]> {
 
-        private Blueprint(
+        Blueprint(
             CsrListBuilder<byte[], ? extends AdjacencyList> adjacencyBuilder,
             CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders,
             HugeIntArray adjacencyDegrees,
@@ -87,13 +78,15 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             boolean noAggregation,
             Aggregation[] aggregations
         ) {
-            this.adjacencyBuilder = adjacencyBuilder;
-            this.propertyBuilders = propertyBuilders;
-            this.adjacencyDegrees = adjacencyDegrees;
-            this.adjacencyOffsets = adjacencyOffsets;
-            this.propertyOffsets = propertyOffsets;
-            this.noAggregation = noAggregation;
-            this.aggregations = aggregations;
+            super(
+                adjacencyBuilder,
+                propertyBuilders,
+                adjacencyDegrees,
+                adjacencyOffsets,
+                propertyOffsets,
+                noAggregation,
+                aggregations
+            );
         }
 
         @Override
@@ -117,30 +110,6 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         public boolean supportsProperties() {
             // TODO temporary until Geri does support properties
             return adjacencyBuilder instanceof TransientCompressedListBuilder;
-        }
-
-        @Override
-        public void flush() {
-            adjacencyBuilder.flush();
-            for (var propertyBuilder : propertyBuilders) {
-                if (propertyBuilder != null) {
-                    propertyBuilder.flush();
-                }
-            }
-        }
-
-        @Override
-        public AdjacencyListsWithProperties build() {
-            var builder = ImmutableAdjacencyListsWithProperties
-                .builder()
-                .adjacency(adjacencyBuilder.build(this.adjacencyDegrees, this.adjacencyOffsets));
-
-            for (int i = 0; i < propertyBuilders.length; i++) {
-                var properties = propertyBuilders[i].build(this.adjacencyDegrees, propertyOffsets[i]);
-                builder.addProperty(properties);
-            }
-
-            return builder.build();
         }
     }
 
