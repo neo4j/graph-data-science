@@ -62,7 +62,7 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
     ) {
         var executorService = Pools.DEFAULT;
         if(configuration.hasRelationshipWeightProperty()) {
-            validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
+            validateRelationshipWeightPropertyValue(graph, configuration.concurrency());
         }
 
         return configuration.isMultiLabel()

@@ -63,7 +63,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
 
         var executorService = Pools.DEFAULT;
         if(configuration.model().trainConfig().hasRelationshipWeightProperty()) {
-            validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
+            validateRelationshipWeightPropertyValue(graph, configuration.concurrency());
         }
 
         return new GraphSage(

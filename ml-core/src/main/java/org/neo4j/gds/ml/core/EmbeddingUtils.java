@@ -21,10 +21,6 @@ package org.neo4j.gds.ml.core;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
-
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -69,36 +65,27 @@ public final class EmbeddingUtils {
         return propertyValue;
     }
 
-    public static void validateRelationshipWeightPropertyValue(Graph graph, int concurrency, ExecutorService executorService) {
+    public static void validateRelationshipWeightPropertyValue(Graph graph, int concurrency) {
         if (!graph.hasRelationshipProperty()) {
             throw new IllegalStateException("Expected a weighted graph");
         }
 
-        var tasks = PartitionUtils.degreePartition(
-            graph,
-            concurrency,
-            partition -> (Runnable) () -> {
-                var concurrentGraph = graph.concurrentCopy();
-                partition.consume(nodeId -> {
-                    concurrentGraph.forEachRelationship(
-                        nodeId,
-                        Double.NaN,
-                        (sourceNodeId, targetNodeId, property) -> {
-                            if (Double.isNaN(property)) {
-                                throw new RuntimeException(
-                                    formatWithLocale("Found a relationship between %d and %d with no specified weight. Consider using `defaultValue` when loading the graph.",
-                                        graph.toOriginalNodeId(sourceNodeId),
-                                        graph.toOriginalNodeId(targetNodeId))
-                                );
-                            }
-                            return true;
-                        }
-                    );
-                });
-            },
-            Optional.empty()
-        );
-
-        ParallelUtil.run(tasks, executorService);
+        ThreadLocal<Graph> concurrentGraph = ThreadLocal.withInitial(graph::concurrentCopy);
+        ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
+            concurrentGraph.get().forEachRelationship(
+                nodeId,
+                Double.NaN,
+                (sourceNodeId, targetNodeId, property) -> {
+                    if (Double.isNaN(property)) {
+                        throw new RuntimeException(
+                            formatWithLocale("Found a relationship between %d and %d with no specified weight. Consider using `defaultValue` when loading the graph.",
+                                graph.toOriginalNodeId(sourceNodeId),
+                                graph.toOriginalNodeId(targetNodeId))
+                        );
+                    }
+                    return true;
+                }
+            );
+        });
     }
 }
