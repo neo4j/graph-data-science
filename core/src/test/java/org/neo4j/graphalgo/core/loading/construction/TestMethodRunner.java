@@ -38,4 +38,14 @@ public interface TestMethodRunner {
     static <E extends Exception> void runWithBitIdMap(CheckedRunnable<E> code) throws E {
         setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(code));
     }
+
+    static Stream<TestMethodRunner> adjacencyCompressions() {
+        TestMethodRunner compressed = CheckedRunnable::checkedRun;
+        TestMethodRunner uncompressed = TestMethodRunner::runWithUncompressedAdjacencyList;
+        return Stream.of(compressed, uncompressed);
+    }
+
+    static <E extends Exception> void runWithUncompressedAdjacencyList(CheckedRunnable<E> code) throws E {
+        setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(code));
+    }
 }

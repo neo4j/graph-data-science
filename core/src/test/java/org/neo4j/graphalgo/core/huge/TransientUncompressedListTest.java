@@ -20,37 +20,19 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
-import org.neo4j.graphalgo.core.loading.TransientCompressedCsrListFactory;
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
-import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_MASK;
 import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_SHIFT;
 
 class TransientUncompressedListTest {
-
-    @Test
-    void shouldPeekValues() {
-        var targets = new long[]{1, 42, 1337};
-        var propertyCursor = propertyCursorFromTargets(targets);
-        for (long target : targets) {
-            assertThat(propertyCursor)
-                .as("expecting value %d", target)
-                .returns(true, PropertyCursor::hasNextLong)
-                .returns(target, PropertyCursor::nextLong);
-        }
-        assertThat(propertyCursor).returns(false, PropertyCursor::hasNextLong);
-    }
 
     @Test
     void shouldComputeUncompressedMemoryEstimationForSinglePage() {
@@ -97,13 +79,5 @@ class TransientUncompressedListTest {
         MemoryRange expected = MemoryRange.of(classSize + adjacencyPages + offsets);
 
         assertEquals(expected, memRec.memoryUsage());
-    }
-
-    private PropertyCursor propertyCursorFromTargets(long[] targets) {
-        var builder = TransientCompressedCsrListFactory.of(AllocationTracker.empty()).newAdjacencyPropertiesBuilder();
-        var allocator = builder.newAllocator();
-        var offset = allocator.write(targets, targets.length);
-        var properties = builder.build(HugeIntArray.of(targets.length), HugeLongArray.of(offset));
-        return properties.propertyCursor(0);
     }
 }
