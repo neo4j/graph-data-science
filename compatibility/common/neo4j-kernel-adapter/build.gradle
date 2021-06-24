@@ -21,8 +21,8 @@ dependencies {
     api project(':neo4j-adapter')
     api project(':neo4j-kernel-adapter-api')
 
-    compatibilityModules.'kernel-adapter'.each { dep ->
-        implementation dep
+    compatibilityModules.'kernel-adapter'.each {
+        implementation it
     }
 
     testImplementation project(":test-utils")
