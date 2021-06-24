@@ -26,9 +26,11 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.queue.QueueBasedSpliterator;
+import org.neo4j.graphalgo.degree.DegreeCentrality;
+import org.neo4j.graphalgo.degree.ImmutableDegreeCentralityConfig;
 
 import java.util.Optional;
 import java.util.Random;
@@ -127,18 +129,19 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         return StreamSupport.stream(new QueueBasedSpliterator<>(walks, TOMB, terminationFlag, timeout), false);
     }
 
-    private HugeAtomicDoubleArray cumulativeWeights() {
-        var weights = HugeAtomicDoubleArray.newArray(graph.nodeCount(), AllocationTracker.empty());
-        ParallelUtil.parallelForEachNode(
-            graph,
-            concurrency,
-            nodeId -> graph.forEachRelationship(nodeId, 1.0, (s, t, weight) -> {
-                weights.update(nodeId, oldWeight -> oldWeight + weight);
-                return true;
-            })
-        );
+    DegreeCentrality.DegreeFunction cumulativeWeights() {
+        var config = ImmutableDegreeCentralityConfig.builder()
+            .concurrency(concurrency)
+            .relationshipWeightProperty("weight")
+            .build();
 
-        return weights;
+        return new DegreeCentrality(
+            graph,
+            Pools.DEFAULT,
+            config,
+            ProgressLogger.NULL_LOGGER,
+            AllocationTracker.empty()
+        ).compute();
     }
 
     @Override

@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.beta.generator.PropertyProducer;
+import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorBuilder;
+import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -283,5 +286,35 @@ class RandomWalkTest extends AlgoTestBase {
         assertThat(nodeCounter.get(0L)).isCloseTo(1500, Percentage.withPercentage(10));
         assertThat(nodeCounter.get(1L)).isCloseTo(1500, Percentage.withPercentage(10));
         assertThat(nodeCounter.get(2L)).isCloseTo(1L, Offset.offset(50L));
+    }
+
+    @Test
+    void parallelWeighted() {
+        int nodeCount = 20_000;
+        var graph = new RandomGraphGeneratorBuilder()
+            .nodeCount(nodeCount)
+            .averageDegree(10)
+            .relationshipPropertyProducer(PropertyProducer.randomDouble("weight", 0, 0.1))
+            .relationshipDistribution(RelationshipDistribution.POWER_LAW)
+            .seed(24L)
+            .build()
+            .generate();
+
+        int numberOfSteps = 10;
+        int walksPerNode = 1;
+        var randomWalk = RandomWalk.create(
+            graph,
+            numberOfSteps,
+            4,
+            walksPerNode,
+            100,
+            1,
+            1,
+            of(23L)
+        );
+
+        assertThat(randomWalk.compute().collect(Collectors.toList()))
+            .matches(walks -> walks.size() <= nodeCount * walksPerNode)
+            .allMatch(walk -> walk.length <= numberOfSteps);
     }
 }
