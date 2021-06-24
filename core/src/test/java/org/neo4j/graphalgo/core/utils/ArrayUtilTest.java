@@ -85,4 +85,49 @@ class ArrayUtilTest {
         }
     }
 
+    @Test
+    void testBinarySearch() {
+        var a = new long[] { 0, 2, 2, 2, 2, 2, 2, 5, 6, 6, 6, 6, 7 };
+
+        assertThat(Arrays.binarySearch(a, 0, a.length, 0)).isEqualTo(0);
+        assertThat(Arrays.binarySearch(a, 0, a.length, 1)).isEqualTo(-2);
+        assertThat(Arrays.binarySearch(a, 0, a.length, 2)).isEqualTo(6);
+        assertThat(Arrays.binarySearch(a, 0, a.length, 3)).isEqualTo(-8);
+        assertThat(Arrays.binarySearch(a, 0, a.length, 4)).isEqualTo(-8);
+        assertThat(Arrays.binarySearch(a, 0, a.length, 5)).isEqualTo(7);
+        assertThat(Arrays.binarySearch(a, 0, a.length, 6)).isEqualTo(9);
+        assertThat(Arrays.binarySearch(a, 0, a.length, 7)).isEqualTo(12);
+        assertThat(Arrays.binarySearch(a, 0, a.length, 8)).isEqualTo(-14);
+    }
+
+    @Test
+    void testBinarySearchFirst() {
+        var a = new long[] { 0, 2, 2, 2, 2, 2, 2, 5, 6, 6, 6, 6, 7 };
+
+        assertThat(ArrayUtil.binarySearchFirst(a, 0, a.length, 0)).isEqualTo(0);
+        assertThat(ArrayUtil.binarySearchFirst(a, 0, a.length, 1)).isEqualTo(-2);
+        assertThat(ArrayUtil.binarySearchFirst(a, 0, a.length, 2)).isEqualTo(1);
+        assertThat(ArrayUtil.binarySearchFirst(a, 0, a.length, 3)).isEqualTo(-8);
+        assertThat(ArrayUtil.binarySearchFirst(a, 0, a.length, 4)).isEqualTo(-8);
+        assertThat(ArrayUtil.binarySearchFirst(a, 0, a.length, 5)).isEqualTo(7);
+        assertThat(ArrayUtil.binarySearchFirst(a, 0, a.length, 6)).isEqualTo(8);
+        assertThat(ArrayUtil.binarySearchFirst(a, 0, a.length, 7)).isEqualTo(12);
+        assertThat(ArrayUtil.binarySearchFirst(a, 0, a.length, 8)).isEqualTo(-14);
+    }
+
+    @Test
+    void testBinarySearchLast() {
+        var a = new long[] { 0, 2, 2, 2, 2, 2, 2, 5, 6, 6, 6, 6, 7 };
+
+        assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 0)).isEqualTo(0);
+        assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 1)).isEqualTo(-2);
+        assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 2)).isEqualTo(6);
+        assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 3)).isEqualTo(-8);
+        assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 4)).isEqualTo(-8);
+        assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 5)).isEqualTo(7);
+        assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 6)).isEqualTo(11);
+        assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 7)).isEqualTo(12);
+        assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 8)).isEqualTo(-14);
+    }
+
 }

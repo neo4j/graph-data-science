@@ -48,6 +48,56 @@ public final class ArrayUtil {
 
     }
 
+    /**
+     * Similar to {@link Arrays#binarySearch(long[], int, int, long)}, but
+     * returns the index of the first occurrence of {@code key} in {@code a}
+     * if there are multiple occurrences.
+     */
+    public static int binarySearchFirst(long[] a, int fromIndex, int toIndex, long key) {
+        int low = fromIndex;
+        int high = toIndex - 1;
+
+        while (low <= high) {
+            int mid = (low + high) >>> 1;
+            long midVal = a[mid];
+
+            if (midVal < key)
+                low = mid + 1;
+            else if (midVal > key)
+                high = mid - 1;
+            else if (mid > 0 && a[mid - 1] == key) // key found, but not first index
+                high = mid - 1;
+            else
+                return mid; // key found
+        }
+        return -(low + 1);  // key not found.
+    }
+
+    /**
+     * Similar to {@link Arrays#binarySearch(long[], int, int, long)}, but
+     * returns the index of the last occurrence of {@code key} in {@code a}
+     * if there are multiple occurrences.
+     */
+    public static int binarySearchLast(long[] a, int fromIndex, int toIndex, long key) {
+        int low = fromIndex;
+        int high = toIndex - 1;
+
+        while (low <= high) {
+            int mid = (low + high) >>> 1;
+            long midVal = a[mid];
+
+            if (midVal < key)
+                low = mid + 1;
+            else if (midVal > key)
+                high = mid - 1;
+            else if (mid < toIndex - 1 && a[mid + 1] == key) // key found, but not last index
+                low = mid + 1;
+            else
+                return mid; // key found
+        }
+        return -(low + 1);  // key not found.
+    }
+
     public static int binarySearchIndex(int[] arr, int length, int key) {
         int low = 0;
         int high = length - 1;
