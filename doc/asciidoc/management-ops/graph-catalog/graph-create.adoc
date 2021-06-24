@@ -217,7 +217,7 @@ image::example-graphs/graph-create-example.svg[Visualization of the example grap
 CREATE
   (florentin:Person { name: 'Florentin', age: 16 }),
   (adam:Person { name: 'Adam', age: 18 }),
-  (veselin:Person { name: 'Veselin', age: 20 }),
+  (veselin:Person { name: 'Veselin', age: 20, ratings: [5.0] }),
   (hobbit:Book { name: 'The Hobbit', isbn: 1234, numberOfPages: 310, ratings: [1.0, 2.0, 3.0, 4.5] }),
   (frankenstein:Book { name: 'Frankenstein', isbn: 4242, price: 19.99 }),
   (florentin)-[:KNOWS { since: 2010 }]->(adam),
@@ -315,13 +315,12 @@ Thus, the `undirectedKnows` graph contains four relationships, twice as many as 
 
 To project node properties we can either use the `nodeProperties` configuration parameter or extend an individual `nodeProjection` for a specific label.
 
-[role=query-example]
+[role=query-example, group=node-properties]
 --
-// FIXME: support extra role for graph-create-query with result consumer
 .The following will project and store the `PERSON` and `Book` nodes and the `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
-[source, cypher, role=noplay graph-create-query]
+[source, cypher, role=noplay]
 ----
-CALL gds.graph.create('graphWithProperties', {Person: {properties: 'age'}, Book: {properties: 'isbn'}}, ['KNOWS', 'READ'], {nodeProperties: {ratings: {defaultValue: 5.0}}})
+CALL gds.graph.create('graphWithProperties', {Person: {properties: 'age'}, Book: {properties: {price: {defaultValue: 5.0}}}}, ['KNOWS', 'READ'], {nodeProperties: 'ratings'})
 YIELD
   graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
 RETURN graph, nodeProjection.Book AS bookProjection, nodes, rels
@@ -331,46 +330,97 @@ RETURN graph, nodeProjection.Book AS bookProjection, nodes, rels
 [opts="header", cols="1,3m,1m,1m"]
 |===
 | graph                 | bookProjection                                                           | nodes  | rels
-| "graphWithProperties" | {label=Book, properties={ratings={defaultValue=5.0, property=ratings}, isbn={defaultValue=null, property=isbn}}} | 5      | 6
+| "graphWithProperties" | {label=Book, properties={price={defaultValue=5.0, property=price}, ratings={defaultValue=null, property=ratings}}} | 5      | 6
 |===
 --
 
 The projected `graphWithProperties` graph contains five nodes and six relationships.
-In the returned `bookProjection` we can observe, the node properties `isbn` and `ratings` are loaded for `Books`.
+In the returned `bookProjection` we can observe, the node properties `price` and `ratings` are loaded for `Books`.
 
 NOTE: GDS currently only supports loading numeric properties.
 
-Further, the `ratings` property has a default value of `5.0`.
-We loaded the `ratings` property for every node label, but only books have ratings specified in the example graph.
-In the following we check if the ratings are correctly projected:
+Further, the `price` property has a default value of `5.0`.
+Not every book has a price specified in the example graph.
+In the following we check if the price was correctly projected:
 
-[role=query-example]
+[role=query-example, group=node-properties]
 --
 .The following will lookup the ratings property of Adam in the projected `graphWithProperties` graph:
 [source, cypher, role=noplay]
 ----
-MATCH (n)
-RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'ratings') as ratings
+MATCH (n:Book)
+RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'price') as price
+ORDER BY price
 ----
 
 .Results
 [opts="header", cols="1,1"]
 |===
-| name          | ratings
-| "The Hobbit"  | [1.0, 2.0, 3.0, 4.5]
-| "Frankenstein"| [1.0, 2.0, 3.0, 4.5]
-| "Adam"        | [5.0]
-| "Florentin"   | [5.0]
-| "Veselin"     | [5.0]
+| name          | price
+| "The Hobbit"  | 5.0
+| "Frankenstein"| 19.99
 |===
 --
 
+We can see, that the price was projected with the Hobbit having the default price of 5.0.
 
-
-// 2.2. expanded node properties with default value and different name
 // 3.1. very simple relationship properties only with String relationship property
 // 3.2. expanded relationship properties with default value and different name
-// 3.3 relationship aggregation + orientation
+//==== Projecting relationship properties
+
+==== Handling parallel relationships
+
+Neo4j supports parallel relationships, i.e., multiple relationships between two nodes.
+By default, GDS preserves the parallel relationships.
+We can specify how parallel relationships should be merged into a single relationship via the `aggregation` parameter in a relationship projection.
+
+// aggregating properties
+
+
+// special case: COUNT example
+[role=query-example, group=count-aggregate]
+--
+.The following projects a `readSums` graph containing the `Person` and `Book` nodes and aggregated `READ` relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('readSums', ['Person', 'Book'], {READ: {properties: {numberOfReads: {property:'*', aggregation: 'COUNT'}}}})
+YIELD
+  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph      | readProjection                                                                  | nodes  | rels
+| "readSums" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfReads={defaultValue=null, property=*, aggregation=COUNT}}}} | 5      | 3
+|===
+--
+
+Next, we will verify that the `READ` relationships were correctly aggregated.
+
+[role=query-example, group=count-aggregate]
+--
+.The following query streams the relationship property `numberOfReads`:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfReads')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
+RETURN gds.util.asNode(sourceNodeId).name AS src, gds.util.asNode(targetNodeId).name AS trg, numberOfReads
+ORDER BY numberOfReads DESC, src
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| src         | trg                  | numberOfReads
+| "Florentin" |  "The Hobbit"        | 2.0
+| "Adam"      |  "The Hobbit"        | 1.0
+| "Veselin"   |  "Frankenstein"      | 1.0
+|===
+--
+
+We can see, that the two READ relationships between Florentin and the Hobbit result in `2` numberOfReads.
+
 // 4. Star projection !?
 
 
