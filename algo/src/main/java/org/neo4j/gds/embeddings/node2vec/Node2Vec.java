@@ -63,7 +63,9 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<Vector>> {
             config.walkBufferSize(),
             config.returnFactor(),
             config.inOutFactor(),
-            config.randomSeed()
+            config.randomSeed(),
+            tracker,
+            progressLogger
         );
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(

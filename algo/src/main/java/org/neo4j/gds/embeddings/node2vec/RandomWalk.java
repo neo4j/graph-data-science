@@ -55,6 +55,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     private final double inOutParam;
     private final AtomicLong nodeIndex;
     private final long randomSeed;
+    private final AllocationTracker tracker;
+    private final ProgressLogger progressLogger;
 
     private RandomWalk(
         Graph graph,
@@ -64,7 +66,9 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         int queueSize,
         double returnParam,
         double inOutParam,
-        long randomSeed
+        long randomSeed,
+        AllocationTracker tracker,
+        ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.steps = steps;
@@ -74,6 +78,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         this.returnParam = returnParam;
         this.inOutParam = inOutParam;
         this.randomSeed = randomSeed;
+        this.tracker = tracker;
+        this.progressLogger = progressLogger;
         nodeIndex = new AtomicLong(0);
     }
 
@@ -85,11 +91,13 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         int queueSize,
         double returnParam,
         double inOutParam,
-        Optional<Long> randomSeed
+        Optional<Long> randomSeed,
+        AllocationTracker tracker,
+        ProgressLogger progressLogger
     ) {
         var seed = randomSeed.orElseGet(() -> new Random().nextLong());
 
-        return new RandomWalk(graph, steps, concurrency, walksPerNode, queueSize, returnParam, inOutParam, seed);
+        return new RandomWalk(graph, steps, concurrency, walksPerNode, queueSize, returnParam, inOutParam, seed, tracker, progressLogger);
     }
 
     @Override
@@ -139,8 +147,8 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             graph,
             Pools.DEFAULT,
             config,
-            ProgressLogger.NULL_LOGGER,
-            AllocationTracker.empty()
+            progressLogger,
+            tracker
         ).compute();
     }
 
