@@ -29,6 +29,7 @@ import org.neo4j.graphalgo.api.AdjacencyProperties;
 import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
+import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -243,13 +244,31 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
 
         @Override
         public long skipUntil(long target) {
-            if (!hasNextVLong()) {
-                return AdjacencyCursor.NOT_FOUND;
+            if (remaining() <= 0) {
+                return NOT_FOUND;
             }
 
-            var value = nextVLong();
-            while (value <= target && hasNextVLong()) {
-                value = nextVLong();
+            var idx = ArrayUtil.binarySearchLast(currentPage, offset, limit, target);
+
+            long value;
+
+            if (idx > 0) { // Found
+                offset = idx;
+
+                // We need to skip the current offset.
+                if (offset + 1 < limit) { // Page has more elements.
+                    value = currentPage[offset + 1];
+                    offset = offset + 2;
+                } else { // Target is the last element.
+                    value = currentPage[offset++];
+                }
+            } else { // Not found
+                offset = -idx - 1; // Index of next largest element.
+                if (offset < limit) { // Page has more elements.
+                    value = currentPage[offset++];
+                } else {
+                    value = currentPage[offset - 1];
+                }
             }
 
             return value;
@@ -257,16 +276,25 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
 
         @Override
         public long advance(long target) {
-            if (!hasNextVLong()) {
-                return AdjacencyCursor.NOT_FOUND;
+            if (remaining() <= 0) {
+                return NOT_FOUND;
             }
 
-            var value = nextVLong();
-            while (value < target && hasNextVLong()) {
-                value = nextVLong();
+            var idx = ArrayUtil.binarySearchFirst(currentPage, offset, limit, target);
+
+            if (idx > 0) { // Found
+                offset = idx;
+            } else {
+                // Set the offset to the element that is greater than target.
+                offset = -idx - 1;
+
+                if (offset == 0 || offset >= limit) { // Target is out of range
+                    offset = limit;
+                    return currentPage[offset - 1];
+                }
             }
 
-            return value;
+            return currentPage[offset++];
         }
 
         @Override
