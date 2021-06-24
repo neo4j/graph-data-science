@@ -20,10 +20,15 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.functions.NodePropertyFunc;
 
 import java.util.List;
 
 class GraphCreateDocTest extends DocTestBase {
+    @Override
+    List<Class<?>> functions() {
+        return List.of(NodePropertyFunc.class);
+    }
 
     @Override
     List<Class<?>> procedures() {

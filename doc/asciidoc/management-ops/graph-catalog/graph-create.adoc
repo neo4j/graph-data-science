@@ -205,13 +205,6 @@ NOTE: To get information about a stored named graph, including its schema, one c
 [[graph-create-examples]]
 === Examples
 
-// 1. the very simple case, List of Strings --> Labels & Rels, no properties
-// 2.1. very simple node properties only with String node property
-// 2.2. expanded node properties with default value and different name
-// 3.1. very simple relationship properties only with String relationship property
-// 3.2. expanded relationship properties with default value and different name
-// 3.3 relationship aggregation + orientation
-// 4. Star projection !?
 
 In order to demonstrate the GDS Graph Create capabilities we are going to create a small social network graph in Neo4j.
 The example graph looks like this:
@@ -236,12 +229,13 @@ CREATE
 ----
 
 
-==== Projecting single label and single relationship type
+==== Projecting a label and relationship type
 
-We are going to start with demonstrating how to load just a single `label` and `relationship`.
+We are going to start with demonstrating how to load a single `label` and `relationship` by projecting only the `Person` label and `KNOWS` relationship type.
 
 [role=query-example]
 --
+.The following will project and store the `PERSON` nodes and `KNOWS` relationships into a `persons` graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create('persons', 'Person', 'KNOWS')
@@ -257,19 +251,19 @@ YIELD
 |===
 --
 
-In the example above we projected an in-memory graph containing only the `Person` nodes with their `KNOWS` relationships.
-We used the `short-hand` syntax to project the Node Label (`Person`) and Relationship Type (`KNOWS`) that we are interested in.
-The used projections have been expanded to the full `Map` syntax as it can be seen from the `Results` table.
-In addition, we can see that only the three `Person` nodes, and the two `KNOWS` relationships have been projected to the in-memory graph.
+In the example above, we used a `short-hand` syntax for the node- and relationship projection.
+The used projections are internally expanded to the full `Map` syntax as shown in the `Results` table.
+In addition, we can see the projected in-memory graph contains three `Person` nodes, and the two `KNOWS` relationships.
 
 
 // 1. the very simple case, List of Strings --> Labels & Rels, no properties
-==== Projecting multiple labels and multiple relationship types
+==== Projecting multiple labels and relationship types
 
-// TODO: Add an introductory sentence.
+To project multiple node labels and relationship types, we can adjust the projections as follows:
 
 [role=query-example]
 --
+.The following will project and store the `PERSON` and `Book` nodes and the `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create('personsAndBooks', ['Person', 'Book'], ['KNOWS', 'READ'])
@@ -285,16 +279,71 @@ YIELD
 |===
 --
 
-// TODO: Add analysis on the results and some explanation to the query.
+In the example above, we used a `short-hand` syntax for the node- and relationship projection.
+The used projections are internally expanded to the full `Map` syntax as shown for the `nodeProjection` in the `Results` table.
+In addition, we can see the projected in-memory graph contains five nodes, and the two relationships.
+
+==== Projecting node properties
+
+To project node properties we can either use the `nodeProperties` configuration parameter or extend an individual `nodeProjection` for a specific label.
+
+[role=query-example]
+--
+// FIXME: support extra role for graph-create-query with result consumer
+.The following will project and store the `PERSON` and `Book` nodes and the `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create('graphWithProperties', {Person: {properties: 'age'}, Book: {properties: 'isbn'}}, ['KNOWS', 'READ'], {nodeProperties: {ratings: {defaultValue: 5.0}}})
+YIELD
+  graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
+RETURN graph, nodeProjection.Book AS bookProjection, nodes, rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph                 | bookProjection                                                           | nodes  | rels
+| "graphWithProperties" | {label=Book, properties={ratings={defaultValue=5.0, property=ratings}, isbn={defaultValue=null, property=isbn}}} | 5      | 6
+|===
+--
+
+The projected `graphWithProperties` graph contains five nodes and six relationships.
+In the returned `bookProjection` we can observe, the node properties `isbn` and `ratings` are loaded for `Books`.
+
+NOTE: GDS currently only supports loading numeric properties.
+
+Further, the `ratings` property has a default value of `5.0`.
+We loaded the `ratings` property for every node label, but only books have ratings specified in the example graph.
+In the following we check if the ratings are correctly projected:
+
+[role=query-example]
+--
+.The following will lookup the ratings property of Adam in the projected `graphWithProperties` graph:
+[source, cypher, role=noplay]
+----
+MATCH (n)
+RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'ratings') as ratings
+----
+
+.Results
+[opts="header", cols="1,1"]
+|===
+| name          | ratings
+| "The Hobbit"  | [1.0, 2.0, 3.0, 4.5]
+| "Frankenstein"| [1.0, 2.0, 3.0, 4.5]
+| "Adam"        | [5.0]
+| "Florentin"   | [5.0]
+| "Veselin"     | [5.0]
+|===
+--
 
 
 
-
-
-
-
-
-
+// 2.2. expanded node properties with default value and different name
+// 3.1. very simple relationship properties only with String relationship property
+// 3.2. expanded relationship properties with default value and different name
+// 3.3 relationship aggregation + orientation
+// 4. Star projection !?
 
 
 == Cypher Projection
