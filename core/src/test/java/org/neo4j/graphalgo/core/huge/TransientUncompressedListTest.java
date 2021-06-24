@@ -41,7 +41,7 @@ class TransientUncompressedListTest {
             .maxRelCount(100)
             .build();
 
-        MemoryTree memRec = TransientUncompressedList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientUncompressedList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long uncompressedAdjacencySize = 1200;
@@ -64,7 +64,7 @@ class TransientUncompressedListTest {
             .maxRelCount(100_000_000_000L)
             .build();
 
-        MemoryTree memRec = TransientUncompressedList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientUncompressedList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
 

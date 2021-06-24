@@ -46,17 +46,17 @@ public final class TransientCompressedList implements AdjacencyList {
     public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
     public static final long PAGE_MASK = PAGE_SIZE - 1;
 
-    public static MemoryEstimation compressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
+    public static MemoryEstimation adjacencyListEstimation(RelationshipType relationshipType, boolean undirected) {
         return MemoryEstimations.setup("", dimensions -> {
             long nodeCount = dimensions.nodeCount();
             long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
             long relCount = undirected ? relCountForType * 2 : relCountForType;
             long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
-            return TransientCompressedList.compressedMemoryEstimation(avgDegree, nodeCount);
+            return TransientCompressedList.adjacencyListEstimation(avgDegree, nodeCount);
         });
     }
 
-    public static MemoryEstimation compressedMemoryEstimation(long avgDegree, long nodeCount) {
+    public static MemoryEstimation adjacencyListEstimation(long avgDegree, long nodeCount) {
         // Best case scenario:
         // Difference between node identifiers in each adjacency list is 1.
         // This leads to ideal compression through delta encoding.
@@ -88,8 +88,8 @@ public final class TransientCompressedList implements AdjacencyList {
     }
 
     @TestOnly
-    public static MemoryEstimation compressedMemoryEstimation(boolean undirected) {
-        return compressedMemoryEstimation(ALL_RELATIONSHIPS, undirected);
+    public static MemoryEstimation adjacencyListEstimation(boolean undirected) {
+        return adjacencyListEstimation(ALL_RELATIONSHIPS, undirected);
     }
 
     /* test private */

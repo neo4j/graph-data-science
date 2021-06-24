@@ -20,12 +20,16 @@
 package org.neo4j.graphalgo.core.compress;
 
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.huge.TransientCompressedList;
+import org.neo4j.graphalgo.core.huge.TransientUncompressedList;
 import org.neo4j.graphalgo.core.loading.DeltaVarLongCompressor;
 import org.neo4j.graphalgo.core.loading.RawCompressor;
 import org.neo4j.graphalgo.core.loading.TransientCompressedCsrListBuilderFactory;
 import org.neo4j.graphalgo.core.loading.TransientUncompressedCsrListBuilderFactory;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.stream.Stream;
@@ -83,5 +87,21 @@ public interface AdjacencyFactory {
                 noAggregation,
                 tracker
             );
+    }
+
+    static MemoryEstimation adjacencyListEstimation(long avgDegree, long nodeCount) {
+        return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
+            ? TransientUncompressedList.adjacencyListEstimation(avgDegree, nodeCount)
+            : TransientCompressedList.adjacencyListEstimation(avgDegree, nodeCount);
+    }
+
+    static MemoryEstimation adjacencyListEstimation(RelationshipType relationshipType, boolean undirected) {
+        return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
+            ? TransientUncompressedList.adjacencyListEstimation(relationshipType, undirected)
+            : TransientCompressedList.adjacencyListEstimation(relationshipType, undirected);
+    }
+
+    static MemoryEstimation adjacencyPropertiesEstimation(RelationshipType relationshipType, boolean undirected) {
+        return TransientUncompressedList.adjacencyPropertiesEstimation(relationshipType, undirected);
     }
 }

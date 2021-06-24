@@ -45,7 +45,7 @@ class TransientCompressedListTest {
             .maxRelCount(100)
             .build();
 
-        MemoryTree memRec = TransientCompressedList.compressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientCompressedList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 500;
@@ -76,7 +76,7 @@ class TransientCompressedListTest {
             .maxRelCount(100_000_000_000L)
             .build();
 
-        MemoryTree memRec = TransientCompressedList.compressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientCompressedList.adjacencyListEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 100_100_000_000L;

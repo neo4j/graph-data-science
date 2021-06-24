@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyProperties;
 import org.neo4j.graphalgo.api.PropertyCursor;
+import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -40,25 +41,45 @@ import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_MASK;
 import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SIZE;
+import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
 
 public final class TransientUncompressedList implements AdjacencyList, AdjacencyProperties {
 
-    public static MemoryEstimation uncompressedMemoryEstimation(RelationshipType relationshipType, boolean undirected) {
+    public static MemoryEstimation adjacencyListEstimation(RelationshipType relationshipType, boolean undirected) {
+        return MemoryEstimations.setup(
+            "",
+            dimensions -> TransientUncompressedList.adjacencyListEstimation(
+                averageDegree(dimensions, relationshipType, undirected),
+                dimensions.nodeCount()
+            )
+        );
+    }
+
+    @TestOnly
+    public static MemoryEstimation adjacencyListEstimation(boolean undirected) {
+        return adjacencyPropertiesEstimation(ALL_RELATIONSHIPS, undirected);
+    }
+
+    public static MemoryEstimation adjacencyListEstimation(long avgDegree, long nodeCount) {
+        return MemoryEstimations
+            .builder(TransientCompressedList.class)
+            .fixed("pages", listSize(avgDegree, nodeCount))
+            .perNode("degrees", HugeIntArray::memoryEstimation)
+            .perNode("offsets", HugeLongArray::memoryEstimation)
+            .build();
+    }
+
+    public static MemoryEstimation adjacencyPropertiesEstimation(
+        RelationshipType relationshipType,
+        boolean undirected
+    ) {
         return MemoryEstimations
             .builder(TransientUncompressedList.class)
-            .perGraphDimension("pages", (dimensions, concurrency) -> {
-                long nodeCount = dimensions.nodeCount();
-                long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
-                long relCount = undirected ? relCountForType * 2 : relCountForType;
-
-                long uncompressedAdjacencySize = relCount * Long.BYTES + nodeCount * Integer.BYTES;
-                int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-                long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
-
-                return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
-            })
+            .perGraphDimension("pages", (dimensions, concurrency) ->
+                listSize(averageDegree(dimensions, relationshipType, undirected), dimensions.nodeCount())
+            )
             /*
              NOTE: one might think to follow this with something like
 
@@ -71,9 +92,22 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
             .build();
     }
 
-    @TestOnly
-    public static MemoryEstimation uncompressedMemoryEstimation(boolean undirected) {
-        return uncompressedMemoryEstimation(ALL_RELATIONSHIPS, undirected);
+    private static long averageDegree(
+        GraphDimensions dimensions,
+        RelationshipType relationshipType,
+        boolean undirected
+    ) {
+        long nodeCount = dimensions.nodeCount();
+        long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
+        long relCount = undirected ? relCountForType * 2 : relCountForType;
+        return (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
+    }
+
+    private static MemoryRange listSize(long avgDegree, long nodeCount) {
+        long uncompressedAdjacencySize = nodeCount * avgDegree * Long.BYTES + nodeCount * Integer.BYTES;
+        int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
+        long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
+        return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
     }
 
     private long[][] pages;
