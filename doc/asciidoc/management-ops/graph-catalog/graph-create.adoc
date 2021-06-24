@@ -228,7 +228,7 @@ CREATE
   (veselin)-[:READ]->(frankenstein)
 ----
 
-
+[[graph-create-example-single-label-type]]
 ==== Projecting a label and relationship type
 
 We are going to start with demonstrating how to load a single `label` and `relationship` by projecting only the `Person` label and `KNOWS` relationship type.
@@ -282,6 +282,34 @@ YIELD
 In the example above, we used a `short-hand` syntax for the node- and relationship projection.
 The used projections are internally expanded to the full `Map` syntax as shown for the `nodeProjection` in the `Results` table.
 In addition, we can see the projected in-memory graph contains five nodes, and the two relationships.
+
+==== Changing the orientation of relationships
+
+By default, relationships are loaded in the same orientation as stored in the Neo4j db.
+In GDS, we call this the `NATURAL` orientation.
+Additionally, we provide the functionality to load the relationships in the `REVERSE` orientation or even `UNDIRECTED`.
+
+[role=query-example]
+--
+.The following will project and store the `PERSON` nodes and the `KNOWS` relationships as undirected into a `undirectedKnows` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('undirectedKnows', 'Person', {KNOWS: {orientation: 'UNDIRECTED'}})
+YIELD
+  graphName AS graph, relationshipProjection AS knowsProjection, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph             | knowsProjection                                                                  | nodes  | rels
+| "undirectedKnows" | {KNOWS={orientation=UNDIRECTED, aggregation=DEFAULT, type=KNOWS, properties={}}} | 3      | 4
+|===
+--
+
+To specify the orientation, we need to write the `relationshipProjection` with extended Map-syntax.
+Projecting the `KNOWS` relationships `UNDIRECTED`, loads each relationship in both directions.
+Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in <<graph-create-example-single-label-type>>.
 
 ==== Projecting node properties
 
