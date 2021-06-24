@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.loading.RawCompressor;
 import org.neo4j.graphalgo.core.loading.TransientCompressedCsrListFactory;
 import org.neo4j.graphalgo.core.loading.TransientUncompressedCsrListFactory;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.stream.Stream;
 
@@ -52,6 +53,12 @@ public interface AdjacencyFactory {
             Stream.of(aggregations).allMatch(aggregation -> aggregation == Aggregation.NONE),
             tracker
         );
+    }
+
+    static AdjacencyFactory configured() {
+        return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
+            ? transientUncompressed()
+            : transientCompressed();
     }
 
     static AdjacencyFactory transientCompressed() {

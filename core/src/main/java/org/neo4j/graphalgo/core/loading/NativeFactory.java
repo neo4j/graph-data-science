@@ -203,7 +203,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
                 Map.Entry::getKey,
                 projectionEntry -> AdjacencyListWithPropertiesBuilder.create(
                     dimensions.nodeCount(),
-                    AdjacencyFactory.transientCompressed(),
+                    AdjacencyFactory.configured(),
                     projectionEntry.getValue(),
                     dimensions.relationshipPropertyTokens(),
                     tracker

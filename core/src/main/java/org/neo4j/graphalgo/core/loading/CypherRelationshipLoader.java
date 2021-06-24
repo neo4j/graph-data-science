@@ -263,7 +263,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<CypherRelationshipLoad
 
             AdjacencyListWithPropertiesBuilder builder = AdjacencyListWithPropertiesBuilder.create(
                 nodeMapping.nodeCount(),
-                AdjacencyFactory.transientCompressed(),
+                AdjacencyFactory.configured(),
                 projection,
                 aggregationsWithDefault,
                 propertyKeyIds,

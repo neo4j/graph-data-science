@@ -292,7 +292,7 @@ public final class GraphFactory {
 
         var adjacencyListWithPropertiesBuilder = AdjacencyListWithPropertiesBuilder.create(
             nodes.rootNodeCount(),
-            AdjacencyFactory.transientCompressed(),
+            AdjacencyFactory.configured(),
             projection,
             aggregations,
             propertyKeyIds,
