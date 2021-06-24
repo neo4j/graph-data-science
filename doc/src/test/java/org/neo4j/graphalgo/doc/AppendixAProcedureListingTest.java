@@ -85,7 +85,7 @@ class AppendixAProcedureListingTest extends BaseProcTest {
         var procedureListingProcessor = new AppendixAProcedureListingProcessor();
         asciidoctor.javaExtensionRegistry().treeprocessor(procedureListingProcessor);
 
-        var baseDirectory =  ASCIIDOC_PATH.resolve("procedures-and-functions-reference");
+        var baseDirectory =  ASCIIDOC_PATH.resolve("operations-reference");
         var files = baseDirectory.toFile().listFiles();
 
         assertThat(files)
