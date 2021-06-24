@@ -62,7 +62,7 @@ class BFSLevelPregelProcTest extends BaseProcTest {
     void stream() {
         var query = GdsCypher.call()
             .loadEverything(Orientation.UNDIRECTED)
-            .algo("example", "pregel", "bfs")
+            .algo("example", "pregel", "bfs.level")
             .streamMode()
             .addParameter("maxIterations", 10)
             .addParameter("startNode", 0)
