@@ -113,14 +113,18 @@ public final class ModelCatalog {
     }
 
     public static Model<?, ?> drop(String username, String modelName) {
+        return drop(username, modelName, true);
+    }
+
+    public static Model<?, ?> drop(String username, String modelName, boolean failOnMissing) {
         if (publicModels.exists(modelName)) {
             Model<?, ?> model = publicModels.getUntyped(modelName);
             if (model.creator().equals(username)) {
-                return publicModels.drop(modelName);
+                return publicModels.drop(modelName, failOnMissing);
             }
             throw new IllegalStateException(formatWithLocale("Only the creator of model %s can drop it.", modelName));
         } else {
-            return getUserCatalog(username).drop(modelName);
+            return getUserCatalog(username).drop(modelName, failOnMissing);
         }
     }
 
@@ -199,18 +203,6 @@ public final class ModelCatalog {
             );
         }
 
-        public <D, C extends ModelConfig & BaseConfig> Model<D, C> getChecked(
-            String modelName,
-            Class<D> dataClass,
-            Class<C> configClass
-        ) {
-            return get(
-                getUntypedChecked(modelName),
-                dataClass,
-                configClass
-            );
-        }
-
         private <D, C extends ModelConfig & BaseConfig> Model<D, C> get(
             Model<?, ?> model,
             Class<D> dataClass,
@@ -254,9 +246,18 @@ public final class ModelCatalog {
                 .map(Model::algoType);
         }
 
-        public Model<?, ?> drop(String modelName) {
-            var model = getUntypedChecked(modelName);
-            return userModels.remove(model.name());
+        public Model<?, ?> drop(String modelName, boolean failOnMissing) {
+            Model<?, ?> storedModel = userModels.remove(modelName);
+
+            if (failOnMissing && storedModel == null) {
+                throw new NoSuchElementException(prettySuggestions(
+                    formatWithLocale("Model with name `%s` does not exist.", modelName),
+                    modelName,
+                    userModels.keySet()
+                ));
+            } else {
+                return storedModel;
+            }
         }
 
         public Collection<Model<?, ?>> list() {
@@ -309,18 +310,6 @@ public final class ModelCatalog {
 
         private Model<?, ?> getUntyped(String modelName) {
             return userModels.get(modelName);
-        }
-
-        private Model<?, ?> getUntypedChecked(String modelName) {
-            Model<?, ?> model = userModels.get(modelName);
-            if (model == null) {
-                throw new NoSuchElementException(prettySuggestions(
-                    formatWithLocale("Model with name `%s` does not exist.", modelName),
-                    modelName,
-                    userModels.keySet()
-                ));
-            }
-            return model;
         }
     }
 }

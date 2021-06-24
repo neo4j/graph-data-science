@@ -70,6 +70,10 @@ public final class EmbeddingUtils {
     }
 
     public static void validateRelationshipWeightPropertyValue(Graph graph, int concurrency, ExecutorService executorService) {
+        if (!graph.hasRelationshipProperty()) {
+            throw new IllegalStateException("Expected a weighted graph");
+        }
+
         var tasks = PartitionUtils.degreePartition(
             graph,
             concurrency,
@@ -82,7 +86,10 @@ public final class EmbeddingUtils {
                         (sourceNodeId, targetNodeId, property) -> {
                             if (Double.isNaN(property)) {
                                 throw new RuntimeException(
-                                    "Found a relationship without the specified property. Consider using `defaultValue` when loading the graph.");
+                                    formatWithLocale("Found a relationship between %d and %d with no specified weight. Consider using `defaultValue` when loading the graph.",
+                                        graph.toOriginalNodeId(sourceNodeId),
+                                        graph.toOriginalNodeId(targetNodeId))
+                                );
                             }
                             return true;
                         }

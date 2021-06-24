@@ -22,6 +22,9 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.model.catalog.ModelDropProc;
+import org.neo4j.gds.model.catalog.ModelExistsProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;
@@ -32,12 +35,9 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.gds.model.catalog.ModelDropProc;
-import org.neo4j.gds.model.catalog.ModelExistsProc;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -64,20 +64,20 @@ class GraphSageBaseProcTest extends BaseProcTest {
         ", (m:King{ name: 'M', age: 99, birth_year: 201, death_year: 300 })" +
         ", (n:King{ name: 'N', age: 99, birth_year: 201, death_year: 300 })" +
         ", (o:King{ name: 'O', age: 99, birth_year: 201, death_year: 300 })" +
-        ", (a)-[:REL]->(b)" +
-        ", (a)-[:REL]->(c)" +
-        ", (b)-[:REL]->(c)" +
-        ", (b)-[:REL]->(d)" +
-        ", (c)-[:REL]->(e)" +
-        ", (d)-[:REL]->(e)" +
-        ", (d)-[:REL]->(f)" +
-        ", (e)-[:REL]->(f)" +
-        ", (e)-[:REL]->(g)" +
-        ", (h)-[:REL]->(i)" +
-        ", (i)-[:REL]->(j)" +
-        ", (j)-[:REL]->(k)" +
-        ", (j)-[:REL]->(l)" +
-        ", (k)-[:REL]->(l)";
+        ", (a)-[:REL {weight: 1.0}]->(b)" +
+        ", (a)-[:REL {weight: 5.0}]->(c)" +
+        ", (b)-[:REL {weight: 42.0}]->(c)" +
+        ", (b)-[:REL {weight: 10.0}]->(d)" +
+        ", (c)-[:REL {weight: 62.0}]->(e)" +
+        ", (d)-[:REL {weight: 1.0}]->(e)" +
+        ", (d)-[:REL {weight: 1.0}]->(f)" +
+        ", (e)-[:REL {weight: 1.0}]->(f)" +
+        ", (e)-[:REL {weight: 4.0}]->(g)" +
+        ", (h)-[:REL {weight: 1.0}]->(i)" +
+        ", (i)-[:REL {weight: -1.0}]->(j)" +
+        ", (j)-[:REL {weight: 1.0}]->(k)" +
+        ", (j)-[:REL {weight: -10.0}]->(l)" +
+        ", (k)-[:REL {weight: 1.0}]->(l)";
 
     static String graphName = "embeddingsGraph";
 
@@ -109,6 +109,7 @@ class GraphSageBaseProcTest extends BaseProcTest {
                     Orientation.UNDIRECTED
                 )
             )
+            .withRelationshipProperty("weight")
             .graphCreate(graphName)
             .yields();
 

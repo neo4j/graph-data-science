@@ -21,13 +21,11 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.MutateConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -62,22 +60,15 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
-        var graphSageModel = ModelCatalog.get(
-            configuration.username(),
-            configuration.modelName(),
-            ModelData.class,
-            GraphSageTrainConfig.class
-        );
 
         var executorService = Pools.DEFAULT;
-        if(graphSageModel.trainConfig().hasRelationshipWeightProperty()) {
+        if(configuration.model().trainConfig().hasRelationshipWeightProperty()) {
             validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
         }
 
         return new GraphSage(
             graph,
             configuration,
-            graphSageModel,
             executorService,
             tracker,
             progressLogger
@@ -86,13 +77,10 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        var trainConfig = ModelCatalog
-            .get(config.username(), config.modelName(), ModelData.class, GraphSageTrainConfig.class)
-            .trainConfig();
         return MemoryEstimations.setup(
             "",
             graphDimensions -> withNodeCount(
-                trainConfig,
+                config.model().trainConfig(),
                 graphDimensions.nodeCount(),
                 config instanceof MutateConfig
             )

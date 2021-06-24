@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.GdsCypher;
@@ -58,6 +59,51 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
             Collection<Double> nodeEmbeddings = (List<Double>) o;
             assertEquals(embeddingDimension, nodeEmbeddings.size());
         });
+    }
+
+    @Test
+    void weightedGraphSage() {
+        var trainQuery = GdsCypher.call()
+            .explicitCreation(graphName)
+            .algo("gds.beta.graphSage")
+            .trainMode()
+            .addParameter("sampleSizes", List.of(1))
+            .addParameter("maxIterations", 1)
+            .addParameter("featureProperties", List.of("age"))
+            .addParameter("relationshipWeightProperty", "weight")
+            .addParameter("embeddingDimension", 1)
+            .addParameter("activationFunction", "RELU")
+            .addParameter("aggregator", "MEAN")
+            .addParameter("randomSeed", 42L)
+            .addParameter("modelName", modelName)
+            .yields();
+
+        runQuery(trainQuery);
+
+        String streamQuery = GdsCypher.call().explicitCreation(graphName)
+            .algo("gds.beta.graphSage")
+            .streamMode()
+            .addParameter("concurrency", 1)
+            .addParameter("modelName", modelName)
+            .yields();
+
+        assertCypherResult(streamQuery, List.of(
+            Map.of("nodeId", 0L, "embedding", List.of(0.999999999980722)),
+            Map.of("nodeId", 1L, "embedding", List.of(0.9999999999975783)),
+            Map.of("nodeId", 2L, "embedding", List.of(0.9999999999880146)),
+            Map.of("nodeId", 3L, "embedding", List.of(0.999999999965436)),
+            Map.of("nodeId", 4L, "embedding", List.of(0.9999999999983651)),
+            Map.of("nodeId", 5L, "embedding", List.of(0.9999999999377848)),
+            Map.of("nodeId", 6L, "embedding", List.of(0.9999999999580143)),
+            Map.of("nodeId", 7L, "embedding", List.of(0.9999999999420027)),
+            Map.of("nodeId", 8L, "embedding", List.of(0.9999999996197955)),
+            Map.of("nodeId", 9L, "embedding", List.of(-0.9999999619795564)),
+            Map.of("nodeId", 10L, "embedding", List.of(0.9999999999485437)),
+            Map.of("nodeId", 11L, "embedding", List.of(-0.9999999979930556)),
+            Map.of("nodeId", 12L, "embedding", List.of(0.999999999965436)),
+            Map.of("nodeId", 13L, "embedding", List.of(0.999999999965436)),
+            Map.of("nodeId", 14L, "embedding", List.of(0.999999999965436))
+        ));
     }
 
     @ParameterizedTest(name = "Graph Properties: {2} - Algo Properties: {1}")
