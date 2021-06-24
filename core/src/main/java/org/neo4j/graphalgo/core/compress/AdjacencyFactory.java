@@ -23,8 +23,8 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.DeltaVarLongCompressor;
 import org.neo4j.graphalgo.core.loading.RawCompressor;
-import org.neo4j.graphalgo.core.loading.TransientCompressedCsrListFactory;
-import org.neo4j.graphalgo.core.loading.TransientUncompressedCsrListFactory;
+import org.neo4j.graphalgo.core.loading.TransientCompressedCsrListBuilderFactory;
+import org.neo4j.graphalgo.core.loading.TransientUncompressedCsrListBuilderFactory;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
@@ -62,30 +62,26 @@ public interface AdjacencyFactory {
     }
 
     static AdjacencyFactory transientCompressed() {
-        return (nodeCount, propertyMappings, aggregations, noAggregation, tracker) -> {
-            var adjacencyFactory = TransientCompressedCsrListFactory.of(tracker);
-            return DeltaVarLongCompressor.Factory.INSTANCE.create(
+        return (nodeCount, propertyMappings, aggregations, noAggregation, tracker) ->
+            DeltaVarLongCompressor.Factory.INSTANCE.create(
                 nodeCount,
-                adjacencyFactory,
+                TransientCompressedCsrListBuilderFactory.of(tracker),
                 propertyMappings,
                 aggregations,
                 noAggregation,
                 tracker
             );
-        };
     }
 
     static AdjacencyFactory transientUncompressed() {
-        return (nodeCount, propertyMappings, aggregations, noAggregation, tracker) -> {
-            var adjacencyFactory = TransientUncompressedCsrListFactory.of(tracker);
-            return RawCompressor.Factory.INSTANCE.create(
+        return (nodeCount, propertyMappings, aggregations, noAggregation, tracker) ->
+            RawCompressor.Factory.INSTANCE.create(
                 nodeCount,
-                adjacencyFactory,
+                TransientUncompressedCsrListBuilderFactory.of(tracker),
                 propertyMappings,
                 aggregations,
                 noAggregation,
                 tracker
             );
-        };
     }
 }

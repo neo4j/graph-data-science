@@ -50,14 +50,12 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
             boolean noAggregation,
             AllocationTracker tracker
         ) {
-            var adjacencyBuilder = csrListBuilderFactory.newAdjacencyListBuilder();
-
             @SuppressWarnings("unchecked")
             CsrListBuilder<long[], ? extends AdjacencyProperties>[] propertyBuilders = new CsrListBuilder[propertyMappings.numberOfMappings()];
             Arrays.setAll(propertyBuilders, i -> csrListBuilderFactory.newAdjacencyPropertiesBuilder());
 
             return new Blueprint(
-                adjacencyBuilder,
+                csrListBuilderFactory.newAdjacencyListBuilder(),
                 propertyBuilders,
                 HugeIntArray.newArray(nodeCount, tracker),
                 HugeLongArray.newArray(nodeCount, tracker),

@@ -19,25 +19,24 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.huge.TransientUncompressedList;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-public final class TransientCompressedCsrListFactory implements CsrListBuilderFactory<byte[], TransientAdjacencyList, long[], TransientUncompressedList> {
+public final class TransientUncompressedCsrListBuilderFactory implements CsrListBuilderFactory<long[], TransientUncompressedList, long[], TransientUncompressedList> {
 
-    public static TransientCompressedCsrListFactory of(AllocationTracker tracker) {
-        return new TransientCompressedCsrListFactory(tracker);
+    public static TransientUncompressedCsrListBuilderFactory of(AllocationTracker tracker) {
+        return new TransientUncompressedCsrListBuilderFactory(tracker);
     }
 
     private final AllocationTracker tracker;
 
-    private TransientCompressedCsrListFactory(AllocationTracker tracker) {
+    private TransientUncompressedCsrListBuilderFactory(AllocationTracker tracker) {
         this.tracker = tracker;
     }
 
     @Override
-    public TransientCompressedListBuilder newAdjacencyListBuilder() {
-        return new TransientCompressedListBuilder(tracker);
+    public TransientUncompressedListBuilder newAdjacencyListBuilder() {
+        return new TransientUncompressedListBuilder(tracker);
     }
 
     @Override
