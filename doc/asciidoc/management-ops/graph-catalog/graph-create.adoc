@@ -235,7 +235,7 @@ We are going to start with demonstrating how to load a single `label` and `relat
 
 [role=query-example]
 --
-.The following will project and store the `PERSON` nodes and `KNOWS` relationships into a `persons` graph:
+.Project and store `PERSON` nodes and `KNOWS` relationships into a `persons` graph.
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create('persons', 'Person', 'KNOWS')
@@ -263,7 +263,7 @@ To project multiple node labels and relationship types, we can adjust the projec
 
 [role=query-example]
 --
-.The following will project and store the `PERSON` and `Book` nodes and the `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
+.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create('personsAndBooks', ['Person', 'Book'], ['KNOWS', 'READ'])
@@ -291,7 +291,7 @@ Additionally, we provide the functionality to load the relationships in the `REV
 
 [role=query-example]
 --
-.The following will project and store the `PERSON` nodes and the `KNOWS` relationships as undirected into a `undirectedKnows` graph:
+.Project and store `PERSON` nodes and undirected `KNOWS` relationships into a `undirectedKnows` graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create('undirectedKnows', 'Person', {KNOWS: {orientation: 'UNDIRECTED'}})
@@ -317,7 +317,7 @@ To project node properties we can either use the `nodeProperties` configuration 
 
 [role=query-example, group=node-properties]
 --
-.The following will project and store the `PERSON` and `Book` nodes and the `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
+.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create('graphWithProperties', {Person: {properties: 'age'}, Book: {properties: {price: {defaultValue: 5.0}}}}, ['KNOWS', 'READ'], {nodeProperties: 'ratings'})
@@ -345,7 +345,7 @@ In the following we check if the price was correctly projected:
 
 [role=query-example, group=node-properties]
 --
-.The following will lookup the ratings property of Adam in the projected `graphWithProperties` graph:
+.Verify the ratings property of Adam in the projected `graphWithProperties` graph:
 [source, cypher, role=noplay]
 ----
 MATCH (n:Book)
@@ -380,7 +380,7 @@ We can specify how parallel relationships should be merged into a single relatio
 // special case: COUNT example
 [role=query-example, group=count-aggregate]
 --
-.The following projects a `readSums` graph containing the `Person` and `Book` nodes and aggregated `READ` relationships:
+.Project a `readSums` graph containing `Person` and `Book` nodes and aggregated `READ` relationships:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create('readSums', ['Person', 'Book'], {READ: {properties: {numberOfReads: {property:'*', aggregation: 'COUNT'}}}})
@@ -400,19 +400,19 @@ Next, we will verify that the `READ` relationships were correctly aggregated.
 
 [role=query-example, group=count-aggregate]
 --
-.The following query streams the relationship property `numberOfReads`:
+.Stream the relationship property `numberOfReads` of the projected `readSums` graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfReads')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
-RETURN gds.util.asNode(sourceNodeId).name AS src, gds.util.asNode(targetNodeId).name AS trg, numberOfReads
-ORDER BY numberOfReads DESC, src
+RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfReads
+ORDER BY numberOfReads DESC, person
 ----
 
 .Results
 [opts="header", cols="1,1,1"]
 |===
-| src         | trg                  | numberOfReads
+| person      | book                  | numberOfReads
 | "Florentin" |  "The Hobbit"        | 2.0
 | "Adam"      |  "The Hobbit"        | 1.0
 | "Veselin"   |  "Frankenstein"      | 1.0
