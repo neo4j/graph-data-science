@@ -40,7 +40,7 @@ import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
 
-public final class TransientAdjacencyList implements AdjacencyList {
+public final class TransientCompressedList implements AdjacencyList {
 
     public static final int PAGE_SHIFT = 18;
     public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
@@ -52,7 +52,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
             long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
             long relCount = undirected ? relCountForType * 2 : relCountForType;
             long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
-            return TransientAdjacencyList.compressedMemoryEstimation(avgDegree, nodeCount);
+            return TransientCompressedList.compressedMemoryEstimation(avgDegree, nodeCount);
         });
     }
 
@@ -80,7 +80,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
         MemoryRange pagesMemoryRange = MemoryRange.of(minMemoryReqs, maxMemoryReqs);
 
         return MemoryEstimations
-            .builder(TransientAdjacencyList.class)
+            .builder(TransientCompressedList.class)
             .fixed("pages", pagesMemoryRange)
             .perNode("degrees", HugeIntArray::memoryEstimation)
             .perNode("offsets", HugeLongArray::memoryEstimation)
@@ -104,7 +104,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
     private HugeIntArray degrees;
     private HugeLongArray offsets;
 
-    public TransientAdjacencyList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+    public TransientCompressedList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;

@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
+import org.neo4j.graphalgo.core.huge.TransientCompressedList;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -69,7 +69,7 @@ public class SimilarityGraphBuilder {
             return MemoryEstimations.builder(HugeGraph.class)
                 .add(
                     "adjacency list",
-                    TransientAdjacencyList.compressedMemoryEstimation(averageDegree, newNodeCount)
+                    TransientCompressedList.compressedMemoryEstimation(averageDegree, newNodeCount)
                 )
                 .build();
         });

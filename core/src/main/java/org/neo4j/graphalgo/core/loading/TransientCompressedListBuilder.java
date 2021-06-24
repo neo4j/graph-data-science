@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
+import org.neo4j.graphalgo.core.huge.TransientCompressedList;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -28,7 +28,7 @@ import java.util.Arrays;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 
-public final class TransientCompressedListBuilder implements CsrListBuilder<byte[], TransientAdjacencyList> {
+public final class TransientCompressedListBuilder implements CsrListBuilder<byte[], TransientCompressedList> {
 
     private final BumpAllocator<byte[]> builder;
 
@@ -42,8 +42,8 @@ public final class TransientCompressedListBuilder implements CsrListBuilder<byte
     }
 
     @Override
-    public TransientAdjacencyList build(HugeIntArray degrees, HugeLongArray offsets) {
-        return new TransientAdjacencyList(builder.intoPages(), degrees, offsets);
+    public TransientCompressedList build(HugeIntArray degrees, HugeLongArray offsets) {
+        return new TransientCompressedList(builder.intoPages(), degrees, offsets);
     }
 
     @Override

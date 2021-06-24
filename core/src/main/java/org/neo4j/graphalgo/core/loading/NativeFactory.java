@@ -33,7 +33,7 @@ import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.GraphDimensionsStoreReader;
 import org.neo4j.graphalgo.core.compress.AdjacencyFactory;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
+import org.neo4j.graphalgo.core.huge.TransientCompressedList;
 import org.neo4j.graphalgo.core.huge.TransientUncompressedList;
 import org.neo4j.graphalgo.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
@@ -109,7 +109,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphCreateFromSto
             // adjacency list
             builder.add(
                 formatWithLocale("adjacency list for '%s'", relationshipType),
-                TransientAdjacencyList.compressedMemoryEstimation(relationshipType, undirected)
+                TransientCompressedList.compressedMemoryEstimation(relationshipType, undirected)
             );
             // all properties per projection
             relationshipProjection.properties().mappings().forEach(resolvedPropertyMapping -> {

@@ -29,8 +29,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_MASK;
-import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_SHIFT;
+import static org.neo4j.graphalgo.core.huge.TransientCompressedList.PAGE_MASK;
+import static org.neo4j.graphalgo.core.huge.TransientCompressedList.PAGE_SHIFT;
 
 class TransientUncompressedListTest {
 

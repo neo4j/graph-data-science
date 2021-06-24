@@ -30,12 +30,12 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_MASK;
-import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.PAGE_SHIFT;
-import static org.neo4j.graphalgo.core.huge.TransientAdjacencyList.computeAdjacencyByteSize;
+import static org.neo4j.graphalgo.core.huge.TransientCompressedList.PAGE_MASK;
+import static org.neo4j.graphalgo.core.huge.TransientCompressedList.PAGE_SHIFT;
+import static org.neo4j.graphalgo.core.huge.TransientCompressedList.computeAdjacencyByteSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
-class TransientAdjacencyListTest {
+class TransientCompressedListTest {
 
     @Test
     void shouldComputeCompressedMemoryEstimationForSinglePage() {
@@ -45,7 +45,7 @@ class TransientAdjacencyListTest {
             .maxRelCount(100)
             .build();
 
-        MemoryTree memRec = TransientAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientCompressedList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 500;
@@ -76,7 +76,7 @@ class TransientAdjacencyListTest {
             .maxRelCount(100_000_000_000L)
             .build();
 
-        MemoryTree memRec = TransientAdjacencyList.compressedMemoryEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = TransientCompressedList.compressedMemoryEstimation(false).estimate(dimensions, 1);
 
         long classSize = 24;
         long bestCaseAdjacencySize = 100_100_000_000L;
