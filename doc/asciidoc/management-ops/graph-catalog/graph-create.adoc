@@ -3,15 +3,28 @@
 
 [abstract]
 --
+This section details projecting and storing graph into the graph catalog within the Neo4j Graph Data Science library.
+--
+
+
 A projected graph can be stored in the catalog under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
 This allows multiple algorithms to use the same graph without having to re-create it on each algorithm run.
+
+[NOTE]
+--
+There is also a way to generate a random graph, see <<graph-generation, Graph Generation>> documentation for more details.
 --
 
-//[NOTE]
-//====
-//There is also a way to generate a random graph, see <<graph-generation, Graph Generation>> documentation for more details.
-//====
+[NOTE]
+--
+The projected graphs will reside in the catalog until:
+
+- the graph is dropped using <<catalog-graph-drop, gds.graph.drop>>
+- the Neo4j database from which to graph was projected is stopped or dropped
+- the Neo4j database management system is stopped.
+--
+
 
 [[graph-create-native]]
 == Native Projection
@@ -263,16 +276,6 @@ YIELD
 | relationshipCount      | Integer  | The number of relationships stored in the projected graph.
 | createMillis           | Integer  | Milliseconds for creating the graph.
 |===
---
-
-// TODO put this into a life-cycle subsection
-[NOTE]
---
-The projected graphs will reside in the catalog until:
-
-- the graph is dropped using <<catalog-graph-drop, gds.graph.drop>>
-- the Neo4j database from which to graph was projected is stopped or dropped
-- the Neo4j database management system is stopped.
 --
 
 NOTE: To get information about a stored named graph, including its schema, one can use <<catalog-graph-list, gds.graph.list>>.
