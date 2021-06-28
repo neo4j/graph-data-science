@@ -169,8 +169,6 @@ public final class LocalBumpAllocator<PAGE> {
 
         private final LocalBumpAllocator<PAGE> globalAllocator;
 
-        private int stashPageIndex;
-        private int stashOffset;
         private long top;
 
         private PAGE page;
@@ -179,7 +177,6 @@ public final class LocalBumpAllocator<PAGE> {
         private Allocator(LocalBumpAllocator<PAGE> globalAllocator, boolean prefetchAndBumpZero) {
             this.globalAllocator = globalAllocator;
 
-            this.stashOffset = -1;
             this.offset = PAGE_SIZE;
             if (prefetchAndBumpZero) {
                 top = prefetchAllocate();
@@ -211,10 +208,6 @@ public final class LocalBumpAllocator<PAGE> {
             if (maxOffset < 0) {
                 return oversizingAllocate(targets, length, targetsLength);
             }
-            if (reset() && maxOffset >= offset) {
-                doAllocate(targets, length);
-                return address;
-            }
             return prefetchAllocate(targets, length);
         }
 
@@ -228,11 +221,6 @@ public final class LocalBumpAllocator<PAGE> {
                 // need to create a smaller slice
                 targets = globalAllocator.pageFactory.copyOfPage(targets, length);
             }
-            if (stashOffset == -1) {
-                stashOffset = offset;
-            }
-            this.page = targets;
-            this.offset = 0;
             return globalAllocator.insertExistingPage(targets);
         }
 
@@ -247,7 +235,6 @@ public final class LocalBumpAllocator<PAGE> {
             assert PageUtil.indexInPage(address, PAGE_MASK) == 0;
             var currentPageIndex = PageUtil.pageIndex(address, PAGE_SHIFT);
             this.page = globalAllocator.pages[currentPageIndex];
-            this.stashPageIndex = currentPageIndex;
             this.offset = 0;
             return address;
         }
@@ -257,16 +244,6 @@ public final class LocalBumpAllocator<PAGE> {
             System.arraycopy(targets, 0, page, offset, length);
             offset += length;
             top += length;
-        }
-
-        private boolean reset() {
-            if (stashOffset != -1) {
-                page = globalAllocator.pages[stashPageIndex];
-                offset = stashOffset;
-                stashOffset = -1;
-                return true;
-            }
-            return false;
         }
     }
 }
