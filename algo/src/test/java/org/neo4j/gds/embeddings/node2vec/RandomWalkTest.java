@@ -23,6 +23,8 @@ import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
@@ -45,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class RandomWalkTest extends AlgoTestBase {
 
@@ -303,9 +306,10 @@ class RandomWalkTest extends AlgoTestBase {
         assertThat(nodeCounter.get(2L)).isCloseTo(1L, Offset.offset(50L));
     }
 
-    @Test
-    void failOnNegativeRelationshipWeights() {
-        var graph = fromGdl("(a)-[:REL {weight: -1}]->(b)");
+    @ParameterizedTest
+    @ValueSource(doubles = {-1, Double.NaN})
+    void failOnInvalidRelationshipWeights(double invalidWeight) {
+        var graph = fromGdl(formatWithLocale("(a)-[:REL {weight: %f}]->(b)", invalidWeight));
 
         assertThatThrownBy(
             () -> RandomWalk.create(
@@ -320,10 +324,11 @@ class RandomWalkTest extends AlgoTestBase {
                 AllocationTracker.empty(),
                 ProgressLogger.NULL_LOGGER
             )
-        )
-            .isInstanceOf(RuntimeException.class)
-            .hasMessage("Found an invalid relationship between 0 and 1 with the property value of -1.000000." +
-                        " Node2Vec only supports non-negative weights.");
+        ).isInstanceOf(RuntimeException.class)
+            .hasMessage(
+                formatWithLocale(
+                    "Found an invalid relationship between 0 and 1 with the property value of %f." +
+                    " Node2Vec only supports non-negative weights.", invalidWeight));
     }
 
     @Test
