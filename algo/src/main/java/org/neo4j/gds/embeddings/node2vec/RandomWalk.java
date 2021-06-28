@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -96,6 +97,16 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         ProgressLogger progressLogger
     ) {
         var seed = randomSeed.orElseGet(() -> new Random().nextLong());
+
+        if (graph.hasRelationshipProperty()) {
+            EmbeddingUtils.validateRelationshipWeightPropertyValue(
+                graph,
+                concurrency,
+                weight -> weight >= 0,
+                "Node2Vec only supports non-negative weights.",
+                Pools.DEFAULT
+            );
+        }
 
         return new RandomWalk(graph, steps, concurrency, walksPerNode, queueSize, returnParam, inOutParam, seed, tracker, progressLogger);
     }
