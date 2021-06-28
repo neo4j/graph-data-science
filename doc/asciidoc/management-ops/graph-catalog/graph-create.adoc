@@ -706,7 +706,7 @@ For graphs without relationship properties, we can use the `COUNT` aggregation.
 // special case: COUNT example
 [role=query-example, group=count-aggregate]
 --
-.Project a `readSums` graph containing `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
+.Project a `readCount` graph containing `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create('readCount', ['Person', 'Book'], {READ: {properties: {numberOfReads: {property:'*', aggregation: 'COUNT'}}}})
@@ -755,13 +755,13 @@ Another way to do this is to project the parallel relationship count as a relati
 // special case: COUNT example
 [role=query-example, group=cypher-count-aggregate]
 --
-.Project a `readSums` graph containing `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
+.Project a `readCount` graph containing `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
   'readCount',
   'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
-  'MATCH (n)-[r:READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type, count(r) as numberOfReads'
+  'MATCH (n)-[r:READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type, count(r) AS numberOfReads'
 )
 YIELD
   graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
@@ -803,6 +803,8 @@ We can see, that the two READ relationships between Florentin and the Hobbit res
 
 === Handling parallel relationships with properties
 
+==== Native-projection
+
 For graphs with relationship properties we can also use other aggregations.
 
 [role=query-example, group=sum-aggregate]
@@ -810,9 +812,16 @@ For graphs with relationship properties we can also use other aggregations.
 .Project a `readSums` graph containing `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('readSums', ['Person', 'Book'], {READ: {properties: {numberOfPages: {aggregation: 'SUM'}}}})
+CALL gds.graph.create(
+  'readSums',
+  ['Person', 'Book'],
+  {READ: {properties: {numberOfPages: {aggregation: 'SUM'}}}}
+)
 YIELD
-  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
+  graphName AS graph,
+  relationshipProjection AS readProjection,
+  nodeCount AS nodes,
+  relationshipCount AS rels
 ----
 
 .Results
@@ -826,6 +835,62 @@ YIELD
 Next, we will verify that the relationship property `numberOfPages` were correctly aggregated.
 
 [role=query-example, group=sum-aggregate]
+--
+.Stream the relationship property `numberOfPages` of the projected `readSums` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfPages')
+YIELD
+  sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfPages
+ORDER BY numberOfPages DESC, person
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Florentin" |  "The Hobbit"        | 46.0
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Veselin"   |  "Frankenstein"      | 0.0
+|===
+--
+
+We can see, that the two READ relationships between Florentin and the Hobbit sum up to `46` numberOfReads.
+
+
+==== Cypher-projection
+
+For graphs with relationship properties we can also use other aggregations.
+
+[role=query-example, group=cypher-sum-aggregate]
+--
+.Project a `readSums` graph containing `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'readSums',
+  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type, sum(r.numberOfPages) AS numberOfPages'
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph      | nodes  | rels
+| "readSums" | 5      | 3
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` were correctly aggregated.
+
+[role=query-example, group=cypher-sum-aggregate]
 --
 .Stream the relationship property `numberOfPages` of the projected `readSums` graph:
 [source, cypher, role=noplay]
