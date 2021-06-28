@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
@@ -300,6 +301,29 @@ class RandomWalkTest extends AlgoTestBase {
         assertThat(nodeCounter.get(0L)).isCloseTo(1500, Percentage.withPercentage(10));
         assertThat(nodeCounter.get(1L)).isCloseTo(1500, Percentage.withPercentage(10));
         assertThat(nodeCounter.get(2L)).isCloseTo(1L, Offset.offset(50L));
+    }
+
+    @Test
+    void failOnNegativeRelationshipWeights() {
+        var graph = fromGdl("(a)-[:REL {weight: -1}]->(b)");
+
+        assertThatThrownBy(
+            () -> RandomWalk.create(
+                graph,
+                1000,
+                1,
+                1,
+                100,
+                1,
+                1,
+                of(23L),
+                AllocationTracker.empty(),
+                ProgressLogger.NULL_LOGGER
+            )
+        )
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Found an invalid relationship between 0 and 1 with the property value of -1.000000." +
+                        " Node2Vec only supports non-negative weights.");
     }
 
     @Test

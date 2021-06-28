@@ -116,7 +116,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
             .addParameter("modelName", modelName)
             .yields();
 
-        assertError(train, "Found a relationship between 10 and 11 with no specified weight. Consider using `defaultValue` when loading the graph.");
+        assertError(train, "Found an invalid relationship between 10 and 11 with the property value of NaN. Consider using `defaultValue` when loading the graph.");
     }
 
     @Test
@@ -198,7 +198,7 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
             .addParameter("modelName", modelName)
             .yields();
 
-        assertError(embeddingQuery, "Found a relationship between 10 and 11 with no specified weight. Consider using `defaultValue` when loading the graph.");
+        assertError(embeddingQuery, "Found an invalid relationship between 10 and 11 with the property value of NaN. Consider using `defaultValue` when loading the graph.");
     }
 
     private static Stream<Arguments> procQueries() {

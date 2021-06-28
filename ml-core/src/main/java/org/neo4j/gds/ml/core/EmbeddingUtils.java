@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.DoublePredicate;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -75,6 +76,10 @@ public final class EmbeddingUtils {
         int concurrency,
         ExecutorService executorService
     ) {
+        validateRelationshipWeightPropertyValue(graph, concurrency, weight -> !Double.isNaN(weight), "Consider using `defaultValue` when loading the graph.", executorService);
+    }
+
+    public static void validateRelationshipWeightPropertyValue(Graph graph, int concurrency, DoublePredicate validator, String errorDetails, ExecutorService executorService) {
         if (!graph.hasRelationshipProperty()) {
             throw new IllegalStateException("Expected a weighted graph");
         }
@@ -83,7 +88,7 @@ public final class EmbeddingUtils {
         var tasks = PartitionUtils.degreePartition(
             graph,
             concurrency,
-            partition -> new RelationshipValidator(concurrentGraph, partition),
+            partition -> new RelationshipValidator(concurrentGraph, partition, validator, errorDetails),
             Optional.empty()
         );
 
@@ -92,15 +97,21 @@ public final class EmbeddingUtils {
 
     private static class RelationshipValidator implements Runnable {
 
-        private ThreadLocal<Graph> concurrentGraph;
-        private Partition partition;
+        private final ThreadLocal<Graph> concurrentGraph;
+        private final Partition partition;
+        private final DoublePredicate validator;
+        private String errorDetails;
 
         RelationshipValidator(
             ThreadLocal<Graph> concurrentGraph,
-            Partition partition
+            Partition partition,
+            DoublePredicate validator,
+            String errorDetails
         ) {
             this.concurrentGraph = concurrentGraph;
             this.partition = partition;
+            this.validator = validator;
+            this.errorDetails = errorDetails;
         }
 
         @Override
@@ -111,12 +122,14 @@ public final class EmbeddingUtils {
                     nodeId,
                     Double.NaN,
                     (sourceNodeId, targetNodeId, property) -> {
-                        if (Double.isNaN(property)) {
+                        if (!validator.test(property)) {
                             throw new RuntimeException(
                                 formatWithLocale(
-                                    "Found a relationship between %d and %d with no specified weight. Consider using `defaultValue` when loading the graph.",
+                                    "Found an invalid relationship between %d and %d with the property value of %f. %s",
                                     partitionLocalGraph.toOriginalNodeId(sourceNodeId),
-                                    partitionLocalGraph.toOriginalNodeId(targetNodeId)
+                                    partitionLocalGraph.toOriginalNodeId(targetNodeId),
+                                    property,
+                                    errorDetails
                                 )
                             );
                         }
@@ -127,5 +140,4 @@ public final class EmbeddingUtils {
 
         }
     }
-
 }
