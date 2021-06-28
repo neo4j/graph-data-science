@@ -192,7 +192,7 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
      */
     public static HugeAtomicByteArray newArray(long size, AllocationTracker tracker) {
         if (size <= ArrayUtil.MAX_ARRAY_LENGTH) {
-            return SingleHugeAtomicByteArray.of(size, BytePageCreator.of(1), tracker);
+            return SingleHugeAtomicByteArray.of(size, tracker);
         }
         return PagedHugeAtomicByteArray.of(size, BytePageCreator.of(1), tracker);
     }
@@ -215,12 +215,11 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
 
         private static final VarHandle ARRAY_HANDLE = MethodHandles.arrayElementVarHandle(byte[].class);
 
-        private static HugeAtomicByteArray of(long size, BytePageCreator pageCreator, AllocationTracker tracker) {
+        private static HugeAtomicByteArray of(long size, AllocationTracker tracker) {
             assert size <= ArrayUtil.MAX_ARRAY_LENGTH;
             final int intSize = (int) size;
             tracker.add(sizeOfByteArray(intSize));
             byte[] page = new byte[intSize];
-            pageCreator.fillPage(page, 0);
 
             return new SingleHugeAtomicByteArray(intSize, page);
         }

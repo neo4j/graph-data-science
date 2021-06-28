@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.utils.paged;
 import java.util.stream.IntStream;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.parallelStreamConsume;
-import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.PAGE_SIZE;
 
 public final class BytePageCreator {
@@ -40,25 +39,16 @@ public final class BytePageCreator {
             IntStream.range(0, lastPageIndex),
             concurrency,
             stream -> stream.forEach(pageIndex -> {
-                createAndFillPage(pages, pageIndex, PAGE_SIZE);
+                createPage(pages, pageIndex, PAGE_SIZE);
             })
         );
 
-        createAndFillPage(pages, lastPageIndex, lastPageSize);
+        createPage(pages, lastPageIndex, lastPageSize);
     }
 
-    public void fillPage(byte[] page, long base) {
-        for (var i = 0; i < page.length; i++) {
-            page[i] = (byte)(i + base);
-        }
-    }
-
-    private void createAndFillPage(byte[][] pages, int pageIndex, int pageSize) {
+    private void createPage(byte[][] pages, int pageIndex, int pageSize) {
         var page = new byte[pageSize];
         pages[pageIndex] = page;
-
-        long base = ((long) pageIndex) << PAGE_SHIFT;
-        fillPage(page, base);
     }
 
     public static BytePageCreator of(int concurrency) {
