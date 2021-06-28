@@ -30,8 +30,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -44,7 +42,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         public AdjacencyCompressorBlueprint create(
             long nodeCount,
             AdjacencyListBuilder adjacencyBuilder,
-            AdjacencyListBuilder[] propertyBuilders,
+            AdjacencyPropertiesBuilder[] propertyBuilders,
             Aggregation[] aggregations,
             boolean noAggregation,
             AllocationTracker tracker
@@ -66,7 +64,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
     private static final class Blueprint implements AdjacencyCompressorBlueprint {
         private final AdjacencyListBuilder adjacencyBuilder;
-        private final AdjacencyListBuilder[] propertyBuilders;
+        private final AdjacencyPropertiesBuilder[] propertyBuilders;
         private final HugeIntArray adjacencyDegrees;
         private final HugeLongArray adjacencyOffsets;
         private final HugeLongArray[] propertyOffsets;
@@ -75,7 +73,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
         private Blueprint(
             AdjacencyListBuilder adjacencyBuilder,
-            AdjacencyListBuilder[] propertyBuilders,
+            AdjacencyPropertiesBuilder[] propertyBuilders,
             HugeIntArray adjacencyDegrees,
             HugeLongArray adjacencyOffsets,
             HugeLongArray[] propertyOffsets,
@@ -97,8 +95,8 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
                 adjacencyBuilder.newAllocator(),
                 Arrays
                     .stream(propertyBuilders)
-                    .map(AdjacencyListBuilder::newAllocator)
-                    .toArray(AdjacencyListAllocator[]::new),
+                    .map(AdjacencyPropertiesBuilder::newAllocator)
+                    .toArray(AdjacencyPropertiesAllocator[]::new),
                 adjacencyDegrees,
                 adjacencyOffsets,
                 propertyOffsets,
@@ -139,7 +137,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     }
 
     private final AdjacencyListAllocator adjacencyAllocator;
-    private final AdjacencyListAllocator[] propertiesAllocators;
+    private final AdjacencyPropertiesAllocator[] propertiesAllocators;
     private final HugeIntArray adjacencyDegrees;
     private final HugeLongArray adjacencyOffsets;
     private final HugeLongArray[] propertyOffsets;
@@ -148,7 +146,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
 
     private DeltaVarLongCompressor(
         AdjacencyListAllocator adjacencyAllocator,
-        AdjacencyListAllocator[] propertiesAllocators,
+        AdjacencyPropertiesAllocator[] propertiesAllocators,
         HugeIntArray adjacencyDegrees,
         HugeLongArray adjacencyOffsets,
         HugeLongArray[] propertyOffsets,
@@ -253,10 +251,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
     }
 
     private long copyIds(byte[] targets, int requiredBytes) {
-        // sizeOf(degree) + compression bytes
-        var slice = adjacencyAllocator.allocate(requiredBytes);
-        slice.insert(targets, 0, requiredBytes);
-        return slice.address();
+        return adjacencyAllocator.writeRawTargets(targets, requiredBytes);
     }
 
     private void copyProperties(long[][] properties, int degree, long nodeId, HugeLongArray[] offsets) {
@@ -268,16 +263,7 @@ public final class DeltaVarLongCompressor implements AdjacencyCompressor {
         }
     }
 
-    private long copyProperties(long[] properties, int degree, AdjacencyListAllocator propertiesAllocator) {
-        int requiredBytes = degree * Long.BYTES;
-        var slice = propertiesAllocator.allocate(requiredBytes);
-        int offset = slice.offset();
-        ByteBuffer
-            .wrap(slice.page(), offset, requiredBytes)
-            .order(ByteOrder.LITTLE_ENDIAN)
-            .asLongBuffer()
-            .put(properties, 0, degree);
-        slice.bytesWritten(requiredBytes);
-        return slice.address();
+    private long copyProperties(long[] properties, int degree, AdjacencyPropertiesAllocator propertiesAllocator) {
+        return propertiesAllocator.writeRawProperties(properties, degree);
     }
 }

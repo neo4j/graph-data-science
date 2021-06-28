@@ -19,8 +19,27 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-@FunctionalInterface
-public interface AdjacencyListBuilderFactory {
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
-    AdjacencyListBuilder newAdjacencyListBuilder();
+public final class TransientAdjacencyFactory implements AdjacencyBuilderFactory {
+
+    public static AdjacencyBuilderFactory of(AllocationTracker tracker) {
+        return new TransientAdjacencyFactory(tracker);
+    }
+
+    private final AllocationTracker tracker;
+
+    private TransientAdjacencyFactory(AllocationTracker tracker) {
+        this.tracker = tracker;
+    }
+
+    @Override
+    public AdjacencyListBuilder newAdjacencyListBuilder() {
+        return new TransientAdjacencyListBuilder(tracker);
+    }
+
+    @Override
+    public AdjacencyPropertiesBuilder newAdjacencyPropertiesBuilder() {
+        return new TransientAdjacencyPropertiesBuilder(tracker);
+    }
 }

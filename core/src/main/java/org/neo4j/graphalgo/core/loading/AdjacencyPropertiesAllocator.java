@@ -19,13 +19,12 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+public interface AdjacencyPropertiesAllocator extends AutoCloseable {
 
-class TransientAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
+    void prepare();
 
-    @Test
-    void test() throws Exception {
-        testAdjacencyList(TransientAdjacencyFactory.of(AllocationTracker.empty()));
-    }
+    long writeRawProperties(long[] properties, int length);
+
+    @Override
+    void close();
 }

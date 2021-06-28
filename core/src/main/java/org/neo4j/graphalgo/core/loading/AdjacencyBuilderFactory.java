@@ -19,13 +19,9 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+public interface AdjacencyBuilderFactory {
 
-class TransientAdjacencyBuilderTest extends AdjacencyBuilderBaseTest {
+    AdjacencyListBuilder newAdjacencyListBuilder();
 
-    @Test
-    void test() throws Exception {
-        testAdjacencyList(TransientAdjacencyFactory.of(AllocationTracker.empty()));
-    }
+    AdjacencyPropertiesBuilder newAdjacencyPropertiesBuilder();
 }

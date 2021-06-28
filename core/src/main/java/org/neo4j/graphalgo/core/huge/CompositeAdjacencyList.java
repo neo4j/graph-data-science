@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.huge;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
-import org.neo4j.graphalgo.api.PropertyCursor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,11 +91,6 @@ public class CompositeAdjacencyList implements AdjacencyList {
             cursors.add(adjacency.rawAdjacencyCursor());
         }
         return new CompositeAdjacencyCursor(cursors);
-    }
-
-    @Override
-    public PropertyCursor propertyCursor(long node, double fallbackValue) {
-        throw new UnsupportedOperationException("CompositeAdjacencyList#propertyCursor is not supported");
     }
 
     @Override

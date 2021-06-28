@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.core.huge;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.Relationships;
@@ -38,6 +40,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import java.util.Arrays;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,9 +54,80 @@ import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 class TransientAdjacencyListTest {
 
     @Test
+    void largePage() {
+        int nodeCount = 1_000_000;
+        var tracker = AllocationTracker.empty();
+
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .nodeCount(nodeCount)
+            .maxOriginalId(nodeCount)
+            .hasLabelInformation(false)
+            .tracker(tracker)
+            .build();
+
+        for (int i = 0; i < nodeCount; i++) {
+            nodesBuilder.addNode(i);
+        }
+
+        var nodes = nodesBuilder.build();
+
+        var relsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(nodes.nodeMapping())
+            .orientation(Orientation.UNDIRECTED)
+            .tracker(tracker)
+            .build();
+
+        for (int i = 1; i <= 200_000; i++) {
+            relsBuilder.add(0, i);
+        }
+
+        for (int i = 2; i < nodeCount; i++) {
+            relsBuilder.add(1, i);
+        }
+
+        for (int i = 3; i < 200_000; i++) {
+            relsBuilder.add(2, i + 100_000);
+        }
+
+        var rels = relsBuilder.build();
+
+        var graph = GraphFactory.create(nodes.nodeMapping(), rels, tracker);
+
+        assertThat(graph.nodeCount()).isEqualTo(nodeCount);
+
+        assertThat(graph.degree(0)).isEqualTo(200_000);
+        assertThat(graph.degree(1)).isEqualTo(nodeCount - 1);
+        assertThat(graph.degree(2)).isEqualTo(200_000 - 1);
+
+
+        var sum0 = new MutableLong(0);
+        graph.forEachRelationship(0, (sourceNodeId, targetNodeId) -> {
+            sum0.add(targetNodeId);
+            return true;
+        });
+        assertThat(sum0.longValue()).isEqualTo(LongStream.rangeClosed(1, 200_000).sum());
+
+
+        var sum1 = new MutableLong(0);
+        graph.forEachRelationship(1, (sourceNodeId, targetNodeId) -> {
+            sum1.add(targetNodeId);
+            return true;
+        });
+        assertThat(sum1.longValue()).isEqualTo(LongStream.range(2, nodeCount).sum());
+
+
+        var sum2 = new MutableLong(0);
+        graph.forEachRelationship(2, (sourceNodeId, targetNodeId) -> {
+            sum2.add(targetNodeId);
+            return true;
+        });
+        assertThat(sum2.longValue()).isEqualTo(LongStream.range(3, 200_000).map(i -> i + 100_000).sum() + /* undirected from 1 */ 1);
+    }
+
+    @Test
     void shouldPeekValues() {
         AdjacencyCursor adjacencyCursor = adjacencyCursorFromTargets(new long[]{1, 42, 1337});
-        while(adjacencyCursor.hasNextVLong()) {
+        while (adjacencyCursor.hasNextVLong()) {
             assertEquals(adjacencyCursor.peekVLong(), adjacencyCursor.nextVLong());
         }
     }
@@ -81,7 +155,7 @@ class TransientAdjacencyListTest {
         Arrays.setAll(targets, i -> i);
         AdjacencyCursor adjacencyCursor = adjacencyCursorFromTargets(targets);
         int position = 0;
-        while(adjacencyCursor.hasNextVLong() && position < targetCount) {
+        while (adjacencyCursor.hasNextVLong() && position < targetCount) {
             assertThat(adjacencyCursor.peekVLong()).isEqualTo(position);
             assertThat(adjacencyCursor.nextVLong()).isEqualTo(position);
             position++;
@@ -100,14 +174,14 @@ class TransientAdjacencyListTest {
         Arrays.setAll(targets, i -> i);
         AdjacencyCursor adjacencyCursor = adjacencyCursorFromTargets(targets);
         int position = 0;
-        while(adjacencyCursor.hasNextVLong() && position < CHUNK_SIZE) {
+        while (adjacencyCursor.hasNextVLong() && position < CHUNK_SIZE) {
             assertThat(adjacencyCursor.peekVLong()).isEqualTo(position);
             assertThat(adjacencyCursor.nextVLong()).isEqualTo(position);
             assertThat(adjacencyCursor.peekVLong()).isEqualTo(position + 1);
             position++;
         }
 
-        while(adjacencyCursor.hasNextVLong() && position < 2 * CHUNK_SIZE) {
+        while (adjacencyCursor.hasNextVLong() && position < 2 * CHUNK_SIZE) {
             assertThat(adjacencyCursor.peekVLong()).isEqualTo(position);
             assertThat(adjacencyCursor.nextVLong()).isEqualTo(position);
             position++;
@@ -149,29 +223,6 @@ class TransientAdjacencyListTest {
     }
 
     @Test
-    void shouldComputeUncompressedMemoryEstimationForSinglePage() {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(100)
-            .maxRelCount(100)
-            .build();
-
-        MemoryTree memRec = TransientAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
-
-        long classSize = 24;
-        long uncompressedAdjacencySize = 1200;
-
-        int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-        long bytesPerPage = BitUtil.align(16 + 262144L, 8);
-        long adjacencyPages = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
-
-        long offsets = HugeLongArray.memoryEstimation(100);
-
-        MemoryRange expected = MemoryRange.of(classSize + adjacencyPages + offsets);
-
-        assertEquals(expected, memRec.memoryUsage());
-    }
-
-    @Test
     void shouldComputeCompressedMemoryEstimationForMultiplePage() {
         var nodeCount = 100_000_000L;
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
@@ -198,30 +249,6 @@ class TransientAdjacencyListTest {
             classSize + minAdjacencyPages + degrees + offsets,
             classSize + maxAdjacencyPages + degrees + offsets
         );
-
-        assertEquals(expected, memRec.memoryUsage());
-    }
-
-    @Test
-    void shouldComputeUncompressedMemoryEstimationForMultiplePage() {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(100_000_000L)
-            .maxRelCount(100_000_000_000L)
-            .build();
-
-        MemoryTree memRec = TransientAdjacencyList.uncompressedMemoryEstimation(false).estimate(dimensions, 1);
-
-        long classSize = 24;
-
-        long uncompressedAdjacencySize = 800_400_000_000L;
-
-        int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
-        long bytesPerPage = BitUtil.align(16 + 262144L, 8);
-        long adjacencyPages = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
-
-        long offsets = HugeLongArray.memoryEstimation(100_000_000L);
-
-        MemoryRange expected = MemoryRange.of(classSize + adjacencyPages + offsets);
 
         assertEquals(expected, memRec.memoryUsage());
     }

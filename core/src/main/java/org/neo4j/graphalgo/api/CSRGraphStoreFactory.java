@@ -101,7 +101,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphCreateConfig> ext
 
     private RelationshipPropertyStore constructRelationshipPropertyStore(
         RelationshipProjection projection,
-        Iterable<AdjacencyList> properties,
+        Iterable<AdjacencyProperties> properties,
         long relationshipCount
     ) {
         PropertyMappings propertyMappings = projection.properties();

@@ -19,33 +19,15 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-public interface AdjacencyListPageSlice {
+import org.neo4j.graphalgo.api.AdjacencyProperties;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-    /**
-     * Global address of the {@link #offset()} in this {@link #page()}.
-     */
-    long address();
+public interface AdjacencyPropertiesBuilder {
 
-    /**
-     * Write some bytes at the current {@link #offset()}.
-     */
-    default void insert(byte[] bytes, int arrayOffset, int length) {
-        System.arraycopy(bytes, arrayOffset, page(), offset(), length);
-        bytesWritten(length);
-    }
+    AdjacencyPropertiesAllocator newAllocator();
 
-    /**
-     * The current page. Only writes starting at {@link #offset} are safe.
-     */
-    byte[] page();
+    AdjacencyProperties build(HugeIntArray degrees, HugeLongArray offsets);
 
-    /**
-     * Start offset for safe writes into the {@link #page}.
-     */
-    int offset();
-
-    /**
-     * Notify that this many bytes have been written to the {@link #page}.
-     */
-    void bytesWritten(int numberOfBytes);
+    void flush();
 }
