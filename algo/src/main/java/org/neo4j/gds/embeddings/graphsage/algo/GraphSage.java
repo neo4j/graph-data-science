@@ -33,8 +33,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingleLabelFeatures;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeMultiLabelFeatures;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingleLabelFeatures;
 
 public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
 
@@ -49,14 +49,13 @@ public class GraphSage extends Algorithm<GraphSage, GraphSage.GraphSageResult> {
     public GraphSage(
         Graph graph,
         GraphSageBaseConfig config,
-        Model<ModelData, GraphSageTrainConfig> model,
         ExecutorService executor,
         AllocationTracker tracker,
         ProgressLogger progressLogger
     ) {
         this.graph = graph;
         this.config = config;
-        this.model = model;
+        this.model = config.model();
         this.executor = executor;
         this.tracker = tracker;
         this.progressLogger = progressLogger;

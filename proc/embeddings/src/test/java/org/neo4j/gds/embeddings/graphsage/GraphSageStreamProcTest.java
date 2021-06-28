@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.GdsCypher;
@@ -58,6 +59,35 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
             Collection<Double> nodeEmbeddings = (List<Double>) o;
             assertEquals(embeddingDimension, nodeEmbeddings.size());
         });
+    }
+
+    @Test
+    void weightedGraphSage() {
+        var trainQuery = GdsCypher.call()
+            .explicitCreation(graphName)
+            .algo("gds.beta.graphSage")
+            .trainMode()
+            .addParameter("sampleSizes", List.of(1))
+            .addParameter("maxIterations", 1)
+            .addParameter("featureProperties", List.of("age"))
+            .addParameter("relationshipWeightProperty", "weight")
+            .addParameter("embeddingDimension", 1)
+            .addParameter("activationFunction", "RELU")
+            .addParameter("aggregator", "MEAN")
+            .addParameter("modelName", modelName)
+            .yields();
+
+        runQuery(trainQuery);
+
+        String streamQuery = GdsCypher.call().explicitCreation(graphName)
+            .algo("gds.beta.graphSage")
+            .streamMode()
+            .addParameter("concurrency", 1)
+            .addParameter("modelName", modelName)
+            .yields();
+
+        // We only check that the query does not throw here as GS has no random-seed yet
+        runQuery(streamQuery);
     }
 
     @ParameterizedTest(name = "Graph Properties: {2} - Algo Properties: {1}")
