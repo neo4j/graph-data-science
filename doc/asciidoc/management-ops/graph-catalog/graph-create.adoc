@@ -429,6 +429,8 @@ YIELD
 
 === Changing the orientation of relationships
 
+==== Native-projection
+
 By default, relationships are loaded in the same orientation as stored in the Neo4j db.
 In GDS, we call this the `NATURAL` orientation.
 Additionally, we provide the functionality to load the relationships in the `REVERSE` orientation or even `UNDIRECTED`.
@@ -455,8 +457,23 @@ To specify the orientation, we need to write the `relationshipProjection` with e
 Projecting the `KNOWS` relationships `UNDIRECTED`, loads each relationship in both directions.
 Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in <<graph-create-example-single-label-type>>.
 
+
+==== Cypher-projection
+
+The native projection supports specifying an orientation per relationship type.
+The cypher projection will treat every relationship returned by the relationship cypher query as if it was in `NATURAL` orientation.
+It is thus not possible to project graphs in `UNDIRECTED` or `REVERSE` orientation when cypher projections are used.
+
+[NOTE]
+--
+Some algorithms require that the graph was loaded with `UNDIRECTED` orientation.
+These algorithms can not be used when loading a graph with cypher projections.
+--
+
 [[node-properties-example]]
 === Projecting node properties
+
+==== Native-projection
 
 To project node properties we can either use the `nodeProperties` configuration parameter or extend an individual `nodeProjection` for a specific label.
 
@@ -489,6 +506,67 @@ Not every book has a price specified in the example graph.
 In the following we check if the price was correctly projected:
 
 [role=query-example, group=node-properties]
+--
+.Verify the ratings property of Adam in the projected `graphWithProperties` graph:
+[source, cypher, role=noplay]
+----
+MATCH (n:Book)
+RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'price') as price
+ORDER BY price
+----
+
+.Results
+[opts="header", cols="1,1"]
+|===
+| name          | price
+| "The Hobbit"  | 5.0
+| "Frankenstein"| 19.99
+|===
+--
+
+We can see, that the price was projected with the Hobbit having the default price of 5.0.
+
+==== Cypher-projection
+
+[role=query-example, group=cypher-node-properties]
+--
+.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'graphWithProperties',
+  'MATCH (n) RETURN
+    id(n) AS id,
+    labels(n) AS labels,
+    coalesce(n.age, 18) AS age,
+    coalesce(n.price, 5.0) AS price,
+    n.ratings AS ratings',
+  'MATCH (n)-[r:KNOWS|READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
+)
+YIELD
+  graphName, nodeCount AS nodes, relationshipCount AS rels
+RETURN graphName, nodes, rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graphName             | nodes  | rels
+| "graphWithProperties" | 5      | 6
+|===
+--
+
+The projected `graphWithProperties` graph contains five nodes and six relationships.
+In Cypher projection every node from the `nodeQuery` gets the same node properties, which means you can't have label-specific properties.
+For instance in the example above the `Person` nodes will also get `ratings` and `price` properties, while `Book` nodes get the `age` property.
+
+NOTE: GDS currently only supports loading numeric properties.
+
+Further, the `price` property has a default value of `5.0`.
+Not every book has a price specified in the example graph.
+In the following we check if the price was correctly projected:
+
+[role=query-example, group=cypher-node-properties]
 --
 .Verify the ratings property of Adam in the projected `graphWithProperties` graph:
 [source, cypher, role=noplay]
