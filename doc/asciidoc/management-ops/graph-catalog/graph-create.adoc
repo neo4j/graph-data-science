@@ -322,14 +322,14 @@ To project node properties we can either use the `nodeProperties` configuration 
 ----
 CALL gds.graph.create('graphWithProperties', {Person: {properties: 'age'}, Book: {properties: {price: {defaultValue: 5.0}}}}, ['KNOWS', 'READ'], {nodeProperties: 'ratings'})
 YIELD
-  graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
-RETURN graph, nodeProjection.Book AS bookProjection, nodes, rels
+  graphName, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
+RETURN graphName, nodeProjection.Book AS bookProjection, nodes, rels
 ----
 
 .Results
 [opts="header", cols="1,3m,1m,1m"]
 |===
-| graph                 | bookProjection                                                           | nodes  | rels
+| graphName             | bookProjection                                                           | nodes  | rels
 | "graphWithProperties" | {label=Book, properties={price={defaultValue=5.0, property=price}, ratings={defaultValue=null, property=ratings}}} | 5      | 6
 |===
 --
@@ -374,16 +374,15 @@ Neo4j supports parallel relationships, i.e., multiple relationships between two 
 By default, GDS preserves the parallel relationships.
 We can specify how parallel relationships should be merged into a single relationship via the `aggregation` parameter in a relationship projection.
 
-// aggregating properties
-
+For graphs without relationship properties, we can use the `COUNT` aggregation.
 
 // special case: COUNT example
 [role=query-example, group=count-aggregate]
 --
-.Project a `readSums` graph containing `Person` and `Book` nodes and aggregated `READ` relationships:
+.Project a `readSums` graph containing `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('readSums', ['Person', 'Book'], {READ: {properties: {numberOfReads: {property:'*', aggregation: 'COUNT'}}}})
+CALL gds.graph.create('readCount', ['Person', 'Book'], {READ: {properties: {numberOfReads: {property:'*', aggregation: 'COUNT'}}}})
 YIELD
   graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
 ----
@@ -392,7 +391,7 @@ YIELD
 [opts="header", cols="1,3m,1m,1m"]
 |===
 | graph      | readProjection                                                                  | nodes  | rels
-| "readSums" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfReads={defaultValue=null, property=*, aggregation=COUNT}}}} | 5      | 3
+| "readCount" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfReads={defaultValue=null, property=*, aggregation=COUNT}}}} | 5      | 3
 |===
 --
 
@@ -400,10 +399,10 @@ Next, we will verify that the `READ` relationships were correctly aggregated.
 
 [role=query-example, group=count-aggregate]
 --
-.Stream the relationship property `numberOfReads` of the projected `readSums` graph:
+.Stream the relationship property `numberOfReads` of the projected `readCount` graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfReads')
+CALL gds.graph.streamRelationshipProperty('readCount', 'numberOfReads')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
 RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfReads
 ORDER BY numberOfReads DESC, person
@@ -421,8 +420,51 @@ ORDER BY numberOfReads DESC, person
 
 We can see, that the two READ relationships between Florentin and the Hobbit result in `2` numberOfReads.
 
-// 4. Star projection !?
 
+For graphs with relationship properties we can also use other aggregations.
+
+[role=query-example, group=sum-aggregate]
+--
+.Project a `readSums` graph containing `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('readSums', ['Person', 'Book'], {READ: {properties: {numberOfPages: {aggregation: 'SUM'}}}})
+YIELD
+  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph      | readProjection                                                                  | nodes  | rels
+| "readSums" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=SUM}}}} | 5      | 3
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` were correctly aggregated.
+
+[role=query-example, group=sum-aggregate]
+--
+.Stream the relationship property `numberOfPages` of the projected `readSums` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfPages')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfPages
+ORDER BY numberOfPages DESC, person
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Florentin" |  "The Hobbit"        | 46.0
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Veselin"   |  "Frankenstein"      | 0.0
+|===
+--
+
+We can see, that the two READ relationships between Florentin and the Hobbit sum up to `46` numberOfReads.
 
 == Cypher Projection
 
