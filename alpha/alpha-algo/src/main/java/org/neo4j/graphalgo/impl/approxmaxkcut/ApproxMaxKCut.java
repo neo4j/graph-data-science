@@ -268,6 +268,20 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         ParallelUtil.runWithConcurrency(config.concurrency(), costTasks, executor);
     }
 
+    // Handle that `Math.abs(Long.MIN_VALUE) == Long.MIN_VALUE`.
+    // `min` is inclusive, and `max` is exclusive.
+    private long randomNonNegativeLong(Random random, long min, long max) {
+        assert min >= 0;
+        assert max > min;
+
+        long randomNum;
+        do {
+            randomNum = random.nextLong();
+        } while (randomNum == Long.MIN_VALUE);
+
+        return (Math.abs(randomNum) % (max - min)) + min;
+    }
+
     private void variableNeighborhoodSearch(int candidateIdx) {
         var random = new Random();
         var bestCandidateSolution = candidateSolutions[candidateIdx];
@@ -280,7 +294,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
             // Generate a neighboring candidate solution of the current order.
             for (int i = 0; i < order; i++) {
-                long nodeToFlip = Math.abs(random.nextLong()) % graph.nodeCount();
+                long nodeToFlip = randomNonNegativeLong(random, 0, graph.nodeCount());
                 // For `nodeToFlip`, move to a new random community not equal to its current community in
                 // `neighboringSolution`.
                 int rndNewCommunity = (neighboringSolution.get(nodeToFlip) + (random.nextInt(config.k() - 1) + 1)) % config
