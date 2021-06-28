@@ -419,7 +419,7 @@ YIELD
 .Results
 [opts="header", cols="1,3m,1m,1m"]
 |===
-| graph             | nodeQuery                                                           | nodes  | rels
+| graph             | nodeQuery                                           | nodes  | rels
 | "personsAndBooks" | "MATCH (n) RETURN id(n) AS id, labels(n) AS labels" | 5      | 6
 |===
 --
@@ -590,6 +590,8 @@ We can see, that the price was projected with the Hobbit having the default pric
 
 === Projecting relationship properties
 
+==== Native-projection
+
 Analogous to node properties, we can either use the `relationshipProperties` configuration parameter or extend an individual `relationshipProjection` for a specific type.
 
 [role=query-example, group=rel-properties]
@@ -636,6 +638,58 @@ ORDER BY person ASC, numberOfPages DESC
 
 We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed using the Map-Syntax the same as for node properties in <<node-properties-example>>.
 
+
+==== Cypher-projection
+
+Analogous to node properties, we can project relationship properties using the `relationshipQuery`.
+
+[role=query-example, group=cypher-rel-properties]
+--
+.Project a `readWithProperties` graph containing `Person` and `Book` nodes and `READ` relationships with `numberOfPages`:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'readWithProperties',
+  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type, r.numberOfPages AS numberOfPages'
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph                | nodes  | rels
+| "readWithProperties" | 5      | 4
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` were correctly loaded.
+
+[role=query-example, group=cypher-rel-properties]
+--
+.Stream the relationship property `numberOfPages` of the projected `readWithProperties` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readWithProperties', 'numberOfPages')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfPages
+ORDER BY person ASC, numberOfPages DESC
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Florentin" |  "The Hobbit"        | 42.0
+| "Florentin" |  "The Hobbit"        | 4.0
+| "Veselin"   |  "Frankenstein"      | NaN
+|===
+--
+
+We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed using the Map-Syntax the same as for node properties in <<node-properties-example>>.
 
 === Handling parallel relationships
 
