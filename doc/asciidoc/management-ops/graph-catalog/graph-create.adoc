@@ -202,319 +202,6 @@ NOTE: To get information about a stored named graph, including its schema, one c
 | defaultValue              | Float or Integer    |  yes     |  `Double.NaN`    | The default value if the property is not defined for a node.
 |===
 
-
-[[graph-create-examples]]
-=== Examples
-
-
-In order to demonstrate the GDS Graph Create capabilities we are going to create a small social network graph in Neo4j.
-The example graph looks like this:
-
-image::example-graphs/graph-create-example.svg[Visualization of the example graph,align="center"]
-
-.The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query]
-----
-CREATE
-  (florentin:Person { name: 'Florentin', age: 16 }),
-  (adam:Person { name: 'Adam', age: 18 }),
-  (veselin:Person { name: 'Veselin', age: 20, ratings: [5.0] }),
-  (hobbit:Book { name: 'The Hobbit', isbn: 1234, numberOfPages: 310, ratings: [1.0, 2.0, 3.0, 4.5] }),
-  (frankenstein:Book { name: 'Frankenstein', isbn: 4242, price: 19.99 }),
-  (florentin)-[:KNOWS { since: 2010 }]->(adam),
-  (florentin)-[:KNOWS { since: 2018 }]->(veselin),
-  (florentin)-[:READ { numberOfPages: 4 }]->(hobbit),
-  (florentin)-[:READ { numberOfPages: 42 }]->(hobbit),
-  (adam)-[:READ { numberOfPages: 30 }]->(hobbit),
-  (veselin)-[:READ]->(frankenstein)
-----
-
-[[graph-create-example-single-label-type]]
-==== Projecting a label and relationship type
-
-We are going to start with demonstrating how to load a single `label` and `relationship` by projecting only the `Person` label and `KNOWS` relationship type.
-
-[role=query-example]
---
-.Project and store `PERSON` nodes and `KNOWS` relationships into a `persons` graph.
-[source, cypher, role=noplay]
-----
-CALL gds.graph.create('persons', 'Person', 'KNOWS')
-YIELD
-  graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipProjection, relationshipCount AS rels
-----
-
-.Results
-[opts="header", cols="1,3m,1,3m,1m"]
-|===
-| graph     | nodeProjection                         | nodes  | relationshipProjection                                                        | rels
-| "persons" | {Person={label=Person, properties={}}} | 3      | {KNOWS={orientation=NATURAL, aggregation=DEFAULT, type=KNOWS, properties={}}} | 2
-|===
---
-
-In the example above, we used a `short-hand` syntax for the node- and relationship projection.
-The used projections are internally expanded to the full `Map` syntax as shown in the `Results` table.
-In addition, we can see the projected in-memory graph contains three `Person` nodes, and the two `KNOWS` relationships.
-
-
-// 1. the very simple case, List of Strings --> Labels & Rels, no properties
-==== Projecting multiple labels and relationship types
-
-To project multiple node labels and relationship types, we can adjust the projections as follows:
-
-[role=query-example]
---
-.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.create('personsAndBooks', ['Person', 'Book'], ['KNOWS', 'READ'])
-YIELD
-  graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
-----
-
-.Results
-[opts="header", cols="1,3m,1m,1m"]
-|===
-| graph             | nodeProjection                                                           | nodes  | rels
-| "personsAndBooks" | {Book={label=Book, properties={}}, Person={label=Person, properties={}}} | 5      | 6
-|===
---
-
-In the example above, we used a `short-hand` syntax for the node- and relationship projection.
-The used projections are internally expanded to the full `Map` syntax as shown for the `nodeProjection` in the `Results` table.
-In addition, we can see the projected in-memory graph contains five nodes, and the two relationships.
-
-==== Changing the orientation of relationships
-
-By default, relationships are loaded in the same orientation as stored in the Neo4j db.
-In GDS, we call this the `NATURAL` orientation.
-Additionally, we provide the functionality to load the relationships in the `REVERSE` orientation or even `UNDIRECTED`.
-
-[role=query-example]
---
-.Project and store `PERSON` nodes and undirected `KNOWS` relationships into a `undirectedKnows` graph:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.create('undirectedKnows', 'Person', {KNOWS: {orientation: 'UNDIRECTED'}})
-YIELD
-  graphName AS graph, relationshipProjection AS knowsProjection, nodeCount AS nodes, relationshipCount AS rels
-----
-
-.Results
-[opts="header", cols="1,3m,1m,1m"]
-|===
-| graph             | knowsProjection                                                                  | nodes  | rels
-| "undirectedKnows" | {KNOWS={orientation=UNDIRECTED, aggregation=DEFAULT, type=KNOWS, properties={}}} | 3      | 4
-|===
---
-
-To specify the orientation, we need to write the `relationshipProjection` with extended Map-syntax.
-Projecting the `KNOWS` relationships `UNDIRECTED`, loads each relationship in both directions.
-Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in <<graph-create-example-single-label-type>>.
-
-[[node-properties-example]]
-==== Projecting node properties
-
-To project node properties we can either use the `nodeProperties` configuration parameter or extend an individual `nodeProjection` for a specific label.
-
-[role=query-example, group=node-properties]
---
-.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.create('graphWithProperties', {Person: {properties: 'age'}, Book: {properties: {price: {defaultValue: 5.0}}}}, ['KNOWS', 'READ'], {nodeProperties: 'ratings'})
-YIELD
-  graphName, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
-RETURN graphName, nodeProjection.Book AS bookProjection, nodes, rels
-----
-
-.Results
-[opts="header", cols="1,3m,1m,1m"]
-|===
-| graphName             | bookProjection                                                           | nodes  | rels
-| "graphWithProperties" | {label=Book, properties={price={defaultValue=5.0, property=price}, ratings={defaultValue=null, property=ratings}}} | 5      | 6
-|===
---
-
-The projected `graphWithProperties` graph contains five nodes and six relationships.
-In the returned `bookProjection` we can observe, the node properties `price` and `ratings` are loaded for `Books`.
-
-NOTE: GDS currently only supports loading numeric properties.
-
-Further, the `price` property has a default value of `5.0`.
-Not every book has a price specified in the example graph.
-In the following we check if the price was correctly projected:
-
-[role=query-example, group=node-properties]
---
-.Verify the ratings property of Adam in the projected `graphWithProperties` graph:
-[source, cypher, role=noplay]
-----
-MATCH (n:Book)
-RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'price') as price
-ORDER BY price
-----
-
-.Results
-[opts="header", cols="1,1"]
-|===
-| name          | price
-| "The Hobbit"  | 5.0
-| "Frankenstein"| 19.99
-|===
---
-
-We can see, that the price was projected with the Hobbit having the default price of 5.0.
-
-
-==== Projecting relationship properties
-
-Analogous to node properties, we can either use the `relationshipProperties` configuration parameter or extend an individual `relationshipProjection` for a specific type.
-
-[role=query-example, group=rel-properties]
---
-.Project a `readWithProperties` graph containing `Person` and `Book` nodes and `READ` relationships with `numberOfPages`:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.create('readWithProperties', ['Person', 'Book'], {READ: {properties: "numberOfPages"}})
-YIELD
-  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
-----
-
-.Results
-[opts="header", cols="1,3m,1m,1m"]
-|===
-| graph      | readProjection                                                                  | nodes  | rels
-| "readWithProperties" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=DEFAULT}}}} | 5      | 4
-|===
---
-
-Next, we will verify that the relationship property `numberOfPages` were correctly loaded.
-
-[role=query-example, group=rel-properties]
---
-.Stream the relationship property `numberOfPages` of the projected `readWithProperties` graph:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.streamRelationshipProperty('readWithProperties', 'numberOfPages')
-YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
-RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfPages
-ORDER BY person ASC, numberOfPages DESC
-----
-
-.Results
-[opts="header", cols="1,1,1"]
-|===
-| person      | book                 | numberOfPages
-| "Adam"      |  "The Hobbit"        | 30.0
-| "Florentin" |  "The Hobbit"        | 42.0
-| "Florentin" |  "The Hobbit"        | 4.0
-| "Veselin"   |  "Frankenstein"      | NaN
-|===
---
-
-We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed using the Map-Syntax the same as for node properties in <<node-properties-example>>.
-
-
-==== Handling parallel relationships
-
-Neo4j supports parallel relationships, i.e., multiple relationships between two nodes.
-By default, GDS preserves the parallel relationships.
-We can specify how parallel relationships should be merged into a single relationship via the `aggregation` parameter in a relationship projection.
-
-For graphs without relationship properties, we can use the `COUNT` aggregation.
-
-// special case: COUNT example
-[role=query-example, group=count-aggregate]
---
-.Project a `readSums` graph containing `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.create('readCount', ['Person', 'Book'], {READ: {properties: {numberOfReads: {property:'*', aggregation: 'COUNT'}}}})
-YIELD
-  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
-----
-
-.Results
-[opts="header", cols="1,3m,1m,1m"]
-|===
-| graph      | readProjection                                                                  | nodes  | rels
-| "readCount" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfReads={defaultValue=null, property=*, aggregation=COUNT}}}} | 5      | 3
-|===
---
-
-Next, we will verify that the `READ` relationships were correctly aggregated.
-
-[role=query-example, group=count-aggregate]
---
-.Stream the relationship property `numberOfReads` of the projected `readCount` graph:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.streamRelationshipProperty('readCount', 'numberOfReads')
-YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
-RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfReads
-ORDER BY numberOfReads DESC, person
-----
-
-.Results
-[opts="header", cols="1,1,1"]
-|===
-| person      | book                  | numberOfReads
-| "Florentin" |  "The Hobbit"        | 2.0
-| "Adam"      |  "The Hobbit"        | 1.0
-| "Veselin"   |  "Frankenstein"      | 1.0
-|===
---
-
-We can see, that the two READ relationships between Florentin and the Hobbit result in `2` numberOfReads.
-
-==== Handling parallel relationships with properties
-
-For graphs with relationship properties we can also use other aggregations.
-
-[role=query-example, group=sum-aggregate]
---
-.Project a `readSums` graph containing `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.create('readSums', ['Person', 'Book'], {READ: {properties: {numberOfPages: {aggregation: 'SUM'}}}})
-YIELD
-  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
-----
-
-.Results
-[opts="header", cols="1,3m,1m,1m"]
-|===
-| graph      | readProjection                                                                  | nodes  | rels
-| "readSums" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=SUM}}}} | 5      | 3
-|===
---
-
-Next, we will verify that the relationship property `numberOfPages` were correctly aggregated.
-
-[role=query-example, group=sum-aggregate]
---
-.Stream the relationship property `numberOfPages` of the projected `readSums` graph:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfPages')
-YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
-RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfPages
-ORDER BY numberOfPages DESC, person
-----
-
-.Results
-[opts="header", cols="1,1,1"]
-|===
-| person      | book                 | numberOfPages
-| "Florentin" |  "The Hobbit"        | 46.0
-| "Adam"      |  "The Hobbit"        | 30.0
-| "Veselin"   |  "Frankenstein"      | 0.0
-|===
---
-
-We can see, that the two READ relationships between Florentin and the Hobbit sum up to `46` numberOfReads.
-
 [[graph-create-cypher]]
 == Cypher Projection
 
@@ -590,30 +277,366 @@ The projected graphs will reside in the catalog until:
 
 NOTE: To get information about a stored named graph, including its schema, one can use <<catalog-graph-list, gds.graph.list>>.
 
+[[graph-create-examples]]
+== Examples
 
-[[graph-create-cypher-examples]]
-=== Examples
+In order to demonstrate the GDS Graph Create capabilities we are going to create a small social network graph in Neo4j.
+The example graph looks like this:
 
-We can also use Cypher to select the nodes and relationships to be projected into the in-memory graph.
+image::example-graphs/graph-create-example.svg[Visualization of the example graph,align="center"]
 
-.Create a graph using a Cypher projection:
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (florentin:Person { name: 'Florentin', age: 16 }),
+  (adam:Person { name: 'Adam', age: 18 }),
+  (veselin:Person { name: 'Veselin', age: 20, ratings: [5.0] }),
+  (hobbit:Book { name: 'The Hobbit', isbn: 1234, numberOfPages: 310, ratings: [1.0, 2.0, 3.0, 4.5] }),
+  (frankenstein:Book { name: 'Frankenstein', isbn: 4242, price: 19.99 }),
+  (florentin)-[:KNOWS { since: 2010 }]->(adam),
+  (florentin)-[:KNOWS { since: 2018 }]->(veselin),
+  (florentin)-[:READ { numberOfPages: 4 }]->(hobbit),
+  (florentin)-[:READ { numberOfPages: 42 }]->(hobbit),
+  (adam)-[:READ { numberOfPages: 30 }]->(hobbit),
+  (veselin)-[:READ]->(frankenstein)
+----
+
+[[graph-create-example-single-label-type]]
+=== Projecting a label and relationship type
+
+We are going to start with demonstrating how to load a single `label` and `relationship` by projecting only the `Person` label and `KNOWS` relationship type.
+
+==== Native-Projection
+
+[role=query-example]
+--
+.Project and store `PERSON` nodes and `KNOWS` relationships into a `persons` graph.
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('persons', 'Person', 'KNOWS')
+YIELD
+  graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipProjection, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1,3m,1m"]
+|===
+| graph     | nodeProjection                         | nodes  | relationshipProjection                                                        | rels
+| "persons" | {Person={label=Person, properties={}}} | 3      | {KNOWS={orientation=NATURAL, aggregation=DEFAULT, type=KNOWS, properties={}}} | 2
+|===
+--
+
+In the example above, we used a `short-hand` syntax for the node- and relationship projection.
+The used projections are internally expanded to the full `Map` syntax as shown in the `Results` table.
+In addition, we can see the projected in-memory graph contains three `Person` nodes, and the two `KNOWS` relationships.
+
+==== Cypher-Projection
+
+[role=query-example]
+--
+.Project and store `PERSON` nodes and `KNOWS` relationships into a `persons` graph.
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
-    'my-cypher-graph',
-    'MATCH (n:Person) RETURN id(n) AS id',
-    'MATCH (a:Person)-[:LIKES]->(b:Person) RETURN id(a) AS source, id(b) AS target'
-)
-YIELD graphName, nodeCount, relationshipCount, createMillis;
+  'persons',
+  'MATCH (n:Person) RETURN id(n) AS id',
+  'MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target')
+YIELD
+  graphName AS graph, nodeQuery, nodeCount AS nodes, relationshipQuery, relationshipCount AS rels
 ----
 
+.Results
+[opts="header", cols="1,3m,1,3m,1m"]
+|===
+| graph     | nodeQuery                             | nodes  | relationshipQuery                                                                | rels
+| "persons" | "MATCH (n:Person) RETURN id(n) AS id" | 3      | "MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target" | 2
+|===
+--
 
-== Using projected graphs
+// 1. the very simple case, List of Strings --> Labels & Rels, no properties
+=== Projecting multiple labels and relationship types
 
-After creating the graphs in the catalog, we can refer to them in algorithms by using their name.
+==== Native-Projection
 
-.Run Page Rank on one of our created graphs:
+To project multiple node labels and relationship types, we can adjust the projections as follows:
+
+[role=query-example]
+--
+.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.pageRank.stream('my-native-graph') YIELD nodeId, score;
+CALL gds.graph.create('personsAndBooks', ['Person', 'Book'], ['KNOWS', 'READ'])
+YIELD
+  graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
 ----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph             | nodeProjection                                                           | nodes  | rels
+| "personsAndBooks" | {Book={label=Book, properties={}}, Person={label=Person, properties={}}} | 5      | 6
+|===
+--
+
+In the example above, we used a `short-hand` syntax for the node- and relationship projection.
+The used projections are internally expanded to the full `Map` syntax as shown for the `nodeProjection` in the `Results` table.
+In addition, we can see the projected in-memory graph contains five nodes, and the two relationships.
+
+
+==== Cypher-Projection
+
+To retain the label and type information, when we load multiple node labels and relationship types, we can add a `labels` column to the node query and `type` column to the relationship query.
+
+[role=query-example]
+--
+.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'personsAndBooks',
+  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:KNOWS|READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type')
+YIELD
+  graphName AS graph, nodeQuery, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph             | nodeQuery                                                           | nodes  | rels
+| "personsAndBooks" | "MATCH (n) RETURN id(n) AS id, labels(n) AS labels" | 5      | 6
+|===
+--
+
+
+=== Changing the orientation of relationships
+
+By default, relationships are loaded in the same orientation as stored in the Neo4j db.
+In GDS, we call this the `NATURAL` orientation.
+Additionally, we provide the functionality to load the relationships in the `REVERSE` orientation or even `UNDIRECTED`.
+
+[role=query-example]
+--
+.Project and store `PERSON` nodes and undirected `KNOWS` relationships into a `undirectedKnows` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('undirectedKnows', 'Person', {KNOWS: {orientation: 'UNDIRECTED'}})
+YIELD
+  graphName AS graph, relationshipProjection AS knowsProjection, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph             | knowsProjection                                                                  | nodes  | rels
+| "undirectedKnows" | {KNOWS={orientation=UNDIRECTED, aggregation=DEFAULT, type=KNOWS, properties={}}} | 3      | 4
+|===
+--
+
+To specify the orientation, we need to write the `relationshipProjection` with extended Map-syntax.
+Projecting the `KNOWS` relationships `UNDIRECTED`, loads each relationship in both directions.
+Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in <<graph-create-example-single-label-type>>.
+
+[[node-properties-example]]
+=== Projecting node properties
+
+To project node properties we can either use the `nodeProperties` configuration parameter or extend an individual `nodeProjection` for a specific label.
+
+[role=query-example, group=node-properties]
+--
+.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('graphWithProperties', {Person: {properties: 'age'}, Book: {properties: {price: {defaultValue: 5.0}}}}, ['KNOWS', 'READ'], {nodeProperties: 'ratings'})
+YIELD
+  graphName, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
+RETURN graphName, nodeProjection.Book AS bookProjection, nodes, rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graphName             | bookProjection                                                           | nodes  | rels
+| "graphWithProperties" | {label=Book, properties={price={defaultValue=5.0, property=price}, ratings={defaultValue=null, property=ratings}}} | 5      | 6
+|===
+--
+
+The projected `graphWithProperties` graph contains five nodes and six relationships.
+In the returned `bookProjection` we can observe, the node properties `price` and `ratings` are loaded for `Books`.
+
+NOTE: GDS currently only supports loading numeric properties.
+
+Further, the `price` property has a default value of `5.0`.
+Not every book has a price specified in the example graph.
+In the following we check if the price was correctly projected:
+
+[role=query-example, group=node-properties]
+--
+.Verify the ratings property of Adam in the projected `graphWithProperties` graph:
+[source, cypher, role=noplay]
+----
+MATCH (n:Book)
+RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'price') as price
+ORDER BY price
+----
+
+.Results
+[opts="header", cols="1,1"]
+|===
+| name          | price
+| "The Hobbit"  | 5.0
+| "Frankenstein"| 19.99
+|===
+--
+
+We can see, that the price was projected with the Hobbit having the default price of 5.0.
+
+
+=== Projecting relationship properties
+
+Analogous to node properties, we can either use the `relationshipProperties` configuration parameter or extend an individual `relationshipProjection` for a specific type.
+
+[role=query-example, group=rel-properties]
+--
+.Project a `readWithProperties` graph containing `Person` and `Book` nodes and `READ` relationships with `numberOfPages`:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('readWithProperties', ['Person', 'Book'], {READ: {properties: "numberOfPages"}})
+YIELD
+  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph      | readProjection                                                                  | nodes  | rels
+| "readWithProperties" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=DEFAULT}}}} | 5      | 4
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` were correctly loaded.
+
+[role=query-example, group=rel-properties]
+--
+.Stream the relationship property `numberOfPages` of the projected `readWithProperties` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readWithProperties', 'numberOfPages')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfPages
+ORDER BY person ASC, numberOfPages DESC
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Florentin" |  "The Hobbit"        | 42.0
+| "Florentin" |  "The Hobbit"        | 4.0
+| "Veselin"   |  "Frankenstein"      | NaN
+|===
+--
+
+We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed using the Map-Syntax the same as for node properties in <<node-properties-example>>.
+
+
+=== Handling parallel relationships
+
+Neo4j supports parallel relationships, i.e., multiple relationships between two nodes.
+By default, GDS preserves the parallel relationships.
+We can specify how parallel relationships should be merged into a single relationship via the `aggregation` parameter in a relationship projection.
+
+For graphs without relationship properties, we can use the `COUNT` aggregation.
+
+// special case: COUNT example
+[role=query-example, group=count-aggregate]
+--
+.Project a `readSums` graph containing `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('readCount', ['Person', 'Book'], {READ: {properties: {numberOfReads: {property:'*', aggregation: 'COUNT'}}}})
+YIELD
+  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph      | readProjection                                                                  | nodes  | rels
+| "readCount" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfReads={defaultValue=null, property=*, aggregation=COUNT}}}} | 5      | 3
+|===
+--
+
+Next, we will verify that the `READ` relationships were correctly aggregated.
+
+[role=query-example, group=count-aggregate]
+--
+.Stream the relationship property `numberOfReads` of the projected `readCount` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readCount', 'numberOfReads')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
+RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfReads
+ORDER BY numberOfReads DESC, person
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                  | numberOfReads
+| "Florentin" |  "The Hobbit"        | 2.0
+| "Adam"      |  "The Hobbit"        | 1.0
+| "Veselin"   |  "Frankenstein"      | 1.0
+|===
+--
+
+We can see, that the two READ relationships between Florentin and the Hobbit result in `2` numberOfReads.
+
+=== Handling parallel relationships with properties
+
+For graphs with relationship properties we can also use other aggregations.
+
+[role=query-example, group=sum-aggregate]
+--
+.Project a `readSums` graph containing `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('readSums', ['Person', 'Book'], {READ: {properties: {numberOfPages: {aggregation: 'SUM'}}}})
+YIELD
+  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph      | readProjection                                                                  | nodes  | rels
+| "readSums" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=SUM}}}} | 5      | 3
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` were correctly aggregated.
+
+[role=query-example, group=sum-aggregate]
+--
+.Stream the relationship property `numberOfPages` of the projected `readSums` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfPages')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfPages
+ORDER BY numberOfPages DESC, person
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Florentin" |  "The Hobbit"        | 46.0
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Veselin"   |  "Frankenstein"      | 0.0
+|===
+--
+
+We can see, that the two READ relationships between Florentin and the Hobbit sum up to `46` numberOfReads.
