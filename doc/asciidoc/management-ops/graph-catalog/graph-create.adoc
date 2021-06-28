@@ -420,6 +420,7 @@ ORDER BY numberOfReads DESC, person
 
 We can see, that the two READ relationships between Florentin and the Hobbit result in `2` numberOfReads.
 
+==== Handling parallel relationships with properties
 
 For graphs with relationship properties we can also use other aggregations.
 
