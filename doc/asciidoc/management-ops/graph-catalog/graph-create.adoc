@@ -443,9 +443,16 @@ Additionally, we provide the functionality to load the relationships in the `REV
 .Project and store `PERSON` nodes and undirected `KNOWS` relationships into a `undirectedKnows` graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('undirectedKnows', 'Person', {KNOWS: {orientation: 'UNDIRECTED'}})
+CALL gds.graph.create(
+  'undirectedKnows',
+  'Person',
+  {KNOWS: {orientation: 'UNDIRECTED'}}
+)
 YIELD
-  graphName AS graph, relationshipProjection AS knowsProjection, nodeCount AS nodes, relationshipCount AS rels
+  graphName AS graph,
+  relationshipProjection AS knowsProjection,
+  nodeCount AS nodes,
+  relationshipCount AS rels
 ----
 
 .Results
@@ -485,7 +492,15 @@ To project node properties we can either use the `nodeProperties` configuration 
 .Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('graphWithProperties', {Person: {properties: 'age'}, Book: {properties: {price: {defaultValue: 5.0}}}}, ['KNOWS', 'READ'], {nodeProperties: 'ratings'})
+CALL gds.graph.create(
+  'graphWithProperties',
+  {
+    Person: {properties: 'age'},
+    Book: {properties: {price: {defaultValue: 5.0}}}
+  },
+  ['KNOWS', 'READ'],
+  {nodeProperties: 'ratings'}
+)
 YIELD
   graphName, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
 RETURN graphName, nodeProjection.Book AS bookProjection, nodes, rels
@@ -602,15 +617,22 @@ Analogous to node properties, we can either use the `relationshipProperties` con
 .Project a `readWithProperties` graph containing `Person` and `Book` nodes and `READ` relationships with `numberOfPages`:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('readWithProperties', ['Person', 'Book'], {READ: {properties: "numberOfPages"}})
+CALL gds.graph.create(
+  'readWithProperties',
+  ['Person', 'Book'],
+  {READ: {properties: "numberOfPages"}}
+)
 YIELD
-  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
+  graphName AS graph,
+  relationshipProjection AS readProjection,
+  nodeCount AS nodes,
+  relationshipCount AS rels
 ----
 
 .Results
 [opts="header", cols="1,3m,1m,1m"]
 |===
-| graph      | readProjection                                                                  | nodes  | rels
+| graph                | readProjection                                                                                                                                            | nodes  | rels
 | "readWithProperties" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=DEFAULT}}}} | 5      | 4
 |===
 --
@@ -624,7 +646,10 @@ Next, we will verify that the relationship property `numberOfPages` were correct
 ----
 CALL gds.graph.streamRelationshipProperty('readWithProperties', 'numberOfPages')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
-RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfPages
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfPages
 ORDER BY person ASC, numberOfPages DESC
 ----
 
@@ -654,7 +679,8 @@ Analogous to node properties, we can project relationship properties using the `
 CALL gds.graph.create.cypher(
   'readWithProperties',
   'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
-  'MATCH (n)-[r:READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type, r.numberOfPages AS numberOfPages'
+  'MATCH (n)-[r:READ]->(m)
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, r.numberOfPages AS numberOfPages'
 )
 YIELD
   graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
@@ -677,7 +703,10 @@ Next, we will verify that the relationship property `numberOfPages` were correct
 ----
 CALL gds.graph.streamRelationshipProperty('readWithProperties', 'numberOfPages')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
-RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfPages
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfPages
 ORDER BY person ASC, numberOfPages DESC
 ----
 
@@ -712,9 +741,25 @@ For graphs without relationship properties, we can use the `COUNT` aggregation.
 .Project a `readCount` graph containing `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('readCount', ['Person', 'Book'], {READ: {properties: {numberOfReads: {property:'*', aggregation: 'COUNT'}}}})
+CALL gds.graph.create(
+  'readCount',
+  ['Person', 'Book'],
+  {
+    READ: {
+      properties: {
+        numberOfReads: {
+          property: '*',
+          aggregation: 'COUNT'
+        }
+      }
+    }
+  }
+)
 YIELD
-  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
+  graphName AS graph,
+  relationshipProjection AS readProjection,
+  nodeCount AS nodes,
+  relationshipCount AS rels
 ----
 
 .Results
@@ -734,7 +779,10 @@ Next, we will verify that the `READ` relationships were correctly aggregated.
 ----
 CALL gds.graph.streamRelationshipProperty('readCount', 'numberOfReads')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
-RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfReads
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfReads
 ORDER BY numberOfReads DESC, person
 ----
 
@@ -764,7 +812,8 @@ Another way to do this is to project the parallel relationship count as a relati
 CALL gds.graph.create.cypher(
   'readCount',
   'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
-  'MATCH (n)-[r:READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type, count(r) AS numberOfReads'
+  'MATCH (n)-[r:READ]->(m)
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, count(r) AS numberOfReads'
 )
 YIELD
   graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
@@ -787,7 +836,10 @@ Next, we will verify that the `READ` relationships were correctly aggregated.
 ----
 CALL gds.graph.streamRelationshipProperty('readCount', 'numberOfReads')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
-RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfReads
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfReads
 ORDER BY numberOfReads DESC, person
 ----
 
@@ -877,7 +929,8 @@ For graphs with relationship properties we can also use other aggregations.
 CALL gds.graph.create.cypher(
   'readSums',
   'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
-  'MATCH (n)-[r:READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type, sum(r.numberOfPages) AS numberOfPages'
+  'MATCH (n)-[r:READ]->(m)
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, sum(r.numberOfPages) AS numberOfPages'
 )
 YIELD
   graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
@@ -900,7 +953,10 @@ Next, we will verify that the relationship property `numberOfPages` were correct
 ----
 CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfPages')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
-RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfPages
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfPages
 ORDER BY numberOfPages DESC, person
 ----
 
