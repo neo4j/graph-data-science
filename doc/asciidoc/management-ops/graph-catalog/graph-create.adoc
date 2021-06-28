@@ -306,7 +306,7 @@ CREATE
 ----
 
 [[graph-create-example-single-label-type]]
-=== Projecting a label and relationship type
+=== Single label and relationship type
 
 We are going to start with demonstrating how to load a single `label` and `relationship` by projecting only the `Person` label and `KNOWS` relationship type.
 
@@ -370,7 +370,7 @@ YIELD
 
 
 // 1. the very simple case, List of Strings --> Labels & Rels, no properties
-=== Projecting multiple labels and relationship types
+=== Multiple labels and relationship types
 
 [.tabbed-example]
 ====
@@ -430,7 +430,7 @@ YIELD
 ====
 
 
-=== Changing the orientation of relationships
+=== Relationship orientation
 
 ==== Native-projection
 
@@ -694,7 +694,7 @@ ORDER BY person ASC, numberOfPages DESC
 
 We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed using the Map-Syntax the same as for node properties in <<node-properties-example>>.
 
-=== Handling parallel relationships
+=== Parallel relationships
 
 Neo4j supports parallel relationships, i.e., multiple relationships between two nodes.
 By default, GDS preserves the parallel relationships.
@@ -804,7 +804,7 @@ ORDER BY numberOfReads DESC, person
 We can see, that the two READ relationships between Florentin and the Hobbit result in `2` numberOfReads.
 
 
-=== Handling parallel relationships with properties
+=== Parallel relationships with properties
 
 ==== Native-projection
 
