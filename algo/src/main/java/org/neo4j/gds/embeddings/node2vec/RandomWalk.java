@@ -137,10 +137,11 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         return StreamSupport.stream(new QueueBasedSpliterator<>(walks, TOMB, terminationFlag, timeout), false);
     }
 
-    DegreeCentrality.DegreeFunction cumulativeWeights() {
+    private DegreeCentrality.DegreeFunction cumulativeWeights() {
         var config = ImmutableDegreeCentralityConfig.builder()
             .concurrency(concurrency)
-            .relationshipWeightProperty("weight")
+            // DegreeCentrality internally decides its computation on the config. The actual property value is not relevant
+            .relationshipWeightProperty("DUMMY")
             .build();
 
         return new DegreeCentrality(
