@@ -306,9 +306,10 @@ CREATE
 ----
 
 [[graph-create-example-single-label-type]]
-=== Single label and relationship type
+=== Simple graph
 
-We are going to start with demonstrating how to load a single `label` and `relationship` by projecting only the `Person` label and `KNOWS` relationship type.
+A simple graph is a graph with only one node label and relationship type.
+We are going to start with demonstrating how to load a simple graph by projecting only the `Person` node label and `KNOWS` relationship type.
 
 [.tabbed-example]
 ====
@@ -318,7 +319,7 @@ We are going to start with demonstrating how to load a single `label` and `relat
 
 [role=query-example]
 --
-.Project and store `PERSON` nodes and `KNOWS` relationships into a `persons` graph.
+.Project and store `Person` nodes and `KNOWS` relationships into a `persons` graph.
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create('persons', 'Person', 'KNOWS')
@@ -334,7 +335,7 @@ YIELD
 |===
 --
 
-In the example above, we used a `short-hand` syntax for the node and relationship projection.
+In the example above, we used a short-hand syntax for the node and relationship projection.
 The used projections are internally expanded to the full `Map` syntax as shown in the `Results` table.
 In addition, we can see the projected in-memory graph contains three `Person` nodes, and the two `KNOWS` relationships.
 ======
@@ -344,7 +345,7 @@ In addition, we can see the projected in-memory graph contains three `Person` no
 
 [role=query-example]
 --
-.Project and store `PERSON` nodes and `KNOWS` relationships into a `persons` graph.
+.Project and store `Person` nodes and `KNOWS` relationships into a `persons` graph.
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
@@ -363,14 +364,14 @@ YIELD
 |===
 --
 
-// TODO: Add analysis here
-
 ======
 ====
 
 
 // 1. the very simple case, List of Strings --> Labels & Rels, no properties
-=== Multiple labels and relationship types
+=== Multi-graph
+
+Multi-graph is a graph with multiple node labels and relationship types.
 
 [.tabbed-example]
 ====
@@ -381,7 +382,7 @@ To project multiple node labels and relationship types, we can adjust the projec
 
 [role=query-example]
 --
-.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
+.Project and store `Person` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create('personsAndBooks', ['Person', 'Book'], ['KNOWS', 'READ'])
@@ -397,8 +398,8 @@ YIELD
 |===
 --
 
-In the example above, we used a `short-hand` syntax for the node- and relationship projection.
-The used projections are internally expanded to the full `Map` syntax as shown for the `nodeProjection` in the `Results` table.
+In the example above, we used a short-hand syntax for the node and relationship projection.
+The used projections are internally expanded to the full `Map` syntax as shown for the `nodeProjection` in the Results table.
 In addition, we can see the projected in-memory graph contains five nodes, and the two relationships.
 ======
 
@@ -408,7 +409,7 @@ To retain the label and type information, when we load multiple node labels and 
 
 [role=query-example]
 --
-.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
+.Project and store `Person` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
@@ -432,7 +433,7 @@ YIELD
 
 === Relationship orientation
 
-==== Native-projection
+==== Native projection
 
 By default, relationships are loaded in the same orientation as stored in the Neo4j db.
 In GDS, we call this the `NATURAL` orientation.
@@ -440,7 +441,7 @@ Additionally, we provide the functionality to load the relationships in the `REV
 
 [role=query-example]
 --
-.Project and store `PERSON` nodes and undirected `KNOWS` relationships into a `undirectedKnows` graph:
+.Project and store `Person` nodes and undirected `KNOWS` relationships into a `undirectedKnows` graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
@@ -481,7 +482,7 @@ These algorithms can not be used when loading a graph with cypher projections.
 --
 
 [[node-properties-example]]
-=== Projecting node properties
+=== Node properties
 
 ==== Native-projection
 
@@ -489,7 +490,7 @@ To project node properties we can either use the `nodeProperties` configuration 
 
 [role=query-example, group=node-properties]
 --
-.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
+.Project and store `Person` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
@@ -548,7 +549,7 @@ We can see, that the price was projected with the Hobbit having the default pric
 
 [role=query-example, group=cypher-node-properties]
 --
-.Project and store `PERSON` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
+.Project and store `Person` and `Book` nodes and `KNOWS` and `READ` relationships into a `personsAndBooks` graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
@@ -606,7 +607,7 @@ ORDER BY price
 We can see, that the price was projected with the Hobbit having the default price of 5.0.
 
 
-=== Projecting relationship properties
+=== Relationship properties
 
 ==== Native-projection
 
