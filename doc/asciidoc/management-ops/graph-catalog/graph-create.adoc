@@ -307,7 +307,11 @@ CREATE
 
 We are going to start with demonstrating how to load a single `label` and `relationship` by projecting only the `Person` label and `KNOWS` relationship type.
 
-==== Native-Projection
+[.tabbed-example]
+====
+
+[.include-with-native-projection]
+======
 
 [role=query-example]
 --
@@ -327,11 +331,13 @@ YIELD
 |===
 --
 
-In the example above, we used a `short-hand` syntax for the node- and relationship projection.
+In the example above, we used a `short-hand` syntax for the node and relationship projection.
 The used projections are internally expanded to the full `Map` syntax as shown in the `Results` table.
 In addition, we can see the projected in-memory graph contains three `Person` nodes, and the two `KNOWS` relationships.
+======
 
-==== Cypher-Projection
+[.include-with-cypher-projection]
+======
 
 [role=query-example]
 --
@@ -354,11 +360,20 @@ YIELD
 |===
 --
 
+// TODO: Add analysis here
+
+======
+====
+
+
 // 1. the very simple case, List of Strings --> Labels & Rels, no properties
 === Projecting multiple labels and relationship types
 
-==== Native-Projection
+[.tabbed-example]
+====
 
+[.include-with-native-projection]
+======
 To project multiple node labels and relationship types, we can adjust the projections as follows:
 
 [role=query-example]
@@ -382,10 +397,10 @@ YIELD
 In the example above, we used a `short-hand` syntax for the node- and relationship projection.
 The used projections are internally expanded to the full `Map` syntax as shown for the `nodeProjection` in the `Results` table.
 In addition, we can see the projected in-memory graph contains five nodes, and the two relationships.
+======
 
-
-==== Cypher-Projection
-
+[.include-with-cypher-projection]
+======
 To retain the label and type information, when we load multiple node labels and relationship types, we can add a `labels` column to the node query and `type` column to the relationship query.
 
 [role=query-example]
@@ -408,6 +423,8 @@ YIELD
 | "personsAndBooks" | "MATCH (n) RETURN id(n) AS id, labels(n) AS labels" | 5      | 6
 |===
 --
+======
+====
 
 
 === Changing the orientation of relationships
