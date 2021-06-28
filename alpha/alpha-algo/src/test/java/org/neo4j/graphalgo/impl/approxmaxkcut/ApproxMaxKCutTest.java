@@ -22,6 +22,9 @@ package org.neo4j.graphalgo.impl.approxmaxkcut;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -31,11 +34,14 @@ import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.TestGraph;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 final class ApproxMaxKCutTest {
@@ -146,5 +152,63 @@ final class ApproxMaxKCutTest {
                 }
             });
         });
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 2})
+    void testProgressLogging(int vnsMaxNeighborhoodOrder) {
+        var configBuilder = ImmutableApproxMaxKCutConfig.builder();
+        configBuilder.vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder);
+
+        var config = configBuilder.build();
+
+        TestProgressLogger progressLogger = new TestProgressLogger(graph.nodeCount(), "Approximate Maximum k-cut", 1);
+        var approxMaxKCut = new ApproxMaxKCut(
+            graph,
+            Pools.DEFAULT,
+            config,
+            progressLogger,
+            AllocationTracker.empty()
+        );
+
+        approxMaxKCut.compute();
+
+        List<AtomicLong> progresses = progressLogger.getProgresses();
+
+        assertEquals(1, progresses.size());
+
+        assertTrue(progressLogger.containsMessage(TestLog.INFO, ":: Start"));
+        assertTrue(progressLogger.containsMessage(TestLog.INFO, ":: Finish"));
+
+        for (int i = 1; i <= config.iterations(); i++) {
+            assertTrue(progressLogger.containsMessage(
+                TestLog.INFO,
+                String.format("Iteration %d: Randomly assign nodes to communities :: Start", i)
+            ));
+            assertTrue(progressLogger.containsMessage(
+                TestLog.INFO,
+                String.format("Iteration %d: Randomly assign nodes to communities :: Finished", i)
+            ));
+
+            if (vnsMaxNeighborhoodOrder > 0) {
+                assertTrue(progressLogger.containsMessage(
+                    TestLog.INFO,
+                    String.format("Iteration %d: Variable neighborhood search :: Start", i)
+                ));
+                assertTrue(progressLogger.containsMessage(
+                    TestLog.INFO,
+                    String.format("Iteration %d: Variable neighborhood search :: Finished", i)
+                ));
+            } else {
+                assertTrue(progressLogger.containsMessage(
+                    TestLog.INFO,
+                    String.format("Iteration %d: Local search :: Start", i)
+                ));
+                assertTrue(progressLogger.containsMessage(
+                    TestLog.INFO,
+                    String.format("Iteration %d: Local search :: Finished", i)
+                ));
+            }
+        }
     }
 }
