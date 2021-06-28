@@ -33,9 +33,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.graphalgo.core.loading.LocalBumpAllocator.PAGE_MASK;
-import static org.neo4j.graphalgo.core.loading.LocalBumpAllocator.PAGE_SHIFT;
-import static org.neo4j.graphalgo.core.loading.LocalBumpAllocator.PAGE_SIZE;
+import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_MASK;
+import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SHIFT;
+import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SIZE;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
 

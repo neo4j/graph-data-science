@@ -31,15 +31,15 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
 
 public final class TransientAdjacencyPropertiesBuilder implements AdjacencyPropertiesBuilder {
 
-    private final LocalBumpAllocator<long[]> builder;
+    private final BumpAllocator<long[]> builder;
 
     TransientAdjacencyPropertiesBuilder(AllocationTracker tracker) {
-        this.builder = new LocalBumpAllocator<>(tracker, Factory.INSTANCE);
+        this.builder = new BumpAllocator<>(tracker, Factory.INSTANCE);
     }
 
     @Override
     public Allocator newAllocator() {
-        return new Allocator(this.builder.newAllocator());
+        return new Allocator(this.builder.newLocalAllocator());
     }
 
     @Override
@@ -51,7 +51,7 @@ public final class TransientAdjacencyPropertiesBuilder implements AdjacencyPrope
     public void flush() {
     }
 
-    private enum Factory implements LocalBumpAllocator.Factory<long[]> {
+    private enum Factory implements BumpAllocator.Factory<long[]> {
         INSTANCE;
 
         @Override
@@ -82,9 +82,9 @@ public final class TransientAdjacencyPropertiesBuilder implements AdjacencyPrope
 
     static final class Allocator implements AdjacencyPropertiesAllocator {
 
-        private final LocalBumpAllocator.Allocator<long[]> allocator;
+        private final BumpAllocator.LocalAllocator<long[]> allocator;
 
-        private Allocator(LocalBumpAllocator.Allocator<long[]> allocator) {
+        private Allocator(BumpAllocator.LocalAllocator<long[]> allocator) {
             this.allocator = allocator;
         }
 

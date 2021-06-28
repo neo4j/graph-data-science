@@ -30,7 +30,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfObjectArrayElements;
 
-public final class LocalBumpAllocator<PAGE> {
+/**
+ * "Bump" refers to the implementation in that there is a local allocator that is able to do a fast-path allocation
+ * by just bumping a pointer value. The name follows the description of the TLAB-allocation from the JVM.
+ * https://shipilev.net/jvm/anatomy-quarks/4-tlab-allocation
+ */
+public final class BumpAllocator<PAGE> {
 
     public static final int PAGE_SHIFT = 18;
     public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
@@ -50,7 +55,7 @@ public final class LocalBumpAllocator<PAGE> {
     private final ReentrantLock growLock;
     private final AllocationTracker tracker;
 
-    LocalBumpAllocator(AllocationTracker tracker, Factory<PAGE> pageFactory) {
+    BumpAllocator(AllocationTracker tracker, Factory<PAGE> pageFactory) {
         this.pageFactory = pageFactory;
         this.tracker = tracker;
         this.growLock = new ReentrantLock(true);
@@ -60,19 +65,19 @@ public final class LocalBumpAllocator<PAGE> {
 
     static {
         try {
-            PAGES = MethodHandles.lookup().findVarHandle(LocalBumpAllocator.class, "pages", Object[].class);
-            ALLOCATED_PAGES = MethodHandles.lookup().findVarHandle(LocalBumpAllocator.class, "allocatedPages", int.class);
+            PAGES = MethodHandles.lookup().findVarHandle(BumpAllocator.class, "pages", Object[].class);
+            ALLOCATED_PAGES = MethodHandles.lookup().findVarHandle(BumpAllocator.class, "allocatedPages", int.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new ExceptionInInitializerError(e);
         }
     }
 
-    public Allocator<PAGE> newAllocator() {
-        return new Allocator<>(this, false);
+    public LocalAllocator<PAGE> newLocalAllocator() {
+        return new LocalAllocator<>(this, false);
     }
 
-    public Allocator<PAGE> newPrefetchingOneBasedAllocator() {
-        return new Allocator<>(this, true);
+    public LocalAllocator<PAGE> newPrefetchingOneBasedLocalAllocator() {
+        return new LocalAllocator<>(this, true);
     }
 
     public PAGE[] intoPages() {
@@ -165,16 +170,16 @@ public final class LocalBumpAllocator<PAGE> {
         long memorySizeOfPage(int length);
     }
 
-    public static final class Allocator<PAGE> {
+    public static final class LocalAllocator<PAGE> {
 
-        private final LocalBumpAllocator<PAGE> globalAllocator;
+        private final BumpAllocator<PAGE> globalAllocator;
 
         private long top;
 
         private PAGE page;
         private int offset;
 
-        private Allocator(LocalBumpAllocator<PAGE> globalAllocator, boolean prefetchAndBumpZero) {
+        private LocalAllocator(BumpAllocator<PAGE> globalAllocator, boolean prefetchAndBumpZero) {
             this.globalAllocator = globalAllocator;
 
             this.offset = PAGE_SIZE;
