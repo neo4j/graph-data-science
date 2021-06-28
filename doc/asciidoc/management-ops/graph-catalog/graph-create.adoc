@@ -695,6 +695,10 @@ We can see, that the `numberOfPages` are loaded. The default property value is `
 
 Neo4j supports parallel relationships, i.e., multiple relationships between two nodes.
 By default, GDS preserves the parallel relationships.
+For some algorithms, we want the projected graph to contain at most one relationship between two nodes.
+
+==== Native-projection
+
 We can specify how parallel relationships should be merged into a single relationship via the `aggregation` parameter in a relationship projection.
 
 For graphs without relationship properties, we can use the `COUNT` aggregation.
@@ -742,6 +746,60 @@ ORDER BY numberOfReads DESC, person
 --
 
 We can see, that the two READ relationships between Florentin and the Hobbit result in `2` numberOfReads.
+
+==== Cypher-projection
+
+The simplest way to achieve relationship deduplication is to use the `DISTINCT` operator in the relationship query.
+Another way to do this is to project the parallel relationship count as a relationship properties.
+
+// special case: COUNT example
+[role=query-example, group=cypher-count-aggregate]
+--
+.Project a `readSums` graph containing `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'readCount',
+  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type, count(r) as numberOfReads'
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph       | nodes  | rels
+| "readCount" | 5      | 3
+|===
+--
+
+Next, we will verify that the `READ` relationships were correctly aggregated.
+
+[role=query-example, group=cypher-count-aggregate]
+--
+.Stream the relationship property `numberOfReads` of the projected `readCount` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readCount', 'numberOfReads')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
+RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfReads
+ORDER BY numberOfReads DESC, person
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                  | numberOfReads
+| "Florentin" |  "The Hobbit"        | 2.0
+| "Adam"      |  "The Hobbit"        | 1.0
+| "Veselin"   |  "Frankenstein"      | 1.0
+|===
+--
+
+We can see, that the two READ relationships between Florentin and the Hobbit result in `2` numberOfReads.
+
 
 === Handling parallel relationships with properties
 
