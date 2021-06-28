@@ -191,6 +191,9 @@ public final class LocalBumpAllocator<PAGE> {
          * Inserts slice into the allocator, returns global address
          */
         public long insert(PAGE targets, int length) {
+            // targetLength is the length of the array that is provided ({@code == targets.length}).
+            // This value can be greater than `length` if the provided array is some sort of a buffer.
+            // We need this to determine if we need to make a slice-copy of the targets array or not.
             var targetLength = globalAllocator.pageFactory.lengthOfPage(targets);
             return insertData(targets, Math.min(length, targetLength), top, targetLength);
         }
