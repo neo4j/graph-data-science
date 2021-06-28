@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.paged;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
@@ -209,6 +210,16 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
             dataSize = PagedHugeAtomicByteArray.memoryUsageOfData(size);
         }
         return instanceSize + dataSize;
+    }
+
+    @TestOnly
+    static HugeAtomicByteArray newPagedArray(long size, final BytePageCreator pageFiller, AllocationTracker tracker) {
+        return HugeAtomicByteArray.PagedHugeAtomicByteArray.of(size, pageFiller, tracker);
+    }
+
+    @TestOnly
+    static HugeAtomicByteArray newSingleArray(int size, AllocationTracker tracker) {
+        return HugeAtomicByteArray.SingleHugeAtomicByteArray.of(size, tracker);
     }
 
     static final class SingleHugeAtomicByteArray extends HugeAtomicByteArray {
