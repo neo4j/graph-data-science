@@ -26,6 +26,7 @@ enum SyntaxMode {
     WRITE("include-with-write"),
     TRAIN("include-with-train"),
     GRAPH_CREATE("graph-create-syntax"),
+    GRAPH_CREATE_CYPHER("graph-create-cypher-syntax"),
     GRAPH_EXISTS("graph-exists-syntax"),
     CREATE_SUBGRAPH("create-subgraph-syntax");
 

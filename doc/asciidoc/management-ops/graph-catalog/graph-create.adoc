@@ -13,6 +13,7 @@ This allows multiple algorithms to use the same graph without having to re-creat
 //There is also a way to generate a random graph, see <<graph-generation, Graph Generation>> documentation for more details.
 //====
 
+[[graph-create-native]]
 == Native Projection
 
 Provides the best performance by reading from the Neo4j store files.
@@ -311,6 +312,7 @@ To specify the orientation, we need to write the `relationshipProjection` with e
 Projecting the `KNOWS` relationships `UNDIRECTED`, loads each relationship in both directions.
 Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in <<graph-create-example-single-label-type>>.
 
+[[node-properties-example]]
 ==== Projecting node properties
 
 To project node properties we can either use the `nodeProperties` configuration parameter or extend an individual `nodeProjection` for a specific label.
@@ -364,9 +366,55 @@ ORDER BY price
 
 We can see, that the price was projected with the Hobbit having the default price of 5.0.
 
-// 3.1. very simple relationship properties only with String relationship property
-// 3.2. expanded relationship properties with default value and different name
-//==== Projecting relationship properties
+
+==== Projecting relationship properties
+
+Analogous to node properties, we can either use the `relationshipProperties` configuration parameter or extend an individual `relationshipProjection` for a specific type.
+
+[role=query-example, group=rel-properties]
+--
+.Project a `readWithProperties` graph containing `Person` and `Book` nodes and `READ` relationships with `numberOfPages`:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('readWithProperties', ['Person', 'Book'], {READ: {properties: "numberOfPages"}})
+YIELD
+  graphName AS graph, relationshipProjection AS readProjection, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph      | readProjection                                                                  | nodes  | rels
+| "readWithProperties" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=DEFAULT}}}} | 5      | 4
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` were correctly loaded.
+
+[role=query-example, group=rel-properties]
+--
+.Stream the relationship property `numberOfPages` of the projected `readWithProperties` graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readWithProperties', 'numberOfPages')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN gds.util.asNode(sourceNodeId).name AS person, gds.util.asNode(targetNodeId).name AS book, numberOfPages
+ORDER BY person ASC, numberOfPages DESC
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Florentin" |  "The Hobbit"        | 42.0
+| "Florentin" |  "The Hobbit"        | 4.0
+| "Veselin"   |  "Frankenstein"      | NaN
+|===
+--
+
+We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed using the Map-Syntax the same as for node properties in <<node-properties-example>>.
+
 
 ==== Handling parallel relationships
 
@@ -467,6 +515,7 @@ ORDER BY numberOfPages DESC, person
 
 We can see, that the two READ relationships between Florentin and the Hobbit sum up to `46` numberOfReads.
 
+[[graph-create-cypher]]
 == Cypher Projection
 
 The more flexible, expressive approach with lesser focus on performance.
@@ -478,6 +527,8 @@ Recommended to be primarily used during the development phase.
 A Cypher projection takes three mandatory arguments: `graphName`, `nodeQuery` and `relationshipQuery`.
 In addition, the optional `configuration` parameter allows us to further configure graph creation.
 
+[.graph-create-cypher-syntax]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
@@ -486,15 +537,22 @@ CALL gds.graph.create.cypher(
     relationshipQuery: String,
     configuration: Map
 )
+YIELD
+    graphName: String,
+    nodeQuery: String,
+    nodeCount: Integer,
+    relationshipQuery: String,
+    relationshipCount: Integer,
+    createMillis: Integer
 ----
 
 .Parameters
-[opts="header",cols="1,1,1"]
+[opts="header",cols="1,1,8"]
 |===
 | Name              | Optional | Description
 | graphName         | no       | The name under which the graph is stored in the catalog.
-| nodeQuery         | no       | Cypher query to project nodes.
-| relationshipQuery | no       | Cypher query to project relationships.
+| nodeQuery         | no       | Cypher query to project nodes. The query result must contain an `id` column. Optionally, a `labels` column can be specified to represent node labels. Additional columns are interpreted as properties.
+| relationshipQuery | no       | Cypher query to project relationships. The query result must contain `source` and `target` columns. Optionally, a `type` column can be specified to represent relationship type. Additional columns are interpreted as properties.
 | configuration     | yes      | Additional parameters to configure the Cypher projection.
 |===
 
@@ -504,8 +562,21 @@ CALL gds.graph.create.cypher(
 | Name                   | Type    | Default        | Description
 | readConcurrency        | Integer | 4              | The number of concurrent threads used for creating the graph.
 | validateRelationships  | Boolean | true           | Whether to throw an error if relationships contain nodes not included in the nodeQuery.
-| parameters             | Map     | empty map      | A map of user-defined query parameters that are passed into the node and relationship query.
+| parameters             | Map     | {}             | A map of user-defined query parameters that are passed into the node and relationship query.
 |===
+
+.Results
+[opts="header",cols="2,1,4"]
+|===
+| Name                   | Type     | Description
+| graphName              | String   | The name under which the graph is stored in the catalog.
+| nodeQuery              | String   | The cypher query used to project the nodes in the graph.
+| nodeCount              | Integer  | The number of nodes stored in the projected graph.
+| relationshipQuery      | String   | The cypher query used to project the relationships in the graph.
+| relationshipCount      | Integer  | The number of relationships stored in the projected graph.
+| createMillis           | Integer  | Milliseconds for creating the graph.
+|===
+--
 
 // TODO put this into a life-cycle subsection
 [NOTE]

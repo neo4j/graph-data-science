@@ -26,7 +26,8 @@ class GraphCreateSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.GRAPH_CREATE)
+            SyntaxModeMeta.of(SyntaxMode.GRAPH_CREATE),
+            SyntaxModeMeta.of(SyntaxMode.GRAPH_CREATE_CYPHER)
         );
     }
 
