@@ -706,7 +706,7 @@ class GraphCreateProcTest extends BaseProcTest {
         runQuery("CREATE ({ratings: [1.0, 2.0]}), ()");
         assertError(
             "CALL gds.graph.create('g', '*', '*', {nodeProperties: {ratings: {defaultValue: 5.0}}}) YIELD nodeProjection",
-            "The default value 5.0 cannot coerced into type double[]."
+            "The default value `5.0` of type Double cannot coerced into type double[]."
         );
 
         assertGraphExists(name);

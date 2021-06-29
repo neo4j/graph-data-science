@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -30,8 +29,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -82,7 +80,12 @@ class DefaultValueTest {
 
         var e = assertThrows(ClassCastException.class, defaultValue::longValue);
 
-        assertThat(e.getMessage(), containsString(formatWithLocale("The default value %s cannot coerced into type Long.", defaultValue.getObject())));
+        assertThat(e.getMessage())
+            .contains(formatWithLocale(
+                "The default value `%s` of type %s cannot coerced into type Long.",
+                defaultValue.getObject(),
+                input.getClass().getSimpleName()
+            ));
     }
 
     @Test
@@ -91,7 +94,7 @@ class DefaultValueTest {
 
         var e = assertThrows(UnsupportedOperationException.class, defaultValue::longValue);
 
-        assertThat(e.getMessage(), containsString("Cannot safely convert 42.42 into an long value"));
+        assertThat(e.getMessage()).contains("Cannot safely convert 42.42 into an long value");
     }
 
     static Stream<Arguments> validDoubleValues() {
@@ -122,7 +125,11 @@ class DefaultValueTest {
 
         var e = assertThrows(ClassCastException.class, defaultValue::doubleValue);
 
-        assertThat(e.getMessage(), containsString(formatWithLocale("The default value %s cannot coerced into type Double.", defaultValue.getObject())));
+        assertThat(e.getMessage())
+            .contains(formatWithLocale(
+                "The default value `%s` of type %s cannot coerced into type Double.",
+                defaultValue.getObject(),
+                input.getClass().getSimpleName()));
     }
 
     @Test
@@ -131,14 +138,14 @@ class DefaultValueTest {
 
         var e = assertThrows(UnsupportedOperationException.class, defaultValue::doubleValue);
 
-        assertThat(e.getMessage(), containsString("Cannot safely convert"));
+        assertThat(e.getMessage()).contains("Cannot safely convert");
     }
 
     @ParameterizedTest
     @MethodSource("valuesWithValueType")
     void shouldCreateDefaultValueUsingValueType(Object valueToSet, ValueType type, Function<DefaultValue, ?> fn, Object expectedValue) {
         var defaultValue = DefaultValue.of(valueToSet, type, true);
-        Assertions.assertThat(fn.apply(defaultValue)).isEqualTo(expectedValue);
+        assertThat(fn.apply(defaultValue)).isEqualTo(expectedValue);
     }
 
     private static Stream<Arguments> valuesWithValueType() {
