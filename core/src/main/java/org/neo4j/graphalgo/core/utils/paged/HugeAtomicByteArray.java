@@ -55,9 +55,9 @@ import static org.neo4j.graphalgo.core.utils.paged.HugeArrays.pageIndex;
  * AllocationTracker tracker = ...;
  * long arraySize = 42L;
  * HugeAtomicByteArray array = HugeAtomicByteArray.newArray(arraySize, tracker);
- * array.set(13L, 37L);
+ * array.set(13L, (byte)37);
  * byte value = array.get(13L);
- * // value = 37L
+ * // value = (byte)37;
  * {@code}
  * </pre>
  *
