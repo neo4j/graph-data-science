@@ -141,7 +141,6 @@ YIELD
 --
 
 
-// 1. the very simple case, List of Strings --> Labels & Rels, no properties
 === Multi-graph
 
 Multi-graph is a graph with multiple node labels and relationship types.
@@ -244,7 +243,7 @@ ORDER BY price
 
 We can see, that the price was projected with the Hobbit having the default price of 5.0.
 
-
+[[cypher-relationship-properties]]
 === Relationship properties
 
 Analogous to node properties, we can project relationship properties using the `relationshipQuery`.
@@ -416,3 +415,63 @@ ORDER BY numberOfPages DESC, person
 --
 
 We can see, that the two READ relationships between Florentin and the Hobbit sum up to `46` numberOfReads.
+
+
+=== Projecting filtered Neo4j graphs
+
+Using Cypher allows us to specify what we want to project on a finer grained basis.
+The following examples is going to demonstrate how we can filter out `READ` relationship if it doesn't have `numberOfPages` property set.
+
+[role=query-example, group=cypher-rel-filtering-properties]
+--
+.Project `Person` and `Book` nodes and aggregated `READ` relationships where `numberOfPages` is present:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'existingNumberOfPages',
+  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:READ]->(m)
+    WHERE r.numberOfPages IS NOT NULL
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, r.numberOfPages AS numberOfPages'
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph                   | nodes  | rels
+| "existingNumberOfPages" | 5      | 3
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` were correctly loaded.
+
+[role=query-example, group=cypher-rel-filtering-properties]
+--
+.Stream the relationship property `numberOfPages` from the projected graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('existingNumberOfPages', 'numberOfPages')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfPages
+ORDER BY person ASC, numberOfPages DESC
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Florentin" |  "The Hobbit"        | 42.0
+| "Florentin" |  "The Hobbit"        | 4.0
+|===
+--
+
+If we compare the results to the ones from <<cypher-relationship-properties>>, we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
+
+NOTE: This functionality can't be directly achieved by using <<catalog-graph-create, native projections>>.
