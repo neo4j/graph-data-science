@@ -425,21 +425,25 @@ We will use the model which we trained in the <<algorithms-ml-nodeclassification
 ----
 CALL gds.alpha.ml.nodeClassification.predict.stream('myGraph', {
   nodeLabels: ['House', 'UnknownHouse'],
-  modelName: 'nc-model'
+  modelName: 'nc-model',
+  includePredictedProbabilities: true
 }) YIELD nodeId, predictedClass, predictedProbabilities
 WITH gds.util.asNode(nodeId) AS houseNode, predictedClass, predictedProbabilities
-WHERE houseNode:UnkownHouse
-RETURN houseNode.color AS classifiedHouse, predictedClass, predictedProbabilities
+WHERE houseNode:UnknownHouse
+RETURN
+  houseNode.color AS classifiedHouse,
+  predictedClass,
+  round(predictedProbabilities[predictedClass], 5) AS confidence
   ORDER BY classifiedHouse
 ----
 
 .Results
-[opts="header"]
+[opts="header",cols="m,m,m"]
 |===
-| classifiedHouse | predictedClass | predictedProbabilities
-| "Pink"          |              0 | [0.9866455686217779, 0.01311656378786989, 2.3786759035214687E-4]
-| "Tan"           |              1 | [0.01749164563726576, 0.9824922482993587, 1.610606337562594E-5]
-| "Yellow"        |              2 | [0.0385634113659007, 0.16350471177895198, 0.7979318768551473]
+| classifiedHouse | predictedClass | confidence
+| "Pink"          |              0 | 0.98714
+| "Tan"           |              1 | 0.98267
+| "Yellow"        |              2 | 0.79983
 |===
 --
 
