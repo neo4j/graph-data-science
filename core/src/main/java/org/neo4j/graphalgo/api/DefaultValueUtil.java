@@ -31,6 +31,23 @@ public final class DefaultValueUtil {
 
     private DefaultValueUtil() {}
 
+    static Object transformObjectToPrimitiveArray(Object[] defaultArrayValue) {
+        if (defaultArrayValue.length == 0) {
+            return defaultArrayValue;
+        }
+        var firstEntry = defaultArrayValue[0];
+
+        if (firstEntry instanceof Double) {
+            return parseDoubleArrayValue(defaultArrayValue, ValueType.DOUBLE_ARRAY);
+        } else if (firstEntry instanceof Float) {
+            return parseFloatArrayValue(defaultArrayValue, ValueType.FLOAT_ARRAY);
+        } else if (firstEntry instanceof Long || firstEntry instanceof Integer) {
+            return parseLongArrayValue(defaultArrayValue, ValueType.LONG_ARRAY);
+        } else {
+            throw new IllegalStateException("Unexpected type of array " + firstEntry.getClass().getSimpleName());
+        }
+    }
+
     static double[] parseDoubleArrayValue(Object defaultValue, ValueType type) {
         double[] defaultDoubleArray;
         if (defaultValue instanceof Collection) {
