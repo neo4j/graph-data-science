@@ -21,17 +21,17 @@ package org.neo4j.graphalgo.doc.syntax;
 
 import java.util.List;
 
-class GraphCreateSyntaxTest extends SyntaxTestBase {
+class GraphCreateCypherSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.GRAPH_CREATE)
+            SyntaxModeMeta.of(SyntaxMode.GRAPH_CREATE_CYPHER)
         );
     }
 
     @Override
     String adocFile() {
-        return "management-ops/graph-catalog/graph-create.adoc";
+        return "management-ops/graph-catalog/graph-create-cypher.adoc";
     }
 }

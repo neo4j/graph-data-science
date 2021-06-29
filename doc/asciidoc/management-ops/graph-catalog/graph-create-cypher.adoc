@@ -1,0 +1,418 @@
+[[catalog-graph-create-cypher]]
+= Creating graphs using Cypher
+
+[abstract]
+--
+This section details projecting GDS graphs using `Cypher` projections.
+--
+
+
+A projected graph can be stored in the catalog under a user-defined name.
+Using that name, the graph can be referred to by any algorithm in the library.
+This allows multiple algorithms to use the same graph without having to re-create it on each algorithm run.
+
+Using Cypher projections is more flexible, expressive approach with lesser focus on performance than the <<catalog-graph-create, native projections>>.
+Recommended primarily for the development phase.
+
+[NOTE]
+--
+There is also a way to generate a random graph, see <<graph-generation, Graph Generation>> documentation for more details.
+--
+
+[NOTE]
+--
+The projected graphs will reside in the catalog until:
+
+- the graph is dropped using <<catalog-graph-drop, gds.graph.drop>>
+- the Neo4j database from which to graph was projected is stopped or dropped
+- the Neo4j database management system is stopped.
+--
+
+
+[[graph-create-cypher-syntax]]
+== Syntax
+
+A Cypher projection takes three mandatory arguments: `graphName`, `nodeQuery` and `relationshipQuery`.
+In addition, the optional `configuration` parameter allows us to further configure graph creation.
+
+[.graph-create-cypher-syntax]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+    graphName: String,
+    nodeQuery: String,
+    relationshipQuery: String,
+    configuration: Map
+)
+YIELD
+    graphName: String,
+    nodeQuery: String,
+    nodeCount: Integer,
+    relationshipQuery: String,
+    relationshipCount: Integer,
+    createMillis: Integer
+----
+
+.Parameters
+[opts="header",cols="1,1,8"]
+|===
+| Name              | Optional | Description
+| graphName         | no       | The name under which the graph is stored in the catalog.
+| nodeQuery         | no       | Cypher query to project nodes. The query result must contain an `id` column. Optionally, a `labels` column can be specified to represent node labels. Additional columns are interpreted as properties.
+| relationshipQuery | no       | Cypher query to project relationships. The query result must contain `source` and `target` columns. Optionally, a `type` column can be specified to represent relationship type. Additional columns are interpreted as properties.
+| configuration     | yes      | Additional parameters to configure the Cypher projection.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name                   | Type    | Default        | Description
+| readConcurrency        | Integer | 4              | The number of concurrent threads used for creating the graph.
+| validateRelationships  | Boolean | true           | Whether to throw an error if relationships contain nodes not included in the nodeQuery.
+| parameters             | Map     | {}             | A map of user-defined query parameters that are passed into the node and relationship query.
+|===
+
+.Results
+[opts="header",cols="2,1,4"]
+|===
+| Name                   | Type     | Description
+| graphName              | String   | The name under which the graph is stored in the catalog.
+| nodeQuery              | String   | The cypher query used to project the nodes in the graph.
+| nodeCount              | Integer  | The number of nodes stored in the projected graph.
+| relationshipQuery      | String   | The cypher query used to project the relationships in the graph.
+| relationshipCount      | Integer  | The number of relationships stored in the projected graph.
+| createMillis           | Integer  | Milliseconds for creating the graph.
+|===
+--
+
+NOTE: To get information about a stored named graph, including its schema, one can use <<catalog-graph-list, gds.graph.list>>.
+
+[[graph-create-examples]]
+== Examples
+
+In order to demonstrate the GDS Graph Create capabilities we are going to create a small social network graph in Neo4j.
+The example graph looks like this:
+
+image::example-graphs/graph-create-example.svg[Visualization of the example graph,align="center"]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (florentin:Person { name: 'Florentin', age: 16 }),
+  (adam:Person { name: 'Adam', age: 18 }),
+  (veselin:Person { name: 'Veselin', age: 20, ratings: [5.0] }),
+  (hobbit:Book { name: 'The Hobbit', isbn: 1234, numberOfPages: 310, ratings: [1.0, 2.0, 3.0, 4.5] }),
+  (frankenstein:Book { name: 'Frankenstein', isbn: 4242, price: 19.99 }),
+  (florentin)-[:KNOWS { since: 2010 }]->(adam),
+  (florentin)-[:KNOWS { since: 2018 }]->(veselin),
+  (florentin)-[:READ { numberOfPages: 4 }]->(hobbit),
+  (florentin)-[:READ { numberOfPages: 42 }]->(hobbit),
+  (adam)-[:READ { numberOfPages: 30 }]->(hobbit),
+  (veselin)-[:READ]->(frankenstein)
+----
+
+[[graph-create-example-single-label-type]]
+=== Simple graph
+
+A simple graph is a graph with only one node label and relationship type.
+We are going to start with demonstrating how to load a simple graph by projecting only the `Person` node label and `KNOWS` relationship type.
+
+[role=query-example]
+--
+.Project `Person` nodes and `KNOWS` relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'persons',
+  'MATCH (n:Person) RETURN id(n) AS id',
+  'MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target')
+YIELD
+  graphName AS graph, nodeQuery, nodeCount AS nodes, relationshipQuery, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1,3m,1m"]
+|===
+| graph     | nodeQuery                             | nodes  | relationshipQuery                                                                | rels
+| "persons" | "MATCH (n:Person) RETURN id(n) AS id" | 3      | "MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target" | 2
+|===
+--
+
+
+// 1. the very simple case, List of Strings --> Labels & Rels, no properties
+=== Multi-graph
+
+Multi-graph is a graph with multiple node labels and relationship types.
+
+To retain the label and type information, when we load multiple node labels and relationship types, we can add a `labels` column to the node query and `type` column to the relationship query.
+
+[role=query-example]
+--
+.Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'personsAndBooks',
+  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:KNOWS|READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type')
+YIELD
+  graphName AS graph, nodeQuery, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,3m,1m,1m"]
+|===
+| graph             | nodeQuery                                           | nodes  | rels
+| "personsAndBooks" | "MATCH (n) RETURN id(n) AS id, labels(n) AS labels" | 5      | 6
+|===
+--
+
+
+=== Relationship orientation
+
+The native projection supports specifying an orientation per relationship type.
+The cypher projection will treat every relationship returned by the relationship cypher query as if it was in `NATURAL` orientation.
+It is thus not possible to project graphs in `UNDIRECTED` or `REVERSE` orientation when cypher projections are used.
+
+[NOTE]
+--
+Some algorithms require that the graph was loaded with `UNDIRECTED` orientation.
+These algorithms can not be used when loading a graph with cypher projections.
+--
+
+[[node-properties-example]]
+=== Node properties
+
+[role=query-example, group=cypher-node-properties]
+--
+.Project `Person` and `Book` nodes and `KNOWS` and `READ`:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'graphWithProperties',
+  'MATCH (n) RETURN
+    id(n) AS id,
+    labels(n) AS labels,
+    coalesce(n.age, 18) AS age,
+    coalesce(n.price, 5.0) AS price,
+    n.ratings AS ratings',
+  'MATCH (n)-[r:KNOWS|READ]->(m) RETURN id(n) AS source, id(m) AS target, type(r) AS type'
+)
+YIELD
+  graphName, nodeCount AS nodes, relationshipCount AS rels
+RETURN graphName, nodes, rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graphName             | nodes  | rels
+| "graphWithProperties" | 5      | 6
+|===
+--
+
+The projected `graphWithProperties` graph contains five nodes and six relationships.
+In Cypher projection every node from the `nodeQuery` gets the same node properties, which means you can't have label-specific properties.
+For instance in the example above the `Person` nodes will also get `ratings` and `price` properties, while `Book` nodes get the `age` property.
+
+NOTE: GDS currently only supports loading numeric properties.
+
+Further, the `price` property has a default value of `5.0`.
+Not every book has a price specified in the example graph.
+In the following we check if the price was correctly projected:
+
+[role=query-example, group=cypher-node-properties]
+--
+.Verify the ratings property of Adam in the projected graph:
+[source, cypher, role=noplay]
+----
+MATCH (n:Book)
+RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'price') as price
+ORDER BY price
+----
+
+.Results
+[opts="header", cols="1,1"]
+|===
+| name          | price
+| "The Hobbit"  | 5.0
+| "Frankenstein"| 19.99
+|===
+--
+
+We can see, that the price was projected with the Hobbit having the default price of 5.0.
+
+
+=== Relationship properties
+
+Analogous to node properties, we can project relationship properties using the `relationshipQuery`.
+
+[role=query-example, group=cypher-rel-properties]
+--
+.Project `Person` and `Book` nodes and `READ` relationships with `numberOfPages` property:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'readWithProperties',
+  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:READ]->(m)
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, r.numberOfPages AS numberOfPages'
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph                | nodes  | rels
+| "readWithProperties" | 5      | 4
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` were correctly loaded.
+
+[role=query-example, group=cypher-rel-properties]
+--
+.Stream the relationship property `numberOfPages` from the projected graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readWithProperties', 'numberOfPages')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfPages
+ORDER BY person ASC, numberOfPages DESC
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Florentin" |  "The Hobbit"        | 42.0
+| "Florentin" |  "The Hobbit"        | 4.0
+| "Veselin"   |  "Frankenstein"      | NaN
+|===
+--
+
+We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed using the Map-Syntax the same as for node properties in <<node-properties-example>>.
+
+=== Parallel relationships
+
+Neo4j supports parallel relationships, i.e., multiple relationships between two nodes.
+By default, GDS preserves the parallel relationships.
+For some algorithms, we want the projected graph to contain at most one relationship between two nodes.
+
+The simplest way to achieve relationship deduplication is to use the `DISTINCT` operator in the relationship query.
+Another way to do this is to project the parallel relationship count as a relationship properties.
+
+[role=query-example, group=cypher-count-aggregate]
+--
+.Project `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'readCount',
+  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:READ]->(m)
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, count(r) AS numberOfReads'
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph       | nodes  | rels
+| "readCount" | 5      | 3
+|===
+--
+
+Next, we will verify that the `READ` relationships were correctly aggregated.
+
+[role=query-example, group=cypher-count-aggregate]
+--
+.Stream the relationship property `numberOfReads` of the projected graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readCount', 'numberOfReads')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfReads
+ORDER BY numberOfReads DESC, person
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                  | numberOfReads
+| "Florentin" |  "The Hobbit"        | 2.0
+| "Adam"      |  "The Hobbit"        | 1.0
+| "Veselin"   |  "Frankenstein"      | 1.0
+|===
+--
+
+We can see, that the two READ relationships between Florentin and the Hobbit result in `2` numberOfReads.
+
+
+=== Parallel relationships with properties
+
+For graphs with relationship properties we can also use other aggregations.
+
+[role=query-example, group=cypher-sum-aggregate]
+--
+.Project `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'readSums',
+  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:READ]->(m)
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, sum(r.numberOfPages) AS numberOfPages'
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph      | nodes  | rels
+| "readSums" | 5      | 3
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` were correctly aggregated.
+
+[role=query-example, group=cypher-sum-aggregate]
+--
+.Stream the relationship property `numberOfPages` of the projected graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfPages')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfPages
+ORDER BY numberOfPages DESC, person
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Florentin" |  "The Hobbit"        | 46.0
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Veselin"   |  "Frankenstein"      | 0.0
+|===
+--
+
+We can see, that the two READ relationships between Florentin and the Hobbit sum up to `46` numberOfReads.

@@ -17,21 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.doc.syntax;
+package org.neo4j.graphalgo.doc;
+
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
+import org.neo4j.graphalgo.functions.NodePropertyFunc;
 
 import java.util.List;
 
-class GraphCreateSyntaxTest extends SyntaxTestBase {
+class GraphCreateCypherDocTest extends DocTestBase {
+    @Override
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class, NodePropertyFunc.class);
+    }
 
     @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(SyntaxMode.GRAPH_CREATE)
-        );
+    List<Class<?>> procedures() {
+        return List.of(GraphCreateProc.class, GraphStreamRelationshipPropertiesProc.class);
     }
 
     @Override
     String adocFile() {
-        return "management-ops/graph-catalog/graph-create.adoc";
+        return "management-ops/graph-catalog/graph-create-cypher.adoc";
     }
 }
