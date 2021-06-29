@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
@@ -38,6 +39,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -188,29 +190,28 @@ final class NodePropertiesFromStoreBuilderTest {
     }
 
     private static Stream<Arguments> invalidValueTypeCombinations() {
-        return Stream.of(
-            Arguments.of(2L, new double[]{1D}),
-            Arguments.of(2L, new long[]{1L}),
-            Arguments.of(2D, new double[]{1D}),
-            Arguments.of(2D, new long[]{1L}),
-            Arguments.of(new double[]{1D}, 2L),
-            Arguments.of(new double[]{1D}, 2D),
-            Arguments.of(new long[]{1L}, 2L),
-            Arguments.of(new long[]{1L}, 2D)
+        Supplier<Stream<Arguments>> scalarValues = () -> Stream.of(
+            Arguments.of(2L, "long"),
+            Arguments.of(2D, "double"));
+
+        Supplier<Stream<Arguments>> arrayValues = () -> Stream.of(
+            Arguments.of(new double[]{1D}, "double[]"),
+            Arguments.of(new long[]{1L}, "long[]")
+        );
+
+        return Stream.concat(
+            TestSupport.crossArguments(scalarValues, arrayValues),
+            TestSupport.crossArguments(arrayValues, scalarValues)
         );
     }
 
     @ParameterizedTest
     @MethodSource("invalidValueTypeCombinations")
-    void failOnInvalidDefaultType(Object defaultValue, Object propertyValue) {
+    void failOnInvalidDefaultType(Object defaultValue, String expectedPropertyClass, Object propertyValue, String expectedDefaultClass) {
         Assertions.assertThatThrownBy(() -> createNodeProperties(1L, defaultValue, b -> {
             b.set(0, Values.of(propertyValue));
         })).isInstanceOf(IllegalArgumentException.class)
-            .hasMessage(formatWithLocale(
-                "Expected type of default value to be `%s`. But got `%s`.",
-                propertyValue.getClass().getSimpleName(),
-                defaultValue.getClass().getSimpleName()
-            ));
+            .hasMessageContaining(formatWithLocale("Expected type of default value to be `%s`.", expectedDefaultClass));
     }
 
     @Test
