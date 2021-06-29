@@ -17,20 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43drop040;
 
-import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.graphalgo.compat.CompositeNodeCursor;
+import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 
-@ServiceProvider
-public final class Neo4jProxyAuraFactory implements Neo4jProxyFactory {
+import java.util.List;
 
-    @Override
-    public boolean canLoad(Neo4jVersion version) {
-        return version == Neo4jVersion.V_4_3_drop40;
-    }
+public final class CompositeNodeCursorImpl extends CompositeNodeCursor {
 
-    @Override
-    public Neo4jProxyApi load() {
-        return new Neo4jProxyAura();
+    CompositeNodeCursorImpl(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+        super(cursors, labelIds);
     }
 }

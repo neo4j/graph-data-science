@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43drop040;
 
 import org.apache.commons.io.output.WriterOutputStream;
 import org.eclipse.collections.api.factory.Sets;
@@ -28,6 +28,14 @@ import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.graphalgo.compat.CompatIndexQuery;
+import org.neo4j.graphalgo.compat.CompatInput;
+import org.neo4j.graphalgo.compat.CompositeNodeCursor;
+import org.neo4j.graphalgo.compat.CustomAccessMode;
+import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
+import org.neo4j.graphalgo.compat.JobRunner;
+import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
+import org.neo4j.graphalgo.compat.Neo4jProxyApi;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -117,16 +125,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class Neo4jProxyAura implements Neo4jProxyApi {
+public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
-        return new CompatGraphDatabaseAPIAura(dbms);
+        return new CompatGraphDatabaseAPIImpl(dbms);
     }
 
     @Override
     public AccessMode accessMode(CustomAccessMode customAccessMode) {
-        return new CompatAccessModeAura(customAccessMode);
+        return new CompatAccessModeImpl(customAccessMode);
     }
 
     @Override
@@ -145,7 +153,7 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
         String databaseName
     ) {
         return new SecurityContext(
-            new CompatUsernameAuthSubjectAura(username, authSubject),
+            new CompatUsernameAuthSubjectImpl(username, authSubject),
             mode,
             // GDS is always operating from an embedded context
             ClientConnectionInfo.EMBEDDED_CONNECTION,
@@ -233,12 +241,12 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
 
     @Override
     public boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
-        return NodeLabelIndexLookupAura.hasNodeLabelIndex(kernelTransaction);
+        return NodeLabelIndexLookupImpl.hasNodeLabelIndex(kernelTransaction);
     }
 
     @Override
     public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
-        var nodeLabelIndexDescriptor = NodeLabelIndexLookupAura.findUsableMatchingIndex(
+        var nodeLabelIndexDescriptor = NodeLabelIndexLookupImpl.findUsableMatchingIndex(
             kernelTransaction,
             SchemaDescriptor.forAnyEntityTokens(EntityType.NODE)
         );
@@ -280,12 +288,12 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
         double to,
         boolean toInclusive
     ) {
-        return new CompatIndexQueryAura(PropertyIndexQuery.range(propertyKeyId, from, fromInclusive, to, toInclusive));
+        return new CompatIndexQueryImpl(PropertyIndexQuery.range(propertyKeyId, from, fromInclusive, to, toInclusive));
     }
 
     @Override
     public CompatIndexQuery rangeAllIndexQuery(int propertyKeyId) {
-        return new CompatIndexQueryAura(PropertyIndexQuery.range(propertyKeyId, ValueGroup.NUMBER));
+        return new CompatIndexQueryImpl(PropertyIndexQuery.range(propertyKeyId, ValueGroup.NUMBER));
     }
 
     @Override
@@ -301,12 +309,12 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
             ? IndexQueryConstraints.unordered(needsValues)
             : IndexQueryConstraints.constrained(indexOrder, needsValues);
 
-        dataRead.nodeIndexSeek(index, cursor, indexQueryConstraints, ((CompatIndexQueryAura) query).indexQuery);
+        dataRead.nodeIndexSeek(index, cursor, indexQueryConstraints, ((CompatIndexQueryImpl) query).indexQuery);
     }
 
     @Override
     public CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
-        return new CompositeNodeCursorAura(cursors, labelIds);
+        return new CompositeNodeCursorImpl(cursors, labelIds);
     }
 
     @Override
@@ -321,17 +329,17 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
 
     @Override
     public MemoryTrackerProxy memoryTrackerProxy(KernelTransaction kernelTransaction) {
-        return MemoryTrackerProxyAura.of(kernelTransaction.memoryTracker());
+        return MemoryTrackerProxyImpl.of(kernelTransaction.memoryTracker());
     }
 
     @Override
     public MemoryTrackerProxy emptyMemoryTracker() {
-        return MemoryTrackerProxyAura.of(EmptyMemoryTracker.INSTANCE);
+        return MemoryTrackerProxyImpl.of(EmptyMemoryTracker.INSTANCE);
     }
 
     @Override
     public MemoryTrackerProxy limitedMemoryTracker(long limitInBytes, long grabSizeInBytes) {
-        return MemoryTrackerProxyAura.of(new LocalMemoryTracker(
+        return MemoryTrackerProxyImpl.of(new LocalMemoryTracker(
             MemoryPools.NO_TRACKING,
             limitInBytes,
             grabSizeInBytes,
@@ -488,7 +496,7 @@ public final class Neo4jProxyAura implements Neo4jProxyApi {
 
     @Override
     public JobRunner runnerFromScheduler(JobScheduler scheduler, Group group) {
-        return new JobRunnerAura(scheduler, group);
+        return new JobRunnerImpl(scheduler, group);
     }
 
     @Override

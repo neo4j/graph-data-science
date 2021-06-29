@@ -17,30 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43drop040;
 
-import org.neo4j.memory.MemoryTracker;
+import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.graphalgo.compat.Neo4jProxyApi;
+import org.neo4j.graphalgo.compat.Neo4jProxyFactory;
+import org.neo4j.graphalgo.compat.Neo4jVersion;
 
-final class AllocationTrackerAdapterAura implements AllocationTrackerAdapter {
+@ServiceProvider
+public final class Neo4jProxyFactoryImpl implements Neo4jProxyFactory {
 
-    private final MemoryTracker memoryTracker;
-
-    AllocationTrackerAdapterAura(MemoryTracker memoryTracker) {
-        this.memoryTracker = memoryTracker;
+    @Override
+    public boolean canLoad(Neo4jVersion version) {
+        return version == Neo4jVersion.V_4_3_drop40;
     }
 
     @Override
-    public void add(long bytes) {
-        memoryTracker.allocateHeap(bytes);
-    }
-
-    @Override
-    public void remove(long bytes) {
-        memoryTracker.releaseHeap(bytes);
-    }
-
-    @Override
-    public long trackedBytes() {
-        return memoryTracker.estimatedHeapMemory();
+    public Neo4jProxyApi load() {
+        return new Neo4jProxyImpl();
     }
 }

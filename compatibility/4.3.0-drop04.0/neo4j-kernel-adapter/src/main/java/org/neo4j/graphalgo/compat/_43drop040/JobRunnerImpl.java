@@ -17,19 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43drop040;
 
+import org.neo4j.graphalgo.compat.JobPromise;
+import org.neo4j.graphalgo.compat.JobRunner;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobHandle;
 import org.neo4j.scheduler.JobScheduler;
 
 import java.util.concurrent.TimeUnit;
 
-final class JobRunnerAura implements JobRunner {
+final class JobRunnerImpl implements JobRunner {
     private final JobScheduler scheduler;
     private final Group group;
 
-    JobRunnerAura(JobScheduler scheduler, Group group) {
+    JobRunnerImpl(JobScheduler scheduler, Group group) {
         this.group = group;
         this.scheduler = scheduler;
     }

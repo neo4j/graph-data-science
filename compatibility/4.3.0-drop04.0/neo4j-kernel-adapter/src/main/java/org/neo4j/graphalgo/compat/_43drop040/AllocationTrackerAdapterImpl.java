@@ -17,26 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43drop040;
 
-import org.neo4j.internal.kernel.api.RelTypeSupplier;
-import org.neo4j.internal.kernel.api.TokenSet;
+import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
+import org.neo4j.memory.MemoryTracker;
 
-import java.util.function.Supplier;
+final class AllocationTrackerAdapterImpl implements AllocationTrackerAdapter {
 
-public final class CompatAccessModeAura extends CompatAccessMode {
+    private final MemoryTracker memoryTracker;
 
-    CompatAccessModeAura(CustomAccessMode custom) {
-        super(custom);
+    AllocationTrackerAdapterImpl(MemoryTracker memoryTracker) {
+        this.memoryTracker = memoryTracker;
     }
 
     @Override
-    public boolean allowsReadNodeProperty(Supplier<TokenSet> labels, int propertyKey) {
-        return custom.allowsReadNodeProperty(propertyKey);
+    public void add(long bytes) {
+        memoryTracker.allocateHeap(bytes);
     }
 
     @Override
-    public boolean allowsReadRelationshipProperty(RelTypeSupplier relType, int propertyKey) {
-        return custom.allowsReadRelationshipProperty(propertyKey);
+    public void remove(long bytes) {
+        memoryTracker.releaseHeap(bytes);
+    }
+
+    @Override
+    public long trackedBytes() {
+        return memoryTracker.estimatedHeapMemory();
     }
 }

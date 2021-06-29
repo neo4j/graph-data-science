@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43drop040;
 
-import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
+import org.neo4j.graphalgo.compat.CompatIndexQuery;
+import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 
-import java.util.List;
+final class CompatIndexQueryImpl implements CompatIndexQuery {
+    final PropertyIndexQuery indexQuery;
 
-public final class CompositeNodeCursorAura extends CompositeNodeCursor {
-
-    CompositeNodeCursorAura(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
-        super(cursors, labelIds);
+    CompatIndexQueryImpl(PropertyIndexQuery indexQuery) {
+        this.indexQuery = indexQuery;
     }
 }
