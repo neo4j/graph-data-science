@@ -213,7 +213,7 @@ class TransientAdjacencyListTest {
 
         long classSize = 24;
 
-        long uncompressedAdjacencySize = 800_400_000_000L;
+        long uncompressedAdjacencySize = 800_000_000_000L;
 
         int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
         long bytesPerPage = BitUtil.align(16 + 262144L, 8);

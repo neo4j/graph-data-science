@@ -101,7 +101,7 @@ public final class TransientAdjacencyList implements AdjacencyList {
                 long relCountForType = dimensions.relationshipCounts().getOrDefault(relationshipType, dimensions.maxRelCount());
                 long relCount = undirected ? relCountForType * 2 : relCountForType;
 
-                long uncompressedAdjacencySize = relCount * Long.BYTES + nodeCount * Integer.BYTES;
+                long uncompressedAdjacencySize = relCount * Long.BYTES;
                 int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
                 long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
 

@@ -122,8 +122,8 @@ class GraphCreateProcEstimateTest extends BaseProcTest {
 
         runQueryWithRowConsumer(query, map("relProjection", relProjection),
             row -> {
-                assertEquals(557864, row.getNumber("bytesMin").longValue());
-                assertEquals(557864, row.getNumber("bytesMax").longValue());
+                assertEquals(295696, row.getNumber("bytesMin").longValue());
+                assertEquals(295696, row.getNumber("bytesMax").longValue());
             }
         );
     }
