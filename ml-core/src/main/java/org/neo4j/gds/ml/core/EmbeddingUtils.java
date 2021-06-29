@@ -21,9 +21,11 @@ package org.neo4j.gds.ml.core;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.concurrent.ExecutorService;
+import java.util.function.DoublePredicate;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -69,34 +71,67 @@ public final class EmbeddingUtils {
     }
 
     public static void validateRelationshipWeightPropertyValue(Graph graph, int concurrency, ExecutorService executorService) {
+        validateRelationshipWeightPropertyValue(graph, concurrency, weight -> !Double.isNaN(weight), "Consider using `defaultValue` when loading the graph.", executorService);
+    }
+
+    public static void validateRelationshipWeightPropertyValue(Graph graph, int concurrency, DoublePredicate validator, String errorDetails, ExecutorService executorService) {
         if (!graph.hasRelationshipProperty()) {
             throw new IllegalStateException("Expected a weighted graph");
         }
 
+        ThreadLocal<Graph> concurrentGraph = ThreadLocal.withInitial(graph::concurrentCopy);
         var tasks = PartitionUtils.degreePartition(
             graph,
             concurrency,
-            partition -> (Runnable) () -> {
-                var concurrentGraph = graph.concurrentCopy();
-                partition.consume(nodeId -> {
-                    concurrentGraph.forEachRelationship(
-                        nodeId,
-                        Double.NaN,
-                        (sourceNodeId, targetNodeId, property) -> {
-                            if (Double.isNaN(property)) {
-                                throw new RuntimeException(
-                                    formatWithLocale("Found a relationship between %d and %d with no specified weight. Consider using `defaultValue` when loading the graph.",
-                                        graph.toOriginalNodeId(sourceNodeId),
-                                        graph.toOriginalNodeId(targetNodeId))
-                                );
-                            }
-                            return true;
-                        }
-                    );
-                });
-            }
+            partition -> new RelationshipValidator(concurrentGraph, partition, validator, errorDetails)
         );
 
-        ParallelUtil.run(tasks, executorService);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+    }
+
+    private static class RelationshipValidator implements Runnable {
+
+        private final ThreadLocal<Graph> concurrentGraph;
+        private final Partition partition;
+        private final DoublePredicate validator;
+        private String errorDetails;
+
+        RelationshipValidator(
+            ThreadLocal<Graph> concurrentGraph,
+            Partition partition,
+            DoublePredicate validator,
+            String errorDetails
+        ) {
+            this.concurrentGraph = concurrentGraph;
+            this.partition = partition;
+            this.validator = validator;
+            this.errorDetails = errorDetails;
+        }
+
+        @Override
+        public void run() {
+            var partitionLocalGraph = concurrentGraph.get();
+            partition.consume(nodeId -> {
+                partitionLocalGraph.forEachRelationship(
+                    nodeId,
+                    Double.NaN,
+                    (sourceNodeId, targetNodeId, property) -> {
+                        if (!validator.test(property)) {
+                            throw new RuntimeException(
+                                formatWithLocale(
+                                    "Found an invalid relationship between %d and %d with the property value of %f. %s",
+                                    partitionLocalGraph.toOriginalNodeId(sourceNodeId),
+                                    partitionLocalGraph.toOriginalNodeId(targetNodeId),
+                                    property,
+                                    errorDetails
+                                )
+                            );
+                        }
+                        return true;
+                    }
+                );
+            });
+
+        }
     }
 }
