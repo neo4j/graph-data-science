@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -46,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class NodePropertiesFromStoreBuilderTest {
 
@@ -183,6 +185,32 @@ final class NodePropertiesFromStoreBuilderTest {
         );
 
         assertThat(ex.getMessage(), containsString("Loading of values of type"));
+    }
+
+    private static Stream<Arguments> invalidValueTypeCombinations() {
+        return Stream.of(
+            Arguments.of(2L, new double[]{1D}),
+            Arguments.of(2L, new long[]{1L}),
+            Arguments.of(2D, new double[]{1D}),
+            Arguments.of(2D, new long[]{1L}),
+            Arguments.of(new double[]{1D}, 2L),
+            Arguments.of(new double[]{1D}, 2D),
+            Arguments.of(new long[]{1L}, 2L),
+            Arguments.of(new long[]{1L}, 2D)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidValueTypeCombinations")
+    void failOnInvalidDefaultType(Object defaultValue, Object propertyValue) {
+        Assertions.assertThatThrownBy(() -> createNodeProperties(1L, defaultValue, b -> {
+            b.set(0, Values.of(propertyValue));
+        })).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(formatWithLocale(
+                "Expected type of default value to be `%s`. But got `%s`.",
+                propertyValue.getClass().getSimpleName(),
+                defaultValue.getClass().getSimpleName()
+            ));
     }
 
     @Test

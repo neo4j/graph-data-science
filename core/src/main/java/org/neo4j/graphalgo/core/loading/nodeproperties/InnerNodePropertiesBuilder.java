@@ -19,10 +19,30 @@
  */
 package org.neo4j.graphalgo.core.loading.nodeproperties;
 
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.values.storable.Value;
 
+import java.util.function.Consumer;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public abstract class InnerNodePropertiesBuilder {
+
+    protected void validateDefaultValueType(DefaultValue defaultValue, Consumer<DefaultValue> consumer) {
+        try {
+            consumer.accept(defaultValue);
+        } catch (ClassCastException exception) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Expected type of default value to be `%s`. But got `%s`.",
+                valueClass().getSimpleName(),
+                defaultValue.valueClass().getSimpleName()
+            ));
+        }
+    }
+
+
+    protected abstract Class<?> valueClass();
 
     public abstract void setValue(long nodeId, Value value);
 
