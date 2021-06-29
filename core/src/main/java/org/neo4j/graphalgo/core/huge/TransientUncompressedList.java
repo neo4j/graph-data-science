@@ -105,7 +105,7 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
     }
 
     private static MemoryRange listSize(long avgDegree, long nodeCount) {
-        long uncompressedAdjacencySize = nodeCount * avgDegree * Long.BYTES + nodeCount * Integer.BYTES;
+        long uncompressedAdjacencySize = nodeCount * avgDegree * Long.BYTES;
         int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, PAGE_SHIFT, PAGE_MASK);
         long bytesPerPage = MemoryUsage.sizeOfByteArray(PAGE_SIZE);
         return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
