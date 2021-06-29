@@ -31,8 +31,8 @@ public enum Neo4jVersion {
     V_4_2,
     V_4_3,
     V_4_3_drop31,
-    V_Dev,
-    V_Aura;
+    V_4_3_drop40,
+    V_Dev;
 
     @Override
     public String toString() {
@@ -47,10 +47,10 @@ public enum Neo4jVersion {
                 return "4.3";
             case V_4_3_drop31:
                 return "4.3.0-drop03.1";
+            case V_4_3_drop40:
+                return "4.3.0-drop04.0";
             case V_Dev:
                 return "dev";
-            case V_Aura:
-                return "aura";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
@@ -99,7 +99,7 @@ public enum Neo4jVersion {
         // TODO: Having to fall back to matching the physical version because the version override isn't working the
         //       way it was intended.
         if (version.endsWith("-aura") || version.equals("4.3.0-drop04.0")) {
-            return Neo4jVersion.V_Aura;
+            return Neo4jVersion.V_4_3_drop40;
         }
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)

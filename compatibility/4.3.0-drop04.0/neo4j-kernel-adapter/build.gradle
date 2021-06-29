@@ -1,15 +1,15 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Neo4j Kernel Adapter Aura'
+description = 'Neo4j Graph Data Science :: Neo4j Kernel Adapter 4.3.0-drop04.0'
 
 dependencies {
     implementation project(':neo4j-kernel-adapter-api')
 
     annotationProcessor project(':annotations')
     annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
-    annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.aura
+    annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'4.3.0-drop04.0'
 
     compileOnly project(':annotations')
     compileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
-    compileOnly         group: 'org.neo4j',      name: 'neo4j',              version: neos.aura
+    compileOnly         group: 'org.neo4j',      name: 'neo4j',              version: neos.'4.3.0-drop04.0'
 }

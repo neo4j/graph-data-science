@@ -26,7 +26,7 @@ public final class Neo4jProxyAuraFactory implements Neo4jProxyFactory {
 
     @Override
     public boolean canLoad(Neo4jVersion version) {
-        return version == Neo4jVersion.V_Aura;
+        return version == Neo4jVersion.V_4_3_drop40;
     }
 
     @Override
