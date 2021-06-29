@@ -32,12 +32,19 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     private final DefaultValue defaultValue;
 
     public LongArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
+        validateDefaultValueType(defaultValue, DefaultValue::longArrayValue);
+
         this.defaultValue = defaultValue;
         this.objectArray = HugeObjectArray.newArray(long[].class, nodeCount, tracker);
     }
 
     public void set(long nodeId, long[] value) {
         objectArray.set(nodeId, value);
+    }
+
+    @Override
+    protected Class<?> valueClass() {
+        return long[].class;
     }
 
     @Override

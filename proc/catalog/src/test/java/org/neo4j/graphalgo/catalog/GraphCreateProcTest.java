@@ -702,16 +702,21 @@ class GraphCreateProcTest extends BaseProcTest {
     @Test
     void failOnWrongDefaultValueTypeForArrayNodeProjectionProperty() {
         clearDb();
-        var name = "g";
         runQuery("CREATE ({ratings: [1.0, 2.0]}), ()");
         assertError(
             "CALL gds.graph.create('g', '*', '*', {nodeProperties: {ratings: {defaultValue: 5.0}}}) YIELD nodeProjection",
-            "The default value `5.0` of type Double cannot coerced into type double[]."
+            "Expected type of default value to be `Double`. But got `double[]`."
         );
+    }
 
-        assertGraphExists(name);
-        var graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
-        assertGraphEquals(fromGdl("({ratings: [1.0, 2.0]}), ({ratings: [5.0]})"), graph);
+    @Test
+    void failOnWrongDefaultValueTypeForDoubleNodeProjectionProperty() {
+        clearDb();
+        runQuery("CREATE ({ratings: 1.0}), ()");
+        assertError(
+            "CALL gds.graph.create('g', '*', '*', {nodeProperties: {ratings: {defaultValue: [5.0]}}}) YIELD nodeProjection",
+            "Expected type of default value to be `double[]`. But got `double`."
+        );
     }
 
     @Test
