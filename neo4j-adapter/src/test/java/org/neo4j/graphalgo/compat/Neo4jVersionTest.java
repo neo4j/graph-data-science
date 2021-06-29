@@ -25,8 +25,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.kernel.internal.Version;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class Neo4jVersionTest {
+    private static final String CUSTOM_VERSION_SETTING = "unsupported.neo4j.custom.version";
 
     @ParameterizedTest
     @CsvSource({
@@ -48,14 +50,14 @@ class Neo4jVersionTest {
         "4.3.0-drop04, V_4_3",
         "4.3.0, V_4_3",
         "4.3.0-drop04.0, V_4_3_drop40",
-        "4.2-aura, V_4_3_drop40",
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
     }
 
     @Test
-    void defaultToKernelVersion() {
-        assertEquals(Version.getNeo4jVersion(), Neo4jVersion.neo4jVersion());
+    void shouldNotRespectVersionOverride() {
+        System.setProperty(Neo4jVersionTest.CUSTOM_VERSION_SETTING, "foobidoobie");
+        assertNotEquals(Version.getNeo4jVersion(), Neo4jVersion.neo4jVersion());
     }
 }
