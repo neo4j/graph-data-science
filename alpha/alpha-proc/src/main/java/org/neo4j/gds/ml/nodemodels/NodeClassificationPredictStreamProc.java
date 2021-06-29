@@ -138,10 +138,6 @@ public class NodeClassificationPredictStreamProc
         public long predictedClass;
         public List<Double> predictedProbabilities;
 
-        StreamResult(long nodeId, long predictedClass) {
-            this(nodeId, predictedClass, null);
-        }
-
         StreamResult(long nodeId, long predictedClass, List<Double> predictedProbabilities) {
             this.nodeId = nodeId;
             this.predictedClass = predictedClass;
