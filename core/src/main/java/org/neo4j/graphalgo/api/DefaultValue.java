@@ -195,6 +195,11 @@ public final class DefaultValue {
 
     @NotNull
     private ClassCastException getInvalidTypeException(Class<?> expectedClass) {
-        return new ClassCastException(formatWithLocale("The default value %s cannot coerced into type %s.", defaultValue, expectedClass.getSimpleName()));
+        return new ClassCastException(formatWithLocale(
+            "The default value `%s` of type %s cannot coerced into type %s.",
+            defaultValue,
+            defaultValue.getClass().getSimpleName(),
+            expectedClass.getSimpleName()
+        ));
     }
 }
