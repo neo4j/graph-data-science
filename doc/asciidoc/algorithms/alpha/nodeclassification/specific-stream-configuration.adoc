@@ -1,0 +1,7 @@
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                          | Type    | Default | Optional | Description
+| includePredictedProbabilities | Boolean | false   | yes      | Whether to return the probability for each class. If `false` then `null` is returned in `predictedProbabilites`.
+| batchSize                     | Integer | 100     | yes      | Number of nodes per batch.
+|===

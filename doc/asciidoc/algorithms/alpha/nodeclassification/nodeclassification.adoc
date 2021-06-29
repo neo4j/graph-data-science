@@ -187,7 +187,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 
 include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
 
-include::specific-configuration.adoc[]
+include::specific-stream-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -220,7 +220,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 
 include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
 
-include::specific-configuration.adoc[]
+include::specific-write-mutate-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -256,7 +256,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 
 include::../../common-configuration/common-write-configuration-named-graph.adoc[]
 
-include::specific-configuration.adoc[]
+include::specific-write-mutate-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
