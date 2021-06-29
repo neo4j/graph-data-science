@@ -1,7 +1,0 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name                         | Type    | Default | Optional | Description
-| predictedProbabilityProperty | String  | n/a     | yes      | The node property in the GDS graph in which the class probability list is stored. If omitted, the probability list is discarded.
-| batchSize                    | Integer | 100     | yes      | Number of nodes per batch.
-|===
