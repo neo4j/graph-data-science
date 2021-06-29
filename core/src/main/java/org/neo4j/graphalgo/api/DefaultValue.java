@@ -23,11 +23,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
+import java.util.List;
 import java.util.Objects;
 
 import static org.neo4j.graphalgo.api.DefaultValueUtil.parseDoubleArrayValue;
 import static org.neo4j.graphalgo.api.DefaultValueUtil.parseFloatArrayValue;
 import static org.neo4j.graphalgo.api.DefaultValueUtil.parseLongArrayValue;
+import static org.neo4j.graphalgo.api.DefaultValueUtil.transformObjectToPrimitiveArray;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.ValueConversion.exactDoubleToLong;
 import static org.neo4j.graphalgo.utils.ValueConversion.exactLongToDouble;
@@ -55,6 +57,11 @@ public final class DefaultValue {
         if (defaultValue instanceof DefaultValue) {
             return (DefaultValue) defaultValue;
         } else {
+            if (defaultValue instanceof List) {
+                var primitiveArray = transformObjectToPrimitiveArray(((List<?>) defaultValue).toArray());
+                return new DefaultValue(primitiveArray, isUserDefined);
+            }
+
             return new DefaultValue(defaultValue, isUserDefined);
         }
     }
