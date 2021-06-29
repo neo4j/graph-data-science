@@ -433,7 +433,7 @@ WHERE houseNode:UnknownHouse
 RETURN
   houseNode.color AS classifiedHouse,
   predictedClass,
-  round(predictedProbabilities[predictedClass], 5) AS confidence
+  round(predictedProbabilities[predictedClass], 2) AS confidence
   ORDER BY classifiedHouse
 ----
 
@@ -441,15 +441,15 @@ RETURN
 [opts="header",cols="m,m,m"]
 |===
 | classifiedHouse | predictedClass | confidence
-| "Pink"          |              0 | 0.98714
-| "Tan"           |              1 | 0.98267
-| "Yellow"        |              2 | 0.79983
+| "Pink"          |              0 | 0.99
+| "Tan"           |              1 | 0.98
+| "Yellow"        |              2 | 0.8
 |===
 --
 
 As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
 This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
-Additionally, we see that the model is confident in these predictions, as the highest class probability is >75% in all cases.
+Additionally, we see that the model is confident in these predictions, as the highest class probability is >=80% in all cases.
 
 
 [[algorithms-ml-nodeclassification-examples-mutate]]
