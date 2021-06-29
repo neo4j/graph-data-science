@@ -327,7 +327,7 @@ class RandomWalkTest extends AlgoTestBase {
         ).isInstanceOf(RuntimeException.class)
             .hasMessage(
                 formatWithLocale(
-                    "Found an invalid relationship between 0 and 1 with the property value of %f." +
+                    "Found an invalid relationship weight between nodes `0` and `1` with the property value of `%f`." +
                     " Node2Vec only supports non-negative weights.", invalidWeight));
     }
 

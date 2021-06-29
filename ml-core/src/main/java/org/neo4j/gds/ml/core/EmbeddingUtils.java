@@ -125,7 +125,7 @@ public final class EmbeddingUtils {
                         if (!validator.test(property)) {
                             throw new RuntimeException(
                                 formatWithLocale(
-                                    "Found an invalid relationship between %d and %d with the property value of %f. %s",
+                                    "Found an invalid relationship weight between nodes `%d` and `%d` with the property value of `%f`. %s",
                                     partitionLocalGraph.toOriginalNodeId(sourceNodeId),
                                     partitionLocalGraph.toOriginalNodeId(targetNodeId),
                                     property,

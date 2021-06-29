@@ -151,7 +151,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     private DegreeCentrality.DegreeFunction cumulativeWeights() {
         var config = ImmutableDegreeCentralityConfig.builder()
             .concurrency(concurrency)
-            // DegreeCentrality internally decides its computation on the config. The actual property value is not relevant
+            // DegreeCentrality internally decides its computation on the config. The actual property key is not relevant
             .relationshipWeightProperty("DUMMY")
             .build();
 

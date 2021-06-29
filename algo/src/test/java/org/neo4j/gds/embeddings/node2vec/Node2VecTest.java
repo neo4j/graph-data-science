@@ -154,7 +154,7 @@ class Node2VecTest extends AlgoTestBase {
 
         assertThatThrownBy(node2Vec::compute)
             .isInstanceOf(RuntimeException.class)
-            .hasMessage("Found an invalid relationship between 0 and 1 with the property value of -1.000000." +
+            .hasMessage("Found an invalid relationship weight between nodes `0` and `1` with the property value of `-1.000000`." +
                         " Node2Vec only supports non-negative weights.");
 
     }
