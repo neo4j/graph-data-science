@@ -23,6 +23,8 @@ import com.carrotsearch.hppc.sorting.IndirectComparator;
 import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
+import java.util.Arrays;
+
 public final class PageReordering {
 
     public static int[] ordering(HugeLongArray offsets, int pageCount, int pageShift) {
@@ -54,8 +56,40 @@ public final class PageReordering {
         );
     }
 
-    public static <PAGE> void reorder(PAGE[] pages, int[] ordering) {
+    public static <PAGE> int[] reorder(PAGE[] pages, int[] ordering) {
+        PAGE tempPage;
+        var swaps = new int[pages.length];
+        Arrays.setAll(swaps, i -> -i - 1);
 
+        for (int targetIdx = 0; targetIdx < ordering.length; targetIdx++) {
+            int sourceIdx = ordering[targetIdx];
+
+            var swapTargetIdx = swaps[targetIdx];
+            assert (swapTargetIdx < 0): "target page has already been set";
+
+            // If swapSourceIdx > 0, the page has been swapped already
+            // and we need to follow that index until we find a free slot.
+            int swapSourceIdx = sourceIdx;
+
+            while (swaps[swapSourceIdx] >= 0) {
+                swapSourceIdx = swaps[swapSourceIdx];
+            }
+
+            assert (swaps[swapSourceIdx] == -sourceIdx - 1): "source page has already been moved";
+
+            if (swapSourceIdx == targetIdx) {
+                swaps[targetIdx] = sourceIdx;
+            } else {
+                tempPage = pages[targetIdx];
+                pages[targetIdx] = pages[swapSourceIdx];
+                pages[swapSourceIdx] = tempPage;
+
+                swaps[targetIdx] = sourceIdx;
+                swaps[swapSourceIdx] = swapTargetIdx;
+            }
+        }
+
+        return swaps;
     }
 
     public static void rewriteOffsets(HugeLongArray offsets, int[] ordering, int pageShift) {

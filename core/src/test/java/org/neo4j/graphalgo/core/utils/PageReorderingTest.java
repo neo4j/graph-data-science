@@ -20,7 +20,11 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,44 +32,74 @@ class PageReorderingTest {
 
     @Test
     void testOrdering() {
+        var pageCount = 4;
         var pageShift = 3;
 
         var offsets = HugeLongArray.of(
-            8, 13, 15, // page 1
-            0, 3, 6,   // page 0
-            16, 18, 22 // page 2
+            16, 18, 22, // page 2
+            0, 3, 6,    // page 0
+            24, 28, 30, // page 3
+            8, 13, 15   // page 1
         );
 
-        var ordering = PageReordering.ordering(offsets, 3, pageShift);
+        var ordering = PageReordering.ordering(offsets, pageCount, pageShift);
 
-        assertThat(ordering).isEqualTo(new int[]{1, 0, 2});
+        assertThat(ordering).isEqualTo(new int[] {1, 3, 0, 2});
     }
 
-    @Test
-    void testReordering() {
-        var pageShift = 3;
-
-        var offsets = HugeLongArray.of(
-            8, 13, 15, // page 1
-            0, 3, 6,   // page 0
-            16, 18, 22 // page 2
+    static Stream<int[]> orderings() {
+        return Stream.of(
+            new int[]{0, 1, 2, 3},
+            new int[]{0, 1, 3, 2},
+            new int[]{0, 2, 1, 3},
+            new int[]{0, 2, 3, 1},
+            new int[]{0, 3, 1, 2},
+            new int[]{0, 3, 2, 1},
+            new int[]{1, 0, 2, 3},
+            new int[]{1, 0, 3, 2},
+            new int[]{1, 2, 0, 3},
+            new int[]{1, 2, 3, 0},
+            new int[]{1, 3, 0, 2},
+            new int[]{1, 3, 2, 0},
+            new int[]{2, 0, 1, 3},
+            new int[]{2, 0, 3, 1},
+            new int[]{2, 1, 0, 3},
+            new int[]{2, 1, 3, 0},
+            new int[]{2, 3, 0, 1},
+            new int[]{2, 3, 1, 0},
+            new int[]{3, 0, 1, 2},
+            new int[]{3, 0, 2, 1},
+            new int[]{3, 1, 0, 2},
+            new int[]{3, 1, 2, 0},
+            new int[]{3, 2, 0, 1},
+            new int[]{3, 2, 1, 0}
         );
+    }
 
-        var ordering = PageReordering.ordering(offsets, 3, pageShift);
+    @ParameterizedTest
+    @MethodSource("orderings")
+    void testReordering(int[] ordering) {
+        var page0 = new String[] {"blue"};
+        var page1 = new String[] {"red"};
+        var page2 = new String[] {"green"};
+        var page3 = new String[] {"yellow"};
 
-        var page0 = new int[0];
-        var page1 = new int[0];
-        var page2 = new int[0];
+        var expectedPages = new String[][]{page0, page1, page2, page3};
+        var inputPages = new String[ordering.length][];
 
-        var pages = new int[][]{page1, page0, page2};
+        for (int i = 0; i < ordering.length; i++) {
+            int order = ordering[i];
+            inputPages[order] = expectedPages[i];
+        }
 
-        PageReordering.reorder(pages, ordering);
-
-        assertThat(pages).isEqualTo(new int[][]{page0, page1, page2});
+        var swaps = PageReordering.reorder(inputPages, ordering);
+        assertThat(inputPages).isEqualTo(expectedPages);
+        assertThat(swaps).isEqualTo(ordering);
     }
 
     @Test
     void testRewriteOffsets() {
+        var pageCount = 4;
         var pageShift = 3;
 
         var offsets = HugeLongArray.of(
@@ -74,7 +108,7 @@ class PageReorderingTest {
             16, 18, 22 // page 2
         );
 
-        var ordering = PageReordering.ordering(offsets, 3, pageShift);
+        var ordering = PageReordering.ordering(offsets, pageCount, pageShift);
 
         PageReordering.rewriteOffsets(offsets, ordering, pageShift);
 
