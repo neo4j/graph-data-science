@@ -30,6 +30,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -78,11 +79,10 @@ class DefaultValueTest {
     void shouldThrowAnErrorIfValueCannotBeCoercedToLong(Object input) {
         var defaultValue = DefaultValue.of(input);
 
-        var e = assertThrows(ClassCastException.class, defaultValue::longValue);
-
-        assertThat(e.getMessage())
-            .contains(formatWithLocale(
-                "The default value of type %s cannot coerced into type Long.",
+        assertThatThrownBy(defaultValue::longValue)
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(formatWithLocale(
+                "Expected type of default value to be `Long`. But got `%s`.",
                 input.getClass().getSimpleName()
             ));
     }
@@ -122,12 +122,12 @@ class DefaultValueTest {
     void shouldThrowAnErrorIfValueCannotBeCoercedToDouble(Object input) {
         var defaultValue = DefaultValue.of(input);
 
-        var e = assertThrows(ClassCastException.class, defaultValue::doubleValue);
-
-        assertThat(e.getMessage())
-            .contains(formatWithLocale(
-                "The default value of type %s cannot coerced into type Double.",
-                input.getClass().getSimpleName()));
+        assertThatThrownBy(defaultValue::doubleValue)
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(formatWithLocale(
+                "Expected type of default value to be `Double`. But got `%s`.",
+                input.getClass().getSimpleName()
+            ));
     }
 
     @Test

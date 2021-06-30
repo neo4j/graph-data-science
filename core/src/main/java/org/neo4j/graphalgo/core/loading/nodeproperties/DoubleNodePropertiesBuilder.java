@@ -54,8 +54,6 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     private final HugeSparseLongArray.Builder valuesBuilder;
 
     public DoubleNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
-        validateDefaultValueType(defaultValue, DefaultValue::doubleValue);
-
         this.maxValue = Double.NEGATIVE_INFINITY;
         this.valuesBuilder = HugeSparseLongArray.builder(nodeCount, Double.doubleToLongBits(defaultValue.doubleValue()), tracker);
     }
