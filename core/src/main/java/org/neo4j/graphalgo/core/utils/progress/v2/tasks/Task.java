@@ -27,6 +27,8 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Task {
 
+    public static final int UNKNOWN_VOLUME = -1;
+
     private final String description;
     private final List<Task> subTasks;
     private Status status;
@@ -99,8 +101,8 @@ public class Task {
         var progress = new MutableLong(0);
 
         subTasks().stream().map(Task::getProgress).forEach(childProgress -> {
-            if (childProgress.volume() < 0 || volume.getValue() < 0) {
-                volume.setValue(-1);
+            if (childProgress.volume() == UNKNOWN_VOLUME || volume.getValue() == UNKNOWN_VOLUME) {
+                volume.setValue(UNKNOWN_VOLUME);
             } else {
                 volume.add(childProgress.volume());
             }

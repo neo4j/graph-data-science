@@ -72,7 +72,7 @@ public final class Tasks {
     }
 
     public static LeafTask leaf(String description) {
-        return leaf(description, -1);
+        return leaf(description, Task.UNKNOWN_VOLUME);
     }
 
     public static LeafTask leaf(String description, long volume) {
