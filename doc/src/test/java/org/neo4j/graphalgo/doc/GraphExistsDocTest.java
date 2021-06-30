@@ -17,23 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.doc.syntax;
+package org.neo4j.graphalgo.doc;
 
-enum SyntaxMode {
-    STATS("include-with-stats"),
-    STREAM("include-with-stream"),
-    MUTATE("include-with-mutate"),
-    WRITE("include-with-write"),
-    TRAIN("include-with-train"),
-    GRAPH_EXISTS("graph-exists-syntax");
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphExistsFunc;
+import org.neo4j.gds.catalog.GraphExistsProc;
 
-    private final String mode;
+import java.util.List;
 
-    SyntaxMode(String mode) {
-        this.mode = mode;
+class GraphExistsDocTest extends DocTestBase {
+
+    @Override
+    List<Class<?>> functions() {
+        return List.of(GraphExistsFunc.class);
     }
 
-    public String mode() {
-        return mode;
+    @Override
+    List<Class<?>> procedures() {
+        return List.of(GraphCreateProc.class, GraphExistsProc.class);
     }
+
+    @Override
+    String adocFile() {
+        return "management-ops/graph-catalog/graph-exists.adoc";
+    }
+
 }

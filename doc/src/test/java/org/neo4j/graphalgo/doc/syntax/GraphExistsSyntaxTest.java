@@ -19,21 +19,19 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
-enum SyntaxMode {
-    STATS("include-with-stats"),
-    STREAM("include-with-stream"),
-    MUTATE("include-with-mutate"),
-    WRITE("include-with-write"),
-    TRAIN("include-with-train"),
-    GRAPH_EXISTS("graph-exists-syntax");
+import java.util.List;
 
-    private final String mode;
+import static org.neo4j.graphalgo.doc.syntax.SyntaxMode.GRAPH_EXISTS;
 
-    SyntaxMode(String mode) {
-        this.mode = mode;
+class GraphExistsSyntaxTest extends SyntaxTestBase {
+
+    @Override
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(SyntaxModeMeta.of(GRAPH_EXISTS));
     }
 
-    public String mode() {
-        return mode;
+    @Override
+    String adocFile() {
+        return "management-ops/graph-catalog/graph-exists.adoc";
     }
 }

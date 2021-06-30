@@ -3,8 +3,109 @@
 
 We can check if a graph is stored in the catalog by looking up its name.
 
-.Check if a graph exists in the catalog:
+== Syntax
+
+[.graph-exists-syntax]
+--
+.Remove a graph from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.exists('my-store-graph') YIELD exists;
+CALL gds.graph.exists(graphName: String) YIELD
+  graphName: String,
+  exists: Boolean
 ----
+
+
+[[graph-exists-syntax]]
+.Parameters
+[opts="header",cols="1,1,1,4"]
+|===
+| Name          | Type      | Optional             | Description
+| graphName     | String    | no                   | The name under which the graph is stored in the catalog.
+|===
+
+.Results
+[opts="header",cols="3m,1,6"]
+|===
+| Name              | Type     | Description
+| graphName         | String   | Name of the removed graph.
+| exists            | Boolean  | If the graph exists in the graph catalog.
+|===
+--
+
+Additionally, to the procedure, we provide a function which directly returns the exists field from the procedure.
+
+.Remove a graph from the catalog:
+[source, cypher, role=noplay]
+----
+RETURN gds.graph.exists(graphName: String)::Boolean
+----
+
+== Examples
+
+In order to demonstrate the GDS Graph Exists capabilities we are going to create a small social network graph in Neo4j and project it into our graph catalog.
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (florentin:Person { name: 'Florentin', age: 16 }),
+  (adam:Person { name: 'Adam', age: 18 }),
+  (veselin:Person { name: 'Veselin', age: 20 }),
+  (florentin)-[:KNOWS { since: 2010 }]->(adam),
+  (florentin)-[:KNOWS { since: 2018 }]->(veselin)
+----
+
+.Project `Person` nodes and `KNOWS` relationships:
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create('persons', 'Person', 'KNOWS')
+----
+
+
+== Procedure
+
+[role=query-example]
+--
+.Check if graphs exist in the catalog:
+[source, cypher, role=noplay]
+----
+UNWIND ['persons', 'books'] AS graph
+CALL gds.graph.exists(graph)
+  YIELD graphName, exists
+RETURN graphName, exists
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| graphName      | exists
+| "persons"      | true
+| "books"        | false
+|===
+--
+
+We can verify the projected `persons` graph exists while a `books` graph does not.
+
+== Function
+
+As an alternative to the procedure, we can also use the corresponding function.
+Opposed to procedures, functions can be inlined in other cypher-statements such as `RETURN` or `WHERE`.
+
+[role=query-example]
+--
+.Check if the ` graph exists in the catalog:
+[source, cypher, role=noplay]
+----
+RETURN gds.graph.exists('persons') AS personExists, gds.graph.exists('books') AS bookExists
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| personExists      | bookExists
+| true              | false
+|===
+--
+
+As before, we can verify the projected `persons` graph exists while a `books` graph does not.
