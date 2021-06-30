@@ -15,23 +15,28 @@ The filter predicates in the subgraph procedure can take labels, relationship ty
 The new graph can be used in the same way as any other in-memory graph in the catalog.
 Creating subgraphs of subgraphs is also possible.
 
+
+== Syntax
+
+[.create-subgraph-syntax]
+--
 .A new graph can be created by using the `gds.beta.graph.create.subgraph()` procedure:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.subgraph(
+CALL gds.beta.graph.create.subgraph(
   graphName: String,
   fromGraphName: String,
   nodeFilter: String,
   relationshipFilter: String,
   configuration: Map
 ) YIELD
-  graphName,
-  fromGraphName,
-  nodeFilter,
-  relationshipFilter,
-  nodeCount,
-  relationshipCount,
-  createMillis;
+  graphName: String,
+  fromGraphName: String,
+  nodeFilter: String,
+  relationshipFilter: String,
+  nodeCount: Integer,
+  relationshipCount: Integer,
+  createMillis: Integer;
 ----
 
 .Subgraph specific configuration
@@ -57,11 +62,13 @@ CALL gds.beta.graph.subgraph(
 | Name                   | Type     | Description
 | graphName              | String   | The name of the new graph that is stored in the graph catalog.
 | fromGraphName          | String   | The name of the original graph in the graph catalog.
+| nodeFilter             | String   | Filter predicate for nodes.
+| relationshipFilter     | String   | Filter predicate for relationships.
 | nodeCount              | Integer  | Number of nodes in the subgraph.
 | relationshipCount      | Integer  | Number of relationships in the subgraph.
 | createMillis           | Integer  | Milliseconds for creating the subgraph.
-| configuration          | Map      | The configuration used for running the procedure.
 |===
+--
 
 The `nodeFilter` and `relationshipFilter` configuration keys can be used to express filter predicates.
 Filter predicates are https://neo4j.com/docs/cypher-manual/current/clauses/where/#query-where[Cypher] predicates bound to a single entity.
