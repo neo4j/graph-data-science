@@ -19,12 +19,39 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import com.carrotsearch.hppc.sorting.IndirectComparator;
+import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 public final class PageReordering {
 
     public static int[] ordering(HugeLongArray offsets, int pageCount, int pageShift) {
-        return null;
+        // TODO implement using HLA cursors
+        var offsetArray = offsets.toArray();
+
+        int[] pageOffsets = new int[pageCount];
+        int[] pageIndexes = new int[pageCount];
+
+        int idx = 0;
+        int pastPageIdx = -1;
+
+        for (int i = 0; i < offsetArray.length; i++) {
+            var offset = offsetArray[i];
+            var pageIdx = (int) offset >>> pageShift;
+
+            if (pageIdx != pastPageIdx) {
+                pageOffsets[idx] = i;
+                pageIndexes[idx] = pageIdx;
+                pastPageIdx = pageIdx;
+                idx = idx + 1;
+            }
+        }
+
+        return IndirectSort.mergesort(
+            0,
+            pageIndexes.length,
+            new IndirectComparator.AscendingIntComparator(pageIndexes)
+        );
     }
 
     public static <PAGE> void reorder(PAGE[] pages, int[] ordering) {
