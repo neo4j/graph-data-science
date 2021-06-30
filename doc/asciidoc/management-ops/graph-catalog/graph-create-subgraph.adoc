@@ -2,6 +2,11 @@
 [.beta]
 = Creating a subgraph
 
+[abstract]
+--
+This section details how to create subgraphs from existing graphs stored in the graph catalog of the Neo4j Graph Data Science library.
+--
+
 In GDS, algorithms can be executed on a named graph that has been filtered based on its <<common-configuration-node-labels,node labels>> and <<common-configuration-relationship-types, relationship types>>.
 However, that filtered graph only exists during the execution of the algorithm and it is not possible to filter on property values.
 If a filtered graph needs to be used multiple times, one can use the subgraph catalog procedure to create a new graph in the graph catalog.
