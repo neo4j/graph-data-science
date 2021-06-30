@@ -28,14 +28,14 @@ class TaskTest {
 
     @Test
     void startShouldSetStatusToRunning() {
-        var task = Tasks.task("test");
+        var task = Tasks.leaf("test");
         task.start();
         assertThat(task.status()).isEqualTo(Status.RUNNING);
     }
 
     @Test
     void startShouldOnlyTransitionFromOpen() {
-        var task = Tasks.task("test");
+        var task = Tasks.leaf("test");
         task.cancel();
         assertThatThrownBy(task::start)
             .hasMessageContaining("Task `test` with state CANCELED cannot be started");
@@ -43,7 +43,7 @@ class TaskTest {
 
     @Test
     void finishShouldSetStatusToFinished() {
-        var task = Tasks.task("test");
+        var task = Tasks.leaf("test");
         task.start();
         task.finish();
         assertThat(task.status()).isEqualTo(Status.FINISHED);
@@ -51,14 +51,14 @@ class TaskTest {
 
     @Test
     void finishShouldOnlyTransitionFromRunning() {
-        var task = Tasks.task("test");
+        var task = Tasks.leaf("test");
         assertThatThrownBy(task::finish)
             .hasMessageContaining("Task `test` with state PENDING cannot be finished");
     }
 
     @Test
     void cancelShouldSetStatusToFinished() {
-        var task = Tasks.task("test");
+        var task = Tasks.leaf("test");
         task.start();
         task.cancel();
         assertThat(task.status()).isEqualTo(Status.CANCELED);
@@ -66,7 +66,7 @@ class TaskTest {
 
     @Test
     void cancelShouldNotBeCallableFromFinished() {
-        var task = Tasks.task("test");
+        var task = Tasks.leaf("test");
         task.start();
         task.finish();
         assertThatThrownBy(task::cancel)

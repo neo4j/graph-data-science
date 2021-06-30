@@ -29,8 +29,11 @@ import java.util.stream.Stream;
 
 public final class Tasks {
 
-    public static Task task(String description, Task... children) {
-        return new Task(description, Arrays.asList(children));
+    public static Task task(String description, Task firstChild, Task... children) {
+        var childrenList = new ArrayList<Task>();
+        childrenList.add(firstChild);
+        childrenList.addAll(Arrays.asList(children));
+        return new Task(description, childrenList);
     }
 
     public static IterativeTask iterativeFixed(
