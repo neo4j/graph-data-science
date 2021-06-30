@@ -88,7 +88,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
         ));
     }
 
-    @ValueSource(strings = {"'id'", "['id']", "{id: {}}", "{id: {defaultValue: 1}}"})
+    @ValueSource(strings = {"'id'", "['id']", "{id: {}}", "{id: {defaultValue: [1]}}"})
     @ParameterizedTest
     void anonymousOverloadingParameter(String nodePropertyProjection) {
         var query =
