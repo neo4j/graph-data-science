@@ -190,14 +190,8 @@ final class NodePropertiesFromStoreBuilderTest {
     }
 
     private static Stream<Arguments> invalidValueTypeCombinations() {
-        Supplier<Stream<Arguments>> scalarValues = () -> Stream.of(
-            Arguments.of(2L, "long"),
-            Arguments.of(2D, "double"));
-
-        Supplier<Stream<Arguments>> arrayValues = () -> Stream.of(
-            Arguments.of(new double[]{1D}, "double[]"),
-            Arguments.of(new long[]{1L}, "long[]")
-        );
+        Supplier<Stream<Arguments>> scalarValues = () -> Stream.of(2L, 2D).map(Arguments::of);
+        Supplier<Stream<Arguments>> arrayValues = () -> Stream.of(new double[]{1D}, new long[]{1L}).map(Arguments::of);
 
         return Stream.concat(
             TestSupport.crossArguments(scalarValues, arrayValues),
@@ -207,11 +201,11 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @ParameterizedTest
     @MethodSource("invalidValueTypeCombinations")
-    void failOnInvalidDefaultType(Object defaultValue, String expectedPropertyClass, Object propertyValue, String expectedDefaultClass) {
+    void failOnInvalidDefaultType(Object defaultValue, Object propertyValue) {
         Assertions.assertThatThrownBy(() -> createNodeProperties(1L, defaultValue, b -> {
             b.set(0, Values.of(propertyValue));
         })).isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining(formatWithLocale("Expected type of default value to be `%s`.", expectedDefaultClass));
+            .hasMessageContaining(formatWithLocale("Expected type of default value to be `%s`.", propertyValue.getClass().getSimpleName()));
     }
 
     @Test
