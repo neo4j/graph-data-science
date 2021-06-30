@@ -1,6 +1,8 @@
 [[appendix-a-graph-ops]]
 = Graph Catalog
 
+== Production-quality tier
+
 .List of all production-quality graph operations in the GDS library. Functions are written in _italic_.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
@@ -11,7 +13,6 @@
 | `gds.graph.create.estimate`
 | `gds.graph.create.cypher`
 | `gds.graph.create.cypher.estimate`
-|<<catalog-graph-create-subgraph, Create a graph from a named graph>> | `gds.beta.graph.create.subgraph`
 .2+<.^|<<catalog-graph-exists, Check if a named graph exists>>
 | `gds.graph.exists`
 | `_gds.graph.exists_`
@@ -28,11 +29,14 @@
 |<<catalog-graph-export-database, Graph Export>> | `gds.graph.export`
 |===
 
+== Beta Tier
+
 .List of all beta graph operations in the GDS library. Functions are written in _italic_.
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
 |Description                                | Operation
+|<<catalog-graph-create-subgraph, Create a graph from a named graph>> | `gds.beta.graph.create.subgraph`
 |<<graph-generation, Generate Random Graph>>| `gds.beta.graph.generate`
 .2+<.^|<<catalog-graph-export-csv, CSV Export>>
 | `gds.beta.graph.export.csv`
