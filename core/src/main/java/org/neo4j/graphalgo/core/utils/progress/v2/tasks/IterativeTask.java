@@ -22,6 +22,8 @@ package org.neo4j.graphalgo.core.utils.progress.v2.tasks;
 import java.util.List;
 import java.util.function.Supplier;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public class IterativeTask extends Task {
 
     enum Mode {
@@ -63,8 +65,12 @@ public class IterativeTask extends Task {
 
     @Override
     public Task nextSubtask() {
-        if (subTasks().stream().anyMatch(t -> t.status() == Status.RUNNING)) {
-            throw new IllegalStateException("Cannot move to next subtask, because some subtasks are still running");
+        var maybeRunningTask = subTasks().stream().filter(t -> t.status() == Status.RUNNING).findFirst();
+        if (maybeRunningTask.isPresent()) {
+            throw new IllegalStateException(formatWithLocale(
+                "Cannot move to next subtask, because subtask `%s` is still running",
+                maybeRunningTask.get()
+            ));
         }
 
         var maybeNextSubtask = subTasks().stream().filter(t -> t.status() == Status.PENDING).findFirst();
