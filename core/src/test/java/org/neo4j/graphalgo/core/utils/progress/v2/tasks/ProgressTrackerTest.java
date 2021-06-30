@@ -77,4 +77,26 @@ public class ProgressTrackerTest {
         progressTracker.logProgress(42);
         assertThat(task.getProgress().progress()).isEqualTo(42);
     }
+
+    @Test
+    void shouldCancelSubTasksOnDynamicIterative() {
+        var task = Tasks.iterativeDynamic("iterative", () -> List.of(Tasks.leaf("leaf")), 2);
+        var progressTracker = new ProgressTracker(task);
+        progressTracker.beginSubTask();
+        assertThat(progressTracker.currentSubTask()).isEqualTo(task);
+
+        var iterativeSubTasks = task.subTasks();
+
+        // visit first iteration leaf
+        progressTracker.beginSubTask();
+        progressTracker.endSubTask();
+
+        assertThat(iterativeSubTasks).extracting(Task::status).contains(Status.FINISHED);
+        assertThat(iterativeSubTasks).extracting(Task::status).contains(Status.PENDING);
+
+        // end task without visiting second iteration leaf
+        progressTracker.endSubTask();
+        assertThat(iterativeSubTasks).extracting(Task::status).contains(Status.FINISHED);
+        assertThat(iterativeSubTasks).extracting(Task::status).contains(Status.CANCELED);
+    }
 }
