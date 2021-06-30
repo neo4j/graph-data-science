@@ -60,7 +60,7 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
 
     @TestOnly
     public static MemoryEstimation adjacencyListEstimation(boolean undirected) {
-        return adjacencyPropertiesEstimation(ALL_RELATIONSHIPS, undirected);
+        return adjacencyListEstimation(ALL_RELATIONSHIPS, undirected);
     }
 
     public static MemoryEstimation adjacencyListEstimation(long avgDegree, long nodeCount) {

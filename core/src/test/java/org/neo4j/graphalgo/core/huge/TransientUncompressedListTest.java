@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
@@ -51,8 +52,9 @@ class TransientUncompressedListTest {
         long adjacencyPages = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
 
         long offsets = HugeLongArray.memoryEstimation(100);
+        long degrees = HugeIntArray.memoryEstimation(100);
 
-        MemoryRange expected = MemoryRange.of(classSize + adjacencyPages + offsets);
+        MemoryRange expected = MemoryRange.of(classSize + adjacencyPages + offsets + degrees);
 
         assertEquals(expected, memRec.memoryUsage());
     }
@@ -75,8 +77,9 @@ class TransientUncompressedListTest {
         long adjacencyPages = pages * bytesPerPage + BitUtil.align(16 + pages * 4, 8);
 
         long offsets = HugeLongArray.memoryEstimation(100_000_000L);
+        long degrees = HugeIntArray.memoryEstimation(100_000_000L);
 
-        MemoryRange expected = MemoryRange.of(classSize + adjacencyPages + offsets);
+        MemoryRange expected = MemoryRange.of(classSize + adjacencyPages + offsets + degrees);
 
         assertEquals(expected, memRec.memoryUsage());
     }
