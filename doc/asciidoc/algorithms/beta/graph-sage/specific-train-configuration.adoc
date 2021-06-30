@@ -3,11 +3,11 @@
 |===
 | Name                                                                             | Type          | Default   | Optional | Description
 | modelName                                                                        | String        | n/a       | no       | The name of the model to train, must not exist in the Model Catalog.
-| featureProperties                                                                | List<String>  | n/a       | no       | The names of the node properties that should be used as input features. All property names must exist in the in-memory graph and be of type Float or List<Float>.
+| featureProperties                                                                | List of String  | n/a       | no       | The names of the node properties that should be used as input features. All property names must exist in the in-memory graph and be of type Float or List of Float.
 | embeddingDimension                                                               | Integer       | 64        | yes      | The dimension of the generated node embeddings as well as their hidden layer representations.
 | aggregator                                                                       | String        | "mean"    | yes      | The aggregator to be used by the layers. Supported values are "mean" and "pool".
 | activationFunction                                                               | String        | "sigmoid" | yes      | The activation function to be used in the model architecture. Supported values are "sigmoid" and "relu".
-| sampleSizes                                                                      | List<Integer> | [25, 10]  | yes      | A list of Integer values, the size of the list determines the number of layers and the values determine how many nodes will be sampled by the layers.
+| sampleSizes                                                                      | List of Integer | [25, 10]  | yes      | A list of Integer values, the size of the list determines the number of layers and the values determine how many nodes will be sampled by the layers.
 | projectedFeatureDimension                                                        | Integer       | n/a       | yes      | The dimension of the projected `featureProperties`. This enables multi-label GraphSage, where each label can have a subset of the `featureProperties`.
 | batchSize                                                                        | Integer       | 100       | yes      | The number of nodes per batch.
 | <<common-configuration-tolerance,tolerance>>                                     | Float         | 1e-4      | yes      | Tolerance used for the early convergence of an epoch.
