@@ -75,12 +75,18 @@ CALL gds.graph.drop(
 
 == Examples
 
+In this section we are going to demonstrate the usage of `gds.graph.drop`.
+All the graph names used in these examples are fictive and should be replaced with real values.
+
+=== Basic usage
+
 .Remove a graph from the catalog:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.drop('my-store-graph') YIELD graphName;
 ----
 
+If we run the example above twice, the second time it will raise an error.
 If we want the procedure to fail silently on non-existing graphs, we can set a boolean flag as the second parameter to false.
 This will yield an empty result for non-existing graphs.
 
@@ -90,14 +96,20 @@ This will yield an empty result for non-existing graphs.
 CALL gds.graph.drop('my-fictive-graph', false) YIELD graphName;
 ----
 
+
+[.enterprise-edition]
+=== Multi-database support
+
 If we want to drop a graph created on another database, we can set the database name as the third parameter.
-This will yield an empty result for non-existing graphs.
 
 .Try removing a graph from the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.drop('my-fictive-graph', false, 'my-other-db') YIELD graphName;
+CALL gds.graph.drop('my-fictive-graph', true, 'my-other-db') YIELD graphName;
 ----
+
+
+=== Multi-user support
 
 If we are a GDS administrator and want to drop a graph that belongs to another user we can set the username as the fourth parameter to the procedure.
 This is useful if there are multiple users with graphs of the same name.
@@ -105,7 +117,7 @@ This is useful if there are multiple users with graphs of the same name.
 .Remove a graph from a specific user's graph catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.drop('my-fictive-graph', false, '', 'another-user') YIELD graphName;
+CALL gds.graph.drop('my-fictive-graph', true, '', 'another-user') YIELD graphName;
 ----
 
 See <<administration>> for more details on this.
