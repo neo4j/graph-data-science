@@ -25,8 +25,11 @@ import java.util.function.Supplier;
 public class IterativeTask extends Task {
 
     enum Mode {
+        // upper bound but can terminate early
         DYNAMIC,
+        // unbounded
         OPEN,
+        // upper bound and will execute exactly n times
         FIXED
     }
 
@@ -34,6 +37,9 @@ public class IterativeTask extends Task {
     private final int iterations;
     private final Mode mode;
 
+    /**
+     * @param subTasks Requires an unrolled list of subtasks for modes DYNAMIC and FIXED.
+     */
     IterativeTask(
         String description,
         List<Task> subTasks,

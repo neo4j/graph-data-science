@@ -21,9 +21,11 @@ package org.neo4j.graphalgo.core.utils.progress.v2.tasks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class Tasks {
 
@@ -36,11 +38,9 @@ public final class Tasks {
         Supplier<List<Task>> subTasksSupplier,
         int iterations
     ) {
-        List<Task> unrolledTasks = new ArrayList<>();
-        IntStream.range(0, iterations).forEach(i -> unrolledTasks.addAll(subTasksSupplier.get()));
         return new IterativeTask(
             description,
-            unrolledTasks,
+            unrollTasks(subTasksSupplier, iterations),
             subTasksSupplier,
             iterations,
             IterativeTask.Mode.FIXED
@@ -52,11 +52,9 @@ public final class Tasks {
         Supplier<List<Task>> subTasksSupplier,
         int iterations
     ) {
-        List<Task> unrolledTasks = new ArrayList<>();
-        IntStream.range(0, iterations).forEach(i -> unrolledTasks.addAll(subTasksSupplier.get()));
         return new IterativeTask(
             description,
-            unrolledTasks,
+            unrollTasks(subTasksSupplier, iterations),
             subTasksSupplier,
             iterations,
             IterativeTask.Mode.DYNAMIC
@@ -82,6 +80,10 @@ public final class Tasks {
 
     public static LeafTask leaf(String description, long volume) {
         return new LeafTask(description, volume);
+    }
+
+    private static List<Task> unrollTasks(Supplier<List<Task>> subTasksSupplier, int iterations) {
+        return Stream.generate(subTasksSupplier).limit(iterations).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
     private Tasks() {}
