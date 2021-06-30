@@ -1,7 +1,79 @@
 [[catalog-graph-drop]]
 = Removing graphs
 
-Once we have finished using the named graph we can remove it from the catalog to free up memory.
+[abstract]
+--
+This section details how to remove graphs stored in the graph catalog of the Neo4j Graph Data Science library.
+--
+
+To free up memory, we can remove unused graphs.
+In order to do so, the `gds.graph.drop` procedure comes in handy.
+
+== Syntax
+
+[.graph-drop-syntax]
+--
+.Remove a graph from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.drop(
+  graphName: String,
+  failIfMissing: Boolean,
+  dbName: String,
+  username: String
+) YIELD
+  graphName: String,
+  database: String,
+  nodeProjection: Map,
+  relationshipProjection: Map,
+  nodeQuery: String,
+  relationshipQuery: String,
+  nodeFilter: String,
+  relationshipFilter: String,
+  nodeCount: Integer,
+  relationshipCount: Integer,
+  schema: Map,
+  density: Float,
+  creationTime: Datetime,
+  modificationTime: Datetime,
+  sizeInBytes: Integer,
+  memoryUsage: String
+----
+
+.Parameters
+[opts="header",cols="1,1,1,4"]
+|===
+| Name          | Type      | Optional             | Description
+| graphName     | String    | no                   | The name under which the graph is stored in the catalog.
+| failIfMissing | Boolean   | true                 | By default, the library will raise an error when trying to remove a non-existing graph. When set to `false`, the procedure returns empty result.
+| dbName        | String    | active database name | Then name of the database that was used to project the graph. When empty, the current database is used.
+| username      | String    | active user          | The name of the user who projected the graph. Can only be used by GDS administrator.
+|===
+
+.Results
+[opts="header",cols="3m,1,6"]
+|===
+| Name                   | Type     | Description
+| graphName              | String   | Name of the removed graph.
+| database               | String   | Name of the database in which the graph has been created.
+| nodeProjection         | Map      | Node projection used to create the graph. If a Cypher projection was used, this will be a derived node projection.
+| relationshipProjection | Map      | Relationship projection used to create the graph. If a Cypher projection was used, this will be a derived relationship projection.
+| nodeQuery              | String   | Node query used to create the graph. If a native projection was used, this will be `null`.
+| relationshipQuery      | String   | Relationship query used to create the graph. If a native projection was used, this will be `null`.
+| nodeFilter             | String   | The node filter used when creating this subgraph from another in-memory graph.
+| relationshipFilter     | String   | The relationship filter used when creating this subgraph from another in-memory graph.
+| nodeCount              | Integer  | Number of nodes in the graph.
+| relationshipCount      | Integer  | Number of relationships in the graph.
+| schema                 | Map      | Node labels, Relationship types and properties contained in the in-memory graph.
+| density                | Float    | Density of the graph.
+| creationTime           | Datetime | Time when the graph was created.
+| modificationTime       | Datetime | Time when the graph was last modified.
+| sizeInBytes            | Integer  | Number of bytes used in the Java heap to store the graph.
+| memoryUsage            | String   | Human readable description of `sizeInBytes`.
+|===
+--
+
+== Examples
 
 .Remove a graph from the catalog:
 [source, cypher, role=noplay]
