@@ -19,13 +19,13 @@ This chapter explains the available model catalog operations.
 [[model-catalog-procs]]
 [opts=header,cols="1m,1"]
 |===
-| Name                                             | Description
-| <<catalog-model-exists, gds.beta.model.exists>>  | Checks if a named model is available in the catalog.
-| <<catalog-model-list, gds.beta.model.list>>      | Prints information about models that are currently available in the catalog.
-| <<catalog-model-drop, gds.beta.model.drop>>      | Drops a named model from the catalog.
-| <<catalog-model-store, gds.alpha.model.store>>    | Stores a names model from the catalog on disk.
-| <<catalog-model-load, gds.alpha.model.load>>      | Loads a named and stored model from disk.
-| <<catalog-model-delete, gds.alpha.model.delete>>  | Removes a named and stored model from disk.
+| Name                                                | Description
+| <<catalog-model-list, gds.beta.model.list>>         | Prints information about models that are currently available in the catalog.
+| <<catalog-model-exists, gds.beta.model.exists>>     | Checks if a named model is available in the catalog.
+| <<catalog-model-drop, gds.beta.model.drop>>         | Drops a named model from the catalog.
+| <<catalog-model-store, gds.alpha.model.store>>      | Stores a names model from the catalog on disk.
+| <<catalog-model-load, gds.alpha.model.load>>        | Loads a named and stored model from disk.
+| <<catalog-model-delete, gds.alpha.model.delete>>    | Removes a named and stored model from disk.
 | <<catalog-model-publish, gds.alpha.model.publish>>  | Makes a model accessible to all users.
 |===
 
