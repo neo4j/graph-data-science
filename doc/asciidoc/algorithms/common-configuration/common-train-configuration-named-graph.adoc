@@ -4,7 +4,7 @@
 | Name                                                          | Type         | Default | Optional | Description
 | modelName                                                     | String       | n/a     | no       | The name of the model to train, must not exist in the Model Catalog.
 | featureProperties                                             | List of String | []      | yes      | The names of the node properties that should be used as input features. All property names must exist in the in-memory graph and be of type Float or List of Float.
-| <<common-configuration-node-labels,nodeLabels>>               | String[]     | ['*']   | yes      | Filter the named graph using the given node labels.
-| <<common-configuration-relationship-types,relationshipTypes>> | String[]     | ['*']   | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-node-labels,nodeLabels>>               | List of String     | ['*']   | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | List of String     | ['*']   | yes      | Filter the named graph using the given relationship types.
 | <<common-configuration-concurrency,concurrency>>              | Integer      | 4       | yes      | The number of concurrent threads used for running the algorithm.
 |===

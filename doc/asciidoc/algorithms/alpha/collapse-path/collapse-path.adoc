@@ -51,7 +51,7 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name              | Type     | Default | Optional | Description
-| nodeLabels        | String[] | ['*']   | yes      | Filter the named graph using the given node labels.
+| nodeLabels        | List of String | ['*']   | yes      | Filter the named graph using the given node labels.
 | concurrency       | Integer  | 4       | yes      | The number of concurrent threads used for running the algorithm.
 |===
 

@@ -10,7 +10,7 @@ CALL gds.louvain.stream(
 YIELD
   nodeId: Integer,
   communityId: Integer,
-  intermediateCommunityIds: Integer[]
+  intermediateCommunityIds: List of Integer
 ----
 
 // This table is only here to make sure we will really pick the `.Results` one

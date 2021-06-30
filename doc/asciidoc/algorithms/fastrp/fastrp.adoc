@@ -130,7 +130,7 @@ CALL gds.fastRP.stream(
   configuration: Map
 ) YIELD
   nodeId: Integer,
-  embedding: Float[]
+  embedding: List of Float
 ----
 
 include::../common-configuration/common-parameters-named-graph.adoc[]

@@ -7,8 +7,8 @@ ifeval::["{modelType}" != ""]
 | modelName                                                     | String      | n/a                    | no       | The name of a {modelType} model in the model catalog.
 endif::[]
 
-| <<common-configuration-node-labels,nodeLabels>>               | String[]    | ['*']                  | yes      | Filter the named graph using the given node labels.
-| <<common-configuration-relationship-types,relationshipTypes>> | String[]    | ['*']                  | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']                  | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']                  | yes      | Filter the named graph using the given relationship types.
 | <<common-configuration-concurrency,concurrency>>              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'writeConcurrency'.
 | <<common-configuration-write-concurrency,writeConcurrency>>   | Integer     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result to Neo4j.
 

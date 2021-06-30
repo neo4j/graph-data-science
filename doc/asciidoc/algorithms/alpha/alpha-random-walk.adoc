@@ -89,7 +89,7 @@ YIELD startNodeId, nodeIds, path
 |===
 | Name        | Type      | Description
 | startNodeId | Integer   | Node ID starting the path.
-| nodeIds     | Integer[] | List of Node ID forming a path.
+| nodeIds     | List of Integer | List of Node ID forming a path.
 | path        | Path      | Optional Path (with virtual relationships).
 |===
 
@@ -180,4 +180,3 @@ YIELD nodeIds
 UNWIND nodeIds AS nodeId
 RETURN gds.util.asNode(nodeId).name AS page
 ----
-

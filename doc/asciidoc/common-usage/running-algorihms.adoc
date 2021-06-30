@@ -84,12 +84,12 @@ By default this value is set to 4.
 For more details on the concurrency settings and limitations please see <<system-requirements-cpu, the CPU section>> of the System Requirements.
 
 [[common-configuration-node-labels]]
-nodeLabels - String[]::
+nodeLabels - List of String::
 If the graph, on which the algorithm is run, was created with multiple node label projections, this parameter can be used to select only a subset of the projected labels.
 The algorithm will only consider nodes with the selected labels.
 
 [[common-configuration-relationship-types]]
-relationshipTypes - String[]::
+relationshipTypes - List of String::
 If the graph, on which the algorithm is run, was created with multiple relationship type projections, this parameter can be used to select only a subset of the projected types.
 The algorithm will only consider relationships with the selected types.
 
