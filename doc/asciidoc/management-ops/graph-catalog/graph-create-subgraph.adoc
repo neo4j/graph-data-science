@@ -36,7 +36,7 @@ CALL gds.beta.graph.create.subgraph(
   relationshipFilter: String,
   nodeCount: Integer,
   relationshipCount: Integer,
-  createMillis: Integer;
+  createMillis: Integer
 ----
 
 .Subgraph specific configuration
@@ -113,7 +113,9 @@ A relationship predicate must refer to variable `r`.
 
 == Examples
 
-.Example graph with Person nodes connected by KNOWS relationships.
+In order to demonstrate the GDS create subgraph capabilities we are going to create a small social graph in Neo4j.
+
+.The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
@@ -129,24 +131,42 @@ CREATE
   (p2)-[:READS]->(b1)
 ----
 
-.Create a graph using a Cypher projection:
+.Project the social network graph:
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.create(
   'social-graph',
-  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels, n.age AS age',
-  'MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target, r.since AS since, type(r) AS type'
+  {
+    Person: { properties: 'age' },    // <1>
+    Book: {}                          // <2>
+  },
+  {
+    KNOWS: { properties: 'since' },   // <3>
+    READS: {}                         // <4>
+  }
 )
-YIELD graphName, nodeCount, relationshipCount, createMillis;
+YIELD graphName, nodeCount, relationshipCount, createMillis
 ----
+<1> Project `Person` nodes with their `age` property.
+<2> Project `Book` nodes without any of their properties.
+<3> Project `KNOWS` relationships with their `since` property.
+<4> Project `READS` relationships without any of their properties.
+
+
+=== Node filtering
 
 [role=query-example]
 --
 .Create a new graph containing only users of a certain age group:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.create.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', '*')
-YIELD graphName, fromGraphName, nodeCount, relationshipCount;
+CALL gds.beta.graph.create.subgraph(
+  'teenagers',
+  'social-graph',
+  'n.age > 13 AND n.age <= 18',
+  '*'
+)
+YIELD graphName, fromGraphName, nodeCount, relationshipCount
 ----
 
 .Results
@@ -157,13 +177,21 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount;
 |===
 --
 
+
+=== Node and relationship filtering
+
 [role=query-example]
 --
 .Create a new graph containing only users of a certain age group that know each other since a given point a time:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.create.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', 'r.since >= 2012')
-YIELD graphName, fromGraphName, nodeCount, relationshipCount;
+CALL gds.beta.graph.create.subgraph(
+  'teenagers',
+  'social-graph',
+  'n.age > 13 AND n.age <= 18',
+  'r.since >= 2012'
+)
+YIELD graphName, fromGraphName, nodeCount, relationshipCount
 ----
 .Results
 [opts="header"]
@@ -173,13 +201,21 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount;
 |===
 --
 
+
+=== Bipartite subgraph
+
 [role=query-example]
 --
 .Create a new bipartite graph between books and users connected by the `READS` relationship type:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.create.subgraph('teenagers-books', 'social-graph', 'n:Book OR n:Person', 'r:READS')
-YIELD graphName, fromGraphName, nodeCount, relationshipCount;
+CALL gds.beta.graph.create.subgraph(
+  'teenagers-books',
+  'social-graph',
+  'n:Book OR n:Person',
+  'r:READS'
+)
+YIELD graphName, fromGraphName, nodeCount, relationshipCount
 ----
 
 .Results
@@ -190,13 +226,21 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount;
 |===
 --
 
+
+=== Bipartite graph node filtering
+
 [role=query-example]
 --
 .The previous example can be extended with an additional filter applied only to persons:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.create.subgraph('teenagers-books', 'social-graph', 'n:Book OR (n:Person AND n.age > 18)', 'r:READS')
-YIELD graphName, fromGraphName, nodeCount, relationshipCount;
+CALL gds.beta.graph.create.subgraph(
+  'teenagers-books',
+  'social-graph',
+  'n:Book OR (n:Person AND n.age > 18)',
+  'r:READS'
+)
+YIELD graphName, fromGraphName, nodeCount, relationshipCount
 ----
 
 .Results
