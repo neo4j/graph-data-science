@@ -9,33 +9,33 @@
         <?dbhtml filename="introduction/index.html"?>
     </d:tocentry>
 
-        <d:tocentry linkend="installation">
-            <?dbhtml filename="installation/index.html"?>
-            <d:tocentry linkend="supported-neo4j-versions">
-                <?dbhtml filename="installation/supported-neo4j-versions/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="neo4j-desktop">
-                <?dbhtml filename="installation/neo4j-desktop/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="neo4j-server">
-                <?dbhtml filename="installation/neo4j-server/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="installation-enterprise-edition">
-                <?dbhtml filename="installation/installation-enterprise-edition/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="installation-docker">
-                <?dbhtml filename="installation/installation-docker/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="installation-causal-cluster">
-                <?dbhtml filename="installation/installation-causal-cluster/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="additional-config-parameters">
-                <?dbhtml filename="installation/additional-config-parameters/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="System-requirements">
-                <?dbhtml filename="installation/System-requirements/index.html"?>
-            </d:tocentry>
+    <d:tocentry linkend="installation">
+        <?dbhtml filename="installation/index.html"?>
+        <d:tocentry linkend="supported-neo4j-versions">
+            <?dbhtml filename="installation/supported-neo4j-versions/index.html"?>
         </d:tocentry>
+        <d:tocentry linkend="neo4j-desktop">
+            <?dbhtml filename="installation/neo4j-desktop/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="neo4j-server">
+            <?dbhtml filename="installation/neo4j-server/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="installation-enterprise-edition">
+            <?dbhtml filename="installation/installation-enterprise-edition/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="installation-docker">
+            <?dbhtml filename="installation/installation-docker/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="installation-causal-cluster">
+            <?dbhtml filename="installation/installation-causal-cluster/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="additional-config-parameters">
+            <?dbhtml filename="installation/additional-config-parameters/index.html"?>
+        </d:tocentry>
+        <d:tocentry linkend="System-requirements">
+            <?dbhtml filename="installation/System-requirements/index.html"?>
+        </d:tocentry>
+    </d:tocentry>
 
     <d:tocentry linkend="common-usage">
         <?dbhtml filename="common-usage/index.html"?>
@@ -71,21 +71,21 @@
     </d:tocentry>
 
         <d:tocentry linkend="model-catalog-ops">
-            <?dbhtml filename="model-catalog/model-catalog/index.html"?>
-            <d:tocentry linkend="catalog-model-exists">
-                <?dbhtml filename="model-catalog/catalog-model-exists/index.html"?>
-            </d:tocentry>
+            <?dbhtml filename="model-catalog/index.html"?>
             <d:tocentry linkend="catalog-model-list">
-                <?dbhtml filename="model-catalog/catalog-model-list/index.html"?>
+                <?dbhtml filename="model-catalog/list/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="catalog-model-exists">
+                <?dbhtml filename="model-catalog/exists/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="catalog-model-drop">
-                <?dbhtml filename="model-catalog/catalog-model-drop/index.html"?>
+                <?dbhtml filename="model-catalog/drop/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="catalog-model-store">
-                <?dbhtml filename="model-catalog/catalog-model-store/index.html"?>
+                <?dbhtml filename="model-catalog/store/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="catalog-model-publish">
-                <?dbhtml filename="model-catalog/catalog-model-publish/index.html"?>
+                <?dbhtml filename="model-catalog/publish/index.html"?>
             </d:tocentry>
         </d:tocentry>
 
