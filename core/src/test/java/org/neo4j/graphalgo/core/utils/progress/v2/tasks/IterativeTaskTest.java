@@ -71,8 +71,7 @@ class IterativeTaskTest {
 
         root.nextSubtask().start();
 
-        assertThatThrownBy(root::nextSubtask).
-            hasMessageContaining("some subtasks are still running");
+        assertThatThrownBy(root::nextSubtask).hasMessageContaining("Cannot move to next subtask, because subtask `A` is still running");
     }
 
     @Test

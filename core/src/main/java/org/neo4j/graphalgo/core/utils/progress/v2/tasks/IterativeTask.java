@@ -69,7 +69,7 @@ public class IterativeTask extends Task {
         if (maybeRunningTask.isPresent()) {
             throw new IllegalStateException(formatWithLocale(
                 "Cannot move to next subtask, because subtask `%s` is still running",
-                maybeRunningTask.get()
+                maybeRunningTask.get().description()
             ));
         }
 
