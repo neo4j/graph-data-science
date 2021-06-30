@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.compat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.kernel.internal.Version;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,6 +57,7 @@ class Neo4jVersionTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
     void shouldNotRespectVersionOverride() {
         System.setProperty(Neo4jVersionTest.CUSTOM_VERSION_SETTING, "foobidoobie");
         assertNotEquals(Version.getNeo4jVersion(), Neo4jVersion.neo4jVersion());
