@@ -19,20 +19,26 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
-import com.carrotsearch.hppc.sorting.IndirectComparator;
-import com.carrotsearch.hppc.sorting.IndirectSort;
+import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
 
 public final class PageReordering {
 
-    public static int[] ordering(HugeLongArray offsets, int pageCount, int pageShift) {
+    @ValueClass
+    interface PageOrdering {
+        int[] ordering();
+
+        int[] pageOffsets();
+    }
+
+    public static PageOrdering ordering(HugeLongArray offsets, int pageCount, int pageShift) {
         // TODO implement using HLA cursors
         var offsetArray = offsets.toArray();
 
         int[] pageOffsets = new int[pageCount];
-        int[] pageIndexes = new int[pageCount];
+        int[] ordering = new int[pageCount];
 
         int idx = 0;
         int pastPageIdx = -1;
@@ -42,18 +48,14 @@ public final class PageReordering {
             var pageIdx = (int) offset >>> pageShift;
 
             if (pageIdx != pastPageIdx) {
+                ordering[pageIdx] = idx;
                 pageOffsets[idx] = i;
-                pageIndexes[idx] = pageIdx;
                 pastPageIdx = pageIdx;
                 idx = idx + 1;
             }
         }
 
-        return IndirectSort.mergesort(
-            0,
-            pageIndexes.length,
-            new IndirectComparator.AscendingIntComparator(pageIndexes)
-        );
+        return ImmutablePageOrdering.of(ordering, pageOffsets);
     }
 
     public static <PAGE> int[] reorder(PAGE[] pages, int[] ordering) {

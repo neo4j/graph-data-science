@@ -21,6 +21,7 @@ package org.neo4j.graphalgo.core.utils;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
@@ -30,21 +31,46 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PageReorderingTest {
 
-    @Test
-    void testOrdering() {
+    static Stream<Arguments> offsets() {
+        return Stream.of(
+            Arguments.of(new long[]{ 16, 18, 22, 0, 3, 6, 24, 28, 30, 8, 13, 15}, new int[]{1, 3, 0, 2}),
+            Arguments.of(new long[]{ 16, 18, 22, 0, 3, 6, 8, 13, 15, 24, 28, 30}, new int[]{1, 2, 0, 3}),
+            Arguments.of(new long[]{ 16, 18, 22, 24, 28, 30, 0, 3, 6, 8, 13, 15}, new int[]{2, 3, 0, 1}),
+            Arguments.of(new long[]{ 16, 18, 22, 24, 28, 30, 8, 13, 15, 0, 3, 6}, new int[]{3, 2, 0, 1}),
+            Arguments.of(new long[]{ 16, 18, 22, 8, 13, 15, 0, 3, 6, 24, 28, 30}, new int[]{2, 1, 0, 3}),
+            Arguments.of(new long[]{ 16, 18, 22, 8, 13, 15, 24, 28, 30, 0, 3, 6}, new int[]{3, 1, 0, 2}),
+            Arguments.of(new long[]{ 0, 3, 6, 16, 18, 22, 24, 28, 30, 8, 13, 15}, new int[]{0, 3, 1, 2}),
+            Arguments.of(new long[]{ 0, 3, 6, 16, 18, 22, 8, 13, 15, 24, 28, 30}, new int[]{0, 2, 1, 3}),
+            Arguments.of(new long[]{ 0, 3, 6, 24, 28, 30, 16, 18, 22, 8, 13, 15}, new int[]{0, 3, 2, 1}),
+            Arguments.of(new long[]{ 0, 3, 6, 24, 28, 30, 8, 13, 15, 16, 18, 22}, new int[]{0, 2, 3, 1}),
+            Arguments.of(new long[]{ 0, 3, 6, 8, 13, 15, 16, 18, 22, 24, 28, 30}, new int[]{0, 1, 2, 3}),
+            Arguments.of(new long[]{ 0, 3, 6, 8, 13, 15, 24, 28, 30, 16, 18, 22}, new int[]{0, 1, 3, 2}),
+            Arguments.of(new long[]{ 24, 28, 30, 16, 18, 22, 0, 3, 6, 8, 13, 15}, new int[]{2, 3, 1, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 16, 18, 22, 8, 13, 15, 0, 3, 6}, new int[]{3, 2, 1, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 0, 3, 6, 16, 18, 22, 8, 13, 15}, new int[]{1, 3, 2, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 0, 3, 6, 8, 13, 15, 16, 18, 22}, new int[]{1, 2, 3, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 8, 13, 15, 16, 18, 22, 0, 3, 6}, new int[]{3, 1, 2, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 8, 13, 15, 0, 3, 6, 16, 18, 22}, new int[]{2, 1, 3, 0}),
+            Arguments.of(new long[]{ 8, 13, 15, 16, 18, 22, 0, 3, 6, 24, 28, 30}, new int[]{2, 0, 1, 3}),
+            Arguments.of(new long[]{ 8, 13, 15, 16, 18, 22, 24, 28, 30, 0, 3, 6}, new int[]{3, 0, 1, 2}),
+            Arguments.of(new long[]{ 8, 13, 15, 0, 3, 6, 16, 18, 22, 24, 28, 30}, new int[]{1, 0, 2, 3}),
+            Arguments.of(new long[]{ 8, 13, 15, 0, 3, 6, 24, 28, 30, 16, 18, 22}, new int[]{1, 0, 3, 2}),
+            Arguments.of(new long[]{ 8, 13, 15, 24, 28, 30, 16, 18, 22, 0, 3, 6}, new int[]{3, 0, 2, 1}),
+            Arguments.of(new long[]{ 8, 13, 15, 24, 28, 30, 0, 3, 6, 16, 18, 22}, new int[]{2, 0, 3, 1})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("offsets")
+    void testOrdering(long[] offsets, int[] expectedOrdering) {
         var pageCount = 4;
         var pageShift = 3;
+        var hugeOffsets = HugeLongArray.of(offsets);
 
-        var offsets = HugeLongArray.of(
-            16, 18, 22, // page 2
-            0, 3, 6,    // page 0
-            24, 28, 30, // page 3
-            8, 13, 15   // page 1
-        );
+        var ordering = PageReordering.ordering(hugeOffsets, pageCount, pageShift);
 
-        var ordering = PageReordering.ordering(offsets, pageCount, pageShift);
-
-        assertThat(ordering).isEqualTo(new int[] {1, 3, 0, 2});
+        assertThat(ordering.ordering()).isEqualTo(expectedOrdering);
+        assertThat(ordering.pageOffsets()).isEqualTo(new int[] {0, 3, 6, 9});
     }
 
     static Stream<int[]> orderings() {
@@ -103,16 +129,22 @@ class PageReorderingTest {
         var pageShift = 3;
 
         var offsets = HugeLongArray.of(
-            8, 13, 15, // page 1
-            0, 3, 6,   // page 0
-            16, 18, 22 // page 2
+            16, 18, 22, // page 2
+            0, 3, 6,    // page 0
+            24, 28, 30, // page 3
+            8, 13, 15   // page 1
         );
 
-        var ordering = PageReordering.ordering(offsets, pageCount, pageShift);
+        var ordering = PageReordering.ordering(offsets, pageCount, pageShift).ordering();
 
         PageReordering.rewriteOffsets(offsets, ordering, pageShift);
 
-        assertThat(offsets.toArray()).isEqualTo(new long[] {0, 5, 7, 8, 11, 14, 16, 18, 22});
+        assertThat(offsets.toArray()).isEqualTo(new long[] {
+            0, 3, 6,    // page 0
+            8, 13, 15,  // page 1
+            16, 18, 22, // page 2
+            24, 28, 30, // page 3
+        });
     }
 
 }
