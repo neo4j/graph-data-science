@@ -1,6 +1,6 @@
 [.beta]
 [[catalog-model-exists]]
-= Check if a model exists in the catalog
+= Checking if a model exists
 
 We can check if a model is available in the catalog by looking up its name.
 

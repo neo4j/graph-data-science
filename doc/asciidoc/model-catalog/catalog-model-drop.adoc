@@ -1,6 +1,6 @@
 [.beta]
 [[catalog-model-drop]]
-= Removing models from the catalog
+= Removing models
 
 If we no longer need a trained model we can remove it from the catalog.
 

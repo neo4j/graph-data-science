@@ -1,6 +1,6 @@
 [.beta]
 [[catalog-model-list]]
-= List models available in the catalog
+= Listing models
 
 Once we have trained models in the catalog we can see information about either all of them or a single model using its name
 
