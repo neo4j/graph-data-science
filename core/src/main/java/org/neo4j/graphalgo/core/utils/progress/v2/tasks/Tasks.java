@@ -42,7 +42,6 @@ public final class Tasks {
             description,
             unrollTasks(subTasksSupplier, iterations),
             subTasksSupplier,
-            iterations,
             IterativeTask.Mode.FIXED
         );
     }
@@ -56,7 +55,6 @@ public final class Tasks {
             description,
             unrollTasks(subTasksSupplier, iterations),
             subTasksSupplier,
-            iterations,
             IterativeTask.Mode.DYNAMIC
         );
     }
@@ -69,7 +67,6 @@ public final class Tasks {
             description,
             new ArrayList<>(),
             subTasksSupplier,
-            -1,
             IterativeTask.Mode.OPEN
         );
     }

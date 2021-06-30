@@ -34,7 +34,6 @@ public class IterativeTask extends Task {
     }
 
     private final Supplier<List<Task>> subTasksSupplier;
-    private final int iterations;
     private final Mode mode;
 
     /**
@@ -44,12 +43,10 @@ public class IterativeTask extends Task {
         String description,
         List<Task> subTasks,
         Supplier<List<Task>> subTasksSupplier,
-        int iterations,
         Mode mode
     ) {
         super(description, subTasks);
         this.subTasksSupplier = subTasksSupplier;
-        this.iterations = iterations;
         this.mode = mode;
     }
 
