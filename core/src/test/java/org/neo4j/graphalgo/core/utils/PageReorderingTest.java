@@ -70,7 +70,7 @@ class PageReorderingTest {
         var ordering = PageReordering.ordering(hugeOffsets, pageCount, pageShift);
 
         assertThat(ordering.ordering()).isEqualTo(expectedOrdering);
-        assertThat(ordering.pageOffsets()).isEqualTo(new int[] {0, 3, 6, 9});
+        assertThat(ordering.pageOffsets()).isEqualTo(new long[] {0, 3, 6, 9});
     }
 
     static Stream<int[]> orderings() {

@@ -30,28 +30,33 @@ public final class PageReordering {
     interface PageOrdering {
         int[] ordering();
 
-        int[] pageOffsets();
+        long[] pageOffsets();
     }
 
     public static PageOrdering ordering(HugeLongArray offsets, int pageCount, int pageShift) {
-        // TODO implement using HLA cursors
-        var offsetArray = offsets.toArray();
+        var cursor = offsets.initCursor(offsets.newCursor());
 
-        int[] pageOffsets = new int[pageCount];
+        long[] pageOffsets = new long[pageCount];
         int[] ordering = new int[pageCount];
 
         int idx = 0;
         int pastPageIdx = -1;
 
-        for (int i = 0; i < offsetArray.length; i++) {
-            var offset = offsetArray[i];
-            var pageIdx = (int) offset >>> pageShift;
+        while (cursor.next()) {
+            var array = cursor.array;
+            var limit = cursor.limit;
+            var base = cursor.base;
 
-            if (pageIdx != pastPageIdx) {
-                ordering[pageIdx] = idx;
-                pageOffsets[idx] = i;
-                pastPageIdx = pageIdx;
-                idx = idx + 1;
+            for (int i = cursor.offset; i < limit; i++) {
+                var offset = array[i];
+                var pageIdx = (int) offset >>> pageShift;
+
+                if (pageIdx != pastPageIdx) {
+                    ordering[pageIdx] = idx;
+                    pageOffsets[idx] = base + i;
+                    pastPageIdx = pageIdx;
+                    idx = idx + 1;
+                }
             }
         }
 
