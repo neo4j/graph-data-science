@@ -82,8 +82,7 @@ class DefaultValueTest {
 
         assertThat(e.getMessage())
             .contains(formatWithLocale(
-                "The default value `%s` of type %s cannot coerced into type Long.",
-                defaultValue.getObject(),
+                "The default value of type %s cannot coerced into type Long.",
                 input.getClass().getSimpleName()
             ));
     }
@@ -127,8 +126,7 @@ class DefaultValueTest {
 
         assertThat(e.getMessage())
             .contains(formatWithLocale(
-                "The default value `%s` of type %s cannot coerced into type Double.",
-                defaultValue.getObject(),
+                "The default value of type %s cannot coerced into type Double.",
                 input.getClass().getSimpleName()));
     }
 
