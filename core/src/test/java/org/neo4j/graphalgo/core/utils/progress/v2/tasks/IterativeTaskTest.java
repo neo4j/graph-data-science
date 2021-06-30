@@ -95,4 +95,22 @@ class IterativeTaskTest {
         assertThat(root.currentIteration()).isEqualTo(1);
     }
 
+    @Test
+    void shouldNotStartSubtasksImplicitly() {
+        Supplier<List<Task>> taskSupplier = () -> List.of(
+            Tasks.iterativeFixed("A", () -> List.of(Tasks.leaf("leaf1"), Tasks.leaf("leaf2")), 1)
+        );
+
+        var root = Tasks.iterativeFixed("root", taskSupplier, 3);
+
+        assertThat(root.currentIteration()).isEqualTo(0);
+        var subTask = root.nextSubtask();
+        subTask.start();
+
+        var leaf1 = subTask.nextSubtask();
+        assertThat(leaf1.status()).isEqualTo(Status.PENDING);
+
+        subTask.finish();
+    }
+
 }
