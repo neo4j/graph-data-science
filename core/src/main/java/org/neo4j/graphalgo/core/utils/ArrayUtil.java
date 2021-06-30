@@ -52,6 +52,13 @@ public final class ArrayUtil {
      * Similar to {@link Arrays#binarySearch(long[], int, int, long)}, but
      * returns the index of the first occurrence of {@code key} in {@code a}
      * if there are multiple occurrences.
+     *
+     * @return index of the first occurrence of the search key, if it is contained in the array;
+     *         otherwise, <code>(-(<i>insertion point</i>) - 1)</code>. The <i>insertion point</i>
+     *         is defined as the point at which the key would be inserted into the array:
+     *         the index of the first element greater than the key, or {@code a.length} if all
+     *         elements in the array are less than the specified key. Note that this guarantees
+     *         that the return value will be &gt;= 0 if and only if the key is found.
      */
     public static int binarySearchFirst(long[] a, int fromIndex, int toIndex, long key) {
         int low = fromIndex;
@@ -77,6 +84,13 @@ public final class ArrayUtil {
      * Similar to {@link Arrays#binarySearch(long[], int, int, long)}, but
      * returns the index of the last occurrence of {@code key} in {@code a}
      * if there are multiple occurrences.
+     *
+     * @return index of the last occurrence of the search key, if it is contained in the array;
+     *         otherwise, <code>(-(<i>insertion point</i>) - 1)</code>. The <i>insertion point</i>
+     *         is defined as the point at which the key would be inserted into the array:
+     *         the index of the first element greater than the key, or {@code a.length} if all
+     *         elements in the array are less than the specified key. Note that this guarantees
+     *         that the return value will be &gt;= 0 if and only if the key is found.
      */
     public static int binarySearchLast(long[] a, int fromIndex, int toIndex, long key) {
         int low = fromIndex;
