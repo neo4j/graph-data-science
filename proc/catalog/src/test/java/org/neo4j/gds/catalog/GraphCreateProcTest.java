@@ -686,6 +686,40 @@ class GraphCreateProcTest extends BaseProcTest {
     }
 
     @Test
+    void defaultArrayNodeProjectionProperty() {
+        clearDb();
+        var name = "g";
+        runQuery("CREATE ({ratings: [1.0, 2.0]}), ()");
+        runQuery(
+            "CALL gds.graph.create($name, '*', '*', {nodeProperties: {ratings: {defaultValue: [5.0]}}}) YIELD nodeProjection",
+            Map.of("name", name));
+
+        assertGraphExists(name);
+        var graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
+        assertGraphEquals(fromGdl("({ratings: [1.0, 2.0]}), ({ratings: [5.0]})"), graph);
+    }
+
+    @Test
+    void failOnWrongDefaultValueTypeForArrayNodeProjectionProperty() {
+        clearDb();
+        runQuery("CREATE ({ratings: [1.0, 2.0]}), ()");
+        assertError(
+            "CALL gds.graph.create('g', '*', '*', {nodeProperties: {ratings: {defaultValue: 5.0}}}) YIELD nodeProjection",
+            "Expected type of default value to be `double[]`. But got `Double`."
+        );
+    }
+
+    @Test
+    void failOnWrongDefaultValueTypeForDoubleNodeProjectionProperty() {
+        clearDb();
+        runQuery("CREATE ({ratings: 1.0}), ()");
+        assertError(
+            "CALL gds.graph.create('g', '*', '*', {nodeProperties: {ratings: {defaultValue: [5.0]}}}) YIELD nodeProjection",
+            "Expected type of default value to be `Double`. But got `double[]`."
+        );
+    }
+
+    @Test
     void shouldFailOnTooBigGraphNative() {
         assertThatThrownBy(() -> {
             applyOnProcedure(proc -> {

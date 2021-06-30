@@ -64,6 +64,11 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
+    protected Class<?> valueClass() {
+        return double.class;
+    }
+
+    @Override
     public void setValue(long nodeId, Value value) {
         double doubleValue = ValueConversion.getDoubleValue(value);
         valuesBuilder.set(nodeId, Double.doubleToLongBits(doubleValue));

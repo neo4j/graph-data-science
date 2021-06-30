@@ -19,10 +19,12 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
@@ -37,6 +39,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class NodePropertiesFromStoreBuilderTest {
 
@@ -183,6 +187,25 @@ final class NodePropertiesFromStoreBuilderTest {
         );
 
         assertThat(ex.getMessage(), containsString("Loading of values of type"));
+    }
+
+    private static Stream<Arguments> invalidValueTypeCombinations() {
+        Supplier<Stream<Arguments>> scalarValues = () -> Stream.of(2L, 2D).map(Arguments::of);
+        Supplier<Stream<Arguments>> arrayValues = () -> Stream.of(new double[]{1D}, new long[]{1L}).map(Arguments::of);
+
+        return Stream.concat(
+            TestSupport.crossArguments(scalarValues, arrayValues),
+            TestSupport.crossArguments(arrayValues, scalarValues)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidValueTypeCombinations")
+    void failOnInvalidDefaultType(Object defaultValue, Object propertyValue) {
+        Assertions.assertThatThrownBy(() -> createNodeProperties(1L, defaultValue, b -> {
+            b.set(0, Values.of(propertyValue));
+        })).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(formatWithLocale("Expected type of default value to be `%s`.", propertyValue.getClass().getSimpleName()));
     }
 
     @Test

@@ -23,9 +23,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.gds.catalog.GraphCreateProc;
 
 import java.util.List;
 import java.util.Map;
@@ -88,7 +88,7 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
         ));
     }
 
-    @ValueSource(strings = {"'id'", "['id']", "{id: {}}", "{id: {defaultValue: 1}}"})
+    @ValueSource(strings = {"'id'", "['id']", "{id: {}}", "{id: {defaultValue: [1]}}"})
     @ParameterizedTest
     void anonymousOverloadingParameter(String nodePropertyProjection) {
         var query =

@@ -32,12 +32,20 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
     private final DefaultValue defaultValue;
 
     public FloatArrayNodePropertiesBuilder(long nodeCount, DefaultValue defaultValue, AllocationTracker tracker) {
+        // validate defaultValue is a float array
+        defaultValue.floatArrayValue();
+
         this.defaultValue = defaultValue;
         this.objectArray = HugeObjectArray.newArray(float[].class, nodeCount, tracker);
     }
 
     public void set(long nodeId, float[] value) {
         objectArray.set(nodeId, value);
+    }
+
+    @Override
+    protected Class<?> valueClass() {
+        return float[].class;
     }
 
     @Override

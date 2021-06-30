@@ -65,6 +65,11 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
+    protected Class<?> valueClass() {
+        return long.class;
+    }
+
+    @Override
     public void setValue(long nodeId, Value value) {
         var longValue = ValueConversion.getLongValue(value);
         valuesBuilder.set(nodeId, longValue);

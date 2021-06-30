@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.api;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -30,8 +29,8 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -80,9 +79,12 @@ class DefaultValueTest {
     void shouldThrowAnErrorIfValueCannotBeCoercedToLong(Object input) {
         var defaultValue = DefaultValue.of(input);
 
-        var e = assertThrows(ClassCastException.class, defaultValue::longValue);
-
-        assertThat(e.getMessage(), containsString(formatWithLocale("The default value %s cannot coerced into type Long.", defaultValue.getObject())));
+        assertThatThrownBy(defaultValue::longValue)
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(formatWithLocale(
+                "Expected type of default value to be `Long`. But got `%s`.",
+                input.getClass().getSimpleName()
+            ));
     }
 
     @Test
@@ -91,7 +93,7 @@ class DefaultValueTest {
 
         var e = assertThrows(UnsupportedOperationException.class, defaultValue::longValue);
 
-        assertThat(e.getMessage(), containsString("Cannot safely convert 42.42 into an long value"));
+        assertThat(e.getMessage()).contains("Cannot safely convert 42.42 into an long value");
     }
 
     static Stream<Arguments> validDoubleValues() {
@@ -120,9 +122,12 @@ class DefaultValueTest {
     void shouldThrowAnErrorIfValueCannotBeCoercedToDouble(Object input) {
         var defaultValue = DefaultValue.of(input);
 
-        var e = assertThrows(ClassCastException.class, defaultValue::doubleValue);
-
-        assertThat(e.getMessage(), containsString(formatWithLocale("The default value %s cannot coerced into type Double.", defaultValue.getObject())));
+        assertThatThrownBy(defaultValue::doubleValue)
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(formatWithLocale(
+                "Expected type of default value to be `Double`. But got `%s`.",
+                input.getClass().getSimpleName()
+            ));
     }
 
     @Test
@@ -131,14 +136,32 @@ class DefaultValueTest {
 
         var e = assertThrows(UnsupportedOperationException.class, defaultValue::doubleValue);
 
-        assertThat(e.getMessage(), containsString("Cannot safely convert"));
+        assertThat(e.getMessage()).contains("Cannot safely convert");
     }
 
     @ParameterizedTest
     @MethodSource("valuesWithValueType")
     void shouldCreateDefaultValueUsingValueType(Object valueToSet, ValueType type, Function<DefaultValue, ?> fn, Object expectedValue) {
         var defaultValue = DefaultValue.of(valueToSet, type, true);
-        Assertions.assertThat(fn.apply(defaultValue)).isEqualTo(expectedValue);
+        assertThat(fn.apply(defaultValue)).isEqualTo(expectedValue);
+    }
+
+    @ParameterizedTest
+    @MethodSource("values")
+    void createUserDefinedValueTypes(Object valueToSet, Function<DefaultValue, ?> fn, Object expectedValue) {
+        var defaultValue = DefaultValue.of(valueToSet, true);
+        assertThat(fn.apply(defaultValue)).isEqualTo(expectedValue);
+    }
+
+    private static Stream<Arguments> values() {
+        return Stream.of(
+            Arguments.of(42, (Function<DefaultValue, ?>) DefaultValue::longValue, 42L),
+            Arguments.of(42, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 42D),
+            Arguments.of(13.37, (Function<DefaultValue, ?>) DefaultValue::doubleValue, 13.37D),
+            Arguments.of(List.of(13.37, 42), (Function<DefaultValue, ?>) DefaultValue::doubleArrayValue, new double[] {13.37D, 42D}),
+            Arguments.of(List.of(1337L, 42L), (Function<DefaultValue, ?>) DefaultValue::longArrayValue, new long[] {1337L, 42L}),
+            Arguments.of(List.of(1337, 42), (Function<DefaultValue, ?>) DefaultValue::longArrayValue, new long[] {1337L, 42L})
+        );
     }
 
     private static Stream<Arguments> valuesWithValueType() {

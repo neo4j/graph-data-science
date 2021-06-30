@@ -41,37 +41,52 @@ class UnionNodePropertiesTest {
 
     @Test
     void shouldReturnDoubleCorrectly() {
-        var unionNodeProperties = initializeUnionNodeProperties(Values.of(42.0D));
+        var unionNodeProperties = initializeUnionNodeProperties(Values.of(42.0D), DefaultValue.of(0.0D));
         assertThat(unionNodeProperties.doubleValue(0)).isEqualTo(42.0D);
     }
 
     @Test
     void shouldReturnLongCorrectly() {
-        var unionNodeProperties = initializeUnionNodeProperties(Values.of(42L));
+        var unionNodeProperties = initializeUnionNodeProperties(Values.of(42L), DefaultValue.of(0.0D));
         assertThat(unionNodeProperties.longValue(0)).isEqualTo(42L);
     }
 
     @Test
     void shouldReturnFloatArrayCorrectly() {
-        var unionNodeProperties = initializeUnionNodeProperties(Values.of(new float[]{4.2F}));
+        var unionNodeProperties = initializeUnionNodeProperties(
+            Values.of(new float[]{4.2F}),
+            DefaultValue.of(new float[]{})
+        );
+
         assertThat(unionNodeProperties.floatArrayValue(0)).isEqualTo(new float[]{4.2f});
     }
 
     @Test
     void shouldReturnDoubleArrayCorrectly() {
-        var unionNodeProperties = initializeUnionNodeProperties(Values.of(new double[]{4.2}));
+        var unionNodeProperties = initializeUnionNodeProperties(Values.of(
+            new double[]{4.2}),
+            DefaultValue.of(new double[]{})
+        );
+
         assertThat(unionNodeProperties.doubleArrayValue(0)).isEqualTo(new double[]{4.2});
     }
 
     @Test
     void shouldReturnLongArrayCorrectly() {
-        var unionNodeProperties = initializeUnionNodeProperties(Values.of(new long[]{42L}));
+        var unionNodeProperties = initializeUnionNodeProperties(
+            Values.of(new long[]{42L}),
+            DefaultValue.of(new long[]{})
+        );
+
         assertThat(unionNodeProperties.longArrayValue(0)).isEqualTo(new long[]{42L});
     }
 
     @Test
     void shouldThrowConversionException() {
-        var unionNodeProperties = initializeUnionNodeProperties(Values.of(new double[]{1.337D}));
+        var unionNodeProperties = initializeUnionNodeProperties(Values.of(
+            new double[]{1.337D}),
+            DefaultValue.of(new double[]{})
+        );
 
         assertThatThrownBy(() -> unionNodeProperties.doubleValue(0))
             .isInstanceOf(UnsupportedOperationException.class)
@@ -79,9 +94,9 @@ class UnionNodePropertiesTest {
             .hasMessageEndingWith("to double");
     }
 
-    private UnionNodeProperties initializeUnionNodeProperties(Value propertyValue) {
+    private UnionNodeProperties initializeUnionNodeProperties(Value propertyValue, DefaultValue defaultValue) {
         NodePropertiesFromStoreBuilder doubleNodePropertiesBuilder = NodePropertiesFromStoreBuilder.of(
-            1, AllocationTracker.empty(), DefaultValue.of(0.0D)
+            1, AllocationTracker.empty(), defaultValue
         );
 
         doubleNodePropertiesBuilder.set(0, propertyValue);

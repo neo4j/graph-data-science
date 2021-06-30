@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.values.storable.Value;
 
 public abstract class InnerNodePropertiesBuilder {
+    protected abstract Class<?> valueClass();
 
     public abstract void setValue(long nodeId, Value value);
 
