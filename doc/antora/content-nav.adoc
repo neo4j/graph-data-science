@@ -94,7 +94,7 @@
 ** xref:production-deployment/transaction-handling/index.adoc[]
 ** xref:production-deployment/fabric/index.adoc[]
 ** xref:production-deployment/feature-toggles/index.adoc[]
-* *Appendix*
+* Appendix
 ** xref:appendix-a/index.adoc[]
 ** xref:appendix-b/index.adoc[]
 *** xref:appendix-b/migration-algos-common/index.adoc[]

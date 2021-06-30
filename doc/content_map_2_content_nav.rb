@@ -23,7 +23,7 @@ end
 def find_filename(node)
   dbhtml = node.xpath("./processing-instruction('dbhtml')").first
   if dbhtml.nil?
-    "*Appendix*"
+    "Appendix"
   else
     to_write = dbhtml.content.gsub('filename=', '').delete_prefix('"').delete_suffix('"')
     "xref:#{to_write.gsub('html', 'adoc')}[]"
