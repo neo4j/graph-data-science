@@ -213,7 +213,7 @@ In the following, we stream the previously computed scores `score`.
 
 [role=query-example]
 --
-.Stream node properties for `Person` nodes:
+.Stream the `score` node property:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.streamNodeProperty('socialGraph', 'score')
@@ -242,7 +242,7 @@ The procedure can be configured to stream just the properties for specific node 
 
 [role=query-example]
 --
-.Stream node properties for `Person` nodes:
+.Stream the `score` property for `Person` nodes:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.streamNodeProperty('socialGraph', 'score', ['Person'])
@@ -306,7 +306,7 @@ To write the 'score' property for all node labels in the social graph, we use th
 
 [role=query-example]
 --
-.Write node properties to Neo4j:
+.Write the `score` property back to Neo4j:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.writeNodeProperties('socialGraph', ['score'])
@@ -330,7 +330,7 @@ In the following example, we will only write back the scores of the `Person` nod
 
 [role=query-example]
 --
-.Write node properties of a specific node projection to Neo4j:
+.Write node properties of a specific projected node label to Neo4j:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.writeNodeProperties('socialGraph', ['score'], ['Person'])
@@ -356,7 +356,7 @@ If the `nodeLabels` parameter is specified, it is required that _all_ given node
 
 [role=query-example]
 --
-.Remove multiple node properties from a named graph:
+.Remove the `score` property from all projected nodes in the `socialGraph`:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.removeNodeProperties('socialGraph', ['score'])
@@ -383,7 +383,7 @@ In the following example, we will only remove the scores from the projected `Per
 
 [role=query-example]
 --
-.Remove multiple node properties from a named graph:
+.Remove the `score` property from the projected `Person` nodes:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.removeNodeProperties('socialGraph', ['score'], ['Person'])
