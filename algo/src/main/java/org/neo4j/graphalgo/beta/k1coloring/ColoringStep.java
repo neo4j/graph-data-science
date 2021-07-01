@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 public final class ColoringStep implements Runnable {
 
@@ -34,7 +34,7 @@ public final class ColoringStep implements Runnable {
     private final BitSet nodesToColor;
     private final BitSet forbiddenColors;
     private final Partition partition;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final long[] resetMask;
 
     public ColoringStep(
@@ -42,7 +42,7 @@ public final class ColoringStep implements Runnable {
         HugeLongArray colors,
         BitSet nodesToColor,
         Partition partition,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.colors = colors;
@@ -50,7 +50,7 @@ public final class ColoringStep implements Runnable {
         this.partition = partition;
         this.forbiddenColors = new BitSet(INITIAL_FORBIDDEN_COLORS);
         this.resetMask = new long[INITIAL_FORBIDDEN_COLORS];
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -73,7 +73,7 @@ public final class ColoringStep implements Runnable {
 
                 colors.set(nodeId, nextColor);
 
-                progressLogger.logProgress();
+                progressTracker.logProgress();
             }
         });
     }

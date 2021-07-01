@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -230,6 +231,7 @@ class ModularityOptimizationTest {
         int minBatchSize,
         ProgressLogger testLogger
     ) {
+        var testTracker = new TestProgressTracker(testLogger);
         return new ModularityOptimization(
             graph,
             maxIterations,
@@ -238,7 +240,7 @@ class ModularityOptimizationTest {
             concurrency,
             minBatchSize,
             Pools.DEFAULT,
-            testLogger,
+            testTracker,
             AllocationTracker.empty()
         ).compute();
     }

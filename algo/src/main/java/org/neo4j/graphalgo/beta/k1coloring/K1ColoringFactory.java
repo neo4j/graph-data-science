@@ -21,6 +21,8 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.config.BaseConfig;
+import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -29,7 +31,12 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
+
+import java.util.List;
 
 public class K1ColoringFactory<T extends K1ColoringConfig> implements AlgorithmFactory<K1Coloring, T> {
 
@@ -49,13 +56,14 @@ public class K1ColoringFactory<T extends K1ColoringConfig> implements AlgorithmF
             eventTracker
         );
 
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
         return new K1Coloring(
             graph,
             configuration.maxIterations(),
             configuration.batchSize(),
             configuration.concurrency(),
             Pools.DEFAULT,
-            progressLogger,
+            progressTracker,
             tracker
         );
     }
@@ -70,5 +78,24 @@ public class K1ColoringFactory<T extends K1ColoringConfig> implements AlgorithmF
                 .perNode("forbiddenColors", MemoryUsage::sizeOfBitset)
                 .build())
             .build();
+    }
+
+    @Override
+    public Task progressTask(Graph graph, T config) {
+        return k1ColoringProgressTask(graph, config);
+    }
+
+    public static <T extends BaseConfig & IterationsConfig> Task k1ColoringProgressTask(Graph graph, T config) {
+        return Tasks.task(
+            "K1Coloring",
+            Tasks.iterativeDynamic(
+                "compute",
+                () -> List.of(
+                    Tasks.leaf("color nodes", graph.nodeCount()),
+                    Tasks.leaf("validate nodes", graph.nodeCount())
+                ),
+                config.maxIterations()
+            )
+        );
     }
 }

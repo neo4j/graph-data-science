@@ -33,7 +33,6 @@ import org.neo4j.graphalgo.beta.k1coloring.K1Coloring;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.graphalgo.beta.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
@@ -41,6 +40,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -91,7 +91,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         int concurrency,
         int minBatchSize,
         ExecutorService executor,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.graph = graph;
@@ -101,7 +101,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.seedProperty = seedProperty;
         this.executor = executor;
         this.concurrency = concurrency;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.tracker = tracker;
         this.minBatchSize = minBatchSize;
 
@@ -115,18 +115,18 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     @Override
     public ModularityOptimization compute() {
-        progressLogger.logMessage(":: Start");
+        progressTracker.beginSubTask();
 
 
-        progressLogger.logMessage(":: Initialization :: Start");
+        progressTracker.beginSubTask();
         computeColoring();
         initSeeding();
         init();
-        progressLogger.logMessage(":: Initialization :: Finished");
+        progressTracker.endSubTask();
 
 
         for (iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
-            progressLogger.logMessage(formatWithLocale(":: Iteration %d :: Start", iterationCounter + 1));
+            progressTracker.beginSubTask();
 
             boolean hasConverged;
 
@@ -141,18 +141,16 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
             hasConverged = !updateModularity();
 
-            progressLogger.logMessage(formatWithLocale(":: Iteration %d :: Finished", iterationCounter + 1));
+            progressTracker.endSubTask();
 
             if (hasConverged) {
                 this.didConverge = true;
                 iterationCounter++;
                 break;
             }
-
-            progressLogger.reset(graph.relationshipCount());
         }
 
-        progressLogger.logMessage(":: Finished");
+        progressTracker.endSubTask();
         return this;
     }
 
@@ -164,6 +162,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             .batchSize((int) minBatchSize)
             .build();
 
+        var progressLogger = progressTracker.progressLogger();
         K1Coloring coloring = new K1ColoringFactory<>()
             .build(graph, k1Config, tracker, progressLogger.getLog(), progressLogger.eventTracker())
             .withTerminationFlag(terminationFlag);
@@ -337,7 +336,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 nodeCommunityInfluences,
                 communityWeights,
                 communityWeightUpdates,
-                getProgressLogger()
+                progressTracker
             ),
             Optional.of((int) minBatchSize)
         );

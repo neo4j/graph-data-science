@@ -40,14 +40,19 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
+
+import java.util.List;
 
 public class LouvainFactory<CONFIG extends LouvainBaseConfig> implements AlgorithmFactory<Louvain, CONFIG> {
 
     @Override
     public Louvain build(
         final Graph graph,
-        final LouvainBaseConfig configuration,
+        final CONFIG configuration,
         final AllocationTracker tracker,
         final Log log,
         ProgressEventTracker eventTracker
@@ -60,11 +65,13 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> implements Algorit
             eventTracker
         );
 
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+
         return new Louvain(
             graph,
             configuration,
             Pools.DEFAULT,
-            progressLogger,
+            progressTracker,
             tracker
         );
     }
@@ -104,5 +111,17 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> implements Algorit
                 HugeLongArray.memoryEstimation(nodeCount) * config.maxLevels()
             ))
             .build();
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "Louvain",
+            Tasks.iterativeDynamic(
+                "compute",
+                () -> List.of(ModularityOptimizationFactory.modularityOptimizationProgressTask(graph, config)),
+                config.maxLevels()
+            )
+        );
     }
 }

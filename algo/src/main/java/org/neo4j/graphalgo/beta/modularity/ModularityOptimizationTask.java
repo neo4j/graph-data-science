@@ -24,11 +24,11 @@ import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 final class ModularityOptimizationTask implements Runnable {
 
@@ -37,7 +37,7 @@ final class ModularityOptimizationTask implements Runnable {
     private final long color;
     private final double totalNodeWeight;
     private final HugeLongArray colors;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final HugeLongArray currentCommunities;
     private final HugeLongArray nextCommunities;
     private final HugeDoubleArray cumulativeNodeWeights;
@@ -57,7 +57,7 @@ final class ModularityOptimizationTask implements Runnable {
         HugeDoubleArray nodeCommunityInfluences,
         HugeAtomicDoubleArray communityWeights,
         HugeAtomicDoubleArray communityWeightUpdates,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.partition = partition;
         this.color = color;
@@ -70,7 +70,7 @@ final class ModularityOptimizationTask implements Runnable {
         this.cumulativeNodeWeights = cumulativeNodeWeights;
         this.nodeCommunityInfluences = nodeCommunityInfluences;
         this.colors = colors;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -138,7 +138,7 @@ final class ModularityOptimizationTask implements Runnable {
             nextCommunities.set(nodeId, nextCommunity);
             communityWeightUpdates.update(currentCommunity, agg -> agg - cumulativeNodeWeight);
             communityWeightUpdates.update(nextCommunity, agg -> agg + cumulativeNodeWeight);
-            progressLogger.logProgress(degree);
+            progressTracker.logProgress(degree);
         });
     }
 }

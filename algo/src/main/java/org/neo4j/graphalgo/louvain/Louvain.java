@@ -35,11 +35,11 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -49,7 +49,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class Louvain extends Algorithm<Louvain, Louvain> {
 
@@ -67,7 +66,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         Graph graph,
         LouvainBaseConfig config,
         ExecutorService executorService,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.config = config;
@@ -77,19 +76,19 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
         this.tracker = tracker;
         this.dendrograms = new HugeLongArray[config.maxLevels()];
         this.modularities = new double[config.maxLevels()];
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
     public Louvain compute() {
-        getProgressLogger().logMessage(":: Start");
+        progressTracker.beginSubTask();
 
         Graph workingGraph = rootGraph;
         NodeProperties nextSeedingValues = seedingValues;
 
         long oldNodeCount = rootGraph.nodeCount();
         for (ranLevels = 0; ranLevels < config.maxLevels(); ranLevels++) {
-            getProgressLogger().logMessage(formatWithLocale("Level %d :: Start", ranLevels + 1));
+            progressTracker.beginSubTask();
 
             assertRunning();
 
@@ -106,7 +105,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
             nextSeedingValues = new OriginalIdNodeProperties(workingGraph);
 
-            getProgressLogger().logMessage(formatWithLocale("Level %d :: Finished", ranLevels + 1));
+            progressTracker.endSubTask();
 
 
             if (workingGraph.nodeCount() == oldNodeCount
@@ -114,7 +113,7 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
                 || hasConverged()
             ) {
                 resizeResultArrays();
-                getProgressLogger().logMessage(":: Finished");
+                progressTracker.endSubTask();
                 break;
             }
             oldNodeCount = workingGraph.nodeCount();
@@ -172,6 +171,8 @@ public final class Louvain extends Algorithm<Louvain, Louvain> {
             .concurrency(config.concurrency())
             .batchSize(DEFAULT_BATCH_SIZE)
             .build();
+
+        var progressLogger = progressTracker.progressLogger();
 
         ModularityOptimization modularityOptimization = new ModularityOptimizationFactory<>()
             .build(

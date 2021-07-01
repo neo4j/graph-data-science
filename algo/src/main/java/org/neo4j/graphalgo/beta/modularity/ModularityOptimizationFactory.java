@@ -22,6 +22,9 @@ package org.neo4j.graphalgo.beta.modularity;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.beta.k1coloring.K1ColoringFactory;
+import org.neo4j.graphalgo.config.BaseConfig;
+import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -33,7 +36,12 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
+
+import java.util.List;
 
 public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> implements AlgorithmFactory<ModularityOptimization, T> {
 
@@ -86,6 +94,26 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
         );
     }
 
+    @Override
+    public Task progressTask(Graph graph, T config) {
+        return modularityOptimizationProgressTask(graph, config);
+    }
+
+    public static <T extends BaseConfig & IterationsConfig> Task modularityOptimizationProgressTask(Graph graph, T config) {
+        return Tasks.task(
+            "ModularityOptimization",
+            Tasks.task(
+                "initialization",
+                K1ColoringFactory.k1ColoringProgressTask(graph, config)
+            ),
+            Tasks.iterativeDynamic(
+                "compute modularity",
+                () -> List.of(Tasks.leaf("optimizeForColor", graph.relationshipCount())),
+                config.maxIterations()
+            )
+        );
+    }
+
     public ModularityOptimization build(
         Graph graph,
         T configuration,
@@ -102,6 +130,8 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             eventTracker
         );
 
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+
         return new ModularityOptimization(
             graph,
             configuration.maxIterations(),
@@ -110,7 +140,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
             configuration.concurrency(),
             configuration.batchSize(),
             Pools.DEFAULT,
-            progressLogger,
+            progressTracker,
             tracker
         );
     }

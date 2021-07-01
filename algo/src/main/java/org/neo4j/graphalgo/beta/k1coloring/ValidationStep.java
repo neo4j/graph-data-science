@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 final class ValidationStep implements Runnable {
 
@@ -32,7 +32,7 @@ final class ValidationStep implements Runnable {
     private final BitSet currentNodesToColor;
     private final BitSet nextNodesToColor;
     private final Partition partition;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
 
     ValidationStep(
         RelationshipIterator graph,
@@ -40,14 +40,14 @@ final class ValidationStep implements Runnable {
         BitSet currentNodesToColor,
         BitSet nextNodesToColor,
         Partition partition,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.colors = colors;
         this.currentNodesToColor = currentNodesToColor;
         this.nextNodesToColor = nextNodesToColor;
         this.partition = partition;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -67,7 +67,7 @@ final class ValidationStep implements Runnable {
                     return true;
                 });
 
-                progressLogger.logProgress();
+                progressTracker.logProgress();
             }
         });
     }
