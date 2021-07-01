@@ -34,36 +34,36 @@ class PageReorderingTest {
 
     static Stream<Arguments> offsets() {
         return Stream.of(
-            Arguments.of(new long[]{ 16, 18, 22, 0, 3, 6, 24, 28, 30, 8, 13, 15}, new int[]{1, 3, 0, 2}, new int[] {2, 0, 3, 1}),
-            Arguments.of(new long[]{ 16, 18, 22, 0, 3, 6, 8, 13, 15, 24, 28, 30}, new int[]{1, 2, 0, 3}, new int[] {2, 0, 1, 3}),
-            Arguments.of(new long[]{ 16, 18, 22, 24, 28, 30, 0, 3, 6, 8, 13, 15}, new int[]{2, 3, 0, 1}, new int[] {2, 3, 0, 1}),
-            Arguments.of(new long[]{ 16, 18, 22, 24, 28, 30, 8, 13, 15, 0, 3, 6}, new int[]{3, 2, 0, 1}, new int[] {2, 3, 1, 0}),
-            Arguments.of(new long[]{ 16, 18, 22, 8, 13, 15, 0, 3, 6, 24, 28, 30}, new int[]{2, 1, 0, 3}, new int[] {2, 1, 0, 3}),
-            Arguments.of(new long[]{ 16, 18, 22, 8, 13, 15, 24, 28, 30, 0, 3, 6}, new int[]{3, 1, 0, 2}, new int[] {2, 1, 3, 0}),
-            Arguments.of(new long[]{ 0, 3, 6, 16, 18, 22, 24, 28, 30, 8, 13, 15}, new int[]{0, 3, 1, 2}, new int[] {0, 2, 3, 1}),
-            Arguments.of(new long[]{ 0, 3, 6, 16, 18, 22, 8, 13, 15, 24, 28, 30}, new int[]{0, 2, 1, 3}, new int[] {0, 2, 1, 3}),
-            Arguments.of(new long[]{ 0, 3, 6, 24, 28, 30, 16, 18, 22, 8, 13, 15}, new int[]{0, 3, 2, 1}, new int[] {0, 3, 2, 1}),
-            Arguments.of(new long[]{ 0, 3, 6, 24, 28, 30, 8, 13, 15, 16, 18, 22}, new int[]{0, 2, 3, 1}, new int[] {0, 3, 1, 2}),
-            Arguments.of(new long[]{ 0, 3, 6, 8, 13, 15, 16, 18, 22, 24, 28, 30}, new int[]{0, 1, 2, 3}, new int[] {0, 1, 2, 3}),
-            Arguments.of(new long[]{ 0, 3, 6, 8, 13, 15, 24, 28, 30, 16, 18, 22}, new int[]{0, 1, 3, 2}, new int[] {0, 1, 3, 2}),
-            Arguments.of(new long[]{ 24, 28, 30, 16, 18, 22, 0, 3, 6, 8, 13, 15}, new int[]{2, 3, 1, 0}, new int[] {3, 2, 0, 1}),
-            Arguments.of(new long[]{ 24, 28, 30, 16, 18, 22, 8, 13, 15, 0, 3, 6}, new int[]{3, 2, 1, 0}, new int[] {3, 2, 1, 0}),
-            Arguments.of(new long[]{ 24, 28, 30, 0, 3, 6, 16, 18, 22, 8, 13, 15}, new int[]{1, 3, 2, 0}, new int[] {3, 0, 2, 1}),
-            Arguments.of(new long[]{ 24, 28, 30, 0, 3, 6, 8, 13, 15, 16, 18, 22}, new int[]{1, 2, 3, 0}, new int[] {3, 0, 1, 2}),
-            Arguments.of(new long[]{ 24, 28, 30, 8, 13, 15, 16, 18, 22, 0, 3, 6}, new int[]{3, 1, 2, 0}, new int[] {3, 1, 2, 0}),
-            Arguments.of(new long[]{ 24, 28, 30, 8, 13, 15, 0, 3, 6, 16, 18, 22}, new int[]{2, 1, 3, 0}, new int[] {3, 1, 0, 2}),
-            Arguments.of(new long[]{ 8, 13, 15, 16, 18, 22, 0, 3, 6, 24, 28, 30}, new int[]{2, 0, 1, 3}, new int[] {1, 2, 0, 3}),
-            Arguments.of(new long[]{ 8, 13, 15, 16, 18, 22, 24, 28, 30, 0, 3, 6}, new int[]{3, 0, 1, 2}, new int[] {1, 2, 3, 0}),
-            Arguments.of(new long[]{ 8, 13, 15, 0, 3, 6, 16, 18, 22, 24, 28, 30}, new int[]{1, 0, 2, 3}, new int[] {1, 0, 2, 3}),
-            Arguments.of(new long[]{ 8, 13, 15, 0, 3, 6, 24, 28, 30, 16, 18, 22}, new int[]{1, 0, 3, 2}, new int[] {1, 0, 3, 2}),
-            Arguments.of(new long[]{ 8, 13, 15, 24, 28, 30, 16, 18, 22, 0, 3, 6}, new int[]{3, 0, 2, 1}, new int[] {1, 3, 2, 0}),
-            Arguments.of(new long[]{ 8, 13, 15, 24, 28, 30, 0, 3, 6, 16, 18, 22}, new int[]{2, 0, 3, 1}, new int[] {1, 3, 0, 2})
+            Arguments.of(new long[]{ 16, 18, 22, 0, 3, 6, 24, 28, 30, 8, 13, 15}, new int[]{1, 3, 0, 2}),
+            Arguments.of(new long[]{ 16, 18, 22, 0, 3, 6, 8, 13, 15, 24, 28, 30}, new int[]{1, 2, 0, 3}),
+            Arguments.of(new long[]{ 16, 18, 22, 24, 28, 30, 0, 3, 6, 8, 13, 15}, new int[]{2, 3, 0, 1}),
+            Arguments.of(new long[]{ 16, 18, 22, 24, 28, 30, 8, 13, 15, 0, 3, 6}, new int[]{3, 2, 0, 1}),
+            Arguments.of(new long[]{ 16, 18, 22, 8, 13, 15, 0, 3, 6, 24, 28, 30}, new int[]{2, 1, 0, 3}),
+            Arguments.of(new long[]{ 16, 18, 22, 8, 13, 15, 24, 28, 30, 0, 3, 6}, new int[]{3, 1, 0, 2}),
+            Arguments.of(new long[]{ 0, 3, 6, 16, 18, 22, 24, 28, 30, 8, 13, 15}, new int[]{0, 3, 1, 2}),
+            Arguments.of(new long[]{ 0, 3, 6, 16, 18, 22, 8, 13, 15, 24, 28, 30}, new int[]{0, 2, 1, 3}),
+            Arguments.of(new long[]{ 0, 3, 6, 24, 28, 30, 16, 18, 22, 8, 13, 15}, new int[]{0, 3, 2, 1}),
+            Arguments.of(new long[]{ 0, 3, 6, 24, 28, 30, 8, 13, 15, 16, 18, 22}, new int[]{0, 2, 3, 1}),
+            Arguments.of(new long[]{ 0, 3, 6, 8, 13, 15, 16, 18, 22, 24, 28, 30}, new int[]{0, 1, 2, 3}),
+            Arguments.of(new long[]{ 0, 3, 6, 8, 13, 15, 24, 28, 30, 16, 18, 22}, new int[]{0, 1, 3, 2}),
+            Arguments.of(new long[]{ 24, 28, 30, 16, 18, 22, 0, 3, 6, 8, 13, 15}, new int[]{2, 3, 1, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 16, 18, 22, 8, 13, 15, 0, 3, 6}, new int[]{3, 2, 1, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 0, 3, 6, 16, 18, 22, 8, 13, 15}, new int[]{1, 3, 2, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 0, 3, 6, 8, 13, 15, 16, 18, 22}, new int[]{1, 2, 3, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 8, 13, 15, 16, 18, 22, 0, 3, 6}, new int[]{3, 1, 2, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 8, 13, 15, 0, 3, 6, 16, 18, 22}, new int[]{2, 1, 3, 0}),
+            Arguments.of(new long[]{ 8, 13, 15, 16, 18, 22, 0, 3, 6, 24, 28, 30}, new int[]{2, 0, 1, 3}),
+            Arguments.of(new long[]{ 8, 13, 15, 16, 18, 22, 24, 28, 30, 0, 3, 6}, new int[]{3, 0, 1, 2}),
+            Arguments.of(new long[]{ 8, 13, 15, 0, 3, 6, 16, 18, 22, 24, 28, 30}, new int[]{1, 0, 2, 3}),
+            Arguments.of(new long[]{ 8, 13, 15, 0, 3, 6, 24, 28, 30, 16, 18, 22}, new int[]{1, 0, 3, 2}),
+            Arguments.of(new long[]{ 8, 13, 15, 24, 28, 30, 16, 18, 22, 0, 3, 6}, new int[]{3, 0, 2, 1}),
+            Arguments.of(new long[]{ 8, 13, 15, 24, 28, 30, 0, 3, 6, 16, 18, 22}, new int[]{2, 0, 3, 1})
         );
     }
 
     @ParameterizedTest
     @MethodSource("offsets")
-    void testOrdering(long[] offsets, int[] expectedOrdering, int[] expectedReverseOrdering) {
+    void testOrdering(long[] offsets, int[] expectedOrdering) {
         var pageCount = 4;
         var pageShift = 3;
         var hugeOffsets = HugeLongArray.of(offsets);
@@ -72,7 +72,6 @@ class PageReorderingTest {
 
         assertThat(ordering.ordering()).isEqualTo(expectedOrdering);
         assertThat(ordering.pageOffsets()).isEqualTo(new long[] {0, 3, 6, 9, 12});
-        assertThat(ordering.reverseOrdering()).isEqualTo(expectedReverseOrdering);
     }
 
     static Stream<int[]> orderings() {
@@ -127,14 +126,13 @@ class PageReorderingTest {
 
     @ParameterizedTest
     @MethodSource("offsets")
-    void testSortOffsets(long[] offsets, int[] expectedOrdering, int[] expectedReverseOrdering) {
+    void testSortOffsets(long[] offsets, int[] expectedOrdering) {
         var orderedOffsets = PageReordering.sortOffsets(
             HugeLongArray.of(offsets),
             ImmutablePageOrdering
                 .builder()
                 .ordering(expectedOrdering)
                 .pageOffsets(0, 3, 6, 9, 12)
-                .reverseOrdering(expectedReverseOrdering)
                 .build(),
             AllocationTracker.empty()
         );

@@ -31,8 +31,6 @@ public final class PageReordering {
     interface PageOrdering {
         int[] ordering();
 
-        int[] reverseOrdering();
-
         long[] pageOffsets();
     }
 
@@ -41,7 +39,6 @@ public final class PageReordering {
 
         long[] pageOffsets = new long[pageCount + 1];
         int[] ordering = new int[pageCount];
-        int[] reverseOrdering = new int[pageCount];
 
         int idx = 0;
         int pastPageIdx = -1;
@@ -57,7 +54,6 @@ public final class PageReordering {
 
                 if (pageIdx != pastPageIdx) {
                     ordering[pageIdx] = idx;
-                    reverseOrdering[idx] = pageIdx;
                     pageOffsets[idx] = base + i;
                     pastPageIdx = pageIdx;
                     idx = idx + 1;
@@ -69,7 +65,6 @@ public final class PageReordering {
         return ImmutablePageOrdering
             .builder()
             .ordering(ordering)
-            .reverseOrdering(reverseOrdering)
             .pageOffsets(pageOffsets)
             .build();
     }
