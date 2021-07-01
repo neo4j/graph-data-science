@@ -167,6 +167,40 @@ YIELD
 
 == Examples
 
+In order to demonstrate the GDS capabilities over node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (florentin:Person { name: 'Florentin', age: 16 }),
+  (adam:Person { name: 'Adam', age: 18 }),
+  (veselin:Person { name: 'Veselin', age: 20 }),
+  (hobbit:Book { name: 'The Hobbit', numberOfPages: 310 }),
+  (florentin)-[:KNOWS { since: 2010 }]->(adam),
+  (florentin)-[:KNOWS { since: 2018 }]->(veselin),
+  (adam)-[:READ]->(hobbit)
+----
+
+.Project the small social network graph:
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+  'socialGraph',
+  {
+    Person: {properties: "age"},
+    Book: {}
+  },
+  ['KNOWS', 'READ']
+)
+----
+
+.Compute the connected components in our social graph using `WCC`:
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.degree.mutate('socialGraph', {mutateProperty: 'score'})
+----
+
 === Stream
 
 We can stream node properties stored in a named in-memory graph back to the user.
