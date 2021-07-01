@@ -419,7 +419,7 @@ In addition to the predicted class, we will also produce the probability for eac
 In order to do this, we must first have an already trained model registered in the Model Catalog.
 We will use the model which we trained in the <<algorithms-ml-nodeclassification-examples-train-query, train example>> which we gave the name `'nc-model'`.
 
-[role=query-example, group=stream]
+[role=query-example, no-result=true, group=stream]
 --
 [source, cypher, role=noplay]
 ----
