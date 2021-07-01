@@ -302,36 +302,53 @@ This adds with some overhead, as each property name must be repeated for each no
 
 === Write
 
-To write the properties `'componentId'`, `'pageRank'`, `'communityId'` for all node projections in the graph `'my-graph'` using 8 concurrent threads, use the following query:
+To write the 'score' property for all node labels in the social graph, we use the following query:
 
-.Write multiple node properties to Neo4j:
+[role=query-example]
+--
+.Write node properties to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeNodeProperties(
-  'my-graph',
-  ['componentId', 'pageRank', 'communityId'],
-  ['*'],
-  {writeConcurrency: 8}
-)
+CALL gds.graph.writeNodeProperties('socialGraph', ['score'])
+YIELD propertiesWritten
 ----
 
-The above example requires all given properties to be present on at least one node projection, and the properties will be written for all such projections.
+.Results
+[opts="header"]
+|===
+| propertiesWritten
+| 4
+|===
+--
 
-The procedure can be configured to write just the properties for some specific node projections.
-In the following example, we run an algorithm on a sub-graph and subsequently write the newly created property to Neo4j.
+The above example requires the `score` property to be present on _at least one_ projected node label, and the properties will be written for all such labels.
 
+==== NodeLabels
+
+The procedure can be configured to write just the properties for some specific node labels.
+In the following example, we will only write back the scores of the `Person` nodes.
+
+[role=query-example]
+--
 .Write node properties of a specific node projection to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('my-graph', ['A', 'B'], '*')
-CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
-CALL gds.graph.writeNodeProperties('my-graph', ['componentId'], ['A'])
+CALL gds.graph.writeNodeProperties('socialGraph', ['score'], ['Person'])
+YIELD propertiesWritten
 ----
 
-When a list of projections not including the star projection (`'*'`) is specified, as in the example above, a different validation and execution is applied.
-In this case, it is required that all projections have all of the given properties, and they will be written to Neo4j for all of the projections.
+.Results
+[opts="header"]
+|===
+| propertiesWritten
+| 3
+|===
+--
 
-If any of the given projections is the star projection, the procedure behaves like in the first example.
+[NOTE]
+--
+If `nodeLabels` is specified, it is required that _all_ given node labels have _all_ of the given properties.
+--
 
 
 === Remove
