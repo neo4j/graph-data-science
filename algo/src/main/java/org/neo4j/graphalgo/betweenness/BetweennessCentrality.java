@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -46,6 +47,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
     private final long nodeCount;
     private final double divisor;
 
+    private final ProgressTracker progressTracker;
     private HugeAtomicDoubleArray centrality;
     private SelectionStrategy selectionStrategy;
 
@@ -58,12 +60,14 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
         SelectionStrategy selectionStrategy,
         ExecutorService executorService,
         int concurrency,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = graph.nodeCount();
+        this.progressTracker = progressTracker;
         this.centrality = HugeAtomicDoubleArray.newArray(nodeCount, tracker);
         this.selectionStrategy = selectionStrategy;
         this.selectionStrategy.init(graph, executorService, concurrency);
@@ -73,8 +77,10 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
 
     @Override
     public HugeAtomicDoubleArray compute() {
+        progressTracker.beginSubTask();
         nodeQueue.set(0);
         ParallelUtil.run(ParallelUtil.tasks(concurrency, () -> new BCTask(tracker)), executorService);
+        progressTracker.endSubTask();
         return centrality;
     }
 
@@ -130,7 +136,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
                     continue;
                 }
                 // reset
-                getProgressLogger().logProgress(startNodeId / (nodeCount - 1));
+                getProgressTracker().logProgress(startNodeId / (nodeCount - 1));
 
                 clear();
 

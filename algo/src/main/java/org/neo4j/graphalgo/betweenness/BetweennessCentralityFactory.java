@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.betweenness;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -31,6 +32,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
@@ -52,11 +56,21 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
             ? new SelectionStrategy.RandomDegree(samplingSize.get(), samplingSeed)
             : SelectionStrategy.ALL;
 
+        var progressLogger = new BatchingProgressLogger(
+            log,
+            graph.nodeCount(),
+            "BetweennessCentrality",
+            configuration.concurrency()
+        );
+
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+
         return new BetweennessCentrality(
             graph,
             strategy,
             Pools.DEFAULT,
             configuration.concurrency(),
+            progressTracker,
             tracker
         );
     }
@@ -80,5 +94,13 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
                 .perNode("distances", HugeIntArray::memoryEstimation)
                 .build())
             .build();
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "BetweennessCentrality",
+            Tasks.leaf("compute")
+        );
     }
 }

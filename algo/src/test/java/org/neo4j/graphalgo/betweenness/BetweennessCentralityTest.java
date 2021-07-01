@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.Map;
@@ -140,6 +141,7 @@ class BetweennessCentralityTest {
             new SelectionStrategy.RandomDegree(samplingSize, Optional.of(42L)),
             Pools.DEFAULT,
             concurrency,
+            ProgressTracker.NULL_TRACKER,
             TRACKER
         ).compute();
 
@@ -153,7 +155,14 @@ class BetweennessCentralityTest {
     @ValueSource(ints = {1, 4})
     void noSampling(int concurrency) {
         TestGraph graph = fromGdl(LINE);
-        var actualResult = new BetweennessCentrality(graph, SelectionStrategy.ALL, Pools.DEFAULT, concurrency, TRACKER).compute();
+        var actualResult = new BetweennessCentrality(
+            graph,
+            SelectionStrategy.ALL,
+            Pools.DEFAULT,
+            concurrency,
+            ProgressTracker.NULL_TRACKER,
+            TRACKER
+        ).compute();
         assertEquals(5, actualResult.size(), "Expected 5 centrality values");
         assertEquals(0.0, actualResult.get((int) graph.toMappedNodeId("a")));
         assertEquals(3.0, actualResult.get((int) graph.toMappedNodeId("b")));
