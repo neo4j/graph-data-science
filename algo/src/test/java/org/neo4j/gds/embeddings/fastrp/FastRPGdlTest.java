@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.fastrp.ImmutableFastRPExtendedStreamConfig;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -94,7 +94,7 @@ public class FastRPGdlTest {
             graph,
             arrayConfig,
             FeatureExtraction.propertyExtractors(graph, properties),
-            ProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty(),
             Optional.of(123L)
         );

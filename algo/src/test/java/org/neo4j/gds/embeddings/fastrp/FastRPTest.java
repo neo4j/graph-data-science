@@ -26,21 +26,18 @@ import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
-import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -98,7 +95,7 @@ class FastRPTest extends AlgoTestBase {
             graph,
             DEFAULT_CONFIG,
             defaultFeatureExtractors(graph),
-            progressLogger,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 
@@ -130,7 +127,7 @@ class FastRPTest extends AlgoTestBase {
             graph,
             DEFAULT_CONFIG,
             defaultFeatureExtractors(graph),
-            progressLogger,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 
@@ -172,7 +169,7 @@ class FastRPTest extends AlgoTestBase {
             graph,
             configBuilder.concurrency(4).build(),
             defaultFeatureExtractors(graph),
-            progressLogger,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 
@@ -183,7 +180,7 @@ class FastRPTest extends AlgoTestBase {
             graph,
             configBuilder.concurrency(1).build(),
             defaultFeatureExtractors(graph),
-            progressLogger,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 
@@ -219,7 +216,7 @@ class FastRPTest extends AlgoTestBase {
             graph,
             weightedConfig,
             defaultFeatureExtractors(graph),
-            progressLogger,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 
@@ -257,7 +254,7 @@ class FastRPTest extends AlgoTestBase {
                 .addIterationWeight(1.0D)
                 .build(),
             List.of(),
-            progressLogger,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 
@@ -311,7 +308,7 @@ class FastRPTest extends AlgoTestBase {
                 .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
                 .build(),
             List.of(),
-            progressLogger,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 
@@ -354,52 +351,9 @@ class FastRPTest extends AlgoTestBase {
             .isEqualTo(159_832);
     }
 
-    @Test
-    void testProgressLogging() {
-        var graph = RandomGraphGenerator
-            .builder()
-            .nodeCount(100)
-            .averageDegree(2)
-            .orientation(Orientation.UNDIRECTED)
-            .relationshipDistribution(RelationshipDistribution.RANDOM)
-            .build()
-            .generate();
-
-        var config = ImmutableFastRPBaseConfig
-            .builder()
-            .embeddingDimension(2)
-            .iterationWeights(List.of(1.0D, 2.0D))
-            .concurrency(4)
-            .build();
-
-        var logger = new TestProgressLogger(
-            graph.nodeCount(),
-            FastRP.class.getSimpleName(),
-            config.concurrency()
-        );
-
-        new FastRP(graph, config, List.of(), logger, AllocationTracker.empty()).compute();
-
-        var expectedMessages = List.of(
-            "FastRP :: Start",
-            "Iteration 1 :: Start",
-            "Iteration 2 :: Finished",
-            "Iteration 2 :: Start",
-            "Iteration 2 :: Finished",
-            "FastRP :: Finished"
-        );
-
-        expectedMessages.forEach(msg -> logger.containsMessage(TestProgressLogger.INFO, msg));
-
-        assertThat(logger.getMessages(TestProgressLogger.INFO))
-            .filteredOn(msg -> msg.contains("100%"))
-            .hasSize(3);
-    }
-
     private List<FeatureExtractor> defaultFeatureExtractors(Graph graph) {
         return FeatureExtraction.propertyExtractors(graph, DEFAULT_CONFIG.featureProperties());
     }
-
 
     @Nested
     @GdlExtension
@@ -433,7 +387,7 @@ class FastRPTest extends AlgoTestBase {
                     .addFeatureProperty("prop")
                     .build(),
                 FeatureExtraction.propertyExtractors(graph, List.of("prop")),
-                progressLogger,
+                ProgressTracker.NULL_TRACKER,
                 AllocationTracker.empty()
             );
 
@@ -461,7 +415,7 @@ class FastRPTest extends AlgoTestBase {
                 graph,
                 weightedConfig,
                 List.of(),
-                progressLogger,
+                ProgressTracker.NULL_TRACKER,
                 AllocationTracker.empty()
             );
 

@@ -26,7 +26,12 @@ import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
+
+import java.util.List;
 
 public class FastRPFactory<CONFIG extends FastRPBaseConfig> implements AlgorithmFactory<FastRP, CONFIG> {
 
@@ -38,11 +43,12 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> implements Algorithm
         var progressLogger = new BatchingProgressLogger(log, graph.nodeCount(), "FastRP", configuration.concurrency(), eventTracker);
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
 
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
         return new FastRP(
             graph,
             configuration,
             featureExtractors,
-            progressLogger,
+            progressTracker,
             tracker
         );
     }
@@ -51,4 +57,18 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> implements Algorithm
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
         return FastRP.memoryEstimation(configuration);
     }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "FastRP",
+            Tasks.leaf("Initialize Random Vectors", graph.nodeCount()),
+            Tasks.iterativeFixed(
+                "Propagate embeddings",
+                () -> List.of(Tasks.leaf("Propagate embeddings task", graph.relationshipCount())),
+                config.iterationWeights().size()
+            )
+        );
+    }
+
 }

@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -36,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Arrays;
 import java.util.List;
@@ -91,17 +91,17 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         Graph graph,
         FastRPBaseConfig config,
         List<FeatureExtractor> featureExtractors,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
-        this(graph, config, featureExtractors, progressLogger, tracker, config.randomSeed());
+        this(graph, config, featureExtractors, progressTracker, tracker, config.randomSeed());
     }
 
     public FastRP(
         Graph graph,
         FastRPBaseConfig config,
         List<FeatureExtractor> featureExtractors,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker,
         Optional<Long> randomSeed
     ) {
@@ -111,7 +111,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         this.relationshipWeightFallback = this.relationshipWeightProperty == null ? 1.0 : Double.NaN;
         this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
         this.randomSeed = improveSeed(randomSeed.orElseGet(System::nanoTime));
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
 
         this.propertyVectors = new float[inputDimension][config.propertyDimension()];
         this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount(), tracker);
@@ -133,11 +133,12 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
     @Override
     public FastRPResult compute() {
-        progressLogger.logStart();
+
+        progressTracker.beginSubTask();
         initPropertyVectors();
         initRandomVectors();
         propagateEmbeddings();
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
         return new FastRPResult(embeddings);
     }
 
@@ -165,7 +166,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
     }
 
     void initRandomVectors() {
-        progressLogger.logMessage("Initialising Random Vectors :: Start");
+        progressTracker.beginSubTask();
 
         long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
         var sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
@@ -179,16 +180,16 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
         );
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
-        progressLogger.logMessage("Initialising Random Vectors :: Finished");
+        progressTracker.endSubTask();
     }
 
     void propagateEmbeddings() {
+        progressTracker.beginSubTask();
         long batchSize = ParallelUtil.adjustedBatchSize(graph.nodeCount(), concurrency, MIN_BATCH_SIZE);
         var partitions = PartitionUtils.degreePartitionWithBatchSize(graph, batchSize, Function.identity());
 
         for (int i = 0; i < iterationWeights.size(); i++) {
-            progressLogger.reset(graph.relationshipCount());
-            progressLogger.logMessage(formatWithLocale("Iteration %s :: Start", i + 1));
+            progressTracker.beginSubTask();
 
             HugeObjectArray<float[]> currentEmbeddings = i % 2 == 0 ? embeddingA : embeddingB;
             HugeObjectArray<float[]> previousEmbeddings = i % 2 == 0 ? embeddingB : embeddingA;
@@ -206,8 +207,9 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                 ).collect(Collectors.toList());
             ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
-            progressLogger.logMessage(formatWithLocale("Iteration %s :: Finished", i + 1));
+            progressTracker.endSubTask();
         }
+        progressTracker.endSubTask();
     }
 
     @TestOnly
@@ -317,7 +319,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                 embeddingB.set(nodeId, randomVector);
                 embeddingA.set(nodeId, new float[embeddingDimension]);
             });
-            progressLogger.logProgress(partition.nodeCount());
+            progressTracker.logProgress(partition.nodeCount());
         }
 
         private float[] computeRandomVector(long nodeId, Random random, float entryValue) {
@@ -415,7 +417,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
                 addWeightedInPlace(embedding, currentEmbedding, iterationWeight);
                 degrees.add(degree);
             });
-            progressLogger.logProgress(degrees.longValue());
+            progressTracker.logProgress(degrees.longValue());
         }
     }
 
