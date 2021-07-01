@@ -37,10 +37,10 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.ImmutableRelationshipCursor;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,17 +76,17 @@ public class GraphSageModelTrainer {
     private final FeatureFunction featureFunction;
     private final Collection<Weights<? extends Tensor<?>>> labelProjectionWeights;
     private final ExecutorService executor;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final int batchSize;
 
-    public GraphSageModelTrainer(GraphSageTrainConfig config, ExecutorService executor, ProgressLogger progressLogger) {
-        this(config, executor, progressLogger, new SingleLabelFeatureFunction(), Collections.emptyList());
+    public GraphSageModelTrainer(GraphSageTrainConfig config, ExecutorService executor, ProgressTracker progressTracker) {
+        this(config, executor, progressTracker, new SingleLabelFeatureFunction(), Collections.emptyList());
     }
 
     public GraphSageModelTrainer(
         GraphSageTrainConfig config,
         ExecutorService executor,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         FeatureFunction featureFunction,
         Collection<Weights<? extends Tensor<?>>> labelProjectionWeights
     ) {
@@ -102,13 +102,13 @@ public class GraphSageModelTrainer {
         this.featureFunction = featureFunction;
         this.labelProjectionWeights = labelProjectionWeights;
         this.executor = executor;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.useWeights = config.hasRelationshipWeightProperty();
         this.randomSeed = config.randomSeed().orElse(ThreadLocalRandom.current().nextLong());
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
-        progressLogger.logStart();
+        progressTracker.beginSubTask();
 
         this.layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
@@ -125,19 +125,18 @@ public class GraphSageModelTrainer {
         boolean converged = false;
         var epochLosses = new ArrayList<Double>();
         for (int epoch = 1; epoch <= epochs; epoch++) {
-            var epochMessage = ":: Epoch " + epoch;
-            progressLogger.logStart(epochMessage);
+            progressTracker.beginSubTask();
 
             double newLoss = trainEpoch(batchTasks, epoch);
             epochLosses.add(newLoss);
-            progressLogger.logFinish(epochMessage);
+            progressTracker.endSubTask();
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
                 converged = true;
                 break;
             }
             previousLoss = newLoss;
         }
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
 
         return ModelTrainResult.of(epochLosses, converged, this.layers);
     }
@@ -150,7 +149,7 @@ public class GraphSageModelTrainer {
         double totalLoss = Double.NaN;
         int iteration = 1;
         for (;iteration <= maxIterations; iteration++) {
-            progressLogger.logStart(":: Iteration " + iteration);
+            progressTracker.beginSubTask();
 
             // run forward + maybe backward for each Batch
             ParallelUtil.run(batchTasks, executor);
@@ -158,7 +157,7 @@ public class GraphSageModelTrainer {
 
             var converged = batchTasks.stream().allMatch(task -> task.converged);
             if (converged) {
-                progressLogger.logFinish(":: Iteration " + iteration);
+                progressTracker.endSubTask();
                 break;
             }
 
@@ -171,14 +170,14 @@ public class GraphSageModelTrainer {
 
             updater.update(meanGradients);
 
-            progressLogger.getLog().debug(
-                "Epoch %d LOSS: %.10f at iteration %d",
-                epoch,
-                totalLoss,
-                iteration
-            );
+//            progressLogger.getLog().debug(
+//                "Epoch %d LOSS: %.10f at iteration %d",
+//                epoch,
+//                totalLoss,
+//                iteration
+//            );
 
-            progressLogger.logFinish(":: Iteration " + iteration);
+            progressTracker.endSubTask();
         }
 
         return totalLoss;

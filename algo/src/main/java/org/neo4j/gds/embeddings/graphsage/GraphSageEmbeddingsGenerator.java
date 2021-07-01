@@ -24,11 +24,11 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -42,7 +42,7 @@ public class GraphSageEmbeddingsGenerator {
     private final boolean isWeighted;
     private final FeatureFunction featureFunction;
     private final ExecutorService executor;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final AllocationTracker tracker;
 
     public GraphSageEmbeddingsGenerator(
@@ -52,7 +52,7 @@ public class GraphSageEmbeddingsGenerator {
         boolean isWeighted,
         FeatureFunction featureFunction,
         ExecutorService executor,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.layers = layers;
@@ -61,7 +61,7 @@ public class GraphSageEmbeddingsGenerator {
         this.isWeighted = isWeighted;
         this.featureFunction = featureFunction;
         this.executor = executor;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.tracker = tracker;
     }
 
@@ -75,7 +75,7 @@ public class GraphSageEmbeddingsGenerator {
             tracker
         );
 
-        progressLogger.logStart();
+        progressTracker.beginSubTask();
 
         var tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
@@ -85,7 +85,7 @@ public class GraphSageEmbeddingsGenerator {
 
         ParallelUtil.run(tasks, executor);
 
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
 
         return result;
     }
@@ -122,7 +122,7 @@ public class GraphSageEmbeddingsGenerator {
                 result.set(nodeIndex + partitionStartNodeId, nodeEmbedding);
             }
 
-            progressLogger.logProgress();
+            progressTracker.logProgress(partitionNodeCount);
         };
     }
 }

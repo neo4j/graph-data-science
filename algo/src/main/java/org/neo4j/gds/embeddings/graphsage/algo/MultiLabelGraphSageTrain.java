@@ -28,8 +28,8 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -53,13 +53,13 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
         Graph graph,
         GraphSageTrainConfig config,
         ExecutorService executor,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.config = config;
         this.executor = executor;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.tracker = tracker;
     }
 
@@ -72,7 +72,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
         var trainer = new GraphSageModelTrainer(
             config,
             executor,
-            progressLogger,
+            progressTracker,
             multiLabelFeatureFunction,
             multiLabelFeatureFunction.weightsByLabel().values()
         );

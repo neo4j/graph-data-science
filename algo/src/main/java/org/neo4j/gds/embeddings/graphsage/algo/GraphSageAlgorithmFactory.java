@@ -31,6 +31,9 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
@@ -58,7 +61,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         Graph graph,
         CONFIG configuration,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
 
         var executorService = Pools.DEFAULT;
@@ -71,7 +74,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             configuration,
             executorService,
             tracker,
-            progressLogger
+            progressTracker
         );
     }
 
@@ -84,6 +87,14 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
                 graphDimensions.nodeCount(),
                 config instanceof MutateConfig
             )
+        );
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "GraphSage",
+            Tasks.leaf("make embeddings", graph.nodeCount())
         );
     }
 

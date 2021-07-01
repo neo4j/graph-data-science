@@ -24,8 +24,8 @@ import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 
@@ -42,19 +42,19 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
         Graph graph,
         GraphSageTrainConfig config,
         ExecutorService executor,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.config = config;
         this.executor = executor;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.tracker = tracker;
     }
 
     @Override
     public Model<ModelData, GraphSageTrainConfig> compute() {
-        var graphSageModel = new GraphSageModelTrainer(config, executor, progressLogger);
+        var graphSageModel = new GraphSageModelTrainer(config, executor, progressTracker);
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(
             graph,

@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainerCompanion;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -31,6 +32,9 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
@@ -58,7 +62,7 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
         Graph graph,
         GraphSageTrainConfig configuration,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         var executorService = Pools.DEFAULT;
         if(configuration.hasRelationshipWeightProperty()) {
@@ -66,8 +70,8 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
         }
 
         return configuration.isMultiLabel()
-        ? new MultiLabelGraphSageTrain(graph, configuration, executorService, progressLogger, tracker)
-        : new SingleLabelGraphSageTrain(graph, configuration, executorService, progressLogger, tracker);
+        ? new MultiLabelGraphSageTrain(graph, configuration, executorService, progressTracker, tracker)
+        : new SingleLabelGraphSageTrain(graph, configuration, executorService, progressTracker, tracker);
     }
 
     @Override
@@ -79,6 +83,27 @@ public final class GraphSageTrainAlgorithmFactory extends AbstractAlgorithmFacto
                 graphDimensions.nodeCount(),
                 graphDimensions.estimationNodeLabelCount()
             )
+        );
+    }
+
+    @Override
+    public Task progressTask(Graph graph, GraphSageTrainConfig config) {
+        return config.isMultiLabel()
+            ? multiLabelTasks(graph, config)
+            : singleLabelTasks(graph, config);
+    }
+
+    private Task multiLabelTasks(Graph graph, GraphSageTrainConfig config) {
+        return Tasks.task(
+            "MultiLabelGraphSageTrain",
+            GraphSageModelTrainerCompanion.progressTask(graph, config)
+        );
+    }
+
+    private Task singleLabelTasks(Graph graph, GraphSageTrainConfig config) {
+        return Tasks.task(
+            "SingleLabelGraphSageTrain",
+            GraphSageModelTrainerCompanion.progressTask(graph, config)
         );
     }
 

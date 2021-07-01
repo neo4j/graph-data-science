@@ -33,8 +33,8 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 import org.neo4j.graphalgo.core.model.proto.ModelProto;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -109,7 +109,7 @@ class GraphSageMultiLabelSerializationTest {
             streamConfig,
             Pools.DEFAULT,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         ).compute();
     }
 
@@ -125,7 +125,7 @@ class GraphSageMultiLabelSerializationTest {
             graph,
             trainConfig,
             Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 

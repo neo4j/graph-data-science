@@ -25,9 +25,9 @@ import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -66,7 +66,7 @@ class GraphSageEmbeddingsGeneratorTest {
 
         var features = GraphSageHelper.initializeSingleLabelFeatures(graph, config, AllocationTracker.empty());
 
-        var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
+        var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
 
@@ -77,7 +77,7 @@ class GraphSageEmbeddingsGeneratorTest {
             config.isWeighted(),
             new SingleLabelFeatureFunction(),
             Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 
@@ -100,9 +100,13 @@ class GraphSageEmbeddingsGeneratorTest {
             .projectedFeatureDimension(5)
             .build();
 
-        var trainer = new MultiLabelGraphSageTrain(graph, config,
+        var trainer = new MultiLabelGraphSageTrain(
+            graph,
+            config,
             Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER, AllocationTracker.empty());
+            ProgressTracker.NULL_TRACKER,
+            AllocationTracker.empty()
+        );
 
         var model = trainer.compute();
 
@@ -113,7 +117,7 @@ class GraphSageEmbeddingsGeneratorTest {
             config.isWeighted(),
             model.data().featureFunction(),
             Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 

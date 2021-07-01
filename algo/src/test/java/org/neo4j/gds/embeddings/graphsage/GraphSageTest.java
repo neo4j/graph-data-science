@@ -42,10 +42,10 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -125,7 +125,7 @@ class GraphSageTest {
             orphanGraph,
             trainConfig,
             Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
         var model = trainAlgo.compute();
@@ -156,7 +156,7 @@ class GraphSageTest {
             .concurrency(1)
             .build();
 
-        var modelTrainer = new GraphSageModelTrainer(trainConfig, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
+        var modelTrainer = new GraphSageModelTrainer(trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
         var layers = modelTrainer.train(graph, features).layers();
         var model = Model.of(
             "",
@@ -200,7 +200,7 @@ class GraphSageTest {
             .addFeatureProperties("f1")
             .build();
 
-        var modelTrainer = new GraphSageModelTrainer(trainConfig, Pools.DEFAULT, ProgressLogger.NULL_LOGGER);
+        var modelTrainer = new GraphSageModelTrainer(trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
         var layers = modelTrainer.train(graph, features).layers();
         var model = Model.of(
             "",
@@ -222,7 +222,7 @@ class GraphSageTest {
         var graphSage = algorithmFactory.build(graph, streamConfig, AllocationTracker.empty(), NullLog.getInstance(), EmptyProgressEventTracker.INSTANCE);
         graphSage.compute();
 
-        var testLogger = (TestProgressLogger) graphSage.getProgressLogger();
+        var testLogger = (TestProgressLogger) graphSage.getProgressTracker().progressLogger();
         var messagesInOrder = testLogger.getMessages(INFO);
 
         assertThat(messagesInOrder)
