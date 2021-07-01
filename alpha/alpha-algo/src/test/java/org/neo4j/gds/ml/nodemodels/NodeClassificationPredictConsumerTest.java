@@ -27,8 +27,8 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPred
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -77,7 +77,7 @@ class NodeClassificationPredictConsumerTest {
             null,
             HugeLongArray.of(0, 1),
             featureProperties,
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(() -> consumer.accept(new ListBatch(List.of(0L, 1L))))

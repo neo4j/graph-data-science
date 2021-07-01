@@ -20,17 +20,17 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.Predictor;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.core.batch.MappedBatch;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
     private final HugeObjectArray<double[]> predictedProbabilities;
     private final HugeLongArray predictedClasses;
     private final List<String> featureProperties;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
 
     public NodeClassificationPredictConsumer(
         Graph graph,
@@ -61,7 +61,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
         @Nullable HugeObjectArray<double[]> predictedProbabilities,
         HugeLongArray predictedClasses,
         List<String> featureProperties,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.nodeIds = nodeIds;
@@ -69,7 +69,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
         this.predictedProbabilities = predictedProbabilities;
         this.predictedClasses = predictedClasses;
         this.featureProperties = featureProperties;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -103,7 +103,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
             predictedClasses.set(nodeIndex, bestClass);
             currentRow++;
         }
-        progressLogger.logProgress(batch.size());
+        progressTracker.logProgress(batch.size());
     }
 
     private void fail(long nodeId) {

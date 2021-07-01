@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -107,7 +108,7 @@ class NodeClassificationPredictTest {
             true,
             featureProperties,
             AllocationTracker.empty(),
-            TestProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         ).compute();
 
         assertThat(result.predictedProbabilities())
@@ -163,7 +164,7 @@ class NodeClassificationPredictTest {
             true,
             featureProperties,
             AllocationTracker.empty(),
-            TestProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         ).compute();
 
         assertThat(result.predictedProbabilities())
@@ -242,7 +243,7 @@ class NodeClassificationPredictTest {
         );
         mcnlrPredict.compute();
 
-        var messagesInOrder = ((TestProgressLogger) mcnlrPredict.getProgressLogger()).getMessages(INFO);
+        var messagesInOrder = ((TestProgressLogger) mcnlrPredict.getProgressTracker().progressLogger()).getMessages(INFO);
 
         AssertionsForInterfaceTypes.assertThat(messagesInOrder)
             // avoid asserting on the thread id

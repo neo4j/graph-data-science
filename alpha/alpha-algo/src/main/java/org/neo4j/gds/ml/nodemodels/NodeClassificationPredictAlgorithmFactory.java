@@ -28,6 +28,9 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 
 public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassificationPredictConfig> extends AbstractAlgorithmFactory<NodeClassificationPredict, CONFIG> {
 
@@ -50,7 +53,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
         Graph graph,
         NodeClassificationPredictConfig configuration,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         var model = ModelCatalog.get(
             configuration.username(),
@@ -67,7 +70,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
             configuration.includePredictedProbabilities(),
             featureProperties,
             tracker,
-            progressLogger
+            progressTracker
         );
     }
 
@@ -88,6 +91,11 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
             .length;
 
         return NodeClassificationPredict.memoryEstimation(configuration.includePredictedProbabilities(), configuration.batchSize(), fudgedFeatureCount, classCount);
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.leaf(taskName(), taskVolume(graph, config));
     }
 
     @TestOnly

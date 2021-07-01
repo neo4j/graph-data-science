@@ -26,12 +26,12 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPred
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.List;
 
@@ -66,7 +66,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         boolean produceProbabilities,
         List<String> featureProperties,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.predictor = predictor;
         this.graph = graph;
@@ -75,12 +75,12 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         this.produceProbabilities = produceProbabilities;
         this.featureProperties = featureProperties;
         this.tracker = tracker;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
     public NodeLogisticRegressionResult compute() {
-        progressLogger.logStart();
+        progressTracker.beginSubTask();
         var predictedProbabilities = initProbabilities();
         var predictedClasses = HugeLongArray.newArray(graph.nodeCount(), tracker);
         var consumer = new NodeClassificationPredictConsumer(
@@ -90,11 +90,11 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
             predictedProbabilities,
             predictedClasses,
             featureProperties,
-            progressLogger
+            progressTracker
         );
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(consumer, concurrency);
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
         return NodeLogisticRegressionResult.of(predictedClasses, predictedProbabilities);
     }
 

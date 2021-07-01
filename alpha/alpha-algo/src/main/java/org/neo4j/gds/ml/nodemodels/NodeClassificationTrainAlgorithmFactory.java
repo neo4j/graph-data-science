@@ -21,10 +21,14 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
+
+import java.util.List;
 
 public class NodeClassificationTrainAlgorithmFactory extends AbstractAlgorithmFactory<NodeClassificationTrain, NodeClassificationTrainConfig> {
 
@@ -33,9 +37,9 @@ public class NodeClassificationTrainAlgorithmFactory extends AbstractAlgorithmFa
         Graph graph,
         NodeClassificationTrainConfig configuration,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
-        return NodeClassificationTrain.create(graph, configuration, tracker, progressLogger);
+        return NodeClassificationTrain.create(graph, configuration, tracker, progressTracker);
     }
 
     @Override
@@ -53,5 +57,26 @@ public class NodeClassificationTrainAlgorithmFactory extends AbstractAlgorithmFa
     @Override
     protected String taskName() {
         return "NCTrain";
+    }
+
+    @Override
+    public Task progressTask(
+        Graph graph, NodeClassificationTrainConfig config
+    ) {
+        return Tasks.task(
+            taskName(),
+            Tasks.leaf("ShuffleAndSplit"),
+            Tasks.iterativeOpen(
+                "SelectBestModel",
+                () -> List.of(
+                    Tasks.leaf("Train"),
+                    Tasks.leaf("Evaluate")
+                )
+            ),
+            Tasks.leaf("SelectModel"),
+            Tasks.leaf("TrainSelectedOnRemainder"),
+            Tasks.leaf("EvaluateSelectedModel"),
+            Tasks.leaf("RetrainSelectedModel")
+        );
     }
 }

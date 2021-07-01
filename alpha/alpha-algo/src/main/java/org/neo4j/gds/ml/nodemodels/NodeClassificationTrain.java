@@ -39,12 +39,12 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.Collection;
@@ -156,7 +156,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         Graph graph,
         NodeClassificationTrainConfig config,
         AllocationTracker allocationTracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var targetsAndClasses = computeGlobalTargetsAndClasses(targetNodeProperty, graph.nodeCount(), allocationTracker);
@@ -167,7 +167,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         nodeIds.setAll(i -> i);
         var trainStats = StatsMap.create(metrics);
         var validationStats = StatsMap.create(metrics);
-        return new NodeClassificationTrain(graph, config, targets, classCounts, metrics, nodeIds, trainStats, validationStats, allocationTracker, progressLogger);
+        return new NodeClassificationTrain(graph, config, targets, classCounts, metrics, nodeIds, trainStats, validationStats, allocationTracker, progressTracker);
     }
 
     private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(NodeProperties targetNodeProperty, long nodeCount, AllocationTracker allocationTracker) {
@@ -197,7 +197,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         StatsMap trainStats,
         StatsMap validationStats,
         AllocationTracker allocationTracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.config = config;
@@ -208,7 +208,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         this.trainStats = trainStats;
         this.validationStats = validationStats;
         this.allocationTracker = allocationTracker;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -221,11 +221,12 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
     @Override
     public Model<NodeLogisticRegressionData, NodeClassificationTrainConfig> compute() {
-        progressLogger.logStart(":: Shuffle and Split");
+        progressTracker.beginSubTask();
+        progressTracker.beginSubTask();
         ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
         var outerSplit = new FractionSplitter(allocationTracker).split(nodeIds, 1 - config.holdoutFraction());
         var innerSplits = new StratifiedKFoldSplitter(config.validationFolds(), outerSplit.trainSet(), targets, config.randomSeed()).splits();
-        progressLogger.logFinish(":: Shuffle and Split");
+        progressTracker.endSubTask();
 
         var modelSelectResult = selectBestModel(innerSplits);
         var bestParameters = modelSelectResult.bestParameters();
@@ -233,11 +234,13 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
 
         var retrainedModelData = retrainBestModel(bestParameters);
 
+        progressTracker.endSubTask();
         return createModel(bestParameters, metricResults, retrainedModelData);
     }
 
     private ModelSelectResult selectBestModel(List<NodeSplit> splits) {
         var paramConfigCounter = 1;
+        progressTracker.beginSubTask();
         for (var modelParams : config.paramsConfig()) {
             var candidateMessage = formatWithLocale(":: Model Candidate %s of %s", paramConfigCounter++, config.paramsConfig().size());
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, splits.size());
@@ -249,33 +252,34 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
 
-                progressLogger.logStart(candidateAndSplitMessage + " :: Train");
+                progressTracker.beginSubTask();
                 // The best upper bound we have for bounding progress is maxEpochs, so tell the user what that value is
                 int maxEpochs = modelParams.maxEpochs();
-                progressLogger.logMessage(formatWithLocale(
+                progressTracker.progressLogger().logMessage(formatWithLocale(
                     candidateAndSplitMessage + " :: Train :: Max iterations: %s",
                     maxEpochs
                 ));
-                progressLogger.reset(maxEpochs);
+                progressTracker.setVolume(maxEpochs);
                 var modelData = trainModel(trainSet, modelParams);
-                progressLogger.logFinish(candidateAndSplitMessage + " :: Train");
+                progressTracker.endSubTask();
 
-                progressLogger.logStart(candidateAndSplitMessage + " :: Evaluate");
-                progressLogger.reset(validationSet.size() + trainSet.size());
+                progressTracker.beginSubTask();
+                progressTracker.setVolume(validationSet.size() + trainSet.size());
                 computeMetrics(classCounts, validationSet, modelData, metrics).forEach(validationStatsBuilder::update);
                 computeMetrics(classCounts, trainSet, modelData, metrics).forEach(trainStatsBuilder::update);
-                progressLogger.logFinish(candidateAndSplitMessage + " :: Evaluate");
+                progressTracker.endSubTask();
             }
             metrics.forEach(metric -> {
                 validationStats.add(metric, validationStatsBuilder.build(metric));
                 trainStats.add(metric, trainStatsBuilder.build(metric));
             });
         }
+        progressTracker.endSubTask();
 
-        progressLogger.logStart(":: Select Model");
+        progressTracker.beginSubTask();
         var mainMetric = metrics.get(0);
         var bestModelStats = validationStats.pickBestModelStats(mainMetric);
-        progressLogger.logFinish(":: Select Model");
+        progressTracker.endSubTask();
 
         return ModelSelectResult.of(bestModelStats.params(), trainStats, validationStats);
     }
@@ -286,26 +290,26 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         NodeLogisticRegressionTrainConfig bestParameters
     ) {
         int maxEpochs = bestParameters.maxEpochs();
-        progressLogger.logStart(":: Train Selected on Remainder");
-        progressLogger.reset(maxEpochs);
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(maxEpochs);
         NodeLogisticRegressionData bestModelData = trainModel(outerSplit.trainSet(), bestParameters);
-        progressLogger.logFinish(":: Train Selected on Remainder");
+        progressTracker.endSubTask();
 
-        progressLogger.logStart(":: Evaluate Selected Model");
-        progressLogger.reset(outerSplit.testSet().size() + outerSplit.trainSet().size());
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(outerSplit.testSet().size() + outerSplit.trainSet().size());
         var testMetrics = computeMetrics(classCounts, outerSplit.testSet(), bestModelData, metrics);
         var outerTrainMetrics = computeMetrics(classCounts, outerSplit.trainSet(), bestModelData, metrics);
-        progressLogger.logFinish(":: Evaluate Selected Model");
+        progressTracker.endSubTask();
 
         return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
     }
 
     private NodeLogisticRegressionData retrainBestModel(NodeLogisticRegressionTrainConfig bestParameters) {
         int maxEpochs = bestParameters.maxEpochs();
-        progressLogger.logStart(":: Retrain Selected Model");
-        progressLogger.reset(maxEpochs);
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(maxEpochs);
         var retrainedModelData = trainModel(nodeIds, bestParameters);
-        progressLogger.logFinish(":: Retrain Selected Model");
+        progressTracker.endSubTask();
         return retrainedModelData;
     }
 
@@ -352,7 +356,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         HugeLongArray trainSet,
         NodeLogisticRegressionTrainConfig nlrConfig
     ) {
-        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressLogger);
+        var train = new NodeLogisticRegressionTrain(graph, trainSet, nlrConfig, progressTracker);
         return train.compute();
     }
 
@@ -374,7 +378,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
             null,
             predictedClasses,
             config.featureProperties(),
-            progressLogger
+            progressTracker
         );
 
         var queue = new BatchQueue(evaluationSet.size());

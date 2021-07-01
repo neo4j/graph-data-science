@@ -21,13 +21,13 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
+import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -39,7 +39,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.nodemodels.metrics.MetricSpecificationTest.allValidMetricSpecifications;
-import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
 
 @GdlExtension
 class NodeClassificationEndToEndTest {
@@ -95,7 +94,7 @@ class NodeClassificationEndToEndTest {
         var config = createConfig(List.of(model2), List.of("a", "b"), metric);
 
 
-        var ncTrain = NodeClassificationTrain.create(trainGraph, config, AllocationTracker.empty(), NULL_LOGGER);
+        var ncTrain = NodeClassificationTrain.create(trainGraph, config, AllocationTracker.empty(), ProgressTracker.NULL_TRACKER);
 
         var modelBeforeSerialization = ncTrain.compute();
 
@@ -129,7 +128,7 @@ class NodeClassificationEndToEndTest {
             false,
             featureProperties,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
     }
 
