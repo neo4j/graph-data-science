@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
@@ -35,7 +35,7 @@ public class PositiveSampleProducer {
     private final HugeDoubleArray samplingProbabilities;
     private final int prefixWindowSize;
     private final int postfixWindowSize;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private long[] currentWalk;
     private int centerWordIndex;
     private long currentCenterWord;
@@ -47,10 +47,10 @@ public class PositiveSampleProducer {
         Iterator<long[]> walks,
         HugeDoubleArray samplingProbabilities,
         int windowSize,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.walks = walks;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.samplingProbabilities = samplingProbabilities;
 
         prefixWindowSize = ceilDiv(windowSize - 1, 2);
@@ -81,11 +81,11 @@ public class PositiveSampleProducer {
         while (walks.hasNext() && filteredWalkLength < 2) {
             walk = walks.next();
             filteredWalkLength = filter(walk);
-            progressLogger.logProgress();
+            progressTracker.logProgress();
         }
 
         if (filteredWalkLength >= 2) {
-            progressLogger.logProgress();
+            progressTracker.logProgress();
             this.currentWalk = walk;
             centerWordIndex = -1;
             return nextCenterWord();

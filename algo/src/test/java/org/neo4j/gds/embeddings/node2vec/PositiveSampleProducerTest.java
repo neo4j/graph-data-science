@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +62,7 @@ class PositiveSampleProducerTest {
             walks.iterator(0, nbrOfWalks),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
             10,
-            TestProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var counter = 0L;
@@ -90,7 +90,7 @@ class PositiveSampleProducerTest {
             walks.iterator(0, nbrOfWalks),
             probabilities,
             10,
-            TestProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
         // does not overflow the stack = passes test
 
@@ -114,7 +114,7 @@ class PositiveSampleProducerTest {
             walks.iterator(0, nbrOfWalks / 2),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
             10,
-            TestProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var counter = 0L;
@@ -139,7 +139,7 @@ class PositiveSampleProducerTest {
             walks.iterator(0, walks.size()),
             centerNodeProbabilities,
             windowSize,
-            TestProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
         while (producer.next(buffer)) {
             actualPairs.add(Pair.of(buffer[0], buffer[1]));
@@ -162,7 +162,7 @@ class PositiveSampleProducerTest {
             walks.iterator(0, 2),
             centerNodeProbabilities,
             3,
-            TestProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
         while (producer.next(buffer)) {
             actualPairs.add(Pair.of(buffer[0], buffer[1]));
@@ -208,7 +208,7 @@ class PositiveSampleProducerTest {
             walks.iterator(0, walks.size()),
             centerNodeProbabilities,
             3,
-            TestProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         while (producer.next(buffer)) {

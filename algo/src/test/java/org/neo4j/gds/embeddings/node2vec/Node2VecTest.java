@@ -30,11 +30,12 @@ import org.neo4j.graphalgo.AlgoTestBase;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.List;
@@ -80,7 +81,7 @@ class Node2VecTest extends AlgoTestBase {
         HugeObjectArray<FloatVector> node2Vec = new Node2Vec(
             graph,
             ImmutableNode2VecStreamConfig.builder().embeddingDimension(embeddingDimension).build(),
-            progressLogger,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         ).compute();
 
@@ -108,7 +109,7 @@ class Node2VecTest extends AlgoTestBase {
         new Node2Vec(
             graph,
             config,
-            testLogger,
+            new TestProgressTracker(testLogger),
             AllocationTracker.empty()
         ).compute();
 
@@ -150,7 +151,7 @@ class Node2VecTest extends AlgoTestBase {
             .relationshipWeightProperty("weight")
             .build();
 
-        var node2Vec = new Node2Vec(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty());
+        var node2Vec = new Node2Vec(graph, config, ProgressTracker.NULL_TRACKER, AllocationTracker.empty());
 
         assertThatThrownBy(node2Vec::compute)
             .isInstanceOf(RuntimeException.class)

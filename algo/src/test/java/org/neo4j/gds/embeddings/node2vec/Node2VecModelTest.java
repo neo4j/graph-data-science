@@ -20,9 +20,9 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.core.utils.Intersections;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Random;
 import java.util.stream.LongStream;
@@ -80,7 +80,7 @@ class Node2VecModelTest {
             config,
             walks,
             probabilitiesBuilder.build(),
-            TestProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 

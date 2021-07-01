@@ -22,12 +22,12 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> {
 
@@ -47,10 +47,10 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
             .build();
     }
 
-    public Node2Vec(Graph graph, Node2VecBaseConfig config, ProgressLogger progressLogger, AllocationTracker tracker) {
+    public Node2Vec(Graph graph, Node2VecBaseConfig config, ProgressTracker progressTracker, AllocationTracker tracker) {
         this.graph = graph;
         this.config = config;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.tracker = tracker;
     }
 
@@ -66,7 +66,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
             config.inOutFactor(),
             config.randomSeed(),
             tracker,
-            progressLogger
+            progressTracker
         );
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
@@ -88,7 +88,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
             config,
             walks,
             probabilitiesBuilder.build(),
-            progressLogger,
+            progressTracker,
             tracker
         );
 

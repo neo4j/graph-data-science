@@ -23,7 +23,6 @@ import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.BitUtil;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -31,12 +30,12 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Random;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Node2VecModel {
 
@@ -47,7 +46,7 @@ public class Node2VecModel {
     private final Node2VecBaseConfig config;
     private final CompressedRandomWalks walks;
     private final RandomWalkProbabilities randomWalkProbabilities;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final AllocationTracker tracker;
 
     public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
@@ -70,13 +69,13 @@ public class Node2VecModel {
         Node2VecBaseConfig config,
         CompressedRandomWalks walks,
         RandomWalkProbabilities randomWalkProbabilities,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.config = config;
         this.walks = walks;
         this.randomWalkProbabilities = randomWalkProbabilities;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.negativeSamples = new NegativeSampleProducer(randomWalkProbabilities.negativeSamplingDistribution());
         this.tracker = tracker;
 
@@ -85,12 +84,11 @@ public class Node2VecModel {
     }
 
     void train() {
-        progressLogger.logMessage(":: Training :: Start");
+        progressTracker.beginSubTask();
         var learningRateAlpha = (config.initialLearningRate() - config.minLearningRate()) / config.iterations();
 
         for (int iteration = 0; iteration < config.iterations(); iteration++) {
-            progressLogger.reset(walks.size());
-            progressLogger.logMessage(formatWithLocale(":: Iteration %d :: Start", iteration + 1));
+            progressTracker.beginSubTask();
 
             var learningRate = (float) Math.max(
                 config.minLearningRate(),
@@ -106,7 +104,7 @@ public class Node2VecModel {
                         walks.iterator(partition.startNode(), partition.nodeCount()),
                         randomWalkProbabilities.positiveSamplingProbabilities(),
                         config.windowSize(),
-                        progressLogger
+                        progressTracker
                     );
 
                     return new TrainingTask(
@@ -122,9 +120,9 @@ public class Node2VecModel {
             );
 
             ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
-            progressLogger.logMessage(formatWithLocale(":: Iteration %d :: Finished", iteration + 1));
+            progressTracker.endSubTask();
         }
-        progressLogger.logMessage(":: Training :: Finished");
+        progressTracker.endSubTask();
     }
 
     public HugeObjectArray<FloatVector> getEmbeddings() {

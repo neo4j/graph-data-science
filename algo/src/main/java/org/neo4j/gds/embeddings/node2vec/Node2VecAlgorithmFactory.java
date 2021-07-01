@@ -25,7 +25,13 @@ import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
+import org.neo4j.graphalgo.degree.DegreeCentralityFactory;
 import org.neo4j.logging.Log;
+
+import java.util.List;
 
 import static java.lang.Math.multiplyExact;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -47,12 +53,29 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> impleme
             eventTracker
         );
         validateConfig(configuration, graph);
-        return new Node2Vec(graph, configuration, progressLogger, tracker);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        return new Node2Vec(graph, configuration, progressTracker, tracker);
     }
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
         return Node2Vec.memoryEstimation(configuration);
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "Node2Vec",
+            Tasks.task(
+                "RandomWalk",
+                DegreeCentralityFactory.degreeCentralityProgressTask(graph)
+            ),
+            Tasks.iterativeFixed(
+                "train",
+                () -> List.of(Tasks.leaf("produce positive samples")),
+                config.iterations()
+            )
+        );
     }
 
     private void validateConfig(CONFIG config, Graph graph) {

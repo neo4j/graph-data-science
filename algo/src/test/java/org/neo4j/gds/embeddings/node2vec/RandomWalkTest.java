@@ -31,8 +31,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -81,7 +81,7 @@ class RandomWalkTest extends AlgoTestBase {
             config.inOutFactor(),
             config.randomSeed(),
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
@@ -129,7 +129,7 @@ class RandomWalkTest extends AlgoTestBase {
             config.inOutFactor(),
             randomSeed,
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         return randomWalk.compute().collect(Collectors.toList());
@@ -150,7 +150,7 @@ class RandomWalkTest extends AlgoTestBase {
             config.inOutFactor(),
             config.randomSeed(),
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         int expectedNumberOfWalks = config.walksPerNode() * 3;
@@ -187,7 +187,7 @@ class RandomWalkTest extends AlgoTestBase {
             1,
             of(42L),
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -244,7 +244,7 @@ class RandomWalkTest extends AlgoTestBase {
             100000,
             of(87L),
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -289,7 +289,7 @@ class RandomWalkTest extends AlgoTestBase {
             1,
             of(23L),
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -322,7 +322,7 @@ class RandomWalkTest extends AlgoTestBase {
                 1,
                 of(23L),
                 AllocationTracker.empty(),
-                ProgressLogger.NULL_LOGGER
+                ProgressTracker.NULL_TRACKER
             )
         ).isInstanceOf(RuntimeException.class)
             .hasMessage(
@@ -355,7 +355,7 @@ class RandomWalkTest extends AlgoTestBase {
             1,
             of(23L),
             AllocationTracker.empty(),
-            ProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         assertThat(randomWalk.compute().collect(Collectors.toList()))

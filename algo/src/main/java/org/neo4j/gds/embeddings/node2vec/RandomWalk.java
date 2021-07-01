@@ -27,8 +27,8 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.core.utils.queue.QueueBasedSpliterator;
 import org.neo4j.graphalgo.degree.DegreeCentrality;
 import org.neo4j.graphalgo.degree.ImmutableDegreeCentralityConfig;
@@ -57,7 +57,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
     private final AtomicLong nodeIndex;
     private final long randomSeed;
     private final AllocationTracker tracker;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
 
     private RandomWalk(
         Graph graph,
@@ -69,7 +69,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         double inOutParam,
         long randomSeed,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.steps = steps;
@@ -80,7 +80,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         this.inOutParam = inOutParam;
         this.randomSeed = randomSeed;
         this.tracker = tracker;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         nodeIndex = new AtomicLong(0);
     }
 
@@ -94,7 +94,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
         double inOutParam,
         Optional<Long> randomSeed,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         var seed = randomSeed.orElseGet(() -> new Random().nextLong());
 
@@ -108,7 +108,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             );
         }
 
-        return new RandomWalk(graph, steps, concurrency, walksPerNode, queueSize, returnParam, inOutParam, seed, tracker, progressLogger);
+        return new RandomWalk(graph, steps, concurrency, walksPerNode, queueSize, returnParam, inOutParam, seed, tracker, progressTracker);
     }
 
     @Override
@@ -159,7 +159,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             graph,
             Pools.DEFAULT,
             config,
-            progressLogger,
+            progressTracker,
             tracker
         ).compute();
     }
