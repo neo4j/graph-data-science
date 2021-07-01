@@ -53,9 +53,25 @@
         </d:tocentry>
     </d:tocentry>
 
-    <d:tocentry linkend="management-ops"><?dbhtml filename="management-ops/index.html"?>
-        <d:tocentry linkend="graph-catalog-ops"><?dbhtml filename="management-ops/graph-catalog-ops/index.html"?>
-        </d:tocentry>
+        <d:tocentry linkend="management-ops"><?dbhtml filename="management-ops/index.html"?>
+            <d:tocentry linkend="graph-catalog-ops"><?dbhtml filename="management-ops/graph-catalog-ops/index.html"?>
+                <d:tocentry linkend="catalog-graph-create"><?dbhtml filename="graph-create/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="catalog-graph-list"><?dbhtml filename="graph-list/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="catalog-graph-exists"><?dbhtml filename="graph-exists/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="catalog-graph-drop"><?dbhtml filename="graph-drop/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="catalog-graph-create-subgraph"><?dbhtml filename="create-subgraph/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="graph-catalog-node-ops"><?dbhtml filename="graph-catalog-node-ops/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="graph-catalog-relationship-ops"><?dbhtml filename="graph-catalog-relationship-ops/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="graph-catalog-export-ops"><?dbhtml filename="graph-catalog-export-ops/index.html"?>
+                </d:tocentry>
+            </d:tocentry>
         <d:tocentry linkend="native-projection"><?dbhtml filename="management-ops/native-projection/index.html"?>
         </d:tocentry>
         <d:tocentry linkend="cypher-projection"><?dbhtml filename="management-ops/cypher-projection/index.html"?>

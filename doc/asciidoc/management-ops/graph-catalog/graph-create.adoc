@@ -1,5 +1,5 @@
 [[catalog-graph-create]]
-= Creating graphs in the catalog
+= Creating graphs
 
 A projected graph can be stored in the catalog under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.

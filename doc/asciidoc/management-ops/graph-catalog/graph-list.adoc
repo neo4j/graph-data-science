@@ -1,5 +1,5 @@
 [[catalog-graph-list]]
-= Listing graphs in the catalog
+= Listing graphs
 
 Information about graphs in the catalog can be listed using the `gds.graph.list()` procedure.
 The procedure takes an optional parameter `graphName`:

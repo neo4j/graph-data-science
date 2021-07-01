@@ -1,0 +1,8 @@
+[[graph-catalog-node-ops]]
+= Node operations
+
+include::graph-stream-node-properties.adoc[leveloffset=+1]
+
+include::graph-remove-node-properties.adoc[leveloffset=+1]
+
+include::graph-write-node-properties.adoc[leveloffset=+1]
