@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
@@ -30,14 +31,17 @@ public final class PageReordering {
     interface PageOrdering {
         int[] ordering();
 
+        int[] reverseOrdering();
+
         long[] pageOffsets();
     }
 
     public static PageOrdering ordering(HugeLongArray offsets, int pageCount, int pageShift) {
         var cursor = offsets.initCursor(offsets.newCursor());
 
-        long[] pageOffsets = new long[pageCount];
+        long[] pageOffsets = new long[pageCount + 1];
         int[] ordering = new int[pageCount];
+        int[] reverseOrdering = new int[pageCount];
 
         int idx = 0;
         int pastPageIdx = -1;
@@ -53,14 +57,21 @@ public final class PageReordering {
 
                 if (pageIdx != pastPageIdx) {
                     ordering[pageIdx] = idx;
+                    reverseOrdering[idx] = pageIdx;
                     pageOffsets[idx] = base + i;
                     pastPageIdx = pageIdx;
                     idx = idx + 1;
                 }
             }
         }
+        pageOffsets[idx] = offsets.size();
 
-        return ImmutablePageOrdering.of(ordering, pageOffsets);
+        return ImmutablePageOrdering
+            .builder()
+            .ordering(ordering)
+            .reverseOrdering(reverseOrdering)
+            .pageOffsets(pageOffsets)
+            .build();
     }
 
     public static <PAGE> int[] reorder(PAGE[] pages, int[] ordering) {
@@ -99,8 +110,26 @@ public final class PageReordering {
         return swaps;
     }
 
-    public static void rewriteOffsets(HugeLongArray offsets, int[] ordering, int pageShift) {
+    public static HugeLongArray sortOffsets(
+        HugeLongArray offsets,
+        PageOrdering pageOrdering,
+        AllocationTracker tracker
+    ) {
+        int[] ordering = pageOrdering.ordering();
+        long[] pageOffsets = pageOrdering.pageOffsets();
 
+        var newOffsets = HugeLongArray.newArray(offsets.size(), tracker);
+        long newIdx = 0;
+
+        for (int sourcePage : ordering) {
+            long startIdx = pageOffsets[sourcePage];
+            long endIdx = pageOffsets[sourcePage + 1];
+
+            for (long idx = startIdx; idx < endIdx; idx++) {
+                newOffsets.set(newIdx++, offsets.get(idx));
+            }
+        }
+        return newOffsets;
     }
 
     private PageReordering() {}
