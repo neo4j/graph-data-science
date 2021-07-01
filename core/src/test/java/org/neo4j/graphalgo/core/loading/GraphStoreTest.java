@@ -150,7 +150,7 @@ class GraphStoreTest extends BaseTest {
             0L,
             Orientation.NATURAL,
             false,
-            TransientCompressedList.of(new byte[0][0], HugeIntArray.of(), HugeLongArray.of()),
+            new TransientCompressedList(new byte[0][0], HugeIntArray.of(), HugeLongArray.of()),
             null,
             42.0
         );

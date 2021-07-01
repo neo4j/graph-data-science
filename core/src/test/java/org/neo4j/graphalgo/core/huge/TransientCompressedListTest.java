@@ -30,9 +30,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.core.huge.TransientCompressedList.PAGE_MASK;
-import static org.neo4j.graphalgo.core.huge.TransientCompressedList.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.huge.TransientCompressedList.computeAdjacencyByteSize;
+import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_MASK;
+import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SHIFT;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 
 class TransientCompressedListTest {

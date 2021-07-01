@@ -19,8 +19,13 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.graphalgo.core.utils.PageReordering;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
+
+import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SHIFT;
 
 public interface CsrListBuilder<PAGE, T> {
 
@@ -36,5 +41,14 @@ public interface CsrListBuilder<PAGE, T> {
 
         @Override
         void close();
+    }
+
+    default HugeLongArray reorder(PAGE[] pages, HugeLongArray offsets, AllocationTracker tracker) {
+        if (GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled() && pages.length > 0) {
+            var ordering = PageReordering.ordering(offsets, pages.length, PAGE_SHIFT);
+            PageReordering.reorder(pages, ordering.ordering());
+            return PageReordering.sortOffsets(offsets, ordering, tracker);
+        }
+        return offsets;
     }
 }
