@@ -7,7 +7,7 @@ We can check if a graph is stored in the catalog by looking up its name.
 
 [.graph-exists-syntax]
 --
-.Remove a graph from the catalog:
+.Check if a graph exists in the catalog:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.exists(graphName: String) YIELD
@@ -35,11 +35,12 @@ CALL gds.graph.exists(graphName: String) YIELD
 
 Additionally, to the procedure, we provide a function which directly returns the exists field from the procedure.
 
-.Remove a graph from the catalog:
+.Check if a graph exists in the catalog:
 [source, cypher, role=noplay]
 ----
 RETURN gds.graph.exists(graphName: String)::Boolean
 ----
+
 
 == Examples
 
@@ -87,23 +88,24 @@ RETURN graphName, exists
 
 We can verify the projected `persons` graph exists while a `books` graph does not.
 
+
 == Function
 
 As an alternative to the procedure, we can also use the corresponding function.
-Opposed to procedures, functions can be inlined in other cypher-statements such as `RETURN` or `WHERE`.
+Unlike procedures, functions can be inlined in other cypher-statements such as `RETURN` or `WHERE`.
 
 [role=query-example]
 --
-.Check if the ` graph exists in the catalog:
+.Check if graphs exists in the catalog:
 [source, cypher, role=noplay]
 ----
-RETURN gds.graph.exists('persons') AS personExists, gds.graph.exists('books') AS bookExists
+RETURN gds.graph.exists('persons') AS personsExists, gds.graph.exists('books') AS booksExists
 ----
 
 .Results
 [opts="header",cols="1,1"]
 |===
-| personExists      | bookExists
+| personsExists      | booksExists
 | true              | false
 |===
 --
