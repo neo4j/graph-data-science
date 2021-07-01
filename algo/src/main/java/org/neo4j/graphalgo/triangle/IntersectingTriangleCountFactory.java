@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.triangle;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -29,6 +30,9 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> implements AlgorithmFactory<IntersectingTriangleCount, CONFIG> {
@@ -47,12 +51,14 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
             eventTracker
         );
 
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+
         return IntersectingTriangleCount.create(
             graph,
             configuration,
             Pools.DEFAULT,
             tracker,
-            progressLogger
+            progressTracker
         );
     }
 
@@ -62,5 +68,18 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
             .builder(IntersectingTriangleCount.class)
             .perNode("triangle-counts", HugeAtomicLongArray::memoryEstimation)
             .build();
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return triangleCountProgressTask(graph);
+    }
+
+    @NotNull
+    public static Task triangleCountProgressTask(Graph graph) {
+        return Tasks.task(
+            "IntersectingTriangleCount",
+            Tasks.leaf("compute", graph.nodeCount())
+        );
     }
 }

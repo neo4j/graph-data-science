@@ -27,9 +27,9 @@ import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.triangle.intersect.ImmutableRelationshipIntersectConfig;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectConfig;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectFactory;
@@ -75,14 +75,14 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         TriangleCountBaseConfig config,
         ExecutorService executorService,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         var factory = RelationshipIntersectFactoryLocator
             .lookup(graph)
             .orElseThrow(
                 () -> new IllegalArgumentException("No relationship intersect factory registered for graph: " + graph.getClass())
             );
-        return new IntersectingTriangleCount(graph, factory, config, executorService, tracker, progressLogger);
+        return new IntersectingTriangleCount(graph, factory, config, executorService, tracker, progressTracker);
     }
 
     @TestOnly
@@ -91,7 +91,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         TriangleCountBaseConfig config,
         ExecutorService executorService
     ) {
-        return create(graph, config, executorService, AllocationTracker.empty(), ProgressLogger.NULL_LOGGER);
+        return create(graph, config, executorService, AllocationTracker.empty(), ProgressTracker.NULL_TRACKER);
     }
 
     private IntersectingTriangleCount(
@@ -100,7 +100,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         TriangleCountBaseConfig config,
         ExecutorService executorService,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.intersectFactory = intersectFactory;
@@ -110,7 +110,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         this.triangleCounts = HugeAtomicLongArray.newArray(graph.nodeCount(), tracker);
         this.globalTriangleCounter = new LongAdder();
         this.queue = new AtomicLong();
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -162,7 +162,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
                 } else {
                     triangleCounts.set(node, EXCLUDED_NODE_TRIANGLE_COUNT);
                 }
-                getProgressLogger().logProgress();
+                progressTracker.logProgress();
             }
         }
 
