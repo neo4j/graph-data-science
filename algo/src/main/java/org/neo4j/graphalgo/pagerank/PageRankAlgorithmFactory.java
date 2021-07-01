@@ -29,10 +29,13 @@ import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.graphalgo.degree.DegreeCentrality;
+import org.neo4j.graphalgo.degree.DegreeCentralityFactory;
 import org.neo4j.graphalgo.degree.ImmutableDegreeCentralityConfig;
 
 import java.util.function.LongToDoubleFunction;
@@ -73,7 +76,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
         Graph graph,
         CONFIG configuration,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         PregelComputation<PageRankConfig> computation;
         double deltaCoefficient = 1;
@@ -82,7 +85,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
             graph,
             configuration,
             tracker,
-            progressLogger
+            progressTracker
         );
 
         var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
@@ -111,7 +114,15 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
             computation = new PageRankComputation(configuration, mappedSourceNodes, degreeFunction, deltaCoefficient);
         }
 
-        return new PageRankAlgorithm(graph, configuration, computation, mode, Pools.DEFAULT, tracker, progressLogger);
+        return new PageRankAlgorithm(graph, configuration, computation, mode, Pools.DEFAULT, tracker, progressTracker);
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "PageRank",
+            DegreeCentralityFactory.degreeCentralityProgressTask(graph)
+        );
     }
 
     @NotNull
@@ -119,11 +130,8 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
         Graph graph,
         CONFIG configuration,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
-        var rootTaskName = progressLogger.getTask();
-        progressLogger.setTask(rootTaskName + " :: Degree computation");
-
         var config = ImmutableDegreeCentralityConfig.builder()
             .concurrency(configuration.concurrency())
             .relationshipWeightProperty(configuration.relationshipWeightProperty())
@@ -133,14 +141,11 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
             graph,
             Pools.DEFAULT,
             config,
-            progressLogger,
+            progressTracker,
             tracker
         );
 
         var degrees = degreeCentrality.compute();
-
-        progressLogger.setTask(rootTaskName);
-        progressLogger.reset(taskVolume(graph, configuration));
         return degrees::get;
     }
 

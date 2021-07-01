@@ -462,7 +462,7 @@ public class PregelProcTest extends BaseProcTest {
             ProgressEventTracker eventTracker,
             boolean throwInCompute
         ) {
-            this.progressLogger = new BatchingProgressLogger(log, 42, "test", 1, eventTracker);
+            var progressLogger = new BatchingProgressLogger(log, 42, "test", 1, eventTracker);
             this.pregelJob = Pregel.create(graph, configuration, new PregelComputation<>() {
 
                 @Override

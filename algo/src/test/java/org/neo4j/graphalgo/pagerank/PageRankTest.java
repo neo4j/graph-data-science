@@ -31,11 +31,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -172,7 +173,9 @@ class PageRankTest {
                 config.concurrency()
             );
 
-            runOnPregel(graph, config, Mode.PAGE_RANK, testLogger);
+            var testTracker = new TestProgressTracker(testLogger);
+
+            runOnPregel(graph, config, Mode.PAGE_RANK, testTracker);
 
             testLogger.getProgresses().forEach(progress -> assertEquals(graph.nodeCount(), progress.get()));
 
@@ -628,16 +631,16 @@ class PageRankTest {
     }
 
     PageRankResult runOnPregel(Graph graph, PageRankConfig config, Mode mode) {
-        return runOnPregel(graph, config, mode, ProgressLogger.NULL_LOGGER);
+        return runOnPregel(graph, config, mode, ProgressTracker.NULL_TRACKER);
     }
 
-    PageRankResult runOnPregel(Graph graph, PageRankConfig config, Mode mode, ProgressLogger progressLogger) {
+    PageRankResult runOnPregel(Graph graph, PageRankConfig config, Mode mode, ProgressTracker progressTracker) {
         return new PageRankAlgorithmFactory<>(mode)
             .build(
                 graph,
                 config,
                 AllocationTracker.empty(),
-                progressLogger
+                progressTracker
             )
             .compute();
     }
