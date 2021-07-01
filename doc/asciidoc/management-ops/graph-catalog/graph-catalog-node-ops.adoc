@@ -1,6 +1,11 @@
 [[graph-catalog-node-ops]]
 = Node operations
 
+[abstract]
+--
+This section details the operations available over node-properties stored in projected graphs within the Neo4j Graph Data Science library.
+--
+
 include::graph-stream-node-properties.adoc[leveloffset=+1]
 
 include::graph-remove-node-properties.adoc[leveloffset=+1]
