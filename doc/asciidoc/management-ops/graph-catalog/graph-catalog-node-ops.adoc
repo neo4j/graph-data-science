@@ -22,8 +22,8 @@ This is useful to free up main memory or to remove accidentally created node pro
 
 == Syntax
 
-.Exporting Node Properties syntax per mode
-[.tabbed-example]
+.Syntax descriptions of the different operations over node properties
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]
