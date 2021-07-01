@@ -40,12 +40,35 @@ public interface TestMethodRunner {
     }
 
     static Stream<TestMethodRunner> adjacencyCompressions() {
-        TestMethodRunner compressed = CheckedRunnable::checkedRun;
-        TestMethodRunner uncompressed = TestMethodRunner::runWithUncompressedAdjacencyList;
-        return Stream.of(compressed, uncompressed);
+        return Stream.of(
+            TestMethodRunner::runCompressedUnordered,
+            TestMethodRunner::runCompressedOrdered,
+            TestMethodRunner::runUncompressedUnordered,
+            TestMethodRunner::runUncompressedOrdered
+        );
     }
 
-    static <E extends Exception> void runWithUncompressedAdjacencyList(CheckedRunnable<E> code) throws E {
-        setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(code));
+    static <E extends Exception> void runCompressedUnordered(CheckedRunnable<E> code) throws E {
+        setToEnterpriseAndRun(() ->
+            GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.disableAndRun(() ->
+                GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.disableAndRun(code)));
+    }
+
+    static <E extends Exception> void runCompressedOrdered(CheckedRunnable<E> code) throws E {
+        setToEnterpriseAndRun(() ->
+            GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.disableAndRun(() ->
+                GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.enableAndRun(code)));
+    }
+
+    static <E extends Exception> void runUncompressedUnordered(CheckedRunnable<E> code) throws E {
+        setToEnterpriseAndRun(() ->
+            GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(() ->
+                GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.disableAndRun(code)));
+    }
+
+    static <E extends Exception> void runUncompressedOrdered(CheckedRunnable<E> code) throws E {
+        setToEnterpriseAndRun(() ->
+            GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.enableAndRun(() ->
+                GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.enableAndRun(code)));
     }
 }

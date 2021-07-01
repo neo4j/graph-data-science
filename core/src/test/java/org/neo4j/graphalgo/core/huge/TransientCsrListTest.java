@@ -45,12 +45,8 @@ import static org.neo4j.graphalgo.core.huge.AdjacencyDecompressingReader.CHUNK_S
 
 class TransientCsrListTest {
 
-    static Stream<TestMethodRunner> methodRunners() {
-        return TestMethodRunner.adjacencyCompressions();
-    }
-
     @ParameterizedTest
-    @MethodSource("methodRunners")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void shouldPeekValues(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 3, 3, 7});
@@ -61,7 +57,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("methodRunners")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void shouldSkipUntilLargerValue(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -73,7 +69,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("methodRunners")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void shouldAdvanceUntilEqualValue(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -86,7 +82,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("methodRunners")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void advanceOutOfUpperBound(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -96,7 +92,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("methodRunners")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void advanceOutOfLowerBound(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -106,7 +102,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("methodRunners")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void skipUntilOutOfUpperBound(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -116,7 +112,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("methodRunners")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void skipUntilOutOfLowerBound(TestMethodRunner runner) {
         runner.run(() -> {
             var adjacencyCursor = adjacencyCursorFromTargets(new long[]{0, 1, 2, 2, 3});
@@ -126,7 +122,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("methodRunners")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void shouldPeekAcrossBlocks(TestMethodRunner runner) {
         runner.run(() -> {
             int targetCount = 2 * CHUNK_SIZE;
@@ -148,7 +144,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("methodRunners")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void shouldNextAcrossBlocks(TestMethodRunner runner) {
         runner.run(() -> {
             int targetCount = 2 * CHUNK_SIZE;
@@ -175,7 +171,7 @@ class TransientCsrListTest {
     }
 
     @ParameterizedTest
-    @MethodSource("methodRunners")
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
     void shouldWorkWithVeryDenseNodes(TestMethodRunner runner) {
         runner.run(() -> {
             int nodeCount = 1_000_000;
