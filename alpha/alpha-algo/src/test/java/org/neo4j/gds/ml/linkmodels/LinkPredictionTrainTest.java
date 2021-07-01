@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -146,7 +147,7 @@ class LinkPredictionTrainTest {
         var linkPredictionTrain = new LinkPredictionTrain(
             UnionGraph.of(List.of(trainGraph, testGraph)),
             config,
-            TestProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var model = linkPredictionTrain.compute();
@@ -199,7 +200,7 @@ class LinkPredictionTrainTest {
         var linkPredictionTrain = new LinkPredictionTrain(
             UnionGraph.of(List.of(trainGraph, testGraph)),
             config,
-            TestProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var model = linkPredictionTrain.compute();
@@ -242,12 +243,12 @@ class LinkPredictionTrainTest {
             graph,
             config,
             AllocationTracker.empty(),
-            TestProgressLogger.NULL_LOGGER.getLog(),
+            ProgressTracker.NULL_TRACKER.progressLogger().getLog(),
             EmptyProgressEventTracker.INSTANCE
         );
         algo.compute();
 
-        var messagesInOrder = ((TestProgressLogger) algo.getProgressLogger()).getMessages(INFO);
+        var messagesInOrder = ((TestProgressLogger) algo.getProgressTracker().progressLogger()).getMessages(INFO);
 
         AssertionsForInterfaceTypes.assertThat(messagesInOrder)
             // avoid asserting on the thread id

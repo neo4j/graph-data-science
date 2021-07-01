@@ -25,6 +25,9 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 
 public class LinkPredictionTrainFactory extends AbstractAlgorithmFactory<LinkPredictionTrain, LinkPredictionTrainConfig> {
 
@@ -52,13 +55,29 @@ public class LinkPredictionTrainFactory extends AbstractAlgorithmFactory<LinkPre
 
     @Override
     protected LinkPredictionTrain build(
-        Graph graph, LinkPredictionTrainConfig configuration, AllocationTracker tracker, ProgressLogger progressLogger
+        Graph graph, LinkPredictionTrainConfig configuration, AllocationTracker tracker, ProgressTracker progressTracker
     ) {
-        return new LinkPredictionTrain(graph, configuration, progressLogger);
+        return new LinkPredictionTrain(graph, configuration, progressTracker);
     }
 
     @Override
     public MemoryEstimation memoryEstimation(LinkPredictionTrainConfig configuration) {
         return LinkPredictionTrainEstimation.estimate(configuration);
+    }
+
+    @Override
+    public Task progressTask(
+        Graph graph, LinkPredictionTrainConfig config
+    ) {
+        return Tasks.task(
+            "LinkPredictionTrain",
+            Tasks.leaf("ModelSelection"),
+            Tasks.leaf("Training"),
+            Tasks.task(
+                "Evaluation",
+                Tasks.leaf("Training"),
+                Tasks.leaf("Testing")
+            )
+        );
     }
 }

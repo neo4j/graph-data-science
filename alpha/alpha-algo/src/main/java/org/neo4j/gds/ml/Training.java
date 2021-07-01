@@ -20,14 +20,14 @@
 package org.neo4j.gds.ml;
 
 import org.neo4j.gds.ml.core.ComputationContext;
-import org.neo4j.gds.ml.core.optimizer.Updater;
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.gds.ml.core.optimizer.Updater;
+import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Consumer;
@@ -35,12 +35,12 @@ import java.util.function.Supplier;
 
 public class Training {
     private final TrainingConfig config;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final long trainSize;
 
-    public Training(TrainingConfig config, ProgressLogger progressLogger, long trainSize) {
+    public Training(TrainingConfig config, ProgressTracker progressTracker, long trainSize) {
         this.config = config;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.trainSize = trainSize;
     }
 
@@ -86,10 +86,10 @@ public class Training {
             lastLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
             stopper.registerLoss(lastLoss);
             epoch++;
-            progressLogger.logProgress();
-            progressLogger.getLog().debug("Loss: %s, After Epoch: %d", lastLoss, epoch);
+            progressTracker.logProgress();
+            progressTracker.progressLogger().getLog().debug("Loss: %s, After Epoch: %d", lastLoss, epoch);
         }
-        progressLogger.getLog().debug(
+        progressTracker.progressLogger().getLog().debug(
             "Training %s after %d epochs. Initial loss: %s, Last loss: %s.%s",
             stopper.converged() ? "converged" : "terminated",
             epoch,

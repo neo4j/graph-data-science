@@ -25,8 +25,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkFeatureCombiners;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -85,7 +85,7 @@ class LinkPredictionSerializerIntegrationTest {
 
         var config = createConfig(List.of(model2), List.of("a", "b"));
 
-        var lpTrain = new LinkPredictionTrain(trainGraph, config, TestProgressLogger.NULL_LOGGER);
+        var lpTrain = new LinkPredictionTrain(trainGraph, config, ProgressTracker.NULL_TRACKER);
 
         var modelBeforeSerialization = lpTrain.compute();
 

@@ -37,11 +37,11 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.nodemodels.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
-import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 
 public class LinkPredictionTrain
@@ -85,48 +84,50 @@ public class LinkPredictionTrain
     public LinkPredictionTrain(
         Graph graph,
         LinkPredictionTrainConfig config,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.trainGraph = graph.relationshipTypeFilteredGraph(Set.of(config.trainRelationshipType()));
         this.testGraph = graph.relationshipTypeFilteredGraph(Set.of(config.testRelationshipType()));
         this.trainExtractors = FeatureExtraction.propertyExtractors(trainGraph, config.featureProperties());
         this.testExtractors = FeatureExtraction.propertyExtractors(testGraph, config.featureProperties());
         this.config = config;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.allocationTracker = AllocationTracker.empty();
     }
 
     @Override
     public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> compute() {
 
-        progressLogger.logStart();
+        progressTracker.beginSubTask();
         // init and shuffle node ids
         var nodeIds = HugeLongArray.newArray(trainGraph.nodeCount(), allocationTracker);
         nodeIds.setAll(i -> i);
         ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
 
-        progressLogger.startSubTask("ModelSelection");
+        progressTracker.beginSubTask();
         var modelSelectResult = modelSelect(nodeIds);
-        progressLogger.finishSubTask("ModelSelection");
+        progressTracker.endSubTask();
         var bestParameters = modelSelectResult.bestParameters();
 
         // train best model on the entire training graph
-        progressLogger.startSubTask("Training");
-        var modelData = trainModel(nodeIds, bestParameters, progressLogger);
-        progressLogger.finishSubTask("Training");
+        progressTracker.beginSubTask();
+        var modelData = trainModel(nodeIds, bestParameters, progressTracker);
+        progressTracker.endSubTask();
 
         // evaluate the best model on the training and test graphs
-        progressLogger.startSubTask("Evaluation");
-        progressLogger.startSubTask("Training");
-        var outerTrainMetrics = computeMetric(trainGraph, nodeIds, predictor(modelData, trainExtractors), progressLogger);
-        progressLogger.finishSubTask("Training");
-        progressLogger.startSubTask("Testing");
-        var testMetrics = computeMetric(testGraph, nodeIds, predictor(modelData, testExtractors), progressLogger);
-        progressLogger.finishSubTask("Testing");
+        progressTracker.beginSubTask();
+        progressTracker.beginSubTask();
+        var outerTrainMetrics = computeMetric(trainGraph, nodeIds, predictor(modelData, trainExtractors),
+            progressTracker
+        );
+        progressTracker.endSubTask();
+        progressTracker.beginSubTask();
+        var testMetrics = computeMetric(testGraph, nodeIds, predictor(modelData, testExtractors), progressTracker);
+        progressTracker.endSubTask();
 
         var metrics = mergeMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
-        progressLogger.finishSubTask("Evaluation");
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
+        progressTracker.endSubTask();
 
         return Model.of(
             config.username(),
@@ -183,13 +184,13 @@ public class LinkPredictionTrain
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
                 // we use a less fine grained progress logging for LP than for NC
-                var modelData = trainModel(trainSet, modelParams, NULL_LOGGER);
+                var modelData = trainModel(trainSet, modelParams, ProgressTracker.NULL_TRACKER);
                 var predictor = predictor(modelData, trainExtractors);
-                progressLogger.logProgress();
+                progressTracker.logProgress();
 
                 // 4. evaluate each model candidate on the train and validation sets
-                computeMetric(trainGraph, trainSet, predictor, NULL_LOGGER).forEach(trainStatsBuilder::update);
-                computeMetric(trainGraph, validationSet, predictor, NULL_LOGGER).forEach(validationStatsBuilder::update);
+                computeMetric(trainGraph, trainSet, predictor, ProgressTracker.NULL_TRACKER).forEach(trainStatsBuilder::update);
+                computeMetric(trainGraph, validationSet, predictor, ProgressTracker.NULL_TRACKER).forEach(validationStatsBuilder::update);
             }
             // insert the candidates metrics into trainStats and validationStats
             config.metrics().forEach(metric -> {
@@ -241,17 +242,17 @@ public class LinkPredictionTrain
         Graph evaluationGraph,
         HugeLongArray evaluationSet,
         LinkLogisticRegressionPredictor predictor,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         var signedProbabilities = SignedProbabilities.create(evaluationGraph.relationshipCount());
 
-        progressLogger.reset(evaluationGraph.nodeCount());
+        progressTracker.setVolume(evaluationGraph.nodeCount());
         var queue = new HugeBatchQueue(evaluationSet);
         queue.parallelConsume(config.concurrency(), ignore -> new SignedProbabilitiesCollector(
             evaluationGraph.concurrentCopy(),
             predictor,
             signedProbabilities,
-            progressLogger
+            progressTracker
         ));
 
         return config.metrics().stream().collect(Collectors.toMap(
@@ -263,15 +264,15 @@ public class LinkPredictionTrain
     private LinkLogisticRegressionData trainModel(
         HugeLongArray trainSet,
         LinkLogisticRegressionTrainConfig llrConfig,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
-        progressLogger.reset(llrConfig.maxEpochs());
+        progressTracker.setVolume(llrConfig.maxEpochs());
         var llrTrain = new LinkLogisticRegressionTrain(
             trainGraph,
             trainSet,
             trainExtractors,
             llrConfig,
-            progressLogger
+            progressTracker
         );
 
         return llrTrain.compute();

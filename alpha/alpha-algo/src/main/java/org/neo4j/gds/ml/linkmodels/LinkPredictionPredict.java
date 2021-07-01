@@ -24,10 +24,10 @@ import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.core.utils.queue.BoundedLongLongPriorityQueue;
 
 import java.util.HashSet;
@@ -57,7 +57,7 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
         int batchSize,
         int concurrency,
         int topN,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         double threshold
     ) {
         this.predictor = predictor;
@@ -66,21 +66,21 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
         this.batchSize = batchSize;
         this.topN = topN;
         this.threshold = threshold;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
     public LinkPredictionResult compute() {
-        progressLogger.logStart();
+        progressTracker.beginSubTask();
         var result = new LinkPredictionResult(topN);
         var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
         batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
             graph.concurrentCopy(),
             predictor,
             result,
-            progressLogger
+            progressTracker
         ));
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
         return result;
     }
 
@@ -98,18 +98,18 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
         private final Graph graph;
         private final LinkLogisticRegressionPredictor predictor;
         private final LinkPredictionResult predictedLinks;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
 
         private LinkPredictionScoreByIdsConsumer(
             Graph graph,
             LinkLogisticRegressionPredictor predictor,
             LinkPredictionResult predictedLinks,
-            ProgressLogger progressLogger
+            ProgressTracker progressTracker
         ) {
             this.graph = graph;
             this.predictor = predictor;
             this.predictedLinks = predictedLinks;
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -126,7 +126,7 @@ public class LinkPredictionPredict extends Algorithm<LinkPredictionPredict, Link
                     }
                 );
             }
-            progressLogger.logProgress(batch.size());
+            progressTracker.logProgress(batch.size());
         }
 
         private HashSet<Long> neighborSet(long sourceId) {

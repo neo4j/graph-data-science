@@ -24,8 +24,8 @@ import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -36,20 +36,20 @@ public class LinkLogisticRegressionTrain {
     private final HugeLongArray trainSet;
     private final List<FeatureExtractor> extractors;
     private final LinkLogisticRegressionTrainConfig config;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
 
     public LinkLogisticRegressionTrain(
         Graph graph,
         HugeLongArray trainSet,
         List<FeatureExtractor> extractors,
         LinkLogisticRegressionTrainConfig config,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.trainSet = trainSet;
         this.extractors = extractors;
         this.config = config;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     public LinkLogisticRegressionData compute() {
@@ -65,7 +65,7 @@ public class LinkLogisticRegressionTrain {
             config.penalty(),
             graph
         );
-        var training = new Training(config, progressLogger, graph.nodeCount());
+        var training = new Training(config, progressTracker, graph.nodeCount());
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
         training.train(objective, queueSupplier, config.concurrency());
         return objective.modelData;

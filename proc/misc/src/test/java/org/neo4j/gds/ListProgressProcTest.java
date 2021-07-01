@@ -41,6 +41,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventConsumerExtension;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressFeatureSettings;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
@@ -272,7 +273,10 @@ public class ListProgressProcTest extends BaseTest {
 
                 @Override
                 public FastRP build(
-                    Graph graph, FastRPStreamConfig configuration, AllocationTracker tracker, Log log,
+                    Graph graph,
+                    FastRPStreamConfig configuration,
+                    AllocationTracker tracker,
+                    Log log,
                     ProgressEventTracker eventTracker
                 ) {
                     var progressLogger = new BatchingProgressLogger(
@@ -284,12 +288,14 @@ public class ListProgressProcTest extends BaseTest {
                         progressTracker
                     );
 
+                    var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+
                     var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
                     return new FastRP(
                         graph,
                         configuration,
                         featureExtractors,
-                        progressLogger,
+                        progressTracker,
                         tracker
                     );
                 }

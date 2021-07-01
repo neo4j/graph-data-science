@@ -29,6 +29,9 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 
 import static org.neo4j.gds.ml.linkmodels.LinkPredictionTrainEstimation.ASSUMED_MIN_NODE_FEATURES;
 
@@ -58,7 +61,7 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
         Graph graph,
         CONFIG configuration,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         var model = ModelCatalog.get(
             configuration.username(),
@@ -75,7 +78,7 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
             configuration.batchSize(),
             configuration.concurrency(),
             configuration.topN(),
-            progressLogger,
+            progressTracker,
             configuration.threshold()
         );
     }
@@ -91,5 +94,10 @@ class LinkPredictionPredictFactory<CONFIG extends LinkPredictionPredictBaseConfi
         int linkFeatureDimension = model.data().weights().dimension(1);
         var nodeFeatureDimension = Math.max(model.trainConfig().featureProperties().size(), ASSUMED_MIN_NODE_FEATURES);
         return LinkPredictionPredict.memoryEstimation(configuration.topN(), linkFeatureDimension, nodeFeatureDimension);
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.leaf("LinkPredictionPredict", graph.nodeCount());
     }
 }

@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.function.Consumer;
 
@@ -36,18 +36,18 @@ public class SignedProbabilitiesCollector implements Consumer<Batch> {
     private final Graph graph;
     private final LinkLogisticRegressionPredictor predictor;
     private final SignedProbabilities signedProbabilities;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
 
     SignedProbabilitiesCollector(
         Graph graph,
         LinkLogisticRegressionPredictor predictor,
         SignedProbabilities signedProbabilities,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.predictor = predictor;
         this.signedProbabilities = signedProbabilities;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class SignedProbabilitiesCollector implements Consumer<Batch> {
                 return true;
             });
         });
-        progressLogger.logProgress(batch.size());
+        progressTracker.logProgress(batch.size());
     }
 
     private int sign(double predictionTarget, long sourceId, long targetId) {
