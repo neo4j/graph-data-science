@@ -23,10 +23,10 @@ import org.neo4j.gds.ml.Training;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.function.Supplier;
 
@@ -35,7 +35,7 @@ public class NodeLogisticRegressionTrain {
     private final Graph graph;
     private final HugeLongArray trainSet;
     private final NodeLogisticRegressionTrainConfig config;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
 
     public static MemoryEstimation memoryEstimation(
         int numberOfClasses,
@@ -59,12 +59,12 @@ public class NodeLogisticRegressionTrain {
         Graph graph,
         HugeLongArray trainSet,
         NodeLogisticRegressionTrainConfig config,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.trainSet = trainSet;
         this.config = config;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     public NodeLogisticRegressionData compute() {
@@ -80,7 +80,7 @@ public class NodeLogisticRegressionTrain {
             config.targetProperty(),
             config.penalty()
         );
-        var training = new Training(config, progressLogger, graph.nodeCount());
+        var training = new Training(config, progressTracker, graph.nodeCount());
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, config.batchSize());
         training.train(objective, queueSupplier, config.concurrency());
 

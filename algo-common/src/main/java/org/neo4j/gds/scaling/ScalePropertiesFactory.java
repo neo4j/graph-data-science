@@ -22,9 +22,9 @@ package org.neo4j.gds.scaling;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 
 public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConfig> extends AbstractAlgorithmFactory<ScaleProperties, CONFIG> {
@@ -48,7 +48,7 @@ public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConf
         Graph graph,
         CONFIG configuration,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         return new ScaleProperties(
             graph,

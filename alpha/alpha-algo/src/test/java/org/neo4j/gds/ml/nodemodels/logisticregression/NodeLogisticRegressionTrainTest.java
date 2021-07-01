@@ -23,9 +23,9 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -67,7 +67,7 @@ class NodeLogisticRegressionTrainTest {
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
-        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressLogger.NULL_LOGGER);
+        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressTracker.NULL_TRACKER);
         var result = algo.compute();
 
         var data = result.weights().data().data();
@@ -100,7 +100,7 @@ class NodeLogisticRegressionTrainTest {
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
-        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressLogger.NULL_LOGGER);
+        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressTracker.NULL_TRACKER);
 
         var result = algo.compute();
 
@@ -142,7 +142,7 @@ class NodeLogisticRegressionTrainTest {
 
         var nodeIds = HugeLongArray.newArray(graph.nodeCount(), AllocationTracker.empty());
         nodeIds.setAll(i -> i);
-        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressLogger.NULL_LOGGER);
+        var algo = new NodeLogisticRegressionTrain(graph, nodeIds, config, ProgressTracker.NULL_TRACKER);
 
         var result = algo.compute();
 
