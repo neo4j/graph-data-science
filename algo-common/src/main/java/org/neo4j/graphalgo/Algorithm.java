@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implements TerminationFlag {
-    protected ProgressLogger progressLogger = ProgressLogger.NULL_LOGGER;
+    protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
 
     protected TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
 
@@ -38,7 +38,7 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
     public abstract void release();
 
     public final void releaseAll(boolean releaseAlgorithm) {
-        progressLogger.release();
+        progressTracker.release();
         if (releaseAlgorithm) {
             release();
         }
@@ -46,8 +46,8 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
 
     @Deprecated
     // This is kept for alpha algorithms using the ProgressLoggerAdapter
-    public ME withProgressLogger(ProgressLogger progressLogger) {
-        this.progressLogger = progressLogger;
+    public ME withProgressTracker(ProgressTracker progressTracker) {
+        this.progressTracker = progressTracker;
         return me();
     }
 
@@ -60,8 +60,8 @@ public abstract class Algorithm<ME extends Algorithm<ME, RESULT>, RESULT> implem
         return terminationFlag;
     }
 
-    public ProgressLogger getProgressLogger() {
-        return this.progressLogger;
+    public ProgressTracker getProgressTracker() {
+        return this.progressTracker;
     }
 
     @Override

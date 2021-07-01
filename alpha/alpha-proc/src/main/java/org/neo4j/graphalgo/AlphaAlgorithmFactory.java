@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.core.utils.ProgressLoggerAdapter;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.logging.Log;
 
@@ -39,7 +40,10 @@ public interface AlphaAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
         ProgressEventTracker eventTracker
     ) {
         ALGO algo = buildAlphaAlgo(graph, configuration, tracker, log, eventTracker);
-        return algo.withProgressLogger(new ProgressLoggerAdapter(log, algo.getClass().getSimpleName()));
+        return algo.withProgressTracker(new TaskProgressTracker(
+            progressTask(graph, configuration),
+            new ProgressLoggerAdapter(log, algo.getClass().getSimpleName())
+        ));
     }
 
     ALGO buildAlphaAlgo(

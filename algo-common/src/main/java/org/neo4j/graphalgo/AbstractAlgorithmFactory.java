@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.logging.Log;
 
 public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> implements AlgorithmFactory<ALGO, CONFIG> {
@@ -56,7 +58,11 @@ public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, 
             configuration.concurrency(),
             eventTracker
         );
-        return build(graph, configuration, tracker, progressLogger);
+        var progressTracker = new TaskProgressTracker(
+            progressTask(graph, configuration),
+            progressLogger
+        );
+        return build(graph, configuration, tracker, progressTracker);
     }
 
     /**
@@ -83,6 +89,6 @@ public abstract class AbstractAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, 
         Graph graph,
         CONFIG configuration,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     );
 }

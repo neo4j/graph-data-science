@@ -24,6 +24,8 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extends AlgoBaseConfig> {
@@ -45,4 +47,13 @@ public interface AlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG extend
      * @see MemoryEstimation#estimate(org.neo4j.graphalgo.core.GraphDimensions, int)
      */
     MemoryEstimation memoryEstimation(CONFIG configuration);
+
+    default Task progressTask(Graph graph, CONFIG config) {
+        var configName = config.getClass().getSimpleName();
+        var algoName = configName.replaceAll(
+            "(Mutate|Stream|Write|Stats)*Config",
+            ""
+        );
+        return Tasks.leaf(algoName);
+    }
 }
