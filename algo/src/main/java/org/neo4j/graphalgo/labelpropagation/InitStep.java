@@ -22,10 +22,10 @@ package org.neo4j.graphalgo.labelpropagation;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 final class InitStep implements Step {
 
@@ -34,7 +34,7 @@ final class InitStep implements Step {
     private final PrimitiveLongIterable nodes;
     private final Graph graph;
     private final NodeProperties nodeWeights;
-    private final ProgressLogger progressLogger;
+    private final ProgressTracker progressTracker;
     private final long maxLabelId;
 
     InitStep(
@@ -43,14 +43,14 @@ final class InitStep implements Step {
             NodeProperties nodeWeights,
             PrimitiveLongIterable nodes,
             HugeLongArray existingLabels,
-            ProgressLogger progressLogger,
+            ProgressTracker progressTracker,
             long maxLabelId) {
         this.nodeProperties = nodeProperties;
         this.existingLabels = existingLabels;
         this.nodes = nodes;
         this.graph = graph;
         this.nodeWeights = nodeWeights;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.maxLabelId = maxLabelId;
     }
 
@@ -74,7 +74,7 @@ final class InitStep implements Step {
                     ? maxLabelId + graph.toOriginalNodeId(nodeId) + 1L
                     : existingLabelValue;
             existingLabels.set(nodeId, existingLabel);
-            progressLogger.logProgress(graph.degree(nodeId));
+            progressTracker.logProgress(graph.degree(nodeId));
         }
     }
 
@@ -88,7 +88,7 @@ final class InitStep implements Step {
         return new ComputeStep(
                 graph,
                 nodeWeights,
-                progressLogger,
+                progressTracker,
                 existingLabels,
                 nodes
         );

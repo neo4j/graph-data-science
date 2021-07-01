@@ -31,7 +31,12 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
+
+import java.util.List;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfLongArray;
@@ -54,11 +59,13 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
             eventTracker
         );
 
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+
         return new LabelPropagation(
             graph,
             configuration,
             Pools.DEFAULT,
-            progressLogger,
+            progressTracker,
             tracker
         );
     }
@@ -84,5 +91,18 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
                     return MemoryRange.of(min, max);
                 }).build())
             .build();
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "LabelPropagation",
+            Tasks.leaf("initialization", graph.relationshipCount()),
+            Tasks.iterativeDynamic(
+                "compute",
+                () -> List.of(Tasks.leaf("iteration", graph.relationshipCount())),
+                config.maxIterations()
+            )
+        );
     }
 }

@@ -40,6 +40,7 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -89,7 +90,7 @@ class LinkPredictionPredictTest {
             1,
             1,
             topN,
-            TestProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             0.0
         ).compute();
         var predictedLinks = result.stream().collect(Collectors.toList());
@@ -142,7 +143,7 @@ class LinkPredictionPredictTest {
         );
         algo.compute();
 
-        var messagesInOrder = ((TestProgressLogger) algo.getProgressLogger()).getMessages(INFO);
+        var messagesInOrder = ((TestProgressLogger) algo.getProgressTracker().progressLogger()).getMessages(INFO);
 
         AssertionsForInterfaceTypes.assertThat(messagesInOrder)
             // avoid asserting on the thread id

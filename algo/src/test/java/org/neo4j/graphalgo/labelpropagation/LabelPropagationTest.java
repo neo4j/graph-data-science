@@ -29,14 +29,15 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -95,7 +96,7 @@ class LabelPropagationTest {
             graph,
             ImmutableLabelPropagationStreamConfig.builder().maxIterations(1).build(),
             Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
         assertArrayEquals(
@@ -122,7 +123,7 @@ class LabelPropagationTest {
                 .maxIterations(1)
                 .build(),
             Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 
@@ -160,7 +161,7 @@ class LabelPropagationTest {
             graph,
             DEFAULT_CONFIG,
             Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
         lp.withBatchSize(batchSize);
@@ -243,12 +244,13 @@ class LabelPropagationTest {
             "LabelPropagation",
             DEFAULT_CONFIG.concurrency()
         );
+        var testTracker = new TestProgressTracker(testLogger);
 
         var lp = new LabelPropagation(
             graph,
             DEFAULT_CONFIG,
             Pools.DEFAULT,
-            testLogger,
+            testTracker,
             AllocationTracker.empty()
         );
 

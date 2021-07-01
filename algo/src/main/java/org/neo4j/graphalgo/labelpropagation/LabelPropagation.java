@@ -27,11 +27,11 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.graphalgo.core.loading.NullPropertyMap.LongNullPropertyMap;
 import org.neo4j.graphalgo.core.utils.LazyBatchCollection;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 
 public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagation> {
@@ -64,7 +63,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         Graph graph,
         LabelPropagationBaseConfig config,
         ExecutorService executor,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.graph = graph;
@@ -94,7 +93,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
 
         maxLabelId = seedProperty.getMaxLongPropertyValue().orElse(NO_SUCH_LABEL);
 
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -125,7 +124,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
 
-        getProgressLogger().logMessage(":: Start");
+        progressTracker.beginSubTask();
 
         if (labels == null || labels.size() != nodeCount) {
             labels = HugeLongArray.newArray(nodeCount, tracker);
@@ -137,19 +136,18 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
         List<StepRunner> stepRunners = stepRunners();
 
         while (ranIterations < config.maxIterations()) {
-            getProgressLogger().logMessage(formatWithLocale(":: Iteration %d :: Start", ranIterations + 1));
+            progressTracker.beginSubTask();
             ParallelUtil.runWithConcurrency(config.concurrency(), stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
             ++ranIterations;
             didConverge = stepRunners.stream().allMatch(StepRunner::didConverge);
             if (didConverge) {
                 break;
             }
-            getProgressLogger().logMessage(formatWithLocale(":: Iteration %d :: Finished", ranIterations));
-            getProgressLogger().reset(graph.relationshipCount());
+            progressTracker.endSubTask();
         }
 
         stepRunners.forEach(StepRunner::release);
-        getProgressLogger().logMessage(":: Finished");
+        progressTracker.endSubTask();
 
         return me();
     }
@@ -173,16 +171,15 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
                 nodeWeights,
                 iter,
                 labels,
-                getProgressLogger(),
+                progressTracker,
                 maxLabelId
             );
             StepRunner task = new StepRunner(initStep);
             tasks.add(task);
         }
-        progressLogger.logMessage(":: Initialization :: Start");
+        progressTracker.beginSubTask();
         ParallelUtil.runWithConcurrency(config.concurrency(), tasks, 1, MICROSECONDS, terminationFlag, executor);
-        progressLogger.logMessage(":: Initialization :: Finished");
-        progressLogger.reset(graph.relationshipCount());
+        progressTracker.endSubTask();
         return tasks;
     }
 
