@@ -25,12 +25,12 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -55,38 +55,38 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         Graph graph,
         ExecutorService executor,
         DegreeCentralityConfig config,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.graph = graph;
         this.executor = executor;
         this.config = config;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
         this.tracker = tracker;
     }
 
     @Override
     public DegreeFunction compute() {
-        progressLogger.logStart();
+            progressTracker.beginSubTask();
 
         var result = config.hasRelationshipWeightProperty()
             ? computeWeighted()
             : computeUnweighted();
 
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
         return result;
     }
 
     private DegreeFunction computeUnweighted() {
         switch (config.orientation()) {
             case NATURAL:
-                progressLogger.logProgress(graph.nodeCount());
+                progressTracker.logProgress(graph.nodeCount());
                 return graph::degree;
             case REVERSE:
                 return computeDegreeAtomic((partition, degrees) -> new ReverseDegreeTask(
                         graph.concurrentCopy(),
                         partition,
-                        progressLogger,
+                        progressTracker,
                         (sourceNodeId, targetNodeId, weight) -> {
                             degrees.getAndAdd(targetNodeId, 1);
                             return true;
@@ -98,7 +98,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                         graph.concurrentCopy(),
                         partition,
                         degrees,
-                        progressLogger
+                        progressTracker
                     )
                 );
             default:
@@ -116,13 +116,13 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                     graph.concurrentCopy(),
                     degrees,
                     partition,
-                    progressLogger
+                    progressTracker
                 ));
             case REVERSE:
                 return computeDegreeAtomic((partition, degrees) -> new ReverseDegreeTask(
                         graph.concurrentCopy(),
                         partition,
-                        progressLogger,
+                        progressTracker,
                         (sourceNodeId, targetNodeId, weight) -> {
                             if (weight > 0.0D) {
                                 degrees.getAndAdd(targetNodeId, weight);
@@ -136,7 +136,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                     graph.concurrentCopy(),
                     partition,
                     degrees,
-                    progressLogger
+                    progressTracker
                 ));
             default:
                 throw new IllegalArgumentException(formatWithLocale(
@@ -195,18 +195,18 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         private final HugeDoubleArray result;
         private final RelationshipIterator relationshipIterator;
         private final Partition partition;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
 
         NaturalWeightedDegreeTask(
             RelationshipIterator relationshipIterator,
             HugeDoubleArray result,
             Partition partition,
-            ProgressLogger progressLogger
+            ProgressTracker progressTracker
         ) {
             this.relationshipIterator = relationshipIterator;
             this.result = result;
             this.partition = partition;
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -226,7 +226,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                 );
                 result.set(nodeId, nodeWeight.doubleValue());
             });
-            progressLogger.logProgress(partition.nodeCount());
+            progressTracker.logProgress(partition.nodeCount());
         }
     }
 
@@ -234,25 +234,25 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
         private final Graph graph;
         private final Partition partition;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
         private final RelationshipWithPropertyConsumer consumer;
 
         ReverseDegreeTask(
             Graph graph,
             Partition partition,
-            ProgressLogger progressLogger,
+            ProgressTracker progressTracker,
             RelationshipWithPropertyConsumer consumer
         ) {
             this.graph = graph;
             this.partition = partition;
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
             this.consumer = consumer;
         }
 
         @Override
         public void run() {
             partition.consume(node -> graph.forEachRelationship(node, DEFAULT_WEIGHT, consumer));
-            progressLogger.logProgress(partition.nodeCount());
+            progressTracker.logProgress(partition.nodeCount());
         }
     }
 
@@ -261,18 +261,18 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         private final Graph graph;
         private final Partition partition;
         private final HugeAtomicDoubleArray degrees;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
 
         UndirectedDegreeTask(
             Graph graph,
             Partition partition,
             HugeAtomicDoubleArray degrees,
-            ProgressLogger progressLogger
+            ProgressTracker progressTracker
         ) {
             this.graph = graph;
             this.partition = partition;
             this.degrees = degrees;
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -288,7 +288,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                     return true;
                 });
             });
-            progressLogger.logProgress(partition.nodeCount());
+            progressTracker.logProgress(partition.nodeCount());
         }
     }
 
@@ -297,18 +297,18 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
         private final Graph graph;
         private final Partition partition;
         private final HugeAtomicDoubleArray degrees;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
 
         UndirectedWeightedDegreeTask(
             Graph graph,
             Partition partition,
             HugeAtomicDoubleArray degrees,
-            ProgressLogger progressLogger
+            ProgressTracker progressTracker
         ) {
             this.graph = graph;
             this.partition = partition;
             this.degrees = degrees;
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -327,7 +327,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
                 }));
                 degrees.getAndAdd(node, nodeWeight.doubleValue());
             });
-            progressLogger.logProgress(partition.nodeCount());
+            progressTracker.logProgress(partition.nodeCount());
         }
     }
 }

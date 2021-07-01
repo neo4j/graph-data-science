@@ -28,6 +28,9 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoefficientBaseConfig> implements AlgorithmFactory<LocalClusteringCoefficient, CONFIG> {
@@ -46,11 +49,13 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
             eventTracker
         );
 
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+
         return new LocalClusteringCoefficient(
             graph,
             configuration,
             tracker,
-            progressLogger
+            progressTracker
         );
     }
 
@@ -79,4 +84,11 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
             .build();
     }
 
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "LocalClusteringCoefficient",
+            IntersectingTriangleCountFactory.triangleCountProgressTask(graph)
+        );
+    }
 }

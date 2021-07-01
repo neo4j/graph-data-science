@@ -24,10 +24,10 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -52,11 +52,11 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         Graph graph,
         LocalClusteringCoefficientBaseConfig configuration,
         AllocationTracker tracker,
-        ProgressLogger progressLogger
+        ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.tracker = tracker;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
 
         this.configuration = configuration;
         this.concurrency = configuration.concurrency();
@@ -109,8 +109,8 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
             graph,
             LocalClusteringCoefficientFactory.createTriangleCountConfig(configuration),
             tracker,
-            progressLogger.getLog(),
-            progressLogger.eventTracker()
+            progressTracker.progressLogger().getLog(),
+            progressTracker.progressLogger().eventTracker()
         );
 
         return intersectingTriangleCount.compute().localTriangles();
