@@ -207,7 +207,66 @@ We can stream node properties stored in a named in-memory graph back to the user
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 This is similar to what the `stream` execution mode does, but allows more fine-grained control over the operations.
 
+==== Single property
+
+In the following, we stream the previously computed scores `score`.
+
+[role=query-example]
+--
+.Stream node properties for `Person` nodes:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamNodeProperty('socialGraph', 'score')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
+ORDER BY score DESC
+----
+
+.Results
+[opts="header"]
+|===
+| name        | score
+| "Florentin" | 2.0
+| "Adam"      | 1.0
+| "Veselin"   | 0.0
+| "The Hobbit"   | 0.0
+|===
+--
+
+NOTE: The above example requires all given properties to be present on at least one node projection, and the properties will be streamed for all such projections.
+
+
+==== NodeLabels
+
+The procedure can be configured to stream just the properties for specific node labels.
+
+[role=query-example]
+--
+.Stream node properties for `Person` nodes:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamNodeProperty('socialGraph', 'score', ['Person'])
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
+ORDER BY score DESC
+----
+
+.Results
+[opts="header"]
+|===
+| name        | score
+| "Florentin" | 2.0
+| "Adam"      | 1.0
+| "Veselin"   | 0.0
+|===
+--
+
+It is required that all specified node labels have the node property.
+
+
 ==== Multiple Properties
+
+We can also stream several properties at once.
 
 [role=query-example]
 --
@@ -235,70 +294,11 @@ ORDER BY name, nodeProperty
 |===
 --
 
-// TODO start with streamNodeProperty
-
-The above example requires all given properties to be present on at least one node projection, and the properties will be streamed for all such projections.
-
-The procedure can be configured to stream just the properties for some specific node projections.
-In the following example, we ran an algorithm on a sub-graph and subsequently streamed the newly created property.
-
-[role=query-example]
---
-.Stream node properties for `Person` nodes:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.streamNodeProperty('socialGraph', 'score', ['Person'])
-YIELD nodeId, propertyValue
-RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
-ORDER BY score DESC
-----
-
-.Results
-[opts="header"]
-|===
-| name        | score
-| "Florentin" | 2.0
-| "Adam"      | 1.0
-| "Veselin"   | 0.0
-|===
---
-
-When a list of projections that are not `*` is specified, as in the example above, a different validation and execution is applied.
-It is then required that all projections have all of the given properties, and they will be streamed for all of the projections.
-
-If any of the given projections is `'*'`, the procedure behaves like in the first example.
-
-==== Optimization for a single property
-
-// TODO extend example and make clear labels are supported
-
+[NOTE]
+====
 When streaming multiple node properties, the name of each property is included in the result.
 This adds with some overhead, as each property name must be repeated for each node in the result, but is necessary in order to distinguish properties.
-For streaming a single node property this is not necessary.
-`gds.graph.streamNodeProperty()` streams a single node property from the in-memory graph, and omits the property name.
-The result has the format `nodeId`, `propertyValue`, as is familiar from the streaming mode of many algorithm procedures.
-
-[role=query-example]
---
-.Stream node properties for `Person` nodes:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.streamNodeProperty('socialGraph', 'score')
-YIELD nodeId, propertyValue
-RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
-ORDER BY score DESC
-----
-
-.Results
-[opts="header"]
-|===
-| name        | score
-| "Florentin" | 2.0
-| "Adam"      | 1.0
-| "Veselin"   | 0.0
-| "The Hobbit"   | 0.0
-|===
---
+====
 
 === Write
 
