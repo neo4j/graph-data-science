@@ -33,9 +33,9 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -196,9 +196,9 @@ abstract class ProcedureGenerator extends PregelGenerator {
                 .addParameter(Graph.class, "graph")
                 .addParameter(pregelSpec.configTypeName(), "configuration")
                 .addParameter(AllocationTracker.class, "tracker")
-                .addParameter(ProgressLogger.class, "progressLogger")
+                .addParameter(ProgressTracker.class, "progressTracker")
                 .returns(algorithmClassName)
-                .addStatement("return new $T(graph, configuration, tracker, progressLogger)", algorithmClassName)
+                .addStatement("return new $T(graph, configuration, tracker, progressTracker.progressLogger())", algorithmClassName)
                 .build()
             )
             .addMethod(MethodSpec.methodBuilder("taskVolume")
