@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.doc.syntax;
 
 import java.util.List;
 
-class StreamNodePropertiesSyntaxTest extends SyntaxTestBase {
+class GraphCatalogNodeOperationsSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
@@ -32,6 +32,6 @@ class StreamNodePropertiesSyntaxTest extends SyntaxTestBase {
 
     @Override
     String adocFile() {
-        return "management-ops/graph-catalog/graph-stream-node-properties.adoc";
+        return "management-ops/graph-catalog/graph-catalog-node-ops.adoc";
     }
 }
