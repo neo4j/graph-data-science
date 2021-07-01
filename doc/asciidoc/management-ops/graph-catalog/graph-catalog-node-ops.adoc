@@ -214,3 +214,64 @@ The result has the format `nodeId`, `propertyValue`, as is familiar from the str
 ----
 CALL gds.graph.streamNodeProperty('my-graph', 'componentId')
 ----
+
+=== Write
+
+To write the properties `'componentId'`, `'pageRank'`, `'communityId'` for all node projections in the graph `'my-graph'` using 8 concurrent threads, use the following query:
+
+.Write multiple node properties to Neo4j:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.writeNodeProperties(
+  'my-graph',
+  ['componentId', 'pageRank', 'communityId'],
+  ['*'],
+  {writeConcurrency: 8}
+)
+----
+
+The above example requires all given properties to be present on at least one node projection, and the properties will be written for all such projections.
+
+The procedure can be configured to write just the properties for some specific node projections.
+In the following example, we run an algorithm on a sub-graph and subsequently write the newly created property to Neo4j.
+
+.Write node properties of a specific node projection to Neo4j:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('my-graph', ['A', 'B'], '*')
+CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
+CALL gds.graph.writeNodeProperties('my-graph', ['componentId'], ['A'])
+----
+
+When a list of projections not including the star projection (`'*'`) is specified, as in the example above, a different validation and execution is applied.
+In this case, it is required that all projections have all of the given properties, and they will be written to Neo4j for all of the projections.
+
+If any of the given projections is the star projection, the procedure behaves like in the first example.
+
+
+=== Remove
+
+.Remove multiple node properties from a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.removeNodeProperties('my-graph', ['pageRank', 'communityId'])
+----
+
+The above example requires all given properties to be present on at least one node projection, and the properties will be removed from all such projections.
+
+The procedure can be configured to remove just the properties for some specific node projections.
+In the following example, we ran an algorithm on a sub-graph and subsequently remove the newly created property.
+
+.Remove node properties of a specific node projection:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create('my-graph', ['A', 'B'], '*')
+CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
+CALL gds.graph.removeNodeProperties('my-graph', ['componentId'], ['A'])
+----
+
+When a list of projections that are not `*` is specified, as in the example above, a different validation and execution is applied;
+It is then required that all projections have all of the given properties, and they will be removed from all of the projections.
+
+If any of the given projections is `'*'`, the procedure behaves like in the first example.
+
