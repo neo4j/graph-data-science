@@ -433,7 +433,7 @@ WHERE houseNode:UnknownHouse
 RETURN
   houseNode.color AS classifiedHouse,
   predictedClass,
-  round(predictedProbabilities[predictedClass], 2) AS confidence
+  floor(predictedProbabilities[predictedClass] * 100) AS confidence
   ORDER BY classifiedHouse
 ----
 
@@ -441,9 +441,9 @@ RETURN
 [opts="header",cols="m,m,m"]
 |===
 | classifiedHouse | predictedClass | confidence
-| "Pink"          |              0 | 0.99
-| "Tan"           |              1 | 0.98
-| "Yellow"        |              2 | 0.8
+| "Pink"          |              0 | 98.0
+| "Tan"           |              1 | 98.0
+| "Yellow"        |              2 | 79.0
 |===
 --
 
