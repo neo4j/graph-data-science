@@ -72,15 +72,15 @@ public final class BumpAllocator<PAGE> {
         }
     }
 
-    public LocalAllocator<PAGE> newLocalAllocator() {
+    LocalAllocator<PAGE> newLocalAllocator() {
         return new LocalAllocator<>(this, false);
     }
 
-    public LocalAllocator<PAGE> newPrefetchingOneBasedLocalAllocator() {
+    LocalAllocator<PAGE> newPrefetchingOneBasedLocalAllocator() {
         return new LocalAllocator<>(this, true);
     }
 
-    public PAGE[] intoPages() {
+    PAGE[] intoPages() {
         return pages;
     }
 

@@ -286,7 +286,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
 
         @Override
         public long get(long index) {
-            assert index < size;
+            assert index < size : "index = " + index + " size = " + size;
             return page[(int) index];
         }
 

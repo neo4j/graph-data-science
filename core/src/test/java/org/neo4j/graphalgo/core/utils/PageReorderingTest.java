@@ -68,7 +68,7 @@ class PageReorderingTest {
         var pageShift = 3;
         var hugeOffsets = HugeLongArray.of(offsets);
 
-        var ordering = PageReordering.ordering(hugeOffsets, pageCount, pageShift);
+        var ordering = PageReordering.ordering(hugeOffsets, nodeId -> true, pageCount, pageShift);
 
         assertThat(ordering.ordering()).isEqualTo(expectedOrdering);
         assertThat(ordering.pageOffsets()).isEqualTo(new long[] {0, 3, 6, 9, 12});

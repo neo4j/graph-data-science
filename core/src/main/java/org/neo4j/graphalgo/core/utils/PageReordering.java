@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
+import java.util.function.LongPredicate;
 
 public final class PageReordering {
 
@@ -34,7 +35,12 @@ public final class PageReordering {
         long[] pageOffsets();
     }
 
-    public static PageOrdering ordering(HugeLongArray offsets, int pageCount, int pageShift) {
+    public static PageOrdering ordering(
+        HugeLongArray offsets,
+        LongPredicate nodeFilter,
+        int pageCount,
+        int pageShift
+    ) {
         var cursor = offsets.initCursor(offsets.newCursor());
 
         long[] pageOffsets = new long[pageCount + 1];
@@ -49,12 +55,18 @@ public final class PageReordering {
             var base = cursor.base;
 
             for (int i = cursor.offset; i < limit; i++) {
+                var nodeId = base + i;
+                // typically, the nodeFilter would return false for unconnected nodes
+                if (!nodeFilter.test(nodeId)) {
+                    continue;
+                }
+
                 var offset = array[i];
                 var pageIdx = (int) (offset >>> pageShift);
 
                 if (pageIdx != pastPageIdx) {
                     ordering[pageIdx] = idx;
-                    pageOffsets[idx] = base + i;
+                    pageOffsets[idx] = nodeId;
                     pastPageIdx = pageIdx;
                     idx = idx + 1;
                 }

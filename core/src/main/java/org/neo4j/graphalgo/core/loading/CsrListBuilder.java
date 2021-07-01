@@ -43,9 +43,9 @@ public interface CsrListBuilder<PAGE, T> {
         void close();
     }
 
-    default HugeLongArray reorder(PAGE[] pages, HugeLongArray offsets, AllocationTracker tracker) {
+    default HugeLongArray reorder(PAGE[] pages, HugeLongArray offsets, HugeIntArray degrees, AllocationTracker tracker) {
         if (GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled() && pages.length > 0) {
-            var ordering = PageReordering.ordering(offsets, pages.length, PAGE_SHIFT);
+            var ordering = PageReordering.ordering(offsets, nodeId -> degrees.get(nodeId) > 0, pages.length, PAGE_SHIFT);
             PageReordering.reorder(pages, ordering.ordering());
             return PageReordering.sortOffsets(offsets, ordering, tracker);
         }
