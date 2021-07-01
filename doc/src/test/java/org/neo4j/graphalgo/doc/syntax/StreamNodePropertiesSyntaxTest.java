@@ -19,28 +19,19 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
-enum SyntaxMode {
-    STATS("include-with-stats"),
-    STREAM("include-with-stream"),
-    MUTATE("include-with-mutate"),
-    WRITE("include-with-write"),
-    TRAIN("include-with-train"),
-    ESTIMATE("estimate-syntax"),
-    GRAPH_DROP("graph-drop-syntax"),
-    GRAPH_CREATE("graph-create-syntax"),
-    GRAPH_CREATE_CYPHER("graph-create-cypher-syntax"),
-    STREAM_NODE_PROPERTIES("stream-node-properties-syntax"),
-    GRAPH_EXISTS("graph-exists-syntax"),
-    GRAPH_EXPORT("graph-export-syntax"),
-    CREATE_SUBGRAPH("create-subgraph-syntax");
+import java.util.List;
 
-    private final String mode;
+class StreamNodePropertiesSyntaxTest extends SyntaxTestBase {
 
-    SyntaxMode(String mode) {
-        this.mode = mode;
+    @Override
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(SyntaxMode.STREAM_NODE_PROPERTIES)
+        );
     }
 
-    public String mode() {
-        return mode;
+    @Override
+    String adocFile() {
+        return "management-ops/graph-catalog/graph-stream-node-properties.adoc";
     }
 }

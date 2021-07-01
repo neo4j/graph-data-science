@@ -5,6 +5,61 @@ We can stream node properties stored in a named in-memory graph back to the user
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 This is similar to what the `stream` execution mode does, but allows more fine-grained control over the operations.
 
+== Syntax
+
+=== Stream node properties
+
+[.stream-node-properties-syntax]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamNodeProperties(
+    graphName: String,
+    nodeProperties: String or List of Strings,
+    nodeLabels: String or List of Strings,
+    configuration: Map
+)
+YIELD
+    nodeId: Integer,
+    nodeProperty: String,
+    propertyValue: Integer or Float or List of Integer or List of Float
+----
+
+.Parameters
+[opts="header",cols="1,1,1, 4"]
+|===
+| Name           | Type                       | Optional | Description
+| graphName      | String                     | no       | The name under which the graph is stored in the catalog.
+| nodeProperties | String or List of Strings  | no       | The node properties in the graph to stream.
+| nodeLabels     | String or List of Strings  | yes      | The node labels to stream the node properties for graph.
+| configuration  | Map                        | yes      | Additional parameters to configure streamNodeProperties.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name                   | Type                  | Default | Description
+| concurrency            | Integer               | 4       | The number of concurrent threads used for streaming the node properties.
+|===
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name            | Type                                                 | Description
+|nodeId           | Integer                                              | The id of the node.
+|nodeProperty     | String                                               | The name of the node property.
+.^|propertyValue    a|
+* Integer
+* Float
+* List of Integer
+* List of Float  .^| The stored property value.
+|===
+--
+
+// TODO document gds.graph.streamNodeProperty
+
+== Examples
+
 .Stream multiple node properties:
 [source, cypher, role=noplay]
 ----
