@@ -21,10 +21,9 @@ def registerSubModules(File file) {
     moduleDirectories.stream()
             .filter { moduleDir -> moduleDir != new File("./") && moduleDir != new File("./public") }
             .filter { moduleDir -> moduleDir.name != 'pregel-bootstrap' }
-            .filter { moduleDir -> moduleDir.getParentFile().name != "4.3" }
-            .filter { moduleDir -> moduleDir.getParentFile().name != "dev" }
-            .filter { moduleDir -> moduleDir.getParentFile().name != "aura" }
             .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop03.1" }
+            .filter { moduleDir -> moduleDir.getParentFile().name != "4.3.0-drop04.0" }
+            .filter { moduleDir -> moduleDir.getParentFile().name != "dev" }
             .forEach { moduleDir ->
                 def parent = moduleDir.getParentFile();
                 def projectName = ":${moduleDir.name}";
@@ -38,6 +37,8 @@ def registerSubModules(File file) {
                     projectName = ":${moduleDir.name}-4.1";
                 } else if (parent.name == "4.2") {
                     projectName = ":${moduleDir.name}-4.2";
+                } else if (parent.name == "4.3") {
+                    projectName = ":${moduleDir.name}-4.3";
                 }
                 include(projectName)
                 project(projectName).projectDir = moduleDir
