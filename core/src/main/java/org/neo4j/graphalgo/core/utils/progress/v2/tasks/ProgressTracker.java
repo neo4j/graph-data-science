@@ -19,51 +19,52 @@
  */
 package org.neo4j.graphalgo.core.utils.progress.v2.tasks;
 
-import org.jetbrains.annotations.TestOnly;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
+public interface ProgressTracker {
 
-public class ProgressTracker {
+    ProgressTracker NULL_TRACKER = new EmptyProgressTracker();
 
-    private final Task baseTask;
-    private final Queue<Task> nestedTasks;
-    private Task currentTask;
+    void beginSubTask();
 
-    public ProgressTracker(Task baseTask) {
-        this.baseTask = baseTask;
-        this.currentTask = null;
-        this.nestedTasks = new LinkedBlockingQueue<>();
-    }
+    void endSubTask();
 
-    public void beginSubTask() {
-        if (currentTask == null) {
-            currentTask = baseTask;
-        } else {
-            nestedTasks.add(currentTask);
-            currentTask = currentTask.nextSubtask();
-        }
-        currentTask.start();
-    }
+    void logProgress(long value);
 
-    public void endSubTask() {
-        if (currentTask == null) {
-            throw new IllegalStateException("No more running tasks");
-        }
-        currentTask.finish();
-        currentTask = nestedTasks.poll();
-    }
-
-    @TestOnly
-    Task currentSubTask() {
-        return currentTask;
-    }
-
-    public void logProgress() {
+    default void logProgress() {
         logProgress(1);
     }
 
-    public void logProgress(long value) {
-        currentTask.logProgress(value);
+    void setVolume(long volume);
+
+    ProgressLogger progressLogger();
+
+    void release();
+
+    class EmptyProgressTracker implements ProgressTracker {
+        @Override
+        public void beginSubTask() {
+        }
+
+        @Override
+        public void endSubTask() {
+        }
+
+        @Override
+        public void logProgress(long value) {
+        }
+
+        @Override
+        public void setVolume(long volume) {
+        }
+
+        @Override
+        public ProgressLogger progressLogger() {
+            return null;
+        }
+
+        @Override
+        public void release() {
+        }
     }
 }
