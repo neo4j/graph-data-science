@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import static org.neo4j.graphalgo.TestSupport.assertAlgorithmTermination;
 import static org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityTest.configBuilder;
@@ -49,7 +49,7 @@ class NodeSimilarityTerminationTest extends AlgoTestBase {
             graph,
             configBuilder().concurrency(1).build(),
             Pools.DEFAULT,
-            ProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         );
 

@@ -30,6 +30,9 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.graphalgo.similarity.SimilarityGraphBuilder;
 import org.neo4j.logging.Log;
 
@@ -54,7 +57,9 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> impl
             eventTracker
         );
 
-        return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressLogger, tracker);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+
+        return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressTracker, tracker);
     }
 
     @Override
@@ -102,5 +107,14 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> impl
             builder.add("topN list", TopNList.memoryEstimation(topN));
         }
         return builder.build();
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "NodeSimilarity",
+            Tasks.leaf("prepare", graph.relationshipCount()),
+            Tasks.leaf("compare")
+        );
     }
 }
