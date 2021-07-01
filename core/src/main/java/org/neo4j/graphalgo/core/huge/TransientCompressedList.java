@@ -26,6 +26,8 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
+import org.neo4j.graphalgo.core.utils.PageReordering;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -35,16 +37,15 @@ import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
+import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_MASK;
+import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SHIFT;
+import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SIZE;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.indexInPage;
 import static org.neo4j.graphalgo.core.utils.paged.PageUtil.pageIndex;
 
 public final class TransientCompressedList implements AdjacencyList {
-
-    public static final int PAGE_SHIFT = 18;
-    public static final int PAGE_SIZE = 1 << PAGE_SHIFT;
-    public static final long PAGE_MASK = PAGE_SIZE - 1;
 
     public static MemoryEstimation adjacencyListEstimation(RelationshipType relationshipType, boolean undirected) {
         return MemoryEstimations.setup("", dimensions -> {
@@ -100,11 +101,27 @@ public final class TransientCompressedList implements AdjacencyList {
         return (firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
     }
 
+    public static TransientCompressedList of(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+        return new TransientCompressedList(pages, degrees, offsets);
+    }
+
+    public static TransientCompressedList ofOrdered(
+        byte[][] pages,
+        HugeIntArray degrees,
+        HugeLongArray offsets,
+        AllocationTracker tracker
+    ) {
+        var ordering = PageReordering.ordering(offsets, pages.length, PAGE_SHIFT);
+        PageReordering.reorder(pages, ordering.ordering());
+        var sortedOffsets = PageReordering.sortOffsets(offsets, ordering, tracker);
+        return new TransientCompressedList(pages, degrees, sortedOffsets);
+    }
+
     private byte[][] pages;
     private HugeIntArray degrees;
     private HugeLongArray offsets;
 
-    public TransientCompressedList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+    private TransientCompressedList(byte[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;

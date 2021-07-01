@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.core.huge.TransientCompressedList;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.Arrays;
 
@@ -31,19 +32,24 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 public final class TransientCompressedListBuilder implements CsrListBuilder<byte[], TransientCompressedList> {
 
     private final BumpAllocator<byte[]> builder;
+    private final AllocationTracker tracker;
 
     TransientCompressedListBuilder(AllocationTracker tracker) {
         this.builder = new BumpAllocator<>(tracker, Factory.INSTANCE);
+        this.tracker = tracker;
     }
 
     @Override
     public Allocator newAllocator() {
-        return new Allocator(this.builder.newPrefetchingOneBasedLocalAllocator());
+        return new Allocator(this.builder.newLocalAllocator());
     }
 
     @Override
     public TransientCompressedList build(HugeIntArray degrees, HugeLongArray offsets) {
-        return new TransientCompressedList(builder.intoPages(), degrees, offsets);
+        var intoPages = builder.intoPages();
+        return GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled()
+            ? TransientCompressedList.ofOrdered(intoPages, degrees, offsets, tracker)
+            : TransientCompressedList.of(intoPages, degrees, offsets);
     }
 
     @Override

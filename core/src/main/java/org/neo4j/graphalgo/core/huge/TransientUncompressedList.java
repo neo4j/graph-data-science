@@ -30,6 +30,8 @@ import org.neo4j.graphalgo.api.PropertyCursor;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.MutableIntValue;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
+import org.neo4j.graphalgo.core.utils.PageReordering;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
@@ -111,11 +113,27 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
         return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
     }
 
+    public static TransientUncompressedList of(long[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+        return new TransientUncompressedList(pages, degrees, offsets);
+    }
+
+    public static TransientUncompressedList ofOrdered(
+        long[][] pages,
+        HugeIntArray degrees,
+        HugeLongArray offsets,
+        AllocationTracker tracker
+    ) {
+        var ordering = PageReordering.ordering(offsets, pages.length, PAGE_SHIFT);
+        PageReordering.reorder(pages, ordering.ordering());
+        var sortedOffsets = PageReordering.sortOffsets(offsets, ordering, tracker);
+        return new TransientUncompressedList(pages, degrees, sortedOffsets);
+    }
+
     private long[][] pages;
     private HugeIntArray degrees;
     private HugeLongArray offsets;
 
-    public TransientUncompressedList(long[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
+    private TransientUncompressedList(long[][] pages, HugeIntArray degrees, HugeLongArray offsets) {
         this.pages = pages;
         this.degrees = degrees;
         this.offsets = offsets;

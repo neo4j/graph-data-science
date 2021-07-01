@@ -28,7 +28,7 @@ import java.util.Arrays;
 public final class PageReordering {
 
     @ValueClass
-    interface PageOrdering {
+    public interface PageOrdering {
         int[] ordering();
 
         long[] pageOffsets();
@@ -50,7 +50,7 @@ public final class PageReordering {
 
             for (int i = cursor.offset; i < limit; i++) {
                 var offset = array[i];
-                var pageIdx = (int) offset >>> pageShift;
+                var pageIdx = (int) (offset >>> pageShift);
 
                 if (pageIdx != pastPageIdx) {
                     ordering[pageIdx] = idx;
