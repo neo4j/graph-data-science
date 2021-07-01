@@ -23,13 +23,19 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
+
+import java.util.List;
 
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfIntArray;
@@ -39,18 +45,28 @@ import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfOpenHashConta
 public class KnnFactory<CONFIG extends KnnBaseConfig> implements AlgorithmFactory<Knn, CONFIG> {
     @Override
     public Knn build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, Log log,
+        Graph graph,
+        CONFIG configuration,
+        AllocationTracker tracker,
+        Log log,
         ProgressEventTracker eventTracker
     ) {
+        var progressLogger = new BatchingProgressLogger(
+            log,
+            (long) Math.ceil(configuration.sampleRate() * configuration.topK() * graph.nodeCount()),
+            "KNN-Graph",
+            configuration.concurrency(),
+            eventTracker
+        );
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
         return new Knn(
             graph,
             configuration,
             ImmutableKnnContext
                 .builder()
-                .log(log)
-                .tracker(tracker)
+                .progressTracker(progressTracker)
                 .executor(Pools.DEFAULT)
-                .eventTracker(eventTracker)
+                .tracker(tracker)
                 .build()
         );
     }
@@ -92,6 +108,18 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> implements AlgorithmFactor
                     )
                     .build();
             }
+        );
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "Knn",
+            Tasks.iterativeDynamic(
+                "compute",
+                () -> List.of(Tasks.leaf("iteration")),
+                config.maxIterations()
+            )
         );
     }
 }

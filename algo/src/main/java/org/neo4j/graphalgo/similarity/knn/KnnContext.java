@@ -23,10 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
-import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 
@@ -44,13 +41,8 @@ public interface KnnContext {
     }
 
     @Value.Default
-    default Log log() {
-        return NullLog.getInstance();
-    }
-
-    @Value.Default
-    default ProgressEventTracker eventTracker() {
-        return EmptyProgressEventTracker.INSTANCE;
+    default ProgressTracker progressTracker() {
+        return ProgressTracker.NULL_TRACKER;
     }
 
     static KnnContext empty() {

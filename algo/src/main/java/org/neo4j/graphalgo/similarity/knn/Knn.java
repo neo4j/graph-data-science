@@ -25,7 +25,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.BiLongConsumer;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
@@ -74,13 +73,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             ? new SplittableRandom(this.config.randomSeed().get())
             : new SplittableRandom();
 
-        this.progressLogger = new BatchingProgressLogger(
-            context.log(),
-            (long) Math.ceil(config.sampleRate() * config.topK() * nodeCount),
-            "KNN-Graph",
-            config.concurrency(),
-            context.eventTracker()
-        );
+        this.progressTracker = context.progressTracker();
     }
 
     public long nodeCount() {
@@ -93,6 +86,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
 
     @Override
     public Result compute() {
+        progressTracker.beginSubTask();
         HugeObjectArray<NeighborList> neighbors;
         try (var ignored1 = ProgressTimer.start(this::logOverallTime)) {
             try (var ignored2 = ProgressTimer.start(this::logInitTime)) {
@@ -112,9 +106,9 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
             for (; iteration < maxIterations; iteration++) {
                 int currentIteration = iteration;
                 try (var ignored3 = ProgressTimer.start(took -> logIterationTime(currentIteration, took))) {
-                    progressLogger.logMessage("KNN-Graph starting iteration " + iteration + "/" + maxIterations);
+                    progressTracker.beginSubTask();
                     updateCount = this.iteration(neighbors);
-                    progressLogger.logMessage("KNN-Graph ending iteration " + iteration + ": updated " + updateCount + "/" + maxUpdates + " nodes");
+                    progressTracker.endSubTask();
                 }
                 if (updateCount <= updateThreshold) {
                     iteration++;
@@ -123,6 +117,7 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
                 }
             }
 
+            progressTracker.endSubTask();
             return ImmutableResult.of(neighbors, iteration, didConverge);
         }
     }
@@ -456,15 +451,15 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
     }
 
     private void logInitTime(long ms) {
-        progressLogger.logMessage(() -> formatWithLocale("KNN-G Graph init took %d ms", ms));
+        progressTracker.progressLogger().logMessage(() -> formatWithLocale("KNN-G Graph init took %d ms", ms));
     }
 
     private void logIterationTime(int iteration, long ms) {
-        progressLogger.logMessage(() -> formatWithLocale("KNN-G Graph iteration %d took %d ms", iteration, ms));
+        progressTracker.progressLogger().logMessage(() -> formatWithLocale("KNN-G Graph iteration %d took %d ms", iteration, ms));
     }
 
     private void logOverallTime(long ms) {
-        progressLogger.logMessage(() -> formatWithLocale("KNN-G Graph execution took %d ms", ms));
+        progressTracker.progressLogger().logMessage(() -> formatWithLocale("KNN-G Graph execution took %d ms", ms));
     }
 
     @Override
