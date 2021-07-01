@@ -30,6 +30,10 @@ import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -41,8 +45,30 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
         return Dijkstra.memoryEstimation(false);
     }
 
+    @Override
+    public Task progressTask(Graph graph, T config) {
+        return dijkstraProgressTask(graph);
+    }
+
     @NotNull
-    public static BatchingProgressLogger progressLogger(
+    public static Task dijkstraProgressTask(Graph graph) {
+        return Tasks.task(
+            "Dijkstra",
+            Tasks.leaf("compute", graph.relationshipCount())
+        );
+    }
+
+    public static ProgressTracker progressTracker(
+        Task task,
+        Graph graph,
+        Log log,
+        ProgressEventTracker eventTracker
+    ) {
+        return new TaskProgressTracker(task, progressLogger(graph, log, eventTracker));
+    }
+
+    @NotNull
+    private static BatchingProgressLogger progressLogger(
         Graph graph,
         Log log,
         ProgressEventTracker eventTracker
@@ -57,7 +83,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     }
 
     public static <T extends ShortestPathBaseConfig> DijkstraFactory<T> sourceTarget() {
-        return new DijkstraFactory<T>() {
+        return new DijkstraFactory<>() {
             @Override
             public Dijkstra build(
                 Graph graph,
@@ -66,11 +92,12 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
                 Log log,
                 ProgressEventTracker eventTracker
             ) {
+                var progressTask = progressTask(graph, configuration);
                 return Dijkstra.sourceTarget(
                     graph,
                     configuration,
                     Optional.empty(),
-                    progressLogger(graph, log, eventTracker),
+                    progressTracker(progressTask, graph, log, eventTracker),
                     tracker
                 );
             }
@@ -78,7 +105,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     }
 
     public static <T extends AllShortestPathsBaseConfig> DijkstraFactory<T> singleSource() {
-        return new DijkstraFactory<T>() {
+        return new DijkstraFactory<>() {
             @Override
             public Dijkstra build(
                 Graph graph,
@@ -87,11 +114,12 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
                 Log log,
                 ProgressEventTracker eventTracker
             ) {
+                var progressTask = progressTask(graph, configuration);
                 return Dijkstra.singleSource(
                     graph,
                     configuration,
                     Optional.empty(),
-                    progressLogger(graph, log, eventTracker),
+                    progressTracker(progressTask, graph, log, eventTracker),
                     tracker
                 );
             }

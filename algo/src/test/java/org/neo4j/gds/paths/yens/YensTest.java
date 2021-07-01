@@ -32,10 +32,11 @@ import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensStreamConfig;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -178,7 +179,9 @@ class YensTest {
             .k(k)
             .build();
 
-        Yens.sourceTarget(graph, config, testLogger, AllocationTracker.empty())
+        var testTracker = new TestProgressTracker(testLogger);
+
+        Yens.sourceTarget(graph, config, testTracker, AllocationTracker.empty())
             .compute()
             .pathSet();
 
@@ -226,7 +229,7 @@ class YensTest {
             .build();
 
         var actualPathResults = Yens
-            .sourceTarget(graph, config, ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            .sourceTarget(graph, config, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
             .compute()
             .pathSet();
 

@@ -25,11 +25,11 @@ import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongDoubleMap;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Optional;
 
@@ -46,7 +46,7 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
     public static AStar sourceTarget(
         Graph graph,
         ShortestPathAStarBaseConfig config,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         var latitudeProperty = config.latitudeProperty();
@@ -72,7 +72,7 @@ public final class AStar extends Algorithm<AStar, DijkstraResult> {
         var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode, tracker);
 
         // Init dijkstra algorithm for computing shortest paths
-        var dijkstra = Dijkstra.sourceTarget(graph, config, Optional.of(heuristic), progressLogger, tracker);
+        var dijkstra = Dijkstra.sourceTarget(graph, config, Optional.of(heuristic), progressTracker, tracker);
         return new AStar(dijkstra);
     }
 

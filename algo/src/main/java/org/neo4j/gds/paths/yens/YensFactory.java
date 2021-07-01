@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths.yens;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
@@ -27,13 +28,31 @@ import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
+
+import java.util.List;
 
 public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements AlgorithmFactory<Yens, CONFIG> {
 
     @Override
     public MemoryEstimation memoryEstimation(ShortestPathYensBaseConfig configuration) {
         return Yens.memoryEstimation();
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "Yens",
+            DijkstraFactory.dijkstraProgressTask(graph),
+            Tasks.iterativeDynamic(
+                "Searching path",
+                () -> List.of(DijkstraFactory.dijkstraProgressTask(graph)),
+                config.k()
+            )
+        );
     }
 
     @NotNull
@@ -54,11 +73,13 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
     @Override
     public Yens build(
         Graph graph,
-        ShortestPathYensBaseConfig configuration,
+        CONFIG configuration,
         AllocationTracker tracker,
         Log log,
         ProgressEventTracker eventTracker
     ) {
-        return Yens.sourceTarget(graph, configuration, progressLogger(graph, log, eventTracker), tracker);
+        var progressLogger = progressLogger(graph, log, eventTracker);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        return Yens.sourceTarget(graph, configuration, progressTracker, tracker);
     }
 }

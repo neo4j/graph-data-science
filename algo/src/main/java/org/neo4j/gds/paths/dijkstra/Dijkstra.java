@@ -29,12 +29,12 @@ import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongLongMap;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.Optional;
@@ -79,7 +79,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         Graph graph,
         ShortestPathBaseConfig config,
         Optional<HeuristicFunction> heuristicFunction,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         long sourceNode = graph.toMappedNodeId(config.sourceNode());
@@ -91,7 +91,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             node -> node == targetNode ? EMIT_AND_STOP : CONTINUE,
             config.trackRelationships(),
             heuristicFunction,
-            progressLogger,
+            progressTracker,
             tracker
         );
     }
@@ -103,7 +103,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         Graph graph,
         AllShortestPathsBaseConfig config,
         Optional<HeuristicFunction> heuristicFunction,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         return new Dijkstra(graph,
@@ -111,7 +111,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             node -> EMIT_AND_CONTINUE,
             config.trackRelationships(),
             heuristicFunction,
-            progressLogger,
+            progressTracker,
             tracker
         );
     }
@@ -138,7 +138,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         TraversalPredicate traversalPredicate,
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.graph = graph;
@@ -153,7 +153,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
         this.relationships = trackRelationships ? new HugeLongLongMap(tracker) : null;
         this.visited = new BitSet();
         this.pathIndex = 0L;
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     public Dijkstra withSourceNode(long sourceNode) {
@@ -180,7 +180,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
     }
 
     public DijkstraResult compute() {
-        progressLogger.logStart();
+        progressTracker.beginSubTask();
 
         queue.add(sourceNode, 0.0);
 
@@ -206,7 +206,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             visited.set(node);
 
             // For disconnected graphs, this will not reach 100%.
-            progressLogger.logProgress(graph.degree(node));
+            progressTracker.logProgress(graph.degree(node));
 
             relationshipId.setValue(0);
             graph.forEachRelationship(
@@ -228,7 +228,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
                 return pathResult(node, pathResultBuilder);
             }
         }
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
         return PathResult.EMPTY;
     }
 

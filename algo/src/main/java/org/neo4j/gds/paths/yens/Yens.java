@@ -31,19 +31,17 @@ import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.stream.Stream;
-
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
@@ -62,7 +60,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
     public static Yens sourceTarget(
         Graph graph,
         ShortestPathYensBaseConfig config,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         // If the input graph is a multi-graph, we need to track
@@ -74,8 +72,8 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
             .trackRelationships(graph.isMultiGraph())
             .build();
         // Init dijkstra algorithm for computing shortest paths
-        var dijkstra = Dijkstra.sourceTarget(graph, newConfig, Optional.empty(), progressLogger, tracker);
-        return new Yens(graph, dijkstra, newConfig, progressLogger);
+        var dijkstra = Dijkstra.sourceTarget(graph, newConfig, Optional.empty(), progressTracker, tracker);
+        return new Yens(graph, dijkstra, newConfig, progressTracker);
     }
 
     // The blacklists contain nodes and relationships that are
@@ -92,7 +90,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
             .build();
     }
 
-    private Yens(Graph graph, Dijkstra dijkstra, ShortestPathYensBaseConfig config, ProgressLogger progressLogger) {
+    private Yens(Graph graph, Dijkstra dijkstra, ShortestPathYensBaseConfig config, ProgressTracker progressTracker) {
         this.graph = graph;
         this.config = config;
         // Track nodes and relationships that are skipped in a single iteration.
@@ -106,17 +104,17 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
             !(relationshipBlackList.getOrDefault(source, EMPTY_SET).contains(relationshipId))
         );
 
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
     public DijkstraResult compute() {
-        progressLogger.logStart();
+        progressTracker.beginSubTask();
         var kShortestPaths = new ArrayList<MutablePathResult>();
         // compute top 1 shortest path
-        logStart(1);
+        progressTracker.beginSubTask();
         var shortestPath = computeDijkstra(config.sourceNode());
-        logFinish(1);
+        progressTracker.endSubTask();
 
         // no shortest path has been found
         if (shortestPath.isEmpty()) {
@@ -128,7 +126,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         PriorityQueue<MutablePathResult> candidates = initCandidatesQueue();
 
         for (int i = 1; i < config.k(); i++) {
-            logStart(i + 1);
+            progressTracker.beginSubTask();
             var prevPath = kShortestPaths.get(i - 1);
 
             for (int n = 0; n < prevPath.nodeCount() - 1; n++) {
@@ -183,10 +181,10 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
             }
 
             kShortestPaths.add(candidates.poll().withIndex(i));
-            logFinish(i + 1);
+            progressTracker.endSubTask();
         }
 
-        progressLogger.logFinish();
+        progressTracker.endSubTask();
 
         return ImmutableDijkstraResult
             .builder()
@@ -213,21 +211,9 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         relationshipBlackList.release();
     }
 
-    private void logStart(int iteration) {
-        progressLogger.logMessage(formatWithLocale(":: Start searching path %d of %d", iteration, config.k()));
-    }
-
-    private void logFinish(int iteration) {
-        progressLogger.logMessage(formatWithLocale(":: Finished searching path %d of %d", iteration, config.k()));
-    }
-
     private Optional<PathResult> computeDijkstra(long sourceNode) {
-        progressLogger.logMessage(formatWithLocale(":: Start Dijkstra for spur node %d", sourceNode));
-        progressLogger.setTask("Dijkstra");
-        progressLogger.reset(graph.relationshipCount());
-        var pathResult = dijkstra.compute().paths().findFirst();
-        progressLogger.setTask("Yens");
-        return pathResult;
+//        progressTracker.logMessage(formatWithLocale(":: Start Dijkstra for spur node %d", sourceNode));
+        return dijkstra.compute().paths().findFirst();
     }
 
 }

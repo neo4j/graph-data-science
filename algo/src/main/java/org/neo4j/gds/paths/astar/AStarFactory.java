@@ -21,12 +21,16 @@ package org.neo4j.gds.paths.astar;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
+import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements AlgorithmFactory<AStar, CONFIG> {
@@ -34,6 +38,11 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
         return AStar.memoryEstimation();
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task("Astar", DijkstraFactory.dijkstraProgressTask(graph));
     }
 
     @NotNull
@@ -49,6 +58,8 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements
 
     @Override
     public AStar build(Graph graph, CONFIG configuration, AllocationTracker tracker, Log log, ProgressEventTracker eventTracker) {
-        return AStar.sourceTarget(graph, configuration, progressLogger(graph, log, eventTracker), tracker);
+        var progressLogger = progressLogger(graph, log, eventTracker);
+        var progressTracker = new TaskProgressTracker(progressTask(graph, configuration), progressLogger);
+        return AStar.sourceTarget(graph, configuration, progressTracker, tracker);
     }
 }

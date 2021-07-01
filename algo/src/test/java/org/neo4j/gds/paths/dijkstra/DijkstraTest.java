@@ -30,10 +30,11 @@ import org.neo4j.gds.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStre
 import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -128,7 +129,7 @@ final class DijkstraTest {
                 .build();
 
             var paths = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
@@ -145,7 +146,7 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
                 .paths()
                 .findFirst()
@@ -168,7 +169,7 @@ final class DijkstraTest {
                 .build();
 
             var dijkstra = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .withRelationshipFilter(relationshipFilter);
             var paths = dijkstra
                 .compute()
@@ -194,7 +195,7 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
                 .paths()
                 .findFirst()
@@ -234,7 +235,7 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
@@ -256,7 +257,7 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
@@ -272,7 +273,9 @@ final class DijkstraTest {
                 .targetNode(idFunction.of("f"))
                 .build();
 
-            Dijkstra.sourceTarget(graph, config, Optional.empty(), testLogger, AllocationTracker.empty())
+            var testTracker = new TestProgressTracker(testLogger);
+
+            Dijkstra.sourceTarget(graph, config, Optional.empty(), testTracker, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
@@ -338,7 +341,7 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
                 .paths()
                 .findFirst()
@@ -365,7 +368,7 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 
@@ -416,7 +419,7 @@ final class DijkstraTest {
             };
 
             var path = Dijkstra
-                .sourceTarget(graph, config, Optional.of(heuristicFunction), ProgressLogger.NULL_LOGGER, AllocationTracker.empty())
+                .sourceTarget(graph, config, Optional.of(heuristicFunction), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
                 .paths()
                 .findFirst()
