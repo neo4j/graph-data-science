@@ -33,7 +33,8 @@ public enum GdsFeatureToggles {
     USE_PROPERTY_VALUE_INDEX(false),
     USE_PARALLEL_PROPERTY_VALUE_INDEX(false),
     USE_BIT_ID_MAP(true),
-    USE_UNCOMPRESSED_ADJACENCY_LIST(false);
+    USE_UNCOMPRESSED_ADJACENCY_LIST(false),
+    USE_REORDERED_ADJACENCY_LIST(false);
 
     public boolean isEnabled() {
         return current.get();

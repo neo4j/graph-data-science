@@ -170,6 +170,21 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.useReorderedAdjacencyList")
+    @Description("Toggle whether the adjacency list should be reordered during graph creation.")
+    public void useReorderedAdjacencyList(@Name(value = "useReorderedAdjacencyList") boolean useReorderedAdjacencyList) {
+        GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.toggle(useReorderedAdjacencyList);
+    }
+
+    @Internal
+    @Procedure("gds.features.useReorderedAdjacencyList.reset")
+    @Description("Set the default behaviour of whether to reorder adjacency lists during graph creation. That value is returned.")
+    public Stream<FeatureState> resetUseReorderedAdjacencyList() {
+        GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled()));
+    }
+
+    @Internal
     @Procedure("gds.features.maxArrayLengthShift.reset")
     @Description("Set the value of the max array size before paging to the default. That value is returned.")
     public Stream<FeatureValue> resetMaxArrayLengthShift() {

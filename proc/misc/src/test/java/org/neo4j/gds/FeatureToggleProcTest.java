@@ -40,6 +40,7 @@ import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
+import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -162,6 +163,25 @@ class FeatureToggleProcTest extends BaseProcTest {
             List.of(Map.of("enabled", false))
         );
         assertEquals(false, USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled());
+    }
+
+    @Test
+    void toggleUseReorderedAdjacencyList() {
+        var useReorderedAdjacencyList = USE_REORDERED_ADJACENCY_LIST.isEnabled();
+        runQuery("CALL gds.features.useReorderedAdjacencyList($value)", Map.of("value", !useReorderedAdjacencyList));
+        assertEquals(!useReorderedAdjacencyList, USE_REORDERED_ADJACENCY_LIST.isEnabled());
+        runQuery("CALL gds.features.useReorderedAdjacencyList($value)", Map.of("value", useReorderedAdjacencyList));
+        assertEquals(useReorderedAdjacencyList, USE_REORDERED_ADJACENCY_LIST.isEnabled());
+    }
+
+    @Test
+    void resetUseReorderedAdjacencyList() {
+        USE_REORDERED_ADJACENCY_LIST.reset();
+        assertCypherResult(
+            "CALL gds.features.useReorderedAdjacencyList.reset()",
+            List.of(Map.of("enabled", false))
+        );
+        assertEquals(false, USE_REORDERED_ADJACENCY_LIST.isEnabled());
     }
 
     @GdsEditionTest(Edition.EE)
