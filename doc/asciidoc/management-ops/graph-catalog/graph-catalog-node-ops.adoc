@@ -209,24 +209,59 @@ This is similar to what the `stream` execution mode does, but allows more fine-g
 
 ==== Multiple Properties
 
+[role=query-example]
+--
 .Stream multiple node properties:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperties('my-graph', ['componentId', 'pageRank', 'communityId'])
+CALL gds.graph.streamNodeProperties('socialGraph', ['score', 'age'])
+YIELD nodeId, nodeProperty, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, nodeProperty, propertyValue
+ORDER BY name, nodeProperty
 ----
+
+.Results
+[opts="header"]
+|===
+| name         | nodeProperty  | propertyValue
+| "Adam"       | "age"         | 18
+| "Adam"       | "score"       | 1.0
+| "Florentin"  | "age"         | 16
+| "Florentin"  | "score"       | 2.0
+| "Veselin"    | "age"         | 20
+| "Veselin"    | "score"       | 0.0
+| "The Hobbit" | "age"         | NaN
+| "The Hobbit" | "score"       | 0.0
+|===
+--
+
+// TODO start with streamNodeProperty
 
 The above example requires all given properties to be present on at least one node projection, and the properties will be streamed for all such projections.
 
 The procedure can be configured to stream just the properties for some specific node projections.
 In the following example, we ran an algorithm on a sub-graph and subsequently streamed the newly created property.
 
-.Stream node properties of a specific node projection:
+[role=query-example]
+--
+.Stream node properties for `Person` nodes:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('my-graph', ['A', 'B'], '*')
-CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
-CALL gds.graph.streamNodeProperties('my-graph', ['componentId'], ['A'])
+CALL gds.graph.streamNodeProperty('socialGraph', 'score', ['Person'])
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
+ORDER BY score DESC
 ----
+
+.Results
+[opts="header"]
+|===
+| name        | score
+| "Florentin" | 2.0
+| "Adam"      | 1.0
+| "Veselin"   | 0.0
+|===
+--
 
 When a list of projections that are not `*` is specified, as in the example above, a different validation and execution is applied.
 It is then required that all projections have all of the given properties, and they will be streamed for all of the projections.
@@ -243,11 +278,27 @@ For streaming a single node property this is not necessary.
 `gds.graph.streamNodeProperty()` streams a single node property from the in-memory graph, and omits the property name.
 The result has the format `nodeId`, `propertyValue`, as is familiar from the streaming mode of many algorithm procedures.
 
-.Stream a single node property:
+[role=query-example]
+--
+.Stream node properties for `Person` nodes:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperty('my-graph', 'componentId')
+CALL gds.graph.streamNodeProperty('socialGraph', 'score')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
+ORDER BY score DESC
 ----
+
+.Results
+[opts="header"]
+|===
+| name        | score
+| "Florentin" | 2.0
+| "Adam"      | 1.0
+| "Veselin"   | 0.0
+| "The Hobbit"   | 0.0
+|===
+--
 
 === Write
 
