@@ -347,33 +347,58 @@ YIELD propertiesWritten
 
 [NOTE]
 --
-If `nodeLabels` is specified, it is required that _all_ given node labels have _all_ of the given properties.
+If the `nodeLabels` parameter is specified, it is required that _all_ given node labels have _all_ of the given properties.
 --
 
 
 === Remove
 
+
+[role=query-example]
+--
 .Remove multiple node properties from a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.removeNodeProperties('my-graph', ['pageRank', 'communityId'])
+CALL gds.graph.removeNodeProperties('socialGraph', ['score'])
+YIELD propertiesRemoved
 ----
 
-The above example requires all given properties to be present on at least one node projection, and the properties will be removed from all such projections.
+.Results
+[opts="header"]
+|===
+| propertiesRemoved
+| 4
+|===
+--
+
+[NOTE]
+--
+The above example requires all given properties to be present on _at least one_ projected node label.
+--
+
+==== NodeLabels
 
 The procedure can be configured to remove just the properties for some specific node projections.
-In the following example, we ran an algorithm on a sub-graph and subsequently remove the newly created property.
+In the following example, we will only remove the scores from the projected `Person` nodes.
 
-.Remove node properties of a specific node projection:
+[role=query-example]
+--
+.Remove multiple node properties from a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('my-graph', ['A', 'B'], '*')
-CALL gds.wcc.mutate('my-graph', {nodeLabels: ['A'], mutateProperty: 'componentId'})
-CALL gds.graph.removeNodeProperties('my-graph', ['componentId'], ['A'])
+CALL gds.graph.removeNodeProperties('socialGraph', ['score'], ['Person'])
+YIELD propertiesRemoved
 ----
 
-When a list of projections that are not `*` is specified, as in the example above, a different validation and execution is applied;
-It is then required that all projections have all of the given properties, and they will be removed from all of the projections.
+.Results
+[opts="header"]
+|===
+| propertiesRemoved
+| 3
+|===
+--
 
-If any of the given projections is `'*'`, the procedure behaves like in the first example.
-
+[NOTE]
+--
+If the `nodeLabels` parameter is specified, it is required that _all_ given node labels have _all_ of the given properties.
+--
