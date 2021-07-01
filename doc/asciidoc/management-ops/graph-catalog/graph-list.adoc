@@ -1,40 +1,52 @@
 [[catalog-graph-list]]
 = Listing graphs
 
-Information about graphs in the catalog can be listed using the `gds.graph.list()` procedure.
-The procedure takes an optional parameter `graphName`:
+[abstract]
+--
+This section details how to list graphs stored in the graph catalog of the Neo4j Graph Data Science library.
+--
 
-* If a graph name is given, only information for that graph will be listed.
-* If no graph name is given, information about all graphs will be listed.
-* If a graph name is given but not found in the catalog, an empty list will be returned.
+Information about graphs in the catalog can be retrieved using the `gds.graph.list()` procedure.
 
+
+== Syntax
+
+[.graph-list-syntax]
+--
 .List information about graphs in the catalog:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.list(
-  graphName: String?
+  graphName: String
 ) YIELD
-  graphName,
-  database,
-  nodeProjection,
-  relationshipProjection,
-  nodeQuery,
-  relationshipQuery,
-  nodeFilter,
-  relationshipFilter,
-  nodeCount,
-  relationshipCount,
-  schema,
-  degreeDistribution,
-  density,
-  creationTime,
-  modificationTime,
-  sizeInBytes,
-  memoryUsage;
+  graphName: String,
+  database: String,
+  nodeProjection: Map,
+  relationshipProjection: Map,
+  nodeQuery: String,
+  relationshipQuery: String,
+  nodeFilter: String,
+  relationshipFilter: String,
+  nodeCount: Integer,
+  relationshipCount: Integer,
+  schema: Map,
+  degreeDistribution: Map,
+  density: Float,
+  creationTime: Datetime,
+  modificationTime: Datetime,
+  sizeInBytes: Integer,
+  memoryUsage: String
 ----
 
+.Parameters
+[opts="header",cols="1,1,1,4"]
+|===
+| Name      | Type   | Optional | Description
+| graphName | String | yes      | The name under which the graph is stored in the catalog. If no graph name is given, information about all graphs will be listed. If a graph name is given but not found in the catalog, an empty list will be returned.
+|===
+
 .Results
-[opts="header",cols="1m,1,6"]
+[opts="header",cols="3m,1,6"]
 |===
 | Name                   | Type     | Description
 | graphName              | String   | Name of the graph.
@@ -55,6 +67,7 @@ CALL gds.graph.list(
 | sizeInBytes            | Integer  | Number of bytes used in the Java heap to store the graph.
 | memoryUsage            | String   | Human readable description of `sizeInBytes`.
 |===
+--
 
 The information contains basic statistics about the graph, e.g., the node and relationship count.
 The result field `creationTime` indicates when the graph was created in memory.
@@ -78,29 +91,170 @@ The `density` is the result of `relationshipCount` divided by the maximal number
 
 == Examples
 
+In order to demonstrate the GDS Graph List capabilities we are going to create a small social network graph in Neo4j.
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (florentin:Person { name: 'Florentin', age: 16 }),
+  (adam:Person { name: 'Adam', age: 18 }),
+  (veselin:Person { name: 'Veselin', age: 20 }),
+  (florentin)-[:KNOWS { since: 2010 }]->(adam),
+  (florentin)-[:KNOWS { since: 2018 }]->(veselin)
+----
+
+Additionally we will project a few graphs to the graph catalog, for more details see <<catalog-graph-create, native projections>> and <<catalog-graph-create-cypher, Cypher projections>>.
+
+.Project `Person` nodes and `KNOWS` relationships using native projections:
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create('personsNative', 'Person', 'KNOWS')
+----
+
+.Project `Person` nodes and `KNOWS` relationships using Cypher projections:
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create.cypher(
+  'personsCypher',
+  'MATCH (n:Person) RETURN id(n) AS id, labels(n) as labels',
+  'MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target, type(r) as type')
+----
+
+.Project `Person` nodes with property `age` and `KNOWS` relationships using Native projections:
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+  'personsWithAgeNative',
+  {
+    Person: {properties: 'age'}
+  },
+  'KNOWS'
+)
+----
+
+=== List basic information about all graphs in the catalog
+
+[role=query-example]
+--
 .List basic information about all graphs in the catalog:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.list()
-YIELD graphName, nodeCount, relationshipCount, schema;
+YIELD graphName, nodeCount, relationshipCount
+RETURN graphName, nodeCount, relationshipCount
+ORDER BY graphName ASC
 ----
 
-.List extended information about a specific named graph in the catalog:
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| graphName              | nodeCount   | relationshipCount
+| "personsCypher"        | 3           | 2
+| "personsNative"        | 3           | 2
+| "personsWithAgeNative" | 3           | 2
+|===
+--
+
+
+=== List extended information about a specific named graph in the catalog
+
+[role=query-example]
+--
+.List extended information about a specific Cypher named graph in the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.list('my-cypher-graph')
-YIELD graphName, nodeQuery, relationshipQuery, nodeCount, relationshipCount, schema, creationTime, modificationTime, memoryUsage;
+CALL gds.graph.list('personsCypher')
+YIELD graphName, nodeProjection, nodeQuery
 ----
 
-.List all information about a specific named graph in the catalog:
+.Results
+[opts="header",cols="1,1,3"]
+|===
+| graphName | nodeProjection | nodeQuery
+| "personsCypher"
+| null
+| "MATCH (n:Person) RETURN id(n) AS id, labels(n) as labels"
+|===
+--
+
+[role=query-example]
+--
+.List extended information about a specific native named graph in the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.list('my-native-graph')
+CALL gds.graph.list('personsNative')
+YIELD graphName, nodeProjection, nodeQuery
 ----
 
+.Results
+[opts="header",cols="1,3,1"]
+|===
+| graphName       | nodeProjection | nodeQuery
+| "personsNative"
+| {Person={label=Person, properties={}}}
+| null
+|===
+--
+
+The above examples demonstrate that `nodeQuery` only has value when the graph is projected using Cypher projection while `nodeProjection` is present when we have a native graph.
+This is also true for `relationshipQuery` and relationshipProjection` respectively.
+
+Despite different result columns being present for the different projections that we can use the Graph Schemas are the same, which is demonstrated in the example below.
+
+[role=query-example]
+--
+.Cypher graph schema:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.list('personsCypher')
+YIELD graphName, schema
+----
+
+.Results
+[opts="header",cols="2,8"]
+|===
+| graphName | schema
+| "personsCypher"
+| {relationships={KNOWS={}}, nodes={Person={}}}
+|===
+--
+
+[role=query-example]
+--
+.Native graph schema:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.list('personsNative')
+YIELD graphName, schema
+----
+
+.Results
+[opts="header",cols="2,8"]
+|===
+| graphName       | schema
+| "personsNative"
+| {relationships={KNOWS={}}, nodes={Person={}}}
+|===
+--
+
+
+=== Degree distribution of a specific graph
+
+[role=query-example]
+--
 .List information about the degree distribution of a specific graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.list('my-cypher-graph')
+CALL gds.graph.list('personsNative')
 YIELD graphName, degreeDistribution;
 ----
+
+.Results
+[opts="header",cols="2,8"]
+|===
+| graphName       | degreeDistribution
+| "personsNative"
+| {p99=2, min=0, max=2, mean=0.6666666666666666, p90=2, p50=0, p999=2, p95=2, p75=0}
+|===
+--
