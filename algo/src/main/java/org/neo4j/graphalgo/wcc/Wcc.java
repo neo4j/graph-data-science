@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -37,6 +36,7 @@ import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,7 +100,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         ExecutorService executor,
         int minBatchSize,
         WccBaseConfig config,
-        ProgressLogger progressLogger,
+        ProgressTracker progressTracker,
         AllocationTracker tracker
     ) {
         this.graph = graph;
@@ -129,12 +129,12 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         }
         this.threadSize = (int) threadSize;
 
-        this.progressLogger = progressLogger;
+        this.progressTracker = progressTracker;
     }
 
     @Override
     public DisjointSetStruct compute() {
-        progressLogger.logMessage(":: Start");
+        progressTracker.beginSubTask();
 
         long nodeCount = graph.nodeCount();
 
@@ -148,7 +148,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             computeDirected(dss);
         }
 
-        progressLogger.logMessage(":: Finished");
+        progressTracker.endSubTask();
         return dss;
     }
 
@@ -195,18 +195,20 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
      * Samples by processing a fixed number of neighbors for each node.
      */
     private void sampleSubgraph(DisjointSetStruct components, List<Partition> partitions) {
+        progressTracker.beginSubTask();
         var tasks = partitions
             .stream()
             .map(partition -> new UndirectedSamplingTask(
                 graph,
                 partition,
                 components,
-                progressLogger,
+                progressTracker,
                 this
             ))
             .collect(Collectors.toList());
 
         ParallelUtil.run(tasks, executor);
+        progressTracker.endSubTask();
     }
 
     /**
@@ -242,6 +244,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
      * Skips nodes that are already contained in the largest component.
      */
     private void linkRemaining(DisjointSetStruct components, List<Partition> partitions, long largestComponent) {
+        progressTracker.beginSubTask();
         var tasks = partitions
             .stream()
             .map(partition -> new UndirectedUnionTask(
@@ -249,11 +252,12 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
                 partition,
                 largestComponent,
                 components,
-                progressLogger,
+                progressTracker,
                 this
             ))
             .collect(Collectors.toList());
         ParallelUtil.run(tasks, executor);
+        progressTracker.endSubTask();
     }
 
     private static double defaultWeight(double threshold) {
@@ -282,7 +286,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
                     assertRunning();
                 }
 
-                progressLogger.logProgress(graph.degree(node));
+                progressTracker.logProgress(graph.degree(node));
             }
         }
 
@@ -325,7 +329,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         private final Graph graph;
         private final Partition partition;
         private final DisjointSetStruct components;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
         private final TerminationFlag terminationFlag;
         private long limit;
 
@@ -333,13 +337,13 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             Graph graph,
             Partition partition,
             DisjointSetStruct components,
-            ProgressLogger progressLogger,
+            ProgressTracker progressTracker,
             TerminationFlag terminationFlag
         ) {
             this.graph = graph.concurrentCopy();
             this.partition = partition;
             this.components = components;
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
             this.terminationFlag = terminationFlag;
         }
 
@@ -355,7 +359,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
                 if (node % RUN_CHECK_NODE_COUNT == 0) {
                     terminationFlag.assertRunning();
                 }
-                progressLogger.logProgress(Math.min(NEIGHBOR_ROUNDS, graph.degree(node)));
+                progressTracker.logProgress(Math.min(NEIGHBOR_ROUNDS, graph.degree(node)));
             }
         }
 
@@ -378,7 +382,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
         private final long skipComponent;
         private final Partition partition;
         private final DisjointSetStruct components;
-        private final ProgressLogger progressLogger;
+        private final ProgressTracker progressTracker;
         private final TerminationFlag terminationFlag;
         private long skip;
 
@@ -387,14 +391,14 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             Partition partition,
             long skipComponent,
             DisjointSetStruct components,
-            ProgressLogger progressLogger,
+            ProgressTracker progressTracker,
             TerminationFlag terminationFlag
         ) {
             this.graph = graph.concurrentCopy();
             this.skipComponent = skipComponent;
             this.partition = partition;
             this.components = components;
-            this.progressLogger = progressLogger;
+            this.progressTracker = progressTracker;
             this.terminationFlag = terminationFlag;
         }
 
@@ -412,7 +416,7 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
                     reset();
                     graph.forEachRelationship(node, this);
 
-                    progressLogger.logProgress(degree - NEIGHBOR_ROUNDS);
+                    progressTracker.logProgress(degree - NEIGHBOR_ROUNDS);
                     if (node % RUN_CHECK_NODE_COUNT == 0) {
                         terminationFlag.assertRunning();
                     }

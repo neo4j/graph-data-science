@@ -25,9 +25,9 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -129,7 +129,7 @@ class IncrementalWccTest {
             Pools.DEFAULT,
             COMMUNITY_SIZE / ConcurrencyConfig.DEFAULT_CONCURRENCY,
             config,
-            ProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             AllocationTracker.empty()
         ).compute();
     }

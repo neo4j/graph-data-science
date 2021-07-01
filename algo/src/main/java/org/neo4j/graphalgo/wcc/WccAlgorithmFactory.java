@@ -27,6 +27,9 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 
 public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends AbstractAlgorithmFactory<Wcc, CONFIG> {
 
@@ -46,10 +49,10 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Abs
 
     @Override
     protected Wcc build(
-        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressLogger progressLogger
+        Graph graph, CONFIG configuration, AllocationTracker tracker, ProgressTracker progressTracker
     ) {
         if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
-            progressLogger
+            progressTracker.progressLogger()
                 .getLog()
                 .warn("Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
         }
@@ -58,7 +61,7 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Abs
             Pools.DEFAULT,
             ParallelUtil.DEFAULT_BATCH_SIZE,
             configuration,
-            progressLogger,
+            progressTracker,
             tracker
         );
     }
@@ -66,6 +69,17 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Abs
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
         return Wcc.memoryEstimation(config.isIncremental());
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return graph.isUndirected() && !config.hasThreshold()
+            ? Tasks.task("Wcc", Tasks.leaf("compute"))
+            : Tasks.task(
+                "Wcc",
+                Tasks.leaf("sampleSubgraph", taskVolume(graph, config)),
+                Tasks.leaf("linkRemaining", taskVolume(graph, config))
+            );
     }
 
     @TestOnly

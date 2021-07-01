@@ -22,11 +22,11 @@ package org.neo4j.graphalgo.wcc;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.CommunityHelper;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -63,7 +63,7 @@ class UndirectedSamplingTaskTest {
             graph,
             partition,
             components,
-            ProgressLogger.NULL_LOGGER,
+            ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
 
