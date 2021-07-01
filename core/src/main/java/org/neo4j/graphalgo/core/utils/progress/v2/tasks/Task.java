@@ -116,6 +116,10 @@ public class Task {
             .build();
     }
 
+    public void setVolume(long volume) {
+        throw new UnsupportedOperationException("Should only be called on a leave task");
+    }
+
     public void logProgress() {
         logProgress(1);
     }

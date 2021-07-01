@@ -24,13 +24,18 @@ import java.util.concurrent.atomic.LongAdder;
 
 public class LeafTask extends Task {
 
-    private final long volume;
+    private long volume;
     private final LongAdder currentProgress;
 
     LeafTask(String description, long volume) {
         super(description, List.of());
         this.volume = volume;
         this.currentProgress = new LongAdder();
+    }
+
+    @Override
+    public void setVolume(long volume) {
+        this.volume = volume;
     }
 
     @Override

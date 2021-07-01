@@ -20,13 +20,14 @@
 package org.neo4j.graphalgo.core.utils.progress.v2.tasks;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class ProgressTrackerTest {
+public class TaskProgressTrackerTest {
 
     @Test
     void shouldStepThroughSubtasks() {
@@ -38,7 +39,7 @@ public class ProgressTrackerTest {
             iterativeTask
         );
 
-        var progressTracker = new ProgressTracker(rootTask);
+        var progressTracker = new TaskProgressTracker(rootTask, ProgressLogger.NULL_LOGGER);
 
         progressTracker.beginSubTask();
         assertThat(progressTracker.currentSubTask()).isEqualTo(rootTask);
@@ -65,7 +66,7 @@ public class ProgressTrackerTest {
     @Test
     void shouldThrowIfEndMoreTasksThanStarted() {
         var task = Tasks.leaf("leaf");
-        var progressTracker = new ProgressTracker(task);
+        var progressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER);
         progressTracker.beginSubTask();
         progressTracker.endSubTask();
         assertThatThrownBy(progressTracker::endSubTask)
@@ -76,7 +77,7 @@ public class ProgressTrackerTest {
     @Test
     void shouldLogProgress() {
         var task = Tasks.leaf("leaf");
-        var progressTracker = new ProgressTracker(task);
+        var progressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER);
         progressTracker.beginSubTask();
         progressTracker.logProgress(42);
         assertThat(task.getProgress().progress()).isEqualTo(42);
@@ -85,7 +86,7 @@ public class ProgressTrackerTest {
     @Test
     void shouldCancelSubTasksOnDynamicIterative() {
         var task = Tasks.iterativeDynamic("iterative", () -> List.of(Tasks.leaf("leaf")), 2);
-        var progressTracker = new ProgressTracker(task);
+        var progressTracker = new TaskProgressTracker(task, ProgressLogger.NULL_LOGGER);
         progressTracker.beginSubTask();
         assertThat(progressTracker.currentSubTask()).isEqualTo(task);
 

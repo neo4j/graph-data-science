@@ -182,4 +182,12 @@ class TaskTest {
             .hasFieldOrPropertyWithValue("volume", -1L)
             .hasFieldOrPropertyWithValue("progress", 50L);
     }
+
+    @Test
+    void shouldSetVolumeLate() {
+        var task = Tasks.task("root", Tasks.leaf("leaf"));
+        assertThat(task.getProgress().volume()).isEqualTo(Task.UNKNOWN_VOLUME);
+        task.nextSubtask().setVolume(100);
+        assertThat(task.getProgress().volume()).isEqualTo(100);
+    }
 }
