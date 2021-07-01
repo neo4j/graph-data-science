@@ -24,6 +24,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
@@ -46,7 +48,10 @@ public class TestAlgorithm extends Algorithm<TestAlgorithm, TestAlgorithm> {
         this.allocationTracker = allocationTracker;
         this.memoryLimit = memoryLimit;
         this.throwInCompute = throwInCompute;
-        this.progressLogger = new BatchingProgressLogger(log, 42, "test", 1, eventTracker);
+        this.progressTracker = new TaskProgressTracker(
+            Tasks.leaf("TestAlgorithm"),
+            new BatchingProgressLogger(log, 42, "test", 1, eventTracker)
+        );
     }
 
     @Override

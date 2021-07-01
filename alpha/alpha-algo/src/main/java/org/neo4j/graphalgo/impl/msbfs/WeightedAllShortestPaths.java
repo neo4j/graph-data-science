@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.impl.msbfs;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 
 import java.util.Arrays;
@@ -88,6 +87,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
      */
     @Override
     public Stream<Result> compute() {
+        progressTracker.beginSubTask();
 
         counter.set(0);
         outputStreamOpen = true;
@@ -98,6 +98,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
 
         long end = (long) nodeCount * nodeCount;
 
+        progressTracker.endSubTask();
         return LongStream.range(0, end)
                 .onClose(() -> outputStreamOpen = false)
                 .mapToObj(i -> {
@@ -140,7 +141,6 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
 
         @Override
         public void run() {
-            final ProgressLogger progressLogger = getProgressLogger();
             int startNode;
             while (outputStreamOpen && running() && (startNode = counter.getAndIncrement()) < nodeCount) {
                 compute(startNode);
@@ -156,7 +156,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
                         throw new RuntimeException(e);
                     }
                 }
-                progressLogger.logProgress((double) startNode / (nodeCount - 1));
+                progressTracker.logProgress();
             }
         }
 

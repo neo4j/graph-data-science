@@ -23,7 +23,6 @@ import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.RelationshipProperties;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
 
 import java.util.function.DoubleUnaryOperator;
@@ -69,7 +68,8 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
 
     @Override
     public SpanningTree compute() {
-        ProgressLogger logger = getProgressLogger();
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(graph.nodeCount());
         Prim prim = new Prim(
             idMapping,
             graph,
@@ -86,7 +86,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
                 continue;
             }
             priorityQueue.add(i, weights.relationshipProperty(p, i, 0.0D));
-            logger.logProgress(i, nodeCount, () -> "reorganization");
+            progressTracker.logProgress();
         }
         // remove k-1 relationships
         for (int i = 0; i < k - 1 && running(); i++) {
@@ -94,6 +94,7 @@ public class KSpanningTree extends Algorithm<KSpanningTree, SpanningTree> {
             parent[cutNode] = -1;
         }
         this.spanningTree = prim.getSpanningTree();
+        progressTracker.endSubTask();
         return this.spanningTree;
     }
 

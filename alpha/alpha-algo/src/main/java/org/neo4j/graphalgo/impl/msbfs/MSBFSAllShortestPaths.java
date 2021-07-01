@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.impl.msbfs;
 
 import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths.Result;
 
@@ -72,6 +71,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
      */
     @Override
     public Stream<Result> compute() {
+        progressTracker.beginSubTask();
         executorService.submit(new ShortestPathTask(concurrency, executorService));
         Iterator<Result> iterator = new AbstractIterator<Result>() {
             @Override
@@ -88,6 +88,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
             }
         };
 
+        progressTracker.endSubTask();
         return StreamSupport.stream(
             Spliterators.spliteratorUnknownSize(iterator, 0),
             false
@@ -125,7 +126,6 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
         @Override
         public void run() {
 
-            final ProgressLogger progressLogger = getProgressLogger();
             final double maxNodeId = nodeCount - 1;
             MultiSourceBFS.aggregatedNeighborProcessing(
                     graph,
@@ -143,7 +143,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
                                 throw new RuntimeException(e);
                             }
                         }
-                        progressLogger.logProgress(target, maxNodeId);
+                        progressTracker.logProgress();
                     },
                     tracker
             ).run(concurrency, executorService);

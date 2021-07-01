@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IntersectionConsumer;
 import org.neo4j.graphalgo.api.RelationshipIntersect;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.triangle.intersect.ImmutableRelationshipIntersectConfig;
 import org.neo4j.graphalgo.triangle.intersect.RelationshipIntersectConfig;
@@ -105,9 +104,11 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
 
     @Override
     public Stream<Result> compute() {
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(graph.nodeCount());
         submitTasks();
         final TerminationFlag flag = getTerminationFlag();
-        final Iterator<Result> it = new Iterator<Result>() {
+        final Iterator<Result> it = new Iterator<>() {
 
             @Override
             public boolean hasNext() {
@@ -124,6 +125,7 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
             }
         };
 
+        progressTracker.endSubTask();
         return StreamSupport
                 .stream(Spliterators.spliteratorUnknownSize(it, 0), false)
                 .filter(Objects::nonNull);
@@ -146,11 +148,10 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
         @Override
         public final void run() {
             try {
-                ProgressLogger progressLogger = getProgressLogger();
                 int node;
                 while ((node = queue.getAndIncrement()) < nodeCount && running()) {
                     evaluateNode(node);
-                    progressLogger.logProgress(visitedNodes.incrementAndGet(), nodeCount);
+                    progressTracker.logProgress();
                 }
             } finally {
                 runningThreads.decrementAndGet();

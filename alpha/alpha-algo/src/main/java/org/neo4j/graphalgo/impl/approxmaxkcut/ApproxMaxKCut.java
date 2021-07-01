@@ -64,6 +64,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private Graph graph;
     private final ExecutorService executor;
     private final ApproxMaxKCutConfig config;
+    private final ProgressLogger progressLogger;
     private final AllocationTracker tracker;
     private final WeightTransformer weightTransformer;
     private final HugeIntArray[] candidateSolutions;

@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.impl.closeness;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleNodeProperties;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.PagedAtomicIntegerArray;
@@ -121,21 +120,21 @@ public class MSClosenessCentrality extends Algorithm<MSClosenessCentrality, MSCl
 
     @Override
     public MSClosenessCentrality compute() {
-        final ProgressLogger progressLogger = getProgressLogger();
-
+        progressTracker.beginSubTask();
         final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
             int len = sourceNodeIds.size();
             farness.add(nodeId, len * depth);
             while (sourceNodeIds.hasNext()) {
                 component.add(sourceNodeIds.next(), 1);
             }
-            progressLogger.logProgress((double) nodeId / (nodeCount - 1));
+            progressTracker.logProgress();
         };
 
         MultiSourceBFS
             .aggregatedNeighborProcessing(graph, graph, consumer, tracker)
             .run(concurrency, executorService);
 
+        progressTracker.endSubTask();
         return this;
     }
 

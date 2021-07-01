@@ -75,6 +75,8 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
      * compute scc
      */
     public HugeLongArray compute() {
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(graph.nodeCount());
         setCount = 0;
         minSetSize = Integer.MAX_VALUE;
         maxSetSize = 0;
@@ -84,6 +86,7 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
         boundaries.clear();
         stack.clear();
         graph.forEachNode(this::compute);
+        progressTracker.endSubTask();
         return connectedComponents;
     }
 
@@ -146,7 +149,7 @@ public class SccAlgorithm extends Algorithm<SccAlgorithm, HugeLongArray> {
                 postVisit(node);
             }
         }
-        getProgressLogger().logProgress((double) nodeId / (nodeCount - 1));
+        progressTracker.logProgress();
         return true;
     }
 

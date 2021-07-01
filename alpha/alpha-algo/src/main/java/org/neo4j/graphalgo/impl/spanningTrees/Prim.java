@@ -25,7 +25,6 @@ import com.carrotsearch.hppc.IntDoubleScatterMap;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.IdMapping;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.queue.SharedIntPriorityQueue;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 
@@ -65,13 +64,14 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
 
     @Override
     public SpanningTree compute() {
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(graph.nodeCount());
         int[] parent = new int[nodeCount];
         IntDoubleMap cost = new IntDoubleScatterMap(nodeCount);
         SharedIntPriorityQueue queue = SharedIntPriorityQueue.min(
                 nodeCount,
                 cost,
                 Double.MAX_VALUE);
-        ProgressLogger logger = getProgressLogger();
         BitSet visited = new BitSet(nodeCount);
         Arrays.fill(parent, -1);
         cost.put(startNodeId, 0.0);
@@ -102,9 +102,10 @@ public class Prim extends Algorithm<Prim, SpanningTree> {
                 }
                 return true;
             }));
-            logger.logProgress(effectiveNodeCount, nodeCount - 1);
+            progressTracker.logProgress();
         }
         this.spanningTree = new SpanningTree(startNodeId, nodeCount, effectiveNodeCount, parent);
+        progressTracker.endSubTask();
         return this.spanningTree;
     }
 
