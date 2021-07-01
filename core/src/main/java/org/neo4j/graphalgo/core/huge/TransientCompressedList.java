@@ -137,8 +137,12 @@ public final class TransientCompressedList implements AdjacencyList {
 
     @Override
     public AdjacencyCursor adjacencyCursor(@Nullable AdjacencyCursor reuse, long node, double fallbackValue) {
+        var degree = degrees.get(node);
+        if (degree == 0) {
+            return AdjacencyCursor.empty();
+        }
         if (reuse instanceof DecompressingCursor) {
-            reuse.init(offsets.get(node), degrees.get(node));
+            reuse.init(offsets.get(node), degree);
             return reuse;
         }
         return adjacencyCursor(node, fallbackValue);

@@ -139,6 +139,19 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
     }
 
     @Override
+    public AdjacencyCursor adjacencyCursor(@Nullable AdjacencyCursor reuse, long node, double fallbackValue) {
+        var degree = degrees.get(node);
+        if (degree == 0) {
+            return AdjacencyCursor.empty();
+        }
+        if (reuse instanceof Cursor) {
+            reuse.init(offsets.get(node), degree);
+            return reuse;
+        }
+        return adjacencyCursor(node, fallbackValue);
+    }
+
+    @Override
     public AdjacencyCursor rawAdjacencyCursor() {
         return new Cursor(pages);
     }
@@ -164,8 +177,12 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
 
     @Override
     public PropertyCursor propertyCursor(PropertyCursor reuse, long node, double fallbackValue) {
+        var degree = degrees.get(node);
+        if (degree == 0) {
+            return PropertyCursor.empty();
+        }
         if (reuse instanceof Cursor) {
-            reuse.init(offsets.get(node), degrees.get(node));
+            reuse.init(offsets.get(node), degree);
             return reuse;
         }
         return propertyCursor(node, fallbackValue);
