@@ -17,6 +17,9 @@ To persist the values in a Neo4j database, we can use `gds.graph.writeNodeProper
 Similar to streaming node properties, it is also possible to write those back to Neo4j.
 This is similar to what the `stream` execution mode does, but allows more fine-grained control over the operations.
 
+We can also remove node properties from a named graph in the catalog.
+This is useful to free up main memory or to remove accidentally created node properties.
+
 == Syntax
 
 .Exporting Node Properties syntax per mode
@@ -53,7 +56,7 @@ YIELD
 [opts="header",cols="1,1,1,7"]
 |===
 | Name                   | Type                  | Default | Description
-| concurrency            | Integer               | 4       | The number of concurrent threads used for streaming the node properties.
+| concurrency            | Integer               | 4       | The number of concurrent threads. Note, this procedure is always running single-threaded.
 |===
 
 .Results
@@ -92,8 +95,8 @@ YIELD
 |===
 | Name           | Type                       | Optional | Description
 | graphName      | String                     | no       | The name under which the graph is stored in the catalog.
-| nodeProperties | String or List of Strings  | no       | The node properties in the graph to stream.
-| nodeLabels     | String or List of Strings  | yes      | The node labels to write the node properties for graph.
+| nodeProperties | String or List of Strings  | no       | The node properties in the graph to write back.
+| nodeLabels     | String or List of Strings  | yes      | The node labels to write back their node properties.
 | configuration  | Map                        | yes      | Additional parameters to configure writeNodeProperties.
 |===
 
@@ -116,6 +119,48 @@ YIELD
 |===
 ======
 
+[.include-with-remove]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.graph.removeNodeProperties(
+    graphName: String,
+    nodeProperties: String or List of Strings,
+    nodeLabels: String or List of Strings,
+    configuration: Map
+)
+YIELD
+    propertiesRemoved: Integer,
+    graphName: String,
+    nodeProperties: String or List of String
+----
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
+|===
+| Name           | Type                       | Optional | Description
+| graphName      | String                     | no       | The name under which the graph is stored in the catalog.
+| nodeProperties | String or List of Strings  | no       | The node properties in the graph to remove.
+| nodeLabels     | String or List of Strings  | yes      | The node labels to remove the node properties from.
+| configuration  | Map                        | yes      | Additional parameters to configure removeNodeProperties.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,7"]
+|===
+| Name                   | Type                  | Default           | Description
+| concurrency            | Integer               | 4                 | The number of concurrent threads. Note, this procedure is always running single-threaded.
+|===
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name              | Type                     | Description
+| propertiesRemoved | Integer                  | Number of properties removed.
+| graphName         | String                   | The name of a graph stored in the catalog.
+| nodeProperties    | String or List of String | The removed node properties.
+|===
+======
 ====
 
 // TODO document gds.graph.streamNodeProperty

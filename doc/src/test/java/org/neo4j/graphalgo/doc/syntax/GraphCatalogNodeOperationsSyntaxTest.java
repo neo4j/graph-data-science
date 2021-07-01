@@ -26,7 +26,9 @@ class GraphCatalogNodeOperationsSyntaxTest extends SyntaxTestBase {
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.STREAM_NODE_PROPERTIES)
+            SyntaxModeMeta.of(SyntaxMode.STREAM),
+            SyntaxModeMeta.of(SyntaxMode.WRITE),
+            SyntaxModeMeta.of(SyntaxMode.REMOVE)
         );
     }
 
