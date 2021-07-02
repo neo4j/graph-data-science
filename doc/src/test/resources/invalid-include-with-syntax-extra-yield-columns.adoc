@@ -10,7 +10,7 @@ CALL gds.louvain.stream(
 YIELD
   nodeId: Integer,
   communityId: Integer,
-  intermediateCommunityIds: Integer[],
+  intermediateCommunityIds: List of Integer,
   bogusResultColumn: Double
 ----
 
@@ -29,6 +29,6 @@ YIELD
 | Name                      | Type      | Description
 | nodeId                    | Integer   | Node ID.
 | communityId               | Integer   | The community ID of the final level.
-| intermediateCommunityIds  | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
+| intermediateCommunityIds  | List of Integer | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
 |===
 ======

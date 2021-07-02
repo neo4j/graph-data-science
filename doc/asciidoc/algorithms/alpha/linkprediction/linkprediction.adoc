@@ -303,8 +303,8 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 |===
 | Name                                                          | Type        | Default                | Optional | Description
 | modelName                                                     | String      | n/a                    | no       | The name of a Link Prediction model in the model catalog.
-| <<common-configuration-node-labels,nodeLabels>>               | String[]    | ['*']                  | yes      | Filter the named graph using the given node labels.
-| <<common-configuration-relationship-types,relationshipTypes>> | String[]    | ['*']                  | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']                  | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']                  | yes      | Filter the named graph using the given relationship types.
 | <<common-configuration-concurrency,concurrency>>              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
 | mutateRelationshipType                                        | String      | n/a                    | no       | The relationship type used for the new relationships written to the in-memory graph.
 | mutateProperty                                                | String      | 'probability'          | yes      | The relationship property in the GDS graph to which the result is written.
@@ -350,8 +350,8 @@ include::../../common-configuration/common-parameters-named-graph.adoc[]
 |===
 | Name                                                          | Type        | Default                | Optional | Description
 | modelName                                                     | String      | n/a                    | no       | The name of a Link Prediction model in the model catalog.
-| <<common-configuration-node-labels,nodeLabels>>               | String[]    | ['*']                  | yes      | Filter the named graph using the given node labels.
-| <<common-configuration-relationship-types,relationshipTypes>> | String[]    | ['*']                  | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']                  | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']                  | yes      | Filter the named graph using the given relationship types.
 | <<common-configuration-concurrency,concurrency>>              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
 | writeRelationshipType                                         | String      | n/a                    | no       | The relationship type used to persist the computed relationships in the Neo4j database.
 | <<common-configuration-write-property,writeProperty>>         | String      | n/a                    | no       | The relationship property in the Neo4j database to which the result is written.

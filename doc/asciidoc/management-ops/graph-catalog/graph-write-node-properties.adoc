@@ -15,12 +15,12 @@ Properties that were added to the created graph at creation time will often alre
 ----
 CALL gds.graph.writeNodeProperties(
   graphName: String,
-  nodeProperties: List<String>,
-  nodeLabels: List<String>,
+  nodeProperties: List of String,
+  nodeLabels: List of String,
   configuration: Map
 ) YIELD
   graphName: String,
-  nodeProperties: List<String>,
+  nodeProperties: List of String,
   writeMillis: Integer,
   propertiesWritten: Integer
 ----
@@ -30,8 +30,8 @@ CALL gds.graph.writeNodeProperties(
 |===
 | Name           | Type         | Default | Optional | Description
 | graphName      | String       | n/a     | no       | The name of a graph stored in the catalog.
-| nodeProperties | List<String> | n/a     | no       | Names of properties to write.
-| nodeLabels     | List<String> | ['*']   | yes      | Names of labels to write properties for.
+| nodeProperties | List of String | n/a     | no       | Names of properties to write.
+| nodeLabels     | List of String | ['*']   | yes      | Names of labels to write properties for.
 | configuration  | Map          | {}      | yes      | Configuration for algorithm-specifics and/or graph filtering.
 |===
 
@@ -49,7 +49,7 @@ CALL gds.graph.writeNodeProperties(
 |===
 | Name              | Type         | Description
 | graphName         | String       | Name of the graph.
-| nodeProperties    | List<String> | Names of written properties.
+| nodeProperties    | List of String | Names of written properties.
 | writeMillis       | Integer      | Milliseconds for writing properties to Neo4j.
 | propertiesWritten | Integer      | Number of properties written.
 |===

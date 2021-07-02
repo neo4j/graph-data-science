@@ -59,7 +59,7 @@ include::../../common-configuration/common-mutate-configuration-named-graph.adoc
 | negativeSamplingRatio         | Float         | n/a             | no        | The desired ratio of negative to positive samples in holdout set.
 | holdoutRelationshipType       | String        | n/a             | no        | Relationship type used for the holdout set. Each relationship has a property `label` indicating whether it is a positive or negative sample.
 | remainingRelationshipType     | String        | n/a             | no        | Relationship type used for the remaining set.
-| nonNegativeRelationshipTypes  | String[]      | n/a             | yes       | Additional relationship types that are used for negative sampling.
+| nonNegativeRelationshipTypes  | List of String      | n/a             | yes       | Additional relationship types that are used for negative sampling.
 | randomSeed                    | Integer       | n/a             | yes       | An optional seed value for the random selection of relationships.
 |===
 

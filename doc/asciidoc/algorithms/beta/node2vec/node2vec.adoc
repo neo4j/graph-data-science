@@ -58,7 +58,7 @@ CALL gds.beta.node2vec.stream(
   configuration: Map
 ) YIELD
   nodeId: Integer,
-  embedding: Float[]
+  embedding: List of Float
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
@@ -73,7 +73,7 @@ include::specific-configuration.adoc[]
 |===
 | Name      | Type    | Description
 | nodeId    | Integer | The Neo4j node ID.
-| embedding | Float[] | The computed node embedding.
+| embedding | List of Float | The computed node embedding.
 |===
 ======
 

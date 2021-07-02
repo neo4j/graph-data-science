@@ -533,8 +533,8 @@ YIELD nodes, similarityPair, writeRelationshipType, writeProperty, min, max, mea
 | writeBatchSize        | Integer           | 10000                  | yes      | The batch size to use when storing results.
 | writeRelationshipType | String            | SIMILAR                | yes      | The relationship type to use when storing results.
 | writeProperty         | String            | score                  | yes      | The property to use when storing results.
-| sourceIds             | String[]          | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
-| targetIds             | String[]          | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| sourceIds             | List of String          | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| targetIds             | List of String          | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 |===
 
 .Results
@@ -585,8 +585,8 @@ YIELD item1, item2, count1, count2, intersection, similarity
 | skipValue         | Float             | gds.util.NaN()         | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
 | concurrency       | Integer           | 4                      | yes      | The number of concurrent threads used for running the algorithm.
 | graph             | String            | dense                  | yes      | The graph name ('dense' or 'cypher').
-| sourceIds         | Integer[]         | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
-| targetIds         | Integer[]         | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| sourceIds         | List of Integer         | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| targetIds         | List of Integer         | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
 |===
 
 .Results

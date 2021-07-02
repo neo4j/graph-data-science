@@ -51,7 +51,7 @@ CALL gds.louvain.stream(
 YIELD
   nodeId: Integer,
   communityId: Integer,
-  intermediateCommunityIds: Integer[]
+  intermediateCommunityIds: List of Integer
 ----
 
 include::../common-configuration/common-parameters-named-graph.adoc[]
@@ -66,7 +66,7 @@ include::specific-configuration.adoc[]
 | Name                      | Type      | Description
 | nodeId                    | Integer   | Node ID.
 | communityId               | Integer   | The community ID of the final level.
-| intermediateCommunityIds  | Integer[] | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
+| intermediateCommunityIds  | List of Integer | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
 |===
 ======
 
@@ -87,7 +87,7 @@ YIELD
   communityCount: Integer,
   ranLevels: Integer,
   modularity: Float,
-  modularities: Integer[],
+  modularities: List of Integer,
   communityDistribution: Map,
   configuration: Map
 ----
@@ -108,7 +108,7 @@ include::specific-configuration.adoc[]
 | communityCount        | Integer   | The number of communities found.
 | ranLevels             | Integer   | The number of supersteps the algorithm actually ran.
 | modularity            | Float     | The final modularity score.
-| modularities          | Integer[] | The modularity scores for each level.
+| modularities          | List of Integer | The modularity scores for each level.
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
@@ -131,7 +131,7 @@ YIELD
   communityCount: Integer,
   ranLevels: Integer,
   modularity: Float,
-  modularities: Integer[],
+  modularities: List of Integer,
   nodePropertiesWritten: Integer,
   communityDistribution: Map,
   configuration: Map
@@ -154,7 +154,7 @@ include::specific-configuration.adoc[]
 | communityCount         | Integer   | The number of communities found.
 | ranLevels              | Integer   | The number of supersteps the algorithm actually ran.
 | modularity             | Float     | The final modularity score.
-| modularities           | Integer[] | The modularity scores for each level.
+| modularities           | List of Integer | The modularity scores for each level.
 | nodePropertiesWritten  | Integer   | Number of properties added to the in-memory graph.
 | communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration          | Map       | The configuration used for running the algorithm.
@@ -180,7 +180,7 @@ YIELD
   communityCount: Integer,
   ranLevels: Integer,
   modularity: Float,
-  modularities: Integer[],
+  modularities: List of Integer,
   communityDistribution: Map,
   configuration: Map
 ----
@@ -203,7 +203,7 @@ include::specific-configuration-write.adoc[]
 | communityCount        | Integer   | The number of communities found.
 | ranLevels             | Integer   | The number of supersteps the algorithm actually ran.
 | modularity            | Float     | The final modularity score.
-| modularities          | Integer[] | The modularity scores for each level.
+| modularities          | List of Integer | The modularity scores for each level.
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
@@ -228,7 +228,7 @@ YIELD
   communityCount: Integer,
   ranLevels: Integer,
   modularity: Float,
-  modularities: Integer[],
+  modularities: List of Integer,
   communityDistribution: Map,
   configuration: Map
 ----

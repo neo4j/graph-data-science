@@ -38,6 +38,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ProcedureSyntaxAutoChecker extends Postprocessor {
 
+    private static final String YIELD_FIELD_SEPARATOR = ",";
+    private static final String YIELD_NAME_DATA_TYPE_SEPARATOR = ":";
+
     private static final String STYLE_SELECTOR = "style";
     private static final String STYLE_SELECTOR_VALUE = "source";
     private static final String LANGUAGE_SELECTOR = "language";
@@ -45,7 +48,6 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
     private static final String CONTEXT_SELECTOR = "context";
     private static final String TABLE_CONTEXT_VALUE = ":table";
     private static final String RESULTS_TABLE_TITLE = "Results";
-    private static final String RESULT_FIELD_TYPE_REGEX = "(: |:)\\w+|([\\[\\]])";
     private static final String YIELD_KEYWORD = "YIELD";
 
     private static final String ROLE_SELECTOR = "role";
@@ -151,8 +153,8 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
 
     private Iterable<String> extractDocResultFields(String syntaxCode) {
         var yield = syntaxCode.substring(syntaxCode.indexOf(YIELD_KEYWORD) + YIELD_KEYWORD.length()).trim();
-        return Arrays.stream(yield.replaceAll(RESULT_FIELD_TYPE_REGEX, "").split(","))
-            .map(String::trim)
+        return Arrays.stream(yield.split(YIELD_FIELD_SEPARATOR))
+            .map(yieldField -> yieldField.split(YIELD_NAME_DATA_TYPE_SEPARATOR)[0].trim())
             .collect(Collectors.toList());
     }
 

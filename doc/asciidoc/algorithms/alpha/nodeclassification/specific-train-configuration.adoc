@@ -5,8 +5,8 @@
 | targetProperty        | String       | n/a     | no       | The class of the node. Must be of type Integer.
 | holdoutFraction       | Float        | n/a     | no       | Portion of the graph reserved for testing. Must be in the range (0, 1).
 | validationFolds       | Integer      | n/a     | no       | Number of divisions of the train graph used for model selection.
-| metrics               | List<String> | n/a     | no       | Metrics used to evaluate the models.
-| params                | List<Map>    | n/a     | no       | List of model configurations to be trained. See next table for details.
+| metrics               | List of String | n/a     | no       | Metrics used to evaluate the models.
+| params                | List of Map    | n/a     | no       | List of model configurations to be trained. See next table for details.
 | randomSeed            | Integer      | n/a     | yes      | Seed for the random number generator used during training.
 |===
 

@@ -130,7 +130,7 @@ CALL gds.fastRP.stream(
   configuration: Map
 ) YIELD
   nodeId: Integer,
-  embedding: Float[]
+  embedding: List of Float
 ----
 
 include::../common-configuration/common-parameters-named-graph.adoc[]
@@ -144,7 +144,7 @@ include::specific-configuration.adoc[]
 |===
 | Name      | Type         | Description
 | nodeId    | Integer      | Node ID.
-| embedding | List<Float>  | FastRP node embedding.
+| embedding | List of Float  | FastRP node embedding.
 |===
 ======
 
@@ -578,7 +578,7 @@ CALL gds.beta.fastRPExtended.stream(
   configuration: Map
 ) YIELD
   nodeId: Integer,
-  embedding: List<Float>
+  embedding: List of Float
 ----
 
 include::../common-configuration/common-parameters-named-graph.adoc[]
@@ -592,7 +592,7 @@ include::specific-configuration-ext.adoc[]
 |===
 | Name      | Type         | Description
 | nodeId    | Integer      | The Neo4j node ID.
-| embedding | List<Float>  | The computed node embedding.
+| embedding | List of Float  | The computed node embedding.
 |===
 ======
 

@@ -106,7 +106,7 @@ include::specific-configuration.adoc[]
 |===
 | Name      | Type         | Description
 | nodeId    | Integer      | The Neo4j node ID.
-| embedding | List<Float>  | The computed node embedding.
+| embedding | List of Float  | The computed node embedding.
 |===
 ======
 
