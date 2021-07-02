@@ -22,6 +22,9 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -34,6 +37,7 @@ import org.neo4j.graphalgo.degree.DegreeCentralityMutateProc;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,6 +54,14 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
         ", (d:B {nodeProp1: 3, nodeProp2: 45})" +
         ", (e:B {nodeProp1: 4, nodeProp2: 46})" +
         ", (f:B {nodeProp1: 5, nodeProp2: 47})";
+
+    private static Stream<Arguments> nodeProperties() {
+        return Stream.of(
+            Arguments.of(List.of("nodeProp1"), 3L),
+            Arguments.of(List.of("nodeProp2"), 3L),
+            Arguments.of(List.of("nodeProp1", "nodeProp2"), 6L)
+        );
+    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -109,16 +121,28 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
         );
     }
 
-    @Test
-    void removeNodePropertiesForLabel() {
+    @ParameterizedTest
+    @MethodSource("nodeProperties")
+    void removeNodePropertiesForLabel(List<String> nodeProperties, long propertyCount) {
         assertCypherResult(
-            "CALL gds.graph.removeNodeProperties($graphName, ['nodeProp2'], ['A']) YIELD graphName, nodeProperties, propertiesRemoved",
-            Map.of("graphName", TEST_GRAPH_DIFFERENT_PROPERTIES),
+            "CALL gds.graph.removeNodeProperties($graphName, $nodeProperties, ['A']) YIELD graphName, nodeProperties, propertiesRemoved",
+            Map.of("graphName", TEST_GRAPH_DIFFERENT_PROPERTIES, "nodeProperties", nodeProperties),
             List.of(Map.of(
                 "graphName", TEST_GRAPH_DIFFERENT_PROPERTIES,
-                "nodeProperties", List.of("nodeProp2"),
-                "propertiesRemoved", 3L
+                "nodeProperties", nodeProperties,
+                "propertiesRemoved", propertyCount
             ))
+        );
+    }
+
+    @Test
+    void failToRemoveSharedPropertyForLabel() {
+        runQuery("CALL gds.degree.mutate($graphName, {mutateProperty: 'score'})", Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES));
+
+        assertError(
+            "CALL gds.graph.removeNodeProperties($graphName, ['score'], ['A']) YIELD graphName, nodeProperties, propertiesRemoved",
+            Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES),
+            "Cannot remove a shared node-property for a subset of node labels. `score` is shared by [A, B]. But only [A] was specified in `nodeLabels`"
         );
     }
 
@@ -143,7 +167,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
             "No node projection with property key(s) ['nodeProp1', 'nodeProp2', 'nodeProp3'] found."
         );
     }
-
+    
     @Test
     void shouldReportRemovalOfFastRPProperties() {
         var fastRPCall = GdsCypher
