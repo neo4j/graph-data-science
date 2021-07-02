@@ -37,7 +37,7 @@ final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCu
 
     @Override
     StoreScan<NodeCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
-        return new ScanBasedStoreScan<>(transaction.dataRead().allNodesScan());
+        return new ScanBasedStoreScan<>(transaction.dataRead().allNodesScan(), batchSize());
     }
 
     @Override

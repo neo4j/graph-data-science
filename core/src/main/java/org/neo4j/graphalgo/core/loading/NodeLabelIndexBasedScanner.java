@@ -41,7 +41,7 @@ final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<No
 
     @Override
     StoreScan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
-        return new ScanBasedStoreScan<>(Neo4jProxy.entityCursorScan(transaction, labelId));
+        return new ScanBasedStoreScan<>(Neo4jProxy.entityCursorScan(transaction, labelId), batchSize());
     }
 
     @Override

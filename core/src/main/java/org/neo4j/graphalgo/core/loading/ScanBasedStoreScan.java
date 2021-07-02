@@ -24,13 +24,15 @@ import org.neo4j.internal.kernel.api.Scan;
 
 public final class ScanBasedStoreScan<C extends Cursor> implements StoreScanner.StoreScan<C> {
     private final Scan<C> scan;
+    private final int batchSize;
 
-    public ScanBasedStoreScan(Scan<C> scan) {
+    public ScanBasedStoreScan(Scan<C> scan, int batchSize) {
         this.scan = scan;
+        this.batchSize = batchSize;
     }
 
     @Override
-    public boolean scanBatch(C cursor, int data) {
-        return scan.reserveBatch(cursor, data);
+    public boolean scanBatch(C cursor) {
+        return scan.reserveBatch(cursor, batchSize);
     }
 }

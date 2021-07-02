@@ -54,7 +54,7 @@ public final class RelationshipScanCursorBasedScanner extends AbstractCursorBase
 
     @Override
     StoreScan<RelationshipScanCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
-        return new ScanBasedStoreScan<>(transaction.dataRead().allRelationshipsScan());
+        return new ScanBasedStoreScan<>(transaction.dataRead().allRelationshipsScan(), batchSize());
     }
 
     @Override

@@ -28,19 +28,21 @@ import java.util.List;
 public class CompositeNodeScan implements StoreScanner.StoreScan<CompositeNodeCursor> {
 
     private final List<Scan<NodeLabelIndexCursor>> scans;
+    private final int batchSize;
 
-    public CompositeNodeScan(List<Scan<NodeLabelIndexCursor>> scans) {
+    public CompositeNodeScan(List<Scan<NodeLabelIndexCursor>> scans, int batchSize) {
         this.scans = scans;
+        this.batchSize = batchSize;
     }
 
     // This method needs to be synchronized as we need to make sure that every subscan is processing the same batch
     @Override
-    public synchronized boolean scanBatch(CompositeNodeCursor cursor, int sizeHint) {
+    public synchronized boolean scanBatch(CompositeNodeCursor cursor) {
         boolean result = false;
         for (int i = 0; i < scans.size(); i++) {
             NodeLabelIndexCursor indexCursor = cursor.getCursor(i);
             if (indexCursor != null) {
-                var hasNextBatch = scans.get(i).reserveBatch(indexCursor, sizeHint);
+                var hasNextBatch = scans.get(i).reserveBatch(indexCursor, batchSize);
                 if (hasNextBatch) {
                     result = true;
                 } else {
