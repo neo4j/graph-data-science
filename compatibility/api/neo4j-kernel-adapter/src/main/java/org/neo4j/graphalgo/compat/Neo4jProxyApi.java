@@ -140,8 +140,8 @@ public interface Neo4jProxyApi {
 
     StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
         KernelTransaction transaction,
-        int batchSize,
-        int labelId
+        int labelId,
+        int batchSize
     );
 
     void nodeIndexScan(

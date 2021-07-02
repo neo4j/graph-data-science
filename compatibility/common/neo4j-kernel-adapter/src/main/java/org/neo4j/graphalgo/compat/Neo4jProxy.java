@@ -206,10 +206,10 @@ public final class Neo4jProxy {
 
     public static StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
         KernelTransaction transaction,
-        int batchSize,
-        int labelId
+        int labelId,
+        int batchSize
     ) {
-        return IMPL.nodeLabelIndexScan(transaction, batchSize, labelId);
+        return IMPL.nodeLabelIndexScan(transaction, labelId, batchSize);
     }
 
     public static void nodeIndexScan(

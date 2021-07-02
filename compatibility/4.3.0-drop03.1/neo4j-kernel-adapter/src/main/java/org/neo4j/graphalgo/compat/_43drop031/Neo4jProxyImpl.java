@@ -235,7 +235,9 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
-        KernelTransaction transaction, int batchSize, int labelId
+        KernelTransaction transaction,
+        int labelId,
+        int batchSize
     ) {
         var read = transaction.dataRead();
         read.prepareForLabelScans();
