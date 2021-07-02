@@ -22,14 +22,13 @@ package org.neo4j.graphalgo.core.utils.progress.v2.tasks;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.Stack;
 
 public class TaskProgressTracker implements ProgressTracker {
 
     private final Task baseTask;
     private final ProgressLogger progressLogger;
-    private final Queue<Task> nestedTasks;
+    private final Stack<Task> nestedTasks;
     private Task currentTask;
 
     public TaskProgressTracker(
@@ -39,7 +38,7 @@ public class TaskProgressTracker implements ProgressTracker {
         this.baseTask = baseTask;
         this.progressLogger = progressLogger;
         this.currentTask = null;
-        this.nestedTasks = new LinkedBlockingQueue<>();
+        this.nestedTasks = new Stack<>();
     }
 
     @Override
@@ -51,6 +50,8 @@ public class TaskProgressTracker implements ProgressTracker {
             currentTask = currentTask.nextSubtask();
         }
         currentTask.start();
+        progressLogger.logStart(currentTask.description());
+        progressLogger.reset(currentTask.getProgress().volume());
     }
 
     @Override
@@ -59,7 +60,10 @@ public class TaskProgressTracker implements ProgressTracker {
             throw new IllegalStateException("No more running tasks");
         }
         currentTask.finish();
-        currentTask = nestedTasks.poll();
+        progressLogger.logFinish(currentTask.description());
+        currentTask = nestedTasks.isEmpty()
+            ? null
+            : nestedTasks.pop();
     }
 
     @Override
@@ -70,12 +74,13 @@ public class TaskProgressTracker implements ProgressTracker {
     @Override
     public void logProgress(long value) {
         currentTask.logProgress(value);
-        progressLogger.logProgress(currentTask.getProgress().progress());
+        progressLogger.logProgress(value);
     }
 
     @Override
     public void setVolume(long volume) {
         currentTask.setVolume(volume);
+        progressLogger.reset(volume);
     }
 
     @Override

@@ -47,7 +47,6 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
     private final long nodeCount;
     private final double divisor;
 
-    private final ProgressTracker progressTracker;
     private HugeAtomicDoubleArray centrality;
     private SelectionStrategy selectionStrategy;
 

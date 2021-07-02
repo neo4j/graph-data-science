@@ -60,7 +60,7 @@ public interface ProgressTracker {
 
         @Override
         public ProgressLogger progressLogger() {
-            return null;
+            return ProgressLogger.NULL_LOGGER;
         }
 
         @Override

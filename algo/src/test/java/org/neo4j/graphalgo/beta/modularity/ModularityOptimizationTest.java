@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -37,6 +36,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -48,7 +48,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
@@ -181,21 +180,11 @@ class ModularityOptimizationTest {
         compute(graph, 3, null, 3, 2, testLogger);
 
         assertTrue(testLogger.containsMessage(INFO, ":: Start"));
-        assertTrue(testLogger.containsMessage(INFO, "Initialization :: Start"));
-        assertTrue(testLogger.containsMessage(INFO, "Initialization :: Finished"));
-        assertTrue(testLogger.containsMessage(INFO, "Iteration 1 :: Start"));
-        assertTrue(testLogger.containsMessage(INFO, "Iteration 1 :: Finished"));
+        assertTrue(testLogger.containsMessage(INFO, "color nodes :: Start"));
+        assertTrue(testLogger.containsMessage(INFO, "color nodes :: Finished"));
+        assertTrue(testLogger.containsMessage(INFO, "validate nodes :: Start"));
+        assertTrue(testLogger.containsMessage(INFO, "validate nodes :: Finished"));
         assertTrue(testLogger.containsMessage(INFO, ":: Finished"));
-    }
-
-    @Test
-    void requireAtLeastOneIteration() {
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> compute(graph, 0, null, 3, 2, ProgressLogger.NULL_LOGGER)
-        );
-
-        assertTrue(exception.getMessage().contains("at least one iteration"));
     }
 
     @ParameterizedTest
@@ -231,7 +220,13 @@ class ModularityOptimizationTest {
         int minBatchSize,
         ProgressLogger testLogger
     ) {
-        var testTracker = new TestProgressTracker(testLogger);
+        var config = ImmutableModularityOptimizationStreamConfig.builder()
+            .maxIterations(maxIterations)
+            .concurrency(concurrency)
+            .batchSize(minBatchSize)
+            .build();
+        var task = new ModularityOptimizationFactory<>().progressTask(graph, config);
+        var progressTracker = new TaskProgressTracker(task, testLogger);
         return new ModularityOptimization(
             graph,
             maxIterations,
@@ -240,7 +235,7 @@ class ModularityOptimizationTest {
             concurrency,
             minBatchSize,
             Pools.DEFAULT,
-            testTracker,
+            progressTracker,
             AllocationTracker.empty()
         ).compute();
     }

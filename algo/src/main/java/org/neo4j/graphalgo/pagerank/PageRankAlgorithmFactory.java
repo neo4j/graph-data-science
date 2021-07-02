@@ -132,6 +132,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
         AllocationTracker tracker,
         ProgressTracker progressTracker
     ) {
+        progressTracker.beginSubTask();
         var config = ImmutableDegreeCentralityConfig.builder()
             .concurrency(configuration.concurrency())
             .relationshipWeightProperty(configuration.relationshipWeightProperty())
@@ -146,6 +147,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
         );
 
         var degrees = degreeCentrality.compute();
+        progressTracker.endSubTask();
         return degrees::get;
     }
 

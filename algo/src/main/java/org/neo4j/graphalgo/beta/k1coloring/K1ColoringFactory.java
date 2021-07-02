@@ -86,16 +86,13 @@ public class K1ColoringFactory<T extends K1ColoringConfig> implements AlgorithmF
     }
 
     public static <T extends BaseConfig & IterationsConfig> Task k1ColoringProgressTask(Graph graph, T config) {
-        return Tasks.task(
-            "K1Coloring",
-            Tasks.iterativeDynamic(
-                "compute",
-                () -> List.of(
-                    Tasks.leaf("color nodes", graph.nodeCount()),
-                    Tasks.leaf("validate nodes", graph.nodeCount())
-                ),
-                config.maxIterations()
-            )
+        return Tasks.iterativeDynamic(
+            "compute",
+            () -> List.of(
+                Tasks.leaf("color nodes", graph.nodeCount()),
+                Tasks.leaf("validate nodes", graph.nodeCount())
+            ),
+            config.maxIterations()
         );
     }
 }

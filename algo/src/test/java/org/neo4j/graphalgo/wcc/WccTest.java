@@ -131,10 +131,9 @@ class WccTest {
         assertThat(messagesInOrder)
             // avoid asserting on the thread id
             .extracting(removingThreadId())
-            .doesNotHaveDuplicates()
             .hasSize(103)
             .containsSequence(
-                "WCC :: Start",
+                "WCC compute :: Start",
                 "WCC 0%",
                 "WCC 1%",
                 "WCC 2%"
@@ -143,7 +142,7 @@ class WccTest {
                 "WCC 98%",
                 "WCC 99%",
                 "WCC 100%",
-                "WCC :: Finished"
+                "WCC compute :: Finished"
             );
     }
 

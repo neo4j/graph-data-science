@@ -109,8 +109,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
             graph,
             LocalClusteringCoefficientFactory.createTriangleCountConfig(configuration),
             tracker,
-            progressTracker.progressLogger().getLog(),
-            progressTracker.progressLogger().eventTracker()
+            progressTracker
         );
 
         return intersectingTriangleCount.compute().localTriangles();

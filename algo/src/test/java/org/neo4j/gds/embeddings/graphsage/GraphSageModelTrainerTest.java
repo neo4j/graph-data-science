@@ -203,12 +203,12 @@ class GraphSageModelTrainerTest {
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsExactly(
-                "GraphSageTrain :: Start",
-                "GraphSageTrain :: Epoch 1 :: Start",
-                "GraphSageTrain :: Iteration 1 :: Start",
-                "GraphSageTrain :: Iteration 1 :: Finished",
-                "GraphSageTrain :: Epoch 1 :: Finished",
-                "GraphSageTrain :: Finished"
+                "GraphSageTrain train :: Start",
+                "GraphSageTrain train epoch :: Start",
+                "GraphSageTrain batch task :: Start",
+                "GraphSageTrain batch task :: Finished",
+                "GraphSageTrain train epoch :: Finished",
+                "GraphSageTrain train :: Finished"
             );
     }
 

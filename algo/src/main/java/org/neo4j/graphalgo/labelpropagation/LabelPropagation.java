@@ -135,6 +135,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
 
         List<StepRunner> stepRunners = stepRunners();
 
+        progressTracker.beginSubTask();
         while (ranIterations < config.maxIterations()) {
             progressTracker.beginSubTask();
             ParallelUtil.runWithConcurrency(config.concurrency(), stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
@@ -145,6 +146,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation, LabelPropagati
             }
             progressTracker.endSubTask();
         }
+        progressTracker.endSubTask();
 
         stepRunners.forEach(StepRunner::release);
         progressTracker.endSubTask();

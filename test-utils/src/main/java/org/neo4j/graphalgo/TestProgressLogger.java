@@ -46,7 +46,6 @@ public class TestProgressLogger extends TestLog implements ProgressLogger {
         super();
         this.batchingLogger = new BatchingProgressLogger(this, initialTaskVolume, task, concurrency, eventTracker);
         progresses = new ArrayList<>();
-        progresses.add(new AtomicLong(0));
     }
 
     public List<AtomicLong> getProgresses() {

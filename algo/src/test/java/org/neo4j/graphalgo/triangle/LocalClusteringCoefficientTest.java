@@ -315,12 +315,13 @@ class LocalClusteringCoefficientTest {
     }
 
     private LocalClusteringCoefficient.Result compute(Graph graph) {
-        return new LocalClusteringCoefficient(
+        var localClusteringCoefficient = new LocalClusteringCoefficient(
             graph,
             createConfig().build(),
             AllocationTracker.empty(),
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        );
+        return localClusteringCoefficient.compute();
     }
 
     private ImmutableLocalClusteringCoefficientBaseConfig.Builder createConfig() {

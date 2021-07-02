@@ -64,12 +64,12 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> impleme
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
+        var randomWalkTask = graph.hasRelationshipProperty()
+            ? Tasks.task("RandomWalk", DegreeCentralityFactory.degreeCentralityProgressTask(graph))
+            : Tasks.leaf("RandomWalk");
         return Tasks.task(
-            "Node2Vec",
-            Tasks.task(
-                "RandomWalk",
-                DegreeCentralityFactory.degreeCentralityProgressTask(graph)
-            ),
+            "compute",
+            randomWalkTask,
             Tasks.iterativeFixed(
                 "train",
                 () -> List.of(Tasks.leaf("produce positive samples")),

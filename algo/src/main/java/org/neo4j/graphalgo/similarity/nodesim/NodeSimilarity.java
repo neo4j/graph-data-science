@@ -88,9 +88,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
 
     @Override
     public NodeSimilarityResult compute() {
-        prepare();
         progressTracker.beginSubTask();
-        progressTracker.setVolume(calculateWorkload());
         if (config.computeToStream()) {
             var computeToStream = computeToStream();
             progressTracker.endSubTask();
@@ -110,7 +108,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
 
     public Stream<SimilarityResult> computeToStream() {
         // Create a filter for which nodes to compare and calculate the neighborhood for each node
-
+        prepare();
         assertRunning();
 
         // Compute similarities
@@ -132,6 +130,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
         boolean isTopKGraph = false;
 
         if (config.hasTopK() && !config.hasTopN()) {
+            prepare();
             assertRunning();
 
             progressTracker.progressLogger().logMessage("NodeSimilarity#computeToGraph");
@@ -140,7 +139,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
             TopKMap topKMap = config.isParallel()
                 ? computeTopKMapParallel()
                 : computeTopKMap();
-            progressTracker.endSubTask();
 
             isTopKGraph = true;
             similarityGraph = new TopKGraph(graph, topKMap);
@@ -210,9 +208,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private Stream<SimilarityResult> computeAll() {
-        progressTracker.progressLogger().logMessage("NodeSimilarity#computeAll");
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(calculateWorkload());
 
-        return loggableAndTerminatableNodeStream()
+        var similarityResultStream = loggableAndTerminatableNodeStream()
             .boxed()
             .flatMap(node1 -> {
                 long[] vector1 = vectors.get(node1);
@@ -225,6 +224,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                     })
                     .filter(Objects::nonNull);
             });
+        progressTracker.endSubTask();
+        return similarityResultStream;
     }
 
     private Stream<SimilarityResult> computeAllParallel() {
@@ -248,6 +249,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private TopKMap computeTopKMap() {
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(calculateWorkload());
 
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator, tracker);
@@ -265,10 +268,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                         }
                     });
             });
+        progressTracker.endSubTask();
         return topKMap;
     }
 
     private TopKMap computeTopKMapParallel() {
+        progressTracker.beginSubTask();
+        progressTracker.setVolume(calculateWorkload());
+
         Comparator<SimilarityResult> comparator = config.normalizedK() > 0 ? SimilarityResult.DESCENDING : SimilarityResult.ASCENDING;
         TopKMap topKMap = new TopKMap(vectors.size(), nodeFilter, Math.abs(config.normalizedK()), comparator, tracker);
         ParallelUtil.parallelStreamConsume(
@@ -296,11 +303,13 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
                 })
         );
 
+        progressTracker.endSubTask();
         return topKMap;
     }
 
     private Stream<SimilarityResult> computeTopN() {
         progressTracker.beginSubTask();
+        progressTracker.setVolume(calculateWorkload());
 
         TopNList topNList = new TopNList(config.normalizedN());
         loggableAndTerminatableNodeStream()
@@ -323,11 +332,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarity, NodeSimilarityResu
     }
 
     private Stream<SimilarityResult> computeTopN(TopKMap topKMap) {
-        progressTracker.beginSubTask();
-
         TopNList topNList = new TopNList(config.normalizedN());
         topKMap.forEach(topNList::add);
-        progressTracker.endSubTask();
         return topNList.stream();
     }
 

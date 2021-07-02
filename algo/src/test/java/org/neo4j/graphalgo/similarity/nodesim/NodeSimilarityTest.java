@@ -28,7 +28,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -38,7 +37,9 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
+import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -798,60 +799,50 @@ final class NodeSimilarityTest {
     void shouldLogMessages(int topK, int concurrency) {
         var graph = naturalGraph;
         var progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity", concurrency);
-        var testTracker = new TestProgressTracker(progressLogger);
 
-        var nodeSimilarity = new NodeSimilarity(
+        var nodeSimilarity = new NodeSimilarityFactory<>().build(
             graph,
             configBuilder().topN(100).topK(topK).concurrency(concurrency).build(),
-            Pools.DEFAULT,
-            testTracker,
-            AllocationTracker.empty()
+            AllocationTracker.empty(),
+            progressLogger.getLog(),
+            EmptyProgressEventTracker.INSTANCE
         );
 
-        nodeSimilarity.computeToGraph();
+        nodeSimilarity.compute();
 
         assertTrue(progressLogger.hasMessages(INFO));
 
-        assertTrue(progressLogger.containsMessage(INFO, "Start :: NodeSimilarity#prepare"));
-        assertTrue(progressLogger.containsMessage(INFO, "Finish :: NodeSimilarity#prepare"));
-        assertTrue(progressLogger.containsMessage(INFO, "NodeSimilarity#computeToStream"));
+        assertTrue(progressLogger.containsMessage(INFO, "NodeSimilarity prepare :: Start"));
+        assertTrue(progressLogger.containsMessage(INFO, "NodeSimilarity prepare :: Finished"));
 
-        if (concurrency > 1) {
-            assertTrue(progressLogger.containsMessage(INFO, "Start :: NodeSimilarity#computeTopKMapParallel"));
-            assertTrue(progressLogger.containsMessage(INFO, "Finish :: NodeSimilarity#computeTopKMapParallel"));
-        } else {
-            assertTrue(progressLogger.containsMessage(INFO, "Start :: NodeSimilarity#computeTopKMap"));
-            assertTrue(progressLogger.containsMessage(INFO, "Finish :: NodeSimilarity#computeTopKMap"));
-        }
-
-        assertTrue(progressLogger.containsMessage(INFO, "Start :: NodeSimilarity#computeTopN(TopKMap)"));
-        assertTrue(progressLogger.containsMessage(INFO, "Finish :: NodeSimilarity#computeTopN(TopKMap)"));
+        assertTrue(progressLogger.containsMessage(INFO, "NodeSimilarity compare :: Start"));
+        assertTrue(progressLogger.containsMessage(INFO, "NodeSimilarity compare :: Finished"));
     }
 
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1,2})
     void shouldLogProgress(int concurrency) {
         var graph = naturalGraph;
+        var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).concurrency(concurrency).build();
         var progressLogger = new TestProgressLogger(graph.relationshipCount(), "NodeSimilarity", concurrency);
-        var testTracker = new TestProgressTracker(progressLogger);
+        var progressTracker = new TaskProgressTracker(new NodeSimilarityFactory<>().progressTask(graph, config), progressLogger);
 
         var nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().degreeCutoff(0).concurrency(concurrency).build(),
+            config,
             Pools.DEFAULT,
-            testTracker,
+            progressTracker,
             AllocationTracker.empty()
         );
 
-        long comparisons = nodeSimilarity.computeToStream().count();
+        long comparisons = nodeSimilarity.compute().streamResult().count();
 
         List<AtomicLong> progresses = progressLogger.getProgresses();
 
         // Should log progress for prepare and actual comparisons
-        assertEquals(2, progresses.size());
+        assertEquals(4, progresses.size());
 
-        assertEquals(graph.relationshipCount(), progresses.get(0).get());
-        assertEquals(concurrency == 1 ? comparisons / 2 : comparisons, progresses.get(1).get());
+        assertEquals(graph.relationshipCount(), progresses.get(1).get());
     }
 }
 

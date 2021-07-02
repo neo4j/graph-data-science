@@ -30,11 +30,11 @@ import org.neo4j.gds.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStre
 import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -273,9 +273,10 @@ final class DijkstraTest {
                 .targetNode(idFunction.of("f"))
                 .build();
 
-            var testTracker = new TestProgressTracker(testLogger);
+            var task = DijkstraFactory.sourceTarget().progressTask(graph, config);
+            var progressTracker = new TaskProgressTracker(task, testLogger);
 
-            Dijkstra.sourceTarget(graph, config, Optional.empty(), testTracker, AllocationTracker.empty())
+            Dijkstra.sourceTarget(graph, config, Optional.empty(), progressTracker, AllocationTracker.empty())
                 .compute()
                 .pathSet();
 

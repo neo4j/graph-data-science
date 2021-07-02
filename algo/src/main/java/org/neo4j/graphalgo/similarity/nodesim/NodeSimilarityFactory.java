@@ -112,7 +112,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> impl
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.task(
-            "NodeSimilarity",
+            "compute",
             Tasks.leaf("prepare", graph.relationshipCount()),
             Tasks.leaf("compare")
         );

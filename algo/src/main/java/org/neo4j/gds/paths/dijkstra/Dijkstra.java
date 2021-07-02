@@ -225,10 +225,11 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             traversalState = traversalPredicate.apply(node);
 
             if (traversalState == EMIT_AND_CONTINUE || traversalState == EMIT_AND_STOP) {
+                progressTracker.endSubTask();
                 return pathResult(node, pathResultBuilder);
             }
         }
-        progressTracker.endSubTask();
+//        progressTracker.endSubTask();
         return PathResult.EMPTY;
     }
 

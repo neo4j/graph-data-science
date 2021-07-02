@@ -113,6 +113,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
 
     @Override
     public Stream<long[]> compute() {
+        progressTracker.beginSubTask();
         int timeout = 100;
         BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(queueSize);
         long[] TOMB = new long[0];
@@ -145,6 +146,7 @@ public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
             }
         }).start();
 
+        progressTracker.endSubTask();
         return StreamSupport.stream(new QueueBasedSpliterator<>(walks, TOMB, terminationFlag, timeout), false);
     }
 

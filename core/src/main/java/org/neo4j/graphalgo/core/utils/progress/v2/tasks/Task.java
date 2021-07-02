@@ -117,7 +117,7 @@ public class Task {
     }
 
     public void setVolume(long volume) {
-        throw new UnsupportedOperationException("Should only be called on a leave task");
+        throw new UnsupportedOperationException("Should only be called on a leaf task");
     }
 
     public void logProgress() {
@@ -125,6 +125,6 @@ public class Task {
     }
 
     public void logProgress(long value) {
-        throw new UnsupportedOperationException("Should only be called on a leave task");
+        throw new UnsupportedOperationException("Should only be called on a leaf task");
     }
 }

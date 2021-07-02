@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
@@ -39,13 +38,13 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -53,7 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class K1ColoringTest {
 
@@ -206,16 +204,21 @@ class K1ColoringTest {
             .build()
             .generate();
 
-        var testLogger = new TestProgressLogger(graph.relationshipCount() * 2, "K1Coloring", 8, EmptyProgressEventTracker.INSTANCE);
-        var testTracker = new TestProgressTracker(testLogger);
+        var config = ImmutableK1ColoringStreamConfig.builder()
+            .concurrency(4)
+            .maxIterations(100)
+            .build();
+
+        var testLogger = new TestProgressLogger(graph.relationshipCount() * 2, "K1Coloring", 4, EmptyProgressEventTracker.INSTANCE);
+        var progressTracker = new TaskProgressTracker(new K1ColoringFactory<>().progressTask(graph, config), testLogger);
 
         var k1Coloring = new K1Coloring(
             graph,
-            100,
+            config.maxIterations(),
             DEFAULT_BATCH_SIZE,
-            8,
+            config.concurrency(),
             Pools.DEFAULT,
-            testTracker,
+            progressTracker,
             AllocationTracker.empty()
         );
 
@@ -223,14 +226,10 @@ class K1ColoringTest {
 
         List<AtomicLong> progresses = testLogger.getProgresses();
 
-        assertEquals(k1Coloring.ranIterations(), progresses.size());
+        assertEquals(k1Coloring.ranIterations() * 4 + 1, progresses.size());
         progresses.forEach(progress -> assertTrue(progress.get() <= 2 * graph.relationshipCount()));
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));
-        LongStream.range(1, k1Coloring.ranIterations() + 1).forEach(iteration -> {
-            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d :: Start", iteration)));
-            assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d :: Start", iteration)));
-        });
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Finished"));
     }
 

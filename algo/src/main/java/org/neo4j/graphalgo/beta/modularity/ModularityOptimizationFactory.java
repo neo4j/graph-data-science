@@ -101,7 +101,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
 
     public static <T extends BaseConfig & IterationsConfig> Task modularityOptimizationProgressTask(Graph graph, T config) {
         return Tasks.task(
-            "ModularityOptimization",
+            "compute",
             Tasks.task(
                 "initialization",
                 K1ColoringFactory.k1ColoringProgressTask(graph, config)

@@ -170,12 +170,12 @@ public class GraphSageModelTrainer {
 
             updater.update(meanGradients);
 
-//            progressLogger.getLog().debug(
-//                "Epoch %d LOSS: %.10f at iteration %d",
-//                epoch,
-//                totalLoss,
-//                iteration
-//            );
+            progressTracker.progressLogger().getLog().debug(
+                "Epoch %d LOSS: %.10f at iteration %d",
+                epoch,
+                totalLoss,
+                iteration
+            );
 
             progressTracker.endSubTask();
         }

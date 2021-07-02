@@ -32,11 +32,11 @@ import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensStreamConfig;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -54,7 +54,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class YensTest {
@@ -179,33 +178,18 @@ class YensTest {
             .k(k)
             .build();
 
-        var testTracker = new TestProgressTracker(testLogger);
+        var task = new YensFactory<>().progressTask(graph, config);
+        var progressTracker = new TaskProgressTracker(task, testLogger);
 
-        Yens.sourceTarget(graph, config, testTracker, AllocationTracker.empty())
+        Yens.sourceTarget(graph, config, progressTracker, AllocationTracker.empty())
             .compute()
             .pathSet();
 
-        assertEquals(8, testLogger.getProgresses().size());
+        assertEquals(9, testLogger.getProgresses().size());
 
         // once
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens :: Start"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens :: Finished"));
-        // for each k
-        for (int i = 1; i <= k; i++) {
-            assertTrue(testLogger.containsMessage(
-                TestLog.INFO,
-                formatWithLocale("Yens :: Start searching path %d of %d", i, k)
-            ));
-            assertTrue(testLogger.containsMessage(
-                TestLog.INFO,
-                formatWithLocale("Yens :: Finished searching path %d of %d", i, k)
-            ));
-
-        }
-        // multiple times within each k
-        assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Yens :: Start Dijkstra for spur node")));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Start")));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, formatWithLocale("Dijkstra :: Finished")));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens compute :: Start"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "Yens compute :: Finished"));
     }
 
     private static void assertResult(Graph graph, IdFunction idFunction, Collection<String> expectedPaths) {

@@ -150,18 +150,19 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
         ranIterations = 0L;
         nodesToColor.set(0, nodeCount);
 
+        var currentVolume = nodeCount;
         while (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
             assertRunning();
-            runColoring();
+            runColoring(currentVolume);
 
             assertRunning();
-            runValidation();
+            runValidation(currentVolume);
 
             ++ranIterations;
 
-//            if (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
-//                getProgressLogger().reset(nodesToColor.cardinality() * 2);
-//            }
+            if (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
+                currentVolume = nodesToColor.cardinality();
+            }
         }
 
         this.didConverge = ranIterations < maxIterations;
@@ -170,8 +171,9 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
         return colors();
     }
 
-    private void runColoring() {
+    private void runColoring(long volume) {
         progressTracker.beginSubTask();
+        progressTracker.setVolume(volume);
         long nodeCount = graph.nodeCount();
         long approximateRelationshipCount = ceilDiv(graph.relationshipCount(), nodeCount) * nodesToColor.cardinality();
         long adjustedBatchSize = ParallelUtil.adjustedBatchSize(
@@ -198,8 +200,9 @@ public class K1Coloring extends Algorithm<K1Coloring, HugeLongArray> {
         progressTracker.endSubTask();
     }
 
-    private void runValidation() {
+    private void runValidation(long volume) {
         progressTracker.beginSubTask();
+        progressTracker.setVolume(volume);
         BitSet nextNodesToColor = new BitSet(nodeCount);
 
         // The nodesToColor bitset is not thread safe, therefore we have to align the batches to multiples of 64

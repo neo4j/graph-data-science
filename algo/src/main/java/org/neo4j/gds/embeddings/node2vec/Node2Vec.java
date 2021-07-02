@@ -56,6 +56,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
 
     @Override
     public HugeObjectArray<FloatVector> compute() {
+        progressTracker.beginSubTask();
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config.walkLength(),
@@ -94,6 +95,7 @@ public class Node2Vec extends Algorithm<Node2Vec, HugeObjectArray<FloatVector>> 
 
         node2VecModel.train();
 
+        progressTracker.endSubTask();
         return node2VecModel.getEmbeddings();
     }
 

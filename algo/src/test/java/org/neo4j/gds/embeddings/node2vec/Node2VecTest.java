@@ -24,18 +24,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.List;
@@ -56,12 +58,12 @@ class Node2VecTest extends AlgoTestBase {
         ", (c:Node2)" +
         ", (d:Isolated)" +
         ", (e:Isolated)" +
-        ", (a)-[:REL]->(b)" +
-        ", (b)-[:REL]->(a)" +
-        ", (a)-[:REL]->(c)" +
-        ", (c)-[:REL]->(a)" +
-        ", (b)-[:REL]->(c)" +
-        ", (c)-[:REL]->(b)";
+        ", (a)-[:REL {prop: 1.0}]->(b)" +
+        ", (b)-[:REL {prop: 1.0}]->(a)" +
+        ", (a)-[:REL {prop: 1.0}]->(c)" +
+        ", (c)-[:REL {prop: 1.0}]->(a)" +
+        ", (b)-[:REL {prop: 1.0}]->(c)" +
+        ", (c)-[:REL {prop: 1.0}]->(b)";
 
     @BeforeEach
     void setUp() {
@@ -92,12 +94,18 @@ class Node2VecTest extends AlgoTestBase {
         );
     }
 
-    @Test
-    void shouldLogProgress() {
-        Graph graph = new StoreLoaderBuilder()
-            .api(db)
-            .build()
-            .graph();
+    @ParameterizedTest
+    @CsvSource(value = {
+        "true,4",
+        "false,3"
+    })
+    void shouldLogProgress(boolean relationshipWeights, int expectedProgresses) {
+        var storeLoaderBuilder = new StoreLoaderBuilder()
+            .api(db);
+        if (relationshipWeights) {
+            storeLoaderBuilder.addRelationshipProperty(PropertyMapping.of("prop"));
+        }
+        Graph graph = storeLoaderBuilder.build().graph();
 
         int embeddingDimension = 128;
         Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().embeddingDimension(embeddingDimension).build();
@@ -106,17 +114,19 @@ class Node2VecTest extends AlgoTestBase {
             "Node2Vec",
             4
         );
+        var task = new Node2VecAlgorithmFactory<>().progressTask(graph, config);
+        var progressTracker = new TaskProgressTracker(task, testLogger);
         new Node2Vec(
             graph,
             config,
-            new TestProgressTracker(testLogger),
+            progressTracker,
             AllocationTracker.empty()
         ).compute();
 
         List<AtomicLong> progresses = testLogger.getProgresses();
 
         // We "reset" the logger once per iteration
-        assertEquals(config.iterations() + 1, progresses.size());
+        assertEquals(config.iterations() + expectedProgresses, progresses.size());
         progresses.forEach(progress -> assertTrue(progress.get() <= graph.nodeCount() * config.walksPerNode()));
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));

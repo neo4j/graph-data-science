@@ -444,7 +444,6 @@ class LouvainTest {
         louvain.compute();
 
         assertTrue(testLogger.containsMessage(INFO, ":: Start"));
-        assertTrue(testLogger.containsMessage(INFO, "Level 1 :: Finished"));
         assertTrue(testLogger.containsMessage(INFO, ":: Finished"));
     }
 }

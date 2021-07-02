@@ -70,10 +70,7 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> impl
 
     @NotNull
     public static Task degreeCentralityProgressTask(Graph graph) {
-        return Tasks.task(
-            "DegreeCentrality",
-            Tasks.leaf("compute", graph.nodeCount())
-        );
+        return Tasks.leaf("compute", graph.nodeCount());
     }
 }
 

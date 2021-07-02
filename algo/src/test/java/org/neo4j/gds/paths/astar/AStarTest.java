@@ -27,11 +27,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.paths.astar.config.ImmutableShortestPathAStarStreamConfig;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -158,9 +158,10 @@ class AStarTest {
             .targetNode(idFunction.of("nX"))
             .build();
 
-        var testTracker = new TestProgressTracker(testLogger);
+        var task = new AStarFactory<>().progressTask(graph, config);
+        var progressTracker = new TaskProgressTracker(task, testLogger);
 
-        AStar.sourceTarget(graph, config, testTracker, AllocationTracker.empty())
+        AStar.sourceTarget(graph, config, progressTracker, AllocationTracker.empty())
             .compute()
             .pathSet();
 
@@ -168,7 +169,7 @@ class AStarTest {
         assertEquals(1, progresses.size());
         assertEquals(9, progresses.get(0).get());
 
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar :: Start"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar compute :: Start"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 5%"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 17%"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 23%"));
@@ -177,7 +178,7 @@ class AStarTest {
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 41%"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 47%"));
         assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar 52%"));
-        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar :: Finished"));
+        assertTrue(testLogger.containsMessage(TestLog.INFO, "AStar compute :: Finished"));
 
         // no duplicate entries in progress logger
         var logMessages = testLogger.getMessages(TestLog.INFO);

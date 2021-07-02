@@ -125,6 +125,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         progressTracker.endSubTask();
 
 
+        progressTracker.beginSubTask();
         for (iterationCounter = 0; iterationCounter < maxIterations; iterationCounter++) {
             progressTracker.beginSubTask();
 
@@ -149,6 +150,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 break;
             }
         }
+        progressTracker.endSubTask();
 
         progressTracker.endSubTask();
         return this;

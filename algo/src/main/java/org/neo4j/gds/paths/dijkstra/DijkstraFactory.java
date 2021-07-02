@@ -52,10 +52,7 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
 
     @NotNull
     public static Task dijkstraProgressTask(Graph graph) {
-        return Tasks.task(
-            "Dijkstra",
-            Tasks.leaf("compute", graph.relationshipCount())
-        );
+        return Tasks.leaf("compute", graph.relationshipCount());
     }
 
     public static ProgressTracker progressTracker(

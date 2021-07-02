@@ -92,10 +92,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.task(
-            "GraphSage",
-            Tasks.leaf("make embeddings", graph.nodeCount())
-        );
+        return Tasks.leaf("make embeddings", graph.nodeCount());
     }
 
     private MemoryEstimation withNodeCount(GraphSageTrainConfig config, long nodeCount, boolean mutate) {

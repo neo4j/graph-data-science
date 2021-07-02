@@ -43,6 +43,8 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
     private static final LongHashSet EMPTY_SET = new LongHashSet(0);
@@ -112,9 +114,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
         progressTracker.beginSubTask();
         var kShortestPaths = new ArrayList<MutablePathResult>();
         // compute top 1 shortest path
-        progressTracker.beginSubTask();
         var shortestPath = computeDijkstra(config.sourceNode());
-        progressTracker.endSubTask();
 
         // no shortest path has been found
         if (shortestPath.isEmpty()) {
@@ -125,8 +125,9 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
         PriorityQueue<MutablePathResult> candidates = initCandidatesQueue();
 
+        progressTracker.beginSubTask();
         for (int i = 1; i < config.k(); i++) {
-            progressTracker.beginSubTask();
+            // TODO: log iterations
             var prevPath = kShortestPaths.get(i - 1);
 
             for (int n = 0; n < prevPath.nodeCount() - 1; n++) {
@@ -181,8 +182,8 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
             }
 
             kShortestPaths.add(candidates.poll().withIndex(i));
-            progressTracker.endSubTask();
         }
+        progressTracker.endSubTask();
 
         progressTracker.endSubTask();
 
@@ -212,7 +213,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
     }
 
     private Optional<PathResult> computeDijkstra(long sourceNode) {
-//        progressTracker.logMessage(formatWithLocale(":: Start Dijkstra for spur node %d", sourceNode));
+        progressTracker.progressLogger().logMessage(formatWithLocale(":: Start Dijkstra for spur node %d", sourceNode));
         return dijkstra.compute().paths().findFirst();
     }
 

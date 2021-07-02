@@ -73,13 +73,7 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Abs
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return graph.isUndirected() && !config.hasThreshold()
-            ? Tasks.task("Wcc", Tasks.leaf("compute"))
-            : Tasks.task(
-                "Wcc",
-                Tasks.leaf("sampleSubgraph", taskVolume(graph, config)),
-                Tasks.leaf("linkRemaining", taskVolume(graph, config))
-            );
+        return Tasks.leaf("compute", taskVolume(graph, config));
     }
 
     @TestOnly

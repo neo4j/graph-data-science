@@ -195,7 +195,6 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
      * Samples by processing a fixed number of neighbors for each node.
      */
     private void sampleSubgraph(DisjointSetStruct components, List<Partition> partitions) {
-        progressTracker.beginSubTask();
         var tasks = partitions
             .stream()
             .map(partition -> new UndirectedSamplingTask(
@@ -208,7 +207,6 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             .collect(Collectors.toList());
 
         ParallelUtil.run(tasks, executor);
-        progressTracker.endSubTask();
     }
 
     /**
@@ -244,7 +242,6 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
      * Skips nodes that are already contained in the largest component.
      */
     private void linkRemaining(DisjointSetStruct components, List<Partition> partitions, long largestComponent) {
-        progressTracker.beginSubTask();
         var tasks = partitions
             .stream()
             .map(partition -> new UndirectedUnionTask(
@@ -257,7 +254,6 @@ public class Wcc extends Algorithm<Wcc, DisjointSetStruct> {
             ))
             .collect(Collectors.toList());
         ParallelUtil.run(tasks, executor);
-        progressTracker.endSubTask();
     }
 
     private static double defaultWeight(double threshold) {

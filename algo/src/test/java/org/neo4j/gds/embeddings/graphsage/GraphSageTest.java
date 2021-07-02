@@ -26,11 +26,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
@@ -188,8 +190,7 @@ class GraphSageTest {
             .build();
         var trainGraph = randomGraphGenerator.generate();
 
-        var algorithmFactory = new GraphSageAlgorithmFactory<>(TestProgressLogger.FACTORY);
-        var graphSage = algorithmFactory.build(trainGraph, streamConfig, AllocationTracker.empty(), NullLog.getInstance(), EmptyProgressEventTracker.INSTANCE);
+        var graphSage = new GraphSage(trainGraph, streamConfig, Pools.DEFAULT, AllocationTracker.empty(), ProgressTracker.NULL_TRACKER);
         graphSage.compute();
     }
 
@@ -200,14 +201,21 @@ class GraphSageTest {
             .addFeatureProperties("f1")
             .build();
 
-        var modelTrainer = new GraphSageModelTrainer(trainConfig, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
-        var layers = modelTrainer.train(graph, features).layers();
+        var graphSageTrain = new GraphSageTrainAlgorithmFactory().build(
+            graph,
+            trainConfig,
+            AllocationTracker.empty(),
+            new TestLog(),
+            EmptyProgressEventTracker.INSTANCE
+        );
+
+        var resultModel = graphSageTrain.compute();
         var model = Model.of(
             "",
             MODEL_NAME,
             "graphSage",
             GraphSchema.empty(),
-            ModelData.of(layers, new SingleLabelFeatureFunction()),
+            ModelData.of(resultModel.data().layers(), new SingleLabelFeatureFunction()),
             trainConfig
         );
         ModelCatalog.set(model);
@@ -229,7 +237,7 @@ class GraphSageTest {
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsExactly(
-                "GraphSage :: Start",
+                "GraphSage make embeddings :: Start",
                 "GraphSage 5%",
                 "GraphSage 10%",
                 "GraphSage 15%",
@@ -250,7 +258,7 @@ class GraphSageTest {
                 "GraphSage 90%",
                 "GraphSage 95%",
                 "GraphSage 100%",
-                "GraphSage :: Finished"
+                "GraphSage make embeddings :: Finished"
             );
     }
 

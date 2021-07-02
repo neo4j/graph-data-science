@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Task;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.logging.Log;
 
 public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements AlgorithmFactory<AStar, CONFIG> {
@@ -42,7 +41,7 @@ public class AStarFactory<CONFIG extends ShortestPathAStarBaseConfig> implements
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.task("Astar", DijkstraFactory.dijkstraProgressTask(graph));
+        return DijkstraFactory.dijkstraProgressTask(graph);
     }
 
     @NotNull

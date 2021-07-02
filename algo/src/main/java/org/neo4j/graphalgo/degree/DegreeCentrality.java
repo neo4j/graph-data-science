@@ -67,7 +67,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality, DegreeCentrali
 
     @Override
     public DegreeFunction compute() {
-            progressTracker.beginSubTask();
+        progressTracker.beginSubTask();
 
         var result = config.hasRelationshipWeightProperty()
             ? computeWeighted()

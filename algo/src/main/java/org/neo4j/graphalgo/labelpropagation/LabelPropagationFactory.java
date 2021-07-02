@@ -96,10 +96,10 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.task(
-            "LabelPropagation",
+            "compute",
             Tasks.leaf("initialization", graph.relationshipCount()),
             Tasks.iterativeDynamic(
-                "compute",
+                "assign labels",
                 () -> List.of(Tasks.leaf("iteration", graph.relationshipCount())),
                 config.maxIterations()
             )
