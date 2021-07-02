@@ -140,7 +140,7 @@ public final class NodesScanner extends StatementAction implements RecordScanner
         try (StoreScanner.ScanCursor<NodeReference> cursor = scanner.getCursor(transaction)) {
             NodesBatchBuffer batches = new NodesBatchBufferBuilder()
                 .nodeLabelIds(labels)
-                .capacity(cursor.bufferSize())
+                .capacity(scanner.bufferSize())
                 .hasLabelInformation(!labels.isEmpty())
                 .readProperty(nodePropertyImporter != null)
                 .build();

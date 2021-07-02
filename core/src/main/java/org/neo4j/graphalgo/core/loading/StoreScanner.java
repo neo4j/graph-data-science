@@ -45,10 +45,6 @@ public interface StoreScanner<Reference> extends AutoCloseable {
     }
 
     interface ScanCursor<Reference> extends AutoCloseable {
-        default int bufferSize() {
-            return bulkSize();
-        }
-
         int bulkSize();
 
         boolean bulkNext(RecordConsumer<Reference> consumer);
@@ -60,6 +56,8 @@ public interface StoreScanner<Reference> extends AutoCloseable {
     ScanCursor<Reference> getCursor(KernelTransaction transaction);
 
     long storeSize(GraphDimensions graphDimensions);
+
+    int bufferSize();
 
     @Override
     void close();
