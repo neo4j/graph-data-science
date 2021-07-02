@@ -22,25 +22,20 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphRemoveNodePropertiesProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.graphalgo.core.loading.CatalogRequest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.graphalgo.degree.DegreeCentralityMutateProc;
 
-import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
@@ -58,7 +53,12 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures( GraphCreateProc.class, GraphRemoveNodePropertiesProc.class, FastRPMutateProc.class );
+        registerProcedures(
+            GraphCreateProc.class,
+            GraphRemoveNodePropertiesProc.class,
+            FastRPMutateProc.class,
+            DegreeCentralityMutateProc.class
+        );
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher.call()
@@ -98,74 +98,49 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void removeNodeProperties() {
-        String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.removeNodeProperties(" +
-            "   '%s', " +
-            "   ['nodeProp1', 'nodeProp2']" +
-            ") YIELD graphName, nodeProperties, propertiesRemoved",
-            TEST_GRAPH_SAME_PROPERTIES
+        assertCypherResult(
+            "CALL gds.graph.removeNodeProperties($graphName, ['nodeProp1', 'nodeProp2'])",
+            Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES),
+            List.of(Map.of(
+                "graphName", TEST_GRAPH_SAME_PROPERTIES,
+                "nodeProperties", List.of("nodeProp1", "nodeProp2"),
+                "propertiesRemoved", 12L
+            ))
         );
-
-        runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
-            assertEquals(Arrays.asList("nodeProp1", "nodeProp2"), row.get("nodeProperties"));
-            assertEquals(12L, row.getNumber("propertiesRemoved").longValue());
-        });
     }
 
     @Test
     void removeNodePropertiesForLabel() {
-        String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.removeNodeProperties(" +
-            "   '%s', " +
-            "   ['nodeProp1', 'nodeProp2'], " +
-            "   ['A']" +
-            ") YIELD graphName, nodeProperties, propertiesRemoved",
-            TEST_GRAPH_SAME_PROPERTIES
+        assertCypherResult(
+            "CALL gds.graph.removeNodeProperties($graphName, ['nodeProp2'], ['A']) YIELD graphName, nodeProperties, propertiesRemoved",
+            Map.of("graphName", TEST_GRAPH_DIFFERENT_PROPERTIES),
+            List.of(Map.of(
+                "graphName", TEST_GRAPH_DIFFERENT_PROPERTIES,
+                "nodeProperties", List.of("nodeProp2"),
+                "propertiesRemoved", 3L
+            ))
         );
-
-        runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
-            assertEquals(Arrays.asList("nodeProp1", "nodeProp2"), row.get("nodeProperties"));
-            assertEquals(6L, row.getNumber("propertiesRemoved").longValue());
-        });
     }
 
     @Test
     void removeNodePropertiesForLabelSubset() {
-        String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.removeNodeProperties(" +
-            "   '%s', " +
-            "   ['nodeProp1', 'nodeProp2']" +
-            ") YIELD graphName, nodeProperties, propertiesRemoved",
-            TEST_GRAPH_DIFFERENT_PROPERTIES
+        assertCypherResult(
+            "CALL gds.graph.removeNodeProperties($graphName, ['nodeProp1', 'nodeProp2'])",
+            Map.of("graphName", TEST_GRAPH_DIFFERENT_PROPERTIES),
+            List.of(Map.of(
+                "graphName", TEST_GRAPH_DIFFERENT_PROPERTIES,
+                "nodeProperties", List.of("nodeProp1", "nodeProp2"),
+                "propertiesRemoved", 6L
+            ))
         );
-
-        runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertEquals(TEST_GRAPH_DIFFERENT_PROPERTIES, row.getString("graphName"));
-            assertEquals(Arrays.asList("nodeProp1", "nodeProp2"), row.get("nodeProperties"));
-            assertEquals(6L, row.getNumber("propertiesRemoved").longValue());
-        });
     }
 
     @Test
     void shouldFailOnNonExistingNodeProperty() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.removeNodeProperties(" +
-                "   '%s', " +
-                "   ['nodeProp1', 'nodeProp2', 'nodeProp3']" +
-                ")",
-                TEST_GRAPH_SAME_PROPERTIES
-            ))
-        );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(
-            rootCause.getMessage(),
-            containsString("No node projection with property key(s) ['nodeProp1', 'nodeProp2', 'nodeProp3'] found.")
+        assertError(
+            "CALL gds.graph.removeNodeProperties($graphName, ['nodeProp1', 'nodeProp2', 'nodeProp3'])",
+            Map.of("graphName", TEST_GRAPH_DIFFERENT_PROPERTIES),
+            "No node projection with property key(s) ['nodeProp1', 'nodeProp2', 'nodeProp3'] found."
         );
     }
 
@@ -182,19 +157,22 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
 
         runQuery(fastRPCall);
 
-        String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.removeNodeProperties(" +
-            "   '%s', " +
-            "   ['nodeProp1', 'nodeProp2', 'fastrp']" +
-            ") YIELD graphName, nodeProperties, propertiesRemoved",
-            TEST_GRAPH_SAME_PROPERTIES
+        List<String> propertiesToRemove = List.of("fastrp", "nodeProp1", "nodeProp2");
+
+        assertCypherResult(
+            "CALL gds.graph.removeNodeProperties( $graphName, $nodeProperties)",
+            Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES, "nodeProperties", propertiesToRemove),
+            List.of(Map.of(
+                "graphName", TEST_GRAPH_SAME_PROPERTIES,
+                "nodeProperties", propertiesToRemove,
+                "propertiesRemoved", 18L
+            ))
         );
 
-        runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
-            assertEquals(Arrays.asList("fastrp", "nodeProp1", "nodeProp2"), row.get("nodeProperties"));
-            assertEquals(18L, row.getNumber("propertiesRemoved").longValue());
-        });
+        var graphStore = GraphStoreCatalog
+            .get(CatalogRequest.of(getUsername(), db.databaseName()), TEST_GRAPH_SAME_PROPERTIES)
+            .graphStore();
 
+        assertThat(propertiesToRemove).allMatch(property -> graphStore.nodeLabels().stream().noneMatch(label -> graphStore.hasNodeProperty(label, property)));
     }
 }
