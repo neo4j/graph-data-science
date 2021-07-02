@@ -424,6 +424,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         @Override
         public void run() {
             var failedSwap = new MutableBoolean();
+            var localChange = new MutableBoolean(false);
 
             partition.consume(nodeId -> {
                 int currCommunity = candidateSolution.get(nodeId);
@@ -431,7 +432,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
                 if (bestCommunity == currCommunity) return;
 
-                change.set(true);
+                localChange.setTrue();
 
                 // If no incoming neighbors has marked us as NEIGHBOR, we can attempt to swap the current node.
                 if (!swapStatus.compareAndSet(nodeId, NodeSwapStatus.UNTOUCHED, NodeSwapStatus.SWAPPING)) return;
@@ -473,6 +474,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
                 candidateSolution.set(nodeId, bestCommunity);
             });
+
+            if (localChange.getValue()) change.set(true);
         }
 
         private int bestCommunity(long nodeId, int currCommunity) {
