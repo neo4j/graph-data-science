@@ -163,13 +163,6 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     }
 
     @Override
-    public Scan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
-        var read = transaction.dataRead();
-        read.prepareForLabelScans();
-        return read.nodeLabelScan(labelId);
-    }
-
-    @Override
     public List<Scan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
         var read = transaction.dataRead();
         read.prepareForLabelScans();
@@ -217,6 +210,17 @@ public final class Neo4jProxy40 implements Neo4jProxyApi {
     @Override
     public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
         kernelTransaction.dataRead().nodeLabelScan(label, cursor);
+    }
+
+    @Override
+    public StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
+        KernelTransaction transaction,
+        int batchSize,
+        int labelId
+    ) {
+        var read = transaction.dataRead();
+        read.prepareForLabelScans();
+        return new ScanBasedStoreScan<>(read.nodeLabelScan(labelId), batchSize);
     }
 
     @Override

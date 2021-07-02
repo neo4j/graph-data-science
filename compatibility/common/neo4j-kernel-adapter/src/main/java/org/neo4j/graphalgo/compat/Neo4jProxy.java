@@ -168,10 +168,6 @@ public final class Neo4jProxy {
         return IMPL.pagedFile(pagedFile);
     }
 
-    public static Scan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
-        return IMPL.entityCursorScan(transaction, labelId);
-    }
-
     public static List<Scan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
         return IMPL.entityCursorScan(transaction, labelIds);
     }
@@ -206,6 +202,14 @@ public final class Neo4jProxy {
 
     public static void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
         IMPL.nodeLabelScan(kernelTransaction, label, cursor);
+    }
+
+    public static StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
+        KernelTransaction transaction,
+        int batchSize,
+        int labelId
+    ) {
+        return IMPL.nodeLabelIndexScan(transaction, batchSize, labelId);
     }
 
     public static void nodeIndexScan(

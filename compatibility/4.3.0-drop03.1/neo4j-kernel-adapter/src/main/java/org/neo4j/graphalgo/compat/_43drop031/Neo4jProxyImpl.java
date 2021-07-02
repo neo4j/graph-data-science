@@ -30,10 +30,12 @@ import org.neo4j.graphalgo.compat.CompatIndexQuery;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompositeNodeCursor;
 import org.neo4j.graphalgo.compat.CustomAccessMode;
+import org.neo4j.graphalgo.compat.ScanBasedStoreScan;
 import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
 import org.neo4j.graphalgo.compat.JobRunner;
 import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxyApi;
+import org.neo4j.graphalgo.compat.StoreScan;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -178,13 +180,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public Scan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
-        var read = transaction.dataRead();
-        read.prepareForLabelScans();
-        return read.nodeLabelScan(labelId);
-    }
-
-    @Override
     public List<Scan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
         var read = transaction.dataRead();
         read.prepareForLabelScans();
@@ -236,6 +231,15 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor) {
         kernelTransaction.dataRead().nodeLabelScan(label, cursor, IndexOrder.NONE);
+    }
+
+    @Override
+    public StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
+        KernelTransaction transaction, int batchSize, int labelId
+    ) {
+        var read = transaction.dataRead();
+        read.prepareForLabelScans();
+        return new ScanBasedStoreScan<>(read.nodeLabelScan(labelId), batchSize);
     }
 
     @Override

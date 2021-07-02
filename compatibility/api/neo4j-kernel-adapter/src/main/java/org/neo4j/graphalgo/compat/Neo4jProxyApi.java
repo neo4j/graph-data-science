@@ -120,8 +120,6 @@ public interface Neo4jProxyApi {
 
     Path pagedFile(PagedFile pagedFile);
 
-    Scan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId);
-
     List<Scan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds);
 
     PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction);
@@ -139,6 +137,12 @@ public interface Neo4jProxyApi {
     boolean hasNodeLabelIndex(KernelTransaction kernelTransaction);
 
     void nodeLabelScan(KernelTransaction kernelTransaction, int label, NodeLabelIndexCursor cursor);
+
+    StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
+        KernelTransaction transaction,
+        int batchSize,
+        int labelId
+    );
 
     void nodeIndexScan(
         Read dataRead,

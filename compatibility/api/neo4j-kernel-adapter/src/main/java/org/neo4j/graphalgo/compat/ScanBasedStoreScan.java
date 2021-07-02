@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.loading;
+package org.neo4j.graphalgo.compat;
 
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.Scan;
 
-public final class ScanBasedStoreScan<C extends Cursor> implements StoreScanner.StoreScan<C> {
+public final class ScanBasedStoreScan<C extends Cursor> implements StoreScan<C> {
     private final Scan<C> scan;
     private final int batchSize;
 

@@ -20,12 +20,13 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.neo4j.graphalgo.compat.CompositeNodeCursor;
+import org.neo4j.graphalgo.compat.StoreScan;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.Scan;
 
 import java.util.List;
 
-public class CompositeNodeScan implements StoreScanner.StoreScan<CompositeNodeCursor> {
+public class CompositeNodeScan implements StoreScan<CompositeNodeCursor> {
 
     private final List<Scan<NodeLabelIndexCursor>> scans;
     private final int batchSize;
