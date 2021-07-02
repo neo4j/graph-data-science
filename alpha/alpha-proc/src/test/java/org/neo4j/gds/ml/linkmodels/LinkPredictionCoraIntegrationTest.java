@@ -35,6 +35,8 @@ import org.neo4j.graphalgo.datasets.Cora;
 import org.neo4j.graphalgo.datasets.DatasetManager;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.gds.model.catalog.ModelListProc;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import org.neo4j.graphdb.Result;
 
 import java.nio.file.Path;
@@ -54,6 +56,7 @@ import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.registerProcedure
 import static org.neo4j.graphalgo.datasets.CoraSchema.CITES_TYPE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
+@GdsEditionTest(Edition.EE)
 class LinkPredictionCoraIntegrationTest {
 
     private static final String GRAPH_NAME = "g";

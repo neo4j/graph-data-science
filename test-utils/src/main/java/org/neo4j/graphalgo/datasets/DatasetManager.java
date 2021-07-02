@@ -21,7 +21,6 @@ package org.neo4j.graphalgo.datasets;
 
 import org.apache.commons.io.file.PathUtils;
 import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
-import org.neo4j.graphalgo.core.GdsEdition;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -108,7 +107,6 @@ public final class DatasetManager {
     private GdsGraphDatabaseAPI openDb(Path dbLocation) {
         GdsGraphDatabaseAPI db = dbCreator.createEmbeddedDatabase(dbLocation, neo4jConfig);
         Runtime.getRuntime().addShutdownHook(new Thread(db::shutdown));
-        GdsEdition.instance().setToEnterpriseEdition();
         return db;
     }
 

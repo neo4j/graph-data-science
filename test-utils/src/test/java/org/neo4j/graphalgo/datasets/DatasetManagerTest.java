@@ -32,7 +32,6 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class DatasetManagerTest {
@@ -50,7 +49,6 @@ class DatasetManagerTest {
         List<Path> filesWithCachedDataset = Files.walk(tempDir).filter(Files::isRegularFile).collect(toList());
 
         GdsGraphDatabaseAPI db = datasetManager.openDb(EmptyDataset.NAME);
-        assertTrue(GdsEdition.instance().isOnEnterpriseEdition());
         datasetManager.closeDb(db);
 
         List<Path> filesAfterClose = Files.walk(tempDir).filter(Files::isRegularFile).collect(toList());

@@ -36,6 +36,8 @@ import org.neo4j.graphalgo.datasets.Cora;
 import org.neo4j.graphalgo.datasets.DatasetManager;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.gds.model.catalog.ModelListProc;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -53,6 +55,7 @@ import static org.neo4j.graphalgo.datasets.CoraSchema.PAPER_LABEL;
 import static org.neo4j.graphalgo.datasets.CoraSchema.SUBJECT_NODE_PROPERTY;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
+@GdsEditionTest(Edition.EE)
 class NodeClassificationCoraIntegrationTest {
 
     private static final String GRAPH_CREATE_QUERY;
