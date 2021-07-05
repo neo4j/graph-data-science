@@ -24,5 +24,5 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 public interface LinkFeatureStep {
 
-    public void execute(Graph graph, HugeObjectArray linkFeatures, int offset);
+    public void execute(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset);
 }
