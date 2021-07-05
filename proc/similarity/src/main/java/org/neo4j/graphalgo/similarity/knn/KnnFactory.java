@@ -113,13 +113,10 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> implements AlgorithmFactor
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.task(
-            "Knn",
-            Tasks.iterativeDynamic(
-                "compute",
-                () -> List.of(Tasks.leaf("iteration")),
-                config.maxIterations()
-            )
+        return Tasks.iterativeDynamic(
+            "KNN compute",
+            () -> List.of(Tasks.leaf("iteration")),
+            config.maxIterations()
         );
     }
 }
