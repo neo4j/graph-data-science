@@ -6,7 +6,7 @@
 This section details projecting GDS graphs using `native` projections.
 --
 
-A projected graph can be stored in the catalog under a user-defined name.
+A projected graph can be stored in the <<graph-catalog-ops, catalog>> under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
 This allows multiple algorithms to use the same graph without having to re-create it on each algorithm run.
 
@@ -33,7 +33,7 @@ The projected graphs will reside in the catalog until:
 == Syntax
 
 A native projection takes three mandatory arguments: `graphName`, `nodeProjection` and `relationshipProjection`.
-In addition, the optional `configuration` parameter allows us to further configure graph creation.
+In addition, the optional `configuration` parameter allows us to further configure the graph creation.
 
 [.graph-create-syntax]
 --
@@ -54,7 +54,7 @@ YIELD
   createMillis: Integer
 ----
 
-NOTE: To get information about a stored named graph, including its schema, one can use <<catalog-graph-list, gds.graph.list>>.
+NOTE: To get information about a stored graph, such as its schema, one can use <<catalog-graph-list, gds.graph.list>>.
 
 .Parameters
 [opts="header",cols="1,1,1, 4"]
@@ -71,9 +71,9 @@ NOTE: To get information about a stored named graph, including its schema, one c
 |===
 | Name                   | Type                  | Default | Description
 | readConcurrency        | Integer               | 4       | The number of concurrent threads used for creating the graph.
-| nodeProperties         | String, List or Map   | {}      | Node properties to load for _all_ node projections.
-| relationshipProperties | String, List or Map   | {}      | Relationship properties to load for _all_ relationship projections.
-| validateRelationships  | Boolean               | false   | Whether to throw an error if relationships contain nodes not included in the nodeProjection.
+| nodeProperties         | String, List or Map   | {}      | The node properties to load for _all_ node projections.
+| relationshipProperties | String, List or Map   | {}      | The relationship properties to load for _all_ relationship projections.
+| validateRelationships  | Boolean               | false   | Whether to throw an error if the `relationshipProjection` includes relationships between nodes not part of the `nodeProjection`.
 |===
 
 .Results
@@ -136,12 +136,12 @@ NOTE: To get information about a stored named graph, including its schema, one c
 [opts="header",cols="1,1,1,2,4"]
 |===
 | Name                     | Type                               | Optional | Default                  | Description
-| <projected-label>        | String                             |  no      | n/a                      |The node label in the projected graph.
-| label                    | String                             |  yes     | `projected-label`        |The node label in the Neo4j graph. If not set, uses the `projected-label`.
-| properties               | Map, List or String                |  yes     | {}                       |The projected node properties for the specified `projected-label`.
-| <projected-property-key> | String                             |  no      | n/a                      |The key for the node property in the projected graph.
-| property                 | String                             |  yes     | `projected-property-key` |The node property key in the Neo4j graph. If not set, uses the `projected-property-key`.
-.4+^.^| defaultValue       | Float                        .4+^.^|  yes     | `Double.NaN`          .4+|The default value if the property is not defined for a node.
+| <projected-label>        | String                             |  no      | n/a                      | The node label in the projected graph.
+| label                    | String                             |  yes     | `projected-label`        | The node label in the Neo4j graph. If not set, uses the `projected-label`.
+| properties               | Map, List or String                |  yes     | {}                       | The projected node properties for the specified `projected-label`.
+| <projected-property-key> | String                             |  no      | n/a                      | The key for the node property in the projected graph.
+| property                 | String                             |  yes     | `projected-property-key` | The node property key in the Neo4j graph. If not set, uses the `projected-property-key`.
+.4+^.^| defaultValue       | Float                        .4+^.^|  yes     | `Double.NaN`          .4+| The default value if the property is not defined for a node.
 |Float[]   | null
 |Integer   |`Integer.MIN_VALUE`
 |Integer[] | null
@@ -201,15 +201,15 @@ NOTE: To get information about a stored named graph, including its schema, one c
 .Relationship Projection fields
 [opts="header",cols="2,1,1,3,4"]
 |===
-| Name                      | Type                | Optional | Default          | Description
-| <projected-type>          | String              |  no      | n/a              | The name of the relationship type in the projected graph.
-| type                      | String              |  yes     | `projected-type` |The relationship type in the Neo4j graph.
-| orientation               | String              |  yes     |  `NATURAL`       | Denotes how Neo4j relationships are represented in the projected graph. Allowed values are `NATURAL`, `UNDIRECTED`, `REVERSE`.
-| aggregation               | String              |  no      |  `NONE`          | Handling of parallel relationships. Allowed values are `NONE`, `MIN`, `MAX`, `SUM`, `SINGLE`, `COUNT`.
-| properties                | Map, List or String |  yes     |  {}              |The projected relationship properties for the specified `projected-type`.
-| <projected-property-key>  | String              |  no      | n/a              |The key for the relationship property in the projected graph.
-| property                  | String              |  yes     | `projected-property-key` |The node property key in the Neo4j graph. If not set, uses the `projected-property-key`.
-| defaultValue              | Float or Integer    |  yes     |  `Double.NaN`    | The default value if the property is not defined for a node.
+| Name                      | Type                | Optional | Default                  | Description
+| <projected-type>          | String              |  no      | n/a                      | The name of the relationship type in the projected graph.
+| type                      | String              |  yes     | `projected-type`         | The relationship type in the Neo4j graph.
+| orientation               | String              |  yes     |  `NATURAL`               | Denotes how Neo4j relationships are represented in the projected graph. Allowed values are `NATURAL`, `UNDIRECTED`, `REVERSE`.
+| aggregation               | String              |  no      |  `NONE`                  | Handling of parallel relationships. Allowed values are `NONE`, `MIN`, `MAX`, `SUM`, `SINGLE`, `COUNT`.
+| properties                | Map, List or String |  yes     |  {}                      | The projected relationship properties for the specified `projected-type`.
+| <projected-property-key>  | String              |  no      | n/a                      | The key for the relationship property in the projected graph.
+| property                  | String              |  yes     | `projected-property-key` | The node property key in the Neo4j graph. If not set, uses the `projected-property-key`.
+| defaultValue              | Float or Integer    |  yes     |  `Double.NaN`            | The default value if the property is not defined for a node.
 |===
 
 
@@ -230,6 +230,7 @@ CREATE
   (veselin:Person { name: 'Veselin', age: 20, ratings: [5.0] }),
   (hobbit:Book { name: 'The Hobbit', isbn: 1234, numberOfPages: 310, ratings: [1.0, 2.0, 3.0, 4.5] }),
   (frankenstein:Book { name: 'Frankenstein', isbn: 4242, price: 19.99 }),
+
   (florentin)-[:KNOWS { since: 2010 }]->(adam),
   (florentin)-[:KNOWS { since: 2018 }]->(veselin),
   (florentin)-[:READ { numberOfPages: 4 }]->(hobbit),
@@ -241,7 +242,7 @@ CREATE
 [[graph-create-example-single-label-type]]
 === Simple graph
 
-A simple graph is a graph with only one node label and relationship type.
+A simple graph is a graph with only one node label and relationship type, i.e., a monopartite graph.
 We are going to start with demonstrating how to load a simple graph by projecting only the `Person` node label and `KNOWS` relationship type.
 
 [role=query-example]
@@ -269,7 +270,7 @@ In addition, we can see the projected in-memory graph contains three `Person` no
 
 === Multi-graph
 
-Multi-graph is a graph with multiple node labels and relationship types.
+A multi-graph is a graph with multiple node labels and relationship types.
 
 To project multiple node labels and relationship types, we can adjust the projections as follows:
 
@@ -300,7 +301,7 @@ In addition, we can see the projected in-memory graph contains five nodes, and t
 
 By default, relationships are loaded in the same orientation as stored in the Neo4j db.
 In GDS, we call this the `NATURAL` orientation.
-Additionally, we provide the functionality to load the relationships in the `REVERSE` orientation or even `UNDIRECTED`.
+Additionally, we provide the functionality to load the relationships in the `REVERSE` or even `UNDIRECTED` orientation.
 
 [role=query-example]
 --
@@ -327,7 +328,7 @@ YIELD
 |===
 --
 
-To specify the orientation, we need to write the `relationshipProjection` with extended Map-syntax.
+To specify the orientation, we need to write the `relationshipProjection` with the extended Map-syntax.
 Projecting the `KNOWS` relationships `UNDIRECTED`, loads each relationship in both directions.
 Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in <<graph-create-example-single-label-type>>.
 
@@ -335,7 +336,7 @@ Thus, the `undirectedKnows` graph contains four relationships, twice as many as 
 [[node-properties-example]]
 === Node properties
 
-To project node properties we can either use the `nodeProperties` configuration parameter or extend an individual `nodeProjection` for a specific label.
+To project node properties, we can either use the `nodeProperties` configuration parameter for shared properties, or extend an individual `nodeProjection` for a specific label.
 
 [role=query-example, group=node-properties]
 --
@@ -451,18 +452,19 @@ ORDER BY person ASC, numberOfPages DESC
 |===
 --
 
-We can see, that the `numberOfPages` are loaded. The default property value is `Double.NaN` and can be changed using the Map-Syntax the same as for node properties in <<node-properties-example>>.
+We can see, that the `numberOfPages` property is loaded. The default property value is `Double.NaN` and could be changed using the Map-Syntax the same as for node properties in <<node-properties-example>>.
 
 
 === Parallel relationships
 
 Neo4j supports parallel relationships, i.e., multiple relationships between two nodes.
-By default, GDS preserves the parallel relationships.
+By default, GDS preserves parallel relationships.
 For some algorithms, we want the projected graph to contain at most one relationship between two nodes.
 
-We can specify how parallel relationships should be merged into a single relationship via the `aggregation` parameter in a relationship projection.
+We can specify how parallel relationships should be aggregated into a single relationship via the `aggregation` parameter in a relationship projection.
 
 For graphs without relationship properties, we can use the `COUNT` aggregation.
+If we do not need the count, we could use the `SINGLE` aggregation.
 
 // special case: COUNT example
 [role=query-example, group=count-aggregate]
@@ -557,7 +559,7 @@ YIELD
 |===
 --
 
-Next, we will verify that the relationship property `numberOfPages` were correctly aggregated.
+Next, we will verify that the relationship property `numberOfPages` was correctly aggregated.
 
 [role=query-example, group=sum-aggregate]
 --
