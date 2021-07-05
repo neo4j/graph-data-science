@@ -120,20 +120,41 @@ public final class PageReordering {
     public static HugeLongArray sortOffsets(
         HugeLongArray offsets,
         PageOrdering pageOrdering,
+        LongPredicate nodeFilter,
         AllocationTracker tracker
     ) {
         int[] ordering = pageOrdering.ordering();
         long[] pageOffsets = pageOrdering.pageOffsets();
 
         var newOffsets = HugeLongArray.newArray(offsets.size(), tracker);
-        long newIdx = 0;
+        long targetIdx = 0;
 
         for (int sourcePage : ordering) {
             long startIdx = pageOffsets[sourcePage];
             long endIdx = pageOffsets[sourcePage + 1];
 
-            for (long idx = startIdx; idx < endIdx; idx++) {
-                newOffsets.set(newIdx++, offsets.get(idx));
+            for (long sourceIdx = startIdx; sourceIdx < endIdx; sourceIdx++) {
+                var writeTarget = nodeFilter.test(targetIdx);
+                var writeSource = nodeFilter.test(sourceIdx);
+
+                if (!writeTarget) {
+                    if (writeSource) {
+                        newOffsets.set(targetIdx, offsets.get(sourceIdx));
+                        targetIdx = targetIdx + 1;
+                        sourceIdx = sourceIdx - 1;
+                    } else {
+                        if (targetIdx == 0) {
+                            newOffsets.set(targetIdx, 0);
+                        } else {
+                            newOffsets.set(targetIdx, offsets.get(targetIdx - 1));
+                        }
+                        targetIdx = targetIdx + 1;
+                    }
+                } else if (writeSource) {
+                    newOffsets.set(targetIdx, offsets.get(sourceIdx));
+                    targetIdx = targetIdx + 1;
+                }
+
             }
         }
         return newOffsets;

@@ -47,7 +47,7 @@ public interface CsrListBuilder<PAGE, T> {
         if (GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled() && pages.length > 0) {
             var ordering = PageReordering.ordering(offsets, nodeId -> degrees.get(nodeId) > 0, pages.length, PAGE_SHIFT);
             PageReordering.reorder(pages, ordering.ordering());
-            return PageReordering.sortOffsets(offsets, ordering, tracker);
+            return PageReordering.sortOffsets(offsets, ordering, node -> degrees.get(node) > 0, tracker);
         }
         return offsets;
     }

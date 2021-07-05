@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -26,6 +27,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.Arrays;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -134,11 +136,58 @@ class PageReorderingTest {
                 .ordering(expectedOrdering)
                 .pageOffsets(0, 3, 6, 9, 12)
                 .build(),
+            node -> true,
             AllocationTracker.empty()
         );
 
         Arrays.sort(offsets);
         assertThat(orderedOffsets.toArray()).isEqualTo(offsets);
+    }
+
+    @Test
+    void testOrderingWithSkippedOffsets() {
+        var pageCount = 3;
+        var pageShift = 3;
+
+        var offsets = new long[]{8, 0, 0, 5, 17, 0};
+        var ordering = PageReordering.ordering(
+            HugeLongArray.of(offsets),
+            nodeId -> nodeId != 5 && nodeId != 1,
+            pageCount,
+            pageShift
+        );
+
+        assertThat(ordering.ordering()).isEqualTo(new int[]{1, 0, 2});
+        assertThat(ordering.pageOffsets()).isEqualTo(new long[]{0, 2, 4, 6});
+    }
+
+    static Stream<Arguments> offsetsWithHoles() {
+        // [ 8, x ] [ 0, 5 ] [ 17, y ]
+        return Stream.of(
+            // [ 0, x, 5 ] [ 8 ] [ 17, y ]
+            Arguments.of(new long[]{8, 0, 0, 5, 17, 0}, Set.of(1L, 5L), new int[] { 1, 0, 2 }, new long[] { 0, 2, 4, 6 }, new long[] { 0, /* (x) */ 5, 5, 8, 17, /* (y) */ 17 }),
+            // [ x, 0, 5 ] [ 8 ] [ 17, 19 ]
+            Arguments.of(new long[]{0, 8, 0, 5, 17, 19}, Set.of(0L), new int[] { 1, 0, 2 }, new long[] { 0, 2, 4, 6 }, new long[] { /* (x) */ 0, 0, 5, 8, 17, 19 }),
+            // [ x, 0, 5 ] [ 8, 12] [ 17, 19 ]
+            Arguments.of(new long[]{0, 5, 8, 12, 17, 19}, Set.of(0L), new int[] { 0, 1, 2 }, new long[] { 0, 2, 4, 6 }, new long[] { /* (x) */ 0, 5, 8, 12, 17, 19 })
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("offsetsWithHoles")
+    void testSortOffsetsWithSkippedOffsets(long[] inputOffsets, Set<Long> holes, int[] ordering, long[] pageOffsets, long[] expectedOffsets) {
+        var orderedOffsets = PageReordering.sortOffsets(
+            HugeLongArray.of(inputOffsets),
+            ImmutablePageOrdering
+                .builder()
+                .ordering(ordering)
+                .pageOffsets(pageOffsets)
+                .build(),
+            node -> !holes.contains(node),
+            AllocationTracker.empty()
+        );
+
+        assertThat(orderedOffsets.toArray()).isEqualTo(expectedOffsets);
     }
 
 }
