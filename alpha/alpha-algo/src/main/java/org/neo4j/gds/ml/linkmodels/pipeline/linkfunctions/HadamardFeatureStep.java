@@ -76,7 +76,7 @@ public class HadamardFeatureStep implements LinkFeatureStep {
                         throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                     }
                 }
-                seenRelationships.add(1);
+                seenRelationships.increment();
 
                 return true;
             }));
