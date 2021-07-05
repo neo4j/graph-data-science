@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
+
 public class LinkFeatureStepFactory {
     private static final Map<String, Function<Map<String, Object>, LinkFeatureStep>> MAP = Map.of(
         "hadamard",
@@ -37,8 +39,9 @@ public class LinkFeatureStepFactory {
     private LinkFeatureStepFactory() {}
 
     public static LinkFeatureStep create(String taskName, Map<String, Object> config) {
-        if (MAP.containsKey(taskName)) {
-            return MAP.get(taskName).apply(config);
+        var lowerCaseTaskName = toLowerCaseWithLocale(taskName);
+        if (MAP.containsKey(lowerCaseTaskName)) {
+            return MAP.get(lowerCaseTaskName).apply(config);
         } else {
             throw new UnsupportedOperationException("Could not find that task");
         }

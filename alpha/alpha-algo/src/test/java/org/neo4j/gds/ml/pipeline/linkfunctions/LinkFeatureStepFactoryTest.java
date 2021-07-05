@@ -36,7 +36,7 @@ final class LinkFeatureStepFactoryTest {
     public void testCreateHadamard() {
         List<String> featureProperties = List.of("noise", "z", "array");
         var step = LinkFeatureStepFactory.create(
-            "hadamard",
+            "hadaMard",
             Map.of("featureProperties", featureProperties)
         );
 
@@ -51,7 +51,7 @@ final class LinkFeatureStepFactoryTest {
     public void testCreateCosine() {
         List<String> featureProperties = List.of("noise", "z", "array");
         var step = LinkFeatureStepFactory.create(
-            "cosine",
+            "coSine",
             Map.of("featureProperties", featureProperties)
         );
 
