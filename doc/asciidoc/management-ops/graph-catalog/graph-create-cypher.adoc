@@ -138,7 +138,7 @@ YIELD
 [opts="header", cols="1,3m,1,3m,1m"]
 |===
 | graph     | nodeQuery                             | nodes  | relationshipQuery                                                                | rels
-| "persons" | "MATCH (n:Person) RETURN id(n) AS id" | 3      | "MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target" | 2
+| "persons" | "MATCH (n:Person) RETURN id(n) AS id" | 3     a| "MATCH (n:Person)-[r:KNOWS]->(m:Person) RETURN id(n) AS source, id(m) AS target" | 2
 |===
 --
 
