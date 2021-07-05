@@ -138,6 +138,17 @@ public final class PageReordering {
                 var writeSource = nodeFilter.test(sourceIdx);
 
                 if (!writeTarget) {
+
+                    // Produces offsets according to non-text-book CSR
+                    // i.e. offsets for 0-degree nodes are arbitrary
+//                    newOffsets.set(targetIdx, -1);
+//                    targetIdx = targetIdx + 1;
+//
+//                    if (writeSource) {
+//                        sourceIdx = sourceIdx - 1;
+//                    }
+                    // Produces offsets according to text-book CSR,
+                    // i.e. degrees can be computed from offsets
                     if (writeSource) {
                         newOffsets.set(targetIdx, offsets.get(sourceIdx));
                         targetIdx = targetIdx + 1;
