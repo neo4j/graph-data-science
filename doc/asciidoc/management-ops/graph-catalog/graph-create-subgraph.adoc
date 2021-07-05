@@ -2,6 +2,11 @@
 [.beta]
 = Creating a subgraph
 
+[abstract]
+--
+This section details how to create subgraphs from existing graphs stored in the graph catalog of the Neo4j Graph Data Science library.
+--
+
 In GDS, algorithms can be executed on a named graph that has been filtered based on its <<common-configuration-node-labels,node labels>> and <<common-configuration-relationship-types, relationship types>>.
 However, that filtered graph only exists during the execution of the algorithm and it is not possible to filter on property values.
 If a filtered graph needs to be used multiple times, one can use the subgraph catalog procedure to create a new graph in the graph catalog.
@@ -10,23 +15,28 @@ The filter predicates in the subgraph procedure can take labels, relationship ty
 The new graph can be used in the same way as any other in-memory graph in the catalog.
 Creating subgraphs of subgraphs is also possible.
 
+
+== Syntax
+
+[.create-subgraph-syntax]
+--
 .A new graph can be created by using the `gds.beta.graph.create.subgraph()` procedure:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.subgraph(
+CALL gds.beta.graph.create.subgraph(
   graphName: String,
   fromGraphName: String,
   nodeFilter: String,
   relationshipFilter: String,
   configuration: Map
 ) YIELD
-  graphName,
-  fromGraphName,
-  nodeFilter,
-  relationshipFilter,
-  nodeCount,
-  relationshipCount,
-  createMillis;
+  graphName: String,
+  fromGraphName: String,
+  nodeFilter: String,
+  relationshipFilter: String,
+  nodeCount: Integer,
+  relationshipCount: Integer,
+  createMillis: Integer
 ----
 
 .Subgraph specific configuration
@@ -52,11 +62,13 @@ CALL gds.beta.graph.subgraph(
 | Name                   | Type     | Description
 | graphName              | String   | The name of the new graph that is stored in the graph catalog.
 | fromGraphName          | String   | The name of the original graph in the graph catalog.
+| nodeFilter             | String   | Filter predicate for nodes.
+| relationshipFilter     | String   | Filter predicate for relationships.
 | nodeCount              | Integer  | Number of nodes in the subgraph.
 | relationshipCount      | Integer  | Number of relationships in the subgraph.
 | createMillis           | Integer  | Milliseconds for creating the subgraph.
-| configuration          | Map      | The configuration used for running the procedure.
 |===
+--
 
 The `nodeFilter` and `relationshipFilter` configuration keys can be used to express filter predicates.
 Filter predicates are https://neo4j.com/docs/cypher-manual/current/clauses/where/#query-where[Cypher] predicates bound to a single entity.
@@ -101,7 +113,9 @@ A relationship predicate must refer to variable `r`.
 
 == Examples
 
-.Example graph with Person nodes connected by KNOWS relationships.
+In order to demonstrate the GDS create subgraph capabilities we are going to create a small social graph in Neo4j.
+
+.The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
 CREATE
@@ -117,24 +131,42 @@ CREATE
   (p2)-[:READS]->(b1)
 ----
 
-.Create a graph using a Cypher projection:
+.Project the social network graph:
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.graph.create.cypher(
+CALL gds.graph.create(
   'social-graph',
-  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels, n.age AS age',
-  'MATCH (n)-[r]->(m) RETURN id(n) AS source, id(m) AS target, r.since AS since, type(r) AS type'
+  {
+    Person: { properties: 'age' },    // <1>
+    Book: {}                          // <2>
+  },
+  {
+    KNOWS: { properties: 'since' },   // <3>
+    READS: {}                         // <4>
+  }
 )
-YIELD graphName, nodeCount, relationshipCount, createMillis;
+YIELD graphName, nodeCount, relationshipCount, createMillis
 ----
+<1> Project `Person` nodes with their `age` property.
+<2> Project `Book` nodes without any of their properties.
+<3> Project `KNOWS` relationships with their `since` property.
+<4> Project `READS` relationships without any of their properties.
+
+
+=== Node filtering
 
 [role=query-example]
 --
 .Create a new graph containing only users of a certain age group:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.create.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', '*')
-YIELD graphName, fromGraphName, nodeCount, relationshipCount;
+CALL gds.beta.graph.create.subgraph(
+  'teenagers',
+  'social-graph',
+  'n.age > 13 AND n.age <= 18',
+  '*'
+)
+YIELD graphName, fromGraphName, nodeCount, relationshipCount
 ----
 
 .Results
@@ -145,13 +177,21 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount;
 |===
 --
 
+
+=== Node and relationship filtering
+
 [role=query-example]
 --
 .Create a new graph containing only users of a certain age group that know each other since a given point a time:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.create.subgraph('teenagers', 'social-graph', 'n.age > 13 AND n.age <= 18', 'r.since >= 2012')
-YIELD graphName, fromGraphName, nodeCount, relationshipCount;
+CALL gds.beta.graph.create.subgraph(
+  'teenagers',
+  'social-graph',
+  'n.age > 13 AND n.age <= 18',
+  'r.since >= 2012'
+)
+YIELD graphName, fromGraphName, nodeCount, relationshipCount
 ----
 .Results
 [opts="header"]
@@ -161,13 +201,21 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount;
 |===
 --
 
+
+=== Bipartite subgraph
+
 [role=query-example]
 --
 .Create a new bipartite graph between books and users connected by the `READS` relationship type:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.create.subgraph('teenagers-books', 'social-graph', 'n:Book OR n:Person', 'r:READS')
-YIELD graphName, fromGraphName, nodeCount, relationshipCount;
+CALL gds.beta.graph.create.subgraph(
+  'teenagers-books',
+  'social-graph',
+  'n:Book OR n:Person',
+  'r:READS'
+)
+YIELD graphName, fromGraphName, nodeCount, relationshipCount
 ----
 
 .Results
@@ -178,13 +226,21 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount;
 |===
 --
 
+
+=== Bipartite graph node filtering
+
 [role=query-example]
 --
 .The previous example can be extended with an additional filter applied only to persons:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.create.subgraph('teenagers-books', 'social-graph', 'n:Book OR (n:Person AND n.age > 18)', 'r:READS')
-YIELD graphName, fromGraphName, nodeCount, relationshipCount;
+CALL gds.beta.graph.create.subgraph(
+  'teenagers-books',
+  'social-graph',
+  'n:Book OR (n:Person AND n.age > 18)',
+  'r:READS'
+)
+YIELD graphName, fromGraphName, nodeCount, relationshipCount
 ----
 
 .Results
