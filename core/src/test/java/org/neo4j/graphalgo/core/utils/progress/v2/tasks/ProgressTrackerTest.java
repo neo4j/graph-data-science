@@ -42,6 +42,7 @@ public class ProgressTrackerTest {
 
         progressTracker.beginSubTask();
         assertThat(progressTracker.currentSubTask()).isEqualTo(rootTask);
+        assertThat(rootTask.status()).isEqualTo(Status.RUNNING);
 
         progressTracker.beginSubTask();
         assertThat(progressTracker.currentSubTask()).isEqualTo(leafTask);
@@ -56,6 +57,9 @@ public class ProgressTrackerTest {
         assertThat(iterativeTask.status()).isEqualTo(Status.FINISHED);
 
         assertThat(progressTracker.currentSubTask()).isEqualTo(rootTask);
+
+        progressTracker.endSubTask();
+        assertThat(rootTask.status()).isEqualTo(Status.FINISHED);
     }
 
     @Test

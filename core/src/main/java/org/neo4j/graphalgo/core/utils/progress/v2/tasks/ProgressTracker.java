@@ -55,7 +55,7 @@ public class ProgressTracker {
     }
 
     @TestOnly
-    public Task currentSubTask() {
+    Task currentSubTask() {
         return currentTask;
     }
 
