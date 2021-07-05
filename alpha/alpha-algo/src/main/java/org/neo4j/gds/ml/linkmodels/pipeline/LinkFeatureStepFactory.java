@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.L2FeatureStep;
 
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,9 @@ public class LinkFeatureStepFactory {
         "hadamard",
         config -> new HadamardFeatureStep((List<String>) config.getOrDefault("featureProperties", null)),
         "cosine",
-        config -> new CosineFeatureStep((List<String>) config.getOrDefault("featureProperties", null))
+        config -> new CosineFeatureStep((List<String>) config.getOrDefault("featureProperties", null)),
+        "l2",
+        config -> new L2FeatureStep((List<String>) config.getOrDefault("featureProperties", null))
     );
 
     private LinkFeatureStepFactory() {}

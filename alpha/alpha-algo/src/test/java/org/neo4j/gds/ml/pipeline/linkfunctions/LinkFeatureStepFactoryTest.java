@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.L2FeatureStep;
 
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,21 @@ final class LinkFeatureStepFactoryTest {
 
         assertThat(step instanceof CosineFeatureStep);
         var actual = (CosineFeatureStep) step;
+
+        assertEquals(featureProperties, actual.featureProperties());
+
+    }
+
+    @Test
+    public void testCreateL2() {
+        List<String> featureProperties = List.of("noise", "z", "array");
+        var step = LinkFeatureStepFactory.create(
+            "L2",
+            Map.of("featureProperties", featureProperties)
+        );
+
+        assertThat(step instanceof L2FeatureStep);
+        var actual = (L2FeatureStep) step;
 
         assertEquals(featureProperties, actual.featureProperties());
 
