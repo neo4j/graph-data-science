@@ -26,6 +26,7 @@ import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphDeleteRelationshipProc;
 import org.neo4j.gds.catalog.GraphDropProc;
+import org.neo4j.gds.catalog.GraphExistsFunc;
 import org.neo4j.gds.catalog.GraphExistsProc;
 import org.neo4j.gds.catalog.GraphListProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
@@ -39,6 +40,8 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageWriteProc;
+import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.gds.model.catalog.ModelDeleteProc;
 import org.neo4j.gds.model.catalog.ModelDropProc;
 import org.neo4j.gds.model.catalog.ModelExistsProc;
@@ -67,13 +70,21 @@ import org.neo4j.graphalgo.betweenness.BetweennessCentralityMutateProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityStreamProc;
 import org.neo4j.graphalgo.betweenness.BetweennessCentralityWriteProc;
+import org.neo4j.graphalgo.centrality.ClosenessCentralityProc;
+import org.neo4j.graphalgo.centrality.HarmonicCentralityProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
+import org.neo4j.graphalgo.functions.IsFiniteFunc;
+import org.neo4j.graphalgo.functions.NodePropertyFunc;
+import org.neo4j.graphalgo.functions.OneHotEncodingFunc;
 import org.neo4j.graphalgo.functions.VersionFunc;
+import org.neo4j.graphalgo.influenceΜaximization.CELFProc;
+import org.neo4j.graphalgo.influenceΜaximization.GreedyProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationStreamProc;
 import org.neo4j.graphalgo.labelpropagation.LabelPropagationWriteProc;
+import org.neo4j.graphalgo.linkprediction.LinkPredictionFunc;
 import org.neo4j.graphalgo.louvain.LouvainMutateProc;
 import org.neo4j.graphalgo.louvain.LouvainStatsProc;
 import org.neo4j.graphalgo.louvain.LouvainStreamProc;
@@ -82,6 +93,15 @@ import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphalgo.pagerank.PageRankStatsProc;
 import org.neo4j.graphalgo.pagerank.PageRankStreamProc;
 import org.neo4j.graphalgo.pagerank.PageRankWriteProc;
+import org.neo4j.graphalgo.scc.SccProc;
+import org.neo4j.graphalgo.shortestpath.ShortestPathDeltaSteppingProc;
+import org.neo4j.graphalgo.shortestpaths.AllShortestPathsProc;
+import org.neo4j.graphalgo.similarity.ApproxNearestNeighborsProc;
+import org.neo4j.graphalgo.similarity.CosineProc;
+import org.neo4j.graphalgo.similarity.EuclideanProc;
+import org.neo4j.graphalgo.similarity.OverlapProc;
+import org.neo4j.graphalgo.similarity.PearsonProc;
+import org.neo4j.graphalgo.similarity.SimilaritiesFunc;
 import org.neo4j.graphalgo.similarity.knn.KnnMutateProc;
 import org.neo4j.graphalgo.similarity.knn.KnnStatsProc;
 import org.neo4j.graphalgo.similarity.knn.KnnStreamProc;
@@ -90,6 +110,9 @@ import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityStreamProc;
 import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityWriteProc;
+import org.neo4j.graphalgo.spanningtree.KSpanningTreeProc;
+import org.neo4j.graphalgo.spanningtree.SpanningTreeProc;
+import org.neo4j.graphalgo.traverse.TraverseProc;
 import org.neo4j.graphalgo.triangle.LocalClusteringCoefficientMutateProc;
 import org.neo4j.graphalgo.triangle.LocalClusteringCoefficientStatsProc;
 import org.neo4j.graphalgo.triangle.LocalClusteringCoefficientStreamProc;
@@ -98,6 +121,8 @@ import org.neo4j.graphalgo.triangle.TriangleCountMutateProc;
 import org.neo4j.graphalgo.triangle.TriangleCountStatsProc;
 import org.neo4j.graphalgo.triangle.TriangleCountStreamProc;
 import org.neo4j.graphalgo.triangle.TriangleCountWriteProc;
+import org.neo4j.graphalgo.triangle.TriangleProc;
+import org.neo4j.graphalgo.walking.RandomWalkProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 import org.neo4j.graphalgo.wcc.WccStatsProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
@@ -120,6 +145,46 @@ class ListProcTest extends BaseProcTest {
         "gds.alpha.model.delete",
         "gds.alpha.model.load",
         "gds.alpha.model.store",
+
+        "gds.alpha.allShortestPaths.stream",
+        "gds.alpha.bfs.stream",
+
+        "gds.alpha.closeness.write",
+        "gds.alpha.closeness.stream",
+        "gds.alpha.closeness.harmonic.write",
+        "gds.alpha.closeness.harmonic.stream",
+
+        "gds.alpha.dfs.stream",
+        "gds.alpha.scc.write",
+        "gds.alpha.scc.stream",
+        "gds.alpha.shortestPath.deltaStepping.write",
+        "gds.alpha.shortestPath.deltaStepping.stream",
+        "gds.alpha.randomWalk.stream",
+        "gds.alpha.similarity.cosine.write",
+        "gds.alpha.similarity.cosine.stream",
+        "gds.alpha.similarity.cosine.stats",
+        "gds.alpha.similarity.euclidean.write",
+        "gds.alpha.similarity.euclidean.stream",
+        "gds.alpha.similarity.euclidean.stats",
+        "gds.alpha.similarity.overlap.write",
+        "gds.alpha.similarity.overlap.stream",
+        "gds.alpha.similarity.overlap.stats",
+        "gds.alpha.similarity.pearson.write",
+        "gds.alpha.similarity.pearson.stream",
+        "gds.alpha.similarity.pearson.stats",
+        "gds.alpha.spanningTree.write",
+        "gds.alpha.spanningTree.kmax.write",
+        "gds.alpha.spanningTree.kmin.write",
+        "gds.alpha.spanningTree.maximum.write",
+        "gds.alpha.spanningTree.minimum.write",
+        "gds.alpha.triangles",
+        "gds.alpha.ml.ann.write",
+        "gds.alpha.ml.ann.stream",
+        "gds.alpha.ml.nodeClassification.train",
+        "gds.alpha.ml.nodeClassification.train.estimate",
+        "gds.alpha.ml.splitRelationships.mutate",
+        "gds.alpha.influenceMaximization.greedy.stream",
+        "gds.alpha.influenceMaximization.celf.stream",
 
         "gds.beta.node2vec.mutate",
         "gds.beta.node2vec.mutate.estimate",
@@ -288,7 +353,32 @@ class ListProcTest extends BaseProcTest {
     private static final List<String> FUNCTIONS = asList(
         "gds.util.asNode",
         "gds.util.asNodes",
-        "gds.version"
+        "gds.util.NaN",
+        "gds.util.infinity",
+        "gds.util.isFinite",
+        "gds.util.isInfinite",
+        "gds.util.nodeProperty",
+
+        "gds.version",
+
+        "gds.alpha.linkprediction.adamicAdar",
+        "gds.alpha.linkprediction.resourceAllocation",
+        "gds.alpha.linkprediction.commonNeighbors",
+        "gds.alpha.linkprediction.preferentialAttachment",
+        "gds.alpha.linkprediction.totalNeighbors",
+        "gds.alpha.linkprediction.sameCommunity",
+
+        "gds.alpha.similarity.cosine",
+        "gds.alpha.similarity.euclidean",
+        "gds.alpha.similarity.euclideanDistance",
+        "gds.alpha.similarity.jaccard",
+        "gds.alpha.similarity.overlap",
+        "gds.alpha.similarity.pearson",
+
+        "gds.alpha.ml.oneHotEncoding",
+
+        "gds.graph.exists"
+
     );
 
     private static final List<String> PAGE_RANK = asList(
@@ -389,17 +479,48 @@ class ListProcTest extends BaseProcTest {
             LocalClusteringCoefficientStreamProc.class,
             LocalClusteringCoefficientStatsProc.class,
             LocalClusteringCoefficientWriteProc.class,
-            LocalClusteringCoefficientMutateProc.class
+            LocalClusteringCoefficientMutateProc.class,
+
+            // alpha
+            AllShortestPathsProc.class,
+            ApproxNearestNeighborsProc.class,
+            ClosenessCentralityProc.class,
+            HarmonicCentralityProc.class,
+            IsFiniteFunc.class,
+            KSpanningTreeProc.class,
+            CosineProc.class,
+            EuclideanProc.class,
+            NodeClassificationTrainProc.class,
+            OverlapProc.class,
+            PearsonProc.class,
+            RandomWalkProc.class,
+            OneHotEncodingFunc.class,
+            SpanningTreeProc.class,
+            SplitRelationshipsMutateProc.class,
+            ShortestPathDeltaSteppingProc.class,
+            SimilaritiesFunc.class,
+            SccProc.class,
+            TraverseProc.class,
+            TriangleProc.class,
+            GreedyProc.class,
+            CELFProc.class
         );
+
         registerFunctions(
             AsNodeFunc.class,
-            VersionFunc.class
+            GraphExistsFunc.class,
+            NodePropertyFunc.class,
+            IsFiniteFunc.class,
+            OneHotEncodingFunc.class,
+            VersionFunc.class,
+            LinkPredictionFunc.class,
+            SimilaritiesFunc.class
         );
     }
 
     @Test
     void shouldListAllThingsExceptTheListProcedure() {
-        assertEquals(ALL, listProcs(null));
+        assertThat(listProcs(null)).containsExactlyInAnyOrderElementsOf(ALL);
     }
 
     @Test
@@ -414,7 +535,7 @@ class ListProcTest extends BaseProcTest {
         SoftAssertions softly = new SoftAssertions();
         runQueryWithRowConsumer(
             "CALL gds.list()",
-            resultRow ->softly
+            resultRow -> softly
                     .assertThat(resultRow.getString("description"))
                     .withFailMessage(resultRow.get("name") + " has no description")
                     .isNotEmpty()
@@ -425,9 +546,8 @@ class ListProcTest extends BaseProcTest {
 
     @Test
     void listEmpty() {
-        String query = "CALL gds.list()";
         assertThat(
-            runQuery(query, (Function<Result, List<String>>) result -> result
+            runQuery("CALL gds.list()", (Function<Result, List<String>>) result -> result
                 .<String>columnAs("name")
                 .stream()
                 .sorted()
