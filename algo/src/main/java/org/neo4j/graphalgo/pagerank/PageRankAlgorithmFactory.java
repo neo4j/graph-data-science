@@ -45,6 +45,13 @@ import static org.neo4j.graphalgo.pagerank.PageRankAlgorithmFactory.Mode.EIGENVE
 
 public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends AbstractAlgorithmFactory<PageRankAlgorithm, CONFIG> {
 
+    static Task pagerankProgressTask(Graph graph) {
+        return Tasks.task(
+            "PageRank",
+            DegreeCentralityFactory.degreeCentralityProgressTask(graph)
+        );
+    }
+
     public enum Mode {
         PAGE_RANK,
         ARTICLE_RANK,
@@ -119,10 +126,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.task(
-            "PageRank",
-            DegreeCentralityFactory.degreeCentralityProgressTask(graph)
-        );
+        return pagerankProgressTask(graph);
     }
 
     @NotNull

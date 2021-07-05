@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.Tasks;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -166,7 +165,10 @@ class PageRankTest {
 
         @Test
         void shouldLogProgress() {
-            var config = ImmutablePageRankConfig.builder().build();
+            var maxIterations = 10;
+            var config = ImmutablePageRankConfig.builder()
+                .maxIterations(maxIterations)
+                .build();
 
             var testLogger = new TestProgressLogger(
                 graph.nodeCount(),
@@ -174,22 +176,23 @@ class PageRankTest {
                 config.concurrency()
             );
 
-            var progressTracker = new TaskProgressTracker(Tasks.leaf("compute"), testLogger);
+            var task = PageRankAlgorithmFactory.pagerankProgressTask(graph);
+
+            var progressTracker = new TaskProgressTracker(task, testLogger);
 
             runOnPregel(graph, config, Mode.PAGE_RANK, progressTracker);
 
-            testLogger.getProgresses().forEach(progress -> {
-                // the first iteration will compute degree centrality and therefore log nodeCount messages twice
-                assertThat(List.of(graph.nodeCount(), graph.nodeCount() * 2)).contains(progress.get());
-            });
+            var progresses = testLogger.getProgresses().stream()
+                .filter(it -> it.get() > 0)
+                .collect(Collectors.toList());
 
-            // TODO: Pregel is currently not adapted to the new progress task tracker
-//            assertThat(testLogger.getMessages(TestLog.INFO))
-//                // avoid asserting on the thread id
-//                .extracting(removingThreadId())
-//                .contains("PageRank :: Degree computation :: Start")
-//                .contains("PageRank :: Degree computation 100%")
-//                .contains("PageRank :: Degree computation :: Finished");
+            // the algorithm doesn't converge in `maxIterations`, so we should have at least that many non-zero progresses
+            assertThat(progresses.size()).isGreaterThanOrEqualTo(maxIterations);
+
+            progresses.forEach(progress -> {
+                // the first iteration will compute degree centrality and therefore log nodeCount messages twice
+                assertThat(progress.get()).isIn(List.of(graph.nodeCount(), graph.nodeCount() * 2));
+            });
 
             LongStream.rangeClosed(1, config.maxIterations()).forEach(iteration ->
                 assertThat(testLogger.getMessages(TestLog.INFO))
