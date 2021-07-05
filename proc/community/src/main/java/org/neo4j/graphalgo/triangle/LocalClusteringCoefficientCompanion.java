@@ -38,6 +38,9 @@ import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 
 final class LocalClusteringCoefficientCompanion {
 
+    static final String DESCRIPTION = "The local clustering coefficient is a metric quantifying how connected the neighborhood of a node is.";
+
+
     private LocalClusteringCoefficientCompanion() {}
 
     static <CONFIG extends LocalClusteringCoefficientBaseConfig> NodeProperties nodeProperties(

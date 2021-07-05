@@ -31,6 +31,7 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.loading.CSRGraphStoreUtil;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -51,6 +52,7 @@ public final class GraphGenerateProc extends BaseProc {
     private static final String DUMMY_RELATIONSHIP_NAME = "RELATIONSHIP";
 
     @Procedure(name = "gds.beta.graph.generate", mode = READ)
+    @Description(value = "Computes a random graph, which will be stored in the graph catalog.")
     public Stream<GraphGenerationStats> generate(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeCount") long nodeCount,

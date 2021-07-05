@@ -37,8 +37,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+import static org.neo4j.graphalgo.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
 import static org.neo4j.graphalgo.triangle.LocalClusteringCoefficientCompanion.warnOnGraphWithParallelRelationships;
-import static org.neo4j.graphalgo.triangle.TriangleCountCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 

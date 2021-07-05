@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
@@ -101,13 +102,16 @@ import org.neo4j.graphalgo.wcc.WccMutateProc;
 import org.neo4j.graphalgo.wcc.WccStatsProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
 import org.neo4j.graphalgo.wcc.WccWriteProc;
+import org.neo4j.graphdb.Result;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ListProcTest extends BaseProcTest {
@@ -406,23 +410,29 @@ class ListProcTest extends BaseProcTest {
     }
 
     @Test
-    void listFunctions() {
-        List<String> actual = listProcs("asNode");
-        actual.addAll(listProcs("getNode"));
-        actual.addAll(listProcs("version"));
-        assertEquals(FUNCTIONS, actual);
+    void allProcsHaveDescriptions() {
+        SoftAssertions softly = new SoftAssertions();
+        runQueryWithRowConsumer(
+            "CALL gds.list()",
+            resultRow ->softly
+                    .assertThat(resultRow.getString("description"))
+                    .withFailMessage(resultRow.get("name") + " has no description")
+                    .isNotEmpty()
+        );
+
+        softly.assertAll();
     }
 
     @Test
     void listEmpty() {
         String query = "CALL gds.list()";
-        assertEquals(
-            ALL,
-            runQuery(query, result -> result
+        assertThat(
+            runQuery(query, (Function<Result, List<String>>) result -> result
                 .<String>columnAs("name")
                 .stream()
                 .sorted()
-                .collect(Collectors.toList())));
+                .collect(Collectors.toList())))
+            .containsExactlyElementsOf(ALL);
     }
 
     private List<String> listProcs(Object name) {

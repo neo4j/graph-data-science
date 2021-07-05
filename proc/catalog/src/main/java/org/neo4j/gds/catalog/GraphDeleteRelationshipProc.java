@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDeleteRelationshipProc extends CatalogProc {
 
-    private static final String DESCRIPTION = "";
+    private static final String DESCRIPTION = "Delete the relationship type for a given graph stored in the graph-catalog.";
 
     @Procedure(name = "gds.graph.deleteRelationships", mode = READ)
     @Description(DESCRIPTION)

@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+import static org.neo4j.graphalgo.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
 import static org.neo4j.graphalgo.triangle.LocalClusteringCoefficientCompanion.warnOnGraphWithParallelRelationships;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
@@ -44,7 +45,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class LocalClusteringCoefficientMutateProc extends MutatePropertyProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientMutateProc.MutateResult, LocalClusteringCoefficientMutateConfig> {
 
     @Procedure(value = "gds.localClusteringCoefficient.mutate", mode = WRITE)
-    @Description("")
+    @Description(DESCRIPTION)
     public Stream<MutateResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

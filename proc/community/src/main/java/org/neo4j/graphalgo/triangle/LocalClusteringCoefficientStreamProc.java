@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIsUndirectedGraph;
+import static org.neo4j.graphalgo.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
 import static org.neo4j.graphalgo.triangle.LocalClusteringCoefficientCompanion.warnOnGraphWithParallelRelationships;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -42,8 +43,8 @@ public class LocalClusteringCoefficientStreamProc
     extends StreamProc<LocalClusteringCoefficient, LocalClusteringCoefficient.Result,
     LocalClusteringCoefficientStreamProc.Result, LocalClusteringCoefficientStreamConfig> {
 
-    @Description("")
     @Procedure(name = "gds.localClusteringCoefficient.stream", mode = READ)
+    @Description(DESCRIPTION)
     public Stream<Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -23,6 +23,7 @@ import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.utils.progress.LogEvent;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventStore;
 import org.neo4j.procedure.Context;
+import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
@@ -33,6 +34,7 @@ public class ListProgressProc extends BaseProc {
     public ProgressEventStore progress;
 
     @Procedure("gds.beta.listProgress")
+    @Description("List progress events for currently running tasks.")
     public Stream<ProgressResult> listProgress() {
         return progress.query(username()).stream().map(ProgressResult::new);
     }
