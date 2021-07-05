@@ -36,11 +36,14 @@ import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /*
  * Implements a parallelized version of a GRASP (optionally with VNS) maximum k-cut approximation algorithm.
@@ -67,6 +70,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final AtomicDoubleArray[] costs;
     private final HugeAtomicDoubleArray nodeToCommunityWeights;
     private final HugeAtomicByteArray swapStatus;
+    private final List<Partition> degreePartition;
     private HugeIntArray neighboringSolution;
 
     public ApproxMaxKCut(
@@ -103,6 +107,13 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
         // Used by `localSearch()` to keep track of whether we can swap a node into another community or not.
         swapStatus = HugeAtomicByteArray.newArray(graph.nodeCount(), tracker);
+
+        degreePartition = PartitionUtils.degreePartition(
+            graph,
+            config.concurrency(),
+            Function.identity(),
+            Optional.of(config.minBatchSize())
+        );
     }
 
     @ValueClass
@@ -221,46 +232,40 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
         while (change.get() && running()) {
             nodeToCommunityWeights.setAll(0.0D);
-            var nodeToCommunityWeightTasks = PartitionUtils.degreePartition(
-                graph,
-                config.concurrency(),
-                partition -> new ComputeNodeToCommunityWeights(
-                    graph.concurrentCopy(),
-                    candidateSolution,
-                    partition
-                ),
-                Optional.of(config.minBatchSize())
-            );
+            var nodeToCommunityWeightTasks = degreePartition.stream()
+                .map(partition ->
+                    new ComputeNodeToCommunityWeights(
+                        graph.concurrentCopy(),
+                        candidateSolution,
+                        partition
+                    )
+                ).collect(Collectors.toList());
             ParallelUtil.runWithConcurrency(config.concurrency(), nodeToCommunityWeightTasks, executor);
 
             swapStatus.setAll(NodeSwapStatus.UNTOUCHED);
             change.set(false);
-            var swapTasks = PartitionUtils.degreePartition(
-                graph,
-                config.concurrency(),
-                partition -> new SwapForLocalImprovements(
-                    graph.concurrentCopy(),
-                    candidateSolution,
-                    change,
-                    partition
-                ),
-                Optional.of(config.minBatchSize())
-            );
+            var swapTasks = degreePartition.stream()
+                .map(partition ->
+                    new SwapForLocalImprovements(
+                        graph.concurrentCopy(),
+                        candidateSolution,
+                        change,
+                        partition
+                    )
+                ).collect(Collectors.toList());
             ParallelUtil.runWithConcurrency(config.concurrency(), swapTasks, executor);
         }
 
         cost.set(0, 0);
-        var costTasks = PartitionUtils.degreePartition(
-            graph,
-            config.concurrency(),
-            partition -> new ComputeCost(
-                graph.concurrentCopy(),
-                candidateSolution,
-                cost,
-                partition
-            ),
-            Optional.of(config.minBatchSize())
-        );
+        var costTasks = degreePartition.stream()
+            .map(partition ->
+                new ComputeCost(
+                    graph.concurrentCopy(),
+                    candidateSolution,
+                    cost,
+                    partition
+                )
+            ).collect(Collectors.toList());
         ParallelUtil.runWithConcurrency(config.concurrency(), costTasks, executor);
     }
 
@@ -419,6 +424,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         @Override
         public void run() {
             var failedSwap = new MutableBoolean();
+            var localChange = new MutableBoolean(false);
 
             partition.consume(nodeId -> {
                 int currCommunity = candidateSolution.get(nodeId);
@@ -426,7 +432,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
                 if (bestCommunity == currCommunity) return;
 
-                change.set(true);
+                localChange.setTrue();
 
                 // If no incoming neighbors has marked us as NEIGHBOR, we can attempt to swap the current node.
                 if (!swapStatus.compareAndSet(nodeId, NodeSwapStatus.UNTOUCHED, NodeSwapStatus.SWAPPING)) return;
@@ -468,6 +474,8 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
 
                 candidateSolution.set(nodeId, bestCommunity);
             });
+
+            if (localChange.getValue()) change.set(true);
         }
 
         private int bestCommunity(long nodeId, int currCommunity) {
