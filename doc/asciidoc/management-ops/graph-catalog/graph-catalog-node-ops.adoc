@@ -195,7 +195,7 @@ CALL gds.graph.create(
 )
 ----
 
-.Compute the connected components in our social graph using `WCC`:
+.Compute the Degree Centrality in our social graph:
 [source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.degree.mutate('socialGraph', {mutateProperty: 'score'})
@@ -378,15 +378,23 @@ The above example requires all given properties to be present on _at least one_ 
 
 ==== NodeLabels
 
-The procedure can be configured to remove just the properties for some specific node projections.
-In the following example, we will only remove the scores from the projected `Person` nodes.
+Consider we compute the Degree Centrality only for a subset of the graph.
+
+.Compute the Degree Centrality for only the `Book` nodes in our social graph:
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.degree.mutate('socialGraph', {nodeLabels: ['Book'], mutateProperty: 'degree'})
+----
+
+The procedure can be configured to remove just the properties for s.
+In the following example, we will only remove the scores from the `Book` nodes.
 
 [role=query-example]
 --
-.Remove the `score` property from the projected `Person` nodes:
+.Remove the `degree` property from the projected `Book` nodes:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.removeNodeProperties('socialGraph', ['score'], ['Person'])
+CALL gds.graph.removeNodeProperties('socialGraph', ['degree'], ['Book'])
 YIELD propertiesRemoved
 ----
 
@@ -394,7 +402,7 @@ YIELD propertiesRemoved
 [opts="header"]
 |===
 | propertiesRemoved
-| 3
+| 1
 |===
 --
 
