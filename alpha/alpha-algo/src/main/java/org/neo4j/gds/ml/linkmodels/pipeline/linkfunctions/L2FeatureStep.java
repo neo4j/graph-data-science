@@ -19,18 +19,15 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStep;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -58,13 +55,13 @@ public class L2FeatureStep implements LinkFeatureStep {
 
     @Override
     public void addFeatures(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset) {
-        var seenRelationships = new MutableLong(0);
+        var currentRelationshipOffset = new MutableLong(0);
         var properties = featureProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
 
         graph.forEachNode(nodeId -> {
             graph.forEachRelationship(nodeId, ((sourceNodeId, targetNodeId) -> {
-                var lf = (double[]) linkFeatures.get(seenRelationships.getValue());
-                var currentOffset = new MutableInt(offset);
+                var currentFeatures = linkFeatures.get(currentRelationshipOffset.getValue());
+                var currentOffset = offset;
 
                 for (NodeProperties props : properties) {
                     var propertyType = props.valueType();
@@ -74,7 +71,7 @@ public class L2FeatureStep implements LinkFeatureStep {
                             var sourceArrayPropValues = props.doubleArrayValue(sourceNodeId);
                             var targetArrayPropValues = props.doubleArrayValue(targetNodeId);
                             for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                lf[currentOffset.getAndIncrement()] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
+                                currentFeatures[currentOffset++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
                             }
                             break;
                         }
@@ -82,19 +79,19 @@ public class L2FeatureStep implements LinkFeatureStep {
                             var sourceArrayPropValues = props.longArrayValue(sourceNodeId);
                             var targetArrayPropValues = props.longArrayValue(targetNodeId);
                             for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                lf[currentOffset.getAndIncrement()] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
+                                currentFeatures[currentOffset++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
                             }
                             break;
                         }
                         case LONG:
                         case DOUBLE:
-                            lf[currentOffset.getAndIncrement()] = Math.pow(props.doubleValue(sourceNodeId) - props.doubleValue(targetNodeId), 2);
+                            currentFeatures[currentOffset++] = Math.pow(props.doubleValue(sourceNodeId) - props.doubleValue(targetNodeId), 2);
                             break;
                         case UNKNOWN:
                             throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                     }
                 }
-                seenRelationships.increment();
+                currentRelationshipOffset.increment();
 
                 return true;
             }));

@@ -24,12 +24,10 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStep;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -57,12 +55,12 @@ public class CosineFeatureStep implements LinkFeatureStep {
 
     @Override
     public void addFeatures(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset) {
-        var seenRelationships = new MutableLong(0);
+        var currentRelationshipOffset = new MutableLong(0);
         var properties = featureProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
 
         graph.forEachNode(nodeId -> {
             graph.forEachRelationship(nodeId, ((sourceNodeId, targetNodeId) -> {
-                var lf = (double[]) linkFeatures.get(seenRelationships.getValue());
+                var currentFeatures = linkFeatures.get(currentRelationshipOffset.getValue());
                 var sourceSquareNorm = 0.0;
                 var targetSquareNorm = 0.0;
 
@@ -74,7 +72,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
                             var sourceArrayPropValues = props.doubleArrayValue(sourceNodeId);
                             var targetArrayPropValues = props.doubleArrayValue(targetNodeId);
                             for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                lf[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
+                                currentFeatures[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
                                 sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
                                 targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
                             }
@@ -84,7 +82,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
                             var sourceArrayPropValues = props.longArrayValue(sourceNodeId);
                             var targetArrayPropValues = props.longArrayValue(targetNodeId);
                             for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                lf[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
+                                currentFeatures[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
                                 sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
                                 targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
                             }
@@ -92,7 +90,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
                         }
                         case LONG:
                         case DOUBLE: {
-                            lf[offset] += props.doubleValue(sourceNodeId) * props.doubleValue(targetNodeId);
+                            currentFeatures[offset] += props.doubleValue(sourceNodeId) * props.doubleValue(targetNodeId);
                             sourceSquareNorm += props.doubleValue(sourceNodeId) * props.doubleValue(sourceNodeId);
                             targetSquareNorm += props.doubleValue(targetNodeId) * props.doubleValue(targetNodeId);
                             break;
@@ -101,8 +99,8 @@ public class CosineFeatureStep implements LinkFeatureStep {
                             throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                     }
                 }
-                lf[offset] /= Math.sqrt(sourceSquareNorm * targetSquareNorm);
-                seenRelationships.increment();
+                currentFeatures[offset] /= Math.sqrt(sourceSquareNorm * targetSquareNorm);
+                currentRelationshipOffset.increment();
 
                 return true;
             }));
