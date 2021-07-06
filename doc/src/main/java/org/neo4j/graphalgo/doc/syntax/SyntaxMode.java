@@ -30,6 +30,7 @@ enum SyntaxMode {
     GRAPH_CREATE("graph-create-syntax"),
     GRAPH_CREATE_CYPHER("graph-create-cypher-syntax"),
     STREAM_NODE_PROPERTIES("stream-node-properties-syntax"),
+    STREAM_NODE_PROPERTY("include-with-stream-single-property"),
     GRAPH_EXISTS("graph-exists-syntax"),
     GRAPH_EXPORT("graph-export-syntax"),
     CREATE_SUBGRAPH("create-subgraph-syntax"),
