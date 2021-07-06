@@ -22,7 +22,11 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import java.util.Map;
+import java.util.Optional;
+
 public interface LinkFeatureStep {
+    final String FEATURE_PROPERTIES = "featureProperties";
 
     public void execute(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset);
 }

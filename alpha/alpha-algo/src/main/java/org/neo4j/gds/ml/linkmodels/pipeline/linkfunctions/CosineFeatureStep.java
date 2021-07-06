@@ -28,6 +28,8 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -38,6 +40,14 @@ public class CosineFeatureStep implements LinkFeatureStep {
 
     public CosineFeatureStep(List<String> featureProperties) {
         this.featureProperties = featureProperties;
+    }
+
+    public CosineFeatureStep(Map<String, Object> config) {
+        this((List<String>) config.get(FEATURE_PROPERTIES));
+    }
+
+    public static void validateConfig(Map<String, Object> config) {
+        LinkFeatureStepValidation.validateConfig("Cosine link feature", config);
     }
 
     @TestOnly

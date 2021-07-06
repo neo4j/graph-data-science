@@ -23,30 +23,55 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.L2FeatureStep;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
-public class LinkFeatureStepFactory {
-    private static final Map<String, Function<Map<String, Object>, LinkFeatureStep>> MAP = Map.of(
-        "hadamard",
-        config -> new HadamardFeatureStep((List<String>) config.getOrDefault("featureProperties", null)),
-        "cosine",
-        config -> new CosineFeatureStep((List<String>) config.getOrDefault("featureProperties", null)),
-        "l2",
-        config -> new L2FeatureStep((List<String>) config.getOrDefault("featureProperties", null))
-    );
+public enum LinkFeatureStepFactory {
+    HADAMARD(HadamardFeatureStep::new, HadamardFeatureStep::validateConfig),
+    COSINE(CosineFeatureStep::new, CosineFeatureStep::validateConfig),
+    L2(L2FeatureStep::new, L2FeatureStep::validateConfig);
 
-    private LinkFeatureStepFactory() {}
+    private final Function<Map<String, Object>, LinkFeatureStep> buildFunction;
+    private final Validation validation;
+
+    LinkFeatureStepFactory(Function<Map<String, Object>, LinkFeatureStep> buildFunction, Validation validation) {
+        this.buildFunction = buildFunction;
+        this.validation = validation;
+    }
+
+    public static final List<String> VALUES = Arrays
+        .stream(LinkFeatureStepFactory.values())
+        .map(LinkFeatureStepFactory::name)
+        .collect(Collectors.toList());
+
+    private static LinkFeatureStepFactory parse(String input) {
+        var inputString = toUpperCaseWithLocale(input);
+
+        if (VALUES.contains(inputString)) {
+            return LinkFeatureStepFactory.valueOf(inputString);
+        }
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "LinkFeatureStepFactory `%s` is not supported. Must be one of: %s.",
+            inputString,
+            VALUES
+        ));
+    }
 
     public static LinkFeatureStep create(String taskName, Map<String, Object> config) {
-        var lowerCaseTaskName = toLowerCaseWithLocale(taskName);
-        if (MAP.containsKey(lowerCaseTaskName)) {
-            return MAP.get(lowerCaseTaskName).apply(config);
-        } else {
-            throw new UnsupportedOperationException("Could not find that task");
-        }
+        LinkFeatureStepFactory factory = parse(taskName);
+        factory.validation.validateConfig(config);
+        return factory.buildFunction.apply(config);
+    }
+
+    interface Validation {
+        void validateConfig(Map<String, Object> config);
     }
 }

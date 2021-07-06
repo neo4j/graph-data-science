@@ -29,6 +29,8 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -39,6 +41,14 @@ public class L2FeatureStep implements LinkFeatureStep {
 
     public L2FeatureStep(List<String> featureProperties) {
         this.featureProperties = featureProperties;
+    }
+
+    public L2FeatureStep(Map<String, Object> config) {
+        this((List<String>) config.get(FEATURE_PROPERTIES));
+    }
+
+    public static void validateConfig(Map<String, Object> config) {
+        LinkFeatureStepValidation.validateConfig("L2 link feature", config);
     }
 
     @TestOnly
