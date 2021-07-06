@@ -34,7 +34,7 @@ public class ProcLinkFeatureStep implements LinkFeatureStep{
         this.config = config;
     }
 
-    public void execute(Graph graph, HugeObjectArray linkFeatures, int offset) {
+    public void addFeatures(Graph graph, HugeObjectArray linkFeatures, int offset) {
 
     }
 }

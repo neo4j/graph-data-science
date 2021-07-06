@@ -56,7 +56,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
     }
 
     @Override
-    public void execute(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset) {
+    public void addFeatures(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset) {
         var seenRelationships = new MutableLong(0);
         var properties = featureProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
 

@@ -26,7 +26,13 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface LinkFeatureStep {
-    final String FEATURE_PROPERTIES = "featureProperties";
+    String FEATURE_PROPERTIES = "featureProperties";
 
-    public void execute(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset);
+    /**
+     * Adds additional features to linkFeatures
+     *
+     * @param linkFeatures a huge array with relationshipCount rows
+     * @param offset the start offset in each double[] where the features should be added
+     */
+    void addFeatures(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset);
 }

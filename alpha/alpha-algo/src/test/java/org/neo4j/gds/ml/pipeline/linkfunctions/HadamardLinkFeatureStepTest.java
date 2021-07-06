@@ -67,7 +67,7 @@ final class HadamardLinkFeatureStepTest {
             Map.of("featureProperties", List.of("noise", "z", "array"))
         );
 
-        step.execute(graph, linkFeatures, 0);
+        step.addFeatures(graph, linkFeatures, 0);
 
         var delta = 0.0001D;
 
