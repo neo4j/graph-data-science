@@ -70,6 +70,7 @@ public class L2FeatureStep implements LinkFeatureStep {
                         case FLOAT_ARRAY: {
                             var sourceArrayPropValues = props.doubleArrayValue(sourceNodeId);
                             var targetArrayPropValues = props.doubleArrayValue(targetNodeId);
+                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
                             for (int i = 0; i < sourceArrayPropValues.length; i++) {
                                 currentFeatures[currentOffset++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
                             }
@@ -78,6 +79,7 @@ public class L2FeatureStep implements LinkFeatureStep {
                         case LONG_ARRAY: {
                             var sourceArrayPropValues = props.longArrayValue(sourceNodeId);
                             var targetArrayPropValues = props.longArrayValue(targetNodeId);
+                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
                             for (int i = 0; i < sourceArrayPropValues.length; i++) {
                                 currentFeatures[currentOffset++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
                             }

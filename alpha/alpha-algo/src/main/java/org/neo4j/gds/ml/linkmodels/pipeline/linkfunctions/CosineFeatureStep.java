@@ -71,6 +71,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
                         case FLOAT_ARRAY: {
                             var sourceArrayPropValues = props.doubleArrayValue(sourceNodeId);
                             var targetArrayPropValues = props.doubleArrayValue(targetNodeId);
+                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
                             for (int i = 0; i < sourceArrayPropValues.length; i++) {
                                 currentFeatures[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
                                 sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
@@ -81,6 +82,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
                         case LONG_ARRAY: {
                             var sourceArrayPropValues = props.longArrayValue(sourceNodeId);
                             var targetArrayPropValues = props.longArrayValue(targetNodeId);
+                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
                             for (int i = 0; i < sourceArrayPropValues.length; i++) {
                                 currentFeatures[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
                                 sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
