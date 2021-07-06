@@ -49,7 +49,7 @@ YIELD
 | writeConcurrency        | Boolean | 4          | yes       | The number of concurrent threads used for writing the database.
 | enableDebugLog          | Boolean | false      | yes       | Prints debug information to Neo4j log files.
 | batchSize               | Integer | 10000      | yes       | Number of entities processed by one single thread at a time.
-| defaultRelationshipType | String  | "\__ALL__" | yes       | Relationship type used for `*` relationship projections.
+| defaultRelationshipType | String  | +__ALL__+ | yes       | Relationship type used for `*` relationship projections.
 |===
 
 .Results
