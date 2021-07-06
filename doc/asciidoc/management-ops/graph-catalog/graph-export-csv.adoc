@@ -70,7 +70,7 @@ YIELD
 == Estimation
 
 As many other procedures in GDS, export to csv has an estimation mode. For more details see <<memory-estimation>>.
-Using the `gds.graph.export.csv.estimate` procedure, it is possible to estimate the required disk space of the exported CSV files.
+Using the `gds.beta.graph.export.csv.estimate` procedure, it is possible to estimate the required disk space of the exported CSV files.
 The estimation uses sampling to generate a more accurate estimate.
 
 [.estimate-syntax]
@@ -187,5 +187,5 @@ relationships_LIVES_IN_2.csv
 .Export the `my-graph` from GDS into a Neo4j database called `my-export`:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.export.csv('my-graph', { exportName: 'my-export' })
+CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export' })
 ----
