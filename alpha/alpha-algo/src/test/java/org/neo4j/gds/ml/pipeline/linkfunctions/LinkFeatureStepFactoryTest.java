@@ -45,11 +45,8 @@ final class LinkFeatureStepFactoryTest {
             Map.of("featureProperties", featureProperties)
         );
 
-        assertThat(step instanceof HadamardFeatureStep);
-        var actual = (HadamardFeatureStep) step;
-
-        assertEquals(featureProperties, actual.featureProperties());
-
+        assertThat(step).isInstanceOf(HadamardFeatureStep.class);
+        assertThat(((HadamardFeatureStep) step).featureProperties()).isEqualTo(featureProperties);
     }
 
     @Test
@@ -60,11 +57,8 @@ final class LinkFeatureStepFactoryTest {
             Map.of("featureProperties", featureProperties)
         );
 
-        assertThat(step instanceof CosineFeatureStep);
-        var actual = (CosineFeatureStep) step;
-
-        assertEquals(featureProperties, actual.featureProperties());
-
+        assertThat(step).isInstanceOf(CosineFeatureStep.class);
+        assertThat(((CosineFeatureStep) step).featureProperties()).isEqualTo(featureProperties);
     }
 
     @Test
@@ -75,11 +69,8 @@ final class LinkFeatureStepFactoryTest {
             Map.of("featureProperties", featureProperties)
         );
 
-        assertThat(step instanceof L2FeatureStep);
-        var actual = (L2FeatureStep) step;
-
-        assertEquals(featureProperties, actual.featureProperties());
-
+        assertThat(step).isInstanceOf(L2FeatureStep.class);
+        assertThat(((L2FeatureStep) step).featureProperties()).isEqualTo(featureProperties);
     }
 
     @ParameterizedTest
