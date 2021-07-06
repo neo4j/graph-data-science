@@ -95,7 +95,7 @@ public class NodeClassificationPredictAlgorithmFactory<CONFIG extends NodeClassi
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.leaf(taskName(), taskVolume(graph, config));
+        return Tasks.leaf("compute", taskVolume(graph, config));
     }
 
     @TestOnly

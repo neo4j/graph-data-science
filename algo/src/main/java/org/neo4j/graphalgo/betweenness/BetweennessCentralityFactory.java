@@ -98,9 +98,6 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.task(
-            "BetweennessCentrality",
-            Tasks.leaf("compute")
-        );
+        return Tasks.leaf("compute", graph.nodeCount());
     }
 }

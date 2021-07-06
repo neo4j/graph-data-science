@@ -189,7 +189,7 @@ public class ListProgressProcTest extends BaseTest {
 
             assertThat(result).hasSize(1)
                 .element(0, InstanceOfAssertFactories.map(String.class, String.class))
-                .hasEntrySatisfying("message", v -> assertThat(v).isEqualTo("[Test worker] FastRP :: Finished"))
+                .hasEntrySatisfying("message", v -> assertThat(v).isEqualTo("[Test worker] FastRP FastRP :: Finished"))
                 .hasEntrySatisfying("taskName", v -> assertThat(v).isEqualTo("FastRP"));
         }
     }

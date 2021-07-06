@@ -251,13 +251,13 @@ class NodeClassificationPredictTest {
             .doesNotHaveDuplicates()
             .hasSize(7)
             .containsExactly(
-                "NodeLogisticRegressionPredict :: Start",
+                "NodeLogisticRegressionPredict compute :: Start",
                 "NodeLogisticRegressionPredict 20%",
                 "NodeLogisticRegressionPredict 40%",
                 "NodeLogisticRegressionPredict 60%",
                 "NodeLogisticRegressionPredict 80%",
                 "NodeLogisticRegressionPredict 100%",
-                "NodeLogisticRegressionPredict :: Finished"
+                "NodeLogisticRegressionPredict compute :: Finished"
             );
         ModelCatalog.drop("", modelName);
     }

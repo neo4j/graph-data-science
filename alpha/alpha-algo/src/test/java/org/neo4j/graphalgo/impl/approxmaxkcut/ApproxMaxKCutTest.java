@@ -175,8 +175,6 @@ final class ApproxMaxKCutTest {
 
         List<AtomicLong> progresses = progressLogger.getProgresses();
 
-        assertEquals(1, progresses.size());
-
         assertTrue(progressLogger.containsMessage(TestLog.INFO, ":: Start"));
         assertTrue(progressLogger.containsMessage(TestLog.INFO, ":: Finish"));
 

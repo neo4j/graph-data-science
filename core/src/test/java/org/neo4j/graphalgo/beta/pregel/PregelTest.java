@@ -135,6 +135,9 @@ class PregelTest {
             config.concurrency()
         );
 
+        // TODO: this will be handles by the ProgressTracker
+        progressLogger.reset(graph.nodeCount());
+
         Pregel.create(
             graph,
             config,
@@ -196,6 +199,9 @@ class PregelTest {
             config.concurrency(),
             eventTracker
         );
+
+        // TODO: this will be handles by the ProgressTracker
+        progressLogger.reset(graph.nodeCount());
 
         var pregelAlgo = Pregel.create(
             graph,

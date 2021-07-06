@@ -21,7 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.core.utils.ProgressLoggerAdapter;
+import org.neo4j.graphalgo.core.utils.BatchingProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
@@ -42,7 +42,7 @@ public interface AlphaAlgorithmFactory<ALGO extends Algorithm<ALGO, ?>, CONFIG e
         ALGO algo = buildAlphaAlgo(graph, configuration, tracker, log, eventTracker);
         return algo.withProgressTracker(new TaskProgressTracker(
             progressTask(graph, configuration),
-            new ProgressLoggerAdapter(log, algo.getClass().getSimpleName())
+            new BatchingProgressLogger(log, 0, algo.getClass().getSimpleName(), configuration.concurrency())
         ));
     }
 

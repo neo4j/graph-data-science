@@ -35,9 +35,9 @@ import org.neo4j.graphalgo.beta.pregel.PregelStatsProc;
 import org.neo4j.graphalgo.beta.pregel.PregelStatsResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -86,8 +86,8 @@ public final class ComputationStatsProc extends PregelStatsProc<ComputationAlgor
         return new AbstractAlgorithmFactory<ComputationAlgorithm, PregelProcedureConfig>() {
             @Override
             public ComputationAlgorithm build(Graph graph, PregelProcedureConfig configuration,
-                                              AllocationTracker tracker, ProgressLogger progressLogger) {
-                return new ComputationAlgorithm(graph, configuration, tracker, progressLogger);
+                                              AllocationTracker tracker, ProgressTracker progressTracker) {
+                return new ComputationAlgorithm(graph, configuration, tracker, progressTracker.progressLogger());
             }
 
             @Override

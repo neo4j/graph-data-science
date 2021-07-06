@@ -37,7 +37,6 @@ import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -224,23 +223,6 @@ class NodeClassificationTrainTest {
         messagesInOrder.stream()
             .filter(s -> s.contains("%"))
             .forEach(s -> assertThat(s).matches(pattern));
-
-        // For every Start there is a corresponding Finish
-        // For every start, there can be no more start before there is a finish
-        for (Iterator<String> iterator = messagesInOrder.iterator(); iterator.hasNext();) {
-            String message = iterator.next();
-            if (message.endsWith("Start")) {
-                var finish = message.replaceAll("Start$", "Finished");
-                while (iterator.hasNext()) {
-                    var next = iterator.next();
-                    if (next.equals(finish)) break;
-                    assertThat(next).as("Should not have another 'Start' message before 'Finished'").doesNotEndWith("Start");
-                }
-            } else {
-                assertThat(message).as("Should not have 'Finished' message before 'Start'").doesNotEndWith("Finished");
-                assertThat(message).as("Should not log percentages outside of a 'Start'/'Finished' block").doesNotEndWith("%");
-            }
-        }
 
         assertThat(messagesInOrder)
             // avoid asserting on the thread id

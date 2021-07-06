@@ -167,6 +167,7 @@ class BatchingProgressLoggerTest {
         var taskVolume = 1337;
 
         var logger = new TestProgressLogger(taskVolume, "Test", concurrency); // batchSize is 13
+        logger.reset(taskVolume);
         logger.logProgress(20); // callCount is 20, call count after logging == 20 - 13 = 7
         assertThat(logger.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -180,6 +181,7 @@ class BatchingProgressLoggerTest {
 
     private static List<Integer> performLogging(long taskVolume, int concurrency) {
         var logger = new TestProgressLogger(taskVolume, "Test", concurrency);
+        logger.reset(taskVolume);
 
         var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency);
 

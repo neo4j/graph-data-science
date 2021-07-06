@@ -127,6 +127,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
 
     @Override
     public TriangleCountResult compute() {
+        progressTracker.beginSubTask();
         queue.set(0);
         globalTriangleCounter.reset();
         // create tasks
@@ -139,6 +140,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
 
         globalTriangleCount = globalTriangleCounter.longValue();
 
+        progressTracker.endSubTask();
         return TriangleCountResult.of(
             triangleCounts,
             globalTriangleCount

@@ -115,13 +115,10 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> implements Algorit
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.task(
-            "Louvain",
-            Tasks.iterativeDynamic(
-                "compute",
-                () -> List.of(ModularityOptimizationFactory.modularityOptimizationProgressTask(graph, config)),
-                config.maxLevels()
-            )
+        return Tasks.iterativeDynamic(
+            "compute",
+            () -> List.of(ModularityOptimizationFactory.modularityOptimizationProgressTask(graph, config)),
+            config.maxLevels()
         );
     }
 }

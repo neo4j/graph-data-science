@@ -86,9 +86,8 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.task(
-            "LocalClusteringCoefficient",
-            IntersectingTriangleCountFactory.triangleCountProgressTask(graph)
-        );
+        return config.seedProperty() == null
+            ? Tasks.task("compute1", IntersectingTriangleCountFactory.triangleCountProgressTask(graph))
+            : Tasks.leaf("compute1");
     }
 }

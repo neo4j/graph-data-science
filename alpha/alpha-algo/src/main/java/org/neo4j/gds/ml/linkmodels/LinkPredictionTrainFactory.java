@@ -70,8 +70,8 @@ public class LinkPredictionTrainFactory extends AbstractAlgorithmFactory<LinkPre
         Graph graph, LinkPredictionTrainConfig config
     ) {
         return Tasks.task(
-            "LinkPredictionTrain",
-            Tasks.leaf("ModelSelection"),
+            "compute",
+            Tasks.leaf("ModelSelection", taskVolume(graph, config)),
             Tasks.leaf("Training"),
             Tasks.task(
                 "Evaluation",

@@ -135,7 +135,7 @@ public class BetweennessCentrality extends Algorithm<BetweennessCentrality, Huge
                     continue;
                 }
                 // reset
-                getProgressTracker().logProgress(startNodeId / (nodeCount - 1));
+                getProgressTracker().logProgress();
 
                 clear();
 

@@ -253,34 +253,33 @@ class LinkPredictionTrainTest {
         AssertionsForInterfaceTypes.assertThat(messagesInOrder)
             // avoid asserting on the thread id
             .extracting(removingThreadId())
-            .doesNotHaveDuplicates()
             .containsSequence(
-                "LinkPredictionTrain :: Start",
-                "LinkPredictionTrain :: ModelSelection :: Start",
-                "LinkPredictionTrain :: ModelSelection 16%",
-                "LinkPredictionTrain :: ModelSelection 33%",
-                "LinkPredictionTrain :: ModelSelection 50%",
-                "LinkPredictionTrain :: ModelSelection 66%",
-                "LinkPredictionTrain :: ModelSelection 83%",
-                "LinkPredictionTrain :: ModelSelection 100%",
-                "LinkPredictionTrain :: ModelSelection :: Finished"
+                "LinkPredictionTrain compute :: Start",
+                "LinkPredictionTrain ModelSelection :: Start",
+                "LinkPredictionTrain 16%",
+                "LinkPredictionTrain 33%",
+                "LinkPredictionTrain 50%",
+                "LinkPredictionTrain 66%",
+                "LinkPredictionTrain 83%",
+                "LinkPredictionTrain 100%",
+                "LinkPredictionTrain ModelSelection :: Finished"
             ).containsSequence(
-                "LinkPredictionTrain :: Training :: Start",
-                "LinkPredictionTrain :: Training 10%",
-                "LinkPredictionTrain :: Training 20%",
-                "LinkPredictionTrain :: Training 30%",
-                "LinkPredictionTrain :: Training 40%"
+                "LinkPredictionTrain Training :: Start",
+                "LinkPredictionTrain 10%",
+                "LinkPredictionTrain 20%",
+                "LinkPredictionTrain 30%",
+                "LinkPredictionTrain 40%"
             ).containsSequence(
-                "LinkPredictionTrain :: Training :: Finished",
-                "LinkPredictionTrain :: Evaluation :: Start",
-                "LinkPredictionTrain :: Evaluation :: Training :: Start",
-                "LinkPredictionTrain :: Evaluation :: Training 100%",
-                "LinkPredictionTrain :: Evaluation :: Training :: Finished",
-                "LinkPredictionTrain :: Evaluation :: Testing :: Start",
-                "LinkPredictionTrain :: Evaluation :: Testing 100%",
-                "LinkPredictionTrain :: Evaluation :: Testing :: Finished",
-                "LinkPredictionTrain :: Evaluation :: Finished",
-                "LinkPredictionTrain :: Finished"
+                "LinkPredictionTrain Training :: Finished",
+                "LinkPredictionTrain Evaluation :: Start",
+                "LinkPredictionTrain Training :: Start",
+                "LinkPredictionTrain 100%",
+                "LinkPredictionTrain Training :: Finished",
+                "LinkPredictionTrain Testing :: Start",
+                "LinkPredictionTrain 100%",
+                "LinkPredictionTrain Testing :: Finished",
+                "LinkPredictionTrain Evaluation :: Finished",
+                "LinkPredictionTrain compute :: Finished"
             );
     }
 }

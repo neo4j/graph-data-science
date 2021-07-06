@@ -71,9 +71,6 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
 
     @NotNull
     public static Task triangleCountProgressTask(Graph graph) {
-        return Tasks.task(
-            "IntersectingTriangleCount",
-            Tasks.leaf("compute", graph.nodeCount())
-        );
+        return Tasks.leaf("compute", graph.nodeCount());
     }
 }
