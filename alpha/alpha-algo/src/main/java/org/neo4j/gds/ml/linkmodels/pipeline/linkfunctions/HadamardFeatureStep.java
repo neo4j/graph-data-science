@@ -68,22 +68,30 @@ public class HadamardFeatureStep implements LinkFeatureStep {
 
                 for (NodeProperties props : properties) {
                     var propertyType = props.valueType();
-                    if ((ValueType.DOUBLE_ARRAY == propertyType) || (ValueType.FLOAT_ARRAY == propertyType)) {
-                        var sourceArrayPropValues = props.doubleArrayValue(sourceNodeId);
-                        var targetArrayPropValues = props.doubleArrayValue(targetNodeId);
-                        for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                            lf[currentOffset.getAndIncrement()] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                    switch (propertyType) {
+                        case DOUBLE_ARRAY:
+                        case FLOAT_ARRAY: {
+                            var sourceArrayPropValues = props.doubleArrayValue(sourceNodeId);
+                            var targetArrayPropValues = props.doubleArrayValue(targetNodeId);
+                            for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                                lf[currentOffset.getAndIncrement()] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                            }
+                            break;
                         }
-                    } else if (ValueType.LONG_ARRAY == propertyType) {
-                        var sourceArrayPropValues = props.longArrayValue(sourceNodeId);
-                        var targetArrayPropValues = props.longArrayValue(targetNodeId);
-                        for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                            lf[currentOffset.getAndIncrement()] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                        case LONG_ARRAY: {
+                            var sourceArrayPropValues = props.longArrayValue(sourceNodeId);
+                            var targetArrayPropValues = props.longArrayValue(targetNodeId);
+                            for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                                lf[currentOffset.getAndIncrement()] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                            }
+                            break;
                         }
-                    } else if ((ValueType.DOUBLE == propertyType) || (ValueType.LONG == propertyType)) {
-                        lf[currentOffset.getAndIncrement()] = props.doubleValue(sourceNodeId) * props.doubleValue(targetNodeId);
-                    } else {
-                        throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
+                        case LONG:
+                        case DOUBLE:
+                            lf[currentOffset.getAndIncrement()] = props.doubleValue(sourceNodeId) * props.doubleValue(targetNodeId);
+                            break;
+                        case UNKNOWN:
+                            throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                     }
                 }
                 seenRelationships.increment();
