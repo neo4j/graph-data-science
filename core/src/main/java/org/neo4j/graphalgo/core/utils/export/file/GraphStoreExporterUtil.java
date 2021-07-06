@@ -53,7 +53,7 @@ public final class GraphStoreExporterUtil {
             var end = System.nanoTime();
 
             var tookMillis = TimeUnit.NANOSECONDS.toMillis(end - start);
-            log.info("Export completed in %s ms", tookMillis);
+            log.info("Export completed for '%s' in %s ms", exportConfig.exportName(), tookMillis);
             return ImmutableExportToCsvResult.of(
                 importedProperties,
                 tookMillis

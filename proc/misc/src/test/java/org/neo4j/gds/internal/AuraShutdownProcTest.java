@@ -46,6 +46,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AuraShutdownProcTest extends BaseProcTest {
@@ -200,10 +201,10 @@ public class AuraShutdownProcTest extends BaseProcTest {
 
         assertThat(messages).contains("Preparing for shutdown");
 
-        assertThat(
-            messages.stream()
-                .filter(it -> it.startsWith("Export completed"))
-                .count()
-        ).isEqualTo(numberOfGraphs);
+        var exportCompletedMessages = messages.stream()
+            .filter(it -> it.startsWith("Export completed"))
+            .collect(toList());
+
+        assertThat(exportCompletedMessages.size()).isEqualTo(numberOfGraphs);
     }
 }
