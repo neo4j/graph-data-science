@@ -443,6 +443,8 @@ class GraphStoreFilterTest {
             var labelA = new NodeLabel[] {NodeLabel.of("A")};
             var labelB = new NodeLabel[] {NodeLabel.of("B")};
 
+            var concurrency = 4;
+
             var generatedGraph = RandomGraphGenerator
                 .builder()
                 .nodeCount(100_000)
@@ -451,6 +453,7 @@ class GraphStoreFilterTest {
                 .relationshipDistribution(RelationshipDistribution.POWER_LAW)
                 .relationshipPropertyProducer(PropertyProducer.randomDouble("relProp", 0, 1))
                 .averageDegree(5)
+                .seed(42)
                 .build()
                 .generate();
 
@@ -459,11 +462,13 @@ class GraphStoreFilterTest {
                 generatedGraph,
                 "REL",
                 Optional.empty(),
-                4,
+                concurrency,
                 AllocationTracker.empty()
             );
 
-            assertGraphEquals(graphStore.getUnion(), filter(graphStore, "*", "*", 4).getUnion());
+            var graph = graphStore.getUnion();
+
+            assertGraphEquals(graph, filter(graphStore, "*", "*", concurrency).getUnion());
         });
     }
 

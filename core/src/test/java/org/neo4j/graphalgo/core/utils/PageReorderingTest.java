@@ -23,11 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-import java.util.Arrays;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,30 +33,30 @@ class PageReorderingTest {
 
     static Stream<Arguments> offsets() {
         return Stream.of(
-            Arguments.of(new long[]{ 16, 18, 22, 0, 3, 6, 24, 28, 30, 8, 13, 15}, new int[]{1, 3, 0, 2}),
-            Arguments.of(new long[]{ 16, 18, 22, 0, 3, 6, 8, 13, 15, 24, 28, 30}, new int[]{1, 2, 0, 3}),
+            Arguments.of(new long[]{ 16, 18, 22, 0, 3, 6, 24, 28, 30, 8, 13, 15}, new int[]{2, 0, 3, 1}),
+            Arguments.of(new long[]{ 16, 18, 22, 0, 3, 6, 8, 13, 15, 24, 28, 30}, new int[]{2, 0, 1, 3}),
             Arguments.of(new long[]{ 16, 18, 22, 24, 28, 30, 0, 3, 6, 8, 13, 15}, new int[]{2, 3, 0, 1}),
-            Arguments.of(new long[]{ 16, 18, 22, 24, 28, 30, 8, 13, 15, 0, 3, 6}, new int[]{3, 2, 0, 1}),
+            Arguments.of(new long[]{ 16, 18, 22, 24, 28, 30, 8, 13, 15, 0, 3, 6}, new int[]{2, 3, 1, 0}),
             Arguments.of(new long[]{ 16, 18, 22, 8, 13, 15, 0, 3, 6, 24, 28, 30}, new int[]{2, 1, 0, 3}),
-            Arguments.of(new long[]{ 16, 18, 22, 8, 13, 15, 24, 28, 30, 0, 3, 6}, new int[]{3, 1, 0, 2}),
-            Arguments.of(new long[]{ 0, 3, 6, 16, 18, 22, 24, 28, 30, 8, 13, 15}, new int[]{0, 3, 1, 2}),
+            Arguments.of(new long[]{ 16, 18, 22, 8, 13, 15, 24, 28, 30, 0, 3, 6}, new int[]{2, 1, 3, 0}),
+            Arguments.of(new long[]{ 0, 3, 6, 16, 18, 22, 24, 28, 30, 8, 13, 15}, new int[]{0, 2, 3, 1}),
             Arguments.of(new long[]{ 0, 3, 6, 16, 18, 22, 8, 13, 15, 24, 28, 30}, new int[]{0, 2, 1, 3}),
             Arguments.of(new long[]{ 0, 3, 6, 24, 28, 30, 16, 18, 22, 8, 13, 15}, new int[]{0, 3, 2, 1}),
-            Arguments.of(new long[]{ 0, 3, 6, 24, 28, 30, 8, 13, 15, 16, 18, 22}, new int[]{0, 2, 3, 1}),
+            Arguments.of(new long[]{ 0, 3, 6, 24, 28, 30, 8, 13, 15, 16, 18, 22}, new int[]{0, 3, 1, 2}),
             Arguments.of(new long[]{ 0, 3, 6, 8, 13, 15, 16, 18, 22, 24, 28, 30}, new int[]{0, 1, 2, 3}),
             Arguments.of(new long[]{ 0, 3, 6, 8, 13, 15, 24, 28, 30, 16, 18, 22}, new int[]{0, 1, 3, 2}),
-            Arguments.of(new long[]{ 24, 28, 30, 16, 18, 22, 0, 3, 6, 8, 13, 15}, new int[]{2, 3, 1, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 16, 18, 22, 0, 3, 6, 8, 13, 15}, new int[]{3, 2, 0, 1}),
             Arguments.of(new long[]{ 24, 28, 30, 16, 18, 22, 8, 13, 15, 0, 3, 6}, new int[]{3, 2, 1, 0}),
-            Arguments.of(new long[]{ 24, 28, 30, 0, 3, 6, 16, 18, 22, 8, 13, 15}, new int[]{1, 3, 2, 0}),
-            Arguments.of(new long[]{ 24, 28, 30, 0, 3, 6, 8, 13, 15, 16, 18, 22}, new int[]{1, 2, 3, 0}),
+            Arguments.of(new long[]{ 24, 28, 30, 0, 3, 6, 16, 18, 22, 8, 13, 15}, new int[]{3, 0, 2, 1}),
+            Arguments.of(new long[]{ 24, 28, 30, 0, 3, 6, 8, 13, 15, 16, 18, 22}, new int[]{3, 0, 1, 2}),
             Arguments.of(new long[]{ 24, 28, 30, 8, 13, 15, 16, 18, 22, 0, 3, 6}, new int[]{3, 1, 2, 0}),
-            Arguments.of(new long[]{ 24, 28, 30, 8, 13, 15, 0, 3, 6, 16, 18, 22}, new int[]{2, 1, 3, 0}),
-            Arguments.of(new long[]{ 8, 13, 15, 16, 18, 22, 0, 3, 6, 24, 28, 30}, new int[]{2, 0, 1, 3}),
-            Arguments.of(new long[]{ 8, 13, 15, 16, 18, 22, 24, 28, 30, 0, 3, 6}, new int[]{3, 0, 1, 2}),
+            Arguments.of(new long[]{ 24, 28, 30, 8, 13, 15, 0, 3, 6, 16, 18, 22}, new int[]{3, 1, 0, 2}),
+            Arguments.of(new long[]{ 8, 13, 15, 16, 18, 22, 0, 3, 6, 24, 28, 30}, new int[]{1, 2, 0, 3}),
+            Arguments.of(new long[]{ 8, 13, 15, 16, 18, 22, 24, 28, 30, 0, 3, 6}, new int[]{1, 2, 3, 0}),
             Arguments.of(new long[]{ 8, 13, 15, 0, 3, 6, 16, 18, 22, 24, 28, 30}, new int[]{1, 0, 2, 3}),
             Arguments.of(new long[]{ 8, 13, 15, 0, 3, 6, 24, 28, 30, 16, 18, 22}, new int[]{1, 0, 3, 2}),
-            Arguments.of(new long[]{ 8, 13, 15, 24, 28, 30, 16, 18, 22, 0, 3, 6}, new int[]{3, 0, 2, 1}),
-            Arguments.of(new long[]{ 8, 13, 15, 24, 28, 30, 0, 3, 6, 16, 18, 22}, new int[]{2, 0, 3, 1})
+            Arguments.of(new long[]{ 8, 13, 15, 24, 28, 30, 16, 18, 22, 0, 3, 6}, new int[]{1, 3, 2, 0}),
+            Arguments.of(new long[]{ 8, 13, 15, 24, 28, 30, 0, 3, 6, 16, 18, 22}, new int[]{1, 3, 0, 2})
         );
     }
 
@@ -74,6 +71,23 @@ class PageReorderingTest {
 
         assertThat(ordering.ordering()).isEqualTo(expectedOrdering);
         assertThat(ordering.pageOffsets()).isEqualTo(new long[] {0, 3, 6, 9, 12});
+    }
+
+    @Test
+    void testOrderingWithNodeFilter() {
+        var pageCount = 3;
+        var pageShift = 3;
+
+        var offsets = new long[]{8, 0, 0, 5, 17, 0};
+        var ordering = PageReordering.ordering(
+            HugeLongArray.of(offsets),
+            nodeId -> nodeId != 5 && nodeId != 1,
+            pageCount,
+            pageShift
+        );
+
+        assertThat(ordering.ordering()).isEqualTo(new int[]{1, 0, 2});
+        assertThat(ordering.pageOffsets()).isEqualTo(new long[]{0, 2, 4, 6});
     }
 
     static Stream<int[]> orderings() {
@@ -126,68 +140,48 @@ class PageReorderingTest {
         assertThat(swaps).isEqualTo(ordering);
     }
 
-    @ParameterizedTest
-    @MethodSource("offsets")
-    void testSortOffsets(long[] offsets, int[] expectedOrdering) {
-        var orderedOffsets = PageReordering.sortOffsets(
-            HugeLongArray.of(offsets),
-            ImmutablePageOrdering
-                .builder()
-                .ordering(expectedOrdering)
-                .pageOffsets(0, 3, 6, 9, 12)
-                .build(),
-            node -> true,
-            AllocationTracker.empty()
-        );
-
-        Arrays.sort(offsets);
-        assertThat(orderedOffsets.toArray()).isEqualTo(offsets);
-    }
+    // TODO
+//    @ParameterizedTest
+//    @MethodSource("offsets")
+//    void testRewriteOffsets(long[] offsets, int[] expectedOrdering) {
+//        var pageShift = 3;
+//
+//        PageReordering.rewriteOffsets(
+//            HugeLongArray.of(offsets),
+//            ImmutablePageOrdering
+//                .builder()
+//                .ordering(expectedOrdering)
+//                .pageOffsets(0, 3, 6, 9, 12)
+//                .build(),
+//            node -> true,
+//            pageShift
+//        );
+//
+//
+////        assertThat(orderedOffsets.toArray()).isEqualTo(offsets);
+//    }
 
     @Test
-    void testOrderingWithSkippedOffsets() {
-        var pageCount = 3;
-        var pageShift = 3;
+    void testRewriteOffsets() {
+        long[] offsets = new long[] { 0x10, 0x12, 0x13, 0x01, 0x03, 0x04, 0x05 };
 
-        var offsets = new long[]{8, 0, 0, 5, 17, 0};
-        var ordering = PageReordering.ordering(
-            HugeLongArray.of(offsets),
-            nodeId -> nodeId != 5 && nodeId != 1,
-            pageCount,
-            pageShift
-        );
+        var page0 = new long[]{0, 2, 3};
+        var page1 = new long[]{1, 2, 3, 4};
+        long[][] pages = new long[][]{page1, page0};
 
-        assertThat(ordering.ordering()).isEqualTo(new int[]{1, 0, 2});
-        assertThat(ordering.pageOffsets()).isEqualTo(new long[]{0, 2, 4, 6});
-    }
+        var hugeOffsets = HugeLongArray.of(offsets);
+        var ordering = PageReordering.ordering(hugeOffsets, node -> true, 2, 4);
 
-    static Stream<Arguments> offsetsWithHoles() {
-        // [ 8, x ] [ 0, 5 ] [ 17, y ]
-        return Stream.of(
-            // [ 0, x, 5 ] [ 8 ] [ 17, y ]
-            Arguments.of(new long[]{8, 0, 0, 5, 17, 0}, Set.of(1L, 5L), new int[] { 1, 0, 2 }, new long[] { 0, 2, 4, 6 }, new long[] { 0, /* (x) */ 5, 5, 8, 17, /* (y) */ 17 }),
-            // [ x, 0, 5 ] [ 8 ] [ 17, 19 ]
-            Arguments.of(new long[]{0, 8, 0, 5, 17, 19}, Set.of(0L), new int[] { 1, 0, 2 }, new long[] { 0, 2, 4, 6 }, new long[] { /* (x) */ 0, 0, 5, 8, 17, 19 }),
-            // [ x, 0, 5 ] [ 8, 12] [ 17, 19 ]
-            Arguments.of(new long[]{0, 5, 8, 12, 17, 19}, Set.of(0L), new int[] { 0, 1, 2 }, new long[] { 0, 2, 4, 6 }, new long[] { /* (x) */ 0, 5, 8, 12, 17, 19 })
-        );
-    }
+        assertThat(ordering.ordering()).isEqualTo(new int[] { 1, 0 });
+        assertThat(ordering.pageOffsets()).isEqualTo(new long[]{0, 3, 7});
 
-    @ParameterizedTest
-    @MethodSource("offsetsWithHoles")
-    void testSortOffsetsWithSkippedOffsets(long[] inputOffsets, Set<Long> holes, int[] ordering, long[] pageOffsets, long[] expectedOffsets) {
-        var orderedOffsets = PageReordering.sortOffsets(
-            HugeLongArray.of(inputOffsets),
-            ImmutablePageOrdering
-                .builder()
-                .ordering(ordering)
-                .pageOffsets(pageOffsets)
-                .build(),
-            node -> !holes.contains(node),
-            AllocationTracker.empty()
-        );
+        PageReordering.reorder(pages, ordering.ordering());
 
-        assertThat(orderedOffsets.toArray()).isEqualTo(expectedOffsets);
+        assertThat(pages).isEqualTo(new long[][]{page0, page1});
+
+        PageReordering.rewriteOffsets(hugeOffsets, ordering, node -> true, 4);
+
+        assertThat(hugeOffsets.toArray()).isEqualTo(new long[]{0x00, 0x02, 0x03, 0x11, 0x13, 0x14, 0x15});
     }
 
 }

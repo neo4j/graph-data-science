@@ -20,12 +20,34 @@
 package org.neo4j.graphalgo.core.utils;
 
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.LongPredicate;
+import java.util.stream.Collectors;
 
+
+/**
+ * Input
+ *
+ * pages    [  r  g  b  s ]
+ * offsets  [ 16, 18, 22, 0, 3, 6, 24, 28, 30, 8, 13, 15 ]
+ *
+ * node 0 -> offset 16 -> page id 2 -> page b
+ * node 3 -> offset  0 -> page id 0 -> page r
+ *
+ * Output
+ *
+ * ordering [  2  0  3  1 ]
+ * pages    [  b  r  s  g ]
+ * offset   [  0, 2, 6, 8, 11, 14, 16, 20, 22, 24, 29, 31 ]
+ *
+ * node 0 -> offset 0 -> page id 0 -> page b
+ * node 3 -> offset 8 -> page id 1 -> page r
+ */
 public final class PageReordering {
 
     @ValueClass
@@ -47,7 +69,7 @@ public final class PageReordering {
         int[] ordering = new int[pageCount];
 
         int idx = 0;
-        int pastPageIdx = -1;
+        int prevPageIdx = -1;
 
         while (cursor.next()) {
             var array = cursor.array;
@@ -64,15 +86,49 @@ public final class PageReordering {
                 var offset = array[i];
                 var pageIdx = (int) (offset >>> pageShift);
 
-                if (pageIdx != pastPageIdx) {
-                    ordering[pageIdx] = idx;
+                if (pageIdx != prevPageIdx) {
+                    ordering[idx] = pageIdx;
                     pageOffsets[idx] = nodeId;
-                    pastPageIdx = pageIdx;
+                    prevPageIdx = pageIdx;
                     idx = idx + 1;
                 }
             }
         }
         pageOffsets[idx] = offsets.size();
+
+
+        // validation
+        var copyOfOrdering = Arrays.copyOf(ordering, ordering.length);
+        Arrays.sort(copyOfOrdering);
+        for (int i = 0; i < copyOfOrdering.length; i++) {
+            if (i != copyOfOrdering[i]) {
+                throw new IllegalStateException(Arrays.toString(copyOfOrdering));
+            }
+        }
+
+        var pageIds = new ArrayList<>();
+
+        for (int i = 0; i < pageOffsets.length - 1; i++) {
+            long startIdx = pageOffsets[i];
+            long endIdx = pageOffsets[i + 1];
+
+            int pageId = (int) (offsets.get(startIdx) >>> pageShift);
+            pageIds.add(pageId);
+            for (long j = startIdx + 1; j < endIdx; j++) {
+                if (nodeFilter.test(j)) {
+                    int pId = (int) (offsets.get(j) >>> pageShift);
+                    if (pageId != pId) {
+                        throw new IllegalStateException("invalid page id within range");
+                    }
+                }
+            }
+        }
+
+        var dedupPageIds = pageIds.stream().distinct().collect(Collectors.toList());
+
+        if (pageIds.size() != dedupPageIds.size()) {
+            throw new IllegalStateException();
+        }
 
         return ImmutablePageOrdering
             .builder()
@@ -82,9 +138,18 @@ public final class PageReordering {
     }
 
     public static <PAGE> int[] reorder(PAGE[] pages, int[] ordering) {
+
+        PAGE[] pagesCopy = Arrays.copyOf(pages, pages.length);
+
         PAGE tempPage;
         var swaps = new int[pages.length];
         Arrays.setAll(swaps, i -> -i - 1);
+
+        int[] pageLengths = new int[pages.length];
+
+        for (int i = 0; i < pages.length; i++) {
+            pageLengths[i] = Array.getLength(pages[i]);
+        }
 
         for (int targetIdx = 0; targetIdx < ordering.length; targetIdx++) {
             int sourceIdx = ordering[targetIdx];
@@ -114,61 +179,112 @@ public final class PageReordering {
             }
         }
 
+        // validation
+        for (int i = 0; i < pages.length; i++) {
+            var sourcePage = pagesCopy[ordering[i]];
+            var targetPage = pages[i];
+
+            if (sourcePage != targetPage) {
+                throw new IllegalStateException("ordering violation");
+            }
+        }
+
+        for (int i = 0; i < ordering.length; i++) {
+            if (swaps[i] != ordering[i]) {
+                throw new IllegalStateException("swap violation");
+            }
+        }
+
         return swaps;
     }
 
-    public static HugeLongArray sortOffsets(
+    public static void rewriteOffsets(
         HugeLongArray offsets,
         PageOrdering pageOrdering,
         LongPredicate nodeFilter,
-        AllocationTracker tracker
+        int pageShift
     ) {
-        int[] ordering = pageOrdering.ordering();
-        long[] pageOffsets = pageOrdering.pageOffsets();
+        // the pageShift number of lower bits are set, the higher bits are empty.
+        long pageMask = (1L << pageShift) - 1;
+        var pageOffsets = pageOrdering.pageOffsets();
+        var cursor = offsets.newCursor();
 
-        var newOffsets = HugeLongArray.newArray(offsets.size(), tracker);
-        long targetIdx = 0;
+        for (int pageId = 0; pageId < pageOffsets.length - 1; pageId++) {
+            // higher bits in pageId part are set to the pageId
+            long newPageId = ((long) pageId) << pageShift;
 
-        for (int sourcePage : ordering) {
-            long startIdx = pageOffsets[sourcePage];
-            long endIdx = pageOffsets[sourcePage + 1];
+            long startIdx = pageOffsets[pageId];
+            long endIdx = pageOffsets[pageId + 1];
 
-            for (long sourceIdx = startIdx; sourceIdx < endIdx; sourceIdx++) {
-                var writeTarget = nodeFilter.test(targetIdx);
-                var writeSource = nodeFilter.test(sourceIdx);
+            offsets.initCursor(cursor, startIdx, endIdx);
+            while (cursor.next()) {
+                var array = cursor.array;
+                var limit = cursor.limit;
+                long baseNodeId = cursor.base;
+                for (int i = cursor.offset; i < limit; i++) {
+                    long oldOffset = array[i];
 
-                if (!writeTarget) {
+                    long nodeId = baseNodeId + i;
+                    long newOffset = nodeFilter.test(nodeId)
+                        ? (oldOffset & pageMask) | newPageId
+                        : -1L;
+                    array[i] = newOffset;
 
-                    // Produces offsets according to non-text-book CSR
-                    // i.e. offsets for 0-degree nodes are arbitrary
-//                    newOffsets.set(targetIdx, -1);
-//                    targetIdx = targetIdx + 1;
-//
-//                    if (writeSource) {
-//                        sourceIdx = sourceIdx - 1;
-//                    }
-                    // Produces offsets according to text-book CSR,
-                    // i.e. degrees can be computed from offsets
-                    if (writeSource) {
-                        newOffsets.set(targetIdx, offsets.get(sourceIdx));
-                        targetIdx = targetIdx + 1;
-                        sourceIdx = sourceIdx - 1;
-                    } else {
-                        if (targetIdx == 0) {
-                            newOffsets.set(targetIdx, 0);
-                        } else {
-                            newOffsets.set(targetIdx, offsets.get(targetIdx - 1));
-                        }
-                        targetIdx = targetIdx + 1;
+
+                    // debug only
+                    if (!nodeFilter.test(nodeId)) {
+                        continue;
                     }
-                } else if (writeSource) {
-                    newOffsets.set(targetIdx, offsets.get(sourceIdx));
-                    targetIdx = targetIdx + 1;
-                }
 
+                    if (PageUtil.indexInPage(oldOffset, pageMask) != PageUtil.indexInPage(newOffset, pageMask)) {
+                        throw new IllegalStateException("Changed the index into the page: nodeId=" + nodeId + " offset=" + oldOffset + " new offset=" + newOffset + " old iip=" + PageUtil
+                            .indexInPage(oldOffset, pageMask) + " new iip=" + PageUtil.indexInPage(
+                            newOffset,
+                            pageMask
+                        ));
+                    }
+
+                    if (PageUtil.pageIndex(newOffset, pageShift) != pageId) {
+                        throw new IllegalStateException("Changed to the wrong pageId: nodeId=" + nodeId + " offset=" + newOffset + " offset pid=" + PageUtil
+                            .pageIndex(newOffset, pageShift) + " expected pid=" + pageId);
+                    }
+
+
+                    long expectedSourcePageId = pageOrdering.ordering()[pageId];
+                    long oldPageId = PageUtil.pageIndex(oldOffset, pageShift);
+
+                    if (oldPageId != expectedSourcePageId) {
+                        throw new IllegalStateException("Changed from the wrong pageId: nodeId=" + nodeId + " offset=" + oldOffset + " offset pid=" + oldPageId + " expected pid=" + expectedSourcePageId);
+                    }
+                }
             }
         }
-        return newOffsets;
+
+        // validation
+        var nOffsets = offsets.toArray();
+
+        var prevPageId = -1;
+
+        for (int nodeId = 0; nodeId < nOffsets.length; nodeId++) {
+            if (!nodeFilter.test(nodeId)) {
+                continue;
+            }
+            long nOffset = nOffsets[nodeId];
+            int newPageId = (int) (nOffset >>> pageShift);
+
+            if (newPageId < prevPageId) {
+                throw new IllegalStateException();
+
+            }
+            prevPageId = newPageId;
+
+            var startIdx = pageOffsets[newPageId];
+            var endIdx = pageOffsets[newPageId + 1];
+
+            if (nodeId < startIdx || nodeId >= endIdx) {
+                throw new IllegalStateException("node id = " + nodeId + " is out of range[" + startIdx + ", " + endIdx + "]");
+            }
+        }
     }
 
     private PageReordering() {}

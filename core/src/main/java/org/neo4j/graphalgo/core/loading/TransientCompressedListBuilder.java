@@ -46,8 +46,8 @@ public final class TransientCompressedListBuilder implements CsrListBuilder<byte
     @Override
     public TransientCompressedList build(HugeIntArray degrees, HugeLongArray offsets) {
         var intoPages = builder.intoPages();
-        var actualOffsets = reorder(intoPages, offsets, degrees, tracker);
-        return new TransientCompressedList(intoPages, degrees, actualOffsets);
+        reorder(intoPages, offsets, degrees);
+        return new TransientCompressedList(intoPages, degrees, offsets);
     }
 
     @Override
