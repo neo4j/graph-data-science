@@ -145,7 +145,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
             QueryExecutionException.class,
             () -> runQuery(exportQuery)
         );
-        assertThat(rootCause(exception)).hasMessage("The specified import directory already exists.");
+        assertThat(rootCause(exception)).hasMessage("The specified export directory already exists.");
     }
 
     @Test

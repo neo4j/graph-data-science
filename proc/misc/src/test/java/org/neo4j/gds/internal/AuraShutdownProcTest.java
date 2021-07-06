@@ -163,7 +163,7 @@ public class AuraShutdownProcTest extends BaseProcTest {
 
         assertThat(testLog.getMessages(TestLog.WARN))
             .contains(
-                "GraphStore persistence failed on graph first for user userA - The specified import directory already exists.");
+                "GraphStore persistence failed on graph first for user userA - The specified export directory already exists.");
 
         assertThat(first).isEmptyDirectory();
 
