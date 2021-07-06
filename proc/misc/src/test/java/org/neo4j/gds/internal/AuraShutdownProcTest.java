@@ -188,4 +188,22 @@ public class AuraShutdownProcTest extends BaseProcTest {
 
         assertCypherResult(pollQuery, List.of(Map.of("safeToRestart", true)));
     }
+
+    @Test
+    void shouldLogAtStartAndForEachExportedGraph() {
+        var numberOfGraphs = GraphStoreCatalog.graphStoresCount();
+        var shutdownQuery = "CALL gds.internal.shutdown()";
+
+        runQuery(shutdownQuery);
+
+        var messages = testLog.getMessages(TestLog.INFO);
+
+        assertThat(messages).contains("Preparing for shutdown");
+
+        assertThat(
+            messages.stream()
+                .filter(it -> it.startsWith("Export completed"))
+                .count()
+        ).isEqualTo(numberOfGraphs);
+    }
 }

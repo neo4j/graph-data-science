@@ -119,6 +119,7 @@ public class AuraShutdownProc implements CallableProcedure {
         long timeoutInSeconds,
         AllocationTracker allocationTracker
     ) {
+        log.info("Preparing for shutdown");
         var timer = ProgressTimer.start();
         try (timer) {
             var success = exportAllGraphStores(neo4jConfig, log, allocationTracker);

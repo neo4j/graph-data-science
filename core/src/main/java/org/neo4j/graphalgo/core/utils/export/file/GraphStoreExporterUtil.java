@@ -30,6 +30,7 @@ import org.neo4j.logging.Log;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 
 import static org.neo4j.graphalgo.core.utils.export.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -51,9 +52,11 @@ public final class GraphStoreExporterUtil {
             var importedProperties = exporter.run(allocationTracker);
             var end = System.nanoTime();
 
+            var tookMillis = TimeUnit.NANOSECONDS.toMillis(end - start);
+            log.info("Export completed in %s ms", tookMillis);
             return ImmutableExportToCsvResult.of(
                 importedProperties,
-                java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(end - start)
+                tookMillis
             );
         } catch (RuntimeException e) {
             log.warn("CSV export failed", e);
