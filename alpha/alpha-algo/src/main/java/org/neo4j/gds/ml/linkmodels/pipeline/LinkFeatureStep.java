@@ -22,9 +22,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
-import java.util.Map;
-import java.util.Optional;
-
 public interface LinkFeatureStep {
     String FEATURE_PROPERTIES = "featureProperties";
 

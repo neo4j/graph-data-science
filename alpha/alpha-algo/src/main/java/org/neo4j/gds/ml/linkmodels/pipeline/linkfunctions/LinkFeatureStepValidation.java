@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStep.FEATURE_PROPERTIES;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
