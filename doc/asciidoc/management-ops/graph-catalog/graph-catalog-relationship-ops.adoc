@@ -217,6 +217,8 @@ YIELD
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small graph in Neo4j and project it into our graph catalog.
 
+image::example-graphs/node-similarity.svg[Visualization of the example graph,align="center"]
+
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query]
 ----
@@ -348,7 +350,6 @@ ORDER BY sourceNodeId ASC, targetNodeId ASC
 
 ==== Multiple properties
 
-
 [role=query-example]
 --
 [source, cypher, role=noplay]
@@ -427,12 +428,47 @@ ORDER BY sourceNodeId ASC, targetNodeId ASC
 |===
 --
 
+
 === Write
 
+==== Relationship type
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.writeRelationship('personsAndInstruments', 'SIMILAR')
+YIELD graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| graphName               | relationshipType | relationshipProperty | relationshipsWritten | propertiesWritten
+| "personsAndInstruments" | "SIMILAR"        | null                 | 10                   | 0
+|===
+--
+
+image::write_relationships_graph.svg[Visualization of the example graph after writing relationships back,align="center"]
+
+
+==== Relationship type with property
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.writeRelationship('personsAndInstruments', 'SIMILAR', 'score')
+YIELD graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| graphName               | relationshipType | relationshipProperty | relationshipsWritten | propertiesWritten
+| "personsAndInstruments" | "SIMILAR"        | "score"              | 10                   | 10
+|===
+--
+
+
 === Remove
-
-include::graph-stream-relationship-properties.adoc[leveloffset=+1]
-
-include::graph-delete-relationship-type.adoc[leveloffset=+1]
-
-include::graph-write-relationship.adoc[leveloffset=+1]
