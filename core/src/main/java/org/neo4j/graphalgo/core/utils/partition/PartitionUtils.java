@@ -89,7 +89,7 @@ public final class PartitionUtils {
     public static <TASK> List<TASK> degreePartition(
         Graph graph,
         int concurrency,
-        Function<Partition, TASK> taskCreator,
+        Function<DegreePartition, TASK> taskCreator,
         Optional<Integer> minBatchSize
     ) {
         var batchSize = Math.max(
@@ -99,7 +99,7 @@ public final class PartitionUtils {
         return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
     }
 
-    public static <TASK> List<TASK> degreePartitionWithBatchSize(Graph graph, long batchSize, Function<Partition, TASK> taskCreator) {
+    public static <TASK> List<TASK> degreePartitionWithBatchSize(Graph graph, long batchSize, Function<DegreePartition, TASK> taskCreator) {
         return degreePartitionWithBatchSize(graph.nodeIterator(), graph::degree, batchSize, taskCreator);
     }
 
@@ -107,7 +107,7 @@ public final class PartitionUtils {
         PrimitiveLongIterator nodes,
         DegreeFunction degrees,
         long batchSize,
-        Function<Partition, TASK> taskCreator
+        Function<DegreePartition, TASK> taskCreator
     ) {
         var result = new ArrayList<TASK>();
         long start = 0L;
@@ -121,7 +121,7 @@ public final class PartitionUtils {
             }
 
             long end = nodeId + 1;
-            result.add(taskCreator.apply(Partition.of(start, end - start)));
+            result.add(taskCreator.apply(DegreePartition.of(start, end - start, partitionSize)));
             start = end;
         }
         return result;

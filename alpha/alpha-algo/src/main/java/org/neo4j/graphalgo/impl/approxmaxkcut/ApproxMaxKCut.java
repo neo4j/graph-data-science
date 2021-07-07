@@ -32,6 +32,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
+import org.neo4j.graphalgo.core.utils.partition.DegreePartition;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
@@ -71,7 +72,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final AtomicDoubleArray[] costs;
     private final HugeAtomicDoubleArray nodeToCommunityWeights;
     private final HugeAtomicByteArray swapStatus;
-    private final List<Partition> degreePartition;
+    private final List<DegreePartition> degreePartition;
     private HugeIntArray neighboringSolution;
 
     public ApproxMaxKCut(

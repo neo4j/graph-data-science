@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.partition.ImmutablePartition;
+import org.neo4j.graphalgo.core.utils.partition.DegreePartition;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
@@ -145,8 +145,9 @@ class PartitionUtilsTest {
         var partitions = PartitionUtils.degreePartition(graph, concurrency, Functions.identity(), Optional.empty());
 
         assertThat(partitions.size()).isEqualTo(concurrency);
-        for (int i = 0; i < concurrency; i++) {
-            assertThat(partitions.get(i).nodeCount()).isCloseTo(expectedPartitionSize, within(10L));
+        for (DegreePartition partition : partitions) {
+            assertThat(partition.nodeCount()).isCloseTo(expectedPartitionSize, within(10L));
+            assertThat(partition.totalDegree()).isEqualTo(partition.stream().map(graph::degree).sum());
         }
     }
 
@@ -212,10 +213,10 @@ class PartitionUtilsTest {
 
         assertThat(partitions)
             .containsExactly(
-                ImmutablePartition.of(0, 3),
-                ImmutablePartition.of(3, 7),
-                ImmutablePartition.of(10, 4),
-                ImmutablePartition.of(14, 1)
+                Partition.of(0, 3),
+                Partition.of(3, 7),
+                Partition.of(10, 4),
+                Partition.of(14, 1)
             );
     }
 
