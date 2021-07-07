@@ -177,7 +177,7 @@ YIELD
 |===
 ======
 
-[.include-with-remove]
+[.include-with-delete-relationships]
 ======
 [source, cypher, role=noplay]
 ----
@@ -438,7 +438,8 @@ ORDER BY sourceNodeId ASC, targetNodeId ASC
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.writeRelationship('personsAndInstruments', 'SIMILAR')
-YIELD graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten
+YIELD
+  graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten
 ----
 
 .Results
@@ -459,7 +460,8 @@ image::write_relationships_graph.svg[Visualization of the example graph after wr
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.writeRelationship('personsAndInstruments', 'SIMILAR', 'score')
-YIELD graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten
+YIELD
+  graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten
 ----
 
 .Results
@@ -471,4 +473,21 @@ YIELD graphName, relationshipType, relationshipProperty, relationshipsWritten, p
 --
 
 
-=== Remove
+=== Delete
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.deleteRelationships('personsAndInstruments', 'SIMILAR')
+YIELD
+  graphName, relationshipType, deletedRelationships, deletedProperties
+----
+
+.Results
+[opts="header"]
+|===
+| graphName               | relationshipType | deletedRelationships | deletedProperties
+| "personsAndInstruments" | "SIMILAR"        | 10                   | {score=10}
+|===
+--

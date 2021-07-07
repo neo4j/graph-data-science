@@ -29,7 +29,7 @@ class GraphCatalogRelationshipOperationsSyntaxTest extends SyntaxTestBase {
             SyntaxModeMeta.of(SyntaxMode.STREAM),
             SyntaxModeMeta.of(SyntaxMode.STREAM_SINGLE_PROPERTY),
             SyntaxModeMeta.of(SyntaxMode.WRITE),
-            SyntaxModeMeta.of(SyntaxMode.REMOVE)
+            SyntaxModeMeta.of(SyntaxMode.DELETE_RELATIONSHIPS)
         );
     }
 

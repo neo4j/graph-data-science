@@ -34,7 +34,8 @@ enum SyntaxMode {
     GRAPH_EXISTS("graph-exists-syntax"),
     GRAPH_EXPORT("graph-export-syntax"),
     CREATE_SUBGRAPH("create-subgraph-syntax"),
-    REMOVE("include-with-remove");
+    REMOVE("include-with-remove"),
+    DELETE_RELATIONSHIPS("include-with-delete-relationships");
 
     private final String mode;
 
