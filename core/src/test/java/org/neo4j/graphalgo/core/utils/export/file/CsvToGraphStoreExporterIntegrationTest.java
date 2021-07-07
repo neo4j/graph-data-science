@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.export.file;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -37,6 +38,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.values.storable.Values;
 
@@ -86,6 +88,20 @@ class CsvToGraphStoreExporterIntegrationTest {
         var importedGraphStore = importer.userGraphStore().graphStore();
         var importedGraph = importedGraphStore.getUnion();
         assertGraphEquals(graph, importedGraph);
+    }
+
+    @Test
+    void shouldImportGraphWithNoLabels() {
+        var graphStore = GdlFactory.of("()-[]->()").build().graphStore();
+
+        GraphStoreToFileExporter.csv(graphStore, config(4), graphLocation).run(AllocationTracker.empty());
+
+        var importer = CsvToGraphStoreExporter.create(config(4), graphLocation, new TestLog());
+        importer.run(AllocationTracker.empty());
+
+        var importedGraphStore = importer.userGraphStore().graphStore();
+        var importedGraph = importedGraphStore.getUnion();
+        assertGraphEquals(graphStore.getUnion(), importedGraph);
     }
 
     @ParameterizedTest

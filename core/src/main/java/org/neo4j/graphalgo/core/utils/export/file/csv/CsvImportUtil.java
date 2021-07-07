@@ -63,8 +63,8 @@ public final class CsvImportUtil {
         return headerToFileMapping(csvDirectory, CsvImportUtil::getRelationshipHeaderFiles);
     }
 
-    static List<Path> getNodeHeaderFiles(Path csvDirectory) {
-        String nodeFilesPattern = "^nodes(_\\w+)+_header.csv";
+    public static List<Path> getNodeHeaderFiles(Path csvDirectory) {
+        String nodeFilesPattern = "^nodes(_\\w+)*_header.csv";
         return getFilesByRegex(csvDirectory, nodeFilesPattern);
     }
 
@@ -97,9 +97,17 @@ public final class CsvImportUtil {
         }
     }
 
-    private static String[] inferNodeLabels(Path headerFile) {
-        var headerFileName = headerFile.getFileName().toString();
-        return headerFileName.replaceAll("nodes_|_header.csv", "").split("_");
+    static String[] inferNodeLabels(Path headerFile) {
+        return inferNodeLabels(headerFile.getFileName().toString());
+    }
+
+    static String[] inferNodeLabels(String headerFileName) {
+        var nodeLabels = headerFileName.replaceAll("nodes_|_?header.csv", "").split("_");
+        return noLabelFound(nodeLabels) ? new String[0] : nodeLabels;
+    }
+
+    private static boolean noLabelFound(String[] nodeLabels) {
+        return nodeLabels.length == 1 && nodeLabels[0].isEmpty();
     }
 
     private static String inferRelationshipType(Path headerFile) {

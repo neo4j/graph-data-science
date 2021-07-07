@@ -30,6 +30,7 @@ import org.neo4j.graphalgo.core.utils.export.file.HeaderProperty;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +56,14 @@ class CsvImportUtilTest {
             .map(Path::toString)
             .collect(Collectors.toList());
 
-        assertThat(nodeHeaderFiles).containsExactlyInAnyOrder("nodes_A_B_header.csv", "nodes_A_C_header.csv", "nodes_B_header.csv", "nodes_Person_header.csv", "nodes_House_Property_header.csv");
+        assertThat(nodeHeaderFiles).containsExactlyInAnyOrder(
+            "nodes_header.csv",
+            "nodes_A_B_header.csv",
+            "nodes_A_C_header.csv",
+            "nodes_B_header.csv",
+            "nodes_Person_header.csv",
+            "nodes_House_Property_header.csv"
+        );
     }
 
     @ParameterizedTest
@@ -68,6 +76,7 @@ class CsvImportUtilTest {
         headerToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
 
         Map<Path, List<Path>> expectedMapping = Map.of(
+            tempDir.resolve("nodes_header.csv"), List.of(tempDir.resolve("nodes_0.csv")),
             tempDir.resolve("nodes_A_B_header.csv"), List.of(tempDir.resolve("nodes_A_B_0.csv"), tempDir.resolve("nodes_A_B_1.csv")),
             tempDir.resolve("nodes_A_C_header.csv"), List.of(tempDir.resolve("nodes_A_C_0.csv"), tempDir.resolve("nodes_A_C_1.csv")),
             tempDir.resolve("nodes_B_header.csv"), List.of(tempDir.resolve("nodes_B_0.csv"), tempDir.resolve("nodes_B_1.csv"), tempDir.resolve("nodes_B_2.csv")),
@@ -137,11 +146,18 @@ class CsvImportUtilTest {
         );
     }
 
+    @Test
+    void shouldReturnEmptyArrayForNoLabels() {
+        var noLabelsNodeHeaderFileName = "nodes_header.csv";
+        assertThat(CsvImportUtil.inferNodeLabels(noLabelsNodeHeaderFileName)).isEmpty();
+        assertThat(CsvImportUtil.inferNodeLabels(Paths.get(noLabelsNodeHeaderFileName))).isEqualTo(new String[0]);
+    }
 
     static Stream<Arguments> nodeFileNames() {
         return Stream.of(
             Arguments.of(
                 List.of(
+                    "nodes_0.csv",
                     "nodes_A_B_0.csv",
                     "nodes_A_B_1.csv",
                     "nodes_A_C_0.csv",
@@ -149,6 +165,7 @@ class CsvImportUtilTest {
                     "nodes_B_0.csv",
                     "nodes_B_1.csv",
                     "nodes_B_2.csv",
+                    "nodes_header.csv",
                     "nodes_A_B_header.csv",
                     "nodes_A_C_header.csv",
                     "nodes_Person_header.csv",

@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.utils.export.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -39,7 +40,11 @@ public interface NodeFileHeader extends FileHeader<NodeSchema, NodeLabel, Proper
 
     @Override
     default Map<String, PropertySchema> schemaForIdentifier(NodeSchema schema) {
-        Set<NodeLabel> nodeLabels = Arrays.stream(nodeLabels()).map(NodeLabel::of).collect(Collectors.toSet());
+        var labelStream = Arrays.stream(nodeLabels()).map(NodeLabel::of);
+        if (nodeLabels().length == 0) {
+            labelStream = Stream.of(NodeLabel.ALL_NODES);
+        }
+        Set<NodeLabel> nodeLabels = labelStream.collect(Collectors.toSet());
         return schema.filter(nodeLabels).unionProperties();
     }
 
