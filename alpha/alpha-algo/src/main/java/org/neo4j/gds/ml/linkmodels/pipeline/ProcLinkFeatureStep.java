@@ -23,6 +23,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
+import java.util.List;
 import java.util.Map;
 
 public class ProcLinkFeatureStep implements LinkFeatureStep{
@@ -42,5 +43,10 @@ public class ProcLinkFeatureStep implements LinkFeatureStep{
     @Override
     public int outputFeatureSize(Graph graph) {
         throw new NotImplementedException();
+    }
+
+    @Override
+    public List<String> inputNodeProperties() {
+        return null;
     }
 }

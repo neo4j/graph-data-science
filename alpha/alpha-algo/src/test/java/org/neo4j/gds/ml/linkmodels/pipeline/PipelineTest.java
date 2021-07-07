@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.withPrecision;
 
 @GdlExtension
@@ -102,5 +103,17 @@ class PipelineTest {
         for (long i = 0; i < actual.size(); i++) {
             assertThat(actual.get(i)).containsExactly(expected.get(i), withPrecision(1e-4D));
         }
+    }
+
+    @Test
+    void validateLinkFeatureSteps() {
+        var pipeline = new Pipeline();
+
+        pipeline.addLinkFeature(LinkFeatureStepFactory.HADAMARD.name(), Map.of("featureProperties", List.of("noise", "no-property", "no-prop-2")));
+        pipeline.addLinkFeature(LinkFeatureStepFactory.HADAMARD.name(), Map.of("featureProperties", List.of("other-no-property")));
+
+        assertThatThrownBy(() -> pipeline.computeLinkFeatures(graph))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Node properties [no-property, no-prop-2, other-no-property] defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline");
     }
 }
