@@ -77,7 +77,7 @@ public final class PageReordering {
      *     </li>
      * </ol>
      *
-     * Note that only offsets for nodes with degree > 0 are being rewritten.
+     * Note that only offsets for nodes with degree &gt; 0 are being rewritten.
      * Nodes with degree = 0 will have offset = 0.
      *
      * <pre>
@@ -89,8 +89,8 @@ public final class PageReordering {
      * offsets  [ 16, 18, 22, 0, 3, 6, 24, 28, 30, 8, 13, 15 ]
      *
      * Lookup:
-     * node 0 -> offset 16 -> page id 2 -> index in page 0 -> page b
-     * node 4 -> offset  3 -> page id 0 -> index in page 3 -> page r
+     * node 0 -&gt; offset 16 -&gt; page id 2 -&gt; index in page 0 -&gt; page b
+     * node 4 -&gt; offset  3 -&gt; page id 0 -&gt; index in page 3 -&gt; page r
      *
      * Output:
      *
@@ -99,8 +99,8 @@ public final class PageReordering {
      * rewritten offsets [  0, 2, 6, 8, 11, 14, 16, 20, 22, 24, 29, 31 ]
      *
      * Lookup:
-     * node 0 -> offset  0 -> page id 0 -> index in page 0 -> page b
-     * node 4 -> offset 11 -> page id 1 -> index in page 3 -> page r
+     * node 0 -&gt; offset  0 -&gt; page id 0 -&gt; index in page 0 -&gt; page b
+     * node 4 -&gt; offset 11 -&gt; page id 1 -&gt; index in page 3 -&gt; page r
      * </pre>
      */
     public static <PAGE> void reorder(PAGE[] pages, HugeLongArray offsets, HugeIntArray degrees) {
