@@ -1,6 +1,219 @@
 [[graph-catalog-relationship-ops]]
 = Relationship operations
 
+[abstract]
+--
+This section details the operations available over relationships and relationship properties stored in projected graphs within the Neo4j Graph Data Science library.
+--
+
+The graphs in the Neo4j Graph Data Science Library support properties for relationships.
+We provide multiple operations to work with the stored relationship-properties in projected graphs.
+Relationship properties are either created during the graph creation or when using the `mutate` mode of our graph algorithms.
+
+To inspect stored relationship property values, the `streamRelationshipProperties` procedure can be used.
+This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
+
+To persist relationship types in a Neo4j database, we can use `gds.graph.writeRelationship`.
+Similar to streaming relationship properties, it is also possible to write back to Neo4j.
+This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
+By default, no relationship properties will be written. To write relationship properties, these have to be explicitly specified.
+
+We can also remove relationships from a named graph in the catalog.
+This is useful to free up main memory or to remove accidentally created relationship types.
+
+== Syntax
+
+.Syntax descriptions of the different operations over relationship types
+[.tabbed-example, caption=]
+====
+
+[.include-with-stream-single-property]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty(
+    graphName: String,
+    relationshipProperties: List of String,
+    relationshipTypes: List of Strings,
+    configuration: Map
+)
+YIELD
+    sourceNodeId: Integer,
+    targetNodeId: Integer,
+    relationshipType: String,
+    propertyValue: Integer or Float
+----
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
+|===
+| Name                   | Type                       | Optional | Description
+| graphName              | String                     | no       | The name under which the graph is stored in the catalog.
+| relationshipProperties | List of String             | no       | The relationship properties in the graph to stream.
+| relationshipTypes      | List of Strings            | yes      | The relationship types to stream the relationship properties for graph.
+| configuration          | Map                        | yes      | Additional parameters to configure streamNodeProperties.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,7"]
+|===
+| Name                   | Type                  | Default | Description
+| concurrency            | Integer               | 4       | The number of concurrent threads. Note, this procedure is always running single-threaded.
+|===
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name                  | Type                                                 | Description
+| sourceNodeId          | Integer                                              | The id of the source node for the relationship.
+| targetNodeId          | Integer                                              | The id of the target node for the relationship.
+| relationshipType      | Integer                                              | The type of the relationship.
+.^| propertyValue
+a|
+* Integer
+* Float
+.^| The stored property value.
+|===
+======
+
+[.include-with-stream]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperties(
+    graphName: String,
+    relationshipProperties: List of String,
+    relationshipTypes: List of Strings,
+    configuration: Map
+)
+YIELD
+    sourceNodeId: Integer,
+    targetNodeId: Integer,
+    relationshipType: String,
+    relationshipProperty: String,
+    propertyValue: Integer or Float
+----
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
+|===
+| Name                   | Type                       | Optional | Description
+| graphName              | String                     | no       | The name under which the graph is stored in the catalog.
+| relationshipProperties | List of String             | no       | The relationship properties in the graph to stream.
+| relationshipTypes      | List of Strings            | yes      | The relationship types to stream the relationship properties for graph.
+| configuration          | Map                        | yes      | Additional parameters to configure streamNodeProperties.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,7"]
+|===
+| Name                   | Type                  | Default | Description
+| concurrency            | Integer               | 4       | The number of concurrent threads. Note, this procedure is always running single-threaded.
+|===
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name                  | Type                                                 | Description
+| sourceNodeId          | Integer                                              | The id of the source node for the relationship.
+| targetNodeId          | Integer                                              | The id of the target node for the relationship.
+| relationshipType      | Integer                                              | The type of the relationship.
+| relationshipProperty  | Integer                                              | The name of the relationship property.
+.^| propertyValue
+a|
+* Integer
+* Float
+.^| The stored property value.
+|===
+======
+
+[.include-with-write]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.graph.writeRelationship(
+    graphName: String,
+    relationshipType: String,
+    relationshipProperty: String,
+    configuration: Map
+)
+YIELD
+  writeMillis: Integer,
+  graphName: String,
+  relationshipType: String,
+  relationshipsWritten: Integer,
+  relationshipProperty: String,
+  propertiesWritten: Integer
+----
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
+|===
+| Name                  | Type    | Optional | Description
+| graphName             | String  | no       | The name under which the graph is stored in the catalog.
+| relationshipType      | String  | no       | The relationship type in the graph to write back.
+| relationshipProperty  | String  | yes      | The relationship property to write back.
+| configuration         | Map     | yes      | Additional parameters to configure writeRelationship.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,7"]
+|===
+| Name                   | Type                  | Default           | Description
+| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure. Also provides the default value for `writeConcurrency`
+| writeConcurrency       | Integer               | 'concurrency'     | The number of concurrent threads used for writing the node properties.
+|===
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name                  | Type                     | Description
+| writeMillis           | Integer                  | Milliseconds for writing result data back to Neo4j.
+| graphName             | String                   | The name of a graph stored in the catalog.
+| relationshipType      | String                   | The type of the relationship that was written.
+| relationshipsWritten  | Integer                  | Number relationships written.
+| relationshipProperty  | String                   | The name of the relationship property that was written.
+| propertiesWritten     | Integer                  | Number relationships properties written.
+|===
+======
+
+[.include-with-remove]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.graph.deleteRelationships(
+    graphName: String,
+    relationshipType: String
+)
+YIELD
+  graphName: String,
+  relationshipType: String,
+  deletedRelationships: Integer,
+  deletedProperties: Map
+----
+
+.Parameters
+[opts="header",cols="1,3,1,5"]
+|===
+| Name             | Type    | Optional | Description
+| graphName        | String  | no       | The name under which the graph is stored in the catalog.
+| relationshipType | String  | no       | The relationship type in the graph to remove.
+|===
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name                 | Type       | Description
+| graphName            | String     | The name of a graph stored in the catalog.
+| relationshipType     | String     | The type of the removed relationships.
+| deletedRelationships | Integer    | Number of removed relationships from the in-memory graph.
+| deletedProperties    | Integer    | Map where the key is the name of the relationship property, and the value is the number of removed properties under that name.
+|===
+======
+====
+
+== Examples
+
 include::graph-stream-relationship-properties.adoc[leveloffset=+1]
 
 include::graph-delete-relationship-type.adoc[leveloffset=+1]

@@ -19,30 +19,22 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
-enum SyntaxMode {
-    STATS("include-with-stats"),
-    STREAM("include-with-stream"),
-    MUTATE("include-with-mutate"),
-    WRITE("include-with-write"),
-    TRAIN("include-with-train"),
-    ESTIMATE("estimate-syntax"),
-    GRAPH_DROP("graph-drop-syntax"),
-    GRAPH_CREATE("graph-create-syntax"),
-    GRAPH_CREATE_CYPHER("graph-create-cypher-syntax"),
-    STREAM_NODE_PROPERTIES("stream-node-properties-syntax"),
-    STREAM_SINGLE_PROPERTY("include-with-stream-single-property"),
-    GRAPH_EXISTS("graph-exists-syntax"),
-    GRAPH_EXPORT("graph-export-syntax"),
-    CREATE_SUBGRAPH("create-subgraph-syntax"),
-    REMOVE("include-with-remove");
+import java.util.List;
 
-    private final String mode;
+class GraphCatalogRelationshipOperationsSyntaxTest extends SyntaxTestBase {
 
-    SyntaxMode(String mode) {
-        this.mode = mode;
+    @Override
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
+        return List.of(
+            SyntaxModeMeta.of(SyntaxMode.STREAM),
+            SyntaxModeMeta.of(SyntaxMode.STREAM_SINGLE_PROPERTY),
+            SyntaxModeMeta.of(SyntaxMode.WRITE),
+            SyntaxModeMeta.of(SyntaxMode.REMOVE)
+        );
     }
 
-    public String mode() {
-        return mode;
+    @Override
+    String adocFile() {
+        return "management-ops/graph-catalog/graph-catalog-relationship-ops.adoc";
     }
 }
