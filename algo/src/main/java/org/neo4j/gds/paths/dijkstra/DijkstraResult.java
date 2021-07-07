@@ -21,19 +21,57 @@ package org.neo4j.gds.paths.dijkstra;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.graphalgo.annotation.ValueClass;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@ValueClass
-public interface DijkstraResult {
+public class DijkstraResult {
 
-    Stream<PathResult> paths();
+    private final Stream<PathResult> paths;
+    private final Runnable closeStreamAction;
+
+    private boolean consumptionTriggered;
+
+    public DijkstraResult(Stream<PathResult> paths) {
+        this(paths, () -> {});
+    }
+
+    public DijkstraResult(Stream<PathResult> paths, Runnable closeStreamAction) {
+        this.paths = paths;
+        this.closeStreamAction = closeStreamAction;
+        this.consumptionTriggered = false;
+    }
+
+    public Optional<PathResult> findFirst() {
+        var first = paths.findFirst();
+        runConsumptionAction();
+        return first;
+    }
+
+    public void forEachPath(Consumer<PathResult> resultConsumer) {
+        paths.forEach(resultConsumer);
+        runConsumptionAction();
+    }
+
+    public <T> Stream<T> mapPaths(Function<PathResult, T> fn) {
+        return paths.map(fn).onClose(this::runConsumptionAction);
+    }
 
     @TestOnly
-    default Set<PathResult> pathSet() {
-        return paths().collect(Collectors.toSet());
+    public Set<PathResult> pathSet() {
+        var resultSet = paths.collect(Collectors.toSet());
+        runConsumptionAction();
+        return resultSet;
+    }
+
+    private void runConsumptionAction() {
+        if (!consumptionTriggered) {
+            closeStreamAction.run();
+            consumptionTriggered = true;
+        }
     }
 }

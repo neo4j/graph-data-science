@@ -148,7 +148,6 @@ final class DijkstraTest {
             var path = Dijkstra
                 .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
-                .paths()
                 .findFirst()
                 .get();
 
@@ -173,7 +172,6 @@ final class DijkstraTest {
                 .withRelationshipFilter(relationshipFilter);
             var paths = dijkstra
                 .compute()
-                .paths()
                 .findFirst()
                 .get();
 
@@ -197,7 +195,6 @@ final class DijkstraTest {
             var path = Dijkstra
                 .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
-                .paths()
                 .findFirst()
                 .get();
 
@@ -344,7 +341,6 @@ final class DijkstraTest {
             var path = Dijkstra
                 .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
-                .paths()
                 .findFirst()
                 .get();
 
@@ -422,7 +418,6 @@ final class DijkstraTest {
             var path = Dijkstra
                 .sourceTarget(graph, config, Optional.of(heuristicFunction), ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
                 .compute()
-                .paths()
                 .findFirst()
                 .get();
 

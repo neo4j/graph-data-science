@@ -191,10 +191,7 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             .generate(() -> next(traversalPredicate, pathResultBuilder))
             .takeWhile(pathResult -> pathResult != PathResult.EMPTY);
 
-        return ImmutableDijkstraResult
-            .builder()
-            .paths(paths)
-            .build();
+        return new DijkstraResult(paths, progressTracker::endSubTask);
     }
 
     private PathResult next(TraversalPredicate traversalPredicate, ImmutablePathResult.Builder pathResultBuilder) {
@@ -225,11 +222,9 @@ public final class Dijkstra extends Algorithm<Dijkstra, DijkstraResult> {
             traversalState = traversalPredicate.apply(node);
 
             if (traversalState == EMIT_AND_CONTINUE || traversalState == EMIT_AND_STOP) {
-                progressTracker.endSubTask();
                 return pathResult(node, pathResultBuilder);
             }
         }
-//        progressTracker.endSubTask();
         return PathResult.EMPTY;
     }
 

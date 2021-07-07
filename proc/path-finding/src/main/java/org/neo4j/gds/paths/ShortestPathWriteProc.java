@@ -66,8 +66,7 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
             var graph = computationResult.graph();
 
             var relationshipStream = result
-                .paths()
-                .map(pathResult -> ImmutableRelationship.of(
+                .mapPaths(pathResult -> ImmutableRelationship.of(
                     pathResult.sourceNode(),
                     pathResult.targetNode(),
                     createValues(graph, pathResult, writeNodeIds, writeCosts)

@@ -43,7 +43,6 @@ public abstract class ShortestPathStreamProc<
     public Stream<StreamResult> stream(AlgoBaseProc.ComputationResult<ALGO, DijkstraResult, CONFIG> computationResult) {
         return runWithExceptionLogging("Result streaming failed", () -> {
             var graph = computationResult.graph();
-            var config = computationResult.config();
 
             if (computationResult.isGraphEmpty()) {
                 graph.release();
@@ -57,8 +56,7 @@ public abstract class ShortestPathStreamProc<
             var resultBuilder = new StreamResult.Builder(graph, transaction.internalTransaction());
             return computationResult
                 .result()
-                .paths()
-                .map(path -> resultBuilder.build(path, shouldReturnPath));
+                .mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
         });
     }
 }

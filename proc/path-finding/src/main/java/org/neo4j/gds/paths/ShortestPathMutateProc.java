@@ -58,7 +58,7 @@ public abstract class ShortestPathMutateProc<ALGO extends Algorithm<ALGO, Dijkst
         Relationships relationships;
 
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-            result.paths().forEach(pathResult -> {
+            result.forEachPath(pathResult -> {
                 relationshipsBuilder.addFromInternal(
                     pathResult.sourceNode(),
                     pathResult.targetNode(),

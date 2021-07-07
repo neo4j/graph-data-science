@@ -142,7 +142,6 @@ class AStarTest {
         var path = AStar
             .sourceTarget(graph, config, ProgressTracker.NULL_TRACKER, AllocationTracker.empty())
             .compute()
-            .paths()
             .findFirst()
             .get();
 

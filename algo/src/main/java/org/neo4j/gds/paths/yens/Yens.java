@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.gds.paths.dijkstra.ImmutableDijkstraResult;
 import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.graphalgo.Algorithm;
@@ -118,7 +117,8 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
         // no shortest path has been found
         if (shortestPath.isEmpty()) {
-            return ImmutableDijkstraResult.of(Stream.empty());
+            progressTracker.endSubTask();
+            return new DijkstraResult(Stream.empty());
         }
 
         kShortestPaths.add(MutablePathResult.of(shortestPath.get()));
@@ -187,10 +187,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
         progressTracker.endSubTask();
 
-        return ImmutableDijkstraResult
-            .builder()
-            .paths(kShortestPaths.stream().map(MutablePathResult::toPathResult))
-            .build();
+        return new DijkstraResult(kShortestPaths.stream().map(MutablePathResult::toPathResult));
     }
 
     @NotNull
@@ -214,7 +211,7 @@ public final class Yens extends Algorithm<Yens, DijkstraResult> {
 
     private Optional<PathResult> computeDijkstra(long sourceNode) {
         progressTracker.progressLogger().logMessage(formatWithLocale(":: Start Dijkstra for spur node %d", sourceNode));
-        return dijkstra.compute().paths().findFirst();
+        return dijkstra.compute().findFirst();
     }
 
 }
