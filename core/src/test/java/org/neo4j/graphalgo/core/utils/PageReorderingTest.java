@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
+import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +63,7 @@ class PageReorderingTest {
 
     @ParameterizedTest
     @MethodSource("offsets")
-    void testOrdering(long[] offsets, int[] expectedOrdering, long[] ignored) {
+    void testOrdering(long[] offsets, int[] expectedOrdering, long[] ignore) {
         var pageCount = 4;
         var pageShift = 3;
         var hugeOffsets = HugeLongArray.of(offsets);
@@ -158,6 +159,59 @@ class PageReorderingTest {
         );
 
         assertThat(hugeOffsets.toArray()).isEqualTo(expectedOffsets);
+    }
+
+    @Test
+    void testReorderWithDifferentOffsetRanges() {
+        int pageCount = 2;
+        int pageShift = 4;
+
+        long[] offsets = new long[] { 0x10, 0x12, 0x13, /* page boundary */ 0x01, 0x03, 0x04, 0x05 };
+
+        var red = new long[]{0, 2, 3};
+        var blue = new long[]{1, 2, 3, 4};
+        long[][] pages = new long[][]{blue, red};
+
+        var hugeOffsets = HugeLongArray.of(offsets);
+        var ordering = PageReordering.ordering(hugeOffsets, node -> true, pageCount, pageShift);
+
+        assertThat(ordering.ordering()).isEqualTo(new int[] { 1, 0 });
+        assertThat(ordering.pageOffsets()).isEqualTo(new long[]{0, 3, 7});
+
+        PageReordering.reorder(pages, ordering.ordering());
+
+        assertThat(pages).isEqualTo(new long[][]{red, blue});
+
+        PageReordering.rewriteOffsets(hugeOffsets, ordering, node -> true, pageShift);
+
+        assertThat(hugeOffsets.toArray()).isEqualTo(new long[]{0x00, 0x02, 0x03, /* page boundary */ 0x11, 0x13, 0x14, 0x15});
+    }
+
+    @Test
+    void testReorderWithDifferentOffsetRangesAndFilteredNodes() {
+        int pageCount = 2;
+        int pageShift = 4;
+
+        LongPredicate nodeFilter = node -> node != 5; // offsets[5] = degrees[5] = 0
+        long[] offsets = new long[] { 0x10, 0x12, 0x13, /* page boundary */ 0x00, 0x03, 0x00, 0x05 };
+
+        var red = new long[]{0, 2, 3};
+        var blue = new long[]{1, 2, 3, 4};
+        long[][] pages = new long[][]{blue, red};
+
+        var hugeOffsets = HugeLongArray.of(offsets);
+        var ordering = PageReordering.ordering(hugeOffsets, nodeFilter, pageCount, pageShift);
+
+        assertThat(ordering.ordering()).isEqualTo(new int[] { 1, 0 });
+        assertThat(ordering.pageOffsets()).isEqualTo(new long[]{0, 3, 7});
+
+        PageReordering.reorder(pages, ordering.ordering());
+
+        assertThat(pages).isEqualTo(new long[][]{red, blue});
+
+        PageReordering.rewriteOffsets(hugeOffsets, ordering, nodeFilter, pageShift);
+
+        assertThat(hugeOffsets.toArray()).isEqualTo(new long[]{0x00, 0x02, 0x03, /* page boundary */ 0x10, 0x13, 0x00, 0x15});
     }
 
 }
