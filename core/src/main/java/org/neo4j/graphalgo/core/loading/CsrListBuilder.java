@@ -22,14 +22,7 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.core.utils.PageReordering;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.core.utils.paged.PageUtil;
 import org.neo4j.graphalgo.utils.GdsFeatureToggles;
-
-import java.lang.reflect.Array;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SHIFT;
 
 public interface CsrListBuilder<PAGE, T> {
 
@@ -49,48 +42,8 @@ public interface CsrListBuilder<PAGE, T> {
 
     default void reorder(PAGE[] pages, HugeLongArray offsets, HugeIntArray degrees) {
         if (GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled() && pages.length > 0) {
-
-            var ordering = PageReordering.ordering(offsets, nodeId -> degrees.get(nodeId) > 0, pages.length, PAGE_SHIFT);
-
-            var inputMap = nodeToPageMap(pages, offsets, degrees);
-
-            PageReordering.reorder(pages, ordering.ordering());
-            PageReordering.rewriteOffsets(offsets, ordering, node -> degrees.get(node) > 0, PAGE_SHIFT);
-
-            Map<Long, PAGE> outputMap = nodeToPageMap(pages, offsets, degrees);
-
-            // validation
-            outputMap.forEach((nodeId, outputPage) -> {
-                var inputPage = inputMap.remove(nodeId);
-
-                if (inputPage != outputPage) {
-                    var message = "nodeId = " + nodeId +
-                                  " inputPage = " + inputPage +
-                                  " outputPage = " + outputPage +
-                                  " inputPage.length = " + ((inputPage == null) ? -1 : Array.getLength(inputPage)) +
-                                  " outputPage.length = " + Array.getLength(outputPage);
-
-                    throw new IllegalStateException(message);
-                }
-            });
-
-            if (!inputMap.isEmpty()) {
-                throw new IllegalStateException("pages left = " + inputMap.size());
-            }
+            PageReordering.reorder(pages, offsets, degrees);
         }
     }
 
-    private Map<Long, PAGE> nodeToPageMap(PAGE[] pages, HugeLongArray offsets, HugeIntArray degrees) {
-        Map<Long, PAGE> nodePageMap = new HashMap<>();
-
-        for (long i = 0; i < offsets.size(); i++) {
-            var offset = offsets.get(i);
-
-            if (degrees.get(i) > 0) {
-                nodePageMap.put(i, pages[PageUtil.pageIndex(offset, PAGE_SHIFT)]);
-            }
-        }
-
-        return nodePageMap;
-    }
 }
