@@ -32,7 +32,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStep.FEATURE_PROPERTIES;
 
 final class LinkFeatureStepFactoryTest {

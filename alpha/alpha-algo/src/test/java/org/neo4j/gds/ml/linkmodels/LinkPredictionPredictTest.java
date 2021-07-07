@@ -133,7 +133,7 @@ class LinkPredictionPredictTest {
             .batchSize(1)
             .build();
 
-        var algo = new LinkPredictionPredictFactory(TestProgressLogger.FACTORY).build(
+        var algo = new LinkPredictionPredictFactory<>(TestProgressLogger.FACTORY).build(
             graph,
             config,
             AllocationTracker.empty(),
