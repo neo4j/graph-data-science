@@ -269,7 +269,7 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
 
             long value;
 
-            if (idx > 0) { // Found
+            if (idx >= 0) { // Found
                 offset = idx;
 
                 // We need to skip the current offset.
@@ -299,7 +299,7 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
 
             var idx = ArrayUtil.binarySearchFirst(currentPage, offset, limit, target);
 
-            if (idx > 0) { // Found
+            if (idx >= 0) { // Found
                 offset = idx;
             } else {
                 // Set the offset to the element that is greater than target.
