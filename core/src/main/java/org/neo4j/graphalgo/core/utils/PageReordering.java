@@ -30,6 +30,8 @@ import static org.neo4j.graphalgo.core.loading.BumpAllocator.PAGE_SHIFT;
 
 public final class PageReordering {
 
+    private static final long ZERO_DEGREE_OFFSET = 0;
+
     @ValueClass
     public interface PageOrdering {
         int[] ordering();
@@ -37,6 +39,52 @@ public final class PageReordering {
         long[] pageOffsets();
     }
 
+    /**
+     * This method aligns the given pages and offsets with the node id space.
+     * Pages and offsets are changed in-place in O(nodeCount) time.
+     *
+     * Reordering happens in three steps:
+     *
+     * <ol>
+     *     <li>
+     *         The offsets are scanned to detect the current page ordering
+     *         and the start and end indexes of a page within the offsets.
+     *     </li>
+     *     <li>
+     *         The pages are swapped to end up in order.
+     *     </li>
+     *     <li>
+     *         The offsets are rewritten to contain the new page id,
+     *         but the same index within the page.
+     *     </li>
+     * </ol>
+     *
+     * Note that only offsets for nodes with degree > 0 are being rewritten.
+     * Nodes with degree = 0 will have offset = 0.
+     *
+     * <pre>
+     * Example for page size = 8
+     *
+     * Input:
+     *
+     * pages    [  r  g  b  s ]
+     * offsets  [ 16, 18, 22, 0, 3, 6, 24, 28, 30, 8, 13, 15 ]
+     *
+     * Lookup:
+     * node 0 -> offset 16 -> page id 2 -> index in page 0 -> page b
+     * node 4 -> offset  3 -> page id 0 -> index in page 3 -> page r
+     *
+     * Output:
+     *
+     * page ordering     [  2  0  3  1 ]
+     * ordered pages     [  b  r  s  g ]
+     * rewritten offsets [  0, 2, 6, 8, 11, 14, 16, 20, 22, 24, 29, 31 ]
+     *
+     * Lookup:
+     * node 0 -> offset  0 -> page id 0 -> index in page 0 -> page b
+     * node 4 -> offset 11 -> page id 1 -> index in page 3 -> page r
+     * </pre>
+     */
     public static <PAGE> void reorder(PAGE[] pages, HugeLongArray offsets, HugeIntArray degrees) {
         var ordering = ordering(
             offsets,
@@ -48,24 +96,6 @@ public final class PageReordering {
         rewriteOffsets(offsets, ordering, node -> degrees.get(node) > 0, PAGE_SHIFT);
     }
 
-    /**
-     * Input:
-     *
-     * pages    [  r  g  b  s ]
-     * offsets  [ 16, 18, 22, 0, 3, 6, 24, 28, 30, 8, 13, 15 ]
-     *
-     * node 0 -> offset 16 -> page id 2 -> page b
-     * node 3 -> offset  0 -> page id 0 -> page r
-     *
-     * Output:
-     *
-     * ordering [  2  0  3  1 ]
-     * pages    [  b  r  s  g ]
-     * offset   [  0, 2, 6, 8, 11, 14, 16, 20, 22, 24, 29, 31 ]
-     *
-     * node 0 -> offset 0 -> page id 0 -> page b
-     * node 3 -> offset 8 -> page id 1 -> page r
-     */
     static PageOrdering ordering(
         HugeLongArray offsets,
         LongPredicate nodeFilter,
@@ -174,7 +204,7 @@ public final class PageReordering {
                 for (int i = cursor.offset; i < limit; i++) {
                     array[i] = nodeFilter.test(baseNodeId + i)
                         ? (array[i] & pageMask) | newPageId
-                        : -1L;
+                        : ZERO_DEGREE_OFFSET;
                 }
             }
         }
