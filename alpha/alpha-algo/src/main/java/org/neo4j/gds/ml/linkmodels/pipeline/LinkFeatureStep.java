@@ -32,4 +32,9 @@ public interface LinkFeatureStep {
      * @param offset the start offset in each double[] where the features should be added
      */
     void addFeatures(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset);
+
+    /**
+     * The expected size of the feature
+     */
+    int outputFeatureSize(Graph graph);
 }

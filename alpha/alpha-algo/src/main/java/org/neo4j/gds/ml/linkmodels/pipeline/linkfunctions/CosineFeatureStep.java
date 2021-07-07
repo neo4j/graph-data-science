@@ -110,4 +110,9 @@ public class CosineFeatureStep implements LinkFeatureStep {
             return true;
         });
     }
+
+    @Override
+    public int outputFeatureSize(Graph graph) {
+        return 1;
+    }
 }

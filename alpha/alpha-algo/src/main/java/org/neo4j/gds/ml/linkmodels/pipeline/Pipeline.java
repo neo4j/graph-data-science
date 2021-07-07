@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Pipeline {
     private List<LinkFeatureStep> linkFeatureSteps;
@@ -45,16 +46,17 @@ public class Pipeline {
             AllocationTracker.empty()
         );
 
-        // FIXME: compute it based on samples for now? (Ideally its known on the property)
-        int featureSize = 2;
+        List<Integer> featureSize = linkFeatureSteps.stream().map(step -> step.outputFeatureSize(graph)).collect(Collectors.toList());
 
-        linkFeatures.setAll(i -> new double[featureSize]);
+        int totalFeatureSize = featureSize.stream().mapToInt(Integer::intValue).sum();
+        linkFeatures.setAll(i -> new double[totalFeatureSize]);
 
         int featureOffset = 0;
-        for (LinkFeatureStep step : linkFeatureSteps) {
+
+        for (int i = 0, linkFeatureStepsSize = linkFeatureSteps.size(); i < linkFeatureStepsSize; i++) {
+            LinkFeatureStep step = linkFeatureSteps.get(i);
             step.addFeatures(graph, linkFeatures, featureOffset);
-            // FIXME get the actual dimension (could sample the properties f.i.)
-            featureOffset += 1;
+            featureOffset += featureSize.get(i);
         }
 
         return linkFeatures;

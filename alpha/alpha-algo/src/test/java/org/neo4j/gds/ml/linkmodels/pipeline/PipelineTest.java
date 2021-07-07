@@ -73,4 +73,34 @@ class PipelineTest {
             assertThat(actual.get(i)).containsExactly(expected.get(i), withPrecision(1e-4D));
         }
     }
+
+    @Test
+    void multipleLinkFeatureStep() {
+        var pipeline = new Pipeline();
+
+        pipeline.addLinkFeature(LinkFeatureStepFactory.HADAMARD.name(), Map.of("featureProperties", List.of("array")));
+        pipeline.addLinkFeature(LinkFeatureStepFactory.COSINE.name(), Map.of("featureProperties", List.of("noise", "z")));
+
+        var normA = Math.sqrt(42 * 42 + 13 * 13);
+        var normB = Math.sqrt(1337 * 1337 + 0 * 0);
+        var normC = Math.sqrt(42 * 42 + 2 * 2);
+        var normD = Math.sqrt(42 * 42 + 9 * 9);
+
+        var expected = HugeObjectArray.of(
+            new double[]{3 * 1D, 2 * 1D, (42 * 1337 + 13 * 0D) / normA / normB}, // a-b
+            new double[]{3 * 8, 2 * 2.3D, (42 * 42 + 13 * 2) / normA / normC}, // a-c
+            new double[]{3 * 0.1D, 2 * 91.0D, (42 * 42 + 13 * 9) / normA / normD}, // a-d
+            new double[]{3 * 1D, 2 * 1D, (42 * 1337 + 13 * 0D) / normA / normB}, // a-b
+            new double[]{3 * 8, 2 * 2.3D, (42 * 42 + 13 * 2) / normA / normC}, // a-c
+            new double[]{3 * 0.1D, 2 * 91.0D, (42 * 42 + 13 * 9) / normA / normD} // a-d
+        );
+
+        var actual = pipeline.computeLinkFeatures(graph);
+
+        assertThat(actual.size()).isEqualTo(expected.size());
+
+        for (long i = 0; i < actual.size(); i++) {
+            assertThat(actual.get(i)).containsExactly(expected.get(i), withPrecision(1e-4D));
+        }
+    }
 }

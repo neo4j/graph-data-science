@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
@@ -36,5 +37,10 @@ public class ProcLinkFeatureStep implements LinkFeatureStep{
 
     public void addFeatures(Graph graph, HugeObjectArray linkFeatures, int offset) {
 
+    }
+
+    @Override
+    public int outputFeatureSize(Graph graph) {
+        throw new NotImplementedException();
     }
 }
