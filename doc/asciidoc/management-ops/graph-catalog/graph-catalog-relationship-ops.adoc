@@ -281,8 +281,12 @@ CALL gds.nodeSimilarity.mutate('personsAndInstruments', {
 
 ==== Single property
 
+The most basic case for streaming relationship information from a named graph is a single property.
+In the example below we stream the relationship property `score`.
+
 [role=query-example]
 --
+.Stream a single relationship property:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('personsAndInstruments', 'score')
@@ -319,8 +323,12 @@ ORDER BY source ASC, target ASC
 |===
 --
 
+As we can see from the results, we get two relationship types (`SIMILAR` and `LIKES`) that have the `score` relationship property.
+We can further on filter the relationship types we want to stream, this is demonstrated in the next example.
+
 [role=query-example]
 --
+.Stream a single relationship property for specific relationship type:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('personsAndInstruments', 'score', ['SIMILAR'])
@@ -350,8 +358,11 @@ ORDER BY source ASC, target ASC
 
 ==== Multiple properties
 
+It is also possible to stream multiple relationship properties.
+
 [role=query-example]
 --
+.Stream multiple relationship properties:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperties('personsAndInstruments', ['score', 'strength'], ['LIKES'])
@@ -390,8 +401,11 @@ ORDER BY source ASC, target ASC
 
 ==== Multiple relationship types
 
+Similar to the multiple relationship properties we can stream properties for multiple relationship types.
+
 [role=query-example]
 --
+.Stream relationship properties of a multiple relationship projections:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperties('personsAndInstruments', ['score'], ['LIKES', 'SIMILAR'])
@@ -428,13 +442,22 @@ ORDER BY source ASC, target ASC
 |===
 --
 
+NOTE: The properties we want to stream must exist for each specified relationship type.
 
 === Write
+
+We can write relationships stored in a named in-memory graph back to Neo4j.
+This can be used to write algorithm results (for example from <<algorithms-node-similarity, Node Similarity>>) or relationships that have been aggregated during graph creation.
+
+The relationships to write are specified by a relationship type.
+
+NOTE: Relationships are always written using a single thread.
 
 ==== Relationship type
 
 [role=query-example]
 --
+.Write relationships to Neo4j:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.writeRelationship('personsAndInstruments', 'SIMILAR')
@@ -450,13 +473,22 @@ YIELD
 |===
 --
 
+By default, no relationship properties will be written, as it can be seen from the results, the `relationshipProperty` value is `null` and `propertiesWritten` are `0`.
+
+Here is an illustration of how the example graph looks in Neo4j after executing the example above.
+
 image::write_relationships_graph.svg[Visualization of the example graph after writing relationships back,align="center"]
 
+The `SIMILAR` relationships have been added to the underlying database and can be used in Cypher queries or for projecting to in-memory graph for running algorithms.
+The relationships in this example are undirected because we used <<algorithms-node-similarity, Node Similarity>> to mutate the in-memory graph and this algorithm creates undirected relationships, this may not be the case if we use different algorithms.
 
 ==== Relationship type with property
 
+To write relationship properties, these have to be explicitly specified.
+
 [role=query-example]
 --
+.Write relationships and their properties to Neo4j:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.writeRelationship('personsAndInstruments', 'SIMILAR', 'score')
@@ -473,10 +505,15 @@ YIELD
 --
 
 
+[[catalog-graph-delete-rel-type]]
 === Delete
+
+We can delete all relationships of a given type from a named graph in the catalog.
+This is useful to free up main memory or to remove accidentally created relationship types.
 
 [role=query-example]
 --
+.Delete all relationships of type `SIMILAR` from a named graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.deleteRelationships('personsAndInstruments', 'SIMILAR')
