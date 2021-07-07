@@ -48,6 +48,7 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.core.utils.export.file.csv.AutoloadFlagVisitor.AUTOLOAD_FILE_NAME;
 
 public class AuraShutdownProcTest extends BaseProcTest {
 
@@ -117,6 +118,16 @@ public class AuraShutdownProcTest extends BaseProcTest {
             }
         });
         builder.setConfig(GraphStoreExportSettings.export_location_setting, tempDir);
+    }
+
+    @Test
+    void shouldWriteAutoloadFlag() {
+        var shutdownQuery = "CALL gds.internal.shutdown()";
+
+        assertCypherResult(shutdownQuery, List.of(Map.of("done", true)));
+
+        assertThat(tempDir.resolve("first")).isDirectoryContaining("glob:**" + AUTOLOAD_FILE_NAME);
+        assertThat(tempDir.resolve("second")).isDirectoryContaining("glob:**" + AUTOLOAD_FILE_NAME);
     }
 
     @Test

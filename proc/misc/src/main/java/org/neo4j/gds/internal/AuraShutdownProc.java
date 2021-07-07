@@ -166,6 +166,7 @@ public class AuraShutdownProc implements CallableProcedure {
                         graphStore,
                         neo4jConfig,
                         config,
+                        true,
                         log,
                         allocationTracker
                     );
