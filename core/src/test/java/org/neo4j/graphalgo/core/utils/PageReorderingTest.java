@@ -70,8 +70,9 @@ class PageReorderingTest {
 
         var ordering = PageReordering.ordering(hugeOffsets, nodeId -> true, pageCount, pageShift);
 
-        assertThat(ordering.ordering()).isEqualTo(expectedOrdering);
-        assertThat(ordering.pageOffsets()).isEqualTo(new long[] {0, 3, 6, 9, 12});
+        assertThat(ordering.distinctOrdering()).isEqualTo(expectedOrdering);
+        assertThat(ordering.shrinkToFitReverseOrdering()).isEqualTo(new int[]{0, 1, 2, 3});
+        assertThat(ordering.shrinkToFitPageOffsets()).isEqualTo(new long[] {0, 3, 6, 9, 12});
     }
 
     @Test
@@ -87,8 +88,9 @@ class PageReorderingTest {
             pageShift
         );
 
-        assertThat(ordering.ordering()).isEqualTo(new int[]{1, 0, 2});
-        assertThat(ordering.pageOffsets()).isEqualTo(new long[]{0, 2, 4, 6});
+        assertThat(ordering.distinctOrdering()).isEqualTo(new int[]{1, 0, 2});
+        assertThat(ordering.shrinkToFitReverseOrdering()).isEqualTo(new int[]{0, 1, 2});
+        assertThat(ordering.shrinkToFitPageOffsets()).isEqualTo(new long[]{0, 2, 4, 6});
     }
 
     static Stream<int[]> orderings() {
@@ -151,7 +153,9 @@ class PageReorderingTest {
             hugeOffsets,
             ImmutablePageOrdering
                 .builder()
-                .ordering(expectedOrdering)
+                .distinctOrdering(expectedOrdering)
+                .reverseOrdering(0, 1, 2, 3)
+                .length(expectedOrdering.length)
                 .pageOffsets(0, 3, 6, 9, 12)
                 .build(),
             node -> true,
@@ -175,10 +179,10 @@ class PageReorderingTest {
         var hugeOffsets = HugeLongArray.of(offsets);
         var ordering = PageReordering.ordering(hugeOffsets, node -> true, pageCount, pageShift);
 
-        assertThat(ordering.ordering()).isEqualTo(new int[] { 1, 0 });
-        assertThat(ordering.pageOffsets()).isEqualTo(new long[]{0, 3, 7});
+        assertThat(ordering.distinctOrdering()).isEqualTo(new int[] { 1, 0 });
+        assertThat(ordering.shrinkToFitPageOffsets()).isEqualTo(new long[]{0, 3, 7});
 
-        PageReordering.reorder(pages, ordering.ordering());
+        PageReordering.reorder(pages, ordering.distinctOrdering());
 
         assertThat(pages).isEqualTo(new long[][]{red, blue});
 
@@ -202,16 +206,46 @@ class PageReorderingTest {
         var hugeOffsets = HugeLongArray.of(offsets);
         var ordering = PageReordering.ordering(hugeOffsets, nodeFilter, pageCount, pageShift);
 
-        assertThat(ordering.ordering()).isEqualTo(new int[] { 1, 0 });
-        assertThat(ordering.pageOffsets()).isEqualTo(new long[]{0, 3, 7});
+        assertThat(ordering.distinctOrdering()).isEqualTo(new int[] { 1, 0 });
+        assertThat(ordering.shrinkToFitPageOffsets()).isEqualTo(new long[]{0, 3, 7});
 
-        PageReordering.reorder(pages, ordering.ordering());
+        PageReordering.reorder(pages, ordering.distinctOrdering());
 
         assertThat(pages).isEqualTo(new long[][]{red, blue});
 
         PageReordering.rewriteOffsets(hugeOffsets, ordering, nodeFilter, pageShift);
 
         assertThat(hugeOffsets.toArray()).isEqualTo(new long[]{0x00, 0x02, 0x03, /* page boundary */ 0x10, 0x13, 0x00, 0x15});
+    }
+
+    @Test
+    void testOrderingWithRecurringPages() {
+        var pageCount = 3;
+        var pageShift = 4;
+
+        var offsets = new long[] { 0, 16, 7, 32, 33 };
+        var hugeOffsets = HugeLongArray.of(offsets);
+
+        var ordering = PageReordering.ordering(hugeOffsets, node -> true, pageCount, pageShift);
+
+        assertThat(ordering.distinctOrdering()).isEqualTo(new int[]{0, 1, 2});
+        assertThat(ordering.shrinkToFitReverseOrdering()).isEqualTo(new int[]{0, 1, 0, 2});
+        assertThat(ordering.shrinkToFitPageOffsets()).isEqualTo(new long[]{0, 1, 2, 3, 5});
+    }
+
+    @Test
+    void testRewriteOffsetsWithRecurringPages() {
+        var pageCount = 3;
+        var pageShift = 4;
+
+        var offsets = new long[] { 0, 16, 7, 32, 33 };
+        var hugeOffsets = HugeLongArray.of(offsets);
+
+        var ordering = PageReordering.ordering(hugeOffsets, node -> true, pageCount, pageShift);
+
+        PageReordering.rewriteOffsets(hugeOffsets, ordering, node -> true, pageShift);
+
+        assertThat(hugeOffsets.toArray()).isEqualTo(new long[]{0, 16, 7, 32, 33});
     }
 
 }

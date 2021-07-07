@@ -19,6 +19,10 @@
  */
 package org.neo4j.graphalgo.core.utils;
 
+import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.IntArrayList;
+import com.carrotsearch.hppc.LongArrayList;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
@@ -34,9 +38,23 @@ public final class PageReordering {
 
     @ValueClass
     public interface PageOrdering {
-        int[] ordering();
+        int[] distinctOrdering();
+
+        int[] reverseOrdering();
 
         long[] pageOffsets();
+
+        int length();
+
+        @TestOnly
+        default int[] shrinkToFitReverseOrdering() {
+            return Arrays.copyOf(reverseOrdering(), length());
+        }
+
+        @TestOnly
+        default long[] shrinkToFitPageOffsets() {
+            return Arrays.copyOf(pageOffsets(), length() + 1);
+        }
     }
 
     /**
@@ -92,7 +110,7 @@ public final class PageReordering {
             pages.length,
             PAGE_SHIFT
         );
-        reorder(pages, ordering.ordering());
+        reorder(pages, ordering.distinctOrdering());
         rewriteOffsets(offsets, ordering, node -> degrees.get(node) > 0, PAGE_SHIFT);
     }
 
@@ -104,11 +122,14 @@ public final class PageReordering {
     ) {
         var cursor = offsets.initCursor(offsets.newCursor());
 
-        long[] pageOffsets = new long[pageCount + 1];
-        int[] ordering = new int[pageCount];
+        var pageOffsets = new LongArrayList(pageCount + 1);
+        var ordering = new IntArrayList(pageCount);
+        int[] distinctOrdering = new int[pageCount];
+        int[] reverseDistinctOrdering = new int[pageCount];
 
         int idx = 0;
         int prevPageIdx = -1;
+        var seenPages = new BitSet(pageCount);
 
         while (cursor.next()) {
             var array = cursor.array;
@@ -126,19 +147,25 @@ public final class PageReordering {
                 var pageIdx = (int) (offset >>> pageShift);
 
                 if (pageIdx != prevPageIdx) {
-                    ordering[idx] = pageIdx;
-                    pageOffsets[idx] = nodeId;
+                    if (!seenPages.getAndSet(pageIdx)) {
+                        distinctOrdering[idx] = pageIdx;
+                        reverseDistinctOrdering[pageIdx] = idx;
+                        idx = idx + 1;
+                    }
+                    ordering.add(reverseDistinctOrdering[pageIdx]);
+                    pageOffsets.add(nodeId);
                     prevPageIdx = pageIdx;
-                    idx = idx + 1;
                 }
             }
         }
-        pageOffsets[idx] = offsets.size();
+        pageOffsets.add(offsets.size());
 
         return ImmutablePageOrdering
             .builder()
-            .ordering(ordering)
-            .pageOffsets(pageOffsets)
+            .distinctOrdering(distinctOrdering)
+            .reverseOrdering(ordering.buffer)
+            .length(ordering.elementsCount)
+            .pageOffsets(pageOffsets.buffer)
             .build();
     }
 
@@ -189,21 +216,24 @@ public final class PageReordering {
         var pageOffsets = pageOrdering.pageOffsets();
         var cursor = offsets.newCursor();
 
-        for (int pageId = 0; pageId < pageOffsets.length - 1; pageId++) {
-            // higher bits in pageId part are set to the pageId
-            long newPageId = ((long) pageId) << pageShift;
+        var ordering = pageOrdering.reverseOrdering();
+        var length = pageOrdering.length();
 
-            long startIdx = pageOffsets[pageId];
-            long endIdx = pageOffsets[pageId + 1];
+        for (int i = 0; i < length; i++) {
+            // higher bits in pageId part are set to the pageId
+            long newPageId = ((long) ordering[i]) << pageShift;
+
+            long startIdx = pageOffsets[i];
+            long endIdx = pageOffsets[i + 1];
 
             offsets.initCursor(cursor, startIdx, endIdx);
             while (cursor.next()) {
                 var array = cursor.array;
                 var limit = cursor.limit;
                 long baseNodeId = cursor.base;
-                for (int i = cursor.offset; i < limit; i++) {
-                    array[i] = nodeFilter.test(baseNodeId + i)
-                        ? (array[i] & pageMask) | newPageId
+                for (int j = cursor.offset; j < limit; j++) {
+                    array[j] = nodeFilter.test(baseNodeId + j)
+                        ? (array[j] & pageMask) | newPageId
                         : ZERO_DEGREE_OFFSET;
                 }
             }

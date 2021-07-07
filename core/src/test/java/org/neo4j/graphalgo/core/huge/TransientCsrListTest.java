@@ -21,8 +21,10 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.Relationships;
@@ -170,9 +172,21 @@ class TransientCsrListTest {
         });
     }
 
+    static Stream<Arguments> testRunnersAndDegrees() {
+        return TestSupport.crossArguments(
+            () -> TestMethodRunner.adjacencyCompressions().map(Arguments::of),
+            () -> Stream.of(
+                // creates 3 pages .. page0: 200_000, page1 (oversize): node count, page2: 200_000
+                Arguments.of(200_000, 200_000),
+                // creates 2 pages .. page0: 1337, page1 (oversize): node count, page0 (reuse): 42
+                Arguments.of(1337, 42)
+            )
+        );
+    }
+
     @ParameterizedTest
-    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#adjacencyCompressions")
-    void shouldWorkWithVeryDenseNodes(TestMethodRunner runner) {
+    @MethodSource("testRunnersAndDegrees")
+    void shouldWorkWithVeryDenseNodes(TestMethodRunner runner, long firstDegree, long secondDegree) {
         runner.run(() -> {
             int nodeCount = 1_000_000;
             var tracker = AllocationTracker.empty();
@@ -196,7 +210,7 @@ class TransientCsrListTest {
                 .tracker(tracker)
                 .build();
 
-            for (int i = 1; i <= 200_000; i++) {
+            for (int i = 1; i <= firstDegree; i++) {
                 relsBuilder.add(0, i);
             }
 
@@ -204,7 +218,7 @@ class TransientCsrListTest {
                 relsBuilder.add(1, i);
             }
 
-            for (int i = 3; i < 200_000; i++) {
+            for (int i = 3; i < secondDegree; i++) {
                 relsBuilder.add(2, i + 100_000);
             }
 
@@ -214,9 +228,9 @@ class TransientCsrListTest {
 
             assertThat(graph.nodeCount()).isEqualTo(nodeCount);
 
-            assertThat(graph.degree(0)).isEqualTo(200_000);
+            assertThat(graph.degree(0)).isEqualTo(firstDegree);
             assertThat(graph.degree(1)).isEqualTo(nodeCount - 1);
-            assertThat(graph.degree(2)).isEqualTo(200_000 - 1);
+            assertThat(graph.degree(2)).isEqualTo(secondDegree - 1);
 
 
             var sum0 = new MutableLong(0);
@@ -224,7 +238,7 @@ class TransientCsrListTest {
                 sum0.add(targetNodeId);
                 return true;
             });
-            assertThat(sum0.longValue()).isEqualTo(LongStream.rangeClosed(1, 200_000).sum());
+            assertThat(sum0.longValue()).isEqualTo(LongStream.rangeClosed(1, firstDegree).sum());
 
 
             var sum1 = new MutableLong(0);
@@ -241,7 +255,7 @@ class TransientCsrListTest {
                 return true;
             });
             assertThat(sum2.longValue())
-                .isEqualTo(LongStream.range(3, 200_000).map(i -> i + 100_000).sum() + /* undirected from 1 */ 1);
+                .isEqualTo(LongStream.range(3, secondDegree).map(i -> i + 100_000).sum() + /* undirected from 1 */ 1);
         });
     }
 
