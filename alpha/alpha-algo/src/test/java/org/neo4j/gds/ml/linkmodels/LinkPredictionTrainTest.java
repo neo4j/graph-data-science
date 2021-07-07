@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.graphalgo.Orientation;
@@ -166,15 +167,19 @@ class LinkPredictionTrainTest {
         var trainGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
         var testGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
 
-        var nodeCount = 15;
+        var nodeCount = graphStore.nodeCount();
         var totalPositives = 16;
         double maxNumberOfRelationships = nodeCount * (nodeCount - 1) / 2d;
         double totalNegatives = maxNumberOfRelationships - totalPositives;
         var classRatio = totalNegatives / totalPositives;
 
-        var expectedWinner = new LinkLogisticRegressionTrainConfigImpl(
+        var concurrency = 4;
+        var sharedUpdater = true;
+
+        var expectedWinner = LinkLogisticRegressionTrainConfig.of(
             List.of("array"),
-            CypherMapWrapper.create(Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10))
+            concurrency,
+            Map.of("maxEpochs", 1000, "minEpochs", 10, "sharedUpdater", sharedUpdater)
         );
 
         var config = ImmutableLinkPredictionTrainConfig.builder()
@@ -184,10 +189,11 @@ class LinkPredictionTrainTest {
             .modelName("model")
             .validationFolds(3)
             .randomSeed(-1L)
+            .concurrency(concurrency)
             .negativeClassWeight(classRatio)
             .params(List.of(
-                Map.of("maxEpochs", 10, "penalty", 1000000),
-                Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10)
+                Map.of("maxEpochs", 10, "penalty", 1000000, "sharedUpdater", sharedUpdater),
+                Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10, "sharedUpdater", sharedUpdater)
             )).build();
 
         var linkPredictionTrain = new LinkPredictionTrain(
