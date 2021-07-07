@@ -212,7 +212,224 @@ YIELD
 ======
 ====
 
+
 == Examples
+
+In order to demonstrate the GDS capabilities over node properties, we are going to create a small graph in Neo4j and project it into our graph catalog.
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (bob:Person {name: 'Bob'}),
+  (carol:Person {name: 'Carol'}),
+  (dave:Person {name: 'Dave'}),
+  (eve:Person {name: 'Eve'}),
+  (guitar:Instrument {name: 'Guitar'}),
+  (synth:Instrument {name: 'Synthesizer'}),
+  (bongos:Instrument {name: 'Bongos'}),
+  (trumpet:Instrument {name: 'Trumpet'}),
+
+  (alice)-[:LIKES { score: 5 }]->(guitar),
+  (alice)-[:LIKES { score: 4 }]->(synth),
+  (alice)-[:LIKES { score: 3, strength: 0.5}]->(bongos),
+  (bob)-[:LIKES { score: 4 }]->(guitar),
+  (bob)-[:LIKES { score: 5 }]->(synth),
+  (carol)-[:LIKES { score: 2 }]->(bongos),
+  (dave)-[:LIKES { score: 3 }]->(guitar),
+  (dave)-[:LIKES { score: 1 }]->(synth),
+  (dave)-[:LIKES { score: 5 }]->(bongos);
+----
+
+.Project the graph:
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+  'personsAndInstruments',
+  ['Person', 'Instrument'],
+  {
+    LIKES: {
+      type: 'LIKES',
+      properties: {
+        strength: {
+          property: 'strength',
+          defaultValue: 1.0
+        },
+        score: {
+          property: 'score'
+        }
+      }
+    }
+  }
+);
+----
+
+.Compute the Node Similarity in our graph:
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.nodeSimilarity.mutate('personsAndInstruments', {
+  mutateRelationshipType: 'SIMILAR',
+  mutateProperty: 'score'
+})
+----
+
+
+=== Stream
+
+==== Single property
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('personsAndInstruments', 'score')
+YIELD
+  sourceNodeId, targetNodeId, relationshipType, propertyValue
+RETURN
+  sourceNodeId, targetNodeId, relationshipType, propertyValue
+ORDER BY sourceNodeId ASC, targetNodeId ASC
+----
+
+.Results
+[opts="header"]
+|===
+| sourceNodeId  | targetNodeId  | relationshipType  | propertyValue
+| 0             | 1             | "SIMILAR"         | 0.6666666666666666
+| 0             | 2             | "SIMILAR"         | 0.3333333333333333
+| 0             | 3             | "SIMILAR"         | 1.0
+| 0             | 5             | "LIKES"           | 5.0
+| 0             | 6             | "LIKES"           | 4.0
+| 0             | 7             | "LIKES"           | 3.0
+| 1             | 0             | "SIMILAR"         | 0.6666666666666666
+| 1             | 3             | "SIMILAR"         | 0.6666666666666666
+| 1             | 5             | "LIKES"           | 4.0
+| 1             | 6             | "LIKES"           | 5.0
+| 2             | 0             | "SIMILAR"         | 0.3333333333333333
+| 2             | 3             | "SIMILAR"         | 0.3333333333333333
+| 2             | 7             | "LIKES"           | 2.0
+| 3             | 0             | "SIMILAR"         | 1.0
+| 3             | 1             | "SIMILAR"         | 0.6666666666666666
+| 3             | 2             | "SIMILAR"         | 0.3333333333333333
+| 3             | 5             | "LIKES"           | 3.0
+| 3             | 6             | "LIKES"           | 1.0
+| 3             | 7             | "LIKES"           | 5.0
+|===
+--
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('personsAndInstruments', 'score', ['SIMILAR'])
+YIELD
+  sourceNodeId, targetNodeId, relationshipType, propertyValue
+RETURN
+  sourceNodeId, targetNodeId, relationshipType, propertyValue
+ORDER BY sourceNodeId ASC, targetNodeId ASC
+----
+
+.Results
+[opts="header"]
+|===
+| sourceNodeId | targetNodeId |	relationshipType | propertyValue
+| 0            | 1            |	"SIMILAR"        | 0.6666666666666666
+| 0            | 2            |	"SIMILAR"        | 0.3333333333333333
+| 0            | 3            |	"SIMILAR"        | 1.0
+| 1            | 0            |	"SIMILAR"        | 0.6666666666666666
+| 1            | 3            |	"SIMILAR"        | 0.6666666666666666
+| 2            | 0            |	"SIMILAR"        | 0.3333333333333333
+| 2            | 3            |	"SIMILAR"        | 0.3333333333333333
+| 3            | 0            |	"SIMILAR"        | 1.0
+| 3            | 1            |	"SIMILAR"        | 0.6666666666666666
+| 3            | 2            |	"SIMILAR"        | 0.3333333333333333
+|===
+--
+
+==== Multiple properties
+
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperties('personsAndInstruments', ['score', 'strength'], ['LIKES'])
+YIELD
+  sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue
+RETURN
+  sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue
+ORDER BY sourceNodeId ASC, targetNodeId ASC
+----
+
+.Results
+[opts="header"]
+|===
+| sourceNodeId | targetNodeId |	relationshipType |	relationshipProperty |	propertyValue
+| 0            | 5            |	"LIKES"	         | "score"               |	5.0
+| 0            | 5            |	"LIKES"	         | "strength"            |	1.0
+| 0            | 6            |	"LIKES"	         | "score"               |	4.0
+| 0            | 6            |	"LIKES"	         | "strength"            |	1.0
+| 0            | 7            |	"LIKES"	         | "score"               |	3.0
+| 0            | 7            |	"LIKES"	         | "strength"            |	0.5
+| 1            | 5            |	"LIKES"	         | "score"               |	4.0
+| 1            | 5            |	"LIKES"	         | "strength"            |	1.0
+| 1            | 6            |	"LIKES"	         | "score"               |	5.0
+| 1            | 6            |	"LIKES"	         | "strength"            |	1.0
+| 2            | 7            |	"LIKES"	         | "score"               |	2.0
+| 2            | 7            |	"LIKES"	         | "strength"            |	1.0
+| 3            | 5            |	"LIKES"	         | "score"               |	3.0
+| 3            | 5            |	"LIKES"	         | "strength"            |	1.0
+| 3            | 6            |	"LIKES"	         | "score"               |	1.0
+| 3            | 6            |	"LIKES"	         | "strength"            |	1.0
+| 3            | 7            |	"LIKES"	         | "score"               |	5.0
+| 3            | 7            |	"LIKES"	         | "strength"            |	1.0
+|===
+--
+
+
+==== Multiple relationship types
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperties('personsAndInstruments', ['score'], ['LIKES', 'SIMILAR'])
+YIELD
+  sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue
+RETURN
+  sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue
+ORDER BY sourceNodeId ASC, targetNodeId ASC
+----
+
+.Results
+[opts="header"]
+|===
+| sourceNodeId  |targetNodeId  | relationshipType  |relationshipProperty  | propertyValue
+| 0             | 1            | "SIMILAR"         | "score"              | 0.6666666666666666
+| 0             | 2            | "SIMILAR"         | "score"              | 0.3333333333333333
+| 0             | 3            | "SIMILAR"         | "score"              | 1.0
+| 0             | 5            | "LIKES"           | "score"              | 5.0
+| 0             | 6            | "LIKES"           | "score"              | 4.0
+| 0             | 7            | "LIKES"           | "score"              | 3.0
+| 1             | 0            | "SIMILAR"         | "score"              | 0.6666666666666666
+| 1             | 3            | "SIMILAR"         | "score"              | 0.6666666666666666
+| 1             | 5            | "LIKES"           | "score"              | 4.0
+| 1             | 6            | "LIKES"           | "score"              | 5.0
+| 2             | 0            | "SIMILAR"         | "score"              | 0.3333333333333333
+| 2             | 3            | "SIMILAR"         | "score"              | 0.3333333333333333
+| 2             | 7            | "LIKES"           | "score"              | 2.0
+| 3             | 0            | "SIMILAR"         | "score"              | 1.0
+| 3             | 1            | "SIMILAR"         | "score"              | 0.6666666666666666
+| 3             | 2            | "SIMILAR"         | "score"              | 0.3333333333333333
+| 3             | 5            | "LIKES"           | "score"              | 3.0
+| 3             | 6            | "LIKES"           | "score"              | 1.0
+| 3             | 7            | "LIKES"           | "score"              | 5.0
+|===
+--
+
+=== Write
+
+=== Remove
 
 include::graph-stream-relationship-properties.adoc[leveloffset=+1]
 
