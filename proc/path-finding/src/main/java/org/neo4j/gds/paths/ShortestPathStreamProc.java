@@ -54,9 +54,17 @@ public abstract class ShortestPathStreamProc<
                 .anyMatch(field -> toLowerCaseWithLocale(field).equals("path"));
 
             var resultBuilder = new StreamResult.Builder(graph, transaction.internalTransaction());
-            return computationResult
+
+            var resultStream = computationResult
                 .result()
                 .mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
+
+            // this is necessary in order to close the result stream which triggers
+            // the progress tracker to close its root task
+            try(var statement = transaction.acquireStatement()) {
+                statement.registerCloseableResource(resultStream);
+            }
+            return resultStream;
         });
     }
 }

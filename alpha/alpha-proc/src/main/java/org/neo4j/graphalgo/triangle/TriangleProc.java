@@ -64,7 +64,11 @@ public class TriangleProc extends AlgoBaseProc<TriangleStream, Stream<TriangleSt
             return Stream.empty();
         }
 
-        return computationResult.result();
+        var resultStream = computationResult.result();
+        try(var statement = transaction.acquireStatement()) {
+            statement.registerCloseableResource(resultStream);
+        }
+        return resultStream;
     }
 
     @Override

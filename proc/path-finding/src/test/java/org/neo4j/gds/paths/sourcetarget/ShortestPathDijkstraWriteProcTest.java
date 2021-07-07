@@ -28,12 +28,18 @@ import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.logging.Log;
+import org.neo4j.logging.LogProvider;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,6 +51,8 @@ import static org.neo4j.graphalgo.config.WriteRelationshipConfig.WRITE_RELATIONS
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraWriteConfig> {
+
+    TestLog testLog;
 
     @Override
     public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraWriteConfig>> getProcedureClazz() {
@@ -65,6 +73,24 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
         }
 
         return mapWrapper;
+    }
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        testLog = new TestLog();
+        builder.setUserLogProvider(new LogProvider() {
+            @Override
+            public Log getLog(Class<?> loggingClass) {
+                return testLog;
+            }
+
+            @Override
+            public Log getLog(String name) {
+                return testLog;
+            }
+        });
     }
 
     @Test
@@ -134,5 +160,24 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
             }
         });
         assertEquals(1, rowCount.getValue());
+    }
+
+    @Test
+    void testLazyComputationLoggingFinishes() {
+        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
+
+        var query = GdsCypher.call().explicitCreation("graph")
+            .algo("gds.shortestPath.dijkstra")
+            .writeMode()
+            .addParameter("sourceNode", config.sourceNode())
+            .addParameter("targetNode", config.targetNode())
+            .addParameter("relationshipWeightProperty", "cost")
+            .addParameter("writeRelationshipType", "BAR")
+            .yields();
+
+        runQuery(query);
+
+        var messages = testLog.getMessages(TestLog.INFO);
+        assertThat(messages.get(messages.size() - 1)).contains(":: Finished");
     }
 }

@@ -125,10 +125,10 @@ public final class TriangleStream extends Algorithm<TriangleStream, Stream<Trian
             }
         };
 
-        progressTracker.endSubTask();
         return StreamSupport
                 .stream(Spliterators.spliteratorUnknownSize(it, 0), false)
-                .filter(Objects::nonNull);
+                .filter(Objects::nonNull)
+                .onClose(progressTracker::endSubTask);
     }
 
     private void submitTasks() {

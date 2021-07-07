@@ -72,21 +72,28 @@ public abstract class ShortestPathWriteProc<ALGO extends Algorithm<ALGO, Dijkstr
                     createValues(graph, pathResult, writeNodeIds, writeCosts)
                 ));
 
-            var exporter = RelationshipStreamExporter
-                .builder(
-                    TransactionContext.of(api, procedureTransaction),
-                    computationResult.graph(),
-                    relationshipStream,
-                    algorithm.getTerminationFlag()
-                )
-                .withLog(log)
-                .build();
+            // this is necessary in order to close the relationship stream which triggers
+            // the progress tracker to close its root task
+            try (var statement = transaction.acquireStatement()) {
+                statement.registerCloseableResource(relationshipStream);
 
-            try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                resultBuilder.withRelationshipsWritten(exporter.write(
-                    writeRelationshipType,
-                    createKeys(writeNodeIds, writeCosts)
-                ));
+                var exporter = RelationshipStreamExporter
+                    .builder(
+                        TransactionContext.of(api, procedureTransaction),
+                        computationResult.graph(),
+                        relationshipStream,
+                        algorithm.getTerminationFlag()
+                    )
+                    .withLog(log)
+                    .build();
+
+
+                try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
+                    resultBuilder.withRelationshipsWritten(exporter.write(
+                        writeRelationshipType,
+                        createKeys(writeNodeIds, writeCosts)
+                    ));
+                }
             }
 
             return Stream.of(resultBuilder.build());

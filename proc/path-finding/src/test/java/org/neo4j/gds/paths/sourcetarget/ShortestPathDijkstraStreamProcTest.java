@@ -27,9 +27,13 @@ import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.logging.Log;
+import org.neo4j.logging.LogProvider;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,9 +41,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<ShortestPathDijkstraStreamConfig> {
+
+    TestLog testLog;
 
     @Override
     public Class<? extends AlgoBaseProc<Dijkstra, DijkstraResult, ShortestPathDijkstraStreamConfig>> getProcedureClazz() {
@@ -49,6 +58,24 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
     @Override
     public ShortestPathDijkstraStreamConfig createConfig(CypherMapWrapper mapWrapper) {
         return ShortestPathDijkstraStreamConfig.of("", Optional.empty(), Optional.empty(), mapWrapper);
+    }
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        testLog = new TestLog();
+        builder.setUserLogProvider(new LogProvider() {
+            @Override
+            public Log getLog(Class<?> loggingClass) {
+                return testLog;
+            }
+
+            @Override
+            public Log getLog(String name) {
+                return testLog;
+            }
+        });
     }
 
     @Test
@@ -63,7 +90,7 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
             .addParameter("relationshipWeightProperty", "cost")
             .yields();
 
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        runInTransaction(db, tx -> {
             PathFactory.RelationshipIds.set(0);
             var expectedPath = PathFactory.create(
                 tx,
@@ -83,5 +110,23 @@ class ShortestPathDijkstraStreamProcTest extends ShortestPathDijkstraProcTest<Sh
             PathFactory.RelationshipIds.set(0);
             assertCypherResult(query, List.of(expected));
         });
+    }
+
+    @Test
+    void testLazyComputationLoggingFinishes() {
+        var config = createConfig(createMinimalConfig(CypherMapWrapper.empty()));
+
+        var query = GdsCypher.call().explicitCreation("graph")
+            .algo("gds.shortestPath.dijkstra")
+            .streamMode()
+            .addParameter("sourceNode", config.sourceNode())
+            .addParameter("targetNode", config.targetNode())
+            .addParameter("relationshipWeightProperty", "cost")
+            .yields();
+
+        runInTransaction(db, tx -> runQueryWithoutClosingTheResult(tx, query, Map.of()).next());
+
+        var messages = testLog.getMessages(TestLog.INFO);
+        assertThat(messages.get(messages.size() - 1)).contains(":: Finished");
     }
 }
