@@ -241,7 +241,7 @@ CREATE
   (carol)-[:LIKES { score: 2 }]->(bongos),
   (dave)-[:LIKES { score: 3 }]->(guitar),
   (dave)-[:LIKES { score: 1 }]->(synth),
-  (dave)-[:LIKES { score: 5 }]->(bongos);
+  (dave)-[:LIKES { score: 5 }]->(bongos)
 ----
 
 .Project the graph:
@@ -264,7 +264,7 @@ CALL gds.graph.create(
       }
     }
   }
-);
+)
 ----
 
 .Compute the Node Similarity in our graph:
@@ -289,33 +289,33 @@ CALL gds.graph.streamRelationshipProperty('personsAndInstruments', 'score')
 YIELD
   sourceNodeId, targetNodeId, relationshipType, propertyValue
 RETURN
-  sourceNodeId, targetNodeId, relationshipType, propertyValue
-ORDER BY sourceNodeId ASC, targetNodeId ASC
+  gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, relationshipType, propertyValue
+ORDER BY source ASC, target ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| sourceNodeId  | targetNodeId  | relationshipType  | propertyValue
-| 0             | 1             | "SIMILAR"         | 0.6666666666666666
-| 0             | 2             | "SIMILAR"         | 0.3333333333333333
-| 0             | 3             | "SIMILAR"         | 1.0
-| 0             | 5             | "LIKES"           | 5.0
-| 0             | 6             | "LIKES"           | 4.0
-| 0             | 7             | "LIKES"           | 3.0
-| 1             | 0             | "SIMILAR"         | 0.6666666666666666
-| 1             | 3             | "SIMILAR"         | 0.6666666666666666
-| 1             | 5             | "LIKES"           | 4.0
-| 1             | 6             | "LIKES"           | 5.0
-| 2             | 0             | "SIMILAR"         | 0.3333333333333333
-| 2             | 3             | "SIMILAR"         | 0.3333333333333333
-| 2             | 7             | "LIKES"           | 2.0
-| 3             | 0             | "SIMILAR"         | 1.0
-| 3             | 1             | "SIMILAR"         | 0.6666666666666666
-| 3             | 2             | "SIMILAR"         | 0.3333333333333333
-| 3             | 5             | "LIKES"           | 3.0
-| 3             | 6             | "LIKES"           | 1.0
-| 3             | 7             | "LIKES"           | 5.0
+| source  | target        | relationshipType  | propertyValue
+| "Alice" | "Bob"         | "SIMILAR"         | 0.6666666666666666
+| "Alice" | "Bongos"      | "LIKES"           | 3.0
+| "Alice" | "Carol"       | "SIMILAR"         | 0.3333333333333333
+| "Alice" | "Dave"        | "SIMILAR"         | 1.0
+| "Alice" | "Guitar"      | "LIKES"           | 5.0
+| "Alice" | "Synthesizer" | "LIKES"           | 4.0
+| "Bob"   | "Alice"       | "SIMILAR"         | 0.6666666666666666
+| "Bob"   | "Dave"        | "SIMILAR"         | 0.6666666666666666
+| "Bob"   | "Guitar"      | "LIKES"           | 4.0
+| "Bob"   | "Synthesizer" | "LIKES"           | 5.0
+| "Carol" | "Alice"       | "SIMILAR"         | 0.3333333333333333
+| "Carol" | "Bongos"      | "LIKES"           | 2.0
+| "Carol" | "Dave"        | "SIMILAR"         | 0.3333333333333333
+| "Dave"  | "Alice"       | "SIMILAR"         | 1.0
+| "Dave"  | "Bob"         | "SIMILAR"         | 0.6666666666666666
+| "Dave"  | "Bongos"      | "LIKES"           | 5.0
+| "Dave"  | "Carol"       | "SIMILAR"         | 0.3333333333333333
+| "Dave"  | "Guitar"      | "LIKES"           | 3.0
+| "Dave"  | "Synthesizer" | "LIKES"           | 1.0
 |===
 --
 
@@ -327,24 +327,24 @@ CALL gds.graph.streamRelationshipProperty('personsAndInstruments', 'score', ['SI
 YIELD
   sourceNodeId, targetNodeId, relationshipType, propertyValue
 RETURN
-  sourceNodeId, targetNodeId, relationshipType, propertyValue
-ORDER BY sourceNodeId ASC, targetNodeId ASC
+  gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, relationshipType, propertyValue
+ORDER BY source ASC, target ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| sourceNodeId | targetNodeId |	relationshipType | propertyValue
-| 0            | 1            |	"SIMILAR"        | 0.6666666666666666
-| 0            | 2            |	"SIMILAR"        | 0.3333333333333333
-| 0            | 3            |	"SIMILAR"        | 1.0
-| 1            | 0            |	"SIMILAR"        | 0.6666666666666666
-| 1            | 3            |	"SIMILAR"        | 0.6666666666666666
-| 2            | 0            |	"SIMILAR"        | 0.3333333333333333
-| 2            | 3            |	"SIMILAR"        | 0.3333333333333333
-| 3            | 0            |	"SIMILAR"        | 1.0
-| 3            | 1            |	"SIMILAR"        | 0.6666666666666666
-| 3            | 2            |	"SIMILAR"        | 0.3333333333333333
+|  source | target  | relationshipType  | propertyValue
+| "Alice" | "Bob"   | "SIMILAR"         | 0.6666666666666666
+| "Alice" | "Carol" | "SIMILAR"         | 0.3333333333333333
+| "Alice" | "Dave"  | "SIMILAR"         | 1.0
+| "Bob"   | "Alice" | "SIMILAR"         | 0.6666666666666666
+| "Bob"   | "Dave"  | "SIMILAR"         | 0.6666666666666666
+| "Carol" | "Alice" | "SIMILAR"         | 0.3333333333333333
+| "Carol" | "Dave"  | "SIMILAR"         | 0.3333333333333333
+| "Dave"  | "Alice" | "SIMILAR"         | 1.0
+| "Dave"  | "Bob"   | "SIMILAR"         | 0.6666666666666666
+| "Dave"  | "Carol" | "SIMILAR"         | 0.3333333333333333
 |===
 --
 
@@ -358,32 +358,32 @@ CALL gds.graph.streamRelationshipProperties('personsAndInstruments', ['score', '
 YIELD
   sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue
 RETURN
-  sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue
-ORDER BY sourceNodeId ASC, targetNodeId ASC
+  gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, relationshipType, relationshipProperty, propertyValue
+ORDER BY source ASC, target ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| sourceNodeId | targetNodeId |	relationshipType |	relationshipProperty |	propertyValue
-| 0            | 5            |	"LIKES"	         | "score"               |	5.0
-| 0            | 5            |	"LIKES"	         | "strength"            |	1.0
-| 0            | 6            |	"LIKES"	         | "score"               |	4.0
-| 0            | 6            |	"LIKES"	         | "strength"            |	1.0
-| 0            | 7            |	"LIKES"	         | "score"               |	3.0
-| 0            | 7            |	"LIKES"	         | "strength"            |	0.5
-| 1            | 5            |	"LIKES"	         | "score"               |	4.0
-| 1            | 5            |	"LIKES"	         | "strength"            |	1.0
-| 1            | 6            |	"LIKES"	         | "score"               |	5.0
-| 1            | 6            |	"LIKES"	         | "strength"            |	1.0
-| 2            | 7            |	"LIKES"	         | "score"               |	2.0
-| 2            | 7            |	"LIKES"	         | "strength"            |	1.0
-| 3            | 5            |	"LIKES"	         | "score"               |	3.0
-| 3            | 5            |	"LIKES"	         | "strength"            |	1.0
-| 3            | 6            |	"LIKES"	         | "score"               |	1.0
-| 3            | 6            |	"LIKES"	         | "strength"            |	1.0
-| 3            | 7            |	"LIKES"	         | "score"               |	5.0
-| 3            | 7            |	"LIKES"	         | "strength"            |	1.0
+| source  | target        | relationshipType  | relationshipProperty  | propertyValue
+| "Alice" | "Bongos"      | "LIKES"           | "score"               | 3.0
+| "Alice" | "Bongos"      | "LIKES"           | "strength"            | 0.5
+| "Alice" | "Guitar"      | "LIKES"           | "score"               | 5.0
+| "Alice" | "Guitar"      | "LIKES"           | "strength"            | 1.0
+| "Alice" | "Synthesizer" | "LIKES"           | "score"               | 4.0
+| "Alice" | "Synthesizer" | "LIKES"           | "strength"            | 1.0
+| "Bob"   | "Guitar"      | "LIKES"           | "score"               | 4.0
+| "Bob"   | "Guitar"      | "LIKES"           | "strength"            | 1.0
+| "Bob"   | "Synthesizer" | "LIKES"           | "score"               | 5.0
+| "Bob"   | "Synthesizer" | "LIKES"           | "strength"            | 1.0
+| "Carol" | "Bongos"      | "LIKES"           | "score"               | 2.0
+| "Carol" | "Bongos"      | "LIKES"           | "strength"            | 1.0
+| "Dave"  | "Bongos"      | "LIKES"           | "score"               | 5.0
+| "Dave"  | "Bongos"      | "LIKES"           | "strength"            | 1.0
+| "Dave"  | "Guitar"      | "LIKES"           | "score"               | 3.0
+| "Dave"  | "Guitar"      | "LIKES"           | "strength"            | 1.0
+| "Dave"  | "Synthesizer" | "LIKES"           | "score"               | 1.0
+| "Dave"  | "Synthesizer" | "LIKES"           | "strength"            | 1.0
 |===
 --
 
@@ -398,33 +398,33 @@ CALL gds.graph.streamRelationshipProperties('personsAndInstruments', ['score'], 
 YIELD
   sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue
 RETURN
-  sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue
-ORDER BY sourceNodeId ASC, targetNodeId ASC
+  gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, relationshipType, relationshipProperty, propertyValue
+ORDER BY source ASC, target ASC
 ----
 
 .Results
 [opts="header"]
 |===
-| sourceNodeId  |targetNodeId  | relationshipType  |relationshipProperty  | propertyValue
-| 0             | 1            | "SIMILAR"         | "score"              | 0.6666666666666666
-| 0             | 2            | "SIMILAR"         | "score"              | 0.3333333333333333
-| 0             | 3            | "SIMILAR"         | "score"              | 1.0
-| 0             | 5            | "LIKES"           | "score"              | 5.0
-| 0             | 6            | "LIKES"           | "score"              | 4.0
-| 0             | 7            | "LIKES"           | "score"              | 3.0
-| 1             | 0            | "SIMILAR"         | "score"              | 0.6666666666666666
-| 1             | 3            | "SIMILAR"         | "score"              | 0.6666666666666666
-| 1             | 5            | "LIKES"           | "score"              | 4.0
-| 1             | 6            | "LIKES"           | "score"              | 5.0
-| 2             | 0            | "SIMILAR"         | "score"              | 0.3333333333333333
-| 2             | 3            | "SIMILAR"         | "score"              | 0.3333333333333333
-| 2             | 7            | "LIKES"           | "score"              | 2.0
-| 3             | 0            | "SIMILAR"         | "score"              | 1.0
-| 3             | 1            | "SIMILAR"         | "score"              | 0.6666666666666666
-| 3             | 2            | "SIMILAR"         | "score"              | 0.3333333333333333
-| 3             | 5            | "LIKES"           | "score"              | 3.0
-| 3             | 6            | "LIKES"           | "score"              | 1.0
-| 3             | 7            | "LIKES"           | "score"              | 5.0
+| source  | target        | relationshipType  | relationshipProperty  | propertyValue
+| "Alice" | "Bob"         | "SIMILAR"         | "score"               | 0.6666666666666666
+| "Alice" | "Bongos"      | "LIKES"           | "score"               | 3.0
+| "Alice" | "Carol"       | "SIMILAR"         | "score"               | 0.3333333333333333
+| "Alice" | "Dave"        | "SIMILAR"         | "score"               | 1.0
+| "Alice" | "Guitar"      | "LIKES"           | "score"               | 5.0
+| "Alice" | "Synthesizer" | "LIKES"           | "score"               | 4.0
+| "Bob"   | "Alice"       | "SIMILAR"         | "score"               | 0.6666666666666666
+| "Bob"   | "Dave"        | "SIMILAR"         | "score"               | 0.6666666666666666
+| "Bob"   | "Guitar"      | "LIKES"           | "score"               | 4.0
+| "Bob"   | "Synthesizer" | "LIKES"           | "score"               | 5.0
+| "Carol" | "Alice"       | "SIMILAR"         | "score"               | 0.3333333333333333
+| "Carol" | "Bongos"      | "LIKES"           | "score"               | 2.0
+| "Carol" | "Dave"        | "SIMILAR"         | "score"               | 0.3333333333333333
+| "Dave"  | "Alice"       | "SIMILAR"         | "score"               | 1.0
+| "Dave"  | "Bob"         | "SIMILAR"         | "score"               | 0.6666666666666666
+| "Dave"  | "Bongos"      | "LIKES"           | "score"               | 5.0
+| "Dave"  | "Carol"       | "SIMILAR"         | "score"               | 0.3333333333333333
+| "Dave"  | "Guitar"      | "LIKES"           | "score"               | 3.0
+| "Dave"  | "Synthesizer" | "LIKES"           | "score"               | 1.0
 |===
 --
 
