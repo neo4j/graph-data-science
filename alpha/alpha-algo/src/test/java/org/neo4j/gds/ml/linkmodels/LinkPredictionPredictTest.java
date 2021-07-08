@@ -149,13 +149,13 @@ class LinkPredictionPredictTest {
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .containsExactly(
-                "LinkPrediction :: Start",
+                "LinkPrediction compute :: Start",
                 "LinkPrediction 20%",
                 "LinkPrediction 40%",
                 "LinkPrediction 60%",
                 "LinkPrediction 80%",
                 "LinkPrediction 100%",
-                "LinkPrediction :: Finished"
+                "LinkPrediction compute :: Finished"
             );
         ModelCatalog.drop("", modelName);
     }
