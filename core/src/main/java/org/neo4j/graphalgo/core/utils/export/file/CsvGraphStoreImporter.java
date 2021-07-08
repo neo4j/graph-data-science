@@ -65,24 +65,24 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public final class CsvToGraphStoreExporter {
+public final class CsvGraphStoreImporter {
 
     private final GraphStoreNodeVisitor.Builder nodeVisitorBuilder;
     private final Path importPath;
     private final GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder;
-    private final GraphStoreToFileExporterConfig config;
+    private final CsvGraphStoreImporterConfig config;
 
     private final GraphStoreBuilder graphStoreBuilder;
     private String userName;
 
     private final Log log;
 
-    public static CsvToGraphStoreExporter create(
-        GraphStoreToFileExporterConfig config,
+    public static CsvGraphStoreImporter create(
+        CsvGraphStoreImporterConfig config,
         Path importPath,
         Log log
     ) {
-        return new CsvToGraphStoreExporter(
+        return new CsvGraphStoreImporter(
             new GraphStoreNodeVisitor.Builder(),
             new GraphStoreRelationshipVisitor.Builder(),
             config,
@@ -91,18 +91,18 @@ public final class CsvToGraphStoreExporter {
         );
     }
 
-    private CsvToGraphStoreExporter(
+    private CsvGraphStoreImporter(
         GraphStoreNodeVisitor.Builder nodeVisitorBuilder,
         GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder,
-        GraphStoreToFileExporterConfig config,
+        CsvGraphStoreImporterConfig config,
         Path importPath,
         Log log
     ) {
-        this.nodeVisitorBuilder = nodeVisitorBuilder.withReverseIdMapping(config.includeMetaData());
+        this.nodeVisitorBuilder = nodeVisitorBuilder;
         this.relationshipVisitorBuilder = relationshipVisitorBuilder;
         this.config = config;
         this.importPath = importPath;
-        this.graphStoreBuilder = new GraphStoreBuilder().concurrency(config.writeConcurrency());
+        this.graphStoreBuilder = new GraphStoreBuilder().concurrency(config.concurrency());
         this.log = log;
     }
 
@@ -134,7 +134,7 @@ public final class CsvToGraphStoreExporter {
         graphStoreBuilder.useBitIdMap(graphInfo.bitIdMap());
         graphStoreBuilder.databaseId(graphInfo.namedDatabaseId());
 
-        int concurrency = config.writeConcurrency();
+        int concurrency = config.concurrency();
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
             .maxOriginalId(graphInfo.maxOriginalId())
             .concurrency(concurrency)
@@ -187,7 +187,7 @@ public final class CsvToGraphStoreExporter {
     }
 
     private long exportRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker tracker) {
-        int concurrency = config.writeConcurrency();
+        int concurrency = config.concurrency();
 
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();

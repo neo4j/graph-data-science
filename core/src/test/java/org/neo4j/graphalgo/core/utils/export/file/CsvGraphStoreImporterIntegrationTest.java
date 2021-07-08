@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 @GdlExtension
-class CsvToGraphStoreExporterIntegrationTest {
+class CsvGraphStoreImporterIntegrationTest {
 
     @GdlGraph
     private static final String GDL =
@@ -80,9 +80,9 @@ class CsvToGraphStoreExporterIntegrationTest {
     @ValueSource(ints = {1, 4})
     void shouldImportProperties(int concurrency) {
 
-        GraphStoreToFileExporter.csv(graphStore, config(concurrency), graphLocation).run(AllocationTracker.empty());
+        GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run(AllocationTracker.empty());
 
-        var importer = CsvToGraphStoreExporter.create(config(concurrency), graphLocation, new TestLog());
+        var importer = CsvGraphStoreImporter.create(importConfig(concurrency), graphLocation, new TestLog());
         importer.run(AllocationTracker.empty());
 
         var importedGraphStore = importer.userGraphStore().graphStore();
@@ -130,9 +130,9 @@ class CsvToGraphStoreExporterIntegrationTest {
             var graphStore = graphStoreFromNodeMapping(nodeMapping);
             var expectedGraph = graphStore.getUnion();
 
-            GraphStoreToFileExporter.csv(graphStore, config(concurrency), graphLocation).run(AllocationTracker.empty());
+            GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run(AllocationTracker.empty());
 
-            var importer = CsvToGraphStoreExporter.create(config(concurrency), graphLocation, new TestLog());
+            var importer = CsvGraphStoreImporter.create(importConfig(concurrency), graphLocation, new TestLog());
             importer.run(AllocationTracker.empty());
 
             var importedGraphStore = importer.userGraphStore().graphStore();
@@ -142,11 +142,17 @@ class CsvToGraphStoreExporterIntegrationTest {
         });
     }
 
-    private GraphStoreToFileExporterConfig config(int concurrency) {
+    private GraphStoreToFileExporterConfig exportConfig(int concurrency) {
         return ImmutableGraphStoreToFileExporterConfig.builder()
             .exportName("my-export")
             .writeConcurrency(concurrency)
             .includeMetaData(true)
+            .build();
+    }
+
+    private CsvGraphStoreImporterConfig importConfig(int concurrency) {
+        return ImmutableCsvGraphStoreImporterConfig.builder()
+            .concurrency(concurrency)
             .build();
     }
 

@@ -33,13 +33,13 @@ import java.util.Objects;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
-class CsvToGraphStoreExporterTest {
+class CsvGraphStoreImporterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldImportProperties(int concurrency) throws URISyntaxException {
 
-        var exporter = CsvToGraphStoreExporter.create(config(concurrency), importPath(), new TestLog());
+        var exporter = CsvGraphStoreImporter.create(config(concurrency), importPath(), new TestLog());
         exporter.run(AllocationTracker.empty());
 
         var userGraphStore = exporter.userGraphStore();
@@ -65,11 +65,8 @@ class CsvToGraphStoreExporterTest {
         assertGraphEquals(expectedGraph, actualGraph);
     }
 
-    private GraphStoreToFileExporterConfig config(int concurrency) {
-        return ImmutableGraphStoreToFileExporterConfig.builder()
-            .exportName("my-export")
-            .writeConcurrency(concurrency)
-            .build();
+    private CsvGraphStoreImporterConfig config(int concurrency) {
+        return ImmutableCsvGraphStoreImporterConfig.builder().concurrency(concurrency).build();
     }
 
     private Path importPath() throws URISyntaxException {
