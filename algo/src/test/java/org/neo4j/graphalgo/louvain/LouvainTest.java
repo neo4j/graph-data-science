@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestProgressTracker;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
@@ -39,6 +38,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
@@ -431,7 +431,8 @@ class LouvainTest {
         var config = defaultConfigBuilder().build();
 
         var testLogger = new TestProgressLogger(0, "Louvain", config.concurrency());
-        var testTracker = new TestProgressTracker(testLogger);
+        var task = new LouvainFactory<>().progressTask(graph, config);
+        var testTracker = new TaskProgressTracker(task, testLogger);
 
         var louvain = new Louvain(
             graph,
