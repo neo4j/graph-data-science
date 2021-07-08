@@ -58,7 +58,7 @@ public class Pipeline {
 
         int featureOffset = 0;
 
-        for (int i = 0, linkFeatureStepsSize = linkFeatureSteps.size(); i < linkFeatureStepsSize; i++) {
+        for (int i = 0; i < linkFeatureSteps.size(); i++) {
             LinkFeatureStep step = linkFeatureSteps.get(i);
             step.addFeatures(graph, linkFeatures, featureOffset);
             featureOffset += featureSize.get(i);
