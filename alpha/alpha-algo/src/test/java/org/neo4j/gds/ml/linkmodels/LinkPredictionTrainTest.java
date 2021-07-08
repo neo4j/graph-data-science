@@ -22,6 +22,9 @@ package org.neo4j.gds.ml.linkmodels;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.graphalgo.Orientation;
@@ -166,15 +169,19 @@ class LinkPredictionTrainTest {
         var trainGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
         var testGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
 
-        var nodeCount = 15;
+        var nodeCount = graphStore.nodeCount();
         var totalPositives = 16;
         double maxNumberOfRelationships = nodeCount * (nodeCount - 1) / 2d;
         double totalNegatives = maxNumberOfRelationships - totalPositives;
         var classRatio = totalNegatives / totalPositives;
 
-        var expectedWinner = new LinkLogisticRegressionTrainConfigImpl(
+        var concurrency = 4;
+        var sharedUpdater = true;
+
+        var expectedWinner = LinkLogisticRegressionTrainConfig.of(
             List.of("array"),
-            CypherMapWrapper.create(Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10))
+            concurrency,
+            Map.of("maxEpochs", 1000, "minEpochs", 10, "sharedUpdater", sharedUpdater)
         );
 
         var config = ImmutableLinkPredictionTrainConfig.builder()
@@ -184,6 +191,7 @@ class LinkPredictionTrainTest {
             .modelName("model")
             .validationFolds(3)
             .randomSeed(-1L)
+            .concurrency(concurrency)
             .negativeClassWeight(classRatio)
             .params(List.of(
                 Map.of("maxEpochs", 10, "penalty", 1000000),
@@ -207,6 +215,42 @@ class LinkPredictionTrainTest {
         double model1Score = validationScores.get(0).avg();
         double model2Score = validationScores.get(1).avg();
         assertThat(model1Score).isNotCloseTo(model2Score, Percentage.withPercentage(0.2));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void seededTrain(int concurrency) {
+        var trainGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TRAIN"), Optional.of("label"));
+        var testGraph = (CSRGraph) graphStore.getGraph(RelationshipType.of("TEST"), Optional.of("label"));
+
+        var nodeCount = 15;
+        var totalPositives = 16;
+        double maxNumberOfRelationships = nodeCount * (nodeCount - 1) / 2d;
+        double totalNegatives = maxNumberOfRelationships - totalPositives;
+        var classRatio = totalNegatives / totalPositives;
+
+        var config = ImmutableLinkPredictionTrainConfig.builder()
+            .trainRelationshipType(RelationshipType.of("TRAIN"))
+            .testRelationshipType(RelationshipType.of("TEST"))
+            .featureProperties(List.of("z", "array"))
+            .modelName("model")
+            .concurrency(concurrency)
+            .validationFolds(2)
+            .randomSeed(1337L)
+            .negativeClassWeight(classRatio)
+            .params(List.of(Map.of("maxEpochs", 10,  "batchSize", 1)))
+            .build();
+
+        var linkPredictionTrain = new LinkPredictionTrain(
+            UnionGraph.of(List.of(trainGraph, testGraph)),
+            config,
+            TestProgressLogger.NULL_LOGGER
+        );
+
+        var firstResult = linkPredictionTrain.compute();
+        var secondResult = linkPredictionTrain.compute();
+
+        assertThat(firstResult.data().weights().data()).isEqualTo(secondResult.data().weights().data());
     }
 
     @Test
