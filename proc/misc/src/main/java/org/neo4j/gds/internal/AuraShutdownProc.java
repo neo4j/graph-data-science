@@ -158,6 +158,7 @@ public class AuraShutdownProc implements CallableProcedure {
                     var config = ImmutableGraphStoreToFileExporterConfig
                         .builder()
                         .includeMetaData(true)
+                        .autoload(true)
                         .exportName(createConfig.graphName())
                         .username(store.userName())
                         .build();
@@ -166,7 +167,6 @@ public class AuraShutdownProc implements CallableProcedure {
                         graphStore,
                         neo4jConfig,
                         config,
-                        true,
                         log,
                         allocationTracker
                     );

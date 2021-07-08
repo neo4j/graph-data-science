@@ -41,13 +41,12 @@ public final class GraphStoreExporterUtil {
         GraphStore graphStore,
         Config neo4jConfig,
         GraphStoreToFileExporterConfig exportConfig,
-        boolean setAutoloadFlag,
         Log log,
         AllocationTracker allocationTracker
     ) {
         try {
             var exportPath = getExportPath(neo4jConfig, exportConfig);
-            var exporter = setAutoloadFlag
+            var exporter = exportConfig.autoload()
                 ? GraphStoreToFileExporter.autoExportCsv(graphStore, exportConfig, exportPath)
                 : GraphStoreToFileExporter.csv(graphStore, exportConfig, exportPath);
 

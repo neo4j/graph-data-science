@@ -95,7 +95,6 @@ public class GraphStoreExportProc extends BaseProc {
             graphStore,
             neo4jConfig,
             exportConfig,
-            false,
             log,
             allocationTracker()
         );
