@@ -22,3 +22,67 @@ To switch to the more memory intensive implementation used in GDS Community Edit
 ----
 CALL gds.features.useBitIdMap(false)
 ----
+
+[[uncompressed-adjacency-list-feature-toggle]]
+== Uncompressed Adjacency List Toggle
+
+The in-memory graph for GDS is based on the CSR layout and uses compressed adjacency lists by default.
+The compression lowers the memory usage for a graph but requires some computation time to decompress during algorithm execution.
+Using an uncompressed adjacency list will use more memory in order to provide faster traversals.
+It can also have negative performance impacts due to the increased resident memory size.
+Using more memory requires a higher memory bandwidth to read the same adjacency list.
+Whether compressed or uncompressed is better heavily depends on the topology of the graph and the algorithm.
+Algorithms that are traversal heavy, such as triangle counting, have a higher chance of benefiting from an uncompressed adjacency list.
+Very dense nodes in graph with a very skewed degree distribution ("power law") can often have a higher compression ratio.
+Using the uncompressed adjacency list on those graphs have a higher chance of running into memory bandwidth limitations.
+
+To switch to uncompressed adjacency lists, use the following procedure call.
+
+[source, cypher, role=noplay]
+----
+CALL gds.features.useUncompressedAdjacencyList(true)
+----
+
+To switch to compressed adjacency lists, use the following procedure call.
+
+[source, cypher, role=noplay]
+----
+CALL gds.features.useUncompressedAdjacencyList(false)
+----
+
+To reset the setting to the default value, use the following procedure call.
+
+[source, cypher, role=noplay]
+----
+CALL gds.features.useUncompressedAdjacencyList.reset() YIELD enabled
+----
+
+[[reordered-adjacency-list-feature-toggle]]
+== Reordered Adjacency List Toggle
+
+The in-memory graph for GDS writes adjacency lists out of order due to the way the data is read from the underlying store.
+This feature toggle will add a step during graph creation in which the adjacency lists will be reordered to follow the internal node ids.
+That reordering results in a CSR representation that is closer to the textbook layout, where the adjacency lists are written in node id order.
+This could have benefit for some graphs and come algorithms because adjacency lists that will be traversed by the same thread are more likely to be closer together in memory.
+The order depends on the GDS internal node ids that are assigned in the in-memory graph, not on the Node ID values from the underlying Neo4j store.
+
+To enable reordering, use the following procedure call.
+
+[source, cypher, role=noplay]
+----
+CALL gds.features.useReorderedAdjacencyList(true)
+----
+
+To disable reordering, use the following procedure call.
+
+[source, cypher, role=noplay]
+----
+CALL gds.features.useReorderedAdjacencyList(false)
+----
+
+To reset the setting to the default value, use the following procedure call.
+
+[source, cypher, role=noplay]
+----
+CALL gds.features.useReorderedAdjacencyList.reset() YIELD enabled
+----
