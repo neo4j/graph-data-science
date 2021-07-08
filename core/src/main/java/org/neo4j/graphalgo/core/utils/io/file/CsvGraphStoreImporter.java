@@ -115,16 +115,16 @@ public final class CsvGraphStoreImporter {
         graphStoreBuilder.tracker(tracker);
         graphStoreBuilder.log(log);
         this.userName = fileInput.userName();
-        return export(fileInput, tracker);
+        return importGraph(fileInput, tracker);
     }
 
-    private GraphStoreExporter.ImportedProperties export(FileInput fileInput, AllocationTracker tracker) {
-        var nodes = exportNodes(fileInput, tracker);
-        var exportedRelationships = exportRelationships(fileInput, nodes, AllocationTracker.empty());
-        return ImmutableImportedProperties.of(nodes.nodeCount(), exportedRelationships);
+    private GraphStoreExporter.ImportedProperties importGraph(FileInput fileInput, AllocationTracker tracker) {
+        var nodes = importNodes(fileInput, tracker);
+        var importedRelationships = importRelationships(fileInput, nodes, AllocationTracker.empty());
+        return ImmutableImportedProperties.of(nodes.nodeCount(), importedRelationships);
     }
 
-    private NodeMapping exportNodes(
+    private NodeMapping importNodes(
         FileInput fileInput,
         AllocationTracker tracker
     ) {
@@ -186,7 +186,7 @@ public final class CsvGraphStoreImporter {
         );
     }
 
-    private long exportRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker tracker) {
+    private long importRelationships(FileInput fileInput, NodeMapping nodes, AllocationTracker tracker) {
         int concurrency = config.concurrency();
 
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
