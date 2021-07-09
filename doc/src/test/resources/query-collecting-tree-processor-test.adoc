@@ -1,0 +1,97 @@
+= TreeProcessor2 test
+
+.Setup query
+[source, cypher, role=noplay setup-query]
+----
+CREATE (alice:Person {name: 'Alice'})
+----
+
+.Setup query
+[source, cypher, role=noplay setup-query]
+----
+CREATE (bob:Person {name: 'Bob'})
+----
+
+.Before each query 1
+[sourcem cypher, role=noplay graph-create-query]
+----
+MATCH (n) RETURN n
+----
+
+.Before each query 2
+[sourcem cypher, role=noplay graph-create-query]
+----
+MATCH (m) RETURN m
+----
+
+.Before each query 3
+[sourcem cypher, role=noplay graph-create-query]
+----
+MATCH (q) RETURN q
+----
+
+[role=query-example]
+--
+
+.This is a test code block
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream() YIELD node1, node2, similarity
+----
+
+.Results
+[opts="header,footer"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Dave"  | "Alice" | 1.0
+3+|2 rows
+|===
+--
+
+[role=query-example, group=testGroup]
+--
+
+.This is a test code block
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream() YIELD node1, node2, similarity
+----
+
+.Results
+[opts="header,footer"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Dave"  | "Alice" | 1.0
+3+|2 rows
+|===
+--
+
+[role=query-example, group=testGroup ]
+--
+
+.This is a test code block
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream() YIELD node1, node2, similarity
+----
+
+.Results
+[opts="header,footer"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Dave"  | "Alice" | 1.0
+3+|2 rows
+|===
+--
+
+[role=query-example, no-result=true]
+--
+.This is a no-results test code block
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream() YIELD node1, node2, similarity
+----
+--
