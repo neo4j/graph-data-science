@@ -39,7 +39,7 @@ CALL gds.beta.graph.create.subgraph(
   createMillis: Integer
 ----
 
-.Subgraph specific configuration
+.Parameters
 [opts="header",cols="1,1,4"]
 |===
 | Name               | Type    | Description
@@ -47,6 +47,7 @@ CALL gds.beta.graph.create.subgraph(
 | fromGraphName      | String  | The name of the original graph in the graph catalog.
 | nodeFilter         | String  | A Cypher predicate for filtering nodes in the input graph. `*` can be used to allow all nodes.
 | relationshipFilter | String  | A Cypher predicate for filtering relationships in the input graph.  `*` can be used to allow all relationships.
+| configuration      | Map     | Additional parameters to configure subgraph creation.
 |===
 
 .Subgraph specific configuration

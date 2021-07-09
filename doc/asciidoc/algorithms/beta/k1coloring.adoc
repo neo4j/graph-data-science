@@ -136,6 +136,8 @@ CALL gds.beta.k1coloring.mutate(graphName: String, configuration: Map)
 YIELD nodeCount, colorCount, ranIterations, didConverge, configuration, createMillis, computeMillis, mutateMillis
 ----
 
+include::../common-configuration/common-parameters.adoc[]
+
 The configuration for the `mutate` mode is similar to the `write` mode.
 Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
 Also, specifying `writeConcurrency` is not possible in `mutate` mode.

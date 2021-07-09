@@ -48,6 +48,7 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
     private static final String CONTEXT_SELECTOR = "context";
     private static final String TABLE_CONTEXT_VALUE = ":table";
     private static final String RESULTS_TABLE_TITLE = "Results";
+    private static final String PARAMETERS_TABLE_TITLE = "Parameters";
     private static final String YIELD_KEYWORD = "YIELD";
 
     private static final String ROLE_SELECTOR = "role";
@@ -79,11 +80,13 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
             var procedureName = ProcedureNameExtractor.findProcedureName(codeSnippet);
 
             var documentedArguments = ProcedureArgumentsExtractor.findArguments(codeSnippet);
-            var actualArguments = ProcedureLookup.findArgumentNames(procedureName);
+            var expectedArguments = ProcedureLookup.findArgumentNames(procedureName);
 
             syntaxAssertions.assertThat(documentedArguments)
                 .as("Asserting procedure arguments for `%s`", mode.syntaxMode().mode())
-                .containsExactlyInAnyOrderElementsOf(actualArguments);
+                .containsExactlyInAnyOrderElementsOf(expectedArguments);
+
+            assertTableValues(currentSyntaxSection, mode.syntaxMode(), PARAMETERS_TABLE_TITLE, expectedArguments);
 
             // YIELD fields
             var resultClass = ProcedureLookup.findResultType(procedureName);
@@ -95,7 +98,7 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
                 .as("Asserting YIELD result columns for `%s`",  mode.syntaxMode().mode())
                 .containsExactlyInAnyOrderElementsOf(expectedResultFieldsFromCode);
 
-            assertResultsTable(currentSyntaxSection,  mode.syntaxMode(), expectedResultFieldsFromCode);
+            assertTableValues(currentSyntaxSection, mode.syntaxMode(), RESULTS_TABLE_TITLE, expectedResultFieldsFromCode);
         });
 
         return output;
@@ -120,31 +123,33 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
         return syntaxSectionContentStream.get(0);
     }
 
-    private void assertResultsTable(
+    private void assertTableValues(
         StructuralNode currentWorkingDocument,
         SyntaxMode mode,
-        Iterable<String> expectedResultFieldsFromCode
+        String tableTitle,
+        Iterable<String> expectedValues
     ) {
         var resultTablesStream = currentWorkingDocument.findBy(Map.of(CONTEXT_SELECTOR, TABLE_CONTEXT_VALUE))
             .stream()
-            .filter(node -> node.getTitle().equals(RESULTS_TABLE_TITLE));
+            .filter(node -> node.getTitle().equals(tableTitle));
 
         assertThat(resultTablesStream)
-            .as("There is an issue finding the results table for `%s`", mode.mode())
+            .as("There is an issue finding the `%s` table for `%s`", tableTitle, mode.mode())
             .hasSize(1)
-            .allSatisfy(assertResultsTable(mode, expectedResultFieldsFromCode));
+            .allSatisfy(assertTableValues(mode, expectedValues, tableTitle));
     }
 
-    private Consumer<StructuralNode> assertResultsTable(
+    private Consumer<StructuralNode> assertTableValues(
         SyntaxMode mode,
-        Iterable<String> expectedResultFieldsFromCode
+        Iterable<String> expectedValues,
+        String tableTitle
     ) {
         return rawDocTable -> {
 
             assertThat(rawDocTable).isInstanceOf(Table.class);
 
             var docTable = (Table) rawDocTable;
-            var actualResultTableFields = docTable
+            var documentedValues = docTable
                 .getBody()
                 .stream()
                 .map(row -> row
@@ -153,9 +158,9 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
                 .map(Cell::getText)
                 .collect(Collectors.toList());
 
-            syntaxAssertions.assertThat(actualResultTableFields)
-                .as("Asserting result table for `%s`", mode.mode())
-                .containsExactlyInAnyOrderElementsOf(expectedResultFieldsFromCode);
+            syntaxAssertions.assertThat(documentedValues)
+                .as("Asserting `%s` table for `%s`", tableTitle, mode.mode())
+                .containsExactlyInAnyOrderElementsOf(expectedValues);
         };
     }
 
