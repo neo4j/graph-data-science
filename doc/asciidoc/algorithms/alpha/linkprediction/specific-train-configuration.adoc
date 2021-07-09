@@ -13,15 +13,16 @@
 .Model configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name          | Type    | Default         | Optional | Description
-| penalty       | Float   | 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.
-| batchSize     | Integer | 100             | yes      | Number of nodes per batch.
-| minEpochs     | Integer | 1               | yes      | Minimum number of training epochs.
-| maxEpochs     | Integer | 100             | yes      | Maximum number of training epochs.
-| patience      | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
-| tolerance     | Float   | 0.001           | yes      | Epochs that do not improve the loss by a factor of 1 - `tolerance` are considered unproductive.
-| sharedUpdater | Boolean | false           | yes      | Whether to use a shared ADAM optimizer across training threads.
-| concurrency   | Integer | see description | yes      | Concurrency for training the model candidate. By default the value of the top level `concurrency` parameter is used.
+| Name                | Type    | Default         | Optional | Description
+| penalty             | Float   | 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.
+| linkFeatureCombiner | String  | "L2"            | yes      | Link feature combiner is used to combine two node feature vectors into the feature vector for the training. Available combiners are `L2`, `HADAMARD` and `COSINE`.
+| batchSize           | Integer | 100             | yes      | Number of nodes per batch.
+| minEpochs           | Integer | 1               | yes      | Minimum number of training epochs.
+| maxEpochs           | Integer | 100             | yes      | Maximum number of training epochs.
+| patience            | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
+| tolerance           | Float   | 0.001           | yes      | Epochs that do not improve the loss by a factor of 1 - `tolerance` are considered unproductive.
+| sharedUpdater       | Boolean | false           | yes      | Whether to use a shared ADAM optimizer across training threads.
+| concurrency         | Integer | see description | yes      | Concurrency for training the model candidate. By default the value of the top level `concurrency` parameter is used.
 |===
 
 For hyperparameter tuning ideas, look <<algorithms-ml-models-tuning, here>>.
