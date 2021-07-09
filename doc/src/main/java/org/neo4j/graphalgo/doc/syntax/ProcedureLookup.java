@@ -19,12 +19,14 @@
  */
 package org.neo4j.graphalgo.doc.syntax;
 
+import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -75,6 +77,22 @@ final class ProcedureLookup {
             "Can't find result class for %s",
             fullyQualifiedProcedureName
         ));
+    }
+
+    static List<String> findArgumentNames(String fullyQualifiedProcedureName) {
+        var method = INSTANCE.findProcedureMethod(fullyQualifiedProcedureName);
+
+        var parameters = method.getParameters();
+        var result = new ArrayList<String>(parameters.length);
+        for (java.lang.reflect.Parameter parameter : parameters) {
+            if (parameter.isAnnotationPresent(Name.class)) {
+                result.add(parameter.getAnnotation(Name.class).value());
+            } else {
+                result.add(parameter.getName());
+            }
+        }
+
+        return result;
     }
 
     private Reflections createReflections(String pkg) {
