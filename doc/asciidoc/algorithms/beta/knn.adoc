@@ -379,7 +379,6 @@ ORDER BY similarity DESCENDING, Person1, Person2
 | "Bob"   | "Eve"   | 0.14285714285714285
 | "Eve"   | "Bob"   | 0.14285714285714285
 | "Dave"  | "Eve"   | 0.05
-3+|5 rows
 |===
 --
 

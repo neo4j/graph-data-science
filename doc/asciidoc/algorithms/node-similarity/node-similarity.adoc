@@ -377,7 +377,6 @@ ORDER BY similarity DESCENDING, Person1, Person2
 | "Carol" | "Alice" | 0.3333333333333333
 | "Carol" | "Dave"  | 0.3333333333333333
 | "Dave"  | "Carol" | 0.3333333333333333
-3+|10 rows
 |===
 --
 
@@ -530,7 +529,6 @@ ORDER BY Person1
 | "Bob"   | "Alice" | 0.6666666666666666
 | "Carol" | "Alice" | 0.3333333333333333
 | "Dave"  | "Alice" | 1.0
-3+|4 rows
 |===
 --
 
@@ -554,7 +552,6 @@ ORDER BY Person1
 | "Bob"   | "Alice" | 0.6666666666666666
 | "Carol" | "Alice" | 0.3333333333333333
 | "Dave"  | "Carol" | 0.3333333333333333
-3+|4 rows
 |===
 --
 
@@ -586,7 +583,6 @@ ORDER BY similarity DESC, Person1, Person2
 | "Alice" | "Dave"  | 1.0
 | "Dave"  | "Alice" | 1.0
 | "Bob"   | "Alice" | 0.6666666666666666
-3+|3 rows
 |===
 --
 
@@ -614,7 +610,6 @@ ORDER BY Person1
 | Person1 | Person2 | similarity
 | "Alice" | "Dave"  | 1.0
 | "Dave"  | "Alice" | 1.0
-3+|2 rows
 |===
 --
 
@@ -647,7 +642,6 @@ ORDER BY Person1
 | "Bob"   | "Alice" | 0.6666666666666666
 | "Dave"  | "Alice" | 1.0
 | "Dave"  | "Bob"   | 0.6666666666666666
-3+|6 rows
 |===
 --
 
@@ -684,7 +678,6 @@ ORDER BY Person1
 | "Bob"   | "Dave"  | 0.6666666666666666
 | "Dave"  | "Alice" | 0.8333333333333334
 | "Dave"  | "Bob"   | 0.6666666666666666
-3+|6 rows
 |===
 --
 

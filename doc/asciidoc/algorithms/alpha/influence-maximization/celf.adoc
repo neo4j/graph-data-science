@@ -179,6 +179,5 @@ ORDER BY spread ASC
 | "Alice"   | 1.519
 | "Ethan"   | 2.701
 | "Michael" | 3.8
-2+|3 rows
 |===
 --
