@@ -14,6 +14,7 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name          | Type    | Default         | Optional | Description
+| penalty       | Float   | 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.
 | batchSize     | Integer | 100             | yes      | Number of nodes per batch.
 | minEpochs     | Integer | 1               | yes      | Minimum number of training epochs.
 | maxEpochs     | Integer | 100             | yes      | Maximum number of training epochs.
