@@ -42,7 +42,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .Run Modularity Optimization in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.modularityOptimization.stream(graphNameOrConfig: String|Map, configuration: Map})
+CALL gds.beta.modularityOptimization.stream(graphName: String, configuration: Map)
 YIELD
   nodeId: Integer,
   communityId: Integer

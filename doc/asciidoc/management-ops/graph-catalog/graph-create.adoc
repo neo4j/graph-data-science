@@ -41,8 +41,8 @@ In addition, the optional `configuration` parameter allows us to further configu
 ----
 CALL gds.graph.create(
     graphName: String,
-    nodeProjection: String, List or Map,
-    relationshipProjection: String, List or Map,
+    nodeProjection: String or List or Map,
+    relationshipProjection: String or List or Map,
     configuration: Map
 )
 YIELD

@@ -48,9 +48,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 .The following describes the API for running the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.k1coloring.stream(graphName: String, {
-  // additional configuration
-})
+CALL gds.beta.k1coloring.stream(graphName: String, configuration: Map)
 YIELD nodeId, color
 ----
 

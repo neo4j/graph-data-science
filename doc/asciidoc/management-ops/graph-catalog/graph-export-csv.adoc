@@ -78,7 +78,7 @@ The estimation uses sampling to generate a more accurate estimate.
 .Estimate the required disk space for exporting a named graph to CSV files.:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.graph.export.csv.estimate(graphName:String, config: Map)
+CALL gds.beta.graph.export.csv.estimate(graphName:String, configuration: Map)
 YIELD
   nodeCount: Integer,
   relationshipCount: Integer,
