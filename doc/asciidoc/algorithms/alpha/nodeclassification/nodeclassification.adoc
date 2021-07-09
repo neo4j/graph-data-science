@@ -367,11 +367,9 @@ YIELD bytesMin, bytesMax, requiredMemory
 
 In this example we will train a model to predict the class in which a house belongs, based on its `sizePerStory` property.
 
-[role=query-example, group=mutate]
---
 [[algorithms-ml-nodeclassification-examples-train-query]]
 .Train a Node Classification model:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay graph-create-query]
 ----
 CALL gds.alpha.ml.nodeClassification.train('myGraph', {
   nodeLabels: ['House'],
@@ -401,7 +399,6 @@ RETURN
 | winningModel     | trainGraphScore   | testGraphScore
 | {penalty=0.0625} | 0.999999990909091 | 0.6363636286363638
 |===
---
 
 Here we can observe that the model candidate with penalty `0.0625` performed the best in the training phase, with a score of almost 100% over the train graph.
 On the test graph, the model scores a bit lower at about 64%.

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 import org.neo4j.graphalgo.wcc.WccStatsProc;
 import org.neo4j.graphalgo.wcc.WccStreamProc;
@@ -39,6 +40,19 @@ class WccDocTest extends DocTestBase {
             WccStatsProc.class,
             GraphCreateProc.class
         );
+    }
+
+    @Override
+    boolean setupNeo4jGraphPerTest() {
+        return true;
+    }
+
+    @Override
+    Runnable cleanup() {
+        return () -> {
+            GraphStoreCatalog.removeAllLoadedGraphs();
+            db.executeTransactionally("MATCH (n) DETACH DELETE n");
+        };
     }
 
     @Override

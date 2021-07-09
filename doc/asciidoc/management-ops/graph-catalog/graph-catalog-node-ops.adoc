@@ -333,8 +333,6 @@ ORDER BY name, nodeProperty
 | "Florentin"  | "score"       | 2.0
 | "Veselin"    | "age"         | 20
 | "Veselin"    | "score"       | 0.0
-| "The Hobbit" | "age"         | NaN
-| "The Hobbit" | "score"       | 0.0
 |===
 --
 

@@ -25,6 +25,8 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictWriteProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 
 import java.util.List;
 
@@ -40,6 +42,14 @@ class NodeClassificationDocTest extends DocTestBase {
             GraphCreateProc.class,
             GraphStreamNodePropertiesProc.class
         );
+    }
+
+    @Override
+    Runnable cleanup() {
+        return () -> {
+            GraphStoreCatalog.removeAllLoadedGraphs();
+            ModelCatalog.removeAllLoadedModels();
+        };
     }
 
     @Override

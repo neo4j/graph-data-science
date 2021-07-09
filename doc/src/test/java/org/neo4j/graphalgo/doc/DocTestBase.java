@@ -20,148 +20,134 @@
 package org.neo4j.graphalgo.doc;
 
 import org.asciidoctor.Asciidoctor;
-import org.asciidoctor.ast.Cell;
-import org.asciidoctor.ast.Row;
+import org.asciidoctor.OptionsBuilder;
 import org.assertj.core.util.Arrays;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.QueryExampleConsumer;
-import org.neo4j.graphalgo.doc.QueryConsumingTreeProcessor.SetupQueryConsumer;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
-import org.neo4j.graphdb.QueryExecutionException;
-import org.neo4j.graphdb.Result;
 import org.neo4j.values.storable.Values;
 
 import java.io.File;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.utils.StringJoining.joinInGivenOrder;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 abstract class DocTestBase extends BaseProcTest {
 
     private static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
-    private static final String DELIMITER = " | ";
+    private List<String> beforeEachQueries;
+    private List<String> beforeAllQueries;
+    private List<QueryExampleGroup> queryExampleGroups;
 
-    final Asciidoctor asciidoctor = create();
+    abstract String adocFile();
 
-    boolean printActuals() {
-        return false;
-    }
-
-    QueryConsumingTreeProcessor defaultTreeProcessor() {
-        return new QueryConsumingTreeProcessor(
-            defaultSetupQueryConsumer(),
-            defaultQueryExampleConsumer(),
-            defaultQueryExampleNoResultConsumer(),
-            this.cleanup()
-        );
-    }
+    abstract List<Class<?>> procedures();
 
     @BeforeEach
     void setUp() throws Exception {
         Class<?>[] clazzArray = new Class<?>[0];
         registerProcedures(procedures().toArray(clazzArray));
         registerFunctions(functions().toArray(clazzArray));
+        Asciidoctor asciidoctor = create();
+        var treeProcessor = new QueryCollectingTreeProcessor();
+        asciidoctor.javaExtensionRegistry().treeprocessor(treeProcessor);
+
+        var file = docFile();
+        assertThat(file).exists().canRead();
+
+        asciidoctor.loadFile(file, OptionsBuilder.options().sourcemap(true).asMap());
+        beforeEachQueries = treeProcessor.beforeEachQueries();
+        queryExampleGroups = treeProcessor.queryExamples();
+
+        beforeAllQueries = treeProcessor.beforeAllQueries();
+
+        if (!setupNeo4jGraphPerTest()) {
+            beforeAllQueries.forEach(this::runQuery);
+        }
     }
 
-    @AfterAll
-    static void clearLoadedGraphs() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
+    @TestFactory
+    Collection<DynamicTest> runTests() {
+        return queryExampleGroups.stream()
+            .map(this::createDynamicTest)
+            .collect(Collectors.toList());
+    }
+
+    boolean setupNeo4jGraphPerTest() {
+        return false;
+    }
+
+    // This emulates `@BeforeEach`. Typically used to project any GDS Graphs
+    private void beforeEachTest() {
+        if(setupNeo4jGraphPerTest()) {
+            beforeAllQueries.forEach(super::runQuery);
+        }
+        beforeEachQueries.forEach(this::runQuery);
+    }
+
+    private DynamicTest createDynamicTest(QueryExampleGroup queryExampleGroup) {
+        return dynamicTest(queryExampleGroup.displayName(), () -> {
+            try {
+                beforeEachTest();
+
+                // This is the actual test
+                queryExampleGroup.queryExamples().forEach(this::runQueryExample);
+            } finally {
+                // This emulates `@AfterEach`
+                cleanup().run();
+            }
+        });
+    }
+
+    List<Class<?>> functions() {
+        return Collections.singletonList(AsNodeFunc.class);
     }
 
     Runnable cleanup() {
         return GraphStoreCatalog::removeAllLoadedGraphs;
     }
 
-    abstract List<Class<?>> procedures();
-
-    abstract String adocFile();
-
-    List<Class<?>> functions() {
-        return Collections.singletonList(AsNodeFunc.class);
+    File docFile(){
+        return ASCIIDOC_PATH.resolve(adocFile()).toFile();
     }
 
-    @Test
-    void dontPrintActuals() {
-        assertFalse(printActuals(), "This should only be true in development, never committed!");
+    private void runQueryExample(QueryExample queryExample) {
+        if(queryExample.assertResults()) {
+            runQueryExampleAndAssertResults(queryExample);
+        } else {
+            assertThatNoException().isThrownBy(() -> runQuery(queryExample.query()));
+        }
     }
 
-    @Test
-    void runTest() throws URISyntaxException {
-        asciidoctor.javaExtensionRegistry().treeprocessor(defaultTreeProcessor());
-        File file = ASCIIDOC_PATH.resolve(adocFile()).toFile();
-        assertTrue(
-            file.exists() && file.canRead(),
-            formatWithLocale("File %s doesn't exist or can't be read", file.getPath())
-        );
-        asciidoctor.loadFile(file, Collections.emptyMap());
-    }
+    private void runQueryExampleAndAssertResults(QueryExample queryExample) {
+        runQueryWithResultConsumer(queryExample.query(), result -> {
+            assertThat(queryExample.resultColumns()).containsExactlyElementsOf(result.columns());
 
-    private SetupQueryConsumer defaultSetupQueryConsumer() {
-        return setupQueries -> {
-            setupQueries.forEach(this::runQuery);
-        };
-    }
+            var actualResults = new ArrayList<List<String>>();
 
-    private QueryExampleConsumer defaultQueryExampleConsumer() {
-        return (query, expectedColumns, expectedRows) -> {
-            runInTransaction(db, tx -> {
-                try (Result result = runQueryWithoutClosingTheResult(tx, query, Collections.emptyMap())) {
-                    if (printActuals()) {
-                        System.out.println(DELIMITER + joinInGivenOrder(result.columns().stream(), DELIMITER));
-                        result.forEachRemaining(row -> System.out.println(DELIMITER + joinInGivenOrder(
-                            result.columns().stream().map(row::get).map(this::valueToString),
-                            DELIMITER
-                        )));
-                    }
-                    assertEquals(
-                        expectedColumns,
-                        result.columns(),
-                        "Expected columns were different from actual: " + query
-                    );
-                    AtomicInteger index = new AtomicInteger(0);
-                    result.accept(actualRow -> {
-                        Row expectedRow = expectedRows.get(index.getAndIncrement());
-                        List<Cell> cells = expectedRow.getCells();
-                        IntStream.range(0, expectedColumns.size()).forEach(i -> {
-                            String expected = cells.get(i).getText();
-                            String actual = valueToString(actualRow.get(expectedColumns.get(i)));
-                            assertEquals(expected, actual, formatWithLocale("Query: %s", query));
-                        });
-                        return true;
-                    });
-                } catch (QueryExecutionException e) {
-                    fail("query failed: " + query, e);
-                }
-            });
-        };
-    }
-
-    private QueryConsumingTreeProcessor.QueryExampleNoResultConsumer defaultQueryExampleNoResultConsumer() {
-        return (query) -> {
-            try {
-                runQuery(query);
-            } catch (QueryExecutionException e) {
-                fail("query failed: " + query, e);
+            while (result.hasNext()) {
+                var actualResultRow = result.next();
+                var actualResultValues = queryExample.resultColumns().stream()
+                    .map(column -> valueToString(actualResultRow.get(column)))
+                    .collect(Collectors.toList());
+                actualResults.add(actualResultValues);
             }
-        };
+            assertThat(queryExample.results())
+                .as(queryExample.query())
+                .containsExactlyElementsOf(actualResults);
+        });
     }
 
     private String valueToString(Object value) {
@@ -170,7 +156,7 @@ abstract class DocTestBase extends BaseProcTest {
         if (value == null) {
             return "null";
         } else if (value instanceof String) {
-            return "\"" + value.toString() + "\"";
+            return "\"" + value + "\"";
         } else if (Arrays.isArray(value)) {
             return Values.of(value).prettyPrint();
         } else {

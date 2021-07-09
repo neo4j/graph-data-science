@@ -422,7 +422,7 @@ include::../shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
 --
-.The following will run the algorithm, and write back results:
+.The following will run the algorithm, and write back results to the in-memory graph:
 [source, cypher, role=noplay]
 ----
 CALL gds.nodeSimilarity.mutate('myGraph', {
