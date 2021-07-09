@@ -40,6 +40,7 @@ allprojects {
                 suspend = true
             }
 
+            jvmArgs += '--illegal-access=permit'
             maxHeapSize = "3G"
             useJUnitPlatform {
                 includeEngines 'junit-jupiter'
@@ -62,6 +63,7 @@ allprojects {
             targetCompatibility = JavaVersion.VERSION_11
             options.warnings = true
             options.encoding = 'UTF-8'
+            options.forkOptions.jvmArgs += '--illegal-access=permit'
             options.compilerArgs += [
                     '-parameters',
                     '-Xlint:all,-cast,-deprecation,-processing,-serial,-try,-unchecked,-varargs',
