@@ -32,6 +32,10 @@ dependencies {
     testImplementation project(':ml-test-utils')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+
+    testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor project(':config-generator')
+    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.immutables
 }
 
 test {
