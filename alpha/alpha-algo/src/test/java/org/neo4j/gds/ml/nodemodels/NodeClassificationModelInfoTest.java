@@ -104,7 +104,6 @@ class NodeClassificationModelInfoTest {
         expectedParams.put("minEpochs", 1);
         expectedParams.put("patience", 1);
         expectedParams.put("penalty", 1.0);
-        expectedParams.put("sharedUpdater", false);
         expectedParams.put("tolerance", 0.001);
         return expectedParams;
     }

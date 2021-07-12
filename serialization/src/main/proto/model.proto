@@ -26,7 +26,6 @@ message TrainingConfig {
   int32 maxEpochs = 3;
   int32 patience = 4;
   double tolerance = 5;
-  bool sharedUpdater = 6;
   int32 concurrency = 7;
 }
 

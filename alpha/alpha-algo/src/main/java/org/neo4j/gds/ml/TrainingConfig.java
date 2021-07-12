@@ -59,9 +59,4 @@ public interface TrainingConfig extends ConcurrencyConfig, Model.Mappable {
     default double tolerance() {
         return 1e-3;
     }
-
-    @Value.Default
-    default boolean sharedUpdater() {
-        return DEFAULT_SHARED_UPDATER;
-    }
 }

@@ -21,8 +21,7 @@
 | maxEpochs           | Integer | 100             | yes      | Maximum number of training epochs.
 | patience            | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
 | tolerance           | Float   | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
-| sharedUpdater       | Boolean | false           | yes      | Whether to use a shared ADAM optimizer across training threads.
-| concurrency         | Integer | see description | yes      | Concurrency for training the model candidate. By default the value of the top level `concurrency` parameter is used.
+| concurrency         | Integer | see description | yes      | Concurrency for training the model candidate. By default, the value of the top level `concurrency` parameter is used.
 |===
 
 For hyperparameter tuning ideas, look <<algorithms-ml-models-tuning, here>>.
