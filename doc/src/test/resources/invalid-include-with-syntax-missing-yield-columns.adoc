@@ -12,6 +12,14 @@ YIELD
   nodeId: Integer
 ----
 
+.Parameters
+[opts="header"]
+|===
+| Name
+| graphName
+| configuration
+|===
+
 // This table is only here to make sure we will really pick the `.Results` one
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]

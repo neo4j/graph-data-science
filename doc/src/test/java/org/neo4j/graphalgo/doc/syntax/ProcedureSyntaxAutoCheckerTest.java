@@ -76,7 +76,7 @@ class ProcedureSyntaxAutoCheckerTest {
         assertTrue(file.exists() && file.canRead());
 
         assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
-            .hasMessageContaining("There is an issue finding the results table for `include-with-stream`")
+            .hasMessageContaining("There is an issue finding the `Results` table for `include-with-stream`")
             .hasMessageContaining("Expected size: 1 but was: 0");
     }
 
@@ -90,7 +90,7 @@ class ProcedureSyntaxAutoCheckerTest {
         assertTrue(file.exists() && file.canRead());
 
         assertThatThrownBy(() -> asciidoctor.convertFile(file, options))
-            .hasMessageContaining("There is an issue finding the results table for `include-with-stream`")
+            .hasMessageContaining("There is an issue finding the `Results` table for `include-with-stream`")
             .hasMessageContaining("Expected size: 1 but was: 2");
     }
 
@@ -188,7 +188,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .hasSize(1)
             .allSatisfy(assertionError -> {
                 assertThat(assertionError)
-                    .hasMessageContaining("Asserting result table for `include-with-stream`")
+                    .hasMessageContaining("Asserting `Results` table for `include-with-stream`")
                     .hasMessageContaining("could not find the following elements:\n" +
                                           "  [\"intermediateCommunityIds\"]");
             });
@@ -212,7 +212,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .hasSize(1)
             .allSatisfy(assertionError -> {
                 assertThat(assertionError)
-                    .hasMessageContaining("Asserting result table for `include-with-stream`")
+                    .hasMessageContaining("Asserting `Results` table for `include-with-stream`")
                     .hasMessageContaining("the following elements were unexpected:\n" +
                                           "  [\"bogusResultColumn\"]");
             });
