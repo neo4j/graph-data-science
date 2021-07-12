@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.core.tensor;
 
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -43,6 +44,21 @@ class TensorFunctionsTest {
         assertThat(averageGradients)
             .isSameAs(batchedTensors.get(0)) // make sure we reuse the first entry in the list
             .isEqualTo(expectedAveragedTensors);
+    }
+
+    @Test
+    void averagePregroupedTensors() {
+        List<List<Scalar>> tensorBatches = List.of(
+            List.of(new Scalar(10d), new Scalar(14d)),
+            List.of(new Scalar(2d), new Scalar(3d)),
+            List.of(new Scalar(6d), new Scalar(7d))
+        );
+
+        var actualNumberOfBatches = 6;
+
+        var expected =  List.of(new Scalar(18 / 6d), new Scalar(24d / 6d));
+
+        assertThat(TensorFunctions.averageTensors(tensorBatches, actualNumberOfBatches)).isEqualTo(expected);
     }
 
     private static Stream<Arguments> batchedTensors() {

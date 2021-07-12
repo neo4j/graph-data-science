@@ -46,8 +46,16 @@ class MiniBatchTrainingOriginalTrainingTest {
     void parallelMiniBatch(boolean sharedUpdater) {
         var testProgressLogger = new TestProgressLogger(100, "testTraining", 4);
         var singleThreadedProgressLogger = new TestProgressLogger(100, "testTraining", 4);
-        var training = new Training(TestTrainingConfig.builder().patience(10).sharedUpdater(sharedUpdater).build(), testProgressLogger, 100L);
-        var singleThreadedTraining = new Training(TestTrainingConfig.builder().patience(10).sharedUpdater(sharedUpdater).build(), singleThreadedProgressLogger, 100L);
+
+        var config = TestTrainingConfig
+            .builder()
+            .patience(10)
+            .maxEpochs(10)
+            .sharedUpdater(sharedUpdater)
+            .build();
+
+        var training = new Training(config, testProgressLogger, 100L);
+        var singleThreadedTraining = new Training(config, singleThreadedProgressLogger, 100L);
 
         Objective<?> objective = new TestTrainingObjective();
         Objective<?> singleThreadedObjective = new TestTrainingObjective();

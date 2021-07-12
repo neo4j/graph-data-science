@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.core.batch;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
@@ -57,13 +58,20 @@ public class BatchQueue {
         parallelConsume(concurrency, ignore -> consumer);
     }
 
-    public void parallelConsume(int concurrency, IntFunction<? extends Consumer<Batch>> consumerSupplier) {
-        var tasks = IntStream.range(0, concurrency).mapToObj(jobId -> {
-            var batchConsumer = consumerSupplier.apply(jobId);
-            return new ConsumerTask(batchConsumer);
-        }).collect(Collectors.toList());
+    public void parallelConsume(int concurrency, List<? extends Consumer<Batch>> consumers) {
+        assert consumers.size() == concurrency;
 
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+        var tasks = consumers.stream().map(ConsumerTask::new).collect(Collectors.toList());
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+    }
+
+    public void parallelConsume(int concurrency, IntFunction<? extends Consumer<Batch>> consumerSupplier) {
+        var consumers = IntStream
+            .range(0, concurrency)
+            .mapToObj(consumerSupplier::apply)
+            .collect(Collectors.toList());
+
+        parallelConsume(concurrency, consumers);
     }
 
     private class ConsumerTask implements Runnable {

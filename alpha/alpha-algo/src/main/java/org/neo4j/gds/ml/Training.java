@@ -25,13 +25,21 @@ import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.optimizer.Updater;
 import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.optimizer.Updater;
+import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.ml.core.tensor.TensorFunctions.averageTensors;
 
 public class Training {
     private final TrainingConfig config;
@@ -72,17 +80,14 @@ public class Training {
     }
 
     public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
-        Updater[] updaters = new Updater[concurrency];
-        updaters[0] = Updater.defaultUpdater(objective.weights());
-        for (int i = 1; i < concurrency; i++) {
-            updaters[i] = config.sharedUpdater() ? updaters[0] : Updater.defaultUpdater(objective.weights());
-        }
+        Updater updater = Updater.defaultUpdater(objective.weights());
         int epoch = 0;
-        TrainingStopper stopper = TrainingStopper.defaultStopper(config);
+        var stopper = TrainingStopper.defaultStopper(config);
         double initialLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
         double lastLoss = initialLoss;
+
         while (!stopper.terminated()) {
-            trainEpoch(objective, queueSupplier.get(), concurrency, updaters);
+            trainEpoch(objective, queueSupplier.get(), concurrency, updater);
             lastLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
             stopper.registerLoss(lastLoss);
             epoch++;
@@ -118,37 +123,76 @@ public class Training {
         Objective<?> objective,
         BatchQueue batches,
         int concurrency,
-        Updater[] updaters
+        Updater updater
     ) {
-        batches.parallelConsume(
-            concurrency,
-            jobId ->
-                new ObjectiveUpdateConsumer(
-                    objective,
-                    updaters[jobId],
-                    trainSize
-                )
-        );
+        var consumers = new ArrayList<ObjectiveUpdateConsumer>(concurrency);
+        for (int i = 0; i < concurrency; i++) {
+            consumers.add(new ObjectiveUpdateConsumer(objective, trainSize));
+        }
+
+        batches.parallelConsume(concurrency, consumers);
+
+        List<? extends List<? extends Tensor<?>>> localGradientSums = consumers
+            .stream()
+            .map(ObjectiveUpdateConsumer::summedWeightGradients)
+            .collect(Collectors.toList());
+
+        var numberOfBatches = consumers
+            .stream()
+            .mapToInt(ObjectiveUpdateConsumer::consumedBatches)
+            .sum();
+
+
+        var avgWeightGradients = averageTensors(localGradientSums, numberOfBatches);
+        updater.update(avgWeightGradients);
     }
 
     static class ObjectiveUpdateConsumer implements Consumer<Batch> {
         private final Objective<?> objective;
-        private final Updater updater;
         private final long trainSize;
+        private List<? extends Tensor<?>> summedWeightGradients;
+        private int consumedBatches;
 
-        ObjectiveUpdateConsumer(Objective<?> objective, Updater updater, long trainSize) {
+        ObjectiveUpdateConsumer(
+            Objective<?> objective,
+            long trainSize
+        ) {
             this.objective = objective;
-            this.updater = updater;
             this.trainSize = trainSize;
+            this.summedWeightGradients = objective
+                .weights()
+                .stream()
+                .map(weight -> weight.data().zeros())
+                .collect(Collectors.toList());
+            this.consumedBatches = 0;
         }
 
         @Override
         public void accept(Batch batch) {
             Variable<Scalar> loss = objective.loss(batch, trainSize);
-            ComputationContext ctx = new ComputationContext();
+            var ctx = new ComputationContext();
             ctx.forward(loss);
             ctx.backward(loss);
-            updater.update(ctx);
+
+            List<? extends Tensor<?>> localWeightGradient = objective
+                .weights()
+                .stream()
+                .map(ctx::gradient)
+                .collect(Collectors.toList());
+
+            for (int i = 0; i < summedWeightGradients.size(); i++) {
+                summedWeightGradients.get(i).addInPlace(localWeightGradient.get(i));
+            }
+
+            consumedBatches++;
+        }
+
+        List<? extends Tensor<?>> summedWeightGradients() {
+            return summedWeightGradients;
+        }
+
+        int consumedBatches() {
+            return consumedBatches;
         }
     }
 

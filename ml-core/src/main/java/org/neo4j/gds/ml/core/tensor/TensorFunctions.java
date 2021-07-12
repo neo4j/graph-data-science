@@ -27,13 +27,18 @@ public final class TensorFunctions {
 
     // Store the result in the first batch tensors.
     public static List<? extends Tensor<? extends Tensor<?>>> averageTensors(List<? extends List<? extends Tensor<?>>> batchedTensors) {
-        var numberOfBatches = batchedTensors.size();
+        return averageTensors(batchedTensors, batchedTensors.size());
+    }
+
+    // Store the result in the first batch tensors.
+    public static List<? extends Tensor<? extends Tensor<?>>> averageTensors(List<? extends List<? extends Tensor<?>>> batchedTensors, int numberOfBatches) {
         var meanTensors = batchedTensors.get(0);
 
         for (int i = 0; i < meanTensors.size(); i++) {
             var currentTensor = meanTensors.get(i);
-            for (int j = 1; j < numberOfBatches; j++) {
-                currentTensor.addInPlace(batchedTensors.get(j).get(i));
+            for (int j = 1; j < batchedTensors.size(); j++) {
+                Tensor<?> weightedBatchTensor = batchedTensors.get(j).get(i);
+                currentTensor.addInPlace(weightedBatchTensor);
             }
             currentTensor.scalarMultiplyMutate(1D / numberOfBatches);
         }
