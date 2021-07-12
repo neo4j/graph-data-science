@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -106,44 +107,47 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
         groupedQueryExampleNodes.forEach((displayName, groupedQueryExamples) -> {
             var groupBuilder = QueryExampleGroup.builder().displayName(displayName);
 
-            groupedQueryExamples.forEach(queryExampleNode -> {
-                var codeBlock = findByContext(queryExampleNode, CODE_BLOCK_CONTEXT);
-                var query = undoReplacements(codeBlock.getContent().toString());
-
-                var queryExampleBuilder = QueryExample.builder().query(query);
-
-                if (Boolean.parseBoolean(queryExampleNode.getAttribute(TEST_TYPE_NO_RESULT, false).toString())) {
-                    queryExampleBuilder.assertResults(false);
-                } else {
-                    var resultsTable = (Table) findByContext(queryExampleNode, TABLE_CONTEXT);
-
-                    var resultColumns = resultsTable.getHeader().get(0).getCells()
-                        .stream()
-                        .map(Cell::getText)
-                        .collect(Collectors.toList());
-
-                    queryExampleBuilder.resultColumns(resultColumns);
-
-                    var body = resultsTable.getBody();
-                    for (Row resultRow : body) {
-                        queryExampleBuilder.addResult(
-                            resultRow.getCells()
-                                .stream()
-                                .map(Cell::getText)
-                                .map(this::undoReplacements)
-                                .collect(Collectors.toList())
-                        );
-                    }
-                }
-
-                groupBuilder.addQueryExample(queryExampleBuilder.build());
-
-            });
+            groupedQueryExamples.forEach(collectQueryExample(groupBuilder));
 
             queryExampleGroups.add(groupBuilder.build());
         });
 
         return queryExampleGroups;
+    }
+
+    private Consumer<StructuralNode> collectQueryExample(ImmutableQueryExampleGroup.Builder groupBuilder) {
+        return queryExampleNode -> {
+            var codeBlock = findByContext(queryExampleNode, CODE_BLOCK_CONTEXT);
+            var query = undoReplacements(codeBlock.getContent().toString());
+
+            var queryExampleBuilder = QueryExample.builder().query(query);
+
+            if (Boolean.parseBoolean(queryExampleNode.getAttribute(TEST_TYPE_NO_RESULT, false).toString())) {
+                queryExampleBuilder.assertResults(false);
+            } else {
+                var resultsTable = (Table) findByContext(queryExampleNode, TABLE_CONTEXT);
+
+                var resultColumns = resultsTable.getHeader().get(0).getCells()
+                    .stream()
+                    .map(Cell::getText)
+                    .collect(Collectors.toList());
+
+                queryExampleBuilder.resultColumns(resultColumns);
+
+                var body = resultsTable.getBody();
+                for (Row resultRow : body) {
+                    queryExampleBuilder.addResult(
+                        resultRow.getCells()
+                            .stream()
+                            .map(Cell::getText)
+                            .map(this::undoReplacements)
+                            .collect(Collectors.toList())
+                    );
+                }
+            }
+
+            groupBuilder.addQueryExample(queryExampleBuilder.build());
+        };
     }
 
     private HashMap<String, List<StructuralNode>> collectQueryExampleNodes(Iterable<StructuralNode> queryExampleNodes) {
@@ -159,18 +163,16 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
 
     private String extractDisplayName(StructuralNode queryExampleNode) {
         var testGroupAttribute = queryExampleNode.getAttribute(TEST_GROUP_ATTRIBUTE);
-        String testDisplayName;
         if (testGroupAttribute != null) {
-            testDisplayName = testGroupAttribute.toString();
+            return testGroupAttribute.toString();
         } else {
             var codeBlock = findByContext(queryExampleNode, CODE_BLOCK_CONTEXT);
             var query = undoReplacements(codeBlock.getContent().toString());
 
-            testDisplayName = codeBlock.getTitle() == null
+            return codeBlock.getTitle() == null
                 ? query
                 : codeBlock.getTitle();
         }
-        return testDisplayName;
     }
 
     private StructuralNode findByContext(StructuralNode node, String context) {
