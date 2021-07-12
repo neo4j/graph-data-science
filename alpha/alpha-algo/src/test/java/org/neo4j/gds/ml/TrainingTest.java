@@ -39,11 +39,11 @@ import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MiniBatchTrainingOriginalTrainingTest {
+class TrainingTest {
 
     @Test
-    void parallelMiniBatch() {
-        var config = TestTrainingConfig
+    void parallel() {
+        var config = ImmutableTestTrainingConfig
             .builder()
             .patience(10)
             .maxEpochs(10)
@@ -101,6 +101,7 @@ class MiniBatchTrainingOriginalTrainingTest {
     }
 
     @ValueClass
+    @SuppressWarnings("immutables:subtype")
     public interface TestTrainingConfig extends TrainingConfig {
         static ImmutableTestTrainingConfig.Builder builder() {
             return ImmutableTestTrainingConfig.builder();
