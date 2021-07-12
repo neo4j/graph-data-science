@@ -38,7 +38,6 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.wcc.WccProc.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
 public class WccStreamProc extends StreamProc<
     Wcc,
@@ -46,7 +45,7 @@ public class WccStreamProc extends StreamProc<
     WccStreamProc.StreamResult,
     WccStreamConfig> {
 
-    @Procedure(value = "gds.wcc.stream", mode = WRITE)
+    @Procedure(value = "gds.wcc.stream", mode = READ)
     @Description(WCC_DESCRIPTION)
     public Stream<WccStreamProc.StreamResult> stream(
         @Name(value = "graphName") Object graphNameOrConfig,

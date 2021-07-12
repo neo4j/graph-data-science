@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.TestProgressEventTracker;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.Algorithm;
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -33,7 +34,6 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.assertj.ConditionFactory;
 import org.neo4j.graphalgo.beta.pregel.context.ComputeContext;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -273,7 +273,7 @@ public class PregelProcTest extends BaseProcTest {
 
         @Procedure(
             name = "example.pregel.test.mutate",
-            mode = Mode.WRITE
+            mode = Mode.READ
         )
         @Description("Connected Components")
         public Stream<PregelMutateResult> mutate(

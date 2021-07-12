@@ -38,11 +38,10 @@ import static org.neo4j.graphalgo.config.GraphCreateConfigValidations.validateIs
 import static org.neo4j.graphalgo.triangle.TriangleCountCompanion.DESCRIPTION;
 import static org.neo4j.graphalgo.triangle.TriangleCountCompanion.nodePropertyTranslator;
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
 public class TriangleCountMutateProc extends MutatePropertyProc<IntersectingTriangleCount, IntersectingTriangleCount.TriangleCountResult, TriangleCountMutateProc.MutateResult, TriangleCountMutateConfig> {
 
-    @Procedure(value = "gds.triangleCount.mutate", mode = WRITE)
+    @Procedure(value = "gds.triangleCount.mutate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MutateResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,

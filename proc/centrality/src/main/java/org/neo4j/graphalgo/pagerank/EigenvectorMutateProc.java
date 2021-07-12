@@ -33,12 +33,11 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.pagerank.PageRankProc.EIGENVECTOR_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
 public class EigenvectorMutateProc extends PageRankMutateProc {
 
     @Override
-    @Procedure(value = "gds.eigenvector.mutate", mode = WRITE)
+    @Procedure(value = "gds.eigenvector.mutate", mode = READ)
     @Description(EIGENVECTOR_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,

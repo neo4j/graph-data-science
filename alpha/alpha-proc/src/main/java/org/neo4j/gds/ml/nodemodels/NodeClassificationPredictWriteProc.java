@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class NodeClassificationPredictWriteProc
@@ -53,7 +54,7 @@ public class NodeClassificationPredictWriteProc
         return write(result);
     }
 
-    @Procedure(name = "gds.alpha.ml.nodeClassification.predict.write.estimate", mode = WRITE)
+    @Procedure(name = "gds.alpha.ml.nodeClassification.predict.write.estimate", mode = READ)
     @Description("Predicts classes for all nodes based on a previously trained model")
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfig,
