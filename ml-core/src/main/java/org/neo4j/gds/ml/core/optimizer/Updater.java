@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.ml.core.optimizer;
 
-import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
 public interface Updater {
-    void update(ComputationContext ctx);
+    void update(List<? extends Tensor<?>> ctx);
 
     static long sizeInBytesOfDefaultUpdater(int rows, int cols, int numberOfWeights) {
         return AdamOptimizer.sizeInBytes(rows, cols, numberOfWeights);
