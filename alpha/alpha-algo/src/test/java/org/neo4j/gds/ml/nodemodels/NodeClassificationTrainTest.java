@@ -276,7 +276,8 @@ class NodeClassificationTrainTest {
         var firstResult = algorithm.compute();
         var secondResult = algorithm.compute();
 
-        assertThat(firstResult.data().weights().data()).isEqualTo(secondResult.data().weights().data());
+        assertThat(firstResult.data().weights().data())
+            .matches(matrix -> matrix.equals(secondResult.data().weights().data(), 1e-10));
     }
 
     private NodeClassificationTrainConfig createConfig(
