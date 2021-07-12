@@ -284,7 +284,6 @@ RETURN gds.util.asNode(nodeId).name AS Name, values.communityIds AS communityIds
 | "Ichabod"  | [1]
 | "James"    | [1]
 | "Khalid"   | [1]
-2+|11 rows
 |===
 --
 

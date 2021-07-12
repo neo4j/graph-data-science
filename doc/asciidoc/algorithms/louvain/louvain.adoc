@@ -352,7 +352,6 @@ ORDER BY name ASC
 | "Doug"    | 5             | null
 | "Mark"    | 5             | null
 | "Michael" | 5             | null
-|6 rows
 |===
 --
 
@@ -466,7 +465,6 @@ ORDER BY name ASC
 | "Doug"    | 3             | null
 | "Mark"    | 5             | null
 | "Michael" | 5             | null
-|6 rows
 |===
 --
 
@@ -501,7 +499,6 @@ ORDER BY name ASC
 | "Doug"    | 47          | null
 | "Mark"    | 47          | null
 | "Michael" | 47          | null
-|6 rows
 |===
 --
 
@@ -607,7 +604,6 @@ ORDER BY name ASC
 | "m"   | 12          | [12, 12]
 | "n"   | 12          | [12, 12]
 | "x"   | 14          | [14, 14]
-|15 rows
 |===
 --
 
