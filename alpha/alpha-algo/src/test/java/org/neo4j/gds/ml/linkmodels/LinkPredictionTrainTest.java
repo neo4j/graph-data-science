@@ -177,12 +177,11 @@ class LinkPredictionTrainTest {
         var classRatio = totalNegatives / totalPositives;
 
         var concurrency = 4;
-        var sharedUpdater = true;
 
         var expectedWinner = LinkLogisticRegressionTrainConfig.of(
             List.of("array"),
             concurrency,
-            Map.of("maxEpochs", 1000, "minEpochs", 10, "sharedUpdater", sharedUpdater)
+            Map.of("maxEpochs", 1000, "minEpochs", 10)
         );
 
         var config = ImmutableLinkPredictionTrainConfig.builder()
@@ -195,8 +194,8 @@ class LinkPredictionTrainTest {
             .concurrency(concurrency)
             .negativeClassWeight(classRatio)
             .params(List.of(
-                Map.of("maxEpochs", 10, "penalty", 1000000, "sharedUpdater", sharedUpdater),
-                Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10, "sharedUpdater", sharedUpdater)
+                Map.of("maxEpochs", 10, "penalty", 1000000),
+                Map.of("maxEpochs", 1000, "minEpochs", 10)
             )).build();
 
         var linkPredictionTrain = new LinkPredictionTrain(

@@ -40,13 +40,12 @@ public class NodeLogisticRegressionTrain {
     public static MemoryEstimation memoryEstimation(
         int numberOfClasses,
         int numberOfFeatures,
-        int batchSize,
-        boolean sharedUpdater
+        int batchSize
     ) {
         var CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA = 1;
         return MemoryEstimations.builder(NodeLogisticRegressionTrain.class)
             .add("model data", NodeLogisticRegressionData.memoryEstimation(numberOfClasses, numberOfFeatures))
-            .add("training", Training.memoryEstimation(numberOfFeatures, numberOfClasses, sharedUpdater, CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA))
+            .add("training", Training.memoryEstimation(numberOfFeatures, numberOfClasses, CONSTANT_NUMBER_OF_WEIGHTS_IN_MODEL_DATA))
             .perThread("computation graph", sizeInBytesOfComputationGraph(batchSize, numberOfFeatures, numberOfClasses))
             .build();
     }

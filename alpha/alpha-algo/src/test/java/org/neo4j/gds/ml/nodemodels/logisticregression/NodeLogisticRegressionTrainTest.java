@@ -135,8 +135,7 @@ class NodeLogisticRegressionTrainTest {
                 "penalty", 1.0,
                 "concurrency", 4,
                 "maxEpochs", 1000000,
-                "tolerance", 1e-10,
-                "sharedUpdater", false
+                "tolerance", 1e-10
             ))
         );
 

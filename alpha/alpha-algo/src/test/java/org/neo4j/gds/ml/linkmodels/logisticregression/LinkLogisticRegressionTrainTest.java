@@ -94,8 +94,7 @@ class LinkLogisticRegressionTrainTest {
                 "penalty", 1.0,
                 "maxEpochs", 1000000,
                 "tolerance", 1e-10,
-                "concurrency", 4,
-                "sharedUpdater", false
+                "concurrency", 4
             ))
         );
 

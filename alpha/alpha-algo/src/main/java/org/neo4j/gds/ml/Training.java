@@ -26,10 +26,9 @@ import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.optimizer.Updater;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.ml.core.optimizer.Updater;
-import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
+import org.neo4j.graphalgo.core.utils.mem.MemoryRange;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.ArrayList;
@@ -55,28 +54,13 @@ public class Training {
     public static MemoryEstimation memoryEstimation(
         int numberOfFeatures,
         int numberOfClasses,
-        boolean sharedUpdater,
         int numberOfWeights
     ) {
         return MemoryEstimations.builder(Training.class)
-            .add("updater", estimateUpdater(sharedUpdater, numberOfClasses, numberOfFeatures, numberOfWeights))
+            .add(MemoryEstimations.of(
+                "updater",
+                MemoryRange.of(Updater.sizeInBytesOfDefaultUpdater(numberOfClasses, numberOfFeatures, numberOfWeights))))
             .build();
-    }
-
-    private static MemoryEstimation estimateUpdater(
-        boolean sharedUpdater,
-        int numberOfClasses,
-        int numberOfFeatures,
-        int numberOfWeights
-    ) {
-        var builder = MemoryEstimations.builder();
-        var bytes = Updater.sizeInBytesOfDefaultUpdater(numberOfClasses, numberOfFeatures, numberOfWeights);
-        if (sharedUpdater) {
-            builder.fixed("", bytes);
-        } else {
-            builder.perThread("", bytes);
-        }
-        return builder.build();
     }
 
     public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {

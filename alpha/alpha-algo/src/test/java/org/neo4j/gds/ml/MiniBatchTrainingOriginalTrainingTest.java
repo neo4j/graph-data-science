@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml;
 
 import com.carrotsearch.hppc.DoubleArrayList;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestProgressEventTracker;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
@@ -34,6 +34,7 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -41,24 +42,20 @@ import java.util.function.Supplier;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MiniBatchTrainingOriginalTrainingTest {
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void parallelMiniBatch(boolean sharedUpdater) {
-        var testProgressLogger = new TestProgressLogger(100, "testTraining", 4);
-        var singleThreadedProgressLogger = new TestProgressLogger(100, "testTraining", 4);
 
+    @Test
+    void parallelMiniBatch() {
         var config = TestTrainingConfig
             .builder()
             .patience(10)
             .maxEpochs(10)
-            .sharedUpdater(sharedUpdater)
             .build();
 
-        var training = new Training(config, testProgressLogger, 100L);
-        var singleThreadedTraining = new Training(config, singleThreadedProgressLogger, 100L);
+        var training = new Training(config, ProgressTracker.NULL_TRACKER, 100L);
+        var singleThreadedTraining = new Training(config, ProgressTracker.NULL_TRACKER, 100L);
 
-        Objective<?> objective = new TestTrainingObjective();
-        Objective<?> singleThreadedObjective = new TestTrainingObjective();
+        var objective = new TestTrainingObjective();
+        var singleThreadedObjective = new TestTrainingObjective();
 
         Supplier<BatchQueue> queueSupplier = () -> new BatchQueue(100, 10);
 

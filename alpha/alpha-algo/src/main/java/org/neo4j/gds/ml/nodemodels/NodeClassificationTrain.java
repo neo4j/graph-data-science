@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.nodemodels;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionData;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionPredictor;
@@ -126,8 +125,7 @@ public class NodeClassificationTrain extends Algorithm<NodeClassificationTrain, 
         MemoryEstimation training = NodeLogisticRegressionTrain.memoryEstimation(
             fudgedClassCount,
             fudgedFeatureCount,
-            maxBatchSize,
-            TrainingConfig.DEFAULT_SHARED_UPDATER
+            maxBatchSize
         );
 
         MemoryEstimation metricsComputation = MemoryEstimations.builder("computing metrics")

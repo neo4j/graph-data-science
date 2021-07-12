@@ -122,7 +122,6 @@ public final class ConfigSerializers {
             "maxEpochs", trainingConfig.getMaxEpochs(),
             "patience", trainingConfig.getPatience(),
             "tolerance", trainingConfig.getTolerance(),
-            "sharedUpdater", trainingConfig.getSharedUpdater(),
             "concurrency", trainingConfig.getConcurrency()
         );
     }
@@ -156,7 +155,6 @@ public final class ConfigSerializers {
             "maxEpochs", trainingConfig.getMaxEpochs(),
             "patience", trainingConfig.getPatience(),
             "tolerance", trainingConfig.getTolerance(),
-            "sharedUpdater", trainingConfig.getSharedUpdater(),
             "concurrency", trainingConfig.getConcurrency()
         );
     }
@@ -168,7 +166,6 @@ public final class ConfigSerializers {
             .setMaxEpochs(config.maxEpochs())
             .setPatience(config.patience())
             .setTolerance(config.tolerance())
-            .setSharedUpdater(config.sharedUpdater())
             .setConcurrency(config.concurrency())
             .build();
     }

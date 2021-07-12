@@ -75,14 +75,13 @@ public class AdamOptimizer implements Updater {
         velocityTerms = new ArrayList<>(momentumTerms);
     }
 
-    // TODO: probably doesnt have to be synchronized
-    public synchronized void update(ComputationContext otherCtx) {
+    public void update(ComputationContext otherCtx) {
         var localWeightGradients = weights.stream().map(otherCtx::gradient).collect(Collectors.toList());
         update(localWeightGradients);
 
     }
 
-    public synchronized void update(List<? extends Tensor<?>> contextLocalWeightGradients) {
+    public void update(List<? extends Tensor<?>> contextLocalWeightGradients) {
         iteration += 1;
 
         for (int i = 0; i < weights.size(); i++) {

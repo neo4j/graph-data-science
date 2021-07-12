@@ -22,11 +22,11 @@ package org.neo4j.gds.ml.nodemodels.logisticregression;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.assertj.ConditionFactory;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphdb.Result;
 
@@ -301,8 +301,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .hasMessageContaining("miniepochs (Did you mean one of [minEpochs, maxEpochs]?)")
             .hasMessageContaining("maxxepochs (Did you mean one of [maxEpochs, minEpochs]?)")
             .hasMessageContaining("patiences (Did you mean [patience]?)")
-            .hasMessageContaining("tollerance (Did you mean [tolerance]?)")
-            .hasMessageContaining("shareUpdaters (Did you mean [sharedUpdater]?)");
+            .hasMessageContaining("tollerance (Did you mean [tolerance]?)");
     }
 
     @Test

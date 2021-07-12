@@ -130,7 +130,7 @@ public class LinkPredictionTrainEstimation {
         int featureDimension = getFeatureDimension(llrConfig, nodeFeatureDimension);
         return MemoryEstimations.builder("train model")
             .add("model data", LinkLogisticRegressionData.memoryEstimation(featureDimension))
-            .add("update weights", Training.memoryEstimation(featureDimension, 1, llrConfig.sharedUpdater(), 1))
+            .add("update weights", Training.memoryEstimation(featureDimension, 1, 1))
             .perThread("computation graph", LinkLogisticRegressionObjective.sizeOfBatchInBytes(llrConfig.batchSize(), featureDimension))
             .build();
     }
