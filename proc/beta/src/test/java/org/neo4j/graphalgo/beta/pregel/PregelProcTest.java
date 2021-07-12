@@ -273,7 +273,7 @@ public class PregelProcTest extends BaseProcTest {
 
         @Procedure(
             name = "example.pregel.test.mutate",
-            mode = Mode.WRITE
+            mode = Mode.READ
         )
         @Description("Connected Components")
         public Stream<PregelMutateResult> mutate(

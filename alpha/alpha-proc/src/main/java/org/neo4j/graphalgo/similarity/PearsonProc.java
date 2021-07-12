@@ -63,7 +63,7 @@ public final class PearsonProc extends AlphaSimilarityProc<PearsonAlgorithm, Pea
         return write(graphNameOrConfig, configuration);
     }
 
-    @Procedure(name = "gds.alpha.similarity.pearson.stats", mode = WRITE)
+    @Procedure(name = "gds.alpha.similarity.pearson.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityStatsResult> pearsonStats(
         @Name(value = "graphName") Object graphNameOrConfig,

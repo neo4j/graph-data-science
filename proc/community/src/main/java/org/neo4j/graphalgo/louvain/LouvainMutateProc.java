@@ -41,11 +41,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.louvain.LouvainProc.LOUVAIN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
 public class LouvainMutateProc extends MutatePropertyProc<Louvain, Louvain, LouvainMutateProc.MutateResult, LouvainMutateConfig> {
 
-    @Procedure(value = "gds.louvain.mutate", mode = WRITE)
+    @Procedure(value = "gds.louvain.mutate", mode = READ)
     @Description(LOUVAIN_DESCRIPTION)
     public Stream<MutateResult> write(
         @Name(value = "graphName") Object graphNameOrConfig,

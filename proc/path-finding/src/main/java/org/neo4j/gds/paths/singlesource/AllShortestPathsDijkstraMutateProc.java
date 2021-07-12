@@ -38,11 +38,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.singlesource.AllShortestPathsDijkstraProc.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
-import static org.neo4j.procedure.Mode.WRITE;
 
 public class AllShortestPathsDijkstraMutateProc extends ShortestPathMutateProc<Dijkstra, AllShortestPathsDijkstraMutateConfig> {
 
-    @Procedure(name = "gds.allShortestPaths.dijkstra.mutate", mode = WRITE)
+    @Procedure(name = "gds.allShortestPaths.dijkstra.mutate", mode = READ)
     @Description(DIJKSTRA_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") Object graphNameOrConfig,
