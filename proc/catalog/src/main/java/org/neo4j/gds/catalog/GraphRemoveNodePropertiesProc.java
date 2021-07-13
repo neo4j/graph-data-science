@@ -77,9 +77,9 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
             graphStore.nodeLabels() :
             config.validNodeLabels(graphStore);
 
-        var propertiesPerLabel  = graphStore.schema().nodeSchema().properties();
+        var propertiesPerLabel = graphStore.schema().nodeSchema().properties();
         var allLabels = graphStore.schema().nodeSchema().availableLabels();
-        var propertiesToRemove  = config.nodeProperties();
+        var propertiesToRemove = config.nodeProperties();
 
         var removedPropertiesCount = new MutableLong(0L);
 
@@ -95,7 +95,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
                 if (selectedNodeLabels.containsAll(labels)) {
                     labels.forEach(label -> graphStore.removeNodeProperty(label, property));
                     removedPropertiesCount.add(propertyObject.size());
-                } else if (labels.stream().noneMatch(selectedNodeLabels::contains)){
+                } else if (labels.stream().noneMatch(selectedNodeLabels::contains)) {
                     return;
                 } else {
                     throw new IllegalArgumentException(formatWithLocale(
