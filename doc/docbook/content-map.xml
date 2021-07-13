@@ -265,7 +265,7 @@
         </d:tocentry>
 
         <d:tocentry linkend="appendix-a">
-            <?dbhtml filename="operations-reference/appendix-a/index.html"?>
+            <?dbhtml filename="appendix-a/index.html"?>
             <d:tocentry linkend="appendix-a-graph-ops">
                 <?dbhtml filename="operations-reference/graph-operation-references/index.html"?>
             </d:tocentry>

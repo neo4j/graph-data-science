@@ -86,7 +86,7 @@
 *** xref:production-deployment/transaction-handling/index.adoc[]
 *** xref:production-deployment/fabric/index.adoc[]
 *** xref:production-deployment/feature-toggles/index.adoc[]
-** xref:operations-reference/appendix-a/index.adoc[]
+** xref:appendix-a/index.adoc[]
 *** xref:operations-reference/graph-operation-references/index.adoc[]
 *** xref:operations-reference/model-operation-references/index.adoc[]
 *** xref:operations-reference/algorithm-references/index.adoc[]
