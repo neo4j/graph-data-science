@@ -26,8 +26,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;
@@ -39,6 +37,8 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.IdentityProperties;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.degree.DegreeCentralityMutateProc;
+import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -74,7 +74,12 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, GraphWriteNodePropertiesProc.class);
+        registerProcedures(
+            GraphCreateProc.class,
+            GraphWriteNodePropertiesProc.class,
+            DegreeCentralityMutateProc.class,
+            PageRankMutateProc.class
+        );
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher.call()
@@ -334,5 +339,21 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         assertEquals(IllegalArgumentException.class, rootCause.getClass());
         assertThat(rootCause.getMessage(), containsString("Node projection 'A' does not have property key 'newNodeProp3'"));
         assertThat(rootCause.getMessage(), containsString("Available keys: ['newNodeProp1', 'newNodeProp2']"));
+    }
+
+    @Test
+    void writePropertyTwice() {
+        clearDb();
+        runQuery("CREATE (:A:B)");
+        runQuery("CALL gds.graph.create('myGraph', ['A','B'], '*')");
+
+        runQuery("CALL gds.pageRank.mutate('myGraph', {nodeLabels: ['A'], mutateProperty: 'score'})");
+        runQuery("CALL gds.degree.mutate('myGraph', {nodeLabels: ['B'], mutateProperty: 'score'})");
+
+        runQuery("CALL gds.graph.writeNodeProperties('myGraph', ['score'])");
+
+        // we write per node-label and as `B` > `A`
+        // the degree-score for label `B` is written at last and overwrites the pageRank-score of label `A`
+        assertCypherResult("MATCH (n) RETURN n.score AS score", List.of(Map.of("score", 0D)));
     }
 }
