@@ -38,12 +38,37 @@ public final class PageReordering {
 
     @ValueClass
     public interface PageOrdering {
+        /**
+         * Represents the order in which pages
+         * occur according to the offsets. Only
+         * the first occurrence of a page is being
+         * recorded.
+         */
         int[] distinctOrdering();
 
+        /**
+         * Represents the order of the indexes at which
+         * pages occur according to the offsets.
+         * Since a page can occur multiple times within
+         * a consecutive range of offsets, the index of
+         * it's first occurrence can be added multiple times.
+         *
+         * The size of this array can be larger than the
+         * total number of pages.
+         */
         int[] reverseOrdering();
 
+        /**
+         * Represents the start and end indexes within
+         * the offsets where a page starts or ends. The
+         * length of this array is determined by the length
+         * of {@link PageOrdering#reverseOrdering}.
+         */
         long[] pageOffsets();
 
+        /**
+         * The actual array length of {@link PageOrdering#reverseOrdering}.
+         */
         int length();
 
         @TestOnly
