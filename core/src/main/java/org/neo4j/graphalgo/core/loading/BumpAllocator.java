@@ -73,11 +73,7 @@ public final class BumpAllocator<PAGE> {
     }
 
     LocalAllocator<PAGE> newLocalAllocator() {
-        return new LocalAllocator<>(this, false);
-    }
-
-    LocalAllocator<PAGE> newPrefetchingOneBasedLocalAllocator() {
-        return new LocalAllocator<>(this, true);
+        return new LocalAllocator<>(this);
     }
 
     PAGE[] intoPages() {
@@ -179,17 +175,9 @@ public final class BumpAllocator<PAGE> {
         private PAGE page;
         private int offset;
 
-        private LocalAllocator(BumpAllocator<PAGE> globalAllocator, boolean prefetchAndBumpZero) {
+        private LocalAllocator(BumpAllocator<PAGE> globalAllocator) {
             this.globalAllocator = globalAllocator;
-
             this.offset = PAGE_SIZE;
-            if (prefetchAndBumpZero) {
-                top = prefetchAllocate();
-                if (top == 0L) {
-                    ++top;
-                    ++offset;
-                }
-            }
         }
 
         /**
