@@ -152,7 +152,7 @@ public class GraphSageModelTrainer {
             progressTracker.beginSubTask();
 
             // run forward + maybe backward for each Batch
-            ParallelUtil.run(batchTasks, executor);
+            ParallelUtil.runWithConcurrency(concurrency, batchTasks, executor);
             totalLoss = batchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
 
             var converged = batchTasks.stream().allMatch(task -> task.converged);
