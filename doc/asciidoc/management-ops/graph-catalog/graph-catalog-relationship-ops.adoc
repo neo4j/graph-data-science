@@ -160,8 +160,8 @@ YIELD
 [opts="header",cols="1,1,1,7"]
 |===
 | Name                   | Type                  | Default           | Description
-| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure. Also provides the default value for `writeConcurrency`
-| writeConcurrency       | Integer               | 'concurrency'     | The number of concurrent threads used for writing the node properties.
+| concurrency            | Integer               | 4                 | The number of concurrent threads used for running the procedure. Also provides the default value for `writeConcurrency`. Note, this procedure is always running single-threaded.
+| writeConcurrency       | Integer               | 'concurrency'     | The number of concurrent threads used for writing the relationship properties. Note, this procedure is always running single-threaded.
 |===
 
 .Results
