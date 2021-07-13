@@ -249,32 +249,39 @@ CREATE
 ----
 CALL gds.graph.create(
   'personsAndInstruments',
-  ['Person', 'Instrument'],
+  ['Person', 'Instrument'],         // <1>
   {
     LIKES: {
-      type: 'LIKES',
+      type: 'LIKES',                // <2>
       properties: {
-        strength: {
+        strength: {                 // <3>
           property: 'strength',
           defaultValue: 1.0
         },
         score: {
-          property: 'score'
+          property: 'score'         // <4>
         }
       }
     }
   }
 )
 ----
+<1> Project node labels `Person` and `Instrument`.
+<2> Project relationship type `LIKES`.
+<3> Project property `strength` of relationship type `LIKES` setting a default value of `1.0` because not all relationships have that property.
+<4> Project property `score` of relationship type `LIKES`.
 
 .Compute the Node Similarity in our graph:
 [source, cypher, role=noplay graph-create-query]
 ----
-CALL gds.nodeSimilarity.mutate('personsAndInstruments', {
-  mutateRelationshipType: 'SIMILAR',
-  mutateProperty: 'score'
+CALL gds.nodeSimilarity.mutate('personsAndInstruments', {   // <1>
+  mutateRelationshipType: 'SIMILAR',                        // <2>
+  mutateProperty: 'score'                                   // <3>
 })
 ----
+<1> Run NodeSimilarity in `mutate` mode on `personsAndInstruments` projected graph.
+<2> The algorithm will create relationships of type `SIMILAR` in the projected graph.
+<3> The algorithm will create relationship property `score` for each created relationship.
 
 
 === Stream
@@ -289,13 +296,18 @@ In the example below we stream the relationship property `score`.
 .Stream a single relationship property:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty('personsAndInstruments', 'score')
+CALL gds.graph.streamRelationshipProperty(
+  'personsAndInstruments',                  // <1>
+  'score'                                   // <2>
+)
 YIELD
   sourceNodeId, targetNodeId, relationshipType, propertyValue
 RETURN
   gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, relationshipType, propertyValue
 ORDER BY source ASC, target ASC
 ----
+<1> The name of the projected graph.
+<2> The property we want to stream out.
 
 .Results
 [opts="header"]
@@ -331,13 +343,20 @@ We can further on filter the relationship types we want to stream, this is demon
 .Stream a single relationship property for specific relationship type:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty('personsAndInstruments', 'score', ['SIMILAR'])
+CALL gds.graph.streamRelationshipProperty(
+  'personsAndInstruments',                  // <1>
+  'score',                                  // <2>
+  ['SIMILAR']                               // <3>
+)
 YIELD
   sourceNodeId, targetNodeId, relationshipType, propertyValue
 RETURN
   gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, relationshipType, propertyValue
 ORDER BY source ASC, target ASC
 ----
+<1> The name of the projected graph.
+<2> The property we want to stream out.
+<3> List of relationship types we want to stream the property from, only use the ones we need.
 
 .Results
 [opts="header"]
@@ -365,13 +384,20 @@ It is also possible to stream multiple relationship properties.
 .Stream multiple relationship properties:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperties('personsAndInstruments', ['score', 'strength'], ['LIKES'])
+CALL gds.graph.streamRelationshipProperties(
+  'personsAndInstruments',                      // <1>
+  ['score', 'strength'],                        // <2>
+  ['LIKES']                                     // <3>
+)
 YIELD
   sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue
 RETURN
   gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, relationshipType, relationshipProperty, propertyValue
 ORDER BY source ASC, target ASC
 ----
+<1> The name of the projected graph.
+<2> List of properties we want to stream out, allows us to stream more than one property.
+<3> List of relationship types we want to stream the property from, only use the ones we need.
 
 .Results
 [opts="header"]
@@ -408,13 +434,26 @@ Similar to the multiple relationship properties we can stream properties for mul
 .Stream relationship properties of a multiple relationship projections:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperties('personsAndInstruments', ['score'], ['LIKES', 'SIMILAR'])
+CALL gds.graph.streamRelationshipProperties(
+  'personsAndInstruments',                          // <1>
+  ['score'],                                        // <2>
+  ['LIKES', 'SIMILAR']                              // <3>
+)
 YIELD
   sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue
 RETURN
-  gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, relationshipType, relationshipProperty, propertyValue
+  gds.util.asNode(sourceNodeId).name as source,     // <4>
+  gds.util.asNode(targetNodeId).name as target,     // <5>
+  relationshipType,
+  relationshipProperty,
+  propertyValue
 ORDER BY source ASC, target ASC
 ----
+<1> The name of the projected graph.
+<2> List of properties we want to stream out, allows us to stream more than one property.
+<3> List of relationship types we want to stream the property from, only use the ones we need.
+<4> Return the `name` of the source node.
+<5> Return the `name` of the target node.
 
 .Results
 [opts="header"]
@@ -460,10 +499,15 @@ NOTE: Relationships are always written using a single thread.
 .Write relationships to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeRelationship('personsAndInstruments', 'SIMILAR')
+CALL gds.graph.writeRelationship(
+  'personsAndInstruments',        // <1>
+  'SIMILAR'                       // <2>
+)
 YIELD
   graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten
 ----
+<1> The name of the projected graph.
+<2> The relationship type we want to write back to the Neo4j database.
 
 .Results
 [opts="header"]
@@ -482,6 +526,7 @@ image::write_relationships_graph.svg[Visualization of the example graph after wr
 The `SIMILAR` relationships have been added to the underlying database and can be used in Cypher queries or for projecting to in-memory graph for running algorithms.
 The relationships in this example are undirected because we used <<algorithms-node-similarity, Node Similarity>> to mutate the in-memory graph and this algorithm creates undirected relationships, this may not be the case if we use different algorithms.
 
+
 ==== Relationship type with property
 
 To write relationship properties, these have to be explicitly specified.
@@ -491,10 +536,17 @@ To write relationship properties, these have to be explicitly specified.
 .Write relationships and their properties to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeRelationship('personsAndInstruments', 'SIMILAR', 'score')
+CALL gds.graph.writeRelationship(
+  'personsAndInstruments',          // <1>
+  'SIMILAR',                        // <2>
+  'score'                           // <3>
+)
 YIELD
   graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten
 ----
+<1> The name of the projected graph.
+<2> The relationship type we want to write back to the Neo4j database.
+<3> The property name of the relationship we want to write back to the Neo4j database.
 
 .Results
 [opts="header"]
@@ -516,10 +568,15 @@ This is useful to free up main memory or to remove accidentally created relation
 .Delete all relationships of type `SIMILAR` from a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.deleteRelationships('personsAndInstruments', 'SIMILAR')
+CALL gds.graph.deleteRelationships(
+  'personsAndInstruments',            // <1>
+  'SIMILAR'                           // <2>
+)
 YIELD
   graphName, relationshipType, deletedRelationships, deletedProperties
 ----
+<1> The name of the projected graph.
+<2> The relationship type we want to delete from the projected graph.
 
 .Results
 [opts="header"]
