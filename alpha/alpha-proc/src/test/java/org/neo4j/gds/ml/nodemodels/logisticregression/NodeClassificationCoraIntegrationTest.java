@@ -174,15 +174,7 @@ class NodeClassificationCoraIntegrationTest {
             "  randomSeed: 2," +
             "  params: [" +
             "    {penalty: 9.999999999999991E-5, maxEpochs: 1000}, " +
-            "    {penalty: 7.742636826811261E-4, maxEpochs: 1000}, " +
-            "    {penalty: 0.005994842503189405, maxEpochs: 1000}, " +
-            "    {penalty: 0.046415888336127774, maxEpochs: 1000}, " +
-            "    {penalty: 0.3593813663804625, maxEpochs: 1000}, " +
-            "    {penalty: 2.7825594022071267, maxEpochs: 1000}, " +
-            "    {penalty: 21.544346900318843, maxEpochs: 1000}," +
-            "    {penalty: 166.81005372000587, maxEpochs: 1000}," +
-            "    {penalty: 1291.5496650148832, maxEpochs: 1000}," +
-            "    {penalty: 10000.00000000001, maxEpochs: 1000}" +
+            "    {penalty: 166.81005372000587, maxEpochs: 1000}" +
             "  ]" +
             "})",
             GRAPH_NAME,
