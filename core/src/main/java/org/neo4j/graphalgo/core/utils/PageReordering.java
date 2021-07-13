@@ -127,12 +127,12 @@ public final class PageReordering {
         int[] distinctOrdering = new int[pageCount];
         int[] reverseDistinctOrdering = new int[pageCount];
 
-        int idx = 0;
+        int orderedIdx = 0;
         int prevPageIdx = -1;
         var seenPages = new BitSet(pageCount);
 
         while (cursor.next()) {
-            var array = cursor.array;
+            var offsetArray = cursor.array;
             var limit = cursor.limit;
             var base = cursor.base;
 
@@ -143,14 +143,14 @@ public final class PageReordering {
                     continue;
                 }
 
-                var offset = array[i];
+                var offset = offsetArray[i];
                 var pageIdx = (int) (offset >>> pageShift);
 
                 if (pageIdx != prevPageIdx) {
                     if (!seenPages.getAndSet(pageIdx)) {
-                        distinctOrdering[idx] = pageIdx;
-                        reverseDistinctOrdering[pageIdx] = idx;
-                        idx = idx + 1;
+                        distinctOrdering[orderedIdx] = pageIdx;
+                        reverseDistinctOrdering[pageIdx] = orderedIdx;
+                        orderedIdx = orderedIdx + 1;
                     }
                     ordering.add(reverseDistinctOrdering[pageIdx]);
                     pageOffsets.add(nodeId);

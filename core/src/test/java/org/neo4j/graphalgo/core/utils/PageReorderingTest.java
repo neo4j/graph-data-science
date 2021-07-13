@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PageReorderingTest {
 
+    // @formatter:off
     static Stream<Arguments> offsets() {
         return Stream.of(
             Arguments.of(new long[]{ 16, 18, 22, 0, 3, 6, 24, 28, 30, 8, 13, 15}, new int[]{2, 0, 3, 1}, new long[] { 0, 2, 6, 8, 11, 14, 16, 20, 22, 24, 29, 31 }),
@@ -60,6 +61,7 @@ class PageReorderingTest {
             Arguments.of(new long[]{ 8, 13, 15, 24, 28, 30, 0, 3, 6, 16, 18, 22}, new int[]{1, 3, 0, 2}, new long[] { 0, 5, 7, 8, 12, 14, 16, 19, 22, 24, 26, 30 })
         );
     }
+    // @formatter:on
 
     @ParameterizedTest
     @MethodSource("offsets")
@@ -131,15 +133,15 @@ class PageReorderingTest {
         var page3 = new String[] {"yellow"};
 
         var expectedPages = new String[][]{page0, page1, page2, page3};
-        var inputPages = new String[ordering.length][];
+        var actualPages = new String[ordering.length][];
 
         for (int i = 0; i < ordering.length; i++) {
             int order = ordering[i];
-            inputPages[order] = expectedPages[i];
+            actualPages[order] = expectedPages[i];
         }
 
-        var swaps = PageReordering.reorder(inputPages, ordering);
-        assertThat(inputPages).isEqualTo(expectedPages);
+        var swaps = PageReordering.reorder(actualPages, ordering);
+        assertThat(actualPages).isEqualTo(expectedPages);
         assertThat(swaps).isEqualTo(ordering);
     }
 
