@@ -35,6 +35,8 @@ import org.neo4j.graphalgo.datasets.CommunityDbCreator;
 import org.neo4j.graphalgo.datasets.Cora;
 import org.neo4j.graphalgo.datasets.DatasetManager;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
+import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import org.neo4j.graphalgo.model.catalog.ModelListProc;
 
 import java.nio.file.Path;
@@ -62,7 +64,7 @@ class NodeClassificationCoraIntegrationTest {
     // Minimum score ('test') for the F1_WEIGHTED metric
     private static final double MIN_F1_SCORE = 0.82;
     // The ratio of nodes being classified with the correct subject
-    private static final double MIN_ACCURACY = 0.82;
+    private static final double MIN_ACCURACY = 0.79;
 
     private static final Map<String, Integer> SUBJECT_DICTIONARY = Map.of(
         "Neural_Networks", 0,
@@ -135,6 +137,7 @@ class NodeClassificationCoraIntegrationTest {
         datasetManager.closeDb(cora);
     }
 
+    @GdsEditionTest(Edition.EE)
     @Test
     void trainAndPredict() {
         produceEmbeddings();
@@ -148,7 +151,9 @@ class NodeClassificationCoraIntegrationTest {
         var fastRp = formatWithLocale(
             "CALL gds.fastRP.mutate('%s', {" +
             " mutateProperty: 'frp'," +
-            " embeddingDimension: 512" +
+            " embeddingDimension: 512," +
+            " concurrency: 8," +
+            " randomSeed: 42" +
             "})",
             GRAPH_NAME
         );
@@ -165,8 +170,8 @@ class NodeClassificationCoraIntegrationTest {
             "  metrics: ['F1_WEIGHTED', 'ACCURACY'], " +
             "  holdoutFraction: 0.2, " +
             "  validationFolds: 5, " +
+            "  concurrency: 8," +
             "  randomSeed: 2," +
-            "  concurrency: 1," +
             "  params: [" +
             "    {penalty: 9.999999999999991E-5, maxEpochs: 1000}, " +
             "    {penalty: 7.742636826811261E-4, maxEpochs: 1000}, " +
@@ -193,7 +198,8 @@ class NodeClassificationCoraIntegrationTest {
             "  nodeLabels: ['%s']," +
             "  modelName: '%s'," +
             "  mutateProperty: 'predicted_class', " +
-            "  predictedProbabilityProperty: 'predicted_proba'" +
+            "  predictedProbabilityProperty: 'predicted_proba'," +
+            "  concurrency: 8" +
             "})",
             GRAPH_NAME,
             PAPER_LABEL.name(),
