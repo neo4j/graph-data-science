@@ -13,7 +13,6 @@ This can be prevented by storing a model on disk.
 The location of the stored models can be configured via the configuration parameter `gds.model.store_location` in the `neo4j.conf`.
 The location must be a directory and writable by the Neo4j process.
 
-
 [NOTE]
 ====
 The `gds.model.store_location` parameter must be configured for this feature.
@@ -22,6 +21,43 @@ The `gds.model.store_location` parameter must be configured for this feature.
 [.alpha]
 [[catalog-model-store]]
 == Storing models from the catalog on disk
+
+*Trained models that can be stored*
+
+* <<algorithms-embeddings-graph-sage,GraphSAGE model>>
+* <<algorithms-ml-nodeclassification,Node Classification model>>
+* <<algorithms-ml-linkprediction,Link Prediction model>>
+
+=== Syntax
+
+[.model-store-syntax]
+--
+.Remove a model from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.model.store(modelName: String)
+YIELD
+    modelName: String,
+    storeMillis: Integer
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type   | Default | Optional | Description
+| modelName     | String | n/a     | no      | The name of a model.
+|===
+
+.Results
+[opts="header",cols="1,1,4"]
+|===
+| Name          | Type     | Description
+| modelName     | String   | The name of the stored model.
+| storeMillis   | Integer  | The number of milliseconds it took to store the model.
+|===
+--
+
+=== Example
 
 [role=query-example, no-result=true]
 --
@@ -35,17 +71,6 @@ YIELD
 ----
 --
 
-.Results
-* `modelName`: The name of the stored model.
-* `storeMillis`: The number of milliseconds it took to store the model.
-
-
-*Trained models that can be stored*
-
-* <<algorithms-embeddings-graph-sage,GraphSAGE model>>
-* <<algorithms-ml-nodeclassification,Node Classification model>>
-* <<algorithms-ml-linkprediction,Link Prediction model>>
-
 [.alpha]
 [[catalog-model-load]]
 == Loading models from disk
@@ -53,6 +78,37 @@ YIELD
 GDS will discover available models from the configured store location upon database startup.
 During discovery, only model metadata is loaded, not the actual model data.
 In order to use a stored model, it has to be explicitly loaded.
+
+=== Syntax
+
+[.model-load-syntax]
+--
+.Remove a model from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.model.load(modelName: String)
+YIELD
+    modelName: String,
+    loadMillis: Integer
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type   | Default | Optional | Description
+| modelName     | String | n/a     | no      | The name of a model.
+|===
+
+.Results
+[opts="header",cols="1,1,4"]
+|===
+| Name          | Type     | Description
+| modelName     | String   | The name of the loaded model.
+| loadMillis    | Integer  | The number of milliseconds it took to load the model.
+|===
+--
+
+=== Example
 
 [role=query-example, no-result=true]
 --
@@ -66,13 +122,9 @@ YIELD
 ----
 --
 
-.Results
-* `modelName`: The name of the stored model.
-* `loadMillis`: The number of milliseconds it took to load the model.
-
-If the model is already loaded, nothing happens.
 To verify if a model is loaded, we can use the <<catalog-model-list,`gds.beta.model.list`>> procedure.
 The procedure returns flags to indicate if the model is stored and if the model is loaded into memory.
+The operation is idempotent, and skips loading if the model is already loaded.
 
 [.alpha]
 [[catalog-model-delete]]
@@ -82,6 +134,38 @@ To remove a stored model from disk, it has to be deleted.
 This is different from dropping a model.
 Dropping a model will remove it from the in-memory model catalog, but not from disk.
 Deleting a model will remove it from disk, but keep it in the in-memory model catalog if it was already loaded.
+
+
+=== Syntax
+
+[.model-delete-syntax]
+--
+.Remove a model from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.model.delete(modelName: String)
+YIELD
+    modelName: String,
+    deleteMillis: Integer
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type   | Default | Optional | Description
+| modelName     | String | n/a     | no      | The name of a model.
+|===
+
+.Results
+[opts="header",cols="1,1,4"]
+|===
+| Name          | Type     | Description
+| modelName     | String   | The name of the loaded model.
+| deleteMillis  | Integer  | The number of milliseconds it took to delete the model.
+|===
+--
+
+=== Example
 
 [role=query-example, no-result=true]
 --
@@ -94,7 +178,3 @@ YIELD
   deleteMillis
 ----
 --
-
-.Results
-* `modelName`: The name of the stored model.
-* `deleteMillis`: The number of milliseconds it took to delete the model.

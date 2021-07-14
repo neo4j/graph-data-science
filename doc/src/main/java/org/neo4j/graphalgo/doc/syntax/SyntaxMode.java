@@ -40,7 +40,10 @@ enum SyntaxMode {
     DELETE_RELATIONSHIPS("include-with-delete-relationships"),
     GRAPH_LIST("graph-list-syntax"),
     MODEL_LIST("model-list-syntax"),
-    MODEL_PUBLISH("model-publish-syntax");
+    MODEL_PUBLISH("model-publish-syntax"),
+    MODEL_STORE("model-store-syntax"),
+    MODEL_LOAD("model-load-syntax"),
+    MODEL_DELETE("model-delete-syntax");
 
     private final String mode;
 
