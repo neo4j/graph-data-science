@@ -45,7 +45,7 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> implements A
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.task(
-            "foo",
+            "Yens",
             DijkstraFactory.dijkstraProgressTask(graph),
             Tasks.iterativeOpen(
                 "Searching path",

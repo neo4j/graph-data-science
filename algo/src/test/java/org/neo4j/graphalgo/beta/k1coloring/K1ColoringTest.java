@@ -204,12 +204,14 @@ class K1ColoringTest {
             .build()
             .generate();
 
+        var concurrency = 4;
+
         var config = ImmutableK1ColoringStreamConfig.builder()
-            .concurrency(4)
+            .concurrency(concurrency)
             .maxIterations(100)
             .build();
 
-        var testLogger = new TestProgressLogger(graph.relationshipCount() * 2, "K1Coloring", 4, EmptyProgressEventTracker.INSTANCE);
+        var testLogger = new TestProgressLogger(graph.relationshipCount() * 2, "K1Coloring", concurrency, EmptyProgressEventTracker.INSTANCE);
         var progressTracker = new TaskProgressTracker(new K1ColoringFactory<>().progressTask(graph, config), testLogger);
 
         var k1Coloring = new K1Coloring(
@@ -226,7 +228,7 @@ class K1ColoringTest {
 
         List<AtomicLong> progresses = testLogger.getProgresses();
 
-        assertEquals(k1Coloring.ranIterations() * 4 + 1, progresses.size());
+        assertEquals(k1Coloring.ranIterations() * concurrency + 1, progresses.size());
         progresses.forEach(progress -> assertTrue(progress.get() <= 2 * graph.relationshipCount()));
 
         assertTrue(testLogger.containsMessage(TestLog.INFO, ":: Start"));

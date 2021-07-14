@@ -133,7 +133,6 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 
     @Override
     public FastRPResult compute() {
-
         progressTracker.beginSubTask();
         initPropertyVectors();
         initRandomVectors();
