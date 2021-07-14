@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.utils.progress.v2.tasks;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 
+import java.util.Optional;
 import java.util.Stack;
 
 public class TaskProgressTracker implements ProgressTracker {
@@ -29,7 +30,7 @@ public class TaskProgressTracker implements ProgressTracker {
     private final Task baseTask;
     private final ProgressLogger progressLogger;
     private final Stack<Task> nestedTasks;
-    private Task currentTask;
+    private Optional<Task> currentTask;
 
     public TaskProgressTracker(
         Task baseTask,
@@ -37,33 +38,30 @@ public class TaskProgressTracker implements ProgressTracker {
     ) {
         this.baseTask = baseTask;
         this.progressLogger = progressLogger;
-        this.currentTask = null;
+        this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();
     }
 
     @Override
     public void beginSubTask() {
-        if (currentTask == null) {
-            currentTask = baseTask;
-        } else {
-            nestedTasks.add(currentTask);
-            currentTask = currentTask.nextSubtask();
-        }
-        currentTask.start();
-        progressLogger.logStart(currentTask.description());
-        progressLogger.reset(currentTask.getProgress().volume());
+        var nextTask = currentTask.map(task -> {
+            nestedTasks.add(task);
+            return task.nextSubtask();
+        }).orElse(baseTask);
+        nextTask.start();
+        progressLogger.logStart(nextTask.description());
+        progressLogger.reset(nextTask.getProgress().volume());
+        currentTask = Optional.of(nextTask);
     }
 
     @Override
     public void endSubTask() {
-        if (currentTask == null) {
-            throw new IllegalStateException("No more running tasks");
-        }
+        var currentTask = requireCurrentTask();
         currentTask.finish();
         progressLogger.logFinish(currentTask.description());
-        currentTask = nestedTasks.isEmpty()
-            ? null
-            : nestedTasks.pop();
+        this.currentTask = nestedTasks.isEmpty()
+            ? Optional.empty()
+            : Optional.of(nestedTasks.pop());
     }
 
     @Override
@@ -73,13 +71,13 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public void logProgress(long value) {
-        currentTask.logProgress(value);
+        requireCurrentTask().logProgress(value);
         progressLogger.logProgress(value);
     }
 
     @Override
     public void setVolume(long volume) {
-        currentTask.setVolume(volume);
+        requireCurrentTask().setVolume(volume);
         progressLogger.reset(volume);
     }
 
@@ -94,6 +92,10 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @TestOnly
     Task currentSubTask() {
-        return currentTask;
+        return requireCurrentTask();
+    }
+
+    private Task requireCurrentTask() {
+        return currentTask.orElseThrow(() -> new IllegalStateException("No more running tasks"));
     }
 }
