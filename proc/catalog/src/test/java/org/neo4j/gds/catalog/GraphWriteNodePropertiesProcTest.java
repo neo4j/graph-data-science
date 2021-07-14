@@ -19,15 +19,11 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.assertj.core.api.Assertions;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;
@@ -39,6 +35,8 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.IdentityProperties;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.degree.DegreeCentralityMutateProc;
+import org.neo4j.graphalgo.pagerank.PageRankMutateProc;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
@@ -48,14 +46,11 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.graphalgo.compat.MapUtil.map;
-import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphWriteNodePropertiesProcTest extends BaseProcTest {
@@ -74,7 +69,12 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphCreateProc.class, GraphWriteNodePropertiesProc.class);
+        registerProcedures(
+            GraphCreateProc.class,
+            GraphWriteNodePropertiesProc.class,
+            DegreeCentralityMutateProc.class,
+            PageRankMutateProc.class
+        );
         runQuery(DB_CYPHER);
 
         runQuery(GdsCypher.call()
@@ -130,10 +130,10 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         String graphWriteQuery = formatWithLocale(graphWriteQueryTemplate, TEST_GRAPH_SAME_PROPERTIES);
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
-            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
-            assertEquals(Arrays.asList("newNodeProp1", "newNodeProp2"), row.get("nodeProperties"));
-            assertEquals(12L, row.getNumber("propertiesWritten").longValue());
+            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(-1L);
+            assertThat(row.getString("graphName")).isEqualTo(TEST_GRAPH_SAME_PROPERTIES);
+            assertThat(row.get("nodeProperties")).isEqualTo(Arrays.asList("newNodeProp1", "newNodeProp2"));
+            assertThat(row.getNumber("propertiesWritten").longValue()).isEqualTo(12L);
         });
 
         String validationQuery =
@@ -165,10 +165,10 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         );
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
-            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
-            assertEquals(Arrays.asList("newNodeProp1", "newNodeProp2"), row.get("nodeProperties"));
-            assertEquals(6L, row.getNumber("propertiesWritten").longValue());
+            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(-1L);
+            assertThat(row.getString("graphName")).isEqualTo(TEST_GRAPH_SAME_PROPERTIES);
+            assertThat(row.get("nodeProperties")).isEqualTo(Arrays.asList("newNodeProp1", "newNodeProp2"));
+            assertThat(row.getNumber("propertiesWritten").longValue()).isEqualTo(6L);
         });
 
         String validationQuery =
@@ -200,10 +200,10 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         );
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
-            assertEquals(TEST_GRAPH_DIFFERENT_PROPERTIES, row.getString("graphName"));
-            assertEquals(Arrays.asList("newNodeProp1", "newNodeProp2"), row.get("nodeProperties"));
-            assertEquals(6L, row.getNumber("propertiesWritten").longValue());
+            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(-1L);
+            assertThat(row.getString("graphName")).isEqualTo(TEST_GRAPH_DIFFERENT_PROPERTIES);
+            assertThat(row.get("nodeProperties")).isEqualTo(Arrays.asList("newNodeProp1", "newNodeProp2"));
+            assertThat(row.getNumber("propertiesWritten").longValue()).isEqualTo(6L);
         });
 
         String validationQuery =
@@ -242,10 +242,10 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         );
 
         runQueryWithRowConsumer(graphWriteQuery, row -> {
-            assertThat(-1L, Matchers.lessThan(row.getNumber("writeMillis").longValue()));
-            assertEquals(TEST_GRAPH_SAME_PROPERTIES, row.getString("graphName"));
-            assertEquals(singletonList("newNodeProp3"), row.get("nodeProperties"));
-            assertEquals(expectedPropertyCount, row.getNumber("propertiesWritten").longValue());
+            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(-1L);
+            assertThat(row.getString("graphName")).isEqualTo(TEST_GRAPH_SAME_PROPERTIES);
+            assertThat(row.get("nodeProperties")).isEqualTo(Arrays.asList("newNodeProp3"));
+            assertThat(row.getNumber("propertiesWritten").longValue()).isEqualTo(expectedPropertyCount);
         });
 
         String validationQuery =
@@ -279,7 +279,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             proc.run(TEST_GRAPH_SAME_PROPERTIES, List.of("newNodeProp1", "newNodeProp2"), List.of("*"), Map.of());
         }
 
-        Assertions.assertThat(log.getMessages(TestLog.INFO))
+        assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .contains(
                 "WriteNodeProperties - Label 1 of 2 [Label='A'] :: Start",
@@ -297,42 +297,50 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistingNodeProperties() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.writeNodeProperties(" +
-                "   '%s', " +
-                "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3']" +
-                ")",
-                TEST_GRAPH_SAME_PROPERTIES
+        assertThatThrownBy(() -> runQuery(formatWithLocale(
+            "CALL gds.graph.writeNodeProperties(" +
+            "   '%s', " +
+            "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3']" +
+            ")",
+            TEST_GRAPH_SAME_PROPERTIES
             ))
-        );
-
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(
-            rootCause.getMessage(),
-            containsString("No node projection with property key(s) ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'] found")
-        );
+        )
+            .isInstanceOf(QueryExecutionException.class)
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(
+                "No node projection with property key(s) ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'] found");
     }
 
     @Test
     void shouldFailOnNonExistingNodePropertiesForSpecificLabel() {
-        QueryExecutionException ex = assertThrows(
-            QueryExecutionException.class,
-            () -> runQuery(formatWithLocale(
-                "CALL gds.graph.writeNodeProperties(" +
-                "   '%s', " +
-                "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], " +
-                "   ['A'] " +
-                ")",
-                TEST_GRAPH_SAME_PROPERTIES
+        assertThatThrownBy(() -> runQuery(formatWithLocale(
+            "CALL gds.graph.writeNodeProperties(" +
+            "   '%s', " +
+            "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], " +
+            "   ['A'] " +
+            ")",
+            TEST_GRAPH_SAME_PROPERTIES
             ))
-        );
+        ).isInstanceOf(QueryExecutionException.class)
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining(
+                "Node projection 'A' does not have property key 'newNodeProp3'")
+            .hasMessageContaining("Available keys: ['newNodeProp1', 'newNodeProp2']");
+    }
 
-        Throwable rootCause = rootCause(ex);
-        assertEquals(IllegalArgumentException.class, rootCause.getClass());
-        assertThat(rootCause.getMessage(), containsString("Node projection 'A' does not have property key 'newNodeProp3'"));
-        assertThat(rootCause.getMessage(), containsString("Available keys: ['newNodeProp1', 'newNodeProp2']"));
+    @Test
+    void writePropertyTwice() {
+        clearDb();
+        runQuery("CREATE (:A:B)");
+        runQuery("CALL gds.graph.create('myGraph', ['A','B'], '*')");
+
+        runQuery("CALL gds.pageRank.mutate('myGraph', {nodeLabels: ['A'], mutateProperty: 'score'})");
+        runQuery("CALL gds.degree.mutate('myGraph', {nodeLabels: ['B'], mutateProperty: 'score'})");
+
+        runQuery("CALL gds.graph.writeNodeProperties('myGraph', ['score'])");
+
+        // we write per node-label and as `B` > `A`
+        // the degree-score for label `B` is written at last and overwrites the pageRank-score of label `A`
+        assertCypherResult("MATCH (n) RETURN n.score AS score", List.of(Map.of("score", 0D)));
     }
 }
