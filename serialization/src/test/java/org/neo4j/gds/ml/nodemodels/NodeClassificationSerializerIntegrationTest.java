@@ -85,8 +85,10 @@ class NodeClassificationSerializerIntegrationTest {
             .ignoringFields(
                 "trainConfig.params",
                 "data.classIdMap",
-                "graphSchema.nodeSchema.properties.defaultValue.defaultValue",
                 "stored"
+            )
+            .ignoringFieldsMatchingRegexes(
+                "graphSchema\\.nodeSchema\\.properties\\..+\\.defaultValue\\.defaultValue"
             )
             .isEqualTo(modelBeforeSerialization);
 

@@ -100,9 +100,11 @@ class LinkPredictionSerializerIntegrationTest {
             .ignoringFields(
                 "params",
                 "trainConfig.params",
-                "graphSchema.nodeSchema.properties.defaultValue.defaultValue",
-                "graphSchema.relationshipSchema.properties.defaultValue.defaultValue",
                 "stored"
+            )
+            .ignoringFieldsMatchingRegexes(
+                "graphSchema\\.nodeSchema\\.properties\\..+\\.defaultValue\\.defaultValue",
+                "graphSchema\\.relationshipSchema\\.properties\\..+\\.defaultValue\\.defaultValue"
             )
             .isEqualTo(modelBeforeSerialization);
     }
