@@ -250,10 +250,17 @@ We are going to start with demonstrating how to load a simple graph by projectin
 .Project `Person` nodes and `KNOWS` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('persons', 'Person', 'KNOWS')
+CALL gds.graph.create(
+  'persons',            // <1>
+  'Person',             // <2>
+  'KNOWS'               // <3>
+)
 YIELD
   graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipProjection, relationshipCount AS rels
 ----
+<1> The name of the graph, this can later be used to run algorithms over this graph, to get details for it or to drop it.
+<2> Single node label to be projected, specified as a String, in this example `Person`.
+<3> Single relationship to be projected, specified as a String, in this example `KNOWS`.
 
 .Results
 [opts="header", cols="1,3m,1,3m,1m"]
@@ -279,10 +286,17 @@ To project multiple node labels and relationship types, we can adjust the projec
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.create('personsAndBooks', ['Person', 'Book'], ['KNOWS', 'READ'])
+CALL gds.graph.create(
+  'personsAndBooks',    // <1>
+  ['Person', 'Book'],   // <2>
+  ['KNOWS', 'READ']     // <3>
+)
 YIELD
   graphName AS graph, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
 ----
+<1> Projects a graph under the name `personsAndBooks`.
+<2> A list of node labels to be projected, in this example `Person` and `Book`.
+<3> A list of relationship types to be projected, in this example `KNOWS` and `READ`.
 
 .Results
 [opts="header", cols="1,3m,1m,1m"]
@@ -309,9 +323,9 @@ Additionally, we provide the functionality to load the relationships in the `REV
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
-  'undirectedKnows',
-  'Person',
-  {KNOWS: {orientation: 'UNDIRECTED'}}
+  'undirectedKnows',                    // <1>
+  'Person',                             // <2>
+  {KNOWS: {orientation: 'UNDIRECTED'}}  // <3>
 )
 YIELD
   graphName AS graph,
@@ -319,6 +333,9 @@ YIELD
   nodeCount AS nodes,
   relationshipCount AS rels
 ----
+<1> Projects a graph under the name `undirectedKnows`.
+<2> Projects node label `Person``.
+<3> Projects relationship type `KNOWS` and specifies that it should be `UNDIRECTED` using the `orientation` parameter.
 
 .Results
 [opts="header", cols="1,3m,1m,1m"]
@@ -344,18 +361,24 @@ To project node properties, we can either use the `nodeProperties` configuration
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
-  'graphWithProperties',
-  {
-    Person: {properties: 'age'},
-    Book: {properties: {price: {defaultValue: 5.0}}}
+  'graphWithProperties',                                // <1>
+  {                                                     // <2>
+    Person: {properties: 'age'},                        // <3>
+    Book: {properties: {price: {defaultValue: 5.0}}}    // <4>
   },
-  ['KNOWS', 'READ'],
-  {nodeProperties: 'ratings'}
+  ['KNOWS', 'READ'],                                    // <5>
+  {nodeProperties: 'ratings'}                           // <6>
 )
 YIELD
   graphName, nodeProjection, nodeCount AS nodes, relationshipCount AS rels
 RETURN graphName, nodeProjection.Book AS bookProjection, nodes, rels
 ----
+<1> Projects a graph under the name `graphWithProperties`.
+<2> Use the expanded node projection syntax.
+<3> Project node label `Person` with its `age` property.
+<4> Project node label `Book` with its `price` property, specifying a `defaultValue` of `5.0`, each `Book` node that doesn't have `price` property will get it with value of `5.0`.
+<5> A list of relationship types to be projected, in this example `KNOWS` and `READ`.
+<6> Global configuration, projects node property `rating` on each of the specified labels.
 
 .Results
 [opts="header", cols="1,3m,1m,1m"]
@@ -406,9 +429,11 @@ Analogous to node properties, we can either use the `relationshipProperties` con
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
-  'readWithProperties',
-  ['Person', 'Book'],
-  {READ: {properties: "numberOfPages"}}
+  'readWithProperties',                     // <1>
+  ['Person', 'Book'],                       // <2>
+  {                                         // <3>
+    READ: { properties: "numberOfPages" }   // <4>
+  }
 )
 YIELD
   graphName AS graph,
@@ -416,6 +441,10 @@ YIELD
   nodeCount AS nodes,
   relationshipCount AS rels
 ----
+<1> Projects a graph under the name `readWithProperties`.
+<2> A list of node labels to be projected, in this example `Person` and `Book`.
+<3> Use the expanded relationship projection syntax.
+<4> Project relationship type `READ` with its `numberOfPages` property.
 
 .Results
 [opts="header", cols="1,3m,1m,1m"]
@@ -473,14 +502,14 @@ If we do not need the count, we could use the `SINGLE` aggregation.
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
-  'readCount',
-  ['Person', 'Book'],
+  'readCount',                      // <1>
+  ['Person', 'Book'],               // <2>
   {
-    READ: {
+    READ: {                         // <3>
       properties: {
-        numberOfReads: {
+        numberOfReads: {            // <4>
           property: '*',
-          aggregation: 'COUNT'
+          aggregation: 'COUNT'      // <5>
         }
       }
     }
@@ -492,6 +521,11 @@ YIELD
   nodeCount AS nodes,
   relationshipCount AS rels
 ----
+<1> Projects a graph under the name `readCount`.
+<2> A list of node labels to be projected, in this example `Person` and `Book`.
+<3> Project relationship type `READ`.
+<4> Project relationship property `numberOfReads`.
+<5> Specify aggregation type, in this example `COUNT` which will result in a projected `numberOfReads` property and its value will be the number of parallel relationships between the source and target nodes.
 
 .Results
 [opts="header", cols="1,3m,1m,1m"]
@@ -540,9 +574,9 @@ For graphs with relationship properties we can also use other aggregations.
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
-  'readSums',
-  ['Person', 'Book'],
-  {READ: {properties: {numberOfPages: {aggregation: 'SUM'}}}}
+  'readSums',                                                   // <1>
+  ['Person', 'Book'],                                           // <2>
+  {READ: {properties: {numberOfPages: {aggregation: 'SUM'}}}}   // <3>
 )
 YIELD
   graphName AS graph,
@@ -550,6 +584,9 @@ YIELD
   nodeCount AS nodes,
   relationshipCount AS rels
 ----
+<1> Projects a graph under the name `readSums`.
+<2> A list of node labels to be projected, in this example `Person` and `Book`.
+<3> Project relationship type `READ`, specifying aggregation type `SUM` which will result in a projected `numberOfPages` property and its value will be the sum of the `numberOfPages` properties of parallel relationships between the source and target nodes.
 
 .Results
 [opts="header", cols="1,3m,1m,1m"]
