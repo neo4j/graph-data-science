@@ -2,8 +2,7 @@
 [[catalog-model-drop]]
 = Removing models
 
-If we no longer need a trained model we can remove it from the catalog.
-
+If we no longer need a trained model and want to free up memory, we can remove the model from the catalog.
 
 == Syntax
 
@@ -34,7 +33,7 @@ YIELD
 [opts="header",cols="1,1,4"]
 |===
 | Name          | Type     | Description
-| modelInfo     | Map      | Detailed information about the trained model. Always includes the `modelName` and `modelType`, i.e., <<algorithms-embeddings-graph-sage, GraphSAGE>>. Dependent on the model-type, there are additional fields.
+| modelInfo     | Map      | Detailed information about the trained model. Always includes the `modelName` and `modelType`, e.g., <<algorithms-embeddings-graph-sage, GraphSAGE>>. Dependent on the model-type, there are additional fields.
 | trainConfig   | Map      | The configuration used for training the model.
 | graphSchema   | Map      | The schema of the graph on which the model was trained.
 | loaded        | Boolean  | True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
@@ -46,6 +45,9 @@ YIELD
 
 
 == Example
+
+In this section we are going to demonstrate the usage of `gds.beta.model.drop`.
+Assume we loaded a stored a model by running `train` on one of our <<algorithms-ml-models, Machine learning algorithms>>.
 
 [role=query-example]
 --
@@ -60,8 +62,11 @@ YIELD modelInfo, loaded, stored, shared
 [opts="header",cols="1m,1m,1m,1m"]
 |===
 | modelInfo                                          | loaded  | stored | shared
-| {modelName=my-model, modelType=example-model-type} |  true   | false  | false
+| {modelName=my-model, modelType=some-model-type} |  true   | false  | false
 |===
 --
+
+In this example, the removed `my-model` was of the imaginary type `some-model-type`.
+The model was loaded in-memory, but neither stored on disk nor published.
 
 NOTE: If the model name does not exist, an error will be raised.

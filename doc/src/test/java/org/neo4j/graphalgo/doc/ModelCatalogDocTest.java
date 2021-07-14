@@ -27,14 +27,9 @@ import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
-import org.neo4j.gds.model.catalog.ModelDropProc;
-import org.neo4j.gds.model.catalog.ModelExistsProc;
-import org.neo4j.gds.model.catalog.ModelListProc;
-
-import java.util.List;
 
 @GdsEditionTest(Edition.EE)
-class ModelCatalogDocTest extends DocTestBase {
+abstract class ModelCatalogDocTest extends DocTestBase {
 
     @Override
     @BeforeEach
@@ -43,7 +38,7 @@ class ModelCatalogDocTest extends DocTestBase {
         ModelCatalog.set(Model.of(
             getUsername(),
             "my-model",
-            "example-model-type",
+            "some-model-type",
             GraphSchema.empty(),
             new Object(),
             (ModelConfig) () -> "my-model",
@@ -55,19 +50,4 @@ class ModelCatalogDocTest extends DocTestBase {
     void tearDown() {
         ModelCatalog.removeAllLoadedModels();
     }
-
-    @Override
-    List<Class<?>> procedures() {
-        return List.of(
-            ModelListProc.class,
-            ModelExistsProc.class,
-            ModelDropProc.class
-        );
-    }
-
-    @Override
-    String adocFile() {
-        return "model-catalog/model-catalog.adoc";
-    }
-
 }
