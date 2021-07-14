@@ -33,6 +33,7 @@ enum SyntaxMode {
     STREAM_NODE_PROPERTIES("stream-node-properties-syntax"),
     STREAM_SINGLE_PROPERTY("include-with-stream-single-property"),
     GRAPH_EXISTS("graph-exists-syntax"),
+    MODEL_EXISTS("model-exists-syntax"),
     GRAPH_EXPORT("graph-export-syntax"),
     CREATE_SUBGRAPH("create-subgraph-syntax"),
     REMOVE("include-with-remove"),

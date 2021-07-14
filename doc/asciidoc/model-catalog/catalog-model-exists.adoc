@@ -4,18 +4,55 @@
 
 We can check if a model is available in the catalog by looking up its name.
 
+== Syntax
+
+[.model-exists-syntax]
+--
+.Remove a model from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.model.exists(modelName: String)
+YIELD
+    modelName: String,
+    modelType: String,
+    exists: Boolean
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type   | Default | Optional | Description
+| modelName     | String | n/a     | no       | The name of a model.
+|===
+
+.Results
+[opts="header",cols="1,1,4"]
+|===
+| Name          | Type     | Description
+| modelName     | String   | The name of a model.
+| modelType     | String   | The type of the model.
+| exists        | Boolean  | True, if the model exists in the model-catalog.
+|===
+--
+
+
+== Example
+
+In this section we are going to demonstrate the usage of `gds.beta.model.exists`.
+Assume we trained model by running `train` on one of our <<algorithms-ml-models, Machine learning algorithms>>.
+
 [role=query-example]
 --
 .Check if a model exists in the catalog:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.model.exists('my-model') YIELD exists;
+CALL gds.beta.model.exists('my-model');
 ----
 
 .Results
-[opts="header",cols="1m"]
+[opts="header"]
 |===
-| exists
-| true
+| modelName    | modelType         | exists
+| "my-model"   | "some-model-type" | true
 |===
 --
