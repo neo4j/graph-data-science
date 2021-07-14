@@ -19,29 +19,20 @@
  */
 package org.neo4j.graphalgo.doc;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.embeddings.graphsage.Layer;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
+import org.neo4j.gds.model.catalog.ModelPublishProc;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.ModelStoreSettings;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
-import org.neo4j.gds.model.catalog.ModelPublishProc;
 
 import java.nio.file.Path;
 import java.util.List;
 
 @GdsEditionTest(Edition.EE)
-class ModelCatalogPublishDocTest extends DocTestBase {
+class ModelCatalogPublishDocTest extends ModelCatalogDocTest {
 
     @TempDir
     Path modelStoreLocation;
@@ -53,20 +44,6 @@ class ModelCatalogPublishDocTest extends DocTestBase {
         GraphDatabaseApiProxy
             .resolveDependency(db, Config.class)
             .set(ModelStoreSettings.model_store_location, modelStoreLocation);
-        ModelCatalog.set(Model.of(
-            getUsername(),
-            "my-model",
-            GraphSage.MODEL_TYPE,
-            GraphSchema.empty(),
-            ModelData.of(new Layer[0], new SingleLabelFeatureFunction()),
-            ImmutableGraphSageTrainConfig.builder().modelName("my-model").addFeatureProperties("a").build(),
-            Model.Mappable.EMPTY
-        ));
-    }
-
-    @AfterEach
-    void tearDown() {
-        ModelCatalog.removeAllLoadedModels();
     }
 
     @Override

@@ -39,7 +39,8 @@ enum SyntaxMode {
     REMOVE("include-with-remove"),
     DELETE_RELATIONSHIPS("include-with-delete-relationships"),
     GRAPH_LIST("graph-list-syntax"),
-    MODEL_LIST("model-list-syntax");
+    MODEL_LIST("model-list-syntax"),
+    MODEL_PUBLISH("model-publish-syntax");
 
     private final String mode;
 

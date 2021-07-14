@@ -10,32 +10,52 @@ Publishing models is an alpha tier feature.
 By default, a trained model is visible to the user that created it.
 Making a model accessible to other users can be achieved by publishing it.
 
-[role=query-example, no-result=true]
+== Syntax
+
+[.model-publish-syntax]
+--
+.Remove a model from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.model.publish(modelName: String)
+YIELD
+    modelInfo: Map,
+    trainConfig: Map,
+    graphSchema: Map,
+    loaded: Boolean,
+    stored: Boolean,
+    creationTime: DateTime,
+    shared: Boolean
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type   | Default | Optional | Description
+| modelName     | String | n/a     | no       | The name of a model stored in the catalog.
+|===
+
+
+include::shared/model-info-result.adoc[]
+--
+
+== Examples
+
+[role=query-example]
 --
 .Publishing trained model:
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.publish('my-model')
-YIELD
-  modelInfo,
-  trainConfig,
-  graphSchema,
-  stored,
-  loaded,
-  creationTime,
-  shared
+YIELD modelInfo, shared
 ----
+
+.Results
+[opts="header",cols="4m,1m"]
+|===
+| modelInfo                                              | shared
+| {modelName=my-model_public, modelType=some-model-type} | true
+|===
 --
 
-The full set of fields returned from this procedure are:
-
-* `modelInfo`: detailed information for the trained model
-** `modelName: String`: the saved model name.
-** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
-** can also contain algorithm specific model details.
-* `trainConfig`: the configuration used for training the model.
-* `graphSchema`: the schema of the graph on which the model was trained.
-* `stored`: True, if the model is <<catalog-model-store,stored>> on disk.
-* `loaded`: True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
-* `creationTime`: the time at which the model was registered in the catalog.
-* `shared`: a boolean flag indicating if the model is published.
+We can see that the model is now shared. The shared model has the `_public` suffix.
