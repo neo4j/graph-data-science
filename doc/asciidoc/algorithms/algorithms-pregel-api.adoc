@@ -31,7 +31,7 @@ The introduction of a new Pregel algorithm can be separated in two main steps.
 First, we need to implement the algorithm using the Pregel Java API.
 Second, we need to expose the algorithm via a Cypher procedure to make use of it.
 
-For an example on how to expose a custom Pregel computation via a Neo4j procedure, have a look at the https://github.com/neo-technology/graph-analytics/tree/master/public/examples/pregel-example/src/main/java/org/neo4j/graphalgo/beta/pregel[Pregel examples].
+For an example on how to expose a custom Pregel computation via a Neo4j procedure, have a look at the https://github.com/neo4j/graph-data-science/tree/master/examples/pregel-example/src/main/java/org/neo4j/graphalgo/beta/pregel[Pregel examples].
 
 [[algorithms-pregel-api-java]]
 == Pregel Java API
