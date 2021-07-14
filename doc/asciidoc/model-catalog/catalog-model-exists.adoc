@@ -52,7 +52,7 @@ CALL gds.beta.model.exists('my-model');
 .Results
 [opts="header"]
 |===
-| modelName    | modelType         | exists
-| "my-model"   | "some-model-type" | true
+| modelName    | modelType   | exists
+| "my-model"   | "graphSage" | true
 |===
 --

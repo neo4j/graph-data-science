@@ -21,8 +21,13 @@ package org.neo4j.graphalgo.doc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
+import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
-import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.junit.annotation.Edition;
@@ -31,18 +36,16 @@ import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 @GdsEditionTest(Edition.EE)
 abstract class ModelCatalogDocTest extends DocTestBase {
 
-    @Override
     @BeforeEach
-    void setUp() throws Exception {
-        super.setUp();
+    void loadModel() {
         ModelCatalog.set(Model.of(
             getUsername(),
             "my-model",
-            "some-model-type",
+            GraphSage.MODEL_TYPE,
             GraphSchema.empty(),
-            new Object(),
-            (ModelConfig) () -> "my-model",
-            Model.Mappable.EMPTY
+            ModelData.of(new Layer[0], new SingleLabelFeatureFunction()),
+            ImmutableGraphSageTrainConfig.builder().modelName("my-model").addFeatureProperties("a").build(),
+            EmptyGraphSageTrainMetrics.INSTANCE
         ));
     }
 

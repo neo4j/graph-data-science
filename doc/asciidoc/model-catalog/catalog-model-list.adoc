@@ -44,14 +44,15 @@ Once we have trained models in the catalog we can see information about either a
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.model.list()
-YIELD modelInfo, loaded, stored, shared
+YIELD modelInfo, loaded, shared, stored
+RETURN modelInfo.modelName AS modelName, loaded, shared, stored
 ----
 
 .Results
-[opts="header",cols="4m,1m,1m,1m"]
+[opts="header",cols="1m,1m,1m,1m"]
 |===
-| modelInfo                                       | loaded  | stored | shared
-| {modelName=my-model, modelType=some-model-type} |  true   | false  | false
+| modelName   | loaded  | shared | stored
+| "my-model"  |  true   | false  | false
 |===
 --
 
@@ -63,17 +64,14 @@ YIELD modelInfo, loaded, stored, shared
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.model.list('my-model')
-YIELD
-  modelInfo,
-  loaded,
-  stored,
-  shared
+YIELD modelInfo, loaded, shared, stored
+RETURN modelInfo.modelName AS modelName, loaded, shared, stored
 ----
 
 .Results
-[opts="header",cols="4m,1m,1m,1m"]
+[opts="header",cols="1m,1m,1m,1m"]
 |===
-| modelInfo                                       | loaded  | stored | shared
-| {modelName=my-model, modelType=some-model-type} |  true   | false  | false
+| modelName   | loaded  | shared | stored
+| "my-model"  |  true   | false  | false
 |===
 --

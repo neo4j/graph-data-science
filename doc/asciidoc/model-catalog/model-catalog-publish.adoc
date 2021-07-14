@@ -47,14 +47,15 @@ include::shared/model-info-result.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.publish('my-model')
-YIELD modelInfo, shared
+YIELD modelInfo, loaded, shared, stored
+RETURN modelInfo.modelName AS modelName, shared
 ----
 
 .Results
-[opts="header",cols="4m,1m"]
+[opts="header"]
 |===
-| modelInfo                                              | shared
-| {modelName=my-model_public, modelType=some-model-type} | true
+| modelName          | shared
+| "my-model_public"  | true
 |===
 --
 

@@ -44,14 +44,15 @@ Assume we trained a model by running `train` on one of our <<algorithms-ml-model
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.model.drop('my-model')
-YIELD modelInfo, loaded, stored, shared
+YIELD modelInfo, loaded, shared, stored
+RETURN modelInfo.modelName AS modelName, loaded, shared, stored
 ----
 
 .Results
 [opts="header",cols="1m,1m,1m,1m"]
 |===
-| modelInfo                                          | loaded  | stored | shared
-| {modelName=my-model, modelType=some-model-type}    |  true   | false  | false
+| modelName   | loaded  | shared | stored
+| "my-model"  |  true   | false  | false
 |===
 --
 

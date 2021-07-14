@@ -37,10 +37,8 @@ class ModelCatalogPublishDocTest extends ModelCatalogDocTest {
     @TempDir
     Path modelStoreLocation;
 
-    @Override
     @BeforeEach
-    void setUp() throws Exception {
-        super.setUp();
+    void setModelStoreLocation() {
         GraphDatabaseApiProxy
             .resolveDependency(db, Config.class)
             .set(ModelStoreSettings.model_store_location, modelStoreLocation);
