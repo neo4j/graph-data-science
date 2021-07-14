@@ -27,6 +27,7 @@ enum SyntaxMode {
     TRAIN("include-with-train"),
     ESTIMATE("estimate-syntax"),
     GRAPH_DROP("graph-drop-syntax"),
+    MODEL_DROP("model-drop-syntax"),
     GRAPH_CREATE("graph-create-syntax"),
     GRAPH_CREATE_CYPHER("graph-create-cypher-syntax"),
     STREAM_NODE_PROPERTIES("stream-node-properties-syntax"),
