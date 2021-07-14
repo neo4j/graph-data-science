@@ -28,7 +28,7 @@ For purely analytical workloads using <<catalog-graph-create, native projections
 However, setting a minimum page cache size is still important while creating in-memory graphs:
 
 * For <<catalog-graph-create, native projections>>, the minimum page cache size for creating the in-memory graph can be roughly estimated by `8KB * 100 * readConcurrency`.
-* For <<cypher-projection, Cypher projections>>, a higher page cache is required depending on the query complexity.
+* For <<catalog-graph-create-cypher, Cypher projections>>, a higher page cache is required depending on the query complexity.
 
 However, if it is required to write algorithm results back to Neo4j, the write performance is highly depended on store fragmentation as well as the number of properties and relationships to write.
 We recommend starting with a page cache size of roughly `250MB * writeConcurrency` and evaluate write performance and adapt accordingly.

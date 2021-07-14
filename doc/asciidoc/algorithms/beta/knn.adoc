@@ -295,11 +295,7 @@ CREATE (eve:Person {name: 'Eve', age: 67});
 
 In the example, we want to use the K-Nearest Neighbors algorithm to compare people based on their age.
 
-[NOTE]
-====
-In the examples below we will use named graphs and standard projections as the norm.
-However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
-====
+include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will create the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-create-query]

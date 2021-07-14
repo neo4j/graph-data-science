@@ -11,14 +11,12 @@ A central concept in the GDS library is the management of in-memory graphs.
 This chapter is divided into the following sections:
 
 * <<graph-catalog-ops>>
-* <<cypher-projection>>
 * <<anonymous-graph>>
 * <<node-properties>>
 * <<utility-functions>>
 * <<administration>>
 
 include::graph-catalog/graph-catalog.adoc[leveloffset=+1]
-include::cypher-projection.adoc[tag=overview,leveloffset=+1]
 include::anonymous-graph.adoc[leveloffset=+1]
 include::node-properties.adoc[leveloffset=+1]
 include::utility-functions.adoc[leveloffset=+1]

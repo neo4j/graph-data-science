@@ -190,7 +190,7 @@ RETURN nodeCount
 [[algorithms-single-source-shortest-path-cp]]
 ==== Cypher projection
 
-include::../../management-ops/cypher-projection.adoc[tag=explanation]
+include::alpha-cypher-explanation.adoc[]
 
 [role=query-example]
 --

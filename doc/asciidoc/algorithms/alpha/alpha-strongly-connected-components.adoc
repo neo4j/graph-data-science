@@ -204,7 +204,7 @@ LIMIT 1
 [[algorithms-strongly-connected-components-cp]]
 == Cypher projection
 
-include::../../management-ops/cypher-projection.adoc[tag=explanation]
+include::alpha-cypher-explanation.adoc[]
 
 .Use `nodeQuery` and `relationshipQuery` in the config:
 

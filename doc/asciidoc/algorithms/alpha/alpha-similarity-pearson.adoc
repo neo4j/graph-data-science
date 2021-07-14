@@ -468,7 +468,7 @@ ORDER BY similarity DESC
 [[algorithms-similarity-pearson-cypher-projection]]
 == Cypher projection
 
-include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
+include::alpha-cypher-similarity-explanation.adoc[]
 
 .Set `graph:'cypher'` in the config:
 

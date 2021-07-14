@@ -164,7 +164,7 @@ RETURN gds.util.asNode(nodeId).name AS page
 [[algorithms-random-walk-cp]]
 == Cypher projection
 
-include::../../management-ops/cypher-projection.adoc[tag=explanation]
+include::alpha-cypher-explanation.adoc[]
 
 [source, cypher, role=noplay]
 ----

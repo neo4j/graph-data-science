@@ -1,0 +1,8 @@
+If the similarity lists are very large they can take up a lot of memory.
+For cases where those lists contain lots of values that should be skipped, you can use the less memory-intensive approach of using Cypher statements to project the graph instead.
+
+The Cypher projection expects to receive 3 fields:
+
+* `item` - should contain node ids, which we can return using the `id` function.
+* `category` - should contain node ids, which we can return using the `id` function.
+* `weight` - should contain a double value.

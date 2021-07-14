@@ -200,7 +200,7 @@ CALL gds.alpha.closeness.write({
 [[algorithms-closeness-centrality-cp]]
 == Cypher projection
 
-include::../../management-ops/cypher-projection.adoc[tag=explanation]
+include::alpha-cypher-explanation.adoc[]
 
 [source, cypher, role=noplay]
 ----

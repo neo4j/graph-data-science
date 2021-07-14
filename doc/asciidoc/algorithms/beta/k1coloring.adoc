@@ -236,11 +236,7 @@ CALL gds.graph.create(
 ----
 We can now go ahead and create an in-memory graph with all the `User` nodes and the `LINK` relationships with `UNDIRECTED` orientation.
 
-[NOTE]
-====
-In the examples below we will use named graphs and standard projections as the norm.
-However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
-====
+include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will create the graph and store it in the graph catalog.
 [source, cypher, role=noplay]

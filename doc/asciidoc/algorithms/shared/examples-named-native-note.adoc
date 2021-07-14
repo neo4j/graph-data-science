@@ -1,5 +1,5 @@
 [NOTE]
 ====
 In the examples below we will use named graphs and native projections as the norm.
-However, anonymous graphs and/or <<cypher-projection, Cypher projections>> can also be used.
+However, anonymous graphs and/or <<catalog-graph-create-cypher, Cypher projections>> can also be used.
 ====

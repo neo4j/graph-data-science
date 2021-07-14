@@ -480,7 +480,7 @@ For cases where no values should be skipped, skipping can be disabled by setting
 [[algorithms-similarity-euclidean-cypher-projection]]
 == Cypher projection
 
-include::../../management-ops/cypher-projection.adoc[tag=similarity-explanation]
+include::alpha-cypher-similarity-explanation.adoc[]
 
 .Set `graph:'cypher'` in the config:
 

@@ -135,7 +135,7 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 | "593 KiB" | 607576   | 607576   | 100       | 1000
 |===
 
-The <<cypher-projection, `gds.graph.create.cypher`>> procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
+The <<catalog-graph-create-cypher, `gds.graph.create.cypher`>> procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
 
 .Syntax
 [source, cypher, role=noplay]

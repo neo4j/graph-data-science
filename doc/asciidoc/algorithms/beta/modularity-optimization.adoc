@@ -203,11 +203,7 @@ Looking at the weights of the relationships, it can be seen that the connections
 Therefore the Modularity Optimization algorithm should detect two communities: "Alice" and "Bob" together with their neighbors respectively.
 
 
-[NOTE]
-====
-In the examples below we will use named graphs and standard projections as the norm.
-However, <<cypher-projection, Cypher projection>> and anonymous graphs could also be used.
-====
+include::../shared/examples-named-native-note.adoc[]
 
 .The following statement will create the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-create-query]
