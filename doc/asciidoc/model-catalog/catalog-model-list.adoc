@@ -2,7 +2,52 @@
 [[catalog-model-list]]
 = Listing models
 
+Information about models in the catalog can be retrieved using the `gds.beta.model.list()` procedure.
+
+== Syntax
+
+[.model-list-syntax]
+--
+.Remove a model from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.model.list(modelName: String)
+YIELD
+    modelInfo: Map,
+    trainConfig: Map,
+    graphSchema: Map,
+    loaded: Boolean,
+    stored: Boolean,
+    creationTime: DateTime,
+    shared: Boolean
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type   | Default | Optional | Description
+| modelName     | String | n/a     | yes      | The name of a model. If not specified, all models in the catalog are listed.
+|===
+
+.Results
+[opts="header",cols="1,1,4"]
+|===
+| Name          | Type     | Description
+| modelInfo     | Map      | Detailed information about the trained model. Always includes the `modelName` and `modelType`, e.g., <<algorithms-embeddings-graph-sage, GraphSAGE>>. Dependent on the model-type, there are additional fields.
+| trainConfig   | Map      | The configuration used for training the model.
+| graphSchema   | Map      | The schema of the graph on which the model was trained.
+| loaded        | Boolean  | True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
+| stored        | Boolean  | True, if the model is <<catalog-model-store,stored>> on disk.
+| creationTime  | Datetime | Time when the model was created.
+| shared        | Boolean  | True, if the model is <<catalog-model-publish,shared>> between users.
+|===
+--
+
+== Examples
+
 Once we have trained models in the catalog we can see information about either all of them or a single model using its name
+
+=== Listing all models
 
 [role=query-example]
 --
@@ -10,20 +55,18 @@ Once we have trained models in the catalog we can see information about either a
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.model.list()
-YIELD
-  modelInfo,
-  loaded,
-  stored,
-  shared
+YIELD modelInfo, loaded, stored, shared
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m"]
+[opts="header",cols="4m,1m,1m,1m"]
 |===
-| modelInfo                                          | loaded  | stored | shared
-| {modelName=my-model, modelType=example-model-type} |  true   | false  | false
+| modelInfo                                       | loaded  | stored | shared
+| {modelName=my-model, modelType=some-model-type} |  true   | false  | false
 |===
 --
+
+=== Listing a specific model
 
 [role=query-example]
 --
@@ -39,22 +82,9 @@ YIELD
 ----
 
 .Results
-[opts="header",cols="1m,1m,1m,1m"]
+[opts="header",cols="4m,1m,1m,1m"]
 |===
-| modelInfo                                          | loaded  | stored | shared
-| {modelName=my-model, modelType=example-model-type} |  true   | false  | false
+| modelInfo                                       | loaded  | stored | shared
+| {modelName=my-model, modelType=some-model-type} |  true   | false  | false
 |===
 --
-
-The full set of fields returned from this procedure are:
-
-* `modelInfo`: detailed information for the trained model
-** `modelName: String`: the saved model name.
-** `modelType: String`: the type of the model, i.e. `GraphSAGE`.
-** can also contain algorithm specific model details.
-* `trainConfig`: the configuration used for training the model.
-* `graphSchema`: the schema of the graph on which the model was trained.
-* `stored`: True, if the model is <<catalog-model-store,stored>> on disk.
-* `loaded`: True, if the model is <<catalog-model-load,loaded>> in the in-memory model catalog.
-* `creationTime`: the time at which the model was registered in the catalog.
-* `shared`: a boolean flag indicating if the model is published.

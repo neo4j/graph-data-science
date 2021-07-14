@@ -37,7 +37,9 @@ enum SyntaxMode {
     GRAPH_EXPORT("graph-export-syntax"),
     CREATE_SUBGRAPH("create-subgraph-syntax"),
     REMOVE("include-with-remove"),
-    DELETE_RELATIONSHIPS("include-with-delete-relationships");
+    DELETE_RELATIONSHIPS("include-with-delete-relationships"),
+    GRAPH_LIST("graph-list-syntax"),
+    MODEL_LIST("model-list-syntax");
 
     private final String mode;
 
