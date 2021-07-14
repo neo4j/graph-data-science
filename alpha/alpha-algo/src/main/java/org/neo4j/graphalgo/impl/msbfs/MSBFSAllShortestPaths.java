@@ -19,18 +19,14 @@
  */
 package org.neo4j.graphalgo.impl.msbfs;
 
-import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths.Result;
+import org.neo4j.graphalgo.impl.msbfs.AllShortestPathsStream.Result;
 
-import java.util.Iterator;
-import java.util.Spliterators;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * AllShortestPaths:
@@ -48,7 +44,6 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
     private final AllocationTracker tracker;
     private final int concurrency;
     private final ExecutorService executorService;
-    private final long nodeCount;
 
     public MSBFSAllShortestPaths(
             Graph graph,
@@ -56,7 +51,6 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
             int concurrency,
             ExecutorService executorService) {
         this.graph = graph;
-        nodeCount = graph.nodeCount();
         this.tracker = tracker;
         this.concurrency = concurrency;
         this.executorService = executorService;
@@ -73,26 +67,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
     public Stream<Result> compute() {
         progressTracker.beginSubTask();
         executorService.submit(new ShortestPathTask(concurrency, executorService));
-        Iterator<Result> iterator = new AbstractIterator<Result>() {
-            @Override
-            protected Result fetch() {
-                try {
-                    Result result = resultQueue.take();
-                    if (result.sourceNodeId == -1) {
-                        return done();
-                    }
-                    return result;
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-
-        progressTracker.endSubTask();
-        return StreamSupport.stream(
-            Spliterators.spliteratorUnknownSize(iterator, 0),
-            false
-        );
+        return AllShortestPathsStream.stream(resultQueue, progressTracker::endSubTask);
     }
 
     @Override
@@ -111,7 +86,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
      * and starts dijkstra on it. It starts emitting results to the
      * queue once all reachable nodes have been visited.
      */
-    private class ShortestPathTask implements Runnable {
+    private final class ShortestPathTask implements Runnable {
 
         private final int concurrency;
         private final ExecutorService executorService;
@@ -125,21 +100,22 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
 
         @Override
         public void run() {
-
-            final double maxNodeId = nodeCount - 1;
             MultiSourceBFS.aggregatedNeighborProcessing(
                     graph,
                     graph,
                     (target, distance, sources) -> {
                         while (sources.hasNext()) {
                             long source = sources.next();
-                            final Result result = new Result(
-                                    graph.toOriginalNodeId(source),
-                                    graph.toOriginalNodeId(target),
-                                    distance);
+                            var result = AllShortestPathsStream.result(
+                                graph.toOriginalNodeId(source),
+                                graph.toOriginalNodeId(target),
+                                distance
+                            );
                             try {
                                 resultQueue.put(result);
                             } catch (InterruptedException e) {
+                                // notify JVM of the interrupt
+                                Thread.currentThread().interrupt();
                                 throw new RuntimeException(e);
                             }
                         }
@@ -148,7 +124,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
                     tracker
             ).run(concurrency, executorService);
 
-            resultQueue.add(new Result(-1, -1, -1));
+            resultQueue.add(AllShortestPathsStream.DONE);
         }
     }
 }

@@ -22,13 +22,13 @@ package org.neo4j.graphalgo.impl.msbfs;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.RelationshipIterator;
 import org.neo4j.graphalgo.core.utils.queue.IntPriorityQueue;
+import org.neo4j.graphalgo.impl.msbfs.AllShortestPathsStream.Result;
 
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
@@ -96,18 +96,12 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
             executorService.submit(new ShortestPathTask());
         }
 
-        long end = (long) nodeCount * nodeCount;
-
-        progressTracker.endSubTask();
-        return LongStream.range(0, end)
-                .onClose(() -> outputStreamOpen = false)
-                .mapToObj(i -> {
-                    try {
-                        return resultQueue.take();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).filter(result -> result.distance != Double.POSITIVE_INFINITY);
+        return AllShortestPathsStream.stream(resultQueue, () -> {
+            outputStreamOpen = false;
+            progressTracker.endSubTask();
+        })
+            .limit((long) nodeCount * nodeCount)
+            .filter(result -> result.distance != Double.POSITIVE_INFINITY);
     }
 
     @Override
@@ -145,11 +139,11 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
             while (outputStreamOpen && running() && (startNode = counter.getAndIncrement()) < nodeCount) {
                 compute(startNode);
                 for (int i = 0; i < nodeCount; i++) {
-                    final Result result = new Result(
+                    var result = AllShortestPathsStream.result(
                             graph.toOriginalNodeId(startNode),
                             graph.toOriginalNodeId(i),
-                            distance[i]);
-
+                            distance[i]
+                    );
                     try {
                         resultQueue.put(result);
                     } catch (InterruptedException e) {
@@ -180,40 +174,6 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
                             return true;
                         }));
             }
-        }
-    }
-
-    /**
-     * Result DTO
-     */
-    public static class Result {
-
-        /**
-         * neo4j nodeId of the source node
-         */
-        public final long sourceNodeId;
-        /**
-         * neo4j nodeId of the target node
-         */
-        public final long targetNodeId;
-        /**
-         * minimum distance between source and target
-         */
-        public final double distance;
-
-        public Result(long sourceNodeId, long targetNodeId, double distance) {
-            this.sourceNodeId = sourceNodeId;
-            this.targetNodeId = targetNodeId;
-            this.distance = distance;
-        }
-
-        @Override
-        public String toString() {
-            return "Result{" +
-                    "sourceNodeId=" + sourceNodeId +
-                    ", targetNodeId=" + targetNodeId +
-                    ", distance=" + distance +
-                    '}';
         }
     }
 }

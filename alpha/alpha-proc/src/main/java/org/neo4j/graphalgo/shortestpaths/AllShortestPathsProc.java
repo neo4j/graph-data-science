@@ -26,6 +26,7 @@ import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
+import org.neo4j.graphalgo.impl.msbfs.AllShortestPathsStream;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSASPAlgorithm;
 import org.neo4j.graphalgo.impl.msbfs.MSBFSAllShortestPaths;
 import org.neo4j.graphalgo.impl.msbfs.WeightedAllShortestPaths;
@@ -39,17 +40,17 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream<WeightedAllShortestPaths.Result>, AllShortestPathsConfig> {
+public class AllShortestPathsProc extends AlgoBaseProc<MSBFSASPAlgorithm, Stream<AllShortestPathsStream.Result>, AllShortestPathsConfig> {
 
     private static final String DESCRIPTION = "The All Pairs Shortest Path (APSP) calculates the shortest (weighted) path between all pairs of nodes.";
 
     @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<WeightedAllShortestPaths.Result> stream(
+    public Stream<AllShortestPathsStream.Result> stream(
         @Name(value = "graphName") Object graphNameOrConfig,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<MSBFSASPAlgorithm, Stream<WeightedAllShortestPaths.Result>, AllShortestPathsConfig> computationResult =
+        ComputationResult<MSBFSASPAlgorithm, Stream<AllShortestPathsStream.Result>, AllShortestPathsConfig> computationResult =
             compute(graphNameOrConfig, configuration, false, false);
 
         if (computationResult.isGraphEmpty()) {

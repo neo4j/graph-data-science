@@ -23,4 +23,4 @@ import org.neo4j.graphalgo.Algorithm;
 
 import java.util.stream.Stream;
 
-public abstract class MSBFSASPAlgorithm extends Algorithm<MSBFSASPAlgorithm, Stream<WeightedAllShortestPaths.Result>> { }
+public abstract class MSBFSASPAlgorithm extends Algorithm<MSBFSASPAlgorithm, Stream<AllShortestPathsStream.Result>> { }
