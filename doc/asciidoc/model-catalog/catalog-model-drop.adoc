@@ -13,13 +13,13 @@ If we no longer need a trained model and want to free up memory, we can remove t
 ----
 CALL gds.beta.model.drop(modelName: String)
 YIELD
-    modelInfo,
-    trainConfig,
-    graphSchema,
-    loaded,
-    stored,
-    creationTime,
-    shared
+    modelInfo: Map,
+    trainConfig: Map,
+    graphSchema: Map,
+    loaded: Boolean,
+    stored: Boolean,
+    creationTime: DateTime,
+    shared: Boolean
 ----
 
 .Parameters
