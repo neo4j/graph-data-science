@@ -14,7 +14,7 @@ Making a model accessible to other users can be achieved by publishing it.
 
 [.model-publish-syntax]
 --
-.Remove a model from the catalog:
+.Publish a model from the catalog:
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.publish(modelName: String)

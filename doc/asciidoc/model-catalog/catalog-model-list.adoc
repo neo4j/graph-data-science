@@ -8,7 +8,7 @@ Information about models in the catalog can be retrieved using the `gds.beta.mod
 
 [.model-list-syntax]
 --
-.Remove a model from the catalog:
+.List models from the catalog:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.model.list(modelName: String)

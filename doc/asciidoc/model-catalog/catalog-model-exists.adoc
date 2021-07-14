@@ -8,7 +8,7 @@ We can check if a model is available in the catalog by looking up its name.
 
 [.model-exists-syntax]
 --
-.Remove a model from the catalog:
+.Check if a model exists in the catalog:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.model.exists(modelName: String)
