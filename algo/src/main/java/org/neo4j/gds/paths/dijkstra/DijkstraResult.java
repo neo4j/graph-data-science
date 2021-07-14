@@ -24,6 +24,7 @@ import org.neo4j.gds.paths.PathResult;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -34,7 +35,7 @@ public class DijkstraResult {
     private final Stream<PathResult> paths;
     private final Runnable closeStreamAction;
 
-    private boolean consumptionTriggered;
+    private final AtomicBoolean consumptionTriggered;
 
     public DijkstraResult(Stream<PathResult> paths) {
         this(paths, () -> {});
@@ -43,7 +44,7 @@ public class DijkstraResult {
     public DijkstraResult(Stream<PathResult> paths, Runnable closeStreamAction) {
         this.paths = paths;
         this.closeStreamAction = closeStreamAction;
-        this.consumptionTriggered = false;
+        this.consumptionTriggered = new AtomicBoolean(false);
     }
 
     public Optional<PathResult> findFirst() {
@@ -69,9 +70,8 @@ public class DijkstraResult {
     }
 
     private void runConsumptionAction() {
-        if (!consumptionTriggered) {
+        if (consumptionTriggered.compareAndSet(false, true)) {
             closeStreamAction.run();
-            consumptionTriggered = true;
         }
     }
 }
