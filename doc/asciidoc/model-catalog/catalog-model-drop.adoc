@@ -47,7 +47,7 @@ YIELD
 == Example
 
 In this section we are going to demonstrate the usage of `gds.beta.model.drop`.
-Assume we loaded a stored a model by running `train` on one of our <<algorithms-ml-models, Machine learning algorithms>>.
+Assume we trained a model by running `train` on one of our <<algorithms-ml-models, Machine learning algorithms>>.
 
 [role=query-example]
 --
@@ -62,7 +62,7 @@ YIELD modelInfo, loaded, stored, shared
 [opts="header",cols="1m,1m,1m,1m"]
 |===
 | modelInfo                                          | loaded  | stored | shared
-| {modelName=my-model, modelType=some-model-type} |  true   | false  | false
+| {modelName=my-model, modelType=some-model-type}    |  true   | false  | false
 |===
 --
 
