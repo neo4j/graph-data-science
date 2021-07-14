@@ -432,7 +432,7 @@ The following examples will demonstrate how we to filter out `READ` relationship
 
 [role=query-example, group=cypher-rel-filtering-properties]
 --
-.Project `Person` and `Book` nodes and aggregated `READ` relationships where `numberOfPages` is present:
+.Project `Person` and `Book` nodes and `READ` relationships where `numberOfPages` is present:
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
@@ -482,3 +482,35 @@ ORDER BY person ASC, numberOfPages DESC
 
 If we compare the results to the ones from <<cypher-relationship-properties>>, we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
 This functionality is only expressible with <<catalog-graph-create, native projections>> by creating a <<catalog-graph-create-subgraph,subraph>>.
+
+[[cypher-projection-parameters]]
+=== Using query parameters
+
+Similar to https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[Cypher], it is also possible to set query parameters.
+In the following example we supply a list of strings to limit the cities we want to project.
+
+.Project `Person` and `Book` nodes and `READ` relationships where `numberOfPages` is greater than 9:
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.graph.create.cypher(
+  'existingNumberOfPages',
+  'MATCH (n) RETURN id(n) AS id, labels(n) AS labels',
+  'MATCH (n)-[r:READ]->(m)
+    WHERE r.numberOfPages > $minNumberOfPages
+    RETURN id(n) AS source, id(m) AS target, type(r) AS type, r.numberOfPages AS numberOfPages',
+  { parameters: { minNumberOfPages: 9} }
+)
+YIELD
+  graphName AS graph, nodeCount AS nodes, relationshipCount AS rels
+
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph                   | nodes  | rels
+| "existingNumberOfPages" | 5      | 2
+|===
+--
