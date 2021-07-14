@@ -74,8 +74,6 @@
                 <d:tocentry linkend="graph-catalog-export-ops"><?dbhtml filename="graph-catalog-export-ops/index.html"?>
                 </d:tocentry>
             </d:tocentry>
-        <d:tocentry linkend="native-projection"><?dbhtml filename="management-ops/native-projection/index.html"?>
-        </d:tocentry>
         <d:tocentry linkend="cypher-projection"><?dbhtml filename="management-ops/cypher-projection/index.html"?>
         </d:tocentry>
         <d:tocentry linkend="anonymous-graph"><?dbhtml filename="management-ops/anonymous-graph/index.html"?>

@@ -7,7 +7,7 @@
 This chapter explains how to create a graph using a Cypher projection.
 --
 
-If the <<native-projection, Native projection>> is not expressive enough to describe the in-memory graph, we can instead use Cypher queries to select nodes and relationships.
+If the <<catalog-graph-create, Native projection>> is not expressive enough to describe the in-memory graph, we can instead use Cypher queries to select nodes and relationships.
 One benefit of using Cypher queries is the possibility to form the graph from data that exists only at query time.
 A common use case is the reduction of paths into single relationships between the start and end node of the path.
 
@@ -38,7 +38,7 @@ For certain Cypher patterns, the same behaviour can be achieved using the <<algo
 Cypher projections are especially useful during the development phase.
 Their flexibility is convenient when exploring data and algorithms, and designing a workflow.
 However, creating a graph from a Cypher projection can be significantly slower than creating it directly from the Neo4j store files.
-For production, it is recommended to adapt the domain model in a way that it can take advantage of the loading speed of <<native-projection, native projections>>.
+For production, it is recommended to adapt the domain model in a way that it can take advantage of the loading speed of <<catalog-graph-create, native projections>>.
 
 [NOTE]
 ====

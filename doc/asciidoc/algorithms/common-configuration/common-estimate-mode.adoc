@@ -1,5 +1,5 @@
 For memory estimation on a named graph the configuration for creating that graph is used.
-For the anonymous graph, configuration is used as for <<native-projection>> or <<cypher-projection>>.
+For the anonymous graph, configuration is used as for <<catalog-graph-create>> or <<catalog-graph-create-cypher>>.
 The graph estimation on an anonymous graph is based on the configuration pertaining to anonymous creation or so-called fictive estimation controlled by the options in the table below.
 
 .Configuration

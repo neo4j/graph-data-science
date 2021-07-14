@@ -12,7 +12,7 @@ Graph projections are stored entirely in-memory using compressed data structures
 
 The graph catalog is a concept within the GDS library that allows managing multiple graph projections by name.
 Using its name, a created graph can be used many times in the analytical workflow.
-Named graphs can be created using either a <<native-projection, Native projection>> or a <<cypher-projection, Cypher projection>>.
+Named graphs can be created using either a <<catalog-graph-create, Native projection>> or a <<cypher-projection, Cypher projection>>.
 After usage, named graphs can be removed from the catalog to free up main memory.
 
 Graphs can also be created when running an algorithm without placing them in the catalog.
@@ -30,7 +30,7 @@ This chapter explains the available graph catalog operations.
 [opts=header,cols="1m,1"]
 |===
 | Name                                                                                     | Description
-| <<catalog-graph-create, gds.graph.create>>                                                | Creates a graph in the catalog using a <<native-projection, Native projection>>.
+| <<catalog-graph-create, gds.graph.create>>                                                | Creates a graph in the catalog using a <<catalog-graph-create, Native projection>>.
 | <<catalog-graph-create-cypher, gds.graph.create.cypher>>                                         | Creates a graph in the catalog using a <<cypher-projection, Cypher projection>>.
 | <<catalog-graph-create-subgraph, gds.beta.graph.create.subgraph>>                        | Creates a graph in the catalog by filtering an existing graph using node and relationship predicates.
 | <<catalog-graph-list, gds.graph.list>>                                                   | Prints information about graphs that are currently stored in the catalog.
