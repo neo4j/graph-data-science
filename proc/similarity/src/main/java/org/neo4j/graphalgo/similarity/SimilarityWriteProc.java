@@ -62,6 +62,7 @@ public abstract class SimilarityWriteProc<
                 );
             }
 
+            var rootNodeMapping = computationResult.graphStore().nodes();
             var algorithm = computationResult.algorithm();
             var similarityGraphResult = similarityGraphResult(computationResult);
             var similarityGraph = similarityGraphResult.similarityGraph();
@@ -80,6 +81,7 @@ public abstract class SimilarityWriteProc<
                             RelationshipExporter exporter = RelationshipExporter
                                 .of(
                                     SecureTransaction.of(api, procedureTransaction),
+                                    rootNodeMapping,
                                     similarityGraph,
                                     algorithm.getTerminationFlag()
                                 )
