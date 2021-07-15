@@ -4,6 +4,7 @@
 
 If we no longer need a trained model and want to free up memory, we can remove the model from the catalog.
 
+
 == Syntax
 
 [.model-drop-syntax]

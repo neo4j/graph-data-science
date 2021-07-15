@@ -28,6 +28,7 @@ The `gds.model.store_location` parameter must be configured for this feature.
 * <<algorithms-ml-nodeclassification,Node Classification model>>
 * <<algorithms-ml-linkprediction,Link Prediction model>>
 
+
 === Syntax
 
 [.model-store-syntax]
@@ -56,6 +57,7 @@ YIELD
 | storeMillis   | Integer  | The number of milliseconds it took to store the model.
 |===
 --
+
 
 === Example
 

@@ -4,6 +4,7 @@
 
 Information about models in the catalog can be retrieved using the `gds.beta.model.list()` procedure.
 
+
 == Syntax
 
 [.model-list-syntax]

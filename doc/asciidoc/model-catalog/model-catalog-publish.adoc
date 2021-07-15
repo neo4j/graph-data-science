@@ -10,6 +10,7 @@ Publishing models is an alpha tier feature.
 By default, a trained model is visible to the user that created it.
 Making a model accessible to other users can be achieved by publishing it.
 
+
 == Syntax
 
 [.model-publish-syntax]
@@ -39,6 +40,7 @@ YIELD
 include::shared/model-info-result.adoc[]
 --
 
+
 == Examples
 
 [role=query-example]
@@ -59,4 +61,5 @@ RETURN modelInfo.modelName AS modelName, shared
 |===
 --
 
-We can see that the model is now shared. The shared model has the `_public` suffix.
+We can see that the model is now shared. 
+The shared model has the `_public` suffix.
