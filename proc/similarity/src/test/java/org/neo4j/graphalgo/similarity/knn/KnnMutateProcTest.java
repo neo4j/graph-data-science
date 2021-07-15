@@ -23,7 +23,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.ImmutablePropertyMapping;
 import org.neo4j.graphalgo.MutateRelationshipWithPropertyTest;
+import org.neo4j.graphalgo.StoreLoaderBuilder;
+import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -146,4 +149,23 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
     @Test
     @Disabled("This test does not work for KNN")
     public void testGraphMutationOnFilteredGraph() { }
+
+    @Override
+    public void setupStoreLoader(StoreLoaderBuilder storeLoaderBuilder, Map<String, Object> config) {
+        var nodeWeightProperty = config.get("nodeWeightProperty");
+        if (nodeWeightProperty != null) {
+            var nodeProperty = String.valueOf(nodeWeightProperty);
+            runQuery(
+                graphDb(),
+                "CALL db.createProperty($prop)",
+                Map.of("prop", nodeWeightProperty)
+            );
+            storeLoaderBuilder.addNodeProperty(
+                ImmutablePropertyMapping.builder()
+                    .propertyKey(nodeProperty)
+                    .defaultValue(DefaultValue.forDouble())
+                    .build()
+            );
+        }
+    }
 }
