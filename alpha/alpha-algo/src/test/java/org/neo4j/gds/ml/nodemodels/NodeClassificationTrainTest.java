@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -265,7 +266,7 @@ class NodeClassificationTrainTest {
             .concurrency(concurrency)
             .build();
 
-        var algorithm = new NodeClassificationTrainAlgorithmFactory().build(
+        Supplier<NodeClassificationTrain> algoSupplier = () -> new NodeClassificationTrainAlgorithmFactory().build(
             graph,
             config,
             AllocationTracker.empty(),
@@ -273,8 +274,8 @@ class NodeClassificationTrainTest {
             EmptyProgressEventTracker.INSTANCE
         );
 
-        var firstResult = algorithm.compute();
-        var secondResult = algorithm.compute();
+        var firstResult = algoSupplier.get().compute();
+        var secondResult = algoSupplier.get().compute();
 
         assertThat(firstResult.data().weights().data())
             .matches(matrix -> matrix.equals(secondResult.data().weights().data(), 1e-10));
