@@ -244,7 +244,7 @@ class LinkPredictionTrainTest {
         var linkPredictionTrain = new LinkPredictionTrain(
             UnionGraph.of(List.of(trainGraph, testGraph)),
             config,
-            TestProgressLogger.NULL_LOGGER
+            ProgressTracker.NULL_TRACKER
         );
 
         var firstResult = linkPredictionTrain.compute();

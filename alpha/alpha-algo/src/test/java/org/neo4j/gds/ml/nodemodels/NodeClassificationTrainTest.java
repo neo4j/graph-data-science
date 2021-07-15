@@ -40,12 +40,14 @@ import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestLog.INFO;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
+import static org.neo4j.graphalgo.core.utils.ProgressLogger.NULL_LOGGER;
 
 @GdlExtension
 class NodeClassificationTrainTest {
@@ -247,7 +249,7 @@ class NodeClassificationTrainTest {
             .concurrency(concurrency)
             .build();
 
-        var algorithm = new NodeClassificationTrainAlgorithmFactory().build(
+        Supplier<NodeClassificationTrain> algoSupplier = () -> new NodeClassificationTrainAlgorithmFactory().build(
             graph,
             config,
             AllocationTracker.empty(),
@@ -255,8 +257,8 @@ class NodeClassificationTrainTest {
             EmptyProgressEventTracker.INSTANCE
         );
 
-        var firstResult = algorithm.compute();
-        var secondResult = algorithm.compute();
+        var firstResult = algoSupplier.get().compute();
+        var secondResult = algoSupplier.get().compute();
 
         assertThat(firstResult.data().weights().data())
             .matches(matrix -> matrix.equals(secondResult.data().weights().data(), 1e-10));
