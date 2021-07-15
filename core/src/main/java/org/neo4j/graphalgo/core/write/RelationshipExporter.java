@@ -36,6 +36,7 @@ import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.values.storable.Values;
 
 import java.util.concurrent.ExecutorService;
+import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.graphalgo.core.concurrency.Pools.DEFAULT_SINGLE_THREAD_POOL;
 import static org.neo4j.graphalgo.core.write.NodePropertyExporter.MIN_BATCH_SIZE;
@@ -45,6 +46,7 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 public final class RelationshipExporter extends StatementApi {
 
     private final Graph graph;
+    private final LongUnaryOperator toOriginalId;
     private final RelationshipPropertyTranslator propertyTranslator;
     private final TerminationFlag terminationFlag;
     private final ProgressLogger progressLogger;
@@ -55,8 +57,23 @@ public final class RelationshipExporter extends StatementApi {
         Graph graph,
         TerminationFlag terminationFlag
     ) {
+        return of(
+            secureTransaction,
+            graph,
+            graph,
+            terminationFlag
+        );
+    }
+
+    public static RelationshipExporter.Builder of(
+        SecureTransaction secureTransaction,
+        IdMapping idMapping,
+        Graph graph,
+        TerminationFlag terminationFlag
+    ) {
         return new RelationshipExporter.Builder(
             secureTransaction,
+            idMapping,
             graph,
             terminationFlag
         );
@@ -67,8 +84,8 @@ public final class RelationshipExporter extends StatementApi {
         private final Graph graph;
         private RelationshipPropertyTranslator propertyTranslator;
 
-        Builder(SecureTransaction tx, Graph graph, TerminationFlag terminationFlag) {
-            super(tx, graph, terminationFlag);
+        Builder(SecureTransaction tx, IdMapping idMapping, Graph graph, TerminationFlag terminationFlag) {
+            super(tx, idMapping, terminationFlag);
             this.graph = graph;
             this.propertyTranslator = Values::doubleValue;
         }
@@ -83,6 +100,7 @@ public final class RelationshipExporter extends StatementApi {
             return new RelationshipExporter(
                 tx,
                 graph,
+                toOriginalId,
                 propertyTranslator,
                 terminationFlag,
                 progressLogger
@@ -103,12 +121,14 @@ public final class RelationshipExporter extends StatementApi {
     private RelationshipExporter(
         SecureTransaction tx,
         Graph graph,
+        LongUnaryOperator toOriginalId,
         RelationshipPropertyTranslator propertyTranslator,
         TerminationFlag terminationFlag,
         ProgressLogger progressLogger
     ) {
         super(tx);
         this.graph = graph;
+        this.toOriginalId = toOriginalId;
         this.propertyTranslator = propertyTranslator;
         this.terminationFlag = terminationFlag;
         this.progressLogger = progressLogger;
@@ -167,7 +187,7 @@ public final class RelationshipExporter extends StatementApi {
 
 
             RelationshipWithPropertyConsumer writeConsumer = new WriteConsumer(
-                graph,
+                toOriginalId,
                 ops,
                 propertyTranslator,
                 relationshipToken,
@@ -196,7 +216,7 @@ public final class RelationshipExporter extends StatementApi {
             void apply(long sourceNodeId, long targetNodeId, double property) throws EntityNotFoundException;
         }
 
-        private final IdMapping idMapping;
+        private final LongUnaryOperator toOriginalId;
         private final Write ops;
         private final RelationshipPropertyTranslator propertyTranslator;
         private final int relTypeToken;
@@ -205,14 +225,14 @@ public final class RelationshipExporter extends StatementApi {
         private final RelationshipWriteBehavior relationshipWriteBehavior;
 
         WriteConsumer(
-            IdMapping idMapping,
+            LongUnaryOperator toOriginalId,
             Write ops,
             RelationshipPropertyTranslator propertyTranslator,
             int relTypeToken,
             int propertyToken,
             ProgressLogger progressLogger
         ) {
-            this.idMapping = idMapping;
+            this.toOriginalId = toOriginalId;
             this.ops = ops;
             this.propertyTranslator = propertyTranslator;
             this.relTypeToken = relTypeToken;
@@ -249,9 +269,9 @@ public final class RelationshipExporter extends StatementApi {
 
         private long writeRelationship(long sourceNodeId, long targetNodeId) throws EntityNotFoundException {
             return ops.relationshipCreate(
-                idMapping.toOriginalNodeId(sourceNodeId),
+                toOriginalId.applyAsLong(sourceNodeId),
                 relTypeToken,
-                idMapping.toOriginalNodeId(targetNodeId)
+                toOriginalId.applyAsLong(targetNodeId)
             );
         }
 
