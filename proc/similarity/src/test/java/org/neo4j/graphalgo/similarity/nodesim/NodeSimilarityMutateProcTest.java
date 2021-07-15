@@ -21,9 +21,12 @@ package org.neo4j.graphalgo.similarity.nodesim;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateRelationshipWithPropertyTest;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -163,4 +166,33 @@ class NodeSimilarityMutateProcTest
     @Test
     @Disabled("This test does not work for NodeSimilarity")
     public void testGraphMutationOnFilteredGraph() { }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 10})
+    void shouldMutateUniqueRelationships(int topN) {
+        var graphName = "undirectedGraph";
+
+        var graphCreateQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipType("LIKES", Orientation.UNDIRECTED)
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(graphCreateQuery);
+
+        var query = GdsCypher.call()
+            .explicitCreation(graphName)
+            .algo("gds", "nodeSimilarity")
+            .mutateMode()
+            .addParameter("sudo", true)
+            .addParameter("topK", 1)
+            .addParameter("topN", topN)
+            .addParameter("mutateRelationshipType", "SIMILAR")
+            .addParameter("mutateProperty", "score")
+            .yields("relationshipsWritten");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(6, row.getNumber("relationshipsWritten").longValue());
+        });
+    }
 }

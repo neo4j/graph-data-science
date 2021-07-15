@@ -25,6 +25,7 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.ImmutablePropertyMapping;
 import org.neo4j.graphalgo.MutateRelationshipWithPropertyTest;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
@@ -149,6 +150,36 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
     @Test
     @Disabled("This test does not work for KNN")
     public void testGraphMutationOnFilteredGraph() { }
+
+    @Test
+    void shouldMutateUniqueRelationships() {
+        var graphName = "undirectedGraph";
+
+        var graphCreateQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withNodeProperty("knn")
+            .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(graphCreateQuery);
+
+        var query = GdsCypher.call()
+            .explicitCreation(graphName)
+            .algo("gds", "beta", "knn")
+            .mutateMode()
+            .addParameter("sudo", true)
+            .addParameter("nodeWeightProperty", "knn")
+            .addParameter("topK", 1)
+            .addParameter("randomSeed", 42)
+            .addParameter("mutateRelationshipType", "SIMILAR")
+            .addParameter("mutateProperty", "score")
+            .yields("relationshipsWritten");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(3, row.getNumber("relationshipsWritten").longValue());
+        });
+    }
 
     @Override
     public void setupStoreLoader(StoreLoaderBuilder storeLoaderBuilder, Map<String, Object> config) {
