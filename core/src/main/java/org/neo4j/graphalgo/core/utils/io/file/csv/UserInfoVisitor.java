@@ -21,20 +21,21 @@ package org.neo4j.graphalgo.core.utils.io.file.csv;
 
 import org.neo4j.graphalgo.core.utils.io.file.SingleRowVisitor;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class UserInfoVisitor implements SingleRowVisitor<String> {
 
     public static final String USER_INFO_FILE_NAME = ".userinfo";
-    private final FileWriter writer;
+    private final Writer writer;
 
     public UserInfoVisitor(Path fileLocation) {
         try {
-            writer = new FileWriter(fileLocation.resolve(USER_INFO_FILE_NAME).toFile(), StandardCharsets.UTF_8);
+            writer = Files.newBufferedWriter(fileLocation.resolve(USER_INFO_FILE_NAME), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

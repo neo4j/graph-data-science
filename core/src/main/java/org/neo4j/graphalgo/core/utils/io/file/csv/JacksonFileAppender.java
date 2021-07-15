@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.io.file.csv;
 
-import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -29,6 +28,8 @@ import org.neo4j.graphalgo.api.schema.PropertySchema;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -70,7 +71,8 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
         var factory = mapper.getFactory();
 
         try {
-            var csvEncoder = factory.createGenerator(filePath.toFile(), JsonEncoding.UTF8);
+            var writer = Files.newBufferedWriter(filePath, StandardCharsets.UTF_8);
+            var csvEncoder = factory.createGenerator(writer);
             csvEncoder.setSchema(csvSchema);
             return new JacksonFileAppender(csvEncoder, csvSchema);
         } catch (IOException e) {

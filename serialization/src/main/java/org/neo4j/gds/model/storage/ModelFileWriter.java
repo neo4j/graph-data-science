@@ -25,10 +25,10 @@ import org.neo4j.graphalgo.config.ModelConfig;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelMetaDataSerializer;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
@@ -53,13 +53,13 @@ public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig> {
     }
 
     public void writeMetaData() throws IOException {
-        File metaDataFile = persistenceDir.resolve(META_DATA_FILE).toFile();
+        var metaDataFile = persistenceDir.resolve(META_DATA_FILE);
         checkFilesExist(metaDataFile);
         writeDataToFile(metaDataFile, ModelMetaDataSerializer.toSerializable(model));
     }
 
     public void writeModelData() throws IOException {
-        File modelDataFile = persistenceDir.resolve(MODEL_DATA_FILE).toFile();
+        var modelDataFile = persistenceDir.resolve(MODEL_DATA_FILE);
         checkFilesExist(modelDataFile);
         writeDataToFile(modelDataFile, toSerializable(model.data(), model.algoType()));
     }
@@ -70,16 +70,16 @@ public class ModelFileWriter<DATA, CONFIG extends BaseConfig & ModelConfig> {
             .toSerializable(data);
     }
 
-    private <T extends GeneratedMessageV3> void writeDataToFile(File file, T data) throws IOException {
-        try (var out = new FileOutputStream(file)) {
+    private <T extends GeneratedMessageV3> void writeDataToFile(Path file, T data) throws IOException {
+        try (var out = new BufferedOutputStream(Files.newOutputStream(file))) {
             data.writeTo(out);
         }
     }
 
-    private static void checkFilesExist(File... files) throws FileAlreadyExistsException {
-        for (File file : files) {
-            if (file.exists()) {
-                throw new FileAlreadyExistsException(file.getAbsolutePath());
+    private static void checkFilesExist(Path... files) throws FileAlreadyExistsException {
+        for (Path file : files) {
+            if (Files.exists(file)) {
+                throw new FileAlreadyExistsException(file.toAbsolutePath().toString());
             }
         }
     }

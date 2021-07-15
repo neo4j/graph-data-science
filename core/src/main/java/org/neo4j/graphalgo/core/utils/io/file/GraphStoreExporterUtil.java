@@ -106,7 +106,7 @@ public final class GraphStoreExporterUtil {
             ));
         }
 
-        if (resolvedExportPath.toFile().exists()) {
+        if (Files.exists(resolvedExportPath)) {
             throw new IllegalArgumentException("The specified export directory already exists.");
         }
 
