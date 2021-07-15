@@ -29,23 +29,23 @@ This chapter explains the available graph catalog operations.
 [[table-proc]]
 [opts=header,cols="1m,1"]
 |===
-| Name                                                                                     | Description
-| <<catalog-graph-create, gds.graph.create>>                                                | Creates a graph in the catalog using Native projection.
-| <<catalog-graph-create-cypher, gds.graph.create.cypher>>                                         | Creates a graph in the catalog using Cypher projection.
-| <<catalog-graph-create-subgraph, gds.beta.graph.create.subgraph>>                        | Creates a graph in the catalog by filtering an existing graph using node and relationship predicates.
-| <<catalog-graph-list, gds.graph.list>>                                                   | Prints information about graphs that are currently stored in the catalog.
-| <<catalog-graph-exists, gds.graph.exists>>                                               | Checks if a named graph is stored in the catalog.
-| <<catalog-graph-remove-node-properties, gds.graph.removeNodeProperties>>                 | Removes node properties from a named graph.
-| <<catalog-graph-delete-rel-type, gds.graph.deleteRelationships>>                         | Deletes relationships of a given relationship type from a named graph.
-| <<catalog-graph-drop, gds.graph.drop>>                                                   | Drops a named graph from the catalog.
-| <<catalog-graph-stream-node-properties, gds.graph.streamNodeProperty>>                   | Streams a single node property stored in a named graph.
-| <<catalog-graph-stream-node-properties, gds.graph.streamNodeProperties>>                 | Streams node properties stored in a named graph.
-| <<catalog-graph-stream-relationship-properties, gds.graph.streamRelationshipProperty>>   | Streams a single relationship property stored in a named graph.
-| <<catalog-graph-stream-relationship-properties, gds.graph.streamRelationshipProperties>> | Streams relationship properties stored in a named graph.
-| <<catalog-graph-write-node-properties, gds.graph.writeNodeProperties>>                   | Writes node properties stored in a named graph to Neo4j.
-| <<catalog-graph-write-relationship, gds.graph.writeRelationship>>                        | Writes relationships stored in a named graph to Neo4j.
-| <<catalog-graph-export-database, gds.graph.export>>                                      | Exports a named graph into a new offline Neo4j database.
-| <<catalog-graph-export-csv, gds.beta.graph.export.csv>>                                  | Exports a named graph into CSV files.
+| Name                                                                          | Description
+| <<catalog-graph-create, gds.graph.create>>                                    | Creates a graph in the catalog using Native projection.
+| <<catalog-graph-create-cypher, gds.graph.create.cypher>>                      | Creates a graph in the catalog using Cypher projection.
+| <<catalog-graph-create-subgraph, gds.beta.graph.create.subgraph>>             | Creates a graph in the catalog by filtering an existing graph using node and relationship predicates.
+| <<catalog-graph-list, gds.graph.list>>                                        | Prints information about graphs that are currently stored in the catalog.
+| <<catalog-graph-exists, gds.graph.exists>>                                    | Checks if a named graph is stored in the catalog.
+| <<graph-catalog-node-ops, gds.graph.removeNodeProperties>>                    | Removes node properties from a named graph.
+| <<graph-catalog-relationship-ops, gds.graph.deleteRelationships>>             | Deletes relationships of a given relationship type from a named graph.
+| <<catalog-graph-drop, gds.graph.drop>>                                        | Drops a named graph from the catalog.
+| <<graph-catalog-node-ops, gds.graph.streamNodeProperty>>                      | Streams a single node property stored in a named graph.
+| <<graph-catalog-node-ops, gds.graph.streamNodeProperties>>                    | Streams node properties stored in a named graph.
+| <<graph-catalog-relationship-ops, gds.graph.streamRelationshipProperty>>      | Streams a single relationship property stored in a named graph.
+| <<graph-catalog-relationship-ops, gds.graph.streamRelationshipProperties>>    | Streams relationship properties stored in a named graph.
+| <<graph-catalog-node-ops, gds.graph.writeNodeProperties>>                     | Writes node properties stored in a named graph to Neo4j.
+| <<graph-catalog-relationship-ops, gds.graph.writeRelationship>>               | Writes relationships stored in a named graph to Neo4j.
+| <<catalog-graph-export-database, gds.graph.export>>                           | Exports a named graph into a new offline Neo4j database.
+| <<catalog-graph-export-csv, gds.beta.graph.export.csv>>                       | Exports a named graph into CSV files.
 |===
 
 [NOTE]
