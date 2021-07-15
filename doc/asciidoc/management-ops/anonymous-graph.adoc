@@ -68,7 +68,7 @@ CALL gds.<algo>.<mode>(
 CALL gds.graph.drop('new-graph-name');
 ----
 
-Similarly for <<catalog-graph-create-cypher, Cypher projection>>, the explicit creation with `gds.graph.create.cypher` can be inlined in an algorithm call using the keys `nodeQuery` and `relationshipQuery`.
+Similarly for <<catalog-graph-create-cypher, Cypher projection>>, the explicit creation with `gds.graph.create.cypher` can be inlined in an algorithm call using the `nodeQuery` and `relationshipQuery` configuration keys.
 
 .Anonymous cypher projection syntax
 [source, cypher, role=noplay]

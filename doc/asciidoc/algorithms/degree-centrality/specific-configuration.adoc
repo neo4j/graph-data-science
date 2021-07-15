@@ -2,8 +2,7 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                                                                             | Type          | Default         | Optional  | Description
-| orientation                                                                      | String        | NATURAL         | yes       | The orientation used to compute all node degrees. Supported orientations are `NATURAL`, `REVERSE` and `UNDIRECTED`.
-| <<common-configuration-relationship-weight-property, relationshipWeightProperty>> | String        | null            | yes       | The name of the relationship property used for weighted random projection
+| orientation                                                                      | String        | NATURAL         | yes       | The orientation used to compute node degrees. Supported orientations are `NATURAL`, `REVERSE` and `UNDIRECTED`.
+| <<common-configuration-relationship-weight-property, relationshipWeightProperty>> | String        | null            | yes       | The name of the relationship property used for weighted degree computation.
 |===
-
 

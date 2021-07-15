@@ -24,7 +24,7 @@ The feature estimates the memory consumption of all involved data structures usi
 
 The page cache is used to cache the Neo4j data and will help to avoid costly disk access.
 
-For purely analytical workloads using <<catalog-graph-create, native projections>>, it is recommended to decrease https://neo4j.com/docs/operations-manual/3.5/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size] in favor of an increased heap size.
+For purely analytical workloads including <<catalog-graph-create, native projections>>, it is recommended to decrease https://neo4j.com/docs/operations-manual/3.5/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size] in favor of an increased heap size.
 However, setting a minimum page cache size is still important while creating in-memory graphs:
 
 * For <<catalog-graph-create, native projections>>, the minimum page cache size for creating the in-memory graph can be roughly estimated by `8KB * 100 * readConcurrency`.
