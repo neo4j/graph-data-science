@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.internal;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.RawIterator;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
@@ -136,7 +137,7 @@ public class AuraBackupProc implements CallableProcedure {
             Values.stringValue(row.type()),
             Values.booleanValue(row.done()),
             Values.stringValue(backupName),
-            Values.stringValue(row.path()),
+            Values.stringOrNoValue(row.path()),
             Values.longValue(row.exportMillis())
         }));
     }
@@ -253,7 +254,7 @@ public class AuraBackupProc implements CallableProcedure {
 
         boolean done();
 
-        String path();
+        @Nullable String path();
 
         long exportMillis();
 
