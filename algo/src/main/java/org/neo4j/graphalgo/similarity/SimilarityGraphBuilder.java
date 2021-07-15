@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.TransientAdjacencyList;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
-import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimations;
@@ -37,10 +36,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 public class SimilarityGraphBuilder {
-
-    private final int concurrency;
-    private final ExecutorService executorService;
-    private final AllocationTracker tracker;
 
     public static MemoryEstimation memoryEstimation(int topK, int topN) {
         return MemoryEstimations.setup("", (dimensions, concurrency) -> {
@@ -75,12 +70,13 @@ public class SimilarityGraphBuilder {
         });
     }
 
-    private final Graph baseGraph;
-
-    private final NodeMapping baseIdMap;
+    private final NodeMapping nodeMapping;
+    private final int concurrency;
+    private final ExecutorService executorService;
+    private final AllocationTracker tracker;
 
     public SimilarityGraphBuilder(
-        Graph baseGraph,
+        NodeMapping nodeMapping,
         int concurrency,
         ExecutorService executorService,
         AllocationTracker tracker
@@ -88,15 +84,13 @@ public class SimilarityGraphBuilder {
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.tracker = tracker;
-        this.baseGraph = baseGraph;
-        this.baseIdMap = baseGraph;
+        this.nodeMapping = nodeMapping;
     }
 
     public Graph build(Stream<SimilarityResult> stream) {
-        Orientation orientation = baseGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
-        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .nodes(baseIdMap)
-            .orientation(orientation)
+        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(nodeMapping)
+            .orientation(Orientation.NATURAL)
             .addPropertyConfig(Aggregation.NONE, DefaultValue.forDouble())
             .concurrency(concurrency)
             .executorService(executorService)
@@ -106,7 +100,7 @@ public class SimilarityGraphBuilder {
         ParallelUtil.parallelStreamConsume(stream, concurrency, relationshipsBuilder::addFromInternal);
 
         return GraphFactory.create(
-            baseIdMap,
+            nodeMapping,
             relationshipsBuilder.build(),
             tracker
         );
