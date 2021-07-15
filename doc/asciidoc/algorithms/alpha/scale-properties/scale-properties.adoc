@@ -136,6 +136,7 @@ CALL gds.alpha.scaleProperties.mutate(
   createMillis: Integer,
   computeMillis: Integer,
   mutateMillis: Integer,
+  postProcessingMillis: Integer,
   nodePropertiesWritten: Integer,
   configuration: Map
 ----
@@ -153,6 +154,7 @@ include::specific-configuration.adoc[]
 | createMillis          | Integer   | Milliseconds for loading data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | mutateMillis          | Integer   | Milliseconds for adding properties to the in-memory graph.
+| postProcessingMillis  | Integer   | Unused.
 | nodePropertiesWritten | Integer   | Number of node properties written.
 | configuration         | Map       | Configuration used for running the algorithm.
 |===
