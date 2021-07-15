@@ -25,12 +25,23 @@ public final class TensorFunctions {
 
     private TensorFunctions() {}
 
-    // Store the result in the first batch tensors.
+    /**
+     * Average multiple lists of tensors.
+     * The operation is done in-place on the first entry of the input
+     *
+     * @return The averaged tensors. At position i is the average over all tensors at position i of the input lists.
+     */
     public static List<? extends Tensor<? extends Tensor<?>>> averageTensors(List<? extends List<? extends Tensor<?>>> batchedTensors) {
         return averageTensors(batchedTensors, batchedTensors.size());
     }
 
-    // Store the result in the first batch tensors.
+    /**
+     * Average multiple lists of tensors.
+     * The operation is done in-place on the first entry of the input
+     *
+     * @param numberOfBatches Actual number of batches. Can be used, if the input tensors are already sums of multiple batches.
+     * @return The averaged tensors. At position i is the average over all tensors at position i of the input lists.
+     */
     public static List<? extends Tensor<? extends Tensor<?>>> averageTensors(List<? extends List<? extends Tensor<?>>> batchedTensors, int numberOfBatches) {
         var meanTensors = batchedTensors.get(0);
 
