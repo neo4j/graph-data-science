@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -101,6 +102,13 @@ public final class ModelCatalog {
         }
 
         return model;
+    }
+
+    public static Stream<Model<?, ?>> getAllModels() {
+        return userCatalogs
+            .entrySet()
+            .stream()
+            .flatMap(entry -> entry.getValue().streamModels());
     }
 
     public static boolean exists(String username, String modelName) {
@@ -270,6 +278,10 @@ public final class ModelCatalog {
 
         public void removeAllLoadedModels() {
             userModels.clear();
+        }
+
+        private Stream<Model<?, ?>> streamModels() {
+            return userModels.values().stream();
         }
 
         public UserCatalog join(UserCatalog other) {

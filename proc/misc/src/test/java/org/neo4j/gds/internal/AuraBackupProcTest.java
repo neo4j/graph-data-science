@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.internal;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -146,38 +147,48 @@ public class AuraBackupProcTest extends BaseProcTest {
         builder.setConfig(GraphStoreExportSettings.backup_location_setting, tempDir);
     }
 
+    void assertGraph(Path path) {
+        assertThat(path)
+            .isDirectoryContaining("glob:**/.userinfo")
+            .isDirectoryContaining("glob:**/graph_info.csv")
+            .isDirectoryContaining("glob:**/node-schema.csv")
+            .isDirectoryContaining("glob:**/relationship-schema.csv")
+            .isDirectoryContaining("regex:.+/nodes_Label[12]_header\\.csv")
+            .isDirectoryContaining("regex:.+/nodes_Label[12]_\\d+\\.csv")
+            .isDirectoryContaining("regex:.+/relationships_REL[12]_header\\.csv")
+            .isDirectoryContaining("regex:.+/relationships_REL[12]_\\d+\\.csv");
+    }
+
+    void assertModel(Path path) {
+
+    }
+
     @Test
     void shouldPersistGraphStoresAndModels() {
         var shutdownQuery = "CALL gds.internal.backup()";
 
-        var backupName = runQuery(shutdownQuery, result -> {
-            var row = result.next();
-            var isDone = (boolean) row.get("done");
-            var backup = (String) row.get("backupName");
-            assertThat(isDone).as("done").isTrue();
-            assertThat(backup).as("backupName").contains("backup-");
-            return backup;
+        var graphCount = new MutableInt(0);
+        var modelCount = new MutableInt(0);
+
+        // type  | done | backupName  | path                             | backupMillis
+        // graph | true | backup-1337 | /.../backup-1337/graph/first     | 4
+        // graph | true | backup-1337 | /.../backup-1337/graph/first     | 2
+        // model | true | backup-1337 | /.../backup-1337/model/42-uuid   | 0
+        runQueryWithRowConsumer(shutdownQuery, row -> {
+            assertThat(row.getBoolean("done")).isTrue();
+            assertThat(row.getString("backupName")).isNotEmpty();
+            assertThat(row.getNumber("backupMillis").longValue()).isGreaterThanOrEqualTo(0L);
+
+            var path = Path.of(row.getString("path"));
+
+            if (row.getString("type").equals("graph")) {
+                graphCount.increment();
+                assertGraph(path);
+            } else {
+                modelCount.increment();
+                assertModel(path);
+            }
         });
-
-        assertThat(tempDir.resolve(backupName).resolve("graphs").resolve("first"))
-            .isDirectoryContaining("glob:**/.userinfo")
-            .isDirectoryContaining("glob:**/graph_info.csv")
-            .isDirectoryContaining("glob:**/node-schema.csv")
-            .isDirectoryContaining("glob:**/relationship-schema.csv")
-            .isDirectoryContaining("glob:**/nodes_Label1_header.csv")
-            .isDirectoryContaining("regex:.+/nodes_Label1_\\d+.csv")
-            .isDirectoryContaining("glob:**/relationships_REL1_header.csv")
-            .isDirectoryContaining("regex:.+/relationships_REL1_\\d+.csv");
-
-        assertThat(tempDir.resolve(backupName).resolve("graphs").resolve("second"))
-            .isDirectoryContaining("glob:**/.userinfo")
-            .isDirectoryContaining("glob:**/graph_info.csv")
-            .isDirectoryContaining("glob:**/node-schema.csv")
-            .isDirectoryContaining("glob:**/relationship-schema.csv")
-            .isDirectoryContaining("glob:**/nodes_Label2_header.csv")
-            .isDirectoryContaining("regex:.+/nodes_Label2_\\d+.csv")
-            .isDirectoryContaining("glob:**/relationships_REL2_header.csv")
-            .isDirectoryContaining("regex:.+/relationships_REL2_\\d+.csv");
 
         assertThat(testLog.getMessages(TestLog.INFO))
             .anySatisfy(msg -> assertThat(msg)

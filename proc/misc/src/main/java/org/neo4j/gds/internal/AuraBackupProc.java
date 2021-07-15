@@ -21,10 +21,12 @@ package org.neo4j.gds.internal;
 
 import org.neo4j.collection.RawIterator;
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.export.file.GraphStoreExporterUtil;
 import org.neo4j.graphalgo.core.utils.export.file.ImmutableGraphStoreToFileExporterConfig;
@@ -42,6 +44,7 @@ import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Values;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
@@ -49,6 +52,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.utils.export.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.helpers.collection.Iterators.asRawIterator;
 import static org.neo4j.internal.kernel.api.procs.Neo4jTypes.NTBoolean;
@@ -69,8 +73,14 @@ public class AuraBackupProc implements CallableProcedure {
         //   @Name(value = "timeoutInSeconds", defaultValue = "42") long timeoutInSeconds
         // ]
         List.of(FieldSignature.inputField("timeoutInSeconds", NTInteger, DefaultParameterValue.ntInteger(42))),
-        // Output type: return a boolean
-        List.of(FieldSignature.outputField("done", NTBoolean), FieldSignature.outputField("backupName", NTString)),
+        // Output type
+        List.of(
+            FieldSignature.outputField("type", NTString),
+            FieldSignature.outputField("done", NTBoolean),
+            FieldSignature.outputField("backupName", NTString),
+            FieldSignature.outputField("path", NTString),
+            FieldSignature.outputField("backupMillis", NTInteger)
+        ),
         // Procedure mode
         READ,
         // Do not require admin user for execution
@@ -120,24 +130,29 @@ public class AuraBackupProc implements CallableProcedure {
             timeoutInSeconds,
             InternalProceduresUtil.lookup(ctx, AllocationTracker.class)
         );
-        return asRawIterator(Stream.ofNullable(new AnyValue[]{Values.booleanValue(result), Values.stringValue(backupName)}));
+
+        return asRawIterator(result.stream().map(row -> new AnyValue[] {
+            Values.stringValue(row.type()),
+            Values.booleanValue(row.done()),
+            Values.stringValue(backupName),
+            Values.stringValue(row.path()),
+            Values.longValue(row.exportMillis())
+        }));
     }
 
-    private static boolean shutdown(
+    private static List<ResultRow> shutdown(
         Path backupRoot,
         Log log,
         long timeoutInSeconds,
         AllocationTracker allocationTracker
     ) {
         log.info("Preparing for backup");
+        List<ResultRow> graphExportResult;
+
         var timer = ProgressTimer.start();
         try (timer) {
-            if(!exportAllGraphStores(backupRoot.resolve(GRAPHS_DIR), log, allocationTracker)) {
-                return false;
-            }
-            if(!exportAllModels(backupRoot.resolve(MODELS_DIR), log, allocationTracker)) {
-                return false;
-            }
+            graphExportResult = exportAllGraphStores(backupRoot.resolve(GRAPHS_DIR), log, allocationTracker);
+            //TODO model export
         }
 
         var elapsedTimeInSeconds = TimeUnit.MILLISECONDS.toSeconds(timer.getDuration());
@@ -154,15 +169,15 @@ public class AuraBackupProc implements CallableProcedure {
                 timeoutInSeconds
             );
         }
-        return true;
+        return graphExportResult;
     }
 
-    private static boolean exportAllGraphStores(
+    private static List<ResultRow> exportAllGraphStores(
         Path backupRoot,
         Log log,
         AllocationTracker allocationTracker
     ) {
-        var failedExports = GraphStoreCatalog.getAllGraphStores()
+        return GraphStoreCatalog.getAllGraphStores()
             .flatMap(store -> {
                 var createConfig = store.config();
                 var graphStore = store.graphStore();
@@ -178,6 +193,7 @@ public class AuraBackupProc implements CallableProcedure {
 
                     var backupPath = GraphStoreExporterUtil.getExportPath(backupRoot, config);
 
+                    var timer = ProgressTimer.start();
                     GraphStoreExporterUtil.runGraphStoreExportToCsv(
                         graphStore,
                         backupPath,
@@ -185,18 +201,42 @@ public class AuraBackupProc implements CallableProcedure {
                         log,
                         allocationTracker
                     );
-                    return Stream.empty();
+                    timer.stop();
+
+                    return Stream.ofNullable(ImmutableResultRow.of("graph", true, backupPath.toString(), timer.getDuration()));
                 } catch (Exception e) {
-                    return Stream.of(ImmutableFailedExport.of(e, store.userName(), createConfig.graphName()));
+                    log.warn(
+                        formatWithLocale(
+                            "GraphStore persistence failed on graph %s for user %s",
+                            createConfig.graphName(),
+                            store.userName()
+                        ),
+                        e
+                    );
+                    return Stream.ofNullable(ImmutableResultRow.of("graph", false, null, 0));
                 }
-            })
-            .collect(Collectors.toList());
+            }).collect(Collectors.toList());
+    }
+
+    private static boolean exportAllModels(Path backupRoot, Log log) {
+        var failedExports = ModelCatalog.getAllModels().flatMap(model -> {
+            try {
+                DIRECTORY_IS_WRITABLE.validate(backupRoot);
+                var modelRoot = backupRoot.resolve(UUID.randomUUID().toString());
+                Files.createDirectory(modelRoot);
+                ModelToFileExporter.toFile(modelRoot, model);
+
+                return Stream.empty();
+            } catch (Exception e) {
+                return Stream.of(ImmutableFailedExport.of(e, model.creator(), model.name()));
+            }
+        }).collect(Collectors.toList());
 
         for (var failedExport : failedExports) {
             log.warn(
                 formatWithLocale(
-                    "GraphStore persistence failed on graph %s for user %s",
-                    failedExport.graphName(),
+                    "Model persistence failed on model %s for user %s",
+                    failedExport.name(),
                     failedExport.userName()
                 ),
                 failedExport.exception()
@@ -206,12 +246,16 @@ public class AuraBackupProc implements CallableProcedure {
         return failedExports.isEmpty();
     }
 
-    private static boolean exportAllModels(
-        Path backupRoot,
-        Log log,
-        AllocationTracker allocationTracker
-    ) {
-        return true;
+    @ValueClass
+    interface ResultRow {
+
+        String type();
+
+        boolean done();
+
+        String path();
+
+        long exportMillis();
     }
 
     @ValueClass
@@ -220,6 +264,6 @@ public class AuraBackupProc implements CallableProcedure {
 
         String userName();
 
-        String graphName();
+        String name();
     }
 }
