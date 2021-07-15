@@ -44,8 +44,23 @@ public final class GraphStoreExporterUtil {
         Log log,
         AllocationTracker allocationTracker
     ) {
+        return runGraphStoreExportToCsv(
+            graphStore,
+            getExportPath(neo4jConfig, exportConfig),
+            exportConfig,
+            log,
+            allocationTracker
+        );
+    }
+
+    public static ExportToCsvResult runGraphStoreExportToCsv(
+        GraphStore graphStore,
+        Path exportPath,
+        GraphStoreToFileExporterConfig exportConfig,
+        Log log,
+        AllocationTracker allocationTracker
+    ) {
         try {
-            var exportPath = getExportPath(neo4jConfig, exportConfig);
             var exporter = exportConfig.autoload()
                 ? GraphStoreToFileExporter.autoExportCsv(graphStore, exportConfig, exportPath)
                 : GraphStoreToFileExporter.csv(graphStore, exportConfig, exportPath);
@@ -67,20 +82,23 @@ public final class GraphStoreExporterUtil {
     }
 
     public static Path getExportPath(Config neo4jConfig, GraphStoreToFileExporterConfig config) {
-        var exportLocation = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
+        var rootPath = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
+        return getExportPath(rootPath, config);
+    }
 
-        if (exportLocation == null) {
+    public static Path getExportPath(Path rootPath, GraphStoreToFileExporterConfig config) {
+        if (rootPath == null) {
             throw new RuntimeException(formatWithLocale(
                 "The configuration option '%s' must be set.",
                 GraphStoreExportSettings.export_location_setting.name()
             ));
         }
 
-        DIRECTORY_IS_WRITABLE.validate(exportLocation);
+        DIRECTORY_IS_WRITABLE.validate(rootPath);
 
-        var resolvedExportPath = exportLocation.resolve(config.exportName()).normalize();
+        var resolvedExportPath = rootPath.resolve(config.exportName()).normalize();
 
-        if (!resolvedExportPath.startsWith(exportLocation)) {
+        if (!resolvedExportPath.startsWith(rootPath)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Illegal parameter value for parameter exportName=%s. It attempts to write into forbidden directory %s.",
                 config.exportName(),
