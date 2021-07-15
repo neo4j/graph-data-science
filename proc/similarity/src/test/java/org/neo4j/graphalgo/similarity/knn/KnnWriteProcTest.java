@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.similarity.knn;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.ImmutablePropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.WriteRelationshipWithPropertyTest;
@@ -132,6 +133,36 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             fromGdl("(a {id: 1})-[{w: 0.5}]->(b {id: 2}), (b)-[{w: 0.5}]->(a), (c {id: 3})-[{w: 0.25}]->(b)"),
             GraphStoreCatalog.get(getUsername(), namedDatabaseId(), resultGraphName).graphStore().getUnion()
         );
+    }
+
+    @Test
+    void shouldWriteUniqueRelationships() {
+        var graphName = "undirectedGraph";
+
+        var graphCreateQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withNodeProperty("knn")
+            .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(graphCreateQuery);
+
+        var query = GdsCypher.call()
+            .explicitCreation(graphName)
+            .algo("gds", "beta", "knn")
+            .writeMode()
+            .addParameter("sudo", true)
+            .addParameter("nodeWeightProperty", "knn")
+            .addParameter("topK", 1)
+            .addParameter("randomSeed", 42)
+            .addParameter("writeRelationshipType", "SIMILAR")
+            .addParameter("writeProperty", "score")
+            .yields("relationshipsWritten");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(3, row.getNumber("relationshipsWritten").longValue());
+        });
     }
 
     @Override

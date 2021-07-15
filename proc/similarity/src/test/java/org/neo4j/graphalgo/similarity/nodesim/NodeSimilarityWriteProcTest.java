@@ -193,6 +193,36 @@ public class NodeSimilarityWriteProcTest
         return mapWrapper;
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {0, 10})
+    void shouldWriteUniqueRelationships(int topN) {
+        var graphName = "undirectedGraph";
+
+        var graphCreateQuery = GdsCypher.call()
+            .withAnyLabel()
+            .withRelationshipType("LIKES", Orientation.UNDIRECTED)
+            .graphCreate(graphName)
+            .yields();
+
+        runQuery(graphCreateQuery);
+
+        var query = GdsCypher.call()
+            .explicitCreation(graphName)
+            .algo("gds", "nodeSimilarity")
+            .writeMode()
+            .addParameter("sudo", true)
+            .addParameter("topK", 1)
+            .addParameter("topN", topN)
+            .addParameter("writeRelationshipType", "SIMILAR")
+            .addParameter("writeProperty", "score")
+            .yields("relationshipsWritten");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(6, row.getNumber("relationshipsWritten").longValue());
+        });
+    }
+
+
     @Override
     public String writeRelationshipType() {
         return "NODE_SIM_REL";
