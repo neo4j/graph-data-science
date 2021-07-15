@@ -109,6 +109,7 @@ include::specific-train-configuration.adoc[]
 The `modelInfo` can also be retrieved at a later time by using the <<catalog-model-list, Model List Procedure>>.
 The `modelInfo` return field has the following algorithm-specific subfields:
 
+.Model info fields
 [opts="header",cols="1,1,6"]
 |===
 | Name           | Type          | Description
@@ -124,7 +125,7 @@ The `train` and `validation` results contain lists of results for all candidate 
 These correspond to the hyper-parameters of the model candidate, and statistics for the result of that model over cross-validation folds.
 The structure of `modelInfo` is:
 
-[source]
+[listing]
 ----
 {
     bestParameters: Map,     // one of the maps specified in `params`
@@ -246,7 +247,6 @@ CALL gds.alpha.ml.nodeClassification.predict.write(
 ) YIELD
   createMillis: Integer,
   computeMillis: Integer,
-  postProcessingMillis: Integer,
   writeMillis: Integer,
   nodePropertiesWritten: Integer,
   configuration: Map
@@ -264,7 +264,6 @@ include::specific-write-mutate-configuration.adoc[]
 | Name                  | Type    | Description
 | createMillis          | Integer | Milliseconds for creating the graph.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
-| postProcessingMillis  | Integer | Milliseconds for computing the global metrics.
 | writeMillis           | Integer | Milliseconds for writing result back to Neo4j.
 | nodePropertiesWritten | Integer | Number of relationships created.
 | configuration         | Map     | Configuration used for running the algorithm.
