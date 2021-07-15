@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
+import org.neo4j.graphalgo.WriteRelationshipWithPropertyTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
@@ -42,7 +43,9 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimilarityWriteConfig> {
+public class NodeSimilarityWriteProcTest
+    extends NodeSimilarityProcTest<NodeSimilarityWriteConfig>
+    implements WriteRelationshipWithPropertyTest<NodeSimilarity, NodeSimilarityWriteConfig, NodeSimilarityResult> {
 
     @Override
     public Class<? extends AlgoBaseProc<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig>> getProcedureClazz() {
@@ -182,11 +185,21 @@ public class NodeSimilarityWriteProcTest extends NodeSimilarityProcTest<NodeSimi
     @Override
     public CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         if (!mapWrapper.containsKey("writeProperty")) {
-            mapWrapper = mapWrapper.withString("writeProperty", "foo");
+            mapWrapper = mapWrapper.withString("writeProperty", writeProperty());
         }
         if (!mapWrapper.containsKey("writeRelationshipType")) {
-            mapWrapper = mapWrapper.withString("writeRelationshipType", "bar");
+            mapWrapper = mapWrapper.withString("writeRelationshipType", writeRelationshipType());
         }
         return mapWrapper;
+    }
+
+    @Override
+    public String writeRelationshipType() {
+        return "NODE_SIM_REL";
+    }
+
+    @Override
+    public String writeProperty() {
+        return "similarity";
     }
 }

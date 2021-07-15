@@ -62,10 +62,19 @@ public abstract class SimilarityWriteProc<
                 );
             }
 
-            var rootNodeMapping = computationResult.graphStore().nodes();
             var algorithm = computationResult.algorithm();
             var similarityGraphResult = similarityGraphResult(computationResult);
             var similarityGraph = similarityGraphResult.similarityGraph();
+            // The relationships in the similarity graph refer to the node id space
+            // of the graph store. Because of that, we must not use the similarity
+            // graph itself to resolve the original node ids for a given source/target
+            // id as this can lead to either assertion errors or to wrong original ids.
+            // An exception is the topK graph where relationships refer to source/target
+            // ids within the node id space of the similarity graph. Therefore it is
+            // safe to use that graph for resolving original ids.
+            var rootNodeMapping = similarityGraphResult.isTopKGraph()
+                ? similarityGraph
+                : computationResult.graphStore().nodes();
 
             SimilarityProc.SimilarityResultBuilder<SimilarityWriteResult> resultBuilder =
                 SimilarityProc.resultBuilder(new SimilarityWriteResult.Builder(), computationResult, (ignore) -> similarityGraphResult);

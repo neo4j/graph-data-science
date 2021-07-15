@@ -22,11 +22,9 @@ package org.neo4j.graphalgo;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
-import org.neo4j.graphalgo.config.MutateConfig;
+import org.neo4j.graphalgo.config.WriteConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
-import org.neo4j.graphalgo.core.GraphLoader;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import java.lang.reflect.InvocationTargetException;
@@ -39,28 +37,26 @@ import static org.neo4j.graphalgo.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
-    extends MutatePropertyProcTest<ALGORITHM, CONFIG, RESULT> {
+public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends WriteConfig & AlgoBaseConfig, RESULT>
+    extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
-    String mutateRelationshipType();
+    String writeRelationshipType();
 
-    String mutateProperty();
-
-    ValueType mutatePropertyType();
+    String writeProperty();
 
     @Test
-    default void testWriteBackGraphMutationOnFilteredGraph() {
+    default void testWriteOnFilteredGraph() {
         emptyDb();
         GraphStoreCatalog.removeAllLoadedGraphs();
 
-        if (mutateRelationshipType().equals("REL")) {
+        if (writeRelationshipType().equals("REL")) {
             throw new IllegalArgumentException("mutateRelationshipType must not be `REL`");
         }
 
         runQuery(graphDb(), "CREATE (:B), (a1: A), (a2: A), (a3: A), (a1)-[:REL]->(a3), (a2)-[:REL]->(a3)");
-        String graphName = "myGraph";
 
-        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
+        var graphName = "myGraph";
+        var storeLoaderBuilder = new StoreLoaderBuilder()
             .api(graphDb())
             .graphName(graphName)
             .addNodeLabels("A", "B");
@@ -68,45 +64,34 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
         relationshipProjections().projections().forEach((relationshipType, projection)->
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
 
-        CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
+        var filterConfig = CypherMapWrapper.empty().withEntry(
             "nodeLabels",
             Collections.singletonList("A")
         );
-        Map<String, Object> config = createMinimalConfig(filterConfig).toMap();
 
+        var config = createMinimalConfig(filterConfig).toMap();
+
+        // KNN requires the `nodeWeightProperty` to exist in the database
         setupStoreLoader(storeLoaderBuilder, config);
 
-        GraphLoader loader = storeLoaderBuilder.build();
+        var loader = storeLoaderBuilder.build();
         GraphStoreCatalog.set(loader.createConfig(), loader.graphStore());
 
         applyOnProcedure(procedure ->
             getProcedureMethods(procedure)
-                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
-                .forEach(mutateMethod -> {
+                .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".write"))
+                .forEach(writeMethod -> {
                     try {
-                        mutateMethod.invoke(procedure, graphName, config);
+                        writeMethod.invoke(procedure, graphName, config);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
                 })
         );
 
-        String graphWriteQuery =
-            "CALL gds.graph.writeRelationship(" +
-            "   $graph, " +
-            "   $relationshipType, " +
-            "   $relationshipProperty " +
-            ") YIELD writeMillis, graphName, relationshipsWritten, propertiesWritten";
-
-        runQuery(graphDb(), graphWriteQuery, Map.of(
-            "graph", graphName,
-            "relationshipType", mutateRelationshipType(),
-            "relationshipProperty", mutateProperty())
-        );
-
-        String checkNeo4jGraphNegativeQuery = formatWithLocale(
+        var checkNeo4jGraphNegativeQuery = formatWithLocale(
             "MATCH ()-[r:REL]->() RETURN r.%s AS property",
-            mutateProperty()
+            writeProperty()
         );
 
         runQueryWithRowConsumer(
@@ -118,10 +103,10 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
                 .isNull())
         );
 
-        String checkNeo4jGraphPositiveQuery = formatWithLocale(
+        var checkNeo4jGraphPositiveQuery = formatWithLocale(
             "MATCH (a1)-[r:%s]->(a2) RETURN labels(a1)[0] AS label1, labels(a2)[0] AS label2, r.%s AS property",
-            mutateRelationshipType(),
-            mutateProperty()
+            writeRelationshipType(),
+            writeProperty()
         );
 
         SoftAssertions.assertSoftly(softly -> {
@@ -139,14 +124,6 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
             );
             softly.assertThat(numberOfRows.longValue()).isGreaterThan(0L);
         });
-    }
-
-    @Override
-    default String failOnExistingTokenMessage() {
-        return formatWithLocale(
-            "Relationship type `%s` already exists in the in-memory graph.",
-            mutateRelationshipType()
-        );
     }
 
     default void setupStoreLoader(StoreLoaderBuilder storeLoaderBuilder, Map<String, Object> config) {}
