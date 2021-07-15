@@ -182,7 +182,7 @@ public class AuraShutdownProc implements CallableProcedure {
             log.warn(
                 formatWithLocale(
                     "GraphStore persistence failed on graph %s for user %s",
-                    failedExport.name(),
+                    failedExport.graphName(),
                     failedExport.userName()
                 ),
                 failedExport.exception()

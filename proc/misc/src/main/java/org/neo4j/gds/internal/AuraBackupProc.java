@@ -46,6 +46,7 @@ import org.neo4j.values.storable.Values;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -131,7 +132,7 @@ public class AuraBackupProc implements CallableProcedure {
             InternalProceduresUtil.lookup(ctx, AllocationTracker.class)
         );
 
-        return asRawIterator(result.stream().map(row -> new AnyValue[] {
+        return asRawIterator(result.stream().map(row -> new AnyValue[]{
             Values.stringValue(row.type()),
             Values.booleanValue(row.done()),
             Values.stringValue(backupName),
@@ -147,12 +148,13 @@ public class AuraBackupProc implements CallableProcedure {
         AllocationTracker allocationTracker
     ) {
         log.info("Preparing for backup");
-        List<ResultRow> graphExportResult;
+
+        var result = new ArrayList<ResultRow>();
 
         var timer = ProgressTimer.start();
         try (timer) {
-            graphExportResult = exportAllGraphStores(backupRoot.resolve(GRAPHS_DIR), log, allocationTracker);
-            //TODO model export
+            result.addAll(exportAllGraphStores(backupRoot.resolve(GRAPHS_DIR), log, allocationTracker));
+            result.addAll(exportAllModels(backupRoot.resolve(MODELS_DIR), log));
         }
 
         var elapsedTimeInSeconds = TimeUnit.MILLISECONDS.toSeconds(timer.getDuration());
@@ -169,7 +171,7 @@ public class AuraBackupProc implements CallableProcedure {
                 timeoutInSeconds
             );
         }
-        return graphExportResult;
+        return result;
     }
 
     private static List<ResultRow> exportAllGraphStores(
@@ -203,7 +205,7 @@ public class AuraBackupProc implements CallableProcedure {
                     );
                     timer.stop();
 
-                    return Stream.ofNullable(ImmutableResultRow.of("graph", true, backupPath.toString(), timer.getDuration()));
+                    return Stream.of(ResultRow.successfulGraph(backupPath, timer));
                 } catch (Exception e) {
                     log.warn(
                         formatWithLocale(
@@ -213,37 +215,35 @@ public class AuraBackupProc implements CallableProcedure {
                         ),
                         e
                     );
-                    return Stream.ofNullable(ImmutableResultRow.of("graph", false, null, 0));
+                    return Stream.of(ResultRow.failedGraph());
                 }
             }).collect(Collectors.toList());
     }
 
-    private static boolean exportAllModels(Path backupRoot, Log log) {
-        var failedExports = ModelCatalog.getAllModels().flatMap(model -> {
+    private static List<ResultRow> exportAllModels(Path backupRoot, Log log) {
+        return ModelCatalog.getAllModels().flatMap(model -> {
             try {
                 DIRECTORY_IS_WRITABLE.validate(backupRoot);
                 var modelRoot = backupRoot.resolve(UUID.randomUUID().toString());
                 Files.createDirectory(modelRoot);
-                ModelToFileExporter.toFile(modelRoot, model);
 
-                return Stream.empty();
+                var timer = ProgressTimer.start();
+                ModelToFileExporter.toFile(modelRoot, model);
+                timer.stop();
+
+                return Stream.of(ResultRow.successfulModel(modelRoot, timer));
             } catch (Exception e) {
-                return Stream.of(ImmutableFailedExport.of(e, model.creator(), model.name()));
+                log.warn(
+                    formatWithLocale(
+                        "Model persistence failed on model %s for user %s",
+                        model.name(),
+                        model.creator()
+                    ),
+                    e
+                );
+                return Stream.of(ResultRow.failedModel());
             }
         }).collect(Collectors.toList());
-
-        for (var failedExport : failedExports) {
-            log.warn(
-                formatWithLocale(
-                    "Model persistence failed on model %s for user %s",
-                    failedExport.name(),
-                    failedExport.userName()
-                ),
-                failedExport.exception()
-            );
-        }
-
-        return failedExports.isEmpty();
     }
 
     @ValueClass
@@ -256,14 +256,21 @@ public class AuraBackupProc implements CallableProcedure {
         String path();
 
         long exportMillis();
-    }
 
-    @ValueClass
-    interface FailedExport {
-        Exception exception();
+        static ResultRow successfulGraph(Path path, ProgressTimer timer) {
+            return ImmutableResultRow.of("graph", true, path.toString(), timer.getDuration());
+        }
 
-        String userName();
+        static ResultRow failedGraph() {
+            return ImmutableResultRow.of("graph", false, null, 0);
+        }
 
-        String name();
+        static ResultRow successfulModel(Path path, ProgressTimer timer) {
+            return ImmutableResultRow.of("model", true, path.toString(), timer.getDuration());
+        }
+
+        static ResultRow failedModel() {
+            return ImmutableResultRow.of("model", false, null, 0);
+        }
     }
 }

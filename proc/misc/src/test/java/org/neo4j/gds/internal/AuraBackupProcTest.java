@@ -29,6 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;
@@ -52,7 +53,6 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.nio.file.Path;
 
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class AuraBackupProcTest extends BaseProcTest {
@@ -160,7 +160,9 @@ public class AuraBackupProcTest extends BaseProcTest {
     }
 
     void assertModel(Path path) {
-
+        assertThat(path)
+            .isDirectoryContaining("glob:**/" + ModelToFileExporter.META_DATA_FILE)
+            .isDirectoryContaining("glob:**/" + ModelToFileExporter.MODEL_DATA_FILE);
     }
 
     @Test
@@ -170,10 +172,6 @@ public class AuraBackupProcTest extends BaseProcTest {
         var graphCount = new MutableInt(0);
         var modelCount = new MutableInt(0);
 
-        // type  | done | backupName  | path                             | backupMillis
-        // graph | true | backup-1337 | /.../backup-1337/graph/first     | 4
-        // graph | true | backup-1337 | /.../backup-1337/graph/first     | 2
-        // model | true | backup-1337 | /.../backup-1337/model/42-uuid   | 0
         runQueryWithRowConsumer(shutdownQuery, row -> {
             assertThat(row.getBoolean("done")).isTrue();
             assertThat(row.getString("backupName")).isNotEmpty();
@@ -221,24 +219,24 @@ public class AuraBackupProcTest extends BaseProcTest {
 //            .isDirectoryContaining("glob:**/relationships_REL2_header.csv")
 //            .isDirectoryContaining("regex:.+/relationships_REL2_\\d+.csv");
 //    }
-
-    @Test
-    void shouldLogAtStartAndForEachExportedGraph() {
-        var numberOfGraphs = GraphStoreCatalog.graphStoresCount();
-        assertThat(numberOfGraphs).isGreaterThan(0);
-
-        var shutdownQuery = "CALL gds.internal.backup()";
-
-        runQuery(shutdownQuery);
-
-        var messages = testLog.getMessages(TestLog.INFO);
-
-        assertThat(messages).contains("Preparing for backup");
-
-        var exportCompletedMessages = messages.stream()
-            .filter(it -> it.startsWith("Backup completed"))
-            .collect(toList());
-
-        assertThat(exportCompletedMessages.size()).isEqualTo(numberOfGraphs);
-    }
+//
+//    @Test
+//    void shouldLogAtStartAndForEachExportedGraph() {
+//        var numberOfGraphs = GraphStoreCatalog.graphStoresCount();
+//        assertThat(numberOfGraphs).isGreaterThan(0);
+//
+//        var shutdownQuery = "CALL gds.internal.backup()";
+//
+//        runQuery(shutdownQuery);
+//
+//        var messages = testLog.getMessages(TestLog.INFO);
+//
+//        assertThat(messages).contains("Preparing for backup");
+//
+//        var exportCompletedMessages = messages.stream()
+//            .filter(it -> it.startsWith("Backup completed"))
+//            .collect(toList());
+//
+//        assertThat(exportCompletedMessages.size()).isEqualTo(numberOfGraphs);
+//    }
 }
