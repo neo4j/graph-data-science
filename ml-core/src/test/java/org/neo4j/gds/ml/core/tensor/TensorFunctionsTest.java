@@ -74,11 +74,11 @@ class TensorFunctionsTest {
             ),
             Arguments.of(
                 List.of(
-                    List.of(new Vector(10d, 14d)),
-                    List.of(new Vector(2d, 3d)),
-                    List.of(new Vector(6d, 7d))
+                    List.of(new Vector(new double[] {10d, 14d})),
+                    List.of(new Vector(new double[] {2d, 3d})),
+                    List.of(new Vector(new double[] {6d, 7d}))
                 ),
-                List.of(new Vector(6d, 8d)),
+                List.of(new Vector(new double[] {6d, 8d})),
                 "Vector Average"
             ),
             Arguments.of(

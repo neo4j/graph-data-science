@@ -32,7 +32,7 @@ import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -49,8 +49,8 @@ class TrainingTest {
             .maxEpochs(10)
             .build();
 
-        var training = new Training(config, ProgressTracker.NULL_TRACKER, 100L);
-        var singleThreadedTraining = new Training(config, ProgressTracker.NULL_TRACKER, 100L);
+        var training = new Training(config, ProgressLogger.NULL_LOGGER, 100L);
+        var singleThreadedTraining = new Training(config, ProgressLogger.NULL_LOGGER, 100L);
 
         var objective = new TestTrainingObjective();
         var singleThreadedObjective = new TestTrainingObjective();

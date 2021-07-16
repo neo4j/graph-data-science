@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
+import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.extension.GdlExtension;
@@ -243,7 +244,7 @@ class LinkPredictionTrainTest {
         var linkPredictionTrain = new LinkPredictionTrain(
             UnionGraph.of(List.of(trainGraph, testGraph)),
             config,
-            ProgressTracker.NULL_TRACKER
+            ProgressLogger.NULL_LOGGER
         );
 
         var firstResult = linkPredictionTrain.compute();

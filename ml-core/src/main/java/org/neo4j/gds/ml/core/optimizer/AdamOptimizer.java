@@ -86,7 +86,8 @@ public class AdamOptimizer implements Updater {
 
         for (int i = 0; i < weights.size(); i++) {
             var weight = this.weights.get(i);
-            var gradient = contextLocalWeightGradients.get(i).mapInPlace(this::clip);
+            var gradient = contextLocalWeightGradients.get(i);
+            gradient.mapInPlace(this::clip);
 
             // m_t = beta_1 * m_t + (1 - beta_1) * g_t
             var momentumTerm = momentumTerms.get(i);
