@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.core.optimizer;
 
-import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
@@ -71,11 +70,6 @@ public class AdamOptimizer implements Updater {
         this.weights = weights;
         this.momentumTerms = weights.stream().map(v -> v.data().zeros()).collect(Collectors.toList());
         this.velocityTerms = weights.stream().map(v -> v.data().zeros()).collect(Collectors.toList());
-    }
-
-    public void update(ComputationContext otherCtx) {
-        var localWeightGradients = weights.stream().map(otherCtx::gradient).collect(Collectors.toList());
-        update(localWeightGradients);
     }
 
     public void update(List<? extends Tensor<?>> contextLocalWeightGradients) {
