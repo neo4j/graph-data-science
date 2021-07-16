@@ -47,7 +47,7 @@ public class Matrix extends Tensor<Matrix> {
         this(new double[Math.multiplyExact(rows, cols)], rows, cols);
     }
 
-    public static Matrix fill(double v, int rows, int cols) {
+    public static Matrix create(double v, int rows, int cols) {
         return new Matrix(ArrayUtil.fill(v, rows * cols), rows, cols);
     }
 
@@ -69,7 +69,7 @@ public class Matrix extends Tensor<Matrix> {
 
     @Override
     public Matrix zeros() {
-        return fill(0D, rows(), cols());
+        return create(0D, rows(), cols());
     }
 
     @Override

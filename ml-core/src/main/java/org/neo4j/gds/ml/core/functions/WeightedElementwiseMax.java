@@ -52,7 +52,7 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        Matrix max = Matrix.fill(Double.NEGATIVE_INFINITY, rows, cols);
+        Matrix max = Matrix.create(Double.NEGATIVE_INFINITY, rows, cols);
 
         double[] parentData = ctx.data(parent()).data();
         for (int source = 0; source < rows; source++) {

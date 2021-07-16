@@ -43,7 +43,7 @@ class LinkPredictionSerializerTest {
     @MethodSource("validLinkFeatureCombiners")
     void shouldSerializeLinkLogisticRegressionData(LinkFeatureCombiners linkFeatureCombiner) {
 
-        var weightData = Matrix.fill(0.5D, 3, 4);
+        var weightData = Matrix.create(0.5D, 3, 4);
         var weight = new Weights<>(weightData);
 
         var modelData = LinkLogisticRegressionData.builder()

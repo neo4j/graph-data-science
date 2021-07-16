@@ -39,7 +39,7 @@ public class MatrixSum extends AbstractVariable<Matrix> {
 
     @Override
     public Matrix apply(ComputationContext ctx) {
-        Matrix sum = Matrix.fill(0D, dimension(ROWS_INDEX), dimension(COLUMNS_INDEX));
+        Matrix sum = Matrix.create(0D, dimension(ROWS_INDEX), dimension(COLUMNS_INDEX));
         for (Variable<?> parent : parents()) {
             sum.addInPlace(ctx.data(parent));
         }

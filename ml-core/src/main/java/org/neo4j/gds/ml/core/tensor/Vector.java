@@ -36,13 +36,13 @@ public class Vector extends Tensor<Vector> {
         this(new double[size]);
     }
 
-    public static Vector fill(double v, int length) {
-        return new Vector(ArrayUtil.fill(v, length));
+    public static Vector create(double v, int size) {
+        return new Vector(ArrayUtil.fill(v, size));
     }
 
     @Override
     public Vector zeros() {
-        return fill(0D, length());
+        return create(0D, length());
     }
 
     @Override

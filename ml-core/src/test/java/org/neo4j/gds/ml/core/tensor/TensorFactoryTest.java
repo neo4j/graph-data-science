@@ -44,7 +44,7 @@ class TensorFactoryTest {
 
         assertThat(matrix)
             .isInstanceOf(Matrix.class)
-            .isEqualTo(Matrix.fill(1, 3, 4));
+            .isEqualTo(Matrix.create(1, 3, 4));
     }
 
     @Test

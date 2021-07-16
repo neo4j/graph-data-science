@@ -55,7 +55,7 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
         var rows = adjacencyMatrix.length;
         var cols = parentData.cols();
 
-        var max = Matrix.fill(Double.NEGATIVE_INFINITY, rows, cols);
+        var max = Matrix.create(Double.NEGATIVE_INFINITY, rows, cols);
 
         for (int row = 0; row < rows; row++) {
             int[] neighbors = this.adjacencyMatrix[row];

@@ -70,7 +70,7 @@ class TrainingTest {
         private final Scalar expectedValue;
 
         TestTrainingObjective() {
-            this.weights = new Weights<>(Vector.fill(0d, 5));
+            this.weights = new Weights<>(Vector.create(0d, 5));
             this.expectedValue = new Scalar(-1D);
         }
 

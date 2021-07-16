@@ -35,7 +35,7 @@ public class NodeLogisticRegressionPredictorFailTest extends FeatureExtractionBa
 
     @Override
     public void makeExtractions(Graph graph) {
-        var weights = new Weights<>(Matrix.fill(0.0, 5, 4));
+        var weights = new Weights<>(Matrix.create(0.0, 5, 4));
         var classIdMap = new LocalIdMap();
         var featureProperties = List.of("a", "b");
         var modelData = ImmutableNodeLogisticRegressionData.of(weights, classIdMap);

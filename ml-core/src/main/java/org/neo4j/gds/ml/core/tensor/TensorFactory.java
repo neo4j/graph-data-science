@@ -31,10 +31,10 @@ public final class TensorFactory {
         if (dimensions.length == 1 && dimensions[ROWS_INDEX] == 1) {
             return new Scalar(v);
         } else if (dimensions.length == 1 && dimensions[ROWS_INDEX] > 1) {
-            return Vector.fill(v, dimensions[ROWS_INDEX]);
+            return Vector.create(v, dimensions[ROWS_INDEX]);
             // TODO: sort out if a (1, 2) is a matrix or a vector vs (2, 1) vector or matrix?
         } else if (dimensions.length == 2 && dimensions[ROWS_INDEX] > 0 && dimensions[COLUMNS_INDEX] > 0) {
-            return Matrix.fill(v, dimensions[ROWS_INDEX], dimensions[COLUMNS_INDEX]);
+            return Matrix.create(v, dimensions[ROWS_INDEX], dimensions[COLUMNS_INDEX]);
         } else {
             throw new IllegalArgumentException(formatWithLocale(
                 "Tensor of dimensions greater than 2 are not supported, got %d dimensions",

@@ -71,7 +71,7 @@ public final class LayerFactory {
                     randomSeed
                 );
 
-                Weights<Vector> bias = new Weights<>(Vector.fill(0D, rows));
+                Weights<Vector> bias = new Weights<>(Vector.create(0D, rows));
 
                 return new MaxPoolAggregatingLayer(
                     layerConfig.sampleSize(),

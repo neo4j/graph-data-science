@@ -98,7 +98,7 @@ public class Softmax extends SingleParentVariable<Matrix> {
         var selfData = ctx.data(this);
         var selfGradient= ctx.gradient(this);
 
-        var computedGradient = Matrix.fill(0.0, rows, cols);
+        var computedGradient = Matrix.create(0.0, rows, cols);
 
         // result[row,col] = sum_{col2} s[row, col2] * (delta(col, col2) - s[row, col]) * grad[row, col2]
         for (int row = 0; row < rows; row++) {

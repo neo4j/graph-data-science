@@ -30,7 +30,7 @@ class MatrixTest {
 
     @Test
     void returnsMatrixZeros() {
-        Matrix matrix = Matrix.fill(6D, 3, 4);
+        Matrix matrix = Matrix.create(6D, 3, 4);
 
         Matrix zeros = matrix.zeros();
         var expected = new Matrix(ArrayUtil.fill(0D, 12), 3, 4);
@@ -42,7 +42,7 @@ class MatrixTest {
 
     @Test
     void createsMatrixFillCopy() {
-        Matrix matrix = Matrix.fill(6D, 3, 4);
+        Matrix matrix = Matrix.create(6D, 3, 4);
 
         Matrix copy = matrix.copy();
 
@@ -123,7 +123,7 @@ class MatrixTest {
 
     @Test
     void testSetDataAtRowCol() {
-        Matrix matrix = Matrix.fill(0, 2, 3);
+        Matrix matrix = Matrix.create(0, 2, 3);
 
         matrix.setDataAt(0, 0, 1.5);
         matrix.setDataAt(0, 1, .1);
@@ -142,7 +142,7 @@ class MatrixTest {
 
     @Test
     void testAddDataAtRowCol() {
-        Matrix matrix = Matrix.fill(1, 2, 3);
+        Matrix matrix = Matrix.create(1, 2, 3);
 
         matrix.addDataAt(0, 0, 1.5);
         matrix.addDataAt(0, 1, .1);
@@ -161,7 +161,7 @@ class MatrixTest {
 
     @Test
     void testUpdateDataAtRowCol() {
-        Matrix matrix = Matrix.fill(2, 2, 3);
+        Matrix matrix = Matrix.create(2, 2, 3);
 
         matrix.updateDataAt(0, 0, v -> v * v);
         matrix.updateDataAt(0, 1, v -> v - 1);

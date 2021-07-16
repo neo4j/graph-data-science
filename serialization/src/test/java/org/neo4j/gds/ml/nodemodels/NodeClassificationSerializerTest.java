@@ -37,7 +37,7 @@ class NodeClassificationSerializerTest {
 
     @Test
     void shouldSerializeData() {
-        var weightData = Matrix.fill(0.5D, 3, 4);
+        var weightData = Matrix.create(0.5D, 3, 4);
         var weight = new Weights<>(weightData);
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(101L);

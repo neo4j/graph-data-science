@@ -54,7 +54,7 @@ class MatrixVectorSumTest extends ComputationGraphBaseTest implements FiniteDiff
     @Test
     void shouldApproximateGradient() {
         Weights<Matrix> weights = new Weights<>(new Matrix(new double[]{1, 2, 3, 4, 5, 7}, 2, 3));
-        Weights<Vector> vector = new Weights<>(Vector.fill(1, 3));
+        Weights<Vector> vector = new Weights<>(Vector.create(1, 3));
 
         Variable<Scalar> broadcastSum = new ElementSum(List.of(new MatrixVectorSum(weights, vector)));
 

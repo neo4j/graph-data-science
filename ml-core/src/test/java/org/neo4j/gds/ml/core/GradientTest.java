@@ -37,8 +37,8 @@ class GradientTest {
 
     @Test
     void matrixAddition() {
-        var operand1 = new Weights<>(Matrix.fill(5, 5, 1));
-        var operand2 = new Constant<>(Matrix.fill(4, 5, 1));
+        var operand1 = new Weights<>(Matrix.create(5, 5, 1));
+        var operand2 = new Constant<>(Matrix.create(4, 5, 1));
         var add = new MatrixSum(List.of(operand1, operand2));
         var sum = new ElementSum(List.of(add));
 
@@ -57,12 +57,12 @@ class GradientTest {
 
         assertArrayEquals(Dimensions.scalar(), sum.dimensions());
         assertEquals(45D, ctx.data(sum).value());
-        assertThat(ctx.data(add)).isEqualTo(Matrix.fill(9D, 5, 1));
+        assertThat(ctx.data(add)).isEqualTo(Matrix.create(9D, 5, 1));
 
         ctx.backward(sum);
 
         assertNull(ctx.gradient(operand2), "Gradient should be null for Constant");
-        assertThat(ctx.gradient(add)).isEqualTo(Matrix.fill(1D, 5, 1));
-        assertThat(ctx.gradient(operand1)).isEqualTo(Matrix.fill(1D, 5, 1));
+        assertThat(ctx.gradient(add)).isEqualTo(Matrix.create(1D, 5, 1));
+        assertThat(ctx.gradient(operand1)).isEqualTo(Matrix.create(1D, 5, 1));
     }
 }

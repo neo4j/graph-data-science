@@ -37,7 +37,7 @@ class WeightsTest {
 
     @Test
     void inAndOutInT() {
-        Matrix in = Matrix.fill(1, 2, 3);
+        Matrix in = Matrix.create(1, 2, 3);
         Matrix out = new Weights<>(in).data();
 
         assertEquals(in, out);

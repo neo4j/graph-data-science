@@ -71,7 +71,7 @@ class NodeClassificationStoreModelTest extends BaseStoreModelTest<NodeLogisticRe
             .build();
 
         var modelData = NodeLogisticRegressionData.builder()
-            .weights(new Weights<>(Matrix.fill(0.19, 3, 4)))
+            .weights(new Weights<>(Matrix.create(0.19, 3, 4)))
             .classIdMap(new LocalIdMap())
             .build();
 

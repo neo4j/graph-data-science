@@ -29,7 +29,7 @@ class VectorTest {
 
     @Test
     void returnsVectorZero() {
-        Vector vector = Vector.fill(3D, 5);
+        Vector vector = Vector.create(3D, 5);
 
         Vector zeros = vector.zeros();
 
