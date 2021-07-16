@@ -24,6 +24,7 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
 import org.neo4j.gds.ml.core.optimizer.Updater;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
@@ -60,13 +61,13 @@ public class Training {
         return MemoryEstimations.builder(Training.class)
             .add(MemoryEstimations.of(
                 "updater",
-                MemoryRange.of(Updater.sizeInBytesOfDefaultUpdater(numberOfClasses, numberOfFeatures, numberOfWeights))))
+                MemoryRange.of(AdamOptimizer.sizeInBytes(numberOfClasses, numberOfFeatures, numberOfWeights))))
             .perThread("weight gradients", Weights.sizeInBytes(numberOfClasses, numberOfFeatures) * numberOfWeights)
             .build();
     }
 
     public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
-        Updater updater = Updater.defaultUpdater(objective.weights());
+        Updater updater = new AdamOptimizer(objective.weights());
         int epoch = 0;
         var stopper = TrainingStopper.defaultStopper(config);
         double initialLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
