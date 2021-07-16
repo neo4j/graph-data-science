@@ -3,6 +3,7 @@
 = Scale Properties
 
 :algorithm: Scale Properties
+:entity: node
 
 [abstract]
 --
