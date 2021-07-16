@@ -20,10 +20,7 @@
 package org.neo4j.gds.ml.core.optimizer;
 
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -79,51 +76,29 @@ public class AdamOptimizer implements Updater {
             var weight = this.weights.get(i);
             var gradient = contextLocalWeightGradients.get(i).mapInPlace(this::clip);
 
+            // In-Place update momentum term
             // m_t = beta_1 * m_t + (1 - beta_1) * g_t
             var momentumTerm = momentumTerms.get(i);
-            var updatedMomentumTerm = castAndAdd(
-                momentumTerm.scalarMultiply(beta_1),
-                gradient.scalarMultiply(1 - beta_1)
-            );
+            momentumTerm.scalarMultiplyMutate(beta_1).addInPlace(gradient.scalarMultiply(1 - beta_1));
 
+            // In-Place updates the velocity terms
             // v_t = beta_2 * v_t + (1 - beta_2) * (g_t^2)
             var velocityTerm = velocityTerms.get(i);
             var squaredGradient = gradient.elementwiseProduct(gradient);
-            var updatedVelocityTerm = castAndAdd(
-                velocityTerm.scalarMultiply(beta_2),
-                squaredGradient.scalarMultiply(1 - beta_2)
-            );
+            velocityTerm.scalarMultiplyMutate(beta_2).addInPlace(squaredGradient.scalarMultiply(1 - beta_2));
 
             // m_cap = m_t / (1 - beta_1^t)		#calculates the bias-corrected estimates
-            var mCap = updatedMomentumTerm.scalarMultiply(1d / (1 - Math.pow(beta_1, iteration)));
+            var mCap = momentumTerm.scalarMultiply(1d / (1 - Math.pow(beta_1, iteration)));
 
             // v_cap = v_t / (1 - beta_2^t)		#calculates the bias-corrected estimates
-            var vCap = updatedVelocityTerm.scalarMultiply(1d / (1 - Math.pow(beta_2, iteration)));
+            var vCap = velocityTerm.scalarMultiply(1d / (1 - Math.pow(beta_2, iteration)));
 
             // theta_0 = theta_0 - (alpha * m_cap) / (math.sqrt(v_cap) + epsilon)	#updates the parameters
             var theta_0 = weight.data();
             theta_0.addInPlace(mCap
-                .scalarMultiply(-alpha)
-                .elementwiseProduct(vCap.map(v -> 1 / (Math.sqrt(v) + epsilon)))
+                .scalarMultiplyMutate(-alpha)
+                .elementwiseProductMutate(vCap.mapInPlace(v -> 1 / (Math.sqrt(v) + epsilon)))
             );
-
-            // Updates the moving averages of the gradient
-            momentumTerms.set(i, updatedMomentumTerm);
-            // Updates the moving averages of the squared gradient
-            velocityTerms.set(i, updatedVelocityTerm);
-        }
-    }
-
-    // TODO: Try to retain type information and avoid these checks
-    private Tensor<?> castAndAdd(Tensor<?> op1, Tensor<?> op2) {
-        if (op1 instanceof Scalar && op2 instanceof Scalar) {
-            return ((Scalar) op1).add(((Scalar) op2));
-        } else if (op1 instanceof Vector && op2 instanceof Vector) {
-            return ((Vector) op1).add(((Vector) op2));
-        } else if (op1 instanceof Matrix && op2 instanceof Matrix) {
-            return ((Matrix) op1).add(((Matrix) op2));
-        } else {
-            throw new IllegalStateException("Mismatched tensors! Can only add same types");
         }
     }
 
