@@ -149,7 +149,7 @@ public class Training {
             this.summedWeightGradients = objective
                 .weights()
                 .stream()
-                .map(weight -> weight.data().zeros())
+                .map(weight -> weight.data().createWithSameDimensions())
                 .collect(Collectors.toList());
             this.consumedBatches = 0;
         }

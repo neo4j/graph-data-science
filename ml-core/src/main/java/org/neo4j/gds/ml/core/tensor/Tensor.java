@@ -41,7 +41,7 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
 
     protected abstract String shortDescription();
 
-    public abstract SELF zeros();
+    public abstract SELF createWithSameDimensions();
 
     public abstract SELF copy();
 
@@ -72,7 +72,7 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
     }
 
     public SELF map(DoubleUnaryOperator f) {
-        var result = zeros();
+        var result = createWithSameDimensions();
         Arrays.setAll(result.data, i -> f.applyAsDouble(data[i]));
         return result;
     }
@@ -111,7 +111,7 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
 
     // TODO: figure out how to replace this one
     public SELF elementwiseProduct(Tensor<?> other) {
-        var result = zeros();
+        var result = createWithSameDimensions();
         for (int i = 0; i < data.length; i++) {
             result.data[i] = data[i] * other.data[i];
         }

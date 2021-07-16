@@ -65,8 +65,8 @@ public class AdamOptimizer implements Updater {
     ) {
         this.alpha = learningRate;
         this.weights = weights;
-        this.momentumTerms = weights.stream().map(v -> v.data().zeros()).collect(Collectors.toList());
-        this.velocityTerms = weights.stream().map(v -> v.data().zeros()).collect(Collectors.toList());
+        this.momentumTerms = weights.stream().map(v -> v.data().createWithSameDimensions()).collect(Collectors.toList());
+        this.velocityTerms = weights.stream().map(v -> v.data().createWithSameDimensions()).collect(Collectors.toList());
     }
 
     public void update(List<? extends Tensor<?>> contextLocalWeightGradients) {

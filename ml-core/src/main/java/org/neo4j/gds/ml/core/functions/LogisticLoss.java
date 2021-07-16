@@ -113,7 +113,7 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
             var targetVector = ctx.data(targets);
             var weightsVector = ctx.data(weights);
             var featuresTensor = ctx.data(features);
-            var gradient = weightsVector.zeros();
+            var gradient = weightsVector.createWithSameDimensions();
             int featureCount = weightsVector.cols();
             int nodeCount = targetVector.length();
 
@@ -126,7 +126,7 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
             return gradient;
         } else {
             // assume other variables do not require gradient
-            return ctx.data(parent).zeros();
+            return ctx.data(parent).createWithSameDimensions();
         }
     }
 

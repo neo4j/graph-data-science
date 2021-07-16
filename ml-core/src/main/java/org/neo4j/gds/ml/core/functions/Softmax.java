@@ -45,7 +45,7 @@ public class Softmax extends SingleParentVariable<Matrix> {
     @Override
     public Matrix apply(ComputationContext ctx) {
         var data = (Matrix) ctx.data(parent());
-        var result = data.zeros();
+        var result = data.createWithSameDimensions();
         boolean rescale = false;
         for (int row = 0; row < rows; row++) {
             double rowSum = 1e-15;

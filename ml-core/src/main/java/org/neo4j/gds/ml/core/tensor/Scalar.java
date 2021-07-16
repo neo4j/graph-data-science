@@ -28,7 +28,7 @@ public class Scalar extends Tensor<Scalar> {
     }
 
     @Override
-    public Scalar zeros() {
+    public Scalar createWithSameDimensions() {
         return new Scalar(0D);
     }
 

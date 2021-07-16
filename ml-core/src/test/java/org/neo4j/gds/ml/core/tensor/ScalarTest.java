@@ -29,7 +29,7 @@ class ScalarTest {
     void returnsScalarZero() {
        var scalar = new Scalar(5D);
 
-        Scalar zero = scalar.zeros();
+        Scalar zero = scalar.createWithSameDimensions();
 
         assertThat(zero)
             .isNotSameAs(scalar)

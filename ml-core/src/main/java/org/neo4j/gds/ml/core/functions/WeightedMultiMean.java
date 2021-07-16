@@ -82,7 +82,7 @@ public class WeightedMultiMean extends SingleParentVariable<Matrix> {
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         double[] multiMeanGradient = ctx.gradient(this).data();
 
-        Tensor<?> result = ctx.data(parent).zeros();
+        Tensor<?> result = ctx.data(parent).createWithSameDimensions();
 
         for (int col = 0; col < cols; col++) {
             for (int row = 0; row < rows; row++) {

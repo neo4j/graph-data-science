@@ -58,7 +58,7 @@ public class Constant<T extends Tensor<T>> extends AbstractVariable<T> {
 
     @Override
     public T gradient(Variable<?> parent, ComputationContext ctx) {
-        return data.zeros();
+        return data.createWithSameDimensions();
     }
 
     public static long sizeInBytes(int[] dimensions) {

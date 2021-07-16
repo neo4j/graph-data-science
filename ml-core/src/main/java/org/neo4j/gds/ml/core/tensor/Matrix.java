@@ -68,7 +68,7 @@ public class Matrix extends Tensor<Matrix> {
     }
 
     @Override
-    public Matrix zeros() {
+    public Matrix createWithSameDimensions() {
         return create(0D, rows(), cols());
     }
 
@@ -88,7 +88,7 @@ public class Matrix extends Tensor<Matrix> {
                 b.cols()
             ));
         }
-        var sum = zeros();
+        var sum = createWithSameDimensions();
         double[] localData = this.data;
         for (int i = 0; i < localData.length; ++i) {
             sum.data[i] = localData[i] + b.data[i];

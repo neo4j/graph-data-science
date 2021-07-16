@@ -85,7 +85,7 @@ public class WeightedElementwiseMax extends SingleParentVariable<Matrix> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        Tensor<?> result = ctx.data(parent).zeros();
+        Tensor<?> result = ctx.data(parent).createWithSameDimensions();
 
         double[] parentData = ctx.data(parent).data();
         double[] thisGradient = ctx.gradient(this).data();

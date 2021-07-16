@@ -31,7 +31,7 @@ class VectorTest {
     void returnsVectorZero() {
         Vector vector = Vector.create(3D, 5);
 
-        Vector zeros = vector.zeros();
+        Vector zeros = vector.createWithSameDimensions();
 
         assertThat(zeros)
             .isNotSameAs(vector)

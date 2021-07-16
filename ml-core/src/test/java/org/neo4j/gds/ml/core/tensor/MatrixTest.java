@@ -32,7 +32,7 @@ class MatrixTest {
     void returnsMatrixZeros() {
         Matrix matrix = Matrix.create(6D, 3, 4);
 
-        Matrix zeros = matrix.zeros();
+        Matrix zeros = matrix.createWithSameDimensions();
         var expected = new Matrix(ArrayUtil.fill(0D, 12), 3, 4);
 
         assertThat(zeros)

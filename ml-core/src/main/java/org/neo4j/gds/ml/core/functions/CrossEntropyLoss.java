@@ -69,7 +69,7 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         if (parent == predictions) {
             var predictionsMatrix = ctx.data(predictions);
-            Matrix gradient = predictionsMatrix.zeros();
+            Matrix gradient = predictionsMatrix.createWithSameDimensions();
             var targetsVector = ctx.data(targets);
 
             var multiplier = -1.0 / gradient.rows();
@@ -87,7 +87,7 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
             }
             return gradient;
         } else {
-            return ctx.data(parent).zeros();
+            return ctx.data(parent).createWithSameDimensions();
         }
     }
 }

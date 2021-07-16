@@ -41,7 +41,7 @@ public class Vector extends Tensor<Vector> {
     }
 
     @Override
-    public Vector zeros() {
+    public Vector createWithSameDimensions() {
         return create(0D, length());
     }
 
@@ -59,7 +59,7 @@ public class Vector extends Tensor<Vector> {
                 b.length()
             ));
         }
-        Vector sum = zeros();
+        Vector sum = createWithSameDimensions();
         for (int i = 0; i < length(); ++i) {
             sum.data[i] = data[i] + b.data[i];
         }

@@ -75,7 +75,7 @@ public class ElementWiseMax extends SingleParentVariable<Matrix> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        var result = (Matrix) ctx.data(parent).zeros();
+        var result = (Matrix) ctx.data(parent).createWithSameDimensions();
 
         var rows = adjacencyMatrix.length;
         var cols = result.cols();
