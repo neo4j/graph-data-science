@@ -80,4 +80,20 @@ class AdamOptimizerTest {
 
         assertThat(oldLoss).isLessThan(1e-4);
     }
+
+    @Test
+    void initializedCorrectly() {
+        Weights<Matrix> weights = new Weights<>(new Matrix(
+            new double[]{
+                0.1, 0.1, 0.1,
+                0.4, 0.3, 0.9,
+                0.01, 0.6, 0.5
+            },
+            3,
+            3
+        ));
+        var optimizer = new AdamOptimizer(List.of(weights));
+
+        assertThat(optimizer.momentumTerms.get(0)).isNotSameAs(optimizer.velocityTerms.get(0));
+    }
 }

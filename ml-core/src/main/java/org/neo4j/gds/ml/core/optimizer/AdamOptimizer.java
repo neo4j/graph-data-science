@@ -26,7 +26,6 @@ import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,8 +47,8 @@ public class AdamOptimizer implements Updater {
 
     private final List<Weights<? extends Tensor<?>>> weights;
 
-    private final List<Tensor<?>> momentumTerms;
-    private final List<Tensor<?>> velocityTerms;
+    final List<Tensor<?>> momentumTerms;
+    final List<Tensor<?>> velocityTerms;
 
     private int iteration = 0;
 
@@ -68,17 +67,15 @@ public class AdamOptimizer implements Updater {
         List<Weights<? extends Tensor<?>>> weights,
         double learningRate
     ) {
-        alpha = learningRate;
+        this.alpha = learningRate;
         this.weights = weights;
-
-        momentumTerms = weights.stream().map(v -> v.data().zeros()).collect(Collectors.toList());
-        velocityTerms = new ArrayList<>(momentumTerms);
+        this.momentumTerms = weights.stream().map(v -> v.data().zeros()).collect(Collectors.toList());
+        this.velocityTerms = weights.stream().map(v -> v.data().zeros()).collect(Collectors.toList());
     }
 
     public void update(ComputationContext otherCtx) {
         var localWeightGradients = weights.stream().map(otherCtx::gradient).collect(Collectors.toList());
         update(localWeightGradients);
-
     }
 
     public void update(List<? extends Tensor<?>> contextLocalWeightGradients) {
