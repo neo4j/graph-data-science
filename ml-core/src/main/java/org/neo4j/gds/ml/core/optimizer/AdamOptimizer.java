@@ -52,7 +52,7 @@ public class AdamOptimizer implements Updater {
         var termSize = Weights.sizeInBytes(rows, cols) * numberOfWeights;
         return sizeOfInstance(AdamOptimizer.class) +
                 2 * termSize + // fields
-                4 * termSize; // working memory
+                2 * termSize; // working memory: mCap, vCap
     }
 
     public AdamOptimizer(List<Weights<? extends Tensor<?>>> weights) {
@@ -73,12 +73,16 @@ public class AdamOptimizer implements Updater {
         iteration += 1;
 
         for (int i = 0; i < weights.size(); i++) {
-            var weight = this.weights.get(i);
-            var gradient = contextLocalWeightGradients.get(i).mapInPlace(this::clip);
+            var weight = this.weights.get(i).data();
+            var gradient = contextLocalWeightGradients.get(i);
+            var momentumTerm = momentumTerms.get(i);
+            var velocityTerm = velocityTerms.get(i);
+
+            // clip gradient to avoid exploding gradients
+            gradient.mapInPlace(this::clip);
 
             // In-Place update momentum term
             // m_t = beta_1 * m_t + (1 - beta_1) * g_t
-            var momentumTerm = momentumTerms.get(i);
             momentumTerm.scalarMultiplyMutate(beta_1).addInPlace(gradient.scalarMultiply(1 - beta_1));
 
             // In-Place updates the velocity terms
@@ -94,8 +98,7 @@ public class AdamOptimizer implements Updater {
             var vCap = velocityTerm.scalarMultiply(1d / (1 - Math.pow(beta_2, iteration)));
 
             // theta_0 = theta_0 - (alpha * m_cap) / (math.sqrt(v_cap) + epsilon)	#updates the parameters
-            var theta_0 = weight.data();
-            theta_0.addInPlace(mCap
+            weight.addInPlace(mCap
                 .scalarMultiplyMutate(-alpha)
                 .elementwiseProductMutate(vCap.mapInPlace(v -> 1 / (Math.sqrt(v) + epsilon)))
             );
