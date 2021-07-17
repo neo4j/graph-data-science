@@ -83,9 +83,9 @@ public class AdamOptimizer implements Updater {
 
             // In-Place updates the velocity terms
             // v_t = beta_2 * v_t + (1 - beta_2) * (g_t^2)
-            var velocityTerm = velocityTerms.get(i);
-            var squaredGradient = gradient.elementwiseProduct(gradient);
-            velocityTerm.scalarMultiplyMutate(beta_2).addInPlace(squaredGradient.scalarMultiply(1 - beta_2));
+            // ! reusing the memory of `gradient` for the `squaredGradient`
+            var squaredGradient = gradient.mapInPlace(v -> v * v);
+            velocityTerm.scalarMultiplyMutate(beta_2).addInPlace(squaredGradient.scalarMultiplyMutate(1 - beta_2));
 
             // m_cap = m_t / (1 - beta_1^t)		#calculates the bias-corrected estimates
             var mCap = momentumTerm.scalarMultiply(1d / (1 - Math.pow(beta_1, iteration)));
