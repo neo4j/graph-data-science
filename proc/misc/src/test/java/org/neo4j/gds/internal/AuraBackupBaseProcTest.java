@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.internal;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
@@ -117,6 +118,12 @@ public abstract class AuraBackupBaseProcTest extends BaseProcTest {
             EmptyGraphSageTrainMetrics.INSTANCE
         );
         ModelCatalog.set(model2);
+    }
+
+    @AfterEach
+    void shutdown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+        ModelCatalog.removeAllLoadedModels();
     }
 
     @Override

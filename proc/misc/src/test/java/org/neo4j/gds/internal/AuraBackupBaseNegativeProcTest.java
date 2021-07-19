@@ -59,10 +59,7 @@ class AuraBackupBaseNegativeProcTest extends AuraBackupBaseProcTest {
     }
 
     @AfterEach
-    void shutdown() throws IOException {
-        GraphStoreCatalog.removeAllLoadedGraphs();
-        ModelCatalog.removeAllLoadedModels();
-
+    void shutdownFileSystem() throws IOException {
         fs.close();
     }
 
