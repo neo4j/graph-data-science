@@ -30,6 +30,7 @@ dependencies {
             [group: 'org.ejml',                name: 'ejml-core',               version: ver.'ejml'],
             [group: 'org.ejml',                name: 'ejml-ddense',             version: ver.'ejml'],
             [group: 'commons-io',              name: 'commons-io',              version: ver.'commons-io'],
+            [group: 'com.github.marschall',    name: 'memoryfilesystem',        version: ver.'memoryfilesystem'],
     )
 
     api(group: 'org.neo4j.community', name: 'it-test-support', version: ver.'neo4j') {
