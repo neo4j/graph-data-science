@@ -21,13 +21,8 @@ package org.neo4j.gds.internal;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.AuraGraphRestorer;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.io.file.CsvGraphStoreImporter;
-import org.neo4j.graphalgo.core.utils.io.file.ImmutableCsvGraphStoreImporterConfig;
-import org.neo4j.graphalgo.core.utils.io.file.csv.AutoloadFlagVisitor;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -39,11 +34,6 @@ import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.stream.Stream;
 
 @ServiceProvider
 public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMaintenanceExtension.Dependencies> {
@@ -92,32 +82,12 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
 
     private static void restorePersistedGraphs(Configuration neo4jConfig, LogService logService) {
         var userLog = logService.getUserLog(AuraMaintenanceExtension.class);
-        var storePath = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
+        var importDir = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
         try {
-            getImportPaths(storePath).forEach(path -> {
-                var config = ImmutableCsvGraphStoreImporterConfig.builder().build();
-                var graphStoreImporter = CsvGraphStoreImporter.create(config, path, userLog);
-
-                graphStoreImporter.run(AllocationTracker.empty());
-
-                var graphStore = graphStoreImporter.userGraphStore();
-
-                var graphName = path.getFileName().toString();
-                var createConfig = GraphCreateFromStoreConfig.emptyWithName(
-                    graphStore.userName(),
-                    graphName
-                );
-                GraphStoreCatalog.set(createConfig, graphStore.graphStore());
-            });
+            AuraGraphRestorer.restore(importDir, userLog);
         } catch (Exception e) {
             userLog.warn("Graph store loading failed", e);
         }
-    }
-
-    private static Stream<Path> getImportPaths(Path storePath) throws IOException {
-        return Files.list(storePath)
-            .peek(CsvGraphStoreImporter.DIRECTORY_IS_READABLE::validate)
-            .filter(graphDir -> Files.exists(graphDir.resolve(AutoloadFlagVisitor.AUTOLOAD_FILE_NAME)));
     }
 
     interface Dependencies {

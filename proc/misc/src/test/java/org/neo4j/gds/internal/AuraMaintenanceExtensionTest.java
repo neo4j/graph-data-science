@@ -19,15 +19,25 @@
  */
 package org.neo4j.gds.internal;
 
+import org.apache.commons.io.file.PathUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.configuration.Config;
+import org.neo4j.gds.AuraGraphRestorer;
 import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.utils.io.file.GraphStoreExporterUtil;
+import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
+import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,6 +48,9 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 
 class AuraMaintenanceExtensionTest extends BaseTest {
 
+    @TempDir
+    Path importDir;
+
     @AfterEach
     void teardown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
@@ -46,9 +59,10 @@ class AuraMaintenanceExtensionTest extends BaseTest {
     @Override
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        prepareImportDir();
         super.configuration(builder);
         builder
-            .setConfig(GraphStoreExportSettings.export_location_setting, importPath())
+            .setConfig(GraphStoreExportSettings.export_location_setting, importDir)
             .setConfig(AuraMaintenanceSettings.maintenance_function_enabled, true)
             .removeExtensions(ext -> ext instanceof AuraMaintenanceExtension)
             .addExtension(new AuraMaintenanceExtension(true));
@@ -57,9 +71,6 @@ class AuraMaintenanceExtensionTest extends BaseTest {
     @Test
     void shouldLoadOnlyAutoloadGraphStores() {
         assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(1);
-
-        var testGraphStore = GraphStoreCatalog.get("UserA", db.databaseId(), "test-graph");
-        assertThat(testGraphStore).isNotNull();
 
         var expectedGraph = TestSupport.fromGdl(
             "  (n0:A {prop1: 21})" +
@@ -76,17 +87,55 @@ class AuraMaintenanceExtensionTest extends BaseTest {
             ", (n1)-[:REL1]->(n2)-[:REL1]->(n3)"
         );
 
+        var testGraphStore = GraphStoreCatalog.get("UserA", db.databaseId(), "test-graph");
+        assertThat(testGraphStore).isNotNull();
         assertGraphEquals(expectedGraph, testGraphStore.graphStore().getUnion());
     }
 
-    private Path importPath() {
+    @Test
+    void shouldRemoveImportedCsvFiles() throws IOException {
+        var log = new TestLog();
+        var importPath = importDir;
+        var addedTestGraph = "test-graph2";
+
+        // export an additional graph
+        var graphStore = TestSupport.graphStoreFromGDL("(), ()-[:TYPE]->()");
+        var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
+
+        var exportConfig = ImmutableGraphStoreToFileExporterConfig.builder()
+            .autoload(true)
+            .includeMetaData(true)
+            .exportName(addedTestGraph)
+            .username("UserA")
+            .build();
+        GraphStoreExporterUtil.runGraphStoreExportToCsv(
+            graphStore,
+            neo4jConfig,
+            exportConfig,
+            log,
+            AllocationTracker.empty()
+        );
+
+        // do an aura-like restore operation
+        AuraGraphRestorer.restore(importPath, log);
+
+        // the graphs should have been loaded
+        assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(2);
+
+        // and the files should have been removed
+        assertThat(importPath.resolve(addedTestGraph)).doesNotExist();
+    }
+
+    private void prepareImportDir() {
         try {
             var uri = Objects
                 .requireNonNull(getClass().getClassLoader().getResource("AuraMaintenanceExtensionTest"))
                 .toURI();
-            return Paths.get(uri);
-        } catch (URISyntaxException e) {
+            var resourceDirectory = Paths.get(uri);
+            PathUtils.copyDirectory(resourceDirectory, importDir);
+        } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
     }
+
 }
