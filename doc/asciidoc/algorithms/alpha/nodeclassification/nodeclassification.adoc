@@ -109,6 +109,7 @@ include::specific-train-configuration.adoc[]
 The `modelInfo` can also be retrieved at a later time by using the <<catalog-model-list, Model List Procedure>>.
 The `modelInfo` return field has the following algorithm-specific subfields:
 
+.Model info fields
 [opts="header",cols="1,1,6"]
 |===
 | Name           | Type          | Description
@@ -117,56 +118,59 @@ The `modelInfo` return field has the following algorithm-specific subfields:
 | metrics        | Map           | Map from metric description to evaluated metrics for various models and subsets of the data, see below.
 |===
 
-The `metrics` map contains for each metric description (such as `F1_MACRO` or `RECALL(class=4)`), the corresponding results for that metric.
-Each such result map contains the keys `train`, `validation`, `outerTrain` and `test`.
-The latter two correspond to numeric values for the evaluation of the best model on the test set and its complement -- the outer train set.
-The `train` and `validation` results contain lists of results for all candidate models (i.e. `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
-These correspond to the hyper-parameters of the model candidate, and statistics for the result of that model over cross-validation folds.
+
 The structure of `modelInfo` is:
 
-[source]
+[listing]
 ----
 {
-    bestParameters: Map,     // one of the maps specified in `params`
-    classes: List of Integer,
-    metrics: {
-        String: {            // a metric description
-            "test": Float,
-            "outerTrain": Float,
-            "train": [{
-                "avg": Float,
-                "max": Float,
-                "min": Float,
-                "params": Map
+    bestParameters: Map,        // <1>
+    classes: List of Integer,   // <2>
+    metrics: {                  // <3>
+        <METRIC_NAME>: {        // <4>
+            test: Float,        // <5>
+            outerTrain: Float,  // <6>
+            train: [{           // <7>
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
             },
             {
-                "avg": Float,
-                "max": Float,
-                "min": Float,
-                "params": Map
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
             },
-            ...              // more results per model candidate
+            ...
             ],
-            "validation": [{
-                "avg": Float,
-                "max": Float,
-                "min": Float,
-                "params": Map
+            validation: [{      // <8>
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
             },
             {
-                "avg": Float,
-                "max": Float,
-                "min": Float,
-                "params": Map
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
             },
-            ...              // more results per model candidate
-            ],
-        },
-        String: Map,         // another metric
-        ...                  // remaining metrics
+            ...
+            ]
+        }
     }
 }
 ----
+<1> The best scoring model candidate configuration.
+<2> Sorted list of class ids which are the distinct values of `targetProperty` over the entire graph.
+<3> The `metrics` map contains an entry for each metric description, and the corresponding results for that metric.
+<4> A metric name specified in the configuration of the procedure, e.g., `F1_MACRO` or `RECALL(class=4)`.
+<5> Numeric value for the evaluation of the best model on the test set.
+<6> Numeric value for the evaluation of the best model on the outer train set.
+<7> The `train` entry lists the scores over the `train` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
+<8> The `validation` entry lists the scores over the `validation` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
+
 ======
 
 [.include-with-stream]
@@ -246,7 +250,6 @@ CALL gds.alpha.ml.nodeClassification.predict.write(
 ) YIELD
   createMillis: Integer,
   computeMillis: Integer,
-  postProcessingMillis: Integer,
   writeMillis: Integer,
   nodePropertiesWritten: Integer,
   configuration: Map
@@ -264,7 +267,6 @@ include::specific-write-mutate-configuration.adoc[]
 | Name                  | Type    | Description
 | createMillis          | Integer | Milliseconds for creating the graph.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
-| postProcessingMillis  | Integer | Milliseconds for computing the global metrics.
 | writeMillis           | Integer | Milliseconds for writing result back to Neo4j.
 | nodePropertiesWritten | Integer | Number of relationships created.
 | configuration         | Map     | Configuration used for running the algorithm.
