@@ -19,19 +19,11 @@
  */
 package org.neo4j.gds.ml.core.optimizer;
 
-import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
+@FunctionalInterface
 public interface Updater {
     void update(List<? extends Tensor<?>> ctx);
-
-    static long sizeInBytesOfDefaultUpdater(int rows, int cols, int numberOfWeights) {
-        return AdamOptimizer.sizeInBytes(rows, cols, numberOfWeights);
-    }
-
-    static Updater defaultUpdater(List<Weights<? extends Tensor<?>>> weights) {
-        return new AdamOptimizer(weights);
-    }
 }

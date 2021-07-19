@@ -23,14 +23,17 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.functions.ConstantScale;
+import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.MatrixSum;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.helper.L2Norm;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 class AdamOptimizerTest {
 
@@ -46,7 +49,7 @@ class AdamOptimizerTest {
             3
         ));
 
-        Variable<Matrix> expectedOptimum = new Weights<>(new Matrix(
+        Variable<Matrix> optimum = new Weights<>(new Matrix(
             new double[]{
                 0.11, 0.13, 0.231,
                 0.4, 0.3, 0.9,
@@ -56,28 +59,74 @@ class AdamOptimizerTest {
             3
         ));
 
-        ComputationContext ctx = new ComputationContext();
-        // need to populate context with data from weights
-        ctx.forward(weights);
         AdamOptimizer adam = new AdamOptimizer(List.of(weights));
+        Variable<Matrix> difference = new MatrixSum(List.of(
+            weights, new ConstantScale<>(optimum, -1)
+        ));
+        var lossFunction = new L2Norm(difference);
 
         double oldLoss = Double.MAX_VALUE;
         while(true) {
-            Variable<Matrix> difference = new MatrixSum(List.of(
-                weights, new ConstantScale<>(expectedOptimum, -1)
-            ));
-            var lossFunction = new L2Norm(difference);
-
-            double newLoss = ctx.forward(lossFunction).value();
+            var localCtx = new ComputationContext();
+            double newLoss = localCtx.forward(lossFunction).value();
             double d = oldLoss - newLoss;
             if (Math.abs(d) < 1e-8) break;
 
             oldLoss = newLoss;
-            ctx.backward(lossFunction);
+            localCtx.backward(lossFunction);
 
-            adam.update(ctx);
+            adam.update(List.of(localCtx.gradient(weights)));
         }
 
+        var expectedWeights = new Matrix(
+            new double[]{0.10999999994868388, 0.13000000005146692, 0.23099999992211442, 0.4, 0.3, 0.9, 0.01, 0.6, 0.1500882018843512},
+            3,
+            3
+        );
+
         assertThat(oldLoss).isLessThan(1e-4);
+        assertThat(weights.data()).isEqualTo(expectedWeights);
+    }
+
+    @Test
+    void runDeterministic() {
+        var weights = new Weights<>(new Vector(0.1, 0.1, 0.1));
+        var expectedOptimum = new Weights<>(new Vector(5.1, 6.1, 7.1));
+        var difference = new ElementSum(List.of(weights, new ConstantScale<>(expectedOptimum, -1)));
+        var lossFunction = new L2Norm(difference);
+
+        AdamOptimizer adam = new AdamOptimizer(List.of(weights), 0.1);
+
+        double oldLoss = Double.MAX_VALUE;
+        for (int i = 0; i < 10; i++) {
+            var localCtx = new ComputationContext();
+            double newLoss = localCtx.forward(lossFunction).value();
+            if (Math.abs(oldLoss - newLoss) < 1e-8) break;
+
+            oldLoss = newLoss;
+            localCtx.backward(lossFunction);
+
+            adam.update(List.of(localCtx.gradient(weights)));
+        }
+
+        assertThat(adam.momentumTerms.get(0)).isEqualTo(new Vector(-0.6513215598999998, -0.6513215598999998, -0.6513215598999998));
+        assertThat(adam.velocityTerms.get(0)).isEqualTo(new Vector(0.009955119790251798, 0.009955119790251798, 0.009955119790251798));
+        assertThat(weights.data()).isEqualTo(new Vector(1.0999999899999986, 1.0999999899999986, 1.0999999899999986));
+    }
+
+    @Test
+    void initializedCorrectly() {
+        Weights<Matrix> weights = new Weights<>(new Matrix(
+            new double[]{
+                0.1, 0.1, 0.1,
+                0.4, 0.3, 0.9,
+                0.01, 0.6, 0.5
+            },
+            3,
+            3
+        ));
+        var optimizer = new AdamOptimizer(List.of(weights));
+
+        assertThat(optimizer.momentumTerms.get(0)).isNotSameAs(optimizer.velocityTerms.get(0));
     }
 }

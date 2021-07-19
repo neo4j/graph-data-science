@@ -118,6 +118,14 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
         return result;
     }
 
+    public Tensor<SELF> elementwiseProductMutate(Tensor<?> other) {
+        for (int i = 0; i < data.length; i++) {
+            this.data[i] = data[i] * other.data[i];
+        }
+
+        return this;
+    }
+
     public double aggregateSum() {
         double sum = 0;
         for (double datum : data) {
