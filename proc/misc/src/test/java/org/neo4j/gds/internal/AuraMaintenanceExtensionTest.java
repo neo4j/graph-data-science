@@ -24,7 +24,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.AuraGraphRestorer;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestSupport;
@@ -117,7 +116,7 @@ class AuraMaintenanceExtensionTest extends BaseTest {
         );
 
         // do an aura-like restore operation
-        AuraGraphRestorer.restore(importPath, log);
+        BackupAndRestore.restore(importPath, log);
 
         // the graphs should have been loaded
         assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(2);

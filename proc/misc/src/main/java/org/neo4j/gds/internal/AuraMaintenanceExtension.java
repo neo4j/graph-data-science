@@ -21,7 +21,6 @@ package org.neo4j.gds.internal;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.AuraGraphRestorer;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -84,7 +83,7 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
         var userLog = logService.getUserLog(AuraMaintenanceExtension.class);
         var importDir = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
         try {
-            AuraGraphRestorer.restore(importDir, userLog);
+            BackupAndRestore.restore(importDir, userLog);
         } catch (Exception e) {
             userLog.warn("Graph store loading failed", e);
         }

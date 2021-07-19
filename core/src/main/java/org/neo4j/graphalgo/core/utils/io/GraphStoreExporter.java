@@ -68,6 +68,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
     public static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
         try {
+            // TODO: A validator should only validate, not create the directory as well
             Files.createDirectories(value);
             if (!Files.isDirectory(value)) {
                 throw new IllegalArgumentException("'" + value + "' is not a directory");
