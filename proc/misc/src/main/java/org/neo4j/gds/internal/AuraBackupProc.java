@@ -167,7 +167,7 @@ public class AuraBackupProc implements CallableProcedure {
             );
         } else {
             log.info(
-                "Backup happened within the given timeout, it took %d seconds and the provided timeout was %d seconds.",
+                "Backup finished within the given timeout, it took %d seconds and the provided timeout was %d seconds.",
                 elapsedTimeInSeconds,
                 timeoutInSeconds
             );
@@ -210,7 +210,7 @@ public class AuraBackupProc implements CallableProcedure {
                 } catch (Exception e) {
                     log.warn(
                         formatWithLocale(
-                            "GraphStore persistence failed on graph %s for user %s",
+                            "Graph backup failed for graph '%s' for user '%s'",
                             createConfig.graphName(),
                             store.userName()
                         ),
@@ -236,7 +236,7 @@ public class AuraBackupProc implements CallableProcedure {
             } catch (Exception e) {
                 log.warn(
                     formatWithLocale(
-                        "Model persistence failed on model %s for user %s",
+                        "Model backup failed on model '%s' for user '%s'",
                         model.name(),
                         model.creator()
                     ),

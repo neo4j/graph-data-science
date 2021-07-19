@@ -19,17 +19,13 @@
  */
 package org.neo4j.gds.internal;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;
@@ -53,9 +49,7 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.nio.file.Path;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class AuraBackupProcTest extends BaseProcTest {
+public abstract class AuraBackupBaseProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER = "CREATE" +
                                             "  (a:Label1 {prop1: 42})" +
@@ -65,9 +59,6 @@ public class AuraBackupProcTest extends BaseProcTest {
                                             ", (e:Label2)" +
                                             ", (a)-[:REL1]->(b)" +
                                             ", (c)-[:REL2]->(d)";
-
-    @TempDir
-    Path tempDir;
 
     TestLog testLog;
 
@@ -144,99 +135,8 @@ public class AuraBackupProcTest extends BaseProcTest {
                 return testLog;
             }
         });
-        builder.setConfig(GraphStoreExportSettings.backup_location_setting, tempDir);
+        builder.setConfig(GraphStoreExportSettings.backup_location_setting, getBackupLocation());
     }
 
-    void assertGraph(Path path) {
-        assertThat(path)
-            .isDirectoryContaining("glob:**/.userinfo")
-            .isDirectoryContaining("glob:**/graph_info.csv")
-            .isDirectoryContaining("glob:**/node-schema.csv")
-            .isDirectoryContaining("glob:**/relationship-schema.csv")
-            .isDirectoryContaining("regex:.+/nodes_Label[12]_header\\.csv")
-            .isDirectoryContaining("regex:.+/nodes_Label[12]_\\d+\\.csv")
-            .isDirectoryContaining("regex:.+/relationships_REL[12]_header\\.csv")
-            .isDirectoryContaining("regex:.+/relationships_REL[12]_\\d+\\.csv");
-    }
-
-    void assertModel(Path path) {
-        assertThat(path)
-            .isDirectoryContaining("glob:**/" + ModelToFileExporter.META_DATA_FILE)
-            .isDirectoryContaining("glob:**/" + ModelToFileExporter.MODEL_DATA_FILE);
-    }
-
-    @Test
-    void shouldPersistGraphStoresAndModels() {
-        var shutdownQuery = "CALL gds.internal.backup()";
-
-        var graphCount = new MutableInt(0);
-        var modelCount = new MutableInt(0);
-
-        runQueryWithRowConsumer(shutdownQuery, row -> {
-            assertThat(row.getBoolean("done")).isTrue();
-            assertThat(row.getString("backupName")).isNotEmpty();
-            assertThat(row.getNumber("backupMillis").longValue()).isGreaterThanOrEqualTo(0L);
-
-            var path = Path.of(row.getString("path"));
-
-            if (row.getString("type").equals("graph")) {
-                graphCount.increment();
-                assertGraph(path);
-            } else {
-                modelCount.increment();
-                assertModel(path);
-            }
-        });
-
-        assertThat(testLog.getMessages(TestLog.INFO))
-            .anySatisfy(msg -> assertThat(msg)
-                .matches(
-                    "Backup happened within the given timeout, it took \\d+ seconds and the provided timeout was 42 seconds."
-                ));
-    }
-
-//    @Test
-//    void shouldCollectErrorsWhenPersistingGraphStores() throws IOException {
-//        var shutdownQuery = "CALL gds.internal.backup()";
-//
-//        var first = tempDir.resolve("first");
-//        Files.createDirectories(first);
-//
-//        assertCypherResult(shutdownQuery, List.of(Map.of("done", false)));
-//
-//        assertThat(testLog.getMessages(TestLog.WARN))
-//            .contains(
-//                "GraphStore persistence failed on graph first for user userA - The specified export directory already exists.");
-//
-//        assertThat(first).isEmptyDirectory();
-//
-//        assertThat(tempDir.resolve("second"))
-//            .isDirectoryContaining("glob:**/graph_info.csv")
-//            .isDirectoryContaining("glob:**/node-schema.csv")
-//            .isDirectoryContaining("glob:**/relationship-schema.csv")
-//            .isDirectoryContaining("glob:**/nodes_Label2_header.csv")
-//            .isDirectoryContaining("regex:.+/nodes_Label2_\\d+.csv")
-//            .isDirectoryContaining("glob:**/relationships_REL2_header.csv")
-//            .isDirectoryContaining("regex:.+/relationships_REL2_\\d+.csv");
-//    }
-//
-//    @Test
-//    void shouldLogAtStartAndForEachExportedGraph() {
-//        var numberOfGraphs = GraphStoreCatalog.graphStoresCount();
-//        assertThat(numberOfGraphs).isGreaterThan(0);
-//
-//        var shutdownQuery = "CALL gds.internal.backup()";
-//
-//        runQuery(shutdownQuery);
-//
-//        var messages = testLog.getMessages(TestLog.INFO);
-//
-//        assertThat(messages).contains("Preparing for backup");
-//
-//        var exportCompletedMessages = messages.stream()
-//            .filter(it -> it.startsWith("Backup completed"))
-//            .collect(toList());
-//
-//        assertThat(exportCompletedMessages.size()).isEqualTo(numberOfGraphs);
-//    }
+    abstract Path getBackupLocation();
 }
