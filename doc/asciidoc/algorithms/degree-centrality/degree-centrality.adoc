@@ -45,7 +45,7 @@ Read more in https://link.springer.com/chapter/10.1007/978-3-319-23461-8_11[Two 
 include::../shared/syntax-intro-named-graph.adoc[]
 
 .Degree Centrality syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

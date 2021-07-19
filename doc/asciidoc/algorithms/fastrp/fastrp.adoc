@@ -116,7 +116,7 @@ If you expect only outgoing or incoming relationships to be informative for a pr
 include::../shared/syntax-intro-named-graph.adoc[]
 
 .FastRP syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]
@@ -565,7 +565,7 @@ We suggest keeping the previously selected value for `embeddingDimension` and se
 Other factors that may influence the choice of `propertyDimension` are vaguely the amount of valuable information contained in the node properties, i.e. number of properties and how independent they are, as well as how relevant the properties are to the problem at hand.
 
 .FastRPExtended syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

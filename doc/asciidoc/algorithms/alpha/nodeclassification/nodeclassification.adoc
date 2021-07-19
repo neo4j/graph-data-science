@@ -74,7 +74,7 @@ The primary metric may not be a `*` expansion due to the ambiguity of which of t
 include::../../shared/syntax-intro-named-graph.adoc[]
 
 .Node Classification syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-train]

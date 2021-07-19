@@ -89,7 +89,7 @@ See the <<algorithms-similarity-cosine-context, Cosine Similarity>> algorithm fo
 include::../shared/syntax-intro-named-graph.adoc[]
 
 .K-Nearest Neighbors syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

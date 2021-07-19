@@ -40,7 +40,7 @@ There are some things to be aware of when using the Eigenvector centrality algor
 include::../shared/syntax-intro-named-graph.adoc[]
 
 .Eigenvector Centrality syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

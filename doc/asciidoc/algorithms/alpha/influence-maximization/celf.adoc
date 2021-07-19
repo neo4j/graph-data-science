@@ -35,7 +35,7 @@ The CELF algorithm is based on a "lazy-forward" optimization.
 include::../alpha-note.adoc[]
 
 .CELF syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

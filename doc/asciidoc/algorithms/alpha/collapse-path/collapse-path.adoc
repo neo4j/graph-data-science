@@ -25,7 +25,7 @@ Exactly one relationship is created for every pair of nodes for which at least o
 == Syntax
 
 .Collapse Path syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-mutate]

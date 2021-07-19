@@ -45,7 +45,7 @@ The number of random walks per node can be influenced by the `walkPerNode` confi
 == Syntax
 
 .Node2Vec syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

@@ -34,7 +34,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 == Syntax
 
 .Modularity Optimization syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

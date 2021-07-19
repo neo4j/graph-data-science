@@ -27,7 +27,7 @@ Both, the holdout and the remaining relationships are added to the in-memory gra
 include::../../shared/syntax-intro-named-graph.adoc[]
 
 .Split Relationships syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-mutate]

@@ -93,7 +93,7 @@ image::equations/scale-properties/l2norm.svg[scaled p equals p divided by l2 nor
 include::../../shared/syntax-intro-named-graph.adoc[]
 
 .Scale Properties syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

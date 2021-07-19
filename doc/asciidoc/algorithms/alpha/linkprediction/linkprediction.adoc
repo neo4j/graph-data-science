@@ -156,7 +156,7 @@ include::../../shared/syntax-intro-named-graph.adoc[]
 WARNING: The named graphs must be projected in the `UNDIRECTED` orientation for the Link Prediction model.
 
 .Link Prediction syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-train]

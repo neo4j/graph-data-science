@@ -37,7 +37,7 @@ include::../shared/syntax-intro-named-graph.adoc[]
 
 
 .WCC syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

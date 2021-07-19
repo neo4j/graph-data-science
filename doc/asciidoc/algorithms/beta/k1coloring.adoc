@@ -40,7 +40,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 
 
 .K-1 Coloring syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

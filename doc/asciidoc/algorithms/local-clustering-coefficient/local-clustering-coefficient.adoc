@@ -36,7 +36,7 @@ include::../shared/syntax-intro-named-graph.adoc[]
 
 
 .Local Clustering Coefficient syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

@@ -35,7 +35,7 @@ For large networks <<algorithms-celf, CELF>> algorithm should be used.
 include::../alpha-note.adoc[]
 
 .Greedy syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

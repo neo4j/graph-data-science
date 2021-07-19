@@ -26,7 +26,7 @@ The GDS implementation is based on the http://www.cs.cornell.edu/home/kleinber/a
 include::../../shared/syntax-intro-named-graph.adoc[]
 
 .HITS syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

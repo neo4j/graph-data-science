@@ -59,7 +59,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 include::../shared/syntax-intro-named-graph.adoc[]
 
 .Label Propagation syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

@@ -27,7 +27,7 @@ To accommodate this, we recommend using a higher number of iterations.
 include::../../shared/syntax-intro-named-graph.adoc[]
 
 .SLLPA syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

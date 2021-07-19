@@ -69,7 +69,7 @@ The idea behind this strategy is that such nodes are likely to lie on many short
 include::../shared/syntax-intro-named-graph.adoc[]
 
 .Betweenness Centrality syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

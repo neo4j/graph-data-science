@@ -50,7 +50,7 @@ It can be interpreted as a probability of a web surfer to sometimes jump to a ra
 include::../shared/syntax-intro-named-graph.adoc[]
 
 .Article Rank syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

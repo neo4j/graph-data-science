@@ -37,7 +37,7 @@ WARNING: The named graphs must be projected in the `UNDIRECTED` orientation for 
 
 
 .Triangle Count syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]

@@ -1,7 +1,7 @@
 include::../shared/syntax-intro-named-graph.adoc[]
 
 .{algorithm} syntax per mode
-[.tabbed-example]
+[.tabbed-example, caption = ]
 ====
 
 [.include-with-stream]
