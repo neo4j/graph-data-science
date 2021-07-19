@@ -34,6 +34,12 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NotDirectoryException;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+
 @ServiceProvider
 public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMaintenanceExtension.Dependencies> {
 
@@ -61,7 +67,7 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
                     var jobScheduler = dependencies.jobScheduler();
                     var jobHandle = jobScheduler.schedule(
                         Group.FILE_IO_HELPER,
-                        () -> restorePersistedGraphs(
+                        () -> restorePersistedData(
                             dependencies.config(),
                             dependencies.logService()
                         )
@@ -79,13 +85,32 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
         return new LifecycleAdapter();
     }
 
-    private static void restorePersistedGraphs(Configuration neo4jConfig, LogService logService) {
+    private static void restorePersistedData(Configuration neo4jConfig, LogService logService) {
         var userLog = logService.getUserLog(AuraMaintenanceExtension.class);
         var importDir = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
         try {
             BackupAndRestore.restore(importDir, userLog);
         } catch (Exception e) {
             userLog.warn("Graph store loading failed", e);
+        }
+
+        try {
+            var backupPath = neo4jConfig.get(GraphStoreExportSettings.backup_location_setting);
+            if (backupPath != null) {
+                Files.list(backupPath).reduce((dir1, dir2) -> {
+                    throw new IllegalStateException(formatWithLocale(
+                        "Found multiple backups (at least '%s' and '%s'). Restore process won't continue, only a single backup is supported.",
+                        dir1,
+                        dir2
+                    ));
+                }).ifPresent(path -> BackupAndRestore.restore(path, userLog));
+            }
+        } catch (NotDirectoryException ignore) {
+            // no backups available, no restore required
+        } catch (IOException e) {
+            userLog.error("Restore failed, could not open the restore directory.", e);
+        } catch (IllegalStateException e) {
+            userLog.error(e.getMessage());
         }
     }
 

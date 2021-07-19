@@ -33,6 +33,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.io.file.GraphStoreExporterUtil;
 import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.logging.log4j.Log4jLogProvider;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -62,7 +63,9 @@ class AuraMaintenanceExtensionTest extends BaseTest {
         super.configuration(builder);
         builder
             .setConfig(GraphStoreExportSettings.export_location_setting, importDir)
+            .setConfig(GraphStoreExportSettings.backup_location_setting, restorePath())
             .setConfig(AuraMaintenanceSettings.maintenance_function_enabled, true)
+            .setUserLogProvider(new Log4jLogProvider(System.out))
             .removeExtensions(ext -> ext instanceof AuraMaintenanceExtension)
             .addExtension(new AuraMaintenanceExtension(true));
     }
@@ -137,4 +140,14 @@ class AuraMaintenanceExtensionTest extends BaseTest {
         }
     }
 
+    private Path restorePath() {
+        try {
+            var uri = Objects
+                .requireNonNull(getClass().getClassLoader().getResource("BackupAndRestoreTest"))
+                .toURI();
+            return Paths.get(uri);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
