@@ -23,6 +23,7 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
 import org.neo4j.gds.ml.nodemodels.metrics.MetricSpecification;
 import org.neo4j.graphalgo.TestLog;
@@ -39,6 +40,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -247,6 +249,36 @@ class NodeClassificationTrainTest {
             .extracting(removingThreadId())
             .as("All messages should start with the correct task name")
             .allMatch(s -> s.startsWith(factory.taskName()));
+    }
+    
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void seededNodeClassification(int concurrency) {
+        var config = ImmutableNodeClassificationTrainConfig.builder()
+            .modelName("model")
+            .featureProperties(List.of("bananas"))
+            .holdoutFraction(0.33)
+            .validationFolds(2)
+            .randomSeed(42L)
+            .targetProperty("t")
+            .metrics(List.of(MetricSpecification.parse("Accuracy")))
+            .params(List.of(Map.of("penalty", 0.0625, "maxEpochs", 100, "batchSize", 1)))
+            .concurrency(concurrency)
+            .build();
+
+        Supplier<NodeClassificationTrain> algoSupplier = () -> new NodeClassificationTrainAlgorithmFactory().build(
+            graph,
+            config,
+            AllocationTracker.empty(),
+            NULL_LOGGER.getLog(),
+            EmptyProgressEventTracker.INSTANCE
+        );
+
+        var firstResult = algoSupplier.get().compute();
+        var secondResult = algoSupplier.get().compute();
+
+        assertThat(firstResult.data().weights().data())
+            .matches(matrix -> matrix.equals(secondResult.data().weights().data(), 1e-10));
     }
 
     private NodeClassificationTrainConfig createConfig(

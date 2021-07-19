@@ -58,18 +58,19 @@ class NodeClassificationTrainAlgorithmFactoryTest {
         var estimateOnSmallishGraph = new NodeClassificationTrainAlgorithmFactory()
             .memoryEstimation(config)
             .estimate(GraphDimensions.of(10_000_000L, 100_000_000L), 4);
-        assertThat(estimateOnSmallishGraph.memoryUsage().max).isCloseTo(2100L*1024*1024, Percentage.withPercentage(5));
+        assertThat(estimateOnSmallishGraph.memoryUsage().max).isCloseTo(2100L * 1024 * 1024, Percentage.withPercentage(8));
 
         // as we up concurrency at this scale, the actual training dominates
         var estimateOnSmallishGraphWithHighConcurrency = new NodeClassificationTrainAlgorithmFactory()
             .memoryEstimation(config)
             .estimate(GraphDimensions.of(10_000_000L, 100_000_000L), 64);
-        assertThat(estimateOnSmallishGraphWithHighConcurrency.memoryUsage().max).isCloseTo(24L*1024*1024*1024, Percentage.withPercentage(5));
+
+        assertThat(estimateOnSmallishGraphWithHighConcurrency.memoryUsage().max).isCloseTo(24L * 1024 * 1024 * 1024, Percentage.withPercentage(8));
 
         // as number of nodes grows, they start to dominate
         var estimateOnLargeGraph = new NodeClassificationTrainAlgorithmFactory()
             .memoryEstimation(config)
             .estimate(GraphDimensions.of(10_000_000_000L, 100_000_000_000L), 64);
-        assertThat(estimateOnLargeGraph.memoryUsage().max).isCloseTo(550L*1024*1024*1024, Percentage.withPercentage(5));
+        assertThat(estimateOnLargeGraph.memoryUsage().max).isCloseTo(550L * 1024 * 1024 * 1024, Percentage.withPercentage(8));
     }
 }

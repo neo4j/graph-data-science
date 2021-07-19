@@ -301,8 +301,7 @@ class NodeClassificationTrainProcTest extends BaseProcTest {
             .hasMessageContaining("miniepochs (Did you mean one of [minEpochs, maxEpochs]?)")
             .hasMessageContaining("maxxepochs (Did you mean one of [maxEpochs, minEpochs]?)")
             .hasMessageContaining("patiences (Did you mean [patience]?)")
-            .hasMessageContaining("tollerance (Did you mean [tolerance]?)")
-            .hasMessageContaining("shareUpdaters (Did you mean [sharedUpdater]?)");
+            .hasMessageContaining("tollerance (Did you mean [tolerance]?)");
     }
 
     @Test

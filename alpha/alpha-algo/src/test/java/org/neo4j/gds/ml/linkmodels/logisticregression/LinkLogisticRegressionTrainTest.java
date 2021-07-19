@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
@@ -94,8 +94,7 @@ class LinkLogisticRegressionTrainTest {
                 "penalty", 1.0,
                 "maxEpochs", 1000000,
                 "tolerance", 1e-10,
-                "concurrency", 4,
-                "sharedUpdater", false
+                "concurrency", 4
             ))
         );
 

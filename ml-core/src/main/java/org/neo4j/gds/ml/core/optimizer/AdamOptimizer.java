@@ -46,7 +46,7 @@ public class AdamOptimizer implements Updater {
     private final double beta_2 = 0.999;
     private final double epsilon = 1e-8;
 
-    private final List<Weights<? extends Tensor<?>>> variables;
+    private final List<Weights<? extends Tensor<?>>> weights;
 
     private final List<Tensor<?>> momentumTerms;
     private final List<Tensor<?>> velocityTerms;
@@ -60,29 +60,34 @@ public class AdamOptimizer implements Updater {
                 4 * termSize; // working memory
     }
 
-    public AdamOptimizer(List<Weights<? extends Tensor<?>>> variables) {
-        this(variables, DEFAULT_ALPHA);
+    public AdamOptimizer(List<Weights<? extends Tensor<?>>> weights) {
+        this(weights, DEFAULT_ALPHA);
     }
 
     public AdamOptimizer(
-        List<Weights<? extends Tensor<?>>> variables,
+        List<Weights<? extends Tensor<?>>> weights,
         double learningRate
     ) {
         alpha = learningRate;
-        this.variables = variables;
+        this.weights = weights;
 
-        momentumTerms = variables.stream().map(v -> v.data().zeros()).collect(Collectors.toList());
+        momentumTerms = weights.stream().map(v -> v.data().zeros()).collect(Collectors.toList());
         velocityTerms = new ArrayList<>(momentumTerms);
     }
 
-    // TODO: probably doesnt have to be synchronized
-    public synchronized void update(ComputationContext otherCtx) {
-        iteration += 1;
-        variables.forEach(variable -> otherCtx.gradient(variable).mapInPlace(this::clip));
+    public void update(ComputationContext otherCtx) {
+        var localWeightGradients = weights.stream().map(otherCtx::gradient).collect(Collectors.toList());
+        update(localWeightGradients);
 
-        for (int i = 0; i < variables.size(); i++) {
-            var variable = variables.get(i);
-            var gradient = otherCtx.gradient(variable);
+    }
+
+    public void update(List<? extends Tensor<?>> contextLocalWeightGradients) {
+        iteration += 1;
+
+        for (int i = 0; i < weights.size(); i++) {
+            var weight = this.weights.get(i);
+            var gradient = contextLocalWeightGradients.get(i);
+            gradient.mapInPlace(this::clip);
 
             // m_t = beta_1 * m_t + (1 - beta_1) * g_t
             var momentumTerm = momentumTerms.get(i);
@@ -106,7 +111,7 @@ public class AdamOptimizer implements Updater {
             var vCap = updatedVelocityTerm.scalarMultiply(1d / (1 - Math.pow(beta_2, iteration)));
 
             // theta_0 = theta_0 - (alpha * m_cap) / (math.sqrt(v_cap) + epsilon)	#updates the parameters
-            var theta_0 = variable.data();
+            var theta_0 = weight.data();
             theta_0.addInPlace(mCap
                 .scalarMultiply(-alpha)
                 .elementwiseProduct(vCap.map(v -> 1 / (Math.sqrt(v) + epsilon)))

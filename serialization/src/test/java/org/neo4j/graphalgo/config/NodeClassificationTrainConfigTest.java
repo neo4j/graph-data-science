@@ -84,7 +84,6 @@ class NodeClassificationTrainConfigTest {
             "minEpochs", 1,
             "patience", 1,
             "penalty", 1.0,
-            "sharedUpdater", false,
             "tolerance", 0.001
         );
         var expectedModel2 = Map.<String, Object>of(
@@ -94,7 +93,6 @@ class NodeClassificationTrainConfigTest {
             "minEpochs", 1,
             "patience", 1,
             "penalty", 1.0,
-            "sharedUpdater", false,
             "tolerance", 1.0E-5
         );
         assertThat(collect).containsExactly(expectedModel1, expectedModel2);
@@ -163,7 +161,6 @@ class NodeClassificationTrainConfigTest {
             "minEpochs", 1,
             "patience", 1,
             "penalty", 1.0,
-            "sharedUpdater", false,
             "tolerance", 0.001
         );
         var expectedModel2 = Map.<String, Object>of(
@@ -173,7 +170,6 @@ class NodeClassificationTrainConfigTest {
             "minEpochs", 1,
             "patience", 1,
             "penalty", 1.0,
-            "sharedUpdater", false,
             "tolerance", 1.0E-5
         );
         assertThat(deserializedConfig.params()).containsExactly(expectedModel1, expectedModel2);

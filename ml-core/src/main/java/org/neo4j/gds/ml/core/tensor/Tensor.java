@@ -85,11 +85,13 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
         }
     }
 
-    public void scalarMultiplyMutate(double scalar) {
+    public Tensor<SELF> scalarMultiplyMutate(double scalar) {
         int totalSize = totalSize();
         for (int pos = 0; pos < totalSize; pos++) {
             data[pos] *= scalar;
         }
+
+        return this;
     }
 
     public SELF scalarMultiply(double scalar) {
