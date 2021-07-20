@@ -225,12 +225,6 @@ public final class BackupAndRestore {
             graphName
         );
         GraphStoreCatalog.set(createConfig, graphStore.graphStore());
-        try {
-            PathUtils.deleteDirectory(path);
-        } catch (IOException e) {
-            log.warn("Failed to remove imported graph '%s'", graphName);
-            throw new UncheckedIOException(e);
-        }
     }
 
     private static void restoreModels(Path storePath, Log log) {
