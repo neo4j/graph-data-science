@@ -10,9 +10,15 @@ dependencies {
     annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 
     compileOnly project(':proc-common')
+    implementation project(':proc-centrality')
+    implementation project(':proc-community')
+    implementation project(':proc-embeddings')
+    implementation project(':proc-path-finding')
+    implementation project(':proc-similarity')
 
     api(project(':alpha-algo'))
 
+    implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     neodeps.each {
