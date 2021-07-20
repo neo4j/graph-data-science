@@ -37,6 +37,8 @@ The manual covers the following areas:
 * <<appendix-a>> -- Reference of all procedures contained in the Neo4j Graph Data Science library.
 * <<appendix-b>> -- Additional resources - migration guide, books, etc - to help using the Neo4j Graph Data Science library.
 
+The source code of the library is available at https://github.com/neo4j/graph-data-science[GitHub].
+If you have a suggestion on how we can improve the library or want to report a problem, you can create a https://github.com/neo4j/graph-data-science/issues/new[new issue].
 
 For further reading resources, we recommend studying the free Graph Algorithms book.
 
