@@ -118,7 +118,7 @@ public final class ProcedureReflection {
         return proc;
     }
 
-    public void invokeProc(BaseProc caller, String procName, String graphName, Map<String, Object> config) {
+    public void invokeProc(BaseProc caller, String graphName, String procName, Map<String, Object> config) {
         var method = findProcedureMethod(procName);
         AlgoBaseProc<?, ?, ?> procedure = createProcedure(caller, method);
         try {
