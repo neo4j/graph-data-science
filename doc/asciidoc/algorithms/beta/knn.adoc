@@ -81,6 +81,7 @@ List of floating-point numbers::
 
 When the property is a list of floating-point numbers, the similarity is computed using the cosine similarity metric.
 See the <<algorithms-similarity-cosine-context, Cosine Similarity>> algorithm for more details.
+If the cosine similarity is negative, we clip the value to `0`, i.e., `max(cosine(a, b), 0))`.
 
 
 [[algorithms-knn-syntax]]
