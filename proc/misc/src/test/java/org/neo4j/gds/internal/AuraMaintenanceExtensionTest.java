@@ -63,7 +63,6 @@ class AuraMaintenanceExtensionTest extends BaseTest {
         super.configuration(builder);
         builder
             .setConfig(GraphStoreExportSettings.export_location_setting, importDir)
-            .setConfig(GraphStoreExportSettings.backup_location_setting, restorePath())
             .setConfig(AuraMaintenanceSettings.maintenance_function_enabled, true)
             .setUserLogProvider(new Log4jLogProvider(System.out))
             .removeExtensions(ext -> ext instanceof AuraMaintenanceExtension)
@@ -136,17 +135,6 @@ class AuraMaintenanceExtensionTest extends BaseTest {
             var resourceDirectory = Paths.get(uri);
             PathUtils.copyDirectory(resourceDirectory, importDir);
         } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Path restorePath() {
-        try {
-            var uri = Objects
-                .requireNonNull(getClass().getClassLoader().getResource("BackupAndRestoreTest"))
-                .toURI();
-            return Paths.get(uri);
-        } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
