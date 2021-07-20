@@ -23,6 +23,7 @@ import org.assertj.core.api.Condition;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
@@ -32,12 +33,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
+
+    private static Stream<Arguments> negativeGraphs() {
+        return Stream.of(
+            Arguments.of("CREATE ({weight: [1.0, 2.0]}), ({weight: [3.0, -10.0]})", "negative float arrays"),
+            Arguments.of("CREATE ({weight: [1.0D, 2.0D]}), ({weight: [3.0D, -10.0D]})", "negative double arrays"),
+            Arguments.of("CREATE ({weight: -99}), ({weight: -10})", "negative long values")
+        );
+    }
 
     @Test
     void testStatsYields() {
@@ -129,6 +139,26 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
                 .collect(Collectors.toList());
             assertEquals(List.of(), badConfigKeys);
         });
+    }
+
+    @ParameterizedTest
+    @MethodSource("negativeGraphs")
+    void supportNegativeArrays(String graphCreateQuery) {
+        clearDb();
+
+        runQuery(graphCreateQuery);
+        runQuery("CALL gds.graph.create('graph', '*', '*', {nodeProperties: 'weight'})");
+
+        String algoQuery = GdsCypher
+            .call()
+            .explicitCreation("graph")
+            .algo("gds.beta.knn")
+            .statsMode()
+            .addParameter("nodeWeightProperty", "weight")
+            .addParameter("randomSeed", 42)
+            .yields("similarityPairs");
+
+        assertCypherResult(algoQuery, List.of(Map.of("similarityPairs", 2L)));
     }
 
     @Override

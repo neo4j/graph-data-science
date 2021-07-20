@@ -36,6 +36,7 @@ import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.nodeproperties.DoubleArrayTestProperties;
 import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
 import org.neo4j.graphalgo.nodeproperties.FloatArrayTestProperties;
@@ -248,6 +249,24 @@ class KnnTest {
         for (int i = 1; i < nodeCount; i++) {
             assertThat(reverseNeighbors.get(i)).isNull();
         }
+    }
+
+    @Test
+    void testNegativeFloatArrays() {
+        var graph = GdlFactory.of("({weight: [1.0, 2.0]}), ({weight: [3.0, -10.0]})").build().graphStore().getUnion();
+
+        var knnConfig = ImmutableKnnBaseConfig.builder()
+            .nodeWeightProperty("weight")
+            .topK(1)
+            .build();
+        var knnContext = ImmutableKnnContext.builder().build();
+
+        var knn = new Knn(graph, knnConfig, knnContext);
+
+        var result = knn.compute();
+
+        assertThat(result.neighborsOf(0)).containsExactly(1L);
+        assertThat(result.neighborsOf(1)).containsExactly(0L);
     }
 
     @Nested

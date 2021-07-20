@@ -143,7 +143,7 @@ final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
         var left = nodeProperties.floatArrayValue(firstNodeId);
         var right = nodeProperties.floatArrayValue(secondNodeId);
         int len = Math.min(left.length, right.length);
-        return Intersections.cosine(left, right, len);
+        return Math.max(Intersections.cosine(left, right, len), 0);
     }
 }
 
@@ -162,7 +162,7 @@ final class DoubleArrayPropertySimilarityComputer implements SimilarityComputer 
         var left = nodeProperties.doubleArrayValue(firstNodeId);
         var right = nodeProperties.doubleArrayValue(secondNodeId);
         int len = Math.min(left.length, right.length);
-        return Intersections.cosine(left, right, len);
+        return Math.max(Intersections.cosine(left, right, len), 0);
     }
 }
 
