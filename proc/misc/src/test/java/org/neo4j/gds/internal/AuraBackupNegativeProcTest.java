@@ -22,7 +22,6 @@ package org.neo4j.gds.internal;
 import com.github.marschall.memoryfilesystem.MemoryFileSystemBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.utils.CheckedSupplier;
 
 import java.io.IOException;
@@ -31,10 +30,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AuraBackupNegativeProcTest extends AuraBackupBaseProcTest {
 
@@ -64,19 +61,10 @@ class AuraBackupNegativeProcTest extends AuraBackupBaseProcTest {
     @Test
     void shouldCollectErrorsWhenPersistingGraphStores() {
         var backupQuery = "CALL gds.internal.backup()";
-        var backupName = new AtomicReference<String>();
 
-        runQueryWithRowConsumer(backupQuery, row -> {
-            assertThat(row.getBoolean("done")).isFalse();
-            backupName.set(row.getString("backupName"));
-        });
-
-        var backupPath = getBackupLocation().resolve(backupName.get()).resolve("graphs").toAbsolutePath().toString();
-
-        assertThat(testLog.getMessages(TestLog.WARN))
-            .contains(formatWithLocale(
-                "Graph backup failed for graph 'first' for user 'userA' - Directory '%s' not writable: ",
-                backupPath
-            ));
+        assertThatThrownBy(() -> runQuery(backupQuery))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Directory")
+            .hasMessageContaining("not writable");
     }
 }

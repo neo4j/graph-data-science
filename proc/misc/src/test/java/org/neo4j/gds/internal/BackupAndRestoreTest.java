@@ -42,7 +42,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
 import org.neo4j.kernel.database.DatabaseIdFactory;
-import org.neo4j.logging.Level;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;

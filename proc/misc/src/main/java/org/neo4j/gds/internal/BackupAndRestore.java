@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.internal;
 
-import org.apache.commons.io.file.PathUtils;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.model.StoredModel;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
@@ -37,7 +36,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.logging.Log;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
