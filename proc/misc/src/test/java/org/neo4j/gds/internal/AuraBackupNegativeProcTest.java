@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class AuraBackupBaseNegativeProcTest extends AuraBackupBaseProcTest {
+class AuraBackupNegativeProcTest extends AuraBackupBaseProcTest {
 
     // instantiate an in-memory file system with
     // default permissions set to read-only
@@ -63,11 +63,10 @@ class AuraBackupBaseNegativeProcTest extends AuraBackupBaseProcTest {
 
     @Test
     void shouldCollectErrorsWhenPersistingGraphStores() {
-        var shutdownQuery = "CALL gds.internal.backup()";
-
+        var backupQuery = "CALL gds.internal.backup()";
         var backupName = new AtomicReference<String>();
 
-        runQueryWithRowConsumer(shutdownQuery, row -> {
+        runQueryWithRowConsumer(backupQuery, row -> {
             assertThat(row.getBoolean("done")).isFalse();
             backupName.set(row.getString("backupName"));
         });

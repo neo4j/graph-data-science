@@ -42,12 +42,12 @@ class AuraBackupPositiveProcTest extends AuraBackupBaseProcTest {
 
     @Test
     void shouldPersistGraphStoresAndModels() {
-        var shutdownQuery = "CALL gds.internal.backup()";
+        var backupQuery = "CALL gds.internal.backup()";
 
         var graphCount = new MutableInt(0);
         var modelCount = new MutableInt(0);
 
-        runQueryWithRowConsumer(shutdownQuery, row -> {
+        runQueryWithRowConsumer(backupQuery, row -> {
             assertThat(row.getBoolean("done")).isTrue();
             assertThat(row.getString("backupName")).isNotEmpty();
             assertThat(row.getNumber("backupMillis").longValue()).isGreaterThanOrEqualTo(0L);
