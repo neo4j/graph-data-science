@@ -27,7 +27,6 @@ import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.logging.log4j.Log4jLogProvider;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -58,7 +57,6 @@ class AuraMaintenanceExtensionTest extends BaseTest {
         builder
             .setConfig(GraphStoreExportSettings.export_location_setting, importDir)
             .setConfig(AuraMaintenanceSettings.maintenance_function_enabled, true)
-            .setUserLogProvider(new Log4jLogProvider(System.out))
             .removeExtensions(ext -> ext instanceof AuraMaintenanceExtension)
             .addExtension(new AuraMaintenanceExtension(true));
     }
