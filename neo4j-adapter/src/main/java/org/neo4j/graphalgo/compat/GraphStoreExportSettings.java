@@ -38,4 +38,12 @@ public class GraphStoreExportSettings implements SettingsDeclaration {
         PATH,
         null
     ).build();
+
+    @Description("Sets the backup location for file based exports.")
+    public static final Setting<Path> backup_location_setting = newBuilder(
+        "gds.backup.location",
+        PATH,
+        null
+    ).build();
+
 }

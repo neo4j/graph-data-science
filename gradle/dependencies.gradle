@@ -54,6 +54,7 @@ ext {
             'junit4':                       '4.13.2',
             'junit5':                       '5.7.2',
             'lucene':                       '8.8.0',
+            'memoryfilesystem':             '2.2.0',
             'mockito':                      '3.11.2',
             'neo4j':                        properties.getOrDefault('neo4jVersion', neos.'4.2'),
             'opencypher-front-end':         '9.0.20210312',
