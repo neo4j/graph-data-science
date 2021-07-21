@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.ConsecutiveLongNodeProperties;
-import org.neo4j.graphalgo.api.nodeproperties.LongIfChangedNodeProperties;
+import org.neo4j.graphalgo.nodeproperties.ConsecutiveLongNodeProperties;
+import org.neo4j.graphalgo.nodeproperties.LongIfChangedNodeProperties;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.CommunitySizeConfig;
