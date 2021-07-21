@@ -17,12 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
+package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 
 import java.util.List;
 import java.util.Map;
@@ -70,7 +72,7 @@ final class LinkFeatureStepFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStepFactory#values")
+    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
     public void shouldFailOnMissingFeatureProperties(LinkFeatureStepFactory factory) {
         assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of()))
             .isExactlyInstanceOf(IllegalArgumentException.class)
@@ -78,7 +80,7 @@ final class LinkFeatureStepFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStepFactory#values")
+    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
     public void shouldFailOnEmptyFeatureProperties(LinkFeatureStepFactory factory) {
         assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(FEATURE_PROPERTIES, List.of())))
             .isExactlyInstanceOf(IllegalArgumentException.class)
@@ -86,7 +88,7 @@ final class LinkFeatureStepFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStepFactory#values")
+    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
     public void shouldFailOnNotListFeatureProperties(LinkFeatureStepFactory factory) {
         assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(FEATURE_PROPERTIES, Map.of())))
             .isExactlyInstanceOf(IllegalArgumentException.class)
@@ -94,7 +96,7 @@ final class LinkFeatureStepFactoryTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStepFactory#values")
+    @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
     public void shouldFailOnListOfNonStringsFeatureProperties(LinkFeatureStepFactory factory) {
         assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(FEATURE_PROPERTIES, List.of("foo", 3))))
             .isExactlyInstanceOf(IllegalArgumentException.class)
