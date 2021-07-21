@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.internal;
 
+import org.apache.commons.io.file.PathUtils;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -43,9 +44,12 @@ import org.neo4j.graphalgo.gdl.GdlFactory;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -129,16 +133,32 @@ class BackupAndRestoreTest {
 
     @ParameterizedTest
     @CsvSource({
-        "backup-1af160e1-806e-48eb-b00a-004e6aa227aa, true, true",
-        "backup-2af160e1-806e-48eb-b00a-004e6aa227aa, true, false",
-        "backup-3af160e1-806e-48eb-b00a-004e6aa227aa, false, true",
+        "backup-1af160e1-806e-48eb-b00a-004e6aa227aa, true, true, true",
+        "backup-2af160e1-806e-48eb-b00a-004e6aa227aa, true, false, true",
+        "backup-3af160e1-806e-48eb-b00a-004e6aa227aa, false, true, true",
+        "backup-1af160e1-806e-48eb-b00a-004e6aa227aa, true, true, false",
+        "backup-2af160e1-806e-48eb-b00a-004e6aa227aa, true, false, false",
+        "backup-3af160e1-806e-48eb-b00a-004e6aa227aa, false, true, false",
     })
-    void shouldRestoreFromBackupLocation(String backupName, boolean hasGraphs, boolean hasModels) {
+    void shouldRestoreFromBackupLocation(
+        String backupName,
+        boolean hasGraphs,
+        boolean hasModels,
+        boolean clearAfterRestore,
+        @TempDir Path tempDir
+    ) throws IOException {
+        var restorePath = importPath(tempDir.resolve("shutdown"), backupName);
+        var backupPath = tempDir.resolve("backup");
+        Files.createDirectories(backupPath);
+
         assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(0);
         assertThat(ModelCatalog.getAllModels().count()).isEqualTo(0);
 
-        var backupPath = importPath().resolve(backupName);
-        BackupAndRestore.restore(backupPath, new TestLog());
+        if (clearAfterRestore) {
+            BackupAndRestore.restoreAndClear(restorePath, backupPath, new TestLog());
+        } else {
+            BackupAndRestore.restore(restorePath, new TestLog());
+        }
 
         if (hasGraphs) {
             assertGraphsAreRestored();
@@ -151,14 +171,31 @@ class BackupAndRestoreTest {
         } else {
             assertThat(ModelCatalog.getAllModels().count()).isEqualTo(0);
         }
+
+        if (clearAfterRestore) {
+            assertThat(restorePath)
+                .exists()
+                .isEmptyDirectory();
+            if (hasGraphs) {
+                assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/graphs/**");
+            }
+            if (hasModels) {
+                assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/models/**");
+            }
+        } else {
+            assertThat(restorePath)
+                .exists()
+                .isNotEmptyDirectory();
+            assertThat(backupPath).isEmptyDirectory();
+        }
     }
 
     @Test
-    void shouldRestoreOnlyGraphsFromBackupLocation() {
+    void shouldRestoreOnlyGraphsFromBackupLocation(@TempDir Path tempDir) {
         assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(0);
         assertThat(ModelCatalog.getAllModels().count()).isEqualTo(0);
 
-        var backupPath = importPath().resolve("backup-1af160e1-806e-48eb-b00a-004e6aa227aa").resolve("graphs");
+        var backupPath = importPath(tempDir, "backup-1af160e1-806e-48eb-b00a-004e6aa227aa", "graphs");
         BackupAndRestore.restore(backupPath, new TestLog());
 
         assertGraphsAreRestored();
@@ -201,13 +238,17 @@ class BackupAndRestoreTest {
         assertThat(bobModels.stream().findFirst().get().name()).isEqualTo("modelBob");
     }
 
-    private Path importPath() {
+    private Path importPath(Path tempDir, String... subFolders) {
         try {
             var uri = Objects
                 .requireNonNull(getClass().getClassLoader().getResource("BackupAndRestoreTest"))
                 .toURI();
-            return Paths.get(uri);
-        } catch (URISyntaxException e) {
+            var resourceDirectory = Arrays
+                .stream(subFolders)
+                .reduce(Paths.get(uri), Path::resolve, (p1, p2) -> p1);
+            PathUtils.copyDirectory(resourceDirectory, tempDir);
+            return tempDir;
+        } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
     }

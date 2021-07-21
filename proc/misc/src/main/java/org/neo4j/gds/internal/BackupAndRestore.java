@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.io.file.ImmutableCsvGraphStoreImporterConf
 import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.io.file.csv.AutoloadFlagVisitor;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.logging.Log;
 
 import java.io.IOException;
@@ -48,6 +49,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.function.Predicate.not;
 import static org.neo4j.graphalgo.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -161,6 +163,39 @@ public final class BackupAndRestore {
         }
     }
 
+    static void restoreAndClear(Path storePath, Path backupPath, Log log) {
+        var graphsPath = storePath.resolve(GRAPHS_DIR);
+        var modelsPath = storePath.resolve(MODELS_DIR);
+        if (Files.exists(graphsPath) && Files.exists(modelsPath)) {
+            boolean success;
+            success = restoreGraphs(graphsPath, log);
+            success = restoreModels(modelsPath, log) && success;
+            if (success) {
+                try {
+                    createNewBackupFromRestore(storePath, backupPath);
+                } catch (IOException e) {
+                    log.warn(
+                        formatWithLocale(
+                            "Could not move the restored files to the backup folder '%s'",
+                            backupPath
+                        ),
+                        e
+                    );
+                }
+            }
+        } else {
+            restoreGraphs(storePath, log);
+        }
+    }
+
+    private static void createNewBackupFromRestore(Path storePath, Path backupPath) throws IOException {
+        var backupName = formatWithLocale("backup-%s-restored", UUID.randomUUID());
+        var backupRoot = backupPath.resolve(backupName);
+        Files.createDirectories(backupRoot);
+        Files.move(storePath.resolve(GRAPHS_DIR), backupRoot.resolve(GRAPHS_DIR));
+        Files.move(storePath.resolve(MODELS_DIR), backupRoot.resolve(MODELS_DIR));
+    }
+
     private static List<BackupResult> backupGraphStores(
         Path backupRoot,
         Consumer<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> onSuccess,
@@ -240,13 +275,15 @@ public final class BackupAndRestore {
         }).collect(Collectors.toList());
     }
 
-    private static void restoreGraphs(Path storePath, Log log) {
+    private static boolean restoreGraphs(Path storePath, Log log) {
         try {
             getImportPaths(storePath)
                 .filter(graphDir -> Files.exists(graphDir.resolve(AutoloadFlagVisitor.AUTOLOAD_FILE_NAME)))
                 .forEach(path -> restoreGraph(path, log));
+            return true;
         } catch (Exception e) {
             log.warn("Restoring graphs failed", e);
+            return false;
         }
     }
 
@@ -266,11 +303,13 @@ public final class BackupAndRestore {
         GraphStoreCatalog.set(createConfig, graphStore.graphStore());
     }
 
-    private static void restoreModels(Path storePath, Log log) {
+    private static boolean restoreModels(Path storePath, Log log) {
         try {
             getImportPaths(storePath).forEach(path -> restoreModel(path, log));
+            return true;
         } catch (Exception e) {
             log.warn("Model restore failed", e);
+            return false;
         }
     }
 
@@ -298,7 +337,9 @@ public final class BackupAndRestore {
     }
 
     private static Stream<Path> getImportPaths(Path storePath) throws IOException {
-        return Files.list(storePath).peek(CsvGraphStoreImporter.DIRECTORY_IS_READABLE::validate);
+        return Files.list(storePath)
+            .filter(not(path -> ExceptionUtil.supply(() -> Files.isHidden(path))))
+            .peek(CsvGraphStoreImporter.DIRECTORY_IS_READABLE::validate);
     }
 
     private BackupAndRestore() {}

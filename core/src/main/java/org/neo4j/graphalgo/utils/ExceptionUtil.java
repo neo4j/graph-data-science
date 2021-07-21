@@ -123,6 +123,10 @@ public final class ExceptionUtil {
         return supplier;
     }
 
+    public static <T, E extends Exception> T supply(CheckedSupplier<? extends T, E> supplier) {
+        return supplier.get();
+    }
+
     public static <T, R, E extends Exception> R apply(
         CheckedFunction<? super T, ? extends R, E> function,
         T input
