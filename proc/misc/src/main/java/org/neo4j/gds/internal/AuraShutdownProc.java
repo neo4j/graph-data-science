@@ -33,6 +33,7 @@ import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.kernel.api.ResourceTracker;
+import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.logging.Log;
@@ -40,6 +41,7 @@ import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Values;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -99,8 +101,19 @@ public class AuraShutdownProc implements CallableProcedure {
         ResourceTracker resourceTracker
     ) throws ProcedureException {
         long timeoutInSeconds = ((NumberValue) input[0]).longValue();
+        var config = InternalProceduresUtil.resolve(ctx, Config.class);
+        var exportPath = config.get(GraphStoreExportSettings.export_location_setting);
+        if (exportPath == null) {
+            throw new ProcedureException(
+                Status.Procedure.ProcedureCallFailed,
+                "The configuration '%s' needs to be set in order to use '%s'.",
+                GraphStoreExportSettings.export_location_setting.name(),
+                PROCEDURE_NAME
+            );
+        }
+
         var result = shutdown(
-            InternalProceduresUtil.resolve(ctx, Config.class),
+            exportPath,
             InternalProceduresUtil.lookup(ctx, Log.class),
             timeoutInSeconds,
             InternalProceduresUtil.lookup(ctx, AllocationTracker.class)
@@ -109,12 +122,11 @@ public class AuraShutdownProc implements CallableProcedure {
     }
 
     private static boolean shutdown(
-        Config neo4jConfig,
+        Path exportPath,
         Log log,
         long timeoutInSeconds,
         AllocationTracker allocationTracker
     ) {
-        var exportPath = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
         var result = BackupAndRestore.backup(
             exportPath,
             log,

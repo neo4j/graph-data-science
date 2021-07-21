@@ -53,10 +53,27 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
     public Lifecycle newInstance(ExtensionContext context, AuraMaintenanceExtension.Dependencies dependencies) {
         var enabled = dependencies.config().get(AuraMaintenanceSettings.maintenance_function_enabled);
         if (enabled) {
+            var exportLocationSetting = dependencies.config().get(GraphStoreExportSettings.export_location_setting);
+            if (exportLocationSetting == null) {
+                dependencies.logService()
+                    .getInternalLog(getClass())
+                    .warn(
+                        "The configuration %s is missing, no restore from the export location will be attempted.",
+                        GraphStoreExportSettings.export_location_setting.name()
+                    );
+            }
+
             var registry = dependencies.globalProceduresRegistry();
             try {
                 registry.register(new AuraMaintenanceFunction(), false);
                 registry.register(new AuraShutdownProc(), false);
+            } catch (ProcedureException e) {
+                dependencies.logService()
+                    .getInternalLog(getClass())
+                    .warn(e.getMessage(), e);
+            }
+
+            if (exportLocationSetting != null) {
                 return LifecycleAdapter.onInit(() -> {
                     var jobScheduler = dependencies.jobScheduler();
                     var jobHandle = jobScheduler.schedule(
@@ -70,10 +87,6 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
                         jobHandle.waitTermination();
                     }
                 });
-            } catch (ProcedureException e) {
-                dependencies.logService()
-                    .getInternalLog(getClass())
-                    .warn("Could not register aura maintenance function: " + e.getMessage(), e);
             }
         }
         return new LifecycleAdapter();

@@ -20,19 +20,27 @@
 package org.neo4j.gds.internal;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
+
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 class AuraShutdownProcEnabledTest extends BaseTest {
+
+    @TempDir
+    Path tempDir;
 
     @Override
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
         builder.setConfig(AuraMaintenanceSettings.maintenance_function_enabled, true);
+        builder.setConfig(GraphStoreExportSettings.export_location_setting, tempDir);
         builder.addExtension(new AuraMaintenanceExtension());
     }
 
