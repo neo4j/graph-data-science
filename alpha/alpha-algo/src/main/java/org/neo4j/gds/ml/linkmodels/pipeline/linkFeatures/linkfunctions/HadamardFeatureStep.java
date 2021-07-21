@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions;
+package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -41,7 +41,7 @@ public class HadamardFeatureStep implements LinkFeatureStep {
     }
 
     public HadamardFeatureStep(Map<String, Object> config) {
-        this((List<String>) config.get(FEATURE_PROPERTIES));
+        this((List<String>) config.get(LinkFeatureStep.FEATURE_PROPERTIES));
     }
 
     public static void validateConfig(Map<String, Object> config) {

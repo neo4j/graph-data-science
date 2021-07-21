@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline;
+package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
-import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.CosineFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.HadamardFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.CosineFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 
 import java.util.Arrays;
 import java.util.List;

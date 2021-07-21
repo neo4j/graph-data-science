@@ -17,22 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions;
+package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStepFactory;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.CosineFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.HadamardFeatureStep;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStep.FEATURE_PROPERTIES;
+import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep.FEATURE_PROPERTIES;
 
 final class LinkFeatureStepFactoryTest {
 

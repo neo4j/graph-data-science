@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions;
+package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStep;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
@@ -32,20 +32,20 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class CosineFeatureStep implements LinkFeatureStep {
+public class L2FeatureStep implements LinkFeatureStep {
 
     private final List<String> featureProperties;
 
-    public CosineFeatureStep(List<String> featureProperties) {
+    public L2FeatureStep(List<String> featureProperties) {
         this.featureProperties = featureProperties;
     }
 
-    public CosineFeatureStep(Map<String, Object> config) {
-        this((List<String>) config.get(FEATURE_PROPERTIES));
+    public L2FeatureStep(Map<String, Object> config) {
+        this((List<String>) config.get(LinkFeatureStep.FEATURE_PROPERTIES));
     }
 
     public static void validateConfig(Map<String, Object> config) {
-        LinkFeatureStepValidation.validateConfig("Cosine link feature", config);
+        LinkFeatureStepValidation.validateConfig("L2 link feature", config);
     }
 
     @TestOnly
@@ -61,8 +61,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
         graph.forEachNode(nodeId -> {
             graph.forEachRelationship(nodeId, ((sourceNodeId, targetNodeId) -> {
                 var currentFeatures = linkFeatures.get(currentRelationshipOffset.getValue());
-                var sourceSquareNorm = 0.0;
-                var targetSquareNorm = 0.0;
+                var currentOffset = offset;
 
                 for (NodeProperties props : properties) {
                     var propertyType = props.valueType();
@@ -73,9 +72,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
                             var targetArrayPropValues = props.doubleArrayValue(targetNodeId);
                             assert sourceArrayPropValues.length == targetArrayPropValues.length;
                             for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                currentFeatures[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
-                                sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
-                                targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
+                                currentFeatures[currentOffset++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
                             }
                             break;
                         }
@@ -84,24 +81,18 @@ public class CosineFeatureStep implements LinkFeatureStep {
                             var targetArrayPropValues = props.longArrayValue(targetNodeId);
                             assert sourceArrayPropValues.length == targetArrayPropValues.length;
                             for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                currentFeatures[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
-                                sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
-                                targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
+                                currentFeatures[currentOffset++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
                             }
                             break;
                         }
                         case LONG:
-                        case DOUBLE: {
-                            currentFeatures[offset] += props.doubleValue(sourceNodeId) * props.doubleValue(targetNodeId);
-                            sourceSquareNorm += props.doubleValue(sourceNodeId) * props.doubleValue(sourceNodeId);
-                            targetSquareNorm += props.doubleValue(targetNodeId) * props.doubleValue(targetNodeId);
+                        case DOUBLE:
+                            currentFeatures[currentOffset++] = Math.pow(props.doubleValue(sourceNodeId) - props.doubleValue(targetNodeId), 2);
                             break;
-                        }
                         case UNKNOWN:
                             throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                     }
                 }
-                currentFeatures[offset] /= Math.sqrt(sourceSquareNorm * targetSquareNorm);
                 currentRelationshipOffset.increment();
 
                 return true;
@@ -113,7 +104,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
 
     @Override
     public int outputFeatureSize(Graph graph) {
-        return 1;
+        return FeatureStepUtil.totalPropertyDimension(graph, featureProperties);
     }
 
     @Override

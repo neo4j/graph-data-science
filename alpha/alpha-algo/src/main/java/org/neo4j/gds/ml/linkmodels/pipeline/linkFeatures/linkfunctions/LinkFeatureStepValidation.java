@@ -17,30 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.linkfunctions;
+package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
+
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.LinkFeatureStep.FEATURE_PROPERTIES;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class LinkFeatureStepValidation {
     public static void validateConfig(String taskName, Map<String, Object> config) {
-        if (!config.containsKey(FEATURE_PROPERTIES)) {
+        if (!config.containsKey(LinkFeatureStep.FEATURE_PROPERTIES)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Configuration for %s is missing `%s`",
                 taskName,
-                FEATURE_PROPERTIES
+                LinkFeatureStep.FEATURE_PROPERTIES
             ));
         }
-        var featureProperties = config.get(FEATURE_PROPERTIES);
+        var featureProperties = config.get(LinkFeatureStep.FEATURE_PROPERTIES);
         if (featureProperties instanceof List) {
             if (((List<?>) featureProperties).isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Configuration for %s requires a non-empty list of strings for `%s`",
                     taskName,
-                    FEATURE_PROPERTIES
+                    LinkFeatureStep.FEATURE_PROPERTIES
                 ));
             }
             if (((List<?>) featureProperties).stream().allMatch(elem -> elem instanceof String)) {
@@ -50,7 +51,7 @@ public class LinkFeatureStepValidation {
         throw new IllegalArgumentException(formatWithLocale(
             "Configuration for %s expects `%s` to be a list of strings",
             taskName,
-            FEATURE_PROPERTIES
+            LinkFeatureStep.FEATURE_PROPERTIES
         ));
     }
 }
