@@ -19,10 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.collection.primitive;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -30,52 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PrimitiveLongCollectionsTest {
-
-    private static final class CountingPrimitiveLongIteratorResource implements PrimitiveLongIterator, AutoCloseable {
-        private final PrimitiveLongIterator delegate;
-        private final AtomicInteger closeCounter;
-
-        private CountingPrimitiveLongIteratorResource(PrimitiveLongIterator delegate, AtomicInteger closeCounter) {
-            this.delegate = delegate;
-            this.closeCounter = closeCounter;
-        }
-
-        @Override
-        public void close() {
-            closeCounter.incrementAndGet();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return delegate.hasNext();
-        }
-
-        @Override
-        public long next() {
-            return delegate.next();
-        }
-    }
-
-    @Test
-    void singleWithDefaultMustAutoCloseEmptyIterator() {
-        AtomicInteger counter = new AtomicInteger();
-        CountingPrimitiveLongIteratorResource itr = new CountingPrimitiveLongIteratorResource(
-            PrimitiveLongCollections.emptyIterator(), counter);
-        assertEquals(PrimitiveLongCollections.single(itr, 2), 2);
-        assertEquals(1, counter.get());
-    }
-
-    @Test
-    void shouldDeduplicate() {
-        // GIVEN
-        long[] array = new long[]{1L, 1L, 2L, 5L, 6L, 6L};
-
-        // WHEN
-        long[] deduped = PrimitiveLongCollections.deduplicate(array);
-
-        // THEN
-        Assertions.assertArrayEquals(new long[]{1L, 2L, 5L, 6L}, deduped);
-    }
 
     @Test
     void shouldNotContinueToCallNextOnHasNextFalse() {
