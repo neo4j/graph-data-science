@@ -38,7 +38,7 @@ import static org.neo4j.graphalgo.config.ConcurrencyConfig.CONCURRENCY_LIMITATIO
 public final class Pools {
 
     public static final ExecutorService DEFAULT = createDefaultPool();
-    public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createDefaultSingleThreadPool();
+    public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createSingleThreadPool("algo");
 
     static final String THREAD_NAME_PREFIX = "gds";
 
@@ -66,8 +66,8 @@ public final class Pools {
         );
     }
 
-    public static ExecutorService createDefaultSingleThreadPool() {
-        return Executors.newSingleThreadExecutor(NamedThreadFactory.daemon("algo"));
+    public static ExecutorService createSingleThreadPool(String threadPrefix) {
+        return Executors.newSingleThreadExecutor(NamedThreadFactory.daemon(threadPrefix));
     }
 
     static class CallerBlocksPolicy implements RejectedExecutionHandler {

@@ -23,6 +23,7 @@ import org.neo4j.collection.RawIterator;
 import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CatalogRequest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -43,6 +44,8 @@ import org.neo4j.values.storable.Values;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 import static org.neo4j.internal.helpers.collection.Iterators.asRawIterator;
@@ -51,6 +54,8 @@ import static org.neo4j.internal.kernel.api.procs.Neo4jTypes.NTInteger;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AuraShutdownProc implements CallableProcedure {
+
+    private static final ExecutorService EXECUTOR_SERVICE = Pools.createSingleThreadPool("shutdown");
 
     private static final QualifiedName PROCEDURE_NAME = new QualifiedName(
         new String[]{"gds", "internal"},
@@ -64,7 +69,7 @@ public class AuraShutdownProc implements CallableProcedure {
         // ]
         List.of(FieldSignature.inputField("timeoutInSeconds", NTInteger, DefaultParameterValue.ntInteger(42))),
         // Output type: return a boolean
-        List.of(FieldSignature.outputField("done", NTBoolean)),
+        List.of(FieldSignature.outputField("submitted", NTBoolean)),
         // Procedure mode
         READ,
         // Do not require admin user for execution
@@ -89,6 +94,16 @@ public class AuraShutdownProc implements CallableProcedure {
         false
     );
 
+    private final boolean blockOnSubmit;
+
+    AuraShutdownProc() {
+        this(false);
+    }
+
+    AuraShutdownProc(boolean blockOnSubmit) {
+        this.blockOnSubmit = blockOnSubmit;
+    }
+
     @Override
     public ProcedureSignature signature() {
         return SIGNATURE;
@@ -100,7 +115,6 @@ public class AuraShutdownProc implements CallableProcedure {
         AnyValue[] input,
         ResourceTracker resourceTracker
     ) throws ProcedureException {
-        long timeoutInSeconds = ((NumberValue) input[0]).longValue();
         var config = InternalProceduresUtil.resolve(ctx, Config.class);
         var exportPath = config.get(GraphStoreExportSettings.export_location_setting);
         if (exportPath == null) {
@@ -112,16 +126,32 @@ public class AuraShutdownProc implements CallableProcedure {
             );
         }
 
-        var result = shutdown(
-            exportPath,
-            InternalProceduresUtil.lookup(ctx, Log.class),
-            timeoutInSeconds,
-            InternalProceduresUtil.lookup(ctx, AllocationTracker.class)
+        var timeoutInSeconds = ((NumberValue) input[0]).longValue();
+        var log = InternalProceduresUtil.lookup(ctx, Log.class);
+        var tracker = InternalProceduresUtil.lookup(ctx, AllocationTracker.class);
+ 
+        var future = EXECUTOR_SERVICE.submit(
+            () -> shutdown(exportPath, log, timeoutInSeconds, tracker)
         );
-        return asRawIterator(Stream.ofNullable(new AnyValue[]{Values.booleanValue(result)}));
+
+        if (blockOnSubmit) {
+            try {
+                future.get();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (ExecutionException e) {
+                throw new ProcedureException(
+                    Status.Procedure.ProcedureCallFailed,
+                    e.getCause(),
+                    "Shutdown job failed."
+                );
+            }
+        }
+
+        return asRawIterator(Stream.ofNullable(new AnyValue[]{Values.booleanValue(true)}));
     }
 
-    private static boolean shutdown(
+    private static void shutdown(
         Path exportPath,
         Log log,
         long timeoutInSeconds,
@@ -140,6 +170,12 @@ public class AuraShutdownProc implements CallableProcedure {
             "Shutdown"
         );
 
-        return result.stream().allMatch(BackupAndRestore.BackupResult::done);
+        result.forEach(backupResult -> {
+            if(backupResult.done()) {
+                log.info(backupResult.toString());
+            } else {
+                log.warn(backupResult.toString());
+            }
+        });
     }
 }
