@@ -21,13 +21,12 @@ package org.neo4j.gds.internal;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.LogProvider;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -35,18 +34,20 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.nio.file.Path;
 
-public abstract class AuraBackupBaseProcTest extends BaseProcTest {
+public abstract class AuraShutdownBaseProcTest extends BaseProcTest {
+
+    @TempDir
+    Path tempDir;
 
     TestLog testLog;
 
     @BeforeEach
     void setup() throws Exception {
         AuraTestSupport.setupGraphsAndModels(db);
-        GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class).register(new AuraBackupProc());
     }
 
     @AfterEach
-    void shutdown() {
+    void teardown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
         ModelCatalog.removeAllLoadedModels();
     }
@@ -67,8 +68,6 @@ public abstract class AuraBackupBaseProcTest extends BaseProcTest {
                 return testLog;
             }
         });
-        builder.setConfig(GraphStoreExportSettings.backup_location_setting, getBackupLocation());
+        builder.setConfig(GraphStoreExportSettings.export_location_setting, tempDir);
     }
-
-    abstract Path getBackupLocation();
 }

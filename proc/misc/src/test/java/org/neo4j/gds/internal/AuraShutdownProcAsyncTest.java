@@ -24,13 +24,17 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
-class AuraShutdownProcAsyncTest extends AuraShutdownProcTest {
+import static org.neo4j.gds.internal.AuraTestSupport.assertGraphs;
+import static org.neo4j.gds.internal.AuraTestSupport.assertModels;
+
+class AuraShutdownProcAsyncTest extends AuraShutdownBaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
@@ -39,7 +43,7 @@ class AuraShutdownProcAsyncTest extends AuraShutdownProcTest {
     }
 
     @Test
-    void shouldPersistGraphStoresOnMultipleShutdownCalls() {
+    void shouldPersistGraphStoresOnMultipleShutdownCalls() throws IOException {
         var shutdownQuery = "CALL gds.internal.shutdown()";
 
         assertCypherResult(shutdownQuery, List.of(Map.of("submitted", true)));
@@ -48,11 +52,22 @@ class AuraShutdownProcAsyncTest extends AuraShutdownProcTest {
         var graphsPath = tempDir.resolve("graphs");
         var modelsPath = tempDir.resolve("models");
 
-        while (!Files.exists(graphsPath) || !Files.exists(modelsPath)) {
+        var start = System.nanoTime();
+
+        while (true) {
+            if (TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - start) > 5) {
+                break;
+            }
+            if (Files.exists(graphsPath) && Files.list(graphsPath).count() == 2) {
+                if (Files.exists(modelsPath) && Files.list(modelsPath).count() == 2) {
+                    break;
+                }
+            }
             LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(42));
         }
 
-        assertSuccessfulWrite();
+        assertGraphs(tempDir);
+        assertModels(tempDir);
     }
 
 }

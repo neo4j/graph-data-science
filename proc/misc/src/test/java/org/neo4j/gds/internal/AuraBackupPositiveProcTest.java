@@ -22,13 +22,13 @@ package org.neo4j.gds.internal;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphalgo.TestLog;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.internal.AuraTestSupport.assertGraph;
+import static org.neo4j.gds.internal.AuraTestSupport.assertModel;
 
 class AuraBackupPositiveProcTest extends AuraBackupBaseProcTest {
 
@@ -71,24 +71,6 @@ class AuraBackupPositiveProcTest extends AuraBackupBaseProcTest {
                 .matches(
                     "Backup finished within the given timeout, it took \\d+ seconds and the provided timeout was 42 seconds."
                 ));
-    }
-
-    void assertGraph(String path) {
-        assertThat(Paths.get(path))
-            .isDirectoryContaining("glob:**/.userinfo")
-            .isDirectoryContaining("glob:**/graph_info.csv")
-            .isDirectoryContaining("glob:**/node-schema.csv")
-            .isDirectoryContaining("glob:**/relationship-schema.csv")
-            .isDirectoryContaining("regex:.+/nodes_Label[12]_header\\.csv")
-            .isDirectoryContaining("regex:.+/nodes_Label[12]_\\d+\\.csv")
-            .isDirectoryContaining("regex:.+/relationships_REL[12]_header\\.csv")
-            .isDirectoryContaining("regex:.+/relationships_REL[12]_\\d+\\.csv");
-    }
-
-    void assertModel(String path) {
-        assertThat(Paths.get(path))
-            .isDirectoryContaining("glob:**/" + ModelToFileExporter.META_DATA_FILE)
-            .isDirectoryContaining("glob:**/" + ModelToFileExporter.MODEL_DATA_FILE);
     }
 
 }

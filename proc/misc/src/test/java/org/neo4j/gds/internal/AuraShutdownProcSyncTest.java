@@ -21,18 +21,9 @@ package org.neo4j.gds.internal;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
-import org.neo4j.gds.embeddings.graphsage.Layer;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
 import java.io.IOException;
@@ -42,9 +33,12 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.internal.AuraTestSupport.assertGraph;
+import static org.neo4j.gds.internal.AuraTestSupport.assertGraphs;
+import static org.neo4j.gds.internal.AuraTestSupport.assertModels;
 import static org.neo4j.graphalgo.core.utils.io.file.csv.AutoloadFlagVisitor.AUTOLOAD_FILE_NAME;
 
-class AuraShutdownProcSyncTest extends AuraShutdownProcTest {
+class AuraShutdownProcSyncTest extends AuraShutdownBaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
@@ -63,12 +57,13 @@ class AuraShutdownProcSyncTest extends AuraShutdownProcTest {
     }
 
     @Test
-    void shouldPersistGraphStores() {
+    void shouldPersistGraphStores() throws IOException {
         var shutdownQuery = "CALL gds.internal.shutdown()";
 
         assertCypherResult(shutdownQuery, List.of(Map.of("submitted", true)));
 
-        assertSuccessfulWrite();
+        assertGraphs(tempDir);
+        assertModels(tempDir);
     }
 
     @Test
@@ -87,29 +82,11 @@ class AuraShutdownProcSyncTest extends AuraShutdownProcTest {
 
         assertThat(first).isEmptyDirectory();
 
-        assertThat(tempDir.resolve("graphs/second"))
-            .isDirectoryContaining("glob:**/graph_info.csv")
-            .isDirectoryContaining("glob:**/node-schema.csv")
-            .isDirectoryContaining("glob:**/relationship-schema.csv")
-            .isDirectoryContaining("glob:**/nodes_Label2_header.csv")
-            .isDirectoryContaining("regex:.+/nodes_Label2_\\d+.csv")
-            .isDirectoryContaining("glob:**/relationships_REL2_header.csv")
-            .isDirectoryContaining("regex:.+/relationships_REL2_\\d+.csv");
+        assertGraph(tempDir.resolve("graphs/second"));
     }
 
     @Test
     void shouldBringTheDatabaseIntoAStateThatIsSafeToRestart() throws Exception {
-        var model = Model.of(
-            "userA",
-            "firstModel",
-            GraphSage.MODEL_TYPE,
-            GraphSchema.empty(),
-            ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
-            GraphSageTrainConfig.builder().modelName("firstModel").addFeatureProperty("foo").build(),
-            EmptyGraphSageTrainMetrics.INSTANCE
-        );
-        ModelCatalog.set(model);
-
         GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class).register(new AuraMaintenanceFunction());
         var pollQuery = "RETURN gds.internal.safeToRestart() AS safeToRestart";
         var shutdownQuery = "CALL gds.internal.shutdown()";
