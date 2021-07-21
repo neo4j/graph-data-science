@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.withPrecision;
 import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 
-class PipelineTest extends BaseProcTest {
+class FeaturePipelineTest extends BaseProcTest {
     private static List<NodeLabel> NODE_LABELS = List.of(NodeLabel.of("N"));
     private static List<RelationshipType> REL_TYPES = List.of(RelationshipType.of("REL"));
 
@@ -87,7 +87,7 @@ class PipelineTest extends BaseProcTest {
     @Test
     void singleLinkFeatureStep() {
         applyOnProcedure(caller -> {
-            var pipeline = new Pipeline(caller, db.databaseId(), getUsername());
+            var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
             pipeline.addLinkFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
@@ -102,7 +102,7 @@ class PipelineTest extends BaseProcTest {
                 new double[]{3 * 8, 2 * 2.3D}, // a-c
                 new double[]{3 * 0.1D, 2 * 91.0D} // a-d
             );
-            var actual = pipeline.computeLinkFeatures("g", NODE_LABELS, REL_TYPES);
+            var actual = pipeline.computeFeatures("g", NODE_LABELS, REL_TYPES);
 
             assertThat(actual.size()).isEqualTo(expected.size());
 
@@ -115,7 +115,7 @@ class PipelineTest extends BaseProcTest {
     @Test
     void multipleLinkFeatureStep() {
         applyOnProcedure(caller -> {
-            var pipeline = new Pipeline(caller, db.databaseId(), getUsername());
+            var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
             pipeline.addLinkFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
@@ -140,7 +140,7 @@ class PipelineTest extends BaseProcTest {
                 new double[]{3 * 0.1D, 2 * 91.0D, (42 * 42 + 13 * 9) / normA / normD} // a-d
             );
 
-            var actual = pipeline.computeLinkFeatures("g", NODE_LABELS, REL_TYPES);
+            var actual = pipeline.computeFeatures("g", NODE_LABELS, REL_TYPES);
 
             assertThat(actual.size()).isEqualTo(expected.size());
 
@@ -154,7 +154,7 @@ class PipelineTest extends BaseProcTest {
     void testProcedureAndLinkFeatures() {
         applyOnProcedure(caller -> {
 
-            var pipeline = new Pipeline(caller, db.databaseId(), getUsername());
+            var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
             pipeline.addProcedureStep("pageRank", Map.of("mutateProperty", "pageRank"));
             pipeline.addLinkFeature(
@@ -173,7 +173,7 @@ class PipelineTest extends BaseProcTest {
                 new double[]{expectedPageRanks.get(3) * expectedPageRanks.get(0)}
             );
 
-            var actual = pipeline.computeLinkFeatures("g", NODE_LABELS, REL_TYPES);
+            var actual = pipeline.computeFeatures("g", NODE_LABELS, REL_TYPES);
 
             assertThat(actual.size()).isEqualTo(expected.size());
 
@@ -186,7 +186,7 @@ class PipelineTest extends BaseProcTest {
     @Test
     void validateLinkFeatureSteps() {
         applyOnProcedure(caller -> {
-            var pipeline = new Pipeline(caller, db.databaseId(), getUsername());
+            var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
             pipeline.addLinkFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
@@ -197,7 +197,7 @@ class PipelineTest extends BaseProcTest {
                 Map.of("featureProperties", List.of("other-no-property"))
             );
 
-            assertThatThrownBy(() -> pipeline.computeLinkFeatures("g", NODE_LABELS, REL_TYPES))
+            assertThatThrownBy(() -> pipeline.computeFeatures("g", NODE_LABELS, REL_TYPES))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(
                     "Node properties [no-property, no-prop-2, other-no-property] defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline");

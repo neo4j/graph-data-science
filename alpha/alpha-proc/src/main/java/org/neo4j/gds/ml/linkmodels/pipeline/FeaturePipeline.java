@@ -40,14 +40,14 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class Pipeline {
+public class FeaturePipeline {
     private List<ProcedureStep> procedureSteps;
     private List<LinkFeatureStep> linkFeatureSteps;
     private final String userName;
     private final NamedDatabaseId databaseId;
     private final BaseProc caller;
 
-    public Pipeline(BaseProc caller, NamedDatabaseId databaseId, String userName) {
+    public FeaturePipeline(BaseProc caller, NamedDatabaseId databaseId, String userName) {
         this.caller = caller;
         this.userName = userName;
         this.databaseId = databaseId;
@@ -64,10 +64,12 @@ public class Pipeline {
     }
 
 
-
-    public HugeObjectArray<double[]> computeLinkFeatures(String graphName, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relationshipTypes) {
+    public HugeObjectArray<double[]> computeFeatures(String graphName, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relationshipTypes) {
         executeProcedureSteps(graphName, nodeLabels, relationshipTypes);
+        return computeLinkFeatures(graphName, nodeLabels, relationshipTypes);
+    }
 
+    private HugeObjectArray<double[]> computeLinkFeatures(String graphName, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relationshipTypes) {
         var graph = GraphStoreCatalog.get(userName, databaseId, graphName)
             .graphStore()
             .getGraph(nodeLabels, relationshipTypes, Optional.empty());
