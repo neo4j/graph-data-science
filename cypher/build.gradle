@@ -12,7 +12,6 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
-    compileOnly group: 'org.ejml', name: 'ejml-all', version: ver.'ejml'
 
     neodeps.each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
@@ -29,8 +28,6 @@ dependencies {
             [group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'],
     )
 
-    testImplementation project(':experimental-test-utils')
-    testImplementation group: 'org.ejml', name: 'ejml-all', version: ver.'ejml'
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
