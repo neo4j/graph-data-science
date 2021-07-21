@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.collection.primitive;
 
-import org.neo4j.graphdb.Resource;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,17 +30,12 @@ import java.util.Set;
 import java.util.function.LongFunction;
 import java.util.function.LongPredicate;
 
-import static java.util.Arrays.copyOf;
 import static org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveCommons.closeSafely;
 
 /**
- * Basic and common primitive int collection utils and manipulations.
- *
- * @see PrimitiveIntCollections
+ * Basic and common primitive long collection utils and manipulations.
  */
-public class PrimitiveLongCollections {
-
-    public static final long[] EMPTY_LONG_ARRAY = new long[0];
+public final class PrimitiveLongCollections {
 
     private static final PrimitiveLongIterator EMPTY = new PrimitiveLongBaseIterator() {
         @Override
@@ -53,17 +46,6 @@ public class PrimitiveLongCollections {
 
     private PrimitiveLongCollections() {
         throw new AssertionError("no instance");
-    }
-
-    public static PrimitiveLongIterator iterator(final long... items) {
-        return new PrimitiveLongResourceCollections.PrimitiveLongBaseResourceIterator(Resource.EMPTY) {
-            private int index = -1;
-
-            @Override
-            protected boolean fetchNext() {
-                return ++index < items.length && next(items[index]);
-            }
-        };
     }
 
     // Concating
@@ -84,18 +66,6 @@ public class PrimitiveLongCollections {
         };
     }
 
-    public static PrimitiveLongResourceIterator filter(
-        PrimitiveLongResourceIterator source,
-        final LongPredicate filter
-    ) {
-        return new PrimitiveLongResourceFilteringIterator(source) {
-            @Override
-            public boolean test(long item) {
-                return filter.test(item);
-            }
-        };
-    }
-
     // Range
     public static PrimitiveLongIterator range(long start, long end) {
         return new PrimitiveLongRangeIterator(start, end);
@@ -104,7 +74,7 @@ public class PrimitiveLongCollections {
     public static long single(PrimitiveLongIterator iterator, long defaultItem) {
         try {
             if (!iterator.hasNext()) {
-                closeSafely(iterator);
+                closeSafely(iterator, null);
                 return defaultItem;
             }
             long item = iterator.next();
@@ -112,7 +82,7 @@ public class PrimitiveLongCollections {
                 throw new NoSuchElementException("More than one item in " + iterator + ", first:" + item +
                                                  ", second:" + iterator.next());
             }
-            closeSafely(iterator);
+            closeSafely(iterator, null);
             return item;
         } catch (NoSuchElementException exception) {
             closeSafely(iterator, exception);
@@ -144,60 +114,12 @@ public class PrimitiveLongCollections {
         return count;
     }
 
-    public static long[] asArray(PrimitiveLongIterator iterator) {
-        long[] array = new long[8];
-        int i = 0;
-        for (; iterator.hasNext(); i++) {
-            if (i >= array.length) {
-                array = copyOf(array, i << 1);
-            }
-            array[i] = iterator.next();
-        }
-
-        if (i < array.length) {
-            array = copyOf(array, i);
-        }
-        return array;
-    }
-
-    public static long[] asArray(Iterator<Long> iterator) {
-        long[] array = new long[8];
-        int i = 0;
-        for (; iterator.hasNext(); i++) {
-            if (i >= array.length) {
-                array = copyOf(array, i << 1);
-            }
-            array[i] = iterator.next();
-        }
-
-        if (i < array.length) {
-            array = copyOf(array, i);
-        }
-        return array;
-    }
-
     public static PrimitiveLongIterator emptyIterator() {
         return EMPTY;
     }
 
-    public static PrimitiveLongIterator toPrimitiveIterator(final Iterator<Long> iterator) {
-        return new PrimitiveLongBaseIterator() {
-            @Override
-            protected boolean fetchNext() {
-                if (iterator.hasNext()) {
-                    Long nextValue = iterator.next();
-                    if (null == nextValue) {
-                        throw new IllegalArgumentException("Cannot convert null Long to primitive long");
-                    }
-                    return next(nextValue.longValue());
-                }
-                return false;
-            }
-        };
-    }
-
     public static <T> Iterator<T> map(final LongFunction<T> mapFunction, final PrimitiveLongIterator source) {
-        return new Iterator<T>() {
+        return new Iterator<>() {
             @Override
             public boolean hasNext() {
                 return source.hasNext();
@@ -227,67 +149,6 @@ public class PrimitiveLongCollections {
             out.add(iterator.next());
         }
         return out;
-    }
-
-    public static Iterator<Long> toIterator(final PrimitiveLongIterator primIterator) {
-        return new Iterator<Long>() {
-            @Override
-            public boolean hasNext() {
-                return primIterator.hasNext();
-            }
-
-            @Override
-            public Long next() {
-                return primIterator.next();
-            }
-
-            @Override
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        };
-    }
-
-    /**
-     * Wraps a {@link PrimitiveLongIterator} in a {@link PrimitiveLongResourceIterator} which closes
-     * the provided {@code resource} in {@link PrimitiveLongResourceIterator#close()}.
-     *
-     * @param iterator {@link PrimitiveLongIterator} to convert
-     * @param resource {@link Resource} to close in {@link PrimitiveLongResourceIterator#close()}
-     * @return Wrapped {@link PrimitiveLongIterator}.
-     */
-    public static PrimitiveLongResourceIterator resourceIterator(
-        final PrimitiveLongIterator iterator,
-        final Resource resource
-    ) {
-        return new PrimitiveLongResourceIterator() {
-            @Override
-            public void close() {
-                if (resource != null) {
-                    resource.close();
-                }
-            }
-
-            @Override
-            public long next() {
-                return iterator.next();
-            }
-
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-        };
-    }
-
-    /**
-     * Convert primitive set into a plain old java {@link Set}, boxing each long.
-     *
-     * @param set {@link PrimitiveLongSet} set of primitive values.
-     * @return a {@link Set} containing all items.
-     */
-    public static Set<Long> toSet(PrimitiveLongSet set) {
-        return toSet(set.iterator());
     }
 
     /**
@@ -407,10 +268,6 @@ public class PrimitiveLongCollections {
             }
             return (currentIterator != null && currentIterator.hasNext()) && next(currentIterator.next());
         }
-
-        protected final PrimitiveLongIterator currentIterator() {
-            return currentIterator;
-        }
     }
 
     public abstract static class PrimitiveLongFilteringIterator extends PrimitiveLongBaseIterator
@@ -434,20 +291,6 @@ public class PrimitiveLongCollections {
 
         @Override
         public abstract boolean test(long testItem);
-    }
-
-    public abstract static class PrimitiveLongResourceFilteringIterator extends PrimitiveLongFilteringIterator
-        implements PrimitiveLongResourceIterator {
-        PrimitiveLongResourceFilteringIterator(PrimitiveLongIterator source) {
-            super(source);
-        }
-
-        @Override
-        public void close() {
-            if (source instanceof Resource) {
-                ((Resource) source).close();
-            }
-        }
     }
 
     public static class PrimitiveLongRangeIterator extends PrimitiveLongBaseIterator {
