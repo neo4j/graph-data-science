@@ -30,7 +30,7 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 public class ProcedureReflectionTest extends BaseProcTest {
 
     @ParameterizedTest
-    @ValueSource(strings = {"boogaloo", "gds.graph.create", "ageRank"})
+    @ValueSource(strings = {"boogieewoogie", "gds.graph.create", "ageRank", ".pageRank"})
     void shouldFailOnInvalidProc(String proc) {
         assertThatThrownBy(() -> ProcedureReflection.INSTANCE.findProcedureMethod(proc))
             .isExactlyInstanceOf(IllegalArgumentException.class)

@@ -65,32 +65,29 @@ public final class ProcedureReflection {
             throw new IllegalArgumentException(formatWithLocale(
                 "Ambiguous procedure name `%s`. Found matching procedures %s.",
                 procName,
-                concatenateProcedureNames(foundMethods)
+                foundMethods.stream()
+                    .map(this::procedureName)
+                    .collect(Collectors.joining(", "))
             ));
         }
         return foundMethods.get(0);
-    }
-
-    private String concatenateProcedureNames(List<Method> foundMethods) {
-        return foundMethods.stream()
-                    .map(this::procedureName)
-                    .collect(Collectors.joining(", "));
     }
 
     private List<Method> filterAlgoBaseMethods(String shortName) {
         return procedureMethods
                 .stream()
                 .filter(method -> {
-                    if (!AlgoBaseProc.class.isAssignableFrom(method.getDeclaringClass())) return false;
-                    String procedureName = procedureName(method);
-                    if (!procedureName.endsWith(".mutate")) return false;
-                    return validShortName(procedureName, shortName);
+                    if (!AlgoBaseProc.class.isAssignableFrom(method.getDeclaringClass())) {
+                        return false;
+                    }
+
+                    return validShortName(procedureName(method), shortName);
                 })
                 .collect(Collectors.toList());
     }
 
-    // for example `ageRank` is not valid short for `gds.pageRank`, but `pageRank` is.
     private static boolean validShortName(String fullName, String shortName) {
+        // '.' as for example `.ageRank` is not valid short for `gds.pageRank`, but `.pageRank` is.
         var normalizedFullName = "." + fullName;
         var normalizedShortName = "." + shortName + (shortName.endsWith(".mutate") ? "" : ".mutate");
         return normalizedFullName.endsWith(normalizedShortName);
