@@ -141,9 +141,9 @@ public final class KnnStatsProcTest extends KnnProcTest<KnnStatsConfig> {
         });
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{1}")
     @MethodSource("negativeGraphs")
-    void supportNegativeArrays(String graphCreateQuery) {
+    void supportNegativeArrays(String graphCreateQuery, String desc) {
         clearDb();
 
         runQuery(graphCreateQuery);
