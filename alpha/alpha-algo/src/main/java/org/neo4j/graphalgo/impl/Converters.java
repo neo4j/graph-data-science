@@ -17,16 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core.heavyweight;
+package org.neo4j.graphalgo.impl;
 
 import org.neo4j.graphalgo.api.IntBinaryPredicate;
 import org.neo4j.graphalgo.api.RelationshipConsumer;
 import org.neo4j.graphalgo.api.RelationshipWithPropertyConsumer;
 
 import java.util.function.IntConsumer;
-import java.util.function.IntPredicate;
 import java.util.function.LongConsumer;
-import java.util.function.LongPredicate;
 
 /**
  * Warning: These conversions are not safe but will fail for very large graphs.
@@ -34,14 +32,6 @@ import java.util.function.LongPredicate;
  * The same limitations apply for those algorithms as before, but failures for very large graphs will be contained in here.
  */
 public interface Converters {
-
-    static LongPredicate longToIntPredicate(IntPredicate p) {
-        return value -> {
-            // This will fail on very large graphs
-            int downCast = Math.toIntExact(value);
-            return p.test(downCast);
-        };
-    }
 
     static LongConsumer longToIntConsumer(IntConsumer p) {
         return value -> {

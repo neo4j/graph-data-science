@@ -39,7 +39,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.graphalgo.core.heavyweight.Converters.longToIntConsumer;
+import static org.neo4j.graphalgo.impl.Converters.longToIntConsumer;
 import static org.neo4j.graphalgo.impl.walking.RandomWalk.NextNodeStrategy.NO_NEXT_NODE;
 
 public class RandomWalk extends Algorithm<RandomWalk, Stream<long[]>> {
