@@ -21,6 +21,7 @@ package org.neo4j.internal.recordstorage;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.counts.CountsAccessor;
+import org.neo4j.gds.storageengine.InMemoryCountStore;
 import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
@@ -66,6 +67,7 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
     private final TokenHolders tokenHolders;
     private final InMemoryMetaDataProvider metaDataProvider;
     private final GraphStore graphStore;
+    private final InMemoryCountStore countStore;
 
     public InMemoryStorageEngine(
         DatabaseLayout databaseLayout,
@@ -88,6 +90,8 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
             )))
             .graphStore();
         schemaAndTokensLifecycle();
+
+        this.countStore = new InMemoryCountStore(graphStore, tokenHolders);
     }
 
     @Override
@@ -211,7 +215,7 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
 
     @Override
     public CountsAccessor countsAccessor() {
-        throw new UnsupportedOperationException();
+        return countStore;
     }
 
     @Override
