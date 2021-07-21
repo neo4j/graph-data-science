@@ -128,7 +128,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         DatabaseReadOnlyChecker readOnlyChecker,
         MemoryTracker memoryTracker
     ) {
-        throw new UnsupportedOperationException();
+        return new InMemoryStorageEngine(databaseLayout, tokenHolders, metaDataProvider);
     }
 
     @Override

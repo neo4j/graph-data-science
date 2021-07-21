@@ -19,13 +19,19 @@
  */
 package org.neo4j.internal.recordstorage;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.config.GraphCreateConfig;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.internal.diagnostics.DiagnosticsLogger;
+import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.KernelVersion;
 import org.neo4j.kernel.impl.api.InjectedNLIUpgradeCallback;
 import org.neo4j.kernel.lifecycle.Lifecycle;
+import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.lock.LockGroup;
 import org.neo4j.lock.LockService;
 import org.neo4j.lock.LockTracer;
@@ -45,16 +51,43 @@ import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionApplicationMode;
 import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
 import org.neo4j.storageengine.api.txstate.TxStateVisitor;
+import org.neo4j.token.TokenHolders;
+import org.neo4j.token.api.NamedToken;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
 
+    private final TokenHolders tokenHolders;
     private final InMemoryMetaDataProvider metaDataProvider;
+    private final GraphStore graphStore;
 
-    public InMemoryStorageEngine(InMemoryMetaDataProvider metaDataProvider) {
+    public InMemoryStorageEngine(
+        DatabaseLayout databaseLayout,
+        TokenHolders tokenHolders,
+        InMemoryMetaDataProvider metaDataProvider
+    ) {
+        this.tokenHolders = tokenHolders;
         this.metaDataProvider = metaDataProvider;
+
+        this.graphStore = GraphStoreCatalog.getAllGraphStores()
+            .filter(graphStoreWithUserNameAndConfig -> graphStoreWithUserNameAndConfig.config().graphName().equals(databaseLayout.getDatabaseName()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(formatWithLocale(
+                "No graph with name %s was found in GraphStoreCatalog. Available graph names are %s",
+                databaseLayout.getDatabaseName(),
+                GraphStoreCatalog.getAllGraphStores()
+                    .map(GraphStoreCatalog.GraphStoreWithUserNameAndConfig::config)
+                    .map(GraphCreateConfig::graphName)
+                    .collect(Collectors.toList())
+            )))
+            .graphStore();
+        schemaAndTokensLifecycle();
     }
 
     @Override
@@ -139,7 +172,41 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
 
     @Override
     public Lifecycle schemaAndTokensLifecycle() {
-        throw new UnsupportedOperationException();
+        MutableInt labelCounter = new MutableInt(0);
+        MutableInt typeCounter = new MutableInt(0);
+        MutableInt propertyCounter = new MutableInt(0);
+        return new LifecycleAdapter() {
+            @Override
+            public void init() {
+                graphStore
+                    .nodePropertyKeys()
+                    .values()
+                    .stream()
+                    .flatMap(Set::stream)
+                    .distinct()
+                    .forEach(propertyKey -> tokenHolders
+                        .propertyKeyTokens()
+                        .addToken(new NamedToken(propertyKey, propertyCounter.getAndIncrement())));
+
+                graphStore
+                    .relationshipPropertyKeys()
+                    .forEach(propertyKey -> tokenHolders
+                        .propertyKeyTokens()
+                        .addToken(new NamedToken(propertyKey, propertyCounter.getAndIncrement())));
+
+                graphStore
+                    .nodeLabels()
+                    .forEach(nodeLabel -> tokenHolders
+                        .labelTokens()
+                        .addToken(new NamedToken(nodeLabel.name(), labelCounter.getAndIncrement())));
+
+                graphStore
+                    .relationshipTypes()
+                    .forEach(relType -> tokenHolders
+                        .relationshipTypeTokens()
+                        .addToken(new NamedToken(relType.name(), typeCounter.getAndIncrement())));
+            }
+        };
     }
 
     @Override
