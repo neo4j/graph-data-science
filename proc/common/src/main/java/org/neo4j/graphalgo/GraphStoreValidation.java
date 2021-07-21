@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.graphalgo;
 
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConfigurableSeedConfig;
 import org.neo4j.graphalgo.config.FeaturePropertiesConfig;

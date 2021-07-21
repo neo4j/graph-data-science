@@ -24,7 +24,7 @@ import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResu
 import org.neo4j.graphalgo.AlgorithmFactory;
 import org.neo4j.graphalgo.MutatePropertyProc;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.GraphStoreValidation;
+import org.neo4j.graphalgo.GraphStoreValidation;
 import org.neo4j.graphalgo.api.nodeproperties.DoubleArrayNodeProperties;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
