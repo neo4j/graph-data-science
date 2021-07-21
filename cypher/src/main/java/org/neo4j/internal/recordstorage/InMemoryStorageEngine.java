@@ -21,6 +21,7 @@ package org.neo4j.internal.recordstorage;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.counts.CountsAccessor;
+import org.neo4j.gds.storageengine.InMemoryCommandCreationContext;
 import org.neo4j.gds.storageengine.InMemoryCountStore;
 import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -230,7 +231,7 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
 
     @Override
     public CommandCreationContext newCommandCreationContext(MemoryTracker memoryTracker) {
-        throw new UnsupportedOperationException();
+        return new InMemoryCommandCreationContext();
     }
 
     @Override
