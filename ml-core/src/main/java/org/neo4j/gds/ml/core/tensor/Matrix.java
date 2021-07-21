@@ -59,6 +59,19 @@ public class Matrix extends Tensor<Matrix> {
         setDataAt(row * columns + column, newValue);
     }
 
+    public void setRow(int row, double[] values) {
+        if (values.length != columns) {
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "Input vector dimension is unequal to column count of the matrix. Got %d, but expected %d.",
+                    columns,
+                    values.length
+                ));
+        }
+
+        System.arraycopy(values, 0, data, row * columns, columns);
+    }
+
     public void addDataAt(int row, int column, double newValue) {
         updateDataAt(row, column, v -> v + newValue);
     }

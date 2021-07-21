@@ -179,6 +179,23 @@ class MatrixTest {
     }
 
     @Test
+    void setRow() {
+        var matrix = Matrix.create(0, 3, 2);
+
+        matrix.setRow(1, new double[] {42, 99});
+
+        assertThat(matrix).isEqualTo(new Matrix(new double[] {0,0, 42, 99, 0,0}, 3, 2));
+    }
+
+    @Test
+    void failSettingInvalidRow() {
+        var matrix = Matrix.create(0, 3, 2);
+        assertThatThrownBy(() -> matrix.setRow(1, new double[]{42}))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Input vector dimension is unequal to column count of the matrix. Got 2, but expected 1.");
+    }
+
+    @Test
     void testToString() {
         Matrix matrix = new Matrix(new double[]{1, 2, 3, 4}, 2, 2);
 
