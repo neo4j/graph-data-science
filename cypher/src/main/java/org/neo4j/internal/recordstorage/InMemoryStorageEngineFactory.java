@@ -266,6 +266,6 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
     @Override
     public CommandReaderFactory commandReaderFactory() {
-        throw new UnsupportedOperationException();
+        return InMemoryStorageCommandReaderFactory.INSTANCE;
     }
 }
