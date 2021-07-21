@@ -30,14 +30,9 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
-import org.neo4j.graphalgo.louvain.LouvainMutateProc;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +41,6 @@ import java.util.function.Consumer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.withPrecision;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
 
 class FeaturePipelineTest extends BaseProcTest {
     private static List<NodeLabel> NODE_LABELS = List.of(NodeLabel.of("N"));
@@ -86,7 +80,13 @@ class FeaturePipelineTest extends BaseProcTest {
     // add several linkFeatureSteps + assert that linkFeatures computed correct
     @Test
     void singleLinkFeatureStep() {
-        applyOnProcedure(caller -> {
+        // a-b
+        // a-c
+        // a-d
+        // a-b
+        // a-c
+        // a-d
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
             pipeline.addLinkFeature(
@@ -114,7 +114,13 @@ class FeaturePipelineTest extends BaseProcTest {
 
     @Test
     void multipleLinkFeatureStep() {
-        applyOnProcedure(caller -> {
+        // a-b
+        // a-c
+        // a-d
+        // a-b
+        // a-c
+        // a-d
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
             pipeline.addLinkFeature(
@@ -152,7 +158,7 @@ class FeaturePipelineTest extends BaseProcTest {
 
     @Test
     void testProcedureAndLinkFeatures() {
-        applyOnProcedure(caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
 
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
@@ -162,7 +168,12 @@ class FeaturePipelineTest extends BaseProcTest {
                 Map.of("featureProperties", List.of("pageRank"))
             );
 
-            var expectedPageRanks = List.of(1.8445425214324187, 0.6668064514098416, 0.6668064514098416, 0.6668064514098416);
+            var expectedPageRanks = List.of(
+                1.8445425214324187,
+                0.6668064514098416,
+                0.6668064514098416,
+                0.6668064514098416
+            );
 
             var expected = HugeObjectArray.of(
                 new double[]{expectedPageRanks.get(0) * expectedPageRanks.get(1)},
@@ -185,7 +196,7 @@ class FeaturePipelineTest extends BaseProcTest {
 
     @Test
     void validateLinkFeatureSteps() {
-        applyOnProcedure(caller -> {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
             pipeline.addLinkFeature(
@@ -204,19 +215,4 @@ class FeaturePipelineTest extends BaseProcTest {
         });
     }
 
-    void applyOnProcedure(Consumer<? super AlgoBaseProc<?, ?, ?>> func) {
-        try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(db)) {
-            // TODO: replace with for example LinkPrediction.train procedure (although maybe not worth it)
-            AlgoBaseProc<?, ?, ?> proc = new LouvainMutateProc(); // any proc really, just highjacking state
-
-            proc.procedureTransaction = transactions.tx();
-            proc.transaction = transactions.ktx();
-            proc.api = db;
-            proc.callContext = ProcedureCallContext.EMPTY;
-            proc.log = new TestLog();
-            proc.progressTracker = EmptyProgressEventTracker.INSTANCE;
-
-            func.accept(proc);
-        }
-    }
 }

@@ -23,22 +23,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
-import org.neo4j.graphalgo.louvain.LouvainMutateProc;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
-import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
+import static org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils.applyOnProcedure;
 
 class ProcedureStepTest extends BaseProcTest {
 
@@ -69,7 +62,7 @@ class ProcedureStepTest extends BaseProcTest {
     @Test
     void testInvokeProc() {
         var step = new ProcedureStep("pageRank", Map.of("mutateProperty", "foo"));
-        applyOnProcedure(proc -> {
+        applyOnProcedure(db, proc -> {
             step.execute(proc, "g");
         });
         String streamQuery = "CALL gds.graph.streamNodeProperties('g', ['foo'])";
@@ -79,21 +72,5 @@ class ProcedureStepTest extends BaseProcTest {
             }
             assertFalse(result.hasNext());
         });
-    }
-
-    void applyOnProcedure(Consumer<? super AlgoBaseProc<?, ?, ?>> func) {
-        try (GraphDatabaseApiProxy.Transactions transactions = newKernelTransaction(db)) {
-            // TODO: replace with for example LinkPrediction.train procedure (although maybe not worth it)
-            AlgoBaseProc<?, ?, ?> proc = new LouvainMutateProc(); // any proc really, just highjacking state
-
-            proc.procedureTransaction = transactions.tx();
-            proc.transaction = transactions.ktx();
-            proc.api = db;
-            proc.callContext = ProcedureCallContext.EMPTY;
-            proc.log = new TestLog();
-            proc.progressTracker = EmptyProgressEventTracker.INSTANCE;
-
-            func.accept(proc);
-        }
     }
 }
