@@ -79,15 +79,15 @@ public final class StoredModelsExtension extends ExtensionFactory<StoredModelsEx
             StoredModel model;
             try {
                 model = new StoredModel(storedModelPath);
-                if (ModelCatalog.exists(model.creator(), model.name())) {
+                try {
+                    ModelCatalog.set(model);
+                } catch (IllegalArgumentException e) {
                     log.error(
                         "Cannot open stored model %s for user %s from %s. A model with the same name already exists for that user.",
                         model.name(),
                         model.creator(),
                         storedModelPath
                     );
-                } else {
-                    ModelCatalog.set(model);
                 }
             } catch (IOException e) {
                 log.error(

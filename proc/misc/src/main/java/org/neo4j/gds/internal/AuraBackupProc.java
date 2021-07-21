@@ -112,7 +112,8 @@ public class AuraBackupProc implements CallableProcedure {
             backupRoot,
             InternalProceduresUtil.lookup(ctx, Log.class),
             timeoutInSeconds,
-            InternalProceduresUtil.lookup(ctx, AllocationTracker.class)
+            InternalProceduresUtil.lookup(ctx, AllocationTracker.class),
+            "Backup"
         );
 
         return asRawIterator(result.stream().map(row -> new AnyValue[]{

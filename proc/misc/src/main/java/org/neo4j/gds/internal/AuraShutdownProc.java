@@ -21,13 +21,11 @@ package org.neo4j.gds.internal;
 
 import org.neo4j.collection.RawIterator;
 import org.neo4j.configuration.Config;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.loading.CatalogRequest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.ProgressTimer;
-import org.neo4j.graphalgo.core.utils.io.file.GraphStoreExporterUtil;
-import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.DefaultParameterValue;
@@ -43,11 +41,8 @@ import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Values;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.helpers.collection.Iterators.asRawIterator;
 import static org.neo4j.internal.kernel.api.procs.Neo4jTypes.NTBoolean;
 import static org.neo4j.internal.kernel.api.procs.Neo4jTypes.NTInteger;
@@ -119,85 +114,20 @@ public class AuraShutdownProc implements CallableProcedure {
         long timeoutInSeconds,
         AllocationTracker allocationTracker
     ) {
-        log.info("Preparing for shutdown");
-        var timer = ProgressTimer.start();
-        try (timer) {
-            var success = exportAllGraphStores(neo4jConfig, log, allocationTracker);
-            if(!success) {
-                return false;
-            }
-        }
+        var exportPath = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
+        var result = BackupAndRestore.backup(
+            exportPath,
+            log,
+            timeoutInSeconds,
+            store -> {
+                var catalogRequest = CatalogRequest.of(store.userName(), store.graphStore().databaseId());
+                GraphStoreCatalog.remove(catalogRequest, store.config().graphName(), graph -> {}, false);
+            },
+            model -> ModelCatalog.drop(model.creator(), model.name(), false),
+            allocationTracker,
+            "Shutdown"
+        );
 
-        var elapsedTimeInSeconds = TimeUnit.MILLISECONDS.toSeconds(timer.getDuration());
-        if (elapsedTimeInSeconds > timeoutInSeconds) {
-            log.warn(
-                "Shutdown took too long, the actual time of %d seconds is greater than the provided timeout of %d seconds",
-                elapsedTimeInSeconds,
-                timeoutInSeconds
-            );
-        } else {
-            log.info(
-                "Shutdown happened within the given timeout, it took %d seconds and the provided timeout as %d seconds.",
-                elapsedTimeInSeconds,
-                timeoutInSeconds
-            );
-        }
-        return true;
-    }
-
-    private static boolean exportAllGraphStores(
-        Config neo4jConfig,
-        Log log,
-        AllocationTracker allocationTracker
-    ) {
-        var failedExports = GraphStoreCatalog.getAllGraphStores()
-            .flatMap(store -> {
-                var createConfig = store.config();
-                var graphStore = store.graphStore();
-                try {
-                    var config = ImmutableGraphStoreToFileExporterConfig
-                        .builder()
-                        .includeMetaData(true)
-                        .autoload(true)
-                        .exportName(createConfig.graphName())
-                        .username(store.userName())
-                        .build();
-
-                    GraphStoreExporterUtil.runGraphStoreExportToCsv(
-                        graphStore,
-                        neo4jConfig,
-                        config,
-                        log,
-                        allocationTracker
-                    );
-                    GraphStoreCatalog.remove(CatalogRequest.of(store.userName(), graphStore.databaseId()), store.config().graphName(), graph -> {}, false);
-                    return Stream.empty();
-                } catch (Exception e) {
-                    return Stream.of(ImmutableFailedExport.of(e, store.userName(), createConfig.graphName()));
-                }
-            })
-            .collect(Collectors.toList());
-
-        for (var failedExport : failedExports) {
-            log.warn(
-                formatWithLocale(
-                    "GraphStore persistence failed on graph %s for user %s",
-                    failedExport.graphName(),
-                    failedExport.userName()
-                ),
-                failedExport.exception()
-            );
-        }
-
-        return failedExports.isEmpty();
-    }
-
-    @ValueClass
-    interface FailedExport {
-        Exception exception();
-
-        String userName();
-
-        String graphName();
+        return result.stream().allMatch(BackupAndRestore.BackupResult::done);
     }
 }

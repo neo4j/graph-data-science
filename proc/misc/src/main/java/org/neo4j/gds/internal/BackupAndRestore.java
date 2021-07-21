@@ -25,6 +25,7 @@ import org.neo4j.gds.model.storage.ModelToFileExporter;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.io.file.CsvGraphStoreImporter;
@@ -40,8 +41,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -86,28 +89,60 @@ public final class BackupAndRestore {
         Path backupRoot,
         Log log,
         long timeoutInSeconds,
-        AllocationTracker allocationTracker
+        AllocationTracker allocationTracker,
+        String taskName
     ) {
-        log.info("Preparing for backup");
+        return backup(
+            backupRoot,
+            log,
+            timeoutInSeconds,
+            ignore -> {},
+            ignore -> {},
+            allocationTracker,
+            taskName
+        );
+    }
+
+    static List<BackupResult> backup(
+        Path backupRoot,
+        Log log,
+        long timeoutInSeconds,
+        Consumer<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> graphOnSuccess,
+        Consumer<Model<?, ?>> modelOnSuccess,
+        AllocationTracker allocationTracker,
+        String taskName
+    ) {
+        log.info("Preparing for %s", taskName.toLowerCase(Locale.ENGLISH));
 
         var result = new ArrayList<BackupResult>();
 
         var timer = ProgressTimer.start();
         try (timer) {
-            result.addAll(backupGraphStores(backupRoot.resolve(GRAPHS_DIR), log, allocationTracker));
-            result.addAll(backupModels(backupRoot.resolve(MODELS_DIR), log));
+            result.addAll(backupGraphStores(
+                backupRoot.resolve(GRAPHS_DIR),
+                graphOnSuccess,
+                log,
+                allocationTracker
+            ));
+            result.addAll(backupModels(
+                backupRoot.resolve(MODELS_DIR),
+                modelOnSuccess,
+                log
+            ));
         }
 
         var elapsedTimeInSeconds = TimeUnit.MILLISECONDS.toSeconds(timer.getDuration());
         if (elapsedTimeInSeconds > timeoutInSeconds) {
             log.warn(
-                "Backup took too long, the actual time of %d seconds is greater than the provided timeout of %d seconds",
+                "%s took too long, the actual time of %d seconds is greater than the provided timeout of %d seconds",
+                taskName,
                 elapsedTimeInSeconds,
                 timeoutInSeconds
             );
         } else {
             log.info(
-                "Backup finished within the given timeout, it took %d seconds and the provided timeout was %d seconds.",
+                "%s finished within the given timeout, it took %d seconds and the provided timeout was %d seconds.",
+                taskName,
                 elapsedTimeInSeconds,
                 timeoutInSeconds
             );
@@ -128,21 +163,19 @@ public final class BackupAndRestore {
 
     private static List<BackupResult> backupGraphStores(
         Path backupRoot,
+        Consumer<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> onSuccess,
         Log log,
         AllocationTracker allocationTracker
     ) {
         DIRECTORY_IS_WRITABLE.validate(backupRoot);
         return GraphStoreCatalog.getAllGraphStores()
             .flatMap(store -> {
-                var createConfig = store.config();
-                var graphStore = store.graphStore();
-
                 try {
                     var config = ImmutableGraphStoreToFileExporterConfig
                         .builder()
                         .includeMetaData(true)
                         .autoload(true)
-                        .exportName(createConfig.graphName())
+                        .exportName(store.config().graphName())
                         .username(store.userName())
                         .build();
 
@@ -150,7 +183,7 @@ public final class BackupAndRestore {
 
                     var timer = ProgressTimer.start();
                     GraphStoreExporterUtil.runGraphStoreExportToCsv(
-                        graphStore,
+                        store.graphStore(),
                         backupPath,
                         config,
                         log,
@@ -158,12 +191,14 @@ public final class BackupAndRestore {
                     );
                     timer.stop();
 
+                    onSuccess.accept(store);
+
                     return Stream.of(BackupResult.successfulGraph(backupPath, timer));
                 } catch (Exception e) {
                     log.warn(
                         formatWithLocale(
-                            "Graph backup failed for graph '%s' for user '%s'",
-                            createConfig.graphName(),
+                            "Persisting graph '%s' for user '%s' failed",
+                            store.config().graphName(),
                             store.userName()
                         ),
                         e
@@ -173,7 +208,11 @@ public final class BackupAndRestore {
             }).collect(Collectors.toList());
     }
 
-    private static List<BackupResult> backupModels(Path backupRoot, Log log) {
+    private static List<BackupResult> backupModels(
+        Path backupRoot,
+        Consumer<Model<?, ?>> onSuccess,
+        Log log
+    ) {
         DIRECTORY_IS_WRITABLE.validate(backupRoot);
         return ModelCatalog.getAllModels().flatMap(model -> {
             try {
@@ -184,11 +223,13 @@ public final class BackupAndRestore {
                 ModelToFileExporter.toFile(modelRoot, model);
                 timer.stop();
 
+                onSuccess.accept(model);
+
                 return Stream.of(BackupResult.successfulModel(modelRoot, timer));
             } catch (Exception e) {
                 log.warn(
                     formatWithLocale(
-                        "Model backup failed on model '%s' for user '%s'",
+                        "Persisting model '%s' for user '%s' failed",
                         model.name(),
                         model.creator()
                     ),
@@ -205,7 +246,7 @@ public final class BackupAndRestore {
                 .filter(graphDir -> Files.exists(graphDir.resolve(AutoloadFlagVisitor.AUTOLOAD_FILE_NAME)))
                 .forEach(path -> restoreGraph(path, log));
         } catch (Exception e) {
-            log.warn("Graph restore failed", e);
+            log.warn("Restoring graphs failed", e);
         }
     }
 
