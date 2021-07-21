@@ -23,6 +23,8 @@ import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.helpers.DatabaseReadOnlyChecker;
 import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
+import org.neo4j.gds.storageengine.InMemoryStoreVersion;
+import org.neo4j.gds.storageengine.InMemoryVersionCheck;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.id.IdController;
 import org.neo4j.internal.id.IdGeneratorFactory;
@@ -84,12 +86,12 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         LogService logService,
         PageCacheTracer pageCacheTracer
     ) {
-        throw new UnsupportedOperationException();
+        return new InMemoryVersionCheck();
     }
 
     @Override
     public StoreVersion versionInformation(String storeVersion) {
-        throw new UnsupportedOperationException();
+        return new InMemoryStoreVersion();
     }
 
     @Override
