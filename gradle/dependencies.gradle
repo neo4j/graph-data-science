@@ -95,6 +95,8 @@ ext {
         'neo4j-storage-engine-api',
         'neo4j-token-api',
         'neo4j-values',
+        'neo4j-lock',
+        'neo4j-diagnostics',
 
         // more modules to choose from
         // 'cypher-ast-factory',
@@ -118,7 +120,6 @@ ext {
         // 'neo4j-cypher',
         // 'neo4j-data-collector',
         // 'neo4j-dbms',
-        // 'neo4j-diagnostics',
         // 'neo4j-exceptions',
         // 'neo4j-expressions',
         // 'neo4j-fabric',
@@ -127,7 +128,6 @@ ext {
         // 'neo4j-graph-algo',
         // 'neo4j-import-tool',
         // 'neo4j-label-index',
-        // 'neo4j-lock',
         // 'neo4j-lucene-index',
         // 'neo4j-native',
         // 'neo4j-parser',
