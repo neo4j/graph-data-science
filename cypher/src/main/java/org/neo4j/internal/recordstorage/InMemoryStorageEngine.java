@@ -21,9 +21,11 @@ package org.neo4j.internal.recordstorage;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.counts.CountsAccessor;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.storageengine.InMemoryCommandCreationContext;
 import org.neo4j.gds.storageengine.InMemoryCountStore;
 import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
+import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -117,7 +119,10 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
         TxStateVisitor.Decorator additionalTxStateVisitor,
         CursorContext cursorContext,
         MemoryTracker memoryTracker
-    ) {
+    ) throws KernelException {
+        try (var txStateVisitor = new InMemoryTransactionStateVisitor(graphStore, tokenHolders)) {
+            txState.accept(txStateVisitor);
+        }
     }
 
     @Override
