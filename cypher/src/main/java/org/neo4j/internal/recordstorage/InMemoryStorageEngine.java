@@ -20,6 +20,7 @@
 package org.neo4j.internal.recordstorage;
 
 import org.neo4j.counts.CountsAccessor;
+import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
 import org.neo4j.internal.diagnostics.DiagnosticsLogger;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.KernelVersion;
@@ -50,7 +51,10 @@ import java.util.List;
 
 public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
 
-    public InMemoryStorageEngine() {
+    private final InMemoryMetaDataProvider metaDataProvider;
+
+    public InMemoryStorageEngine(InMemoryMetaDataProvider metaDataProvider) {
+        this.metaDataProvider = metaDataProvider;
     }
 
     @Override
@@ -130,7 +134,7 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
 
     @Override
     public StoreId getStoreId() {
-        throw new UnsupportedOperationException();
+        return metaDataProvider.getStoreId();
     }
 
     @Override
@@ -150,7 +154,7 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
 
     @Override
     public MetadataProvider metadataProvider() {
-        throw new UnsupportedOperationException();
+        return metaDataProvider;
     }
 
     @Override

@@ -22,6 +22,7 @@ package org.neo4j.internal.recordstorage;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.helpers.DatabaseReadOnlyChecker;
+import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
 import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
 import org.neo4j.internal.id.IdController;
 import org.neo4j.internal.id.IdGeneratorFactory;
@@ -66,7 +67,13 @@ import java.util.UUID;
 @ServiceProvider
 public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
-    public static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory";
+    private static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory";
+
+    private final InMemoryMetaDataProvider metaDataProvider;
+
+    public InMemoryStorageEngineFactory() {
+        metaDataProvider = new InMemoryMetaDataProvider();
+    }
 
     @Override
     public StoreVersionCheck versionCheck(
@@ -143,14 +150,14 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         PageCache pageCache,
         CursorContext cursorContext
     ) {
-        throw new UnsupportedOperationException();
+        return metaDataProvider.transactionIdStore();
     }
 
     @Override
     public LogVersionRepository readOnlyLogVersionRepository(
         DatabaseLayout databaseLayout, PageCache pageCache, CursorContext cursorContext
     ) {
-        throw new UnsupportedOperationException();
+        return metaDataProvider.logVersionRepository();
     }
 
     @Override
@@ -161,7 +168,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         PageCache pageCache,
         PageCacheTracer cacheTracer
     ) {
-        throw new UnsupportedOperationException();
+        return metaDataProvider;
     }
 
     @Override
