@@ -19,69 +19,99 @@
  */
 package org.neo4j.gds.ml.linkmodels;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
-import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
-import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedMutateProc;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
-import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
-import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.datasets.CommunityDbCreator;
-import org.neo4j.graphalgo.datasets.Cora;
-import org.neo4j.graphalgo.datasets.DatasetManager;
-import org.neo4j.graphalgo.functions.AsNodeFunc;
+import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import org.neo4j.gds.model.catalog.ModelListProc;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.beta.fastrp.FastRPExtendedMutateProc;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
+import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.graphalgo.junit.annotation.Edition;
 import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
-import org.neo4j.graphdb.Result;
 
-import java.nio.file.Path;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.IntFunction;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.QueryRunner.runQueryWithResultConsumer;
-import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.registerFunctions;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.registerProcedures;
-import static org.neo4j.graphalgo.datasets.CoraSchema.CITES_TYPE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdsEditionTest(Edition.EE)
-class LinkPredictionCoraIntegrationTest {
+class LinkPredictionIntegrationTest extends BaseProcTest {
 
-    private static final String GRAPH_NAME = "g";
+    // Five cliques of size 2, 3, or 4
+    private static final String GRAPH =
+        "CREATE " +
+        "(a:N {z: 0}), " +
+        "(b:N {z: 0}), " +
+        "(c:N {z: 0}), " +
+        "(d:N {z: 0}), " +
+        "(e:N {z: 100}), " +
+        "(f:N {z: 100}), " +
+        "(g:N {z: 100}), " +
+        "(h:N {z: 200}), " +
+        "(i:N {z: 200}), " +
+        "(j:N {z: 300}), " +
+        "(k:N {z: 300}), " +
+        "(l:N {z: 300}), " +
+        "(m:N {z: 400}), " +
+        "(n:N {z: 400}), " +
+        "(o:N {z: 400}), " +
+
+        "(a)-[:REL {label: 1}]->(b), " +
+        "(a)-[:REL {label: 1}]->(c), " +       
+        "(a)-[:REL {label: 1}]->(d), " +
+        "(b)-[:REL {label: 1}]->(c), " +
+        "(b)-[:REL {label: 1}]->(d), " +       
+        "(c)-[:REL {label: 1}]->(d), " +
+
+        "(e)-[:REL {label: 1}]->(f), " +       
+        "(e)-[:REL {label: 1}]->(g), " +
+        "(f)-[:REL {label: 1}]->(g), " +
+
+        "(h)-[:REL {label: 1}]->(i), " +
+
+        "(j)-[:REL {label: 1}]->(k), " +
+        "(j)-[:REL {label: 1}]->(l), " +
+        "(k)-[:REL {label: 1}]->(l), " +
+
+        "(m)-[:REL {label: 1}]->(n), " +       
+        "(m)-[:REL {label: 1}]->(o), " +       
+        "(n)-[:REL {label: 1}]->(o), " +
+
+        "(a)-[:REL {label: 0}]->(e), " +
+        "(a)-[:REL {label: 0}]->(o), " +
+        "(b)-[:REL {label: 0}]->(e), " +
+        "(e)-[:REL {label: 0}]->(i), " +
+        "(e)-[:REL {label: 0}]->(o), " +
+        "(e)-[:REL {label: 0}]->(n), " +
+        "(h)-[:REL {label: 0}]->(k), " +
+        "(h)-[:REL {label: 0}]->(m), " +
+        "(i)-[:REL {label: 0}]->(j), " +
+        "(k)-[:REL {label: 0}]->(m), " +
+        "(k)-[:REL {label: 0}]->(o), " +
+        "(a)-[:REL {label: 0}]->(f), " +
+        "(b)-[:REL {label: 0}]->(f), " +
+        "(i)-[:REL {label: 0}]->(k), " +
+        "(j)-[:REL {label: 0}]->(o), " +
+        "(k)-[:REL {label: 0}]->(o)";
+
+    private static final String GRAPH_NAME = "graph";
     private static final String MODEL_NAME = "model";
+    private static final String TRAIN_GRAPH_REL_TYPE = "REL_TRAINGRAPH";
+    private static final String TEST_SET_REL_TYPE = "REL_TESTSET";
+    private static final String TRAIN_SET_REL_TYPE = "REL_TRAINSET";
+    private static final String EMBEDDING_GRAPH_REL_TYPE = "REL_EMBEDDING";
+    private static final String EMBEDDING_FEATURE = "embedding";
+    private static final String PREDICTED_REL_TYPE = "REL_PREDICTED";
 
-    // Minimum score ('test') for the AUCPR metric
-    private static final String TRAIN_GRAPH_REL_TYPE = "CITES_TRAINGRAPH";
-    private static final String TEST_SET_REL_TYPE = "CITES_TESTSET";
-    private static final String TRAIN_SET_REL_TYPE = "CITES_TRAINSET";
-    private static final String EMBEDDING_GRAPH_REL_TYPE = "CITES_EMBEDDING";
-    private static final String EMBEDDING_FEATURE = "frp";
-    private static final String PREDICTED_REL_TYPE = "CITES_PREDICTED";
-    private static final int NUMBER_OF_FEATURES = 1433;
-    private static final double MIN_AUCPR_TEST_SCORE = 0.25;
-
-    private DatasetManager datasetManager;
-    private GdsGraphDatabaseAPI cora;
 
     @BeforeEach
-    void setUp(@TempDir Path tempDir) throws Exception {
-        this.datasetManager = new DatasetManager(tempDir, CommunityDbCreator.getInstance());
-        this.cora = datasetManager.openDb(Cora.ID);
-
+    void setUp() throws Exception {
         registerProcedures(
-            cora,
             GraphCreateProc.class,
             FastRPMutateProc.class,
             FastRPExtendedMutateProc.class,
@@ -92,13 +122,14 @@ class LinkPredictionCoraIntegrationTest {
             ModelListProc.class
         );
 
-        registerFunctions(cora, AsNodeFunc.class);
+        registerFunctions(AsNodeFunc.class);
+
+        runQuery(GRAPH);
     }
 
     @AfterEach
     void tearDown() {
         ModelCatalog.removeAllLoadedModels();
-        datasetManager.closeDb(cora);
     }
 
     @Test
@@ -114,22 +145,14 @@ class LinkPredictionCoraIntegrationTest {
     }
 
     private void createGraph() {
-        IntFunction<String> nodePropertyTemplate = (i) -> formatWithLocale("w%d: {defaultValue: 0.0}", i);
-        var nodeProperties = IntStream.range(0, NUMBER_OF_FEATURES)
-            .mapToObj(nodePropertyTemplate)
-            .collect(Collectors.joining(", "));
+        var graphCreateQuery =
+            "CALL gds.graph.create(" +
+            "  $graphName," +
+            "  {N: {properties: 'z'}}," +
+            "  {REL: {orientation: 'UNDIRECTED', properties: 'label'}}" +
+            ");";
 
-        var graphCreateQuery = "CALL gds.graph.create(" +
-                  "  $graphName," +
-                  "  {" +
-                  "     Paper : {" +
-                  "         properties: {"+ nodeProperties +"}" +
-                  "     }" +
-                  "  }," +
-                  "  {CITES: {orientation: 'UNDIRECTED'}}" +
-                  ");";
-
-        runQuery(cora, graphCreateQuery, Map.of("graphName", GRAPH_NAME));
+        runQuery(graphCreateQuery, Map.of("graphName", GRAPH_NAME));
     }
 
     private void testSplit() {
@@ -143,7 +166,6 @@ class LinkPredictionCoraIntegrationTest {
             "})";
 
         runQuery(
-            cora,
             testSplitQuery,
             Map.of(
                 "graphName", GRAPH_NAME,
@@ -165,7 +187,6 @@ class LinkPredictionCoraIntegrationTest {
             "})";
 
         runQuery(
-            cora,
             trainSplitQuery,
             Map.of(
                 "graphName", GRAPH_NAME,
@@ -177,11 +198,6 @@ class LinkPredictionCoraIntegrationTest {
     }
 
     private void fastRPExtendedEmbeddings() {
-        IntFunction<String> featureProperty = (i) -> formatWithLocale("'w%d'", i);
-        var featureProperties = IntStream.range(0, NUMBER_OF_FEATURES)
-            .mapToObj(featureProperty)
-            .collect(Collectors.joining(", "));
-
         var fastRpQuery = "CALL gds.beta.fastRPExtended.mutate($graphName, " +
                           "{" +
                           "  relationshipTypes: [$embeddingRelType]," +
@@ -189,10 +205,10 @@ class LinkPredictionCoraIntegrationTest {
                           "  embeddingDimension: 512, " +
                           "  propertyDimension: 256, " +
                           "  randomSeed: 42, " +
-                          "  featureProperties: [" +featureProperties+ "]" +
+                          "  featureProperties: ['z']" +
                           "})";
 
-        runQuery(cora, fastRpQuery, Map.of(
+        runQuery(fastRpQuery, Map.of(
             "graphName", GRAPH_NAME,
             "embeddingRelType", EMBEDDING_GRAPH_REL_TYPE,
             "mutateProperty", EMBEDDING_FEATURE
@@ -207,21 +223,12 @@ class LinkPredictionCoraIntegrationTest {
             "  modelName: $modelName," +
             "  featureProperties: [$embeddingFeature], " +
             "  validationFolds: 5, " +
-            "  negativeClassWeight: 673.6," + // (2707 * 2706 - 10858) / 10858
+            "  negativeClassWeight: 0.01," +
             "  randomSeed: 2," +
-            "  concurrency: 1," +
-            "  params: [" +
-            "    {penalty: 9.999999999999991E-5, maxEpochs: 1000}, " +
-            "    {penalty: 0.3593813663804625, maxEpochs: 1000}, " +
-            "    {penalty: 2.7825594022071267, maxEpochs: 1000}, " +
-            "    {penalty: 21.544346900318843, maxEpochs: 1000}," +
-            "    {penalty: 10000.00000000001, maxEpochs: 1000}" +
-            "  ]" +
-            "}) " +
-            "YIELD modelInfo " +
-            "RETURN modelInfo.metrics.AUCPR.outerTrain, modelInfo.metrics.AUCPR.test, modelInfo.bestParameters";
+            "  params: [{penalty: 0.3593813663804625, maxEpochs: 1000}]" +
+            "})";
 
-        runQuery(cora, trainQuery, Map.of(
+        runQuery(trainQuery, Map.of(
             "graphName", GRAPH_NAME,
             "trainSetRelType", TRAIN_SET_REL_TYPE,
             "testSetRelType", TEST_SET_REL_TYPE,
@@ -233,16 +240,16 @@ class LinkPredictionCoraIntegrationTest {
     private void predict() {
         var predictQuery =
             "CALL gds.alpha.ml.linkPrediction.predict.mutate($graphName, { " +
-            "  relationshipTypes: [$citesRelType], " +
+            "  relationshipTypes: [$relType], " +
             "  modelName: $modelName," +
             "  mutateRelationshipType: $predictRelType, " +
-            "  topN: 10000, " +
+            "  topN: 1, " +
             "  threshold: 0.4 " +
             "})";
 
-        runQuery(cora, predictQuery, Map.of(
+        runQuery(predictQuery, Map.of(
             "graphName", GRAPH_NAME,
-            "citesRelType", CITES_TYPE,
+            "relType", "REL",
             "modelName", MODEL_NAME,
             "predictRelType", PREDICTED_REL_TYPE
         ));
@@ -253,35 +260,8 @@ class LinkPredictionCoraIntegrationTest {
             " CALL gds.beta.model.list($modelName) YIELD modelInfo" +
             " RETURN modelInfo.metrics.AUCPR.test AS score";
 
-        runQueryWithRowConsumer(cora, scoreQuery, Map.of("modelName", MODEL_NAME), (tx, row) -> {
-            assertThat(row.getNumber("score").doubleValue()).isGreaterThan(MIN_AUCPR_TEST_SCORE);
+        runQueryWithRowConsumer(scoreQuery, Map.of("modelName", MODEL_NAME), (row) -> {
+            assertThat(row.getNumber("score").doubleValue()).isCloseTo(0.82D, Offset.offset(1e-2));
         });
-    }
-
-    private void getResults() {
-        var predictedLinks =
-            "CALL gds.graph.streamRelationshipProperty($graphName, 'probability')" +
-            " YIELD sourceNodeId, targetNodeId, relationshipType, propertyValue" +
-            " RETURN distinct(propertyValue) AS predictionStrength" +
-            " ORDER BY predictionStrength DESC";
-
-        var counter = new AtomicInteger(0);
-        runQueryWithResultConsumer(
-            cora,
-            predictedLinks,
-            Map.of("graphName", GRAPH_NAME),
-            (result) -> {
-                //noinspection CatchMayIgnoreException
-                try {
-                    result.accept((Result.ResultVisitor<Exception>) row -> {
-                        counter.incrementAndGet();
-                        return true;
-                    });
-                } catch (Exception e) {
-                    fail(e.getMessage());
-                }
-            }
-        );
-        assertThat(counter.get()).isGreaterThan(1);
     }
 }
