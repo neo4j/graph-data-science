@@ -37,6 +37,8 @@ shadowJar {
     relocate('io.jsonwebtoken.', 'org.neo4j.gds.shaded.io.jsonwebtoken.')
     relocate('pabeles', 'org.neo4j.gds.shaded.pabeles')
 
+    relocate('javassist', 'org.neo4j.gds.shaded.javassist')
+
     if (project.hasProperty("gdsDropVersion")) {
         version project.property("gdsDropVersion")
     }
