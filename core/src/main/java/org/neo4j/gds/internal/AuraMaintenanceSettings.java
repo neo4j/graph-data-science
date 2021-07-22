@@ -38,4 +38,12 @@ public final class AuraMaintenanceSettings implements SettingsDeclaration {
         BOOL,
         false
     ).build();
+
+    @Description("Use maximum memory estimation in procedure memory guard.")
+    @DocumentedDefaultValue("false")
+    public static final Setting<Boolean> validate_using_max_memory_estimation = newBuilder(
+        "gds.validate_using_max_memory_estimation",
+        BOOL,
+        false
+    ).build();
 }

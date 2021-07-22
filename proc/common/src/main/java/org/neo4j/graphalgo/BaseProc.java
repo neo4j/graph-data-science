@@ -19,9 +19,12 @@
  */
 package org.neo4j.graphalgo;
 
+import org.neo4j.configuration.Config;
+import org.neo4j.gds.internal.AuraMaintenanceSettings;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.ImmutableGraphLoaderContext;
+import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -42,7 +45,6 @@ import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;
 import org.neo4j.graphalgo.core.utils.mem.ImmutableMemoryEstimationWithDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimationWithDimensions;
 import org.neo4j.graphalgo.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.progress.ProgressEventTracker;
 import org.neo4j.graphalgo.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.graphdb.Transaction;
@@ -62,6 +64,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.util.function.Predicate.isEqual;
+import static org.neo4j.graphalgo.MemoryValidation.validateMemoryUsage;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -233,30 +236,11 @@ public abstract class BaseProc {
             memoryTreeWithDimensions = runEstimation.apply(config);
         } catch (MemoryEstimationNotImplementedException ignored) {
         }
-        if (memoryTreeWithDimensions != null) {
-            validateMemoryUsage(memoryTreeWithDimensions, inspector);
-        }
-    }
 
-    private void validateMemoryUsage(
-        MemoryTreeWithDimensions memoryTreeWithDimensions,
-        FreeMemoryInspector inspector
-    ) {
-        long freeMemory = inspector.freeMemory();
-        long minBytesProcedure = memoryTreeWithDimensions.memoryTree.memoryUsage().min;
-        if (minBytesProcedure > freeMemory) {
-            String template = "Procedure was blocked since minimum estimated memory (%s) exceeds current free memory (%s).";
-            if (!GraphStoreCatalog.isEmpty()) {
-                template += formatWithLocale(
-                    " Note: there are %s graphs currently loaded into memory.",
-                    GraphStoreCatalog.graphStoresCount()
-                );
-            }
-            throw new IllegalStateException(formatWithLocale(
-                template,
-                MemoryUsage.humanReadable(minBytesProcedure),
-                MemoryUsage.humanReadable(freeMemory)
-            ));
+        if (memoryTreeWithDimensions != null) {
+            var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
+            var useMaxMemoryEstimation = neo4jConfig.get(AuraMaintenanceSettings.validate_using_max_memory_estimation);
+            validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation);
         }
     }
 
