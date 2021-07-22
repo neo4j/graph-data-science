@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.internal;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphdb.config.Configuration;
+import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
@@ -30,9 +32,12 @@ import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
+import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
+
+import java.nio.file.Path;
 
 @ServiceProvider
 public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMaintenanceExtension.Dependencies> {
@@ -53,27 +58,21 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
     public Lifecycle newInstance(ExtensionContext context, AuraMaintenanceExtension.Dependencies dependencies) {
         var enabled = dependencies.config().get(AuraMaintenanceSettings.maintenance_function_enabled);
         if (enabled) {
-            var exportLocationSetting = dependencies.config().get(GraphStoreExportSettings.export_location_setting);
-            if (exportLocationSetting == null) {
-                dependencies.logService()
-                    .getInternalLog(getClass())
-                    .warn(
-                        "The configuration %s is missing, no restore from the export location will be attempted.",
-                        GraphStoreExportSettings.export_location_setting.name()
-                    );
-            }
+            var config = dependencies.config();
+            var log = dependencies.logService().getInternalLog(getClass());
+
+            var exportLocationSetting = pathSetting(config, GraphStoreExportSettings.export_location_setting, log);
+            var backupLocationSetting = pathSetting(config, GraphStoreExportSettings.backup_location_setting, log);
 
             var registry = dependencies.globalProceduresRegistry();
             try {
                 registry.register(new AuraMaintenanceFunction(), false);
                 registry.register(new AuraShutdownProc(), false);
             } catch (ProcedureException e) {
-                dependencies.logService()
-                    .getInternalLog(getClass())
-                    .warn(e.getMessage(), e);
+                log.warn(e.getMessage(), e);
             }
 
-            if (exportLocationSetting != null) {
+            if (exportLocationSetting != null && backupLocationSetting != null) {
                 return LifecycleAdapter.onInit(() -> {
                     var jobScheduler = dependencies.jobScheduler();
                     var jobHandle = jobScheduler.schedule(
@@ -95,11 +94,23 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
     private static void restorePersistedData(Configuration neo4jConfig, LogService logService) {
         var userLog = logService.getUserLog(AuraMaintenanceExtension.class);
         var importDir = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
+        var backupDir = neo4jConfig.get(GraphStoreExportSettings.backup_location_setting);
         try {
-            BackupAndRestore.restore(importDir, userLog);
+            BackupAndRestore.restoreAndClear(importDir, backupDir, userLog);
         } catch (Exception e) {
             userLog.warn("Graph store loading failed", e);
         }
+    }
+
+    private static @Nullable Path pathSetting(Configuration config, Setting<Path> setting, Log log) {
+        var path = config.get(setting);
+        if (path == null) {
+            log.warn(
+                "The configuration %s is missing, no restore from the export location will be attempted.",
+                setting.name()
+            );
+        }
+        return path;
     }
 
     interface Dependencies {

@@ -45,6 +45,10 @@ class AuraMaintenanceExtensionTest extends BaseTest {
     @TempDir
     Path importDir;
 
+    private Path exportLocation;
+
+    private Path backupLocation;
+
     @AfterEach
     void teardown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
@@ -54,10 +58,15 @@ class AuraMaintenanceExtensionTest extends BaseTest {
     @Override
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        prepareImportDir();
+        exportLocation = importDir.resolve("export");
+        backupLocation = importDir.resolve("backup");
+
+        prepareImportDir(exportLocation);
         super.configuration(builder);
+
         builder
-            .setConfig(GraphStoreExportSettings.export_location_setting, importDir)
+            .setConfig(GraphStoreExportSettings.export_location_setting, exportLocation)
+            .setConfig(GraphStoreExportSettings.backup_location_setting, backupLocation)
             .setConfig(AuraMaintenanceSettings.maintenance_function_enabled, true)
             .removeExtensions(ext -> ext instanceof AuraMaintenanceExtension)
             .addExtension(new AuraMaintenanceExtension(true));
@@ -85,6 +94,9 @@ class AuraMaintenanceExtensionTest extends BaseTest {
         var testGraphStore = GraphStoreCatalog.get("UserA", db.databaseId(), "test-graph");
         assertThat(testGraphStore).isNotNull();
         assertGraphEquals(expectedGraph, testGraphStore.graphStore().getUnion());
+
+        assertThat(exportLocation).isEmptyDirectory();
+        assertThat(backupLocation).isDirectoryContaining("glob:**/backup-*-restored");
     }
 
     @Test
@@ -99,15 +111,18 @@ class AuraMaintenanceExtensionTest extends BaseTest {
 
         assertThat(bobModels).hasSize(1);
         assertThat(bobModels.stream().findFirst().get().name()).isEqualTo("modelBob");
+
+        assertThat(exportLocation).isEmptyDirectory();
+        assertThat(backupLocation).isDirectoryContaining("glob:**/backup-*-restored");
     }
 
-    private void prepareImportDir() {
+    private void prepareImportDir(Path exportLocation) {
         try {
             var uri = Objects
                 .requireNonNull(getClass().getClassLoader().getResource("AuraMaintenanceExtensionTest"))
                 .toURI();
             var resourceDirectory = Paths.get(uri);
-            PathUtils.copyDirectory(resourceDirectory, importDir);
+            PathUtils.copyDirectory(resourceDirectory, exportLocation);
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);
         }
