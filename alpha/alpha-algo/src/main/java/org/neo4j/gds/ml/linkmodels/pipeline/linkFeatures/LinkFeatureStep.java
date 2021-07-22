@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
@@ -34,6 +35,8 @@ public interface LinkFeatureStep {
      * @param offset the start offset in each double[] where the features should be added
      */
     void addFeatures(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset);
+
+    void addFeature(long sourceNodeId, long targetNodeId, List<NodeProperties> nodeProperties, int startOffset, double[] linkFeature);
 
     /**
      * The expected size of the feature

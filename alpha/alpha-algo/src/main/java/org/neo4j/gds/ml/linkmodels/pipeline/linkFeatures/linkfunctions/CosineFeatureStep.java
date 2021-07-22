@@ -54,61 +54,66 @@ public class CosineFeatureStep implements LinkFeatureStep {
     }
 
     @Override
-    public void addFeatures(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset) {
+    public void addFeatures(Graph graph, HugeObjectArray<double[]> linkFeatures, int featureOffset) {
         var currentRelationshipOffset = new MutableLong(0);
-        var properties = featureProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
+
+        var nodeProperties = featureProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
 
         graph.forEachNode(nodeId -> {
             graph.forEachRelationship(nodeId, ((sourceNodeId, targetNodeId) -> {
-                var currentFeatures = linkFeatures.get(currentRelationshipOffset.getValue());
-                var sourceSquareNorm = 0.0;
-                var targetSquareNorm = 0.0;
-
-                for (NodeProperties props : properties) {
-                    var propertyType = props.valueType();
-                    switch (propertyType) {
-                        case DOUBLE_ARRAY:
-                        case FLOAT_ARRAY: {
-                            var sourceArrayPropValues = props.doubleArrayValue(sourceNodeId);
-                            var targetArrayPropValues = props.doubleArrayValue(targetNodeId);
-                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
-                            for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                currentFeatures[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
-                                sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
-                                targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
-                            }
-                            break;
-                        }
-                        case LONG_ARRAY: {
-                            var sourceArrayPropValues = props.longArrayValue(sourceNodeId);
-                            var targetArrayPropValues = props.longArrayValue(targetNodeId);
-                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
-                            for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                currentFeatures[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
-                                sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
-                                targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
-                            }
-                            break;
-                        }
-                        case LONG:
-                        case DOUBLE: {
-                            currentFeatures[offset] += props.doubleValue(sourceNodeId) * props.doubleValue(targetNodeId);
-                            sourceSquareNorm += props.doubleValue(sourceNodeId) * props.doubleValue(sourceNodeId);
-                            targetSquareNorm += props.doubleValue(targetNodeId) * props.doubleValue(targetNodeId);
-                            break;
-                        }
-                        case UNKNOWN:
-                            throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
-                    }
-                }
-                currentFeatures[offset] /= Math.sqrt(sourceSquareNorm * targetSquareNorm);
-                currentRelationshipOffset.increment();
-
+                double[] linkFeature = linkFeatures.get(currentRelationshipOffset.getAndIncrement());
+                addFeature(sourceNodeId, targetNodeId, nodeProperties, featureOffset, linkFeature);
                 return true;
             }));
 
             return true;
         });
+    }
+
+    public void addFeature(long sourceNodeId, long targetNodeId, List<NodeProperties> nodeProperties, int startOffset, double[] linkFeature) {
+        var sourceSquareNorm = 0.0;
+        var targetSquareNorm = 0.0;
+
+
+
+        for (NodeProperties props : nodeProperties) {
+            var propertyType = props.valueType();
+            switch (propertyType) {
+                case DOUBLE_ARRAY:
+                case FLOAT_ARRAY: {
+                    var sourceArrayPropValues = props.doubleArrayValue(sourceNodeId);
+                    var targetArrayPropValues = props.doubleArrayValue(targetNodeId);
+                    assert sourceArrayPropValues.length == targetArrayPropValues.length;
+                    for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                        linkFeature[startOffset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
+                        sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
+                        targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
+                    }
+                    break;
+                }
+                case LONG_ARRAY: {
+                    var sourceArrayPropValues = props.longArrayValue(sourceNodeId);
+                    var targetArrayPropValues = props.longArrayValue(targetNodeId);
+                    assert sourceArrayPropValues.length == targetArrayPropValues.length;
+                    for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                        linkFeature[startOffset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
+                        sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
+                        targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
+                    }
+                    break;
+                }
+                case LONG:
+                case DOUBLE: {
+                    linkFeature[startOffset] += props.doubleValue(sourceNodeId) * props.doubleValue(targetNodeId);
+                    sourceSquareNorm += props.doubleValue(sourceNodeId) * props.doubleValue(sourceNodeId);
+                    targetSquareNorm += props.doubleValue(targetNodeId) * props.doubleValue(targetNodeId);
+                    break;
+                }
+                case UNKNOWN:
+                    throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
+            }
+        }
+        linkFeature[startOffset] /= Math.sqrt(sourceSquareNorm * targetSquareNorm);
     }
 
     @Override
