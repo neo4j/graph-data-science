@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.core.functions;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -49,6 +50,11 @@ public class Constant<T extends Tensor<T>> extends AbstractVariable<T> {
 
     public static Constant<Matrix> matrix(double[] data, int rows, int cols) {
         return new Constant<>(new Matrix(data, rows, cols));
+    }
+
+    @TestOnly
+    public T data() {
+        return data;
     }
 
     @Override

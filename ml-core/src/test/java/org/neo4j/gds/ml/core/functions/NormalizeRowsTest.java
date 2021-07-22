@@ -64,7 +64,7 @@ class NormalizeRowsTest extends ComputationGraphBaseTest implements FiniteDiffer
         var w = new Weights<>(new Matrix(data, 3, 2));
         var normalizeRows = new NormalizeRows(w);
 
-        assertThat(ctx.forward(normalizeRows)).satisfies(tensor -> tensor.equals(expected, 1e-8));
+        assertThat(ctx.forward(normalizeRows)).matches(tensor -> tensor.equals(expected, 1e-8));
     }
 
 

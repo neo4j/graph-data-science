@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.logisticregression;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.Weights;
@@ -77,7 +76,7 @@ class LinkLogisticRegressionBaseTest {
             1.00, 3.61, 1.0
         }, 4, 3);
 
-        assertThat(features.apply(new ComputationContext())).satisfies(tensor -> tensor.equals(expectedFeatures, 1e-6));
+        assertThat(features.data()).matches(tensor -> tensor.equals(expectedFeatures, 1e-6));
     }
 
 }

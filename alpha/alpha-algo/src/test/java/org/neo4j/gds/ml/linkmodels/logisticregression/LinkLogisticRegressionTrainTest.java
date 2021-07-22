@@ -82,7 +82,7 @@ class LinkLogisticRegressionTrainTest {
         var trainedWeights = result.weights();
 
         var expected = new Matrix(new double[]{-1.0681821169962793, 1.0115009499444914, -0.1381213947059403}, 1, 3);
-        assertThat(trainedWeights.data()).satisfies(matrix -> matrix.equals(expected, 1e-8));
+        assertThat(trainedWeights.data()).matches(matrix -> matrix.equals(expected, 1e-8));
     }
 
     @Test

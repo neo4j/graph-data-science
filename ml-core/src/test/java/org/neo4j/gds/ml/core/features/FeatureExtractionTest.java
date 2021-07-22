@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.core.features;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.api.Graph;
@@ -52,7 +51,7 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
         var featuresMatrix = FeatureExtraction.extract(allNodesBatch, featureExtractors);
 
         var expected = new Matrix(new double[]{ 2.0, 1.0, 1.2, 1.3, 1.0, 0.5, 0.0, 1.0, 2.8, 1.0, 1.0, 0.9 }, 4, 3);
-        assertThat(new ComputationContext().forward(featuresMatrix)).satisfies(matrix -> matrix.equals(expected, 1e-7));
+        assertThat(featuresMatrix.data()).matches(matrix -> matrix.equals(expected, 1e-7));
     }
 
     @Test
@@ -62,9 +61,8 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
         var allNodesBatch = new LazyBatch(0, (int) validGraph.nodeCount(), validGraph.nodeCount());
         var featuresMatrix = FeatureExtraction.extract(allNodesBatch, allExtractors);
 
-        var expected = new Matrix(new double[]{ 2.0, 1.0, 1.2, 1.0, 1.3, 1.0, 0.5, 1.0, 0.0, 1.0, 2.8, 1.0, 1.0, 1.0, 0.9, 1.0 }, 4, 4);
-        assertThat(featuresMatrix.dimensions()).containsExactly(4, 4);
-        assertThat(new ComputationContext().forward(featuresMatrix)).satisfies(matrix -> matrix.equals(expected, 1e-7));
+        var expected = new Matrix(new double[]{2.0, 1.0, 1.2, 1.0, 1.3, 1.0, 0.5, 1.0, 0.0, 1.0, 2.8, 1.0, 1.0, 1.0, 0.9, 1.0}, 4, 4);
+        assertThat(featuresMatrix.data()).matches(matrix -> matrix.equals(expected, 1e-7));
     }
 
     @Test
