@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator
 
 import java.util.Map;
 
-public final class GraphStatistics {
+public final class GraphInfoHelper {
 
     /**
      * Needs to be at least 2 due to some requirement from the AtomicHistogram.
@@ -38,7 +38,7 @@ public final class GraphStatistics {
      */
     private static final int PRECISION = 5;
 
-    private GraphStatistics() {}
+    private GraphInfoHelper() {}
 
     public static Map<String, Object> degreeDistribution(Graph graph) {
         int batchSize = Math.toIntExact(ParallelUtil.adjustedBatchSize(

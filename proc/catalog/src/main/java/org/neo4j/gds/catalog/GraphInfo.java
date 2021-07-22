@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-import static org.neo4j.gds.catalog.GraphStatistics.density;
+import static org.neo4j.gds.catalog.GraphInfoHelper.density;
 
 public class GraphInfo {
 

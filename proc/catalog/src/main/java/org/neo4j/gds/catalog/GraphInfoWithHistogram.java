@@ -65,7 +65,7 @@ public class GraphInfoWithHistogram extends GraphInfo {
         );
 
         var degreeDistribution = maybeDegreeDistribution.orElseGet(() -> {
-            var newHistogram = GraphStatistics.degreeDistribution(graphStore.getUnion());
+            var newHistogram = GraphInfoHelper.degreeDistribution(graphStore.getUnion());
             // Cache the computed degree distribution in the Catalog
             GraphStoreCatalog.setDegreeDistribution(
                 graphCreateConfig.username(),

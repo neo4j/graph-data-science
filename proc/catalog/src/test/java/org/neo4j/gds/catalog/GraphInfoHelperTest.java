@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
-class GraphStatisticsTest {
+class GraphInfoHelperTest {
 
     @GdlGraph
     private static final String GRAPH =
@@ -52,7 +52,7 @@ class GraphStatisticsTest {
 
     @Test
     void degreeDistribution() {
-        var actual = GraphStatistics.degreeDistribution(graph);
+        var actual = GraphInfoHelper.degreeDistribution(graph);
         var expected = Map.of(
             "min", 0L,
             "max", 3L,
@@ -70,12 +70,12 @@ class GraphStatisticsTest {
     @ParameterizedTest
     @MethodSource("densitySource")
     void density(long nodeCount, long relationshipCount, double expectedDensity) {
-        assertEquals(expectedDensity, GraphStatistics.density(nodeCount, relationshipCount));
+        assertEquals(expectedDensity, GraphInfoHelper.density(nodeCount, relationshipCount));
     }
 
     @Test
     void graphBasedDensity() {
-        assertEquals(GraphStatistics.density(graph), 0.5);
+        assertEquals(GraphInfoHelper.density(graph), 0.5);
     }
 
     private static Stream<Arguments> densitySource() {
