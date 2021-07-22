@@ -133,18 +133,17 @@ class BackupAndRestoreTest {
 
     @ParameterizedTest
     @CsvSource({
-        "backup-1af160e1-806e-48eb-b00a-004e6aa227aa, true, true, true",
-        "backup-2af160e1-806e-48eb-b00a-004e6aa227aa, true, false, true",
-        "backup-3af160e1-806e-48eb-b00a-004e6aa227aa, false, true, true",
-        "backup-1af160e1-806e-48eb-b00a-004e6aa227aa, true, true, false",
-        "backup-2af160e1-806e-48eb-b00a-004e6aa227aa, true, false, false",
-        "backup-3af160e1-806e-48eb-b00a-004e6aa227aa, false, true, false",
+        "backup-1af160e1-806e-48eb-b00a-004e6aa227aa, true, true",
+        "backup-2af160e1-806e-48eb-b00a-004e6aa227aa, true, false",
+        "backup-3af160e1-806e-48eb-b00a-004e6aa227aa, false, true",
+        "backup-1af160e1-806e-48eb-b00a-004e6aa227aa, true, true",
+        "backup-2af160e1-806e-48eb-b00a-004e6aa227aa, true, false",
+        "backup-3af160e1-806e-48eb-b00a-004e6aa227aa, false, true",
     })
     void shouldRestoreFromBackupLocation(
         String backupName,
         boolean hasGraphs,
         boolean hasModels,
-        boolean clearAfterRestore,
         @TempDir Path tempDir
     ) throws IOException {
         var restorePath = importPath(tempDir.resolve("shutdown"), backupName);
@@ -154,11 +153,7 @@ class BackupAndRestoreTest {
         assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(0);
         assertThat(ModelCatalog.getAllModels().count()).isEqualTo(0);
 
-        if (clearAfterRestore) {
-            BackupAndRestore.restoreAndClear(restorePath, backupPath, new TestLog());
-        } else {
-            BackupAndRestore.restore(restorePath, new TestLog());
-        }
+        BackupAndRestore.restore(restorePath, backupPath, new TestLog());
 
         if (hasGraphs) {
             assertGraphsAreRestored();
@@ -172,34 +167,15 @@ class BackupAndRestoreTest {
             assertThat(ModelCatalog.getAllModels().count()).isEqualTo(0);
         }
 
-        if (clearAfterRestore) {
-            assertThat(restorePath)
-                .exists()
-                .isEmptyDirectory();
-            if (hasGraphs) {
-                assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/graphs/**");
-            }
-            if (hasModels) {
-                assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/models/**");
-            }
-        } else {
-            assertThat(restorePath)
-                .exists()
-                .isNotEmptyDirectory();
-            assertThat(backupPath).isEmptyDirectory();
+        assertThat(restorePath)
+            .exists()
+            .isEmptyDirectory();
+        if (hasGraphs) {
+            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/graphs/**");
         }
-    }
-
-    @Test
-    void shouldRestoreOnlyGraphsFromBackupLocation(@TempDir Path tempDir) {
-        assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(0);
-        assertThat(ModelCatalog.getAllModels().count()).isEqualTo(0);
-
-        var backupPath = importPath(tempDir, "backup-1af160e1-806e-48eb-b00a-004e6aa227aa", "graphs");
-        BackupAndRestore.restore(backupPath, new TestLog());
-
-        assertGraphsAreRestored();
-        assertThat(ModelCatalog.getAllModels().count()).isEqualTo(0);
+        if (hasModels) {
+            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/models/**");
+        }
     }
 
     private void assertGraphsAreRestored() {

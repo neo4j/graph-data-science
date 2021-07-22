@@ -152,18 +152,7 @@ public final class BackupAndRestore {
         return result;
     }
 
-    static void restore(Path storePath, Log log) {
-        var graphsPath = storePath.resolve(GRAPHS_DIR);
-        var modelsPath = storePath.resolve(MODELS_DIR);
-        if (Files.exists(graphsPath) && Files.exists(modelsPath)) {
-            restoreGraphs(graphsPath, log);
-            restoreModels(modelsPath, log);
-        } else {
-            restoreGraphs(storePath, log);
-        }
-    }
-
-    static void restoreAndClear(Path storePath, Path backupPath, Log log) {
+    static void restore(Path storePath, Path backupPath, Log log) {
         var graphsPath = storePath.resolve(GRAPHS_DIR);
         var modelsPath = storePath.resolve(MODELS_DIR);
         if (Files.exists(graphsPath) && Files.exists(modelsPath)) {
@@ -183,8 +172,6 @@ public final class BackupAndRestore {
                     );
                 }
             }
-        } else {
-            restoreGraphs(storePath, log);
         }
     }
 
