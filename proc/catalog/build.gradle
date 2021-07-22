@@ -3,6 +3,7 @@ apply plugin: 'java-library'
 description = 'Neo4j Graph Data Science :: Procedures :: Catalog'
 dependencies {
     annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
 
     annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
