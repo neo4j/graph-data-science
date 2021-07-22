@@ -35,6 +35,7 @@ import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphStoreToFileExporterC
 import org.neo4j.graphalgo.core.utils.io.file.csv.AutoloadFlagVisitor;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
+import org.neo4j.graphalgo.utils.StringFormatting;
 import org.neo4j.logging.Log;
 
 import java.io.IOException;
@@ -42,7 +43,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -114,7 +114,7 @@ public final class BackupAndRestore {
         AllocationTracker allocationTracker,
         String taskName
     ) {
-        log.info("Preparing for %s", taskName.toLowerCase(Locale.ENGLISH));
+        log.info("Preparing for %s", StringFormatting.toLowerCaseWithLocale(taskName));
 
         var result = new ArrayList<BackupResult>();
 
@@ -197,12 +197,12 @@ public final class BackupAndRestore {
     }
 
     private static List<BackupResult> backupGraphStores(
-        Path backupRoot,
+        Path graphsDir,
         Consumer<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> onSuccess,
         Log log,
         AllocationTracker allocationTracker
     ) {
-        DIRECTORY_IS_WRITABLE.validate(backupRoot);
+        DIRECTORY_IS_WRITABLE.validate(graphsDir);
         return GraphStoreCatalog.getAllGraphStores()
             .flatMap(store -> {
                 try {
@@ -214,7 +214,7 @@ public final class BackupAndRestore {
                         .username(store.userName())
                         .build();
 
-                    var backupPath = GraphStoreExporterUtil.getExportPath(backupRoot, config);
+                    var backupPath = GraphStoreExporterUtil.getExportPath(graphsDir, config);
 
                     var timer = ProgressTimer.start();
                     GraphStoreExporterUtil.runGraphStoreExportToCsv(
@@ -244,14 +244,14 @@ public final class BackupAndRestore {
     }
 
     private static List<BackupResult> backupModels(
-        Path backupRoot,
+        Path modelsDir,
         Consumer<Model<?, ?>> onSuccess,
         Log log
     ) {
-        DIRECTORY_IS_WRITABLE.validate(backupRoot);
+        DIRECTORY_IS_WRITABLE.validate(modelsDir);
         return ModelCatalog.getAllModels().flatMap(model -> {
             try {
-                var modelRoot = backupRoot.resolve(UUID.randomUUID().toString());
+                var modelRoot = modelsDir.resolve(UUID.randomUUID().toString());
                 Files.createDirectory(modelRoot);
 
                 var timer = ProgressTimer.start();
