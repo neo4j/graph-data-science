@@ -136,9 +136,6 @@ class BackupAndRestoreTest {
         "backup-1af160e1-806e-48eb-b00a-004e6aa227aa, true, true",
         "backup-2af160e1-806e-48eb-b00a-004e6aa227aa, true, false",
         "backup-3af160e1-806e-48eb-b00a-004e6aa227aa, false, true",
-        "backup-1af160e1-806e-48eb-b00a-004e6aa227aa, true, true",
-        "backup-2af160e1-806e-48eb-b00a-004e6aa227aa, true, false",
-        "backup-3af160e1-806e-48eb-b00a-004e6aa227aa, false, true",
     })
     void shouldRestoreFromBackupLocation(
         String backupName,
@@ -179,10 +176,10 @@ class BackupAndRestoreTest {
     }
 
     private void assertGraphsAreRestored() {
-        assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(1);
+        assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(2);
 
         var databaseId = DatabaseIdFactory.from("neo4j", UUID.fromString("26ca2600-2f7a-4e99-acc1-9d976603698c"));
-        var testGraphStore = GraphStoreCatalog.get("UserA", databaseId, "test-graph");
+        var testGraphStore = GraphStoreCatalog.get("UserA", databaseId, "test-graph-1");
         assertThat(testGraphStore).isNotNull();
 
         var expectedGraph = TestSupport.fromGdl(

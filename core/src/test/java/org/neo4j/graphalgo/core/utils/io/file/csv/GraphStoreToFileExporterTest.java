@@ -385,22 +385,6 @@ public class GraphStoreToFileExporterTest extends CsvTest {
     }
 
     @Test
-    void shouldExportAutoloadFlagFile() {
-        var config = ImmutableGraphStoreToFileExporterConfig
-            .builder()
-            .exportName(tempDir.toString())
-            .writeConcurrency(1)
-            .includeMetaData(true)
-            .build();
-
-        var exporter = GraphStoreToFileExporter.autoExportCsv(noPropertiesGraphStore, config, tempDir);
-        exporter.run(AllocationTracker.empty());
-
-        assertThat(tempDir)
-            .isDirectoryContaining("glob:**/.autoload");
-    }
-
-    @Test
     void shouldExportWithOffsetIds() {
         var counter = new MutableLong(42L);
         var graphStore = GdlFactory.builder()

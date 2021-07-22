@@ -61,9 +61,7 @@ public final class GraphStoreExporterUtil {
         AllocationTracker allocationTracker
     ) {
         try {
-            var exporter = exportConfig.autoload()
-                ? GraphStoreToFileExporter.autoExportCsv(graphStore, exportConfig, exportPath)
-                : GraphStoreToFileExporter.csv(graphStore, exportConfig, exportPath);
+            var exporter = GraphStoreToFileExporter.csv(graphStore, exportConfig, exportPath);
 
             var start = System.nanoTime();
             var importedProperties = exporter.run(allocationTracker);

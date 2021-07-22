@@ -51,7 +51,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         GraphStoreToFileExporterConfig config,
         Path exportPath
     ) {
-        return csv(graphStore, config, exportPath, Optional.of(() -> new AutoloadFlagVisitor(exportPath)));
+        return csv(graphStore, config, exportPath, Optional.empty());
     }
 
     public static GraphStoreToFileExporter csv(
