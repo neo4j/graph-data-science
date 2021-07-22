@@ -42,6 +42,7 @@ import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitors;
+import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexQuery;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
@@ -166,12 +167,17 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     }
 
     @Override
-    public List<Scan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
+    public List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
+        KernelTransaction transaction,
+        int[] labelIds,
+        int batchSize
+    ) {
         var read = transaction.dataRead();
         read.prepareForLabelScans();
         return Arrays
             .stream(labelIds)
             .mapToObj(read::nodeLabelScan)
+            .map(scan -> scanToStoreScan(scan, batchSize))
             .collect(Collectors.toList());
     }
 
@@ -227,7 +233,12 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     ) {
         var read = transaction.dataRead();
         read.prepareForLabelScans();
-        return new ScanBasedStoreScan<>(read.nodeLabelScan(labelId), batchSize);
+        return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
+    }
+
+    @Override
+    public <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
+        return new ScanBasedStoreScan41<>(scan, batchSize);
     }
 
     @Override

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.compat.ScanBasedStoreScan;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.StoreScan;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -56,7 +55,7 @@ public final class RelationshipScanCursorBasedScanner extends AbstractCursorBase
 
     @Override
     StoreScan<RelationshipScanCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
-        return new ScanBasedStoreScan<>(transaction.dataRead().allRelationshipsScan(), batchSize());
+        return Neo4jProxy.scanToStoreScan(transaction.dataRead().allRelationshipsScan(), batchSize());
     }
 
     @Override

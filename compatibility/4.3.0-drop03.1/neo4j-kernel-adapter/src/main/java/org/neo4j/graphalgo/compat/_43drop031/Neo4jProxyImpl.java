@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.compat.CompatIndexQuery;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompositeNodeCursor;
 import org.neo4j.graphalgo.compat.CustomAccessMode;
-import org.neo4j.graphalgo.compat.ScanBasedStoreScan;
 import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
 import org.neo4j.graphalgo.compat.JobRunner;
 import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
@@ -52,6 +51,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -180,12 +180,17 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public List<Scan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
+    public List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
+        KernelTransaction transaction,
+        int[] labelIds,
+        int batchSize
+    ) {
         var read = transaction.dataRead();
         read.prepareForLabelScans();
         return Arrays
             .stream(labelIds)
             .mapToObj(read::nodeLabelScan)
+            .map(scan -> scanToStoreScan(scan, batchSize))
             .collect(Collectors.toList());
     }
 
@@ -241,7 +246,12 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     ) {
         var read = transaction.dataRead();
         read.prepareForLabelScans();
-        return new ScanBasedStoreScan<>(read.nodeLabelScan(labelId), batchSize);
+        return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
+    }
+
+    @Override
+    public <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
+        return new ScanBasedStoreScanImpl<>(scan, batchSize);
     }
 
     @Override

@@ -22,28 +22,26 @@ package org.neo4j.graphalgo.core.loading;
 import org.neo4j.graphalgo.compat.CompositeNodeCursor;
 import org.neo4j.graphalgo.compat.StoreScan;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
-import org.neo4j.internal.kernel.api.Scan;
+import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.List;
 
 public class CompositeNodeScan implements StoreScan<CompositeNodeCursor> {
 
-    private final List<Scan<NodeLabelIndexCursor>> scans;
-    private final int batchSize;
+    private final List<StoreScan<NodeLabelIndexCursor>> scans;
 
-    public CompositeNodeScan(List<Scan<NodeLabelIndexCursor>> scans, int batchSize) {
+    public CompositeNodeScan(List<StoreScan<NodeLabelIndexCursor>> scans) {
         this.scans = scans;
-        this.batchSize = batchSize;
     }
 
     // This method needs to be synchronized as we need to make sure that every subscan is processing the same batch
     @Override
-    public synchronized boolean scanBatch(CompositeNodeCursor cursor) {
+    public synchronized boolean scanBatch(CompositeNodeCursor cursor, KernelTransaction ktx) {
         boolean result = false;
         for (int i = 0; i < scans.size(); i++) {
             NodeLabelIndexCursor indexCursor = cursor.getCursor(i);
             if (indexCursor != null) {
-                var hasNextBatch = scans.get(i).reserveBatch(indexCursor, batchSize);
+                var hasNextBatch = scans.get(i).scanBatch(indexCursor, ktx);
                 if (hasNextBatch) {
                     result = true;
                 } else {

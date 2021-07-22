@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.compat.CompatIndexQuery;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompositeNodeCursor;
 import org.neo4j.graphalgo.compat.CustomAccessMode;
-import org.neo4j.graphalgo.compat.ScanBasedStoreScan;
 import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
 import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
 import org.neo4j.graphalgo.compat.Neo4jProxyApi;
@@ -54,6 +53,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -61,6 +61,7 @@ import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.PropertyIndexQuery;
+import org.neo4j.internal.kernel.api.QueryContext;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
@@ -193,11 +194,16 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public List<Scan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
+    public List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
+        KernelTransaction transaction,
+        int[] labelIds,
+        int batchSize
+    ) {
         var read = transaction.dataRead();
         return Arrays
             .stream(labelIds)
             .mapToObj(read::nodeLabelScan)
+            .map(scan -> scanToStoreScan(scan, batchSize))
             .collect(Collectors.toList());
     }
 
@@ -258,7 +264,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
                 session,
                 cursor,
                 IndexQueryConstraints.unordered(true),
-                new TokenPredicate(label)
+                new TokenPredicate(label),
+                kernelTransaction.cursorContext()
             );
         } catch (KernelException e) {
             throw new RuntimeException(e);
@@ -272,7 +279,12 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         int batchSize
     ) {
         var read = transaction.dataRead();
-        return new ScanBasedStoreScan<>(read.nodeLabelScan(labelId), batchSize);
+        return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
+    }
+
+    @Override
+    public <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
+        return new ScanBasedStoreScanImpl<>(scan, batchSize);
     }
 
     @Override
@@ -315,7 +327,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             ? IndexQueryConstraints.unordered(needsValues)
             : IndexQueryConstraints.constrained(indexOrder, needsValues);
 
-        dataRead.nodeIndexSeek(index, cursor, indexQueryConstraints, ((CompatIndexQueryImpl) query).indexQuery);
+        dataRead.nodeIndexSeek((QueryContext) dataRead, index, cursor, indexQueryConstraints, ((CompatIndexQueryImpl) query).indexQuery);
     }
 
     @Override

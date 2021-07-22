@@ -51,8 +51,7 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractNodeCursorBasedSc
 
     @Override
     StoreScan<CompositeNodeCursor> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
-        var scans = Neo4jProxy.entityCursorScan(transaction, labelIds);
-        return new CompositeNodeScan(scans, batchSize());
+        return new CompositeNodeScan(Neo4jProxy.entityCursorScan(transaction, labelIds, batchSize()));
     }
 
     @Override

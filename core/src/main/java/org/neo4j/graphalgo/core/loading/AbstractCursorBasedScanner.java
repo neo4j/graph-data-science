@@ -30,25 +30,26 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
     private final class ScanCursor implements StoreScanner.ScanCursor<Reference> {
 
-        private final StoreScan<EntityCursor> scan;
-
         private EntityCursor cursor;
-
         private Reference cursorReference;
+        private final StoreScan<EntityCursor> scan;
+        private final KernelTransaction ktx;
 
         ScanCursor(
             EntityCursor cursor,
             Reference reference,
-            StoreScan<EntityCursor> entityCursorScan
+            StoreScan<EntityCursor> entityCursorScan,
+            KernelTransaction ktx
         ) {
             this.cursor = cursor;
             this.cursorReference = reference;
             this.scan = entityCursorScan;
+            this.ktx = ktx;
         }
 
         @Override
         public boolean bulkNext(RecordConsumer<Reference> consumer) {
-            boolean hasNextBatch = scan.scanBatch(cursor);
+            boolean hasNextBatch = scan.scanBatch(cursor, ktx);
 
             if (!hasNextBatch) {
                 return false;
@@ -109,7 +110,8 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
             scanCursor = new ScanCursor(
                 entityCursor,
                 reference,
-                entityCursorScan
+                entityCursorScan,
+                transaction
             );
             this.cursors.set(scanCursor);
         }

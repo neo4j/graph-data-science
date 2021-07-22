@@ -17,11 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.compat;
+package org.neo4j.graphalgo.compat._43drop031;
 
+import org.neo4j.graphalgo.compat.StoreScan;
+import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
 
-public interface StoreScan<Cursor extends org.neo4j.internal.kernel.api.Cursor> {
+public final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan<C> {
+    private final Scan<C> scan;
+    private final int batchSize;
 
-    boolean scanBatch(Cursor cursor, KernelTransaction ktx);
+    public ScanBasedStoreScanImpl(Scan<C> scan, int batchSize) {
+        this.scan = scan;
+        this.batchSize = batchSize;
+    }
+
+    @Override
+    public boolean scanBatch(C cursor, KernelTransaction ktx) {
+        return scan.reserveBatch(cursor, batchSize);
+    }
 }

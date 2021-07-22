@@ -19,9 +19,21 @@
  */
 package org.neo4j.graphalgo.compat;
 
+import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
 
-public interface StoreScan<Cursor extends org.neo4j.internal.kernel.api.Cursor> {
+public final class ScanBasedStoreScan41<C extends Cursor> implements StoreScan<C> {
+    private final Scan<C> scan;
+    private final int batchSize;
 
-    boolean scanBatch(Cursor cursor, KernelTransaction ktx);
+    public ScanBasedStoreScan41(Scan<C> scan, int batchSize) {
+        this.scan = scan;
+        this.batchSize = batchSize;
+    }
+
+    @Override
+    public boolean scanBatch(C cursor, KernelTransaction ktx) {
+        return scan.reserveBatch(cursor, batchSize);
+    }
 }

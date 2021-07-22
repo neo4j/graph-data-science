@@ -35,6 +35,7 @@ import org.neo4j.internal.batchimport.cache.OffHeapLongArray;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -168,8 +169,8 @@ public final class Neo4jProxy {
         return IMPL.pagedFile(pagedFile);
     }
 
-    public static List<Scan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
-        return IMPL.entityCursorScan(transaction, labelIds);
+    public static List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(KernelTransaction transaction, int[] labelIds, int batchSize) {
+        return IMPL.entityCursorScan(transaction, labelIds, batchSize);
     }
 
     public static PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
@@ -210,6 +211,10 @@ public final class Neo4jProxy {
         int batchSize
     ) {
         return IMPL.nodeLabelIndexScan(transaction, labelId, batchSize);
+    }
+
+    public static <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
+        return IMPL.scanToStoreScan(scan, batchSize);
     }
 
     public static void nodeIndexScan(

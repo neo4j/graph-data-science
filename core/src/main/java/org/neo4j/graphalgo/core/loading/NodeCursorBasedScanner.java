@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.compat.ScanBasedStoreScan;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.StoreScan;
 import org.neo4j.graphalgo.core.TransactionContext;
@@ -39,7 +38,7 @@ final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCu
 
     @Override
     StoreScan<NodeCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
-        return new ScanBasedStoreScan<>(transaction.dataRead().allNodesScan(), batchSize());
+        return Neo4jProxy.scanToStoreScan(transaction.dataRead().allNodesScan(), batchSize());
     }
 
     @Override
