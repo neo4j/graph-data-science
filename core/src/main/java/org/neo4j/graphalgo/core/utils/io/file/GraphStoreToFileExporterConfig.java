@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.io.file;
 
-import org.immutables.value.Value;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -31,11 +30,6 @@ import org.neo4j.graphalgo.core.utils.io.GraphStoreExporterBaseConfig;
 public interface GraphStoreToFileExporterConfig extends GraphStoreExporterBaseConfig {
 
     String exportName();
-
-    @Value.Default
-    default boolean autoload() {
-        return false;
-    }
 
     static GraphStoreToFileExporterConfig of(String username, CypherMapWrapper config) {
         return new GraphStoreToFileExporterConfigImpl(username, config);

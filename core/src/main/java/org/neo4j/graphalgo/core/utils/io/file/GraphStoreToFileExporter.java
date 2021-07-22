@@ -24,7 +24,6 @@ import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.io.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.io.GraphStoreInput;
-import org.neo4j.graphalgo.core.utils.io.file.csv.AutoloadFlagVisitor;
 import org.neo4j.graphalgo.core.utils.io.file.csv.CsvGraphInfoVisitor;
 import org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeSchemaVisitor;
 import org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeVisitor;
@@ -36,37 +35,19 @@ import org.neo4j.graphalgo.core.utils.io.file.schema.RelationshipSchemaVisitor;
 import org.neo4j.internal.batchimport.input.Collector;
 
 import java.nio.file.Path;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFileExporterConfig> {
 
-    protected final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
-    protected final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
-
-    public static GraphStoreToFileExporter autoExportCsv(
-        GraphStore graphStore,
-        GraphStoreToFileExporterConfig config,
-        Path exportPath
-    ) {
-        return csv(graphStore, config, exportPath, Optional.empty());
-    }
+    private final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
+    private final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
 
     public static GraphStoreToFileExporter csv(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
         Path exportPath
-    ) {
-        return csv(graphStore, config, exportPath, Optional.empty());
-    }
-
-    private static GraphStoreToFileExporter csv(
-        GraphStore graphStore,
-        GraphStoreToFileExporterConfig config,
-        Path exportPath,
-        Optional<Supplier<AutoloadFlagVisitor>> autoloadFlagVisitorSupplier
     ) {
         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
 
@@ -76,7 +57,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         return GraphStoreToFileExporter.of(
             graphStore,
             config,
-            autoloadFlagVisitorSupplier,
             () -> new UserInfoVisitor(exportPath),
             () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
@@ -89,7 +69,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private static GraphStoreToFileExporter of(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
-        Optional<Supplier<AutoloadFlagVisitor>> autoloadFlagVisitorSupplier,
         Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier,
         Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
         Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
@@ -101,7 +80,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             return new FullGraphStoreToFileExporter(
                 graphStore,
                 config,
-                autoloadFlagVisitorSupplier,
                 userInfoVisitorSupplier,
                 graphInfoVisitorSupplier,
                 nodeSchemaVisitorSupplier,
@@ -114,7 +92,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         }
     }
 
-    protected GraphStoreToFileExporter(
+    GraphStoreToFileExporter(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
@@ -156,7 +134,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     }
 
     private static final class FullGraphStoreToFileExporter extends GraphStoreToFileExporter {
-        private final Optional<Supplier<AutoloadFlagVisitor>> maybeAutoloadFlagSupplier;
         private final Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier;
         private final Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier;
         private final Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier;
@@ -165,7 +142,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         private FullGraphStoreToFileExporter(
             GraphStore graphStore,
             GraphStoreToFileExporterConfig config,
-            Optional<Supplier<AutoloadFlagVisitor>> maybeAutoloadFlagSupplier,
             Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier,
             Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
             Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
@@ -174,7 +150,6 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
         ) {
             super(graphStore, config, nodeVisitorSupplier, relationshipVisitorSupplier);
-            this.maybeAutoloadFlagSupplier = maybeAutoloadFlagSupplier;
             this.userInfoVisitorSupplier = userInfoVisitorSupplier;
             this.graphInfoVisitorSupplier = graphInfoVisitorSupplier;
             this.nodeSchemaVisitorSupplier = nodeSchemaVisitorSupplier;
@@ -183,18 +158,11 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
 
         @Override
         protected void export(GraphStoreInput graphStoreInput) {
-            exportAutoloadFlag();
             exportUserName();
             exportGraphInfo(graphStoreInput);
             exportNodeSchema(graphStoreInput);
             exportRelationshipSchema(graphStoreInput);
             super.export(graphStoreInput);
-        }
-
-        private void exportAutoloadFlag() {
-            maybeAutoloadFlagSupplier.ifPresent(
-                autoLoadFlagSupplier -> autoLoadFlagSupplier.get().export()
-            );
         }
 
         private void exportUserName() {

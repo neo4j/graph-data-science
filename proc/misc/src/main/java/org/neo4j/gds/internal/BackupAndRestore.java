@@ -195,7 +195,6 @@ public final class BackupAndRestore {
                     var config = ImmutableGraphStoreToFileExporterConfig
                         .builder()
                         .includeMetaData(true)
-                        .autoload(true)
                         .exportName(store.config().graphName())
                         .username(store.userName())
                         .build();
