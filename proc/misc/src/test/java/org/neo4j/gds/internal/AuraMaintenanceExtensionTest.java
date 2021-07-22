@@ -27,6 +27,7 @@ import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -47,6 +48,7 @@ class AuraMaintenanceExtensionTest extends BaseTest {
     @AfterEach
     void teardown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
+        ModelCatalog.removeAllLoadedModels();
     }
 
     @Override
@@ -83,6 +85,20 @@ class AuraMaintenanceExtensionTest extends BaseTest {
         var testGraphStore = GraphStoreCatalog.get("UserA", db.databaseId(), "test-graph");
         assertThat(testGraphStore).isNotNull();
         assertGraphEquals(expectedGraph, testGraphStore.graphStore().getUnion());
+    }
+
+    @Test
+    void shouldLoadModelsIntoModelCatalog() {
+        assertThat(ModelCatalog.getAllModels().count()).isEqualTo(2);
+
+        var aliceModels = ModelCatalog.list("alice");
+        var bobModels = ModelCatalog.list("bob");
+
+        assertThat(aliceModels).hasSize(1);
+        assertThat(aliceModels.stream().findFirst().get().name()).isEqualTo("modelAlice");
+
+        assertThat(bobModels).hasSize(1);
+        assertThat(bobModels.stream().findFirst().get().name()).isEqualTo("modelBob");
     }
 
     private void prepareImportDir() {

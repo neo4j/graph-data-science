@@ -79,7 +79,7 @@ class BackupAndRestoreTest {
         GraphStoreCatalog.set(graphConfig, GdlFactory.of(gdlGraph).build().graphStore());
 
         var backupPath = tempDir.resolve("backup-1337");
-        var results = BackupAndRestore.backup(backupPath, new TestLog(), 42, AllocationTracker.empty());
+        var results = BackupAndRestore.backup(backupPath, new TestLog(), 42, AllocationTracker.empty(), "Backup");
 
         assertThat(results).hasSize(1)
             .element(0, InstanceOfAssertFactories.type(BackupResult.class))
@@ -110,7 +110,7 @@ class BackupAndRestoreTest {
         ModelCatalog.set(model);
 
         var backupPath = tempDir.resolve("backup-42");
-        var results = BackupAndRestore.backup(backupPath, new TestLog(), 42, AllocationTracker.empty());
+        var results = BackupAndRestore.backup(backupPath, new TestLog(), 42, AllocationTracker.empty(), "Backup");
 
         assertThat(results).hasSize(1)
             .element(0, InstanceOfAssertFactories.type(BackupResult.class))

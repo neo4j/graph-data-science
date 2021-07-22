@@ -19,9 +19,16 @@
  */
 package org.neo4j.gds.internal;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
+import org.neo4j.gds.embeddings.graphsage.Layer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;
@@ -30,9 +37,12 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.logging.Log;
@@ -101,6 +111,12 @@ public class AuraShutdownProcTest extends BaseProcTest {
         GraphStoreCatalog.set(createConfig2, graphStore2);
     }
 
+    @AfterEach
+    void teardown() {
+        GraphStoreCatalog.removeAllLoadedGraphs();
+        ModelCatalog.removeAllLoadedModels();
+    }
+
     @Override
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
@@ -126,8 +142,8 @@ public class AuraShutdownProcTest extends BaseProcTest {
 
         assertCypherResult(shutdownQuery, List.of(Map.of("done", true)));
 
-        assertThat(tempDir.resolve("first")).isDirectoryContaining("glob:**" + AUTOLOAD_FILE_NAME);
-        assertThat(tempDir.resolve("second")).isDirectoryContaining("glob:**" + AUTOLOAD_FILE_NAME);
+        assertThat(tempDir.resolve("graphs/first")).isDirectoryContaining("glob:**" + AUTOLOAD_FILE_NAME);
+        assertThat(tempDir.resolve("graphs/second")).isDirectoryContaining("glob:**" + AUTOLOAD_FILE_NAME);
     }
 
     @Test
@@ -136,7 +152,7 @@ public class AuraShutdownProcTest extends BaseProcTest {
 
         assertCypherResult(shutdownQuery, List.of(Map.of("done", true)));
 
-        assertThat(tempDir.resolve("first"))
+        assertThat(tempDir.resolve("graphs/first"))
             .isDirectoryContaining("glob:**/.userinfo")
             .isDirectoryContaining("glob:**/graph_info.csv")
             .isDirectoryContaining("glob:**/node-schema.csv")
@@ -146,7 +162,7 @@ public class AuraShutdownProcTest extends BaseProcTest {
             .isDirectoryContaining("glob:**/relationships_REL1_header.csv")
             .isDirectoryContaining("regex:.+/relationships_REL1_\\d+.csv");
 
-        assertThat(tempDir.resolve("second"))
+        assertThat(tempDir.resolve("graphs/second"))
             .isDirectoryContaining("glob:**/.userinfo")
             .isDirectoryContaining("glob:**/graph_info.csv")
             .isDirectoryContaining("glob:**/node-schema.csv")
@@ -159,7 +175,7 @@ public class AuraShutdownProcTest extends BaseProcTest {
         assertThat(testLog.getMessages(TestLog.INFO))
             .anySatisfy(msg -> assertThat(msg)
                 .matches(
-                    "Shutdown happened within the given timeout, it took \\d+ seconds and the provided timeout as 42 seconds."
+                    "Shutdown finished within the given timeout, it took \\d+ seconds and the provided timeout was 42 seconds."
                 ));
     }
 
@@ -167,18 +183,18 @@ public class AuraShutdownProcTest extends BaseProcTest {
     void shouldCollectErrorsWhenPersistingGraphStores() throws IOException {
         var shutdownQuery = "CALL gds.internal.shutdown()";
 
-        var first = tempDir.resolve("first");
+        var first = tempDir.resolve("graphs/first");
         Files.createDirectories(first);
 
         assertCypherResult(shutdownQuery, List.of(Map.of("done", false)));
 
         assertThat(testLog.getMessages(TestLog.WARN))
             .contains(
-                "GraphStore persistence failed on graph first for user userA - The specified export directory already exists.");
+                "Persisting graph 'first' for user 'userA' failed - The specified export directory already exists.");
 
         assertThat(first).isEmptyDirectory();
 
-        assertThat(tempDir.resolve("second"))
+        assertThat(tempDir.resolve("graphs/second"))
             .isDirectoryContaining("glob:**/graph_info.csv")
             .isDirectoryContaining("glob:**/node-schema.csv")
             .isDirectoryContaining("glob:**/relationship-schema.csv")
@@ -190,6 +206,17 @@ public class AuraShutdownProcTest extends BaseProcTest {
 
     @Test
     void shouldBringTheDatabaseIntoAStateThatIsSafeToRestart() throws Exception {
+        var model = Model.of(
+            "userA",
+            "firstModel",
+            GraphSage.MODEL_TYPE,
+            GraphSchema.empty(),
+            ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
+            GraphSageTrainConfig.builder().modelName("firstModel").addFeatureProperty("foo").build(),
+            EmptyGraphSageTrainMetrics.INSTANCE
+        );
+        ModelCatalog.set(model);
+
         GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class).register(new AuraMaintenanceFunction());
         var pollQuery = "RETURN gds.internal.safeToRestart() AS safeToRestart";
         var shutdownQuery = "CALL gds.internal.shutdown()";
