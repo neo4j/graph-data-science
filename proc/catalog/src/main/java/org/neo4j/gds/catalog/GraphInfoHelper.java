@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.gds.catalog;
 
 import org.HdrHistogram.AtomicHistogram;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
@@ -27,9 +28,8 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Map;
-import java.util.concurrent.atomic.LongAdder;
 
-public final class GraphStatistics {
+public final class GraphInfoHelper {
 
     /**
      * Needs to be at least 2 due to some requirement from the AtomicHistogram.
@@ -38,7 +38,7 @@ public final class GraphStatistics {
      */
     private static final int PRECISION = 5;
 
-    private GraphStatistics() {}
+    private GraphInfoHelper() {}
 
     public static Map<String, Object> degreeDistribution(Graph graph) {
         int batchSize = Math.toIntExact(ParallelUtil.adjustedBatchSize(
@@ -86,13 +86,4 @@ public final class GraphStatistics {
         return density(graph.nodeCount(), graph.relationshipCount());
     }
 
-    public static double averageDegree(Graph graph, int concurrency) {
-        var degreeSum = new LongAdder();
-        ParallelUtil.parallelForEachNode(
-            graph,
-            concurrency,
-            nodeId -> degreeSum.add(graph.degree(nodeId))
-        );
-        return (double) degreeSum.sum() / graph.nodeCount();
-    }
 }

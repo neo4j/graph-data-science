@@ -20,19 +20,11 @@
 package org.neo4j.graphalgo.core.utils.collection.primitive;
 
 /**
- * Package-private static methods shared between Primitive, PrimitiveIntCollections and PrimitiveLongCollections
+ * Package-private static methods shared between Primitive and PrimitiveLongCollections
  */
 final class PrimitiveCommons {
 
     private PrimitiveCommons() {
-    }
-
-    /**
-     * If the given obj is AutoCloseable, then close it.
-     * Any exceptions thrown from the close method will be wrapped in RuntimeExceptions.
-     */
-    static void closeSafely(Object obj) {
-        closeSafely(obj, null);
     }
 
     /**

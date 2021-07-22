@@ -17,8 +17,6 @@
 package org.neo4j.graphalgo.core.utils.queue;
 
 import com.carrotsearch.hppc.IntDoubleScatterMap;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveIntIterable;
-import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveIntIterator;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeArrays;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
@@ -36,10 +34,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
  * Implementation has been copied from https://issues.apache.org/jira/browse/SOLR-2092
  * and slightly adapted to our needs.
  */
-public abstract class IntPriorityQueue implements PrimitiveIntIterable {
+public abstract class IntPriorityQueue {
 
-    public static final int DEFAULT_CAPACITY = 14;
-
+    private static final int DEFAULT_CAPACITY = 14;
     private static final int[] EMPTY_INT = new int[0];
 
     private HugeIntArray heap;
@@ -249,27 +246,6 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
         }
     }
 
-    @Override
-    public PrimitiveIntIterator iterator() {
-        return new PrimitiveIntIterator() {
-
-            int i = 1;
-
-            @Override
-            public boolean hasNext() {
-                return i <= size;
-            }
-
-            /**
-             * @throws ArrayIndexOutOfBoundsException when the iterator is exhausted.
-             */
-            @Override
-            public int next() {
-                return heap.get(i++);
-            }
-        };
-    }
-
     public static IntPriorityQueue min(int capacity) {
         return new AbstractPriorityQueue(capacity) {
             @Override
@@ -296,11 +272,11 @@ public abstract class IntPriorityQueue implements PrimitiveIntIterable {
         return max(DEFAULT_CAPACITY);
     }
 
-    private static abstract class AbstractPriorityQueue extends IntPriorityQueue {
+    private abstract static class AbstractPriorityQueue extends IntPriorityQueue {
 
         protected final IntDoubleScatterMap costs;
 
-        public AbstractPriorityQueue(int initialCapacity) {
+        AbstractPriorityQueue(int initialCapacity) {
             super(initialCapacity);
             this.costs = new IntDoubleScatterMap(initialCapacity);
         }

@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.api;
+package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
@@ -34,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
-class GraphStatisticsTest {
+class GraphInfoHelperTest {
 
     @GdlGraph
     private static final String GRAPH =
@@ -51,7 +52,7 @@ class GraphStatisticsTest {
 
     @Test
     void degreeDistribution() {
-        var actual = GraphStatistics.degreeDistribution(graph);
+        var actual = GraphInfoHelper.degreeDistribution(graph);
         var expected = Map.of(
             "min", 0L,
             "max", 3L,
@@ -69,12 +70,12 @@ class GraphStatisticsTest {
     @ParameterizedTest
     @MethodSource("densitySource")
     void density(long nodeCount, long relationshipCount, double expectedDensity) {
-        assertEquals(expectedDensity, GraphStatistics.density(nodeCount, relationshipCount));
+        assertEquals(expectedDensity, GraphInfoHelper.density(nodeCount, relationshipCount));
     }
 
     @Test
     void graphBasedDensity() {
-        assertEquals(GraphStatistics.density(graph), 0.5);
+        assertEquals(GraphInfoHelper.density(graph), 0.5);
     }
 
     private static Stream<Arguments> densitySource() {

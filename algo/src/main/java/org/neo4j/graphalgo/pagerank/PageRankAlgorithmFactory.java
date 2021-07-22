@@ -23,11 +23,11 @@ import com.carrotsearch.hppc.LongScatterSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.graphalgo.AbstractAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.GraphStatistics;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.beta.pregel.PregelComputation;
 import org.neo4j.graphalgo.beta.pregel.PregelSchema;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryEstimation;
@@ -38,6 +38,7 @@ import org.neo4j.graphalgo.degree.DegreeCentrality;
 import org.neo4j.graphalgo.degree.DegreeCentralityFactory;
 import org.neo4j.graphalgo.degree.ImmutableDegreeCentralityConfig;
 
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.LongToDoubleFunction;
 
 import static org.neo4j.graphalgo.pagerank.PageRankAlgorithmFactory.Mode.ARTICLE_RANK;
@@ -50,6 +51,16 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
             "PageRank",
             DegreeCentralityFactory.degreeCentralityProgressTask(graph)
         );
+    }
+
+    private static double averageDegree(Graph graph, int concurrency) {
+        var degreeSum = new LongAdder();
+        ParallelUtil.parallelForEachNode(
+            graph,
+            concurrency,
+            nodeId -> degreeSum.add(graph.degree(nodeId))
+        );
+        return (double) degreeSum.sum() / graph.nodeCount();
     }
 
     public enum Mode {
@@ -101,7 +112,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Abs
             .forEach(mappedSourceNodes::add);
 
         if (mode == ARTICLE_RANK) {
-            double avgDegree = GraphStatistics.averageDegree(graph, configuration.concurrency());
+            double avgDegree = averageDegree(graph, configuration.concurrency());
             var tempFn = degreeFunction;
             degreeFunction = nodeId -> tempFn.applyAsDouble(nodeId) + avgDegree;
             deltaCoefficient = avgDegree;
