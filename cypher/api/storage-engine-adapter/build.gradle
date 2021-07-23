@@ -15,5 +15,7 @@ dependencies {
             transitive = false
         }
     }
+
+    api project(':neo4j-adapter')
 }
 
