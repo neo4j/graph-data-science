@@ -554,6 +554,7 @@ final class GenerateConfiguration {
         Collection<InvalidCandidate> invalidCandidates = new ArrayList<>();
         Deque<TypeElement> classesToSearch = new ArrayDeque<>();
         classesToSearch.addLast(classElement);
+
         do {
             TypeElement currentClass = classesToSearch.pollFirst();
             if (currentClass == null) {
@@ -569,29 +570,7 @@ final class GenerateConfiguration {
 
                 int sizeBeforeValidation = invalidCandidates.size();
 
-                Set<Modifier> modifiers = candidate.getModifiers();
-                if (!modifiers.contains(Modifier.STATIC)) {
-                    invalidCandidates.add(InvalidCandidate.of(candidate, "Must be static"));
-                }
-                if (!modifiers.contains(Modifier.PUBLIC)) {
-                    invalidCandidates.add(InvalidCandidate.of(candidate, "Must be public"));
-                }
-                if (!candidate.getTypeParameters().isEmpty()) {
-                    invalidCandidates.add(InvalidCandidate.of(candidate, "May not be generic"));
-                }
-                if (!candidate.getThrownTypes().isEmpty()) {
-                    invalidCandidates.add(InvalidCandidate.of(candidate, "May not declare any exceptions"));
-                }
-                if (!(candidate.getParameters().size() == 1)) {
-                    invalidCandidates.add(InvalidCandidate.of(candidate, "May only accept one parameter"));
-                }
-                if (!typeUtils.isAssignable(candidate.getReturnType(), targetType)) {
-                    invalidCandidates.add(InvalidCandidate.of(
-                        candidate,
-                        "Must return a type that is assignable to %s",
-                        targetType
-                    ));
-                }
+                validateCandidateModifiers(targetType, invalidCandidates, candidate, candidate.getModifiers());
 
                 if (invalidCandidates.size() == sizeBeforeValidation) {
                     validCandidates.add(candidate);
@@ -646,6 +625,36 @@ final class GenerateConfiguration {
             converter,
             targetType
         );
+    }
+
+    private void validateCandidateModifiers(
+        TypeMirror targetType,
+        Collection<InvalidCandidate> invalidCandidates,
+        ExecutableElement candidate,
+        Set<Modifier> modifiers
+    ) {
+        if (!modifiers.contains(Modifier.STATIC)) {
+            invalidCandidates.add(InvalidCandidate.of(candidate, "Must be static"));
+        }
+        if (!modifiers.contains(Modifier.PUBLIC)) {
+            invalidCandidates.add(InvalidCandidate.of(candidate, "Must be public"));
+        }
+        if (!candidate.getTypeParameters().isEmpty()) {
+            invalidCandidates.add(InvalidCandidate.of(candidate, "May not be generic"));
+        }
+        if (!candidate.getThrownTypes().isEmpty()) {
+            invalidCandidates.add(InvalidCandidate.of(candidate, "May not declare any exceptions"));
+        }
+        if (!(candidate.getParameters().size() == 1)) {
+            invalidCandidates.add(InvalidCandidate.of(candidate, "May only accept one parameter"));
+        }
+        if (!typeUtils.isAssignable(candidate.getReturnType(), targetType)) {
+            invalidCandidates.add(InvalidCandidate.of(
+                candidate,
+                "Must return a type that is assignable to %s",
+                targetType
+            ));
+        }
     }
 
     private Optional<MemberDefinition> memberDefinition(

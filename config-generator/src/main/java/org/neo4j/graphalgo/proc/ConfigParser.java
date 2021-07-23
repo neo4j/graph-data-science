@@ -96,14 +96,10 @@ final class ConfigParser {
             seen.add(method.getSimpleName().toString());
             return Optional.empty();
         }
-        if (!seen.add(method.getSimpleName().toString())) {
+        if (!seen.add(method.getSimpleName().toString()) || method.getModifiers().contains(Modifier.STATIC)) {
             return Optional.empty();
         }
 
-        Set<Modifier> modifiers = method.getModifiers();
-        if (modifiers.contains(Modifier.STATIC)) {
-            return Optional.empty();
-        }
 
         if (!method.getParameters().isEmpty()) {
             messager.printMessage(
@@ -137,50 +133,14 @@ final class ConfigParser {
             .owner(root)
             .method(method);
 
-        if (isAnnotationPresent(method, CollectKeys.class)) {
-            TypeElement collectionType = elementUtils.getTypeElement(Collection.class.getTypeName());
-            TypeMirror stringType = elementUtils.getTypeElement(String.class.getTypeName()).asType();
-            DeclaredType collectionOfStringType = typeUtils.getDeclaredType(collectionType, stringType);
-
-            if (!typeUtils.isSameType(method.getReturnType(), collectionOfStringType)) {
-                messager.printMessage(
-                    Diagnostic.Kind.ERROR,
-                    "Method must return Collection<String>",
-                    method
-                );
-            }
-
-            memberBuilder.collectsKeys(true);
-        }
-
-        if (isAnnotationPresent(method, ToMap.class)) {
-            TypeElement mapType = elementUtils.getTypeElement(Map.class.getTypeName());
-            TypeMirror stringType = elementUtils.getTypeElement(String.class.getTypeName()).asType();
-            TypeMirror objectType = elementUtils.getTypeElement(Object.class.getTypeName()).asType();
-            DeclaredType mapOfStringToObjectType = typeUtils.getDeclaredType(mapType, stringType, objectType);
-
-            if (!typeUtils.isSameType(method.getReturnType(), mapOfStringToObjectType)) {
-                messager.printMessage(
-                    Diagnostic.Kind.ERROR,
-                    "Method must return Map<String, Object>",
-                    method
-                );
-            }
-
-            memberBuilder.toMap(true);
-        }
+        validateCollectKeys(method, memberBuilder);
+        validateToMap(method, memberBuilder);
 
         memberBuilder.validatesIntegerRange(isAnnotationPresent(method, Configuration.IntegerRange.class));
         memberBuilder.validatesLongRange(isAnnotationPresent(method, Configuration.LongRange.class));
         memberBuilder.validatesDoubleRange(isAnnotationPresent(method, Configuration.DoubleRange.class));
 
-        if (isAnnotationPresent(method, Value.Check.class)) {
-            if (method.getReturnType().getKind() == TypeKind.VOID) {
-                memberBuilder.validates(true);
-            } else {
-                memberBuilder.normalizes(true);
-            }
-        }
+        validateValueCheck(method, memberBuilder);
 
         Key key = method.getAnnotation(Key.class);
         if (key != null) {
@@ -198,12 +158,55 @@ final class ConfigParser {
         try {
             return Optional.of(memberBuilder.build());
         } catch (InvalidMemberException invalid) {
-            messager.printMessage(
-                Diagnostic.Kind.ERROR,
-                invalid.getMessage(),
-                method
-            );
+            messager.printMessage(Diagnostic.Kind.ERROR, invalid.getMessage(), method);
             return Optional.empty();
+        }
+    }
+
+    private void validateToMap(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
+        if (isAnnotationPresent(method, ToMap.class)) {
+            TypeElement mapType = elementUtils.getTypeElement(Map.class.getTypeName());
+            TypeMirror stringType = elementUtils.getTypeElement(String.class.getTypeName()).asType();
+            TypeMirror objectType = elementUtils.getTypeElement(Object.class.getTypeName()).asType();
+            DeclaredType mapOfStringToObjectType = typeUtils.getDeclaredType(mapType, stringType, objectType);
+
+            if (!typeUtils.isSameType(method.getReturnType(), mapOfStringToObjectType)) {
+                messager.printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Method must return Map<String, Object>",
+                    method
+                );
+            }
+
+            memberBuilder.toMap(true);
+        }
+    }
+
+    private void validateCollectKeys(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
+        if (isAnnotationPresent(method, CollectKeys.class)) {
+            TypeElement collectionType = elementUtils.getTypeElement(Collection.class.getTypeName());
+            TypeMirror stringType = elementUtils.getTypeElement(String.class.getTypeName()).asType();
+            DeclaredType collectionOfStringType = typeUtils.getDeclaredType(collectionType, stringType);
+
+            if (!typeUtils.isSameType(method.getReturnType(), collectionOfStringType)) {
+                messager.printMessage(
+                    Diagnostic.Kind.ERROR,
+                    "Method must return Collection<String>",
+                    method
+                );
+            }
+
+            memberBuilder.collectsKeys(true);
+        }
+    }
+
+    private void validateValueCheck(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
+        if (isAnnotationPresent(method, Value.Check.class)) {
+            if (method.getReturnType().getKind() == TypeKind.VOID) {
+                memberBuilder.validates(true);
+            } else {
+                memberBuilder.normalizes(true);
+            }
         }
     }
 
