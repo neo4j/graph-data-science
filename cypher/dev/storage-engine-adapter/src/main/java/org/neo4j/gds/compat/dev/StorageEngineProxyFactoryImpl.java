@@ -34,6 +34,6 @@ public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory 
 
     @Override
     public StorageEngineProxyApi load() {
-        return null;
+        return new StorageEngineProxyImpl();
     }
 }

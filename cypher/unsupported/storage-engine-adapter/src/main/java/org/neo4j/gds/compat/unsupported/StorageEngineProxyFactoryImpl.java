@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.dev;
+package org.neo4j.gds.compat.unsupported;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
@@ -43,6 +43,6 @@ public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory 
 
     @Override
     public StorageEngineProxyApi load() {
-        return null;
+        return new StorageEngineProxyImpl();
     }
 }

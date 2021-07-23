@@ -17,33 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.dev;
+package org.neo4j.gds.compat._43;
 
-import org.neo4j.counts.CountsStore;
-import org.neo4j.gds.compat.StorageEngineProxyApi;
+import org.neo4j.gds.compat.AbstractInMemoryCountStore;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.memory.MemoryTracker;
 import org.neo4j.token.TokenHolders;
 
-public class StorageEngineProxyImpl implements StorageEngineProxyApi {
+public class InMemoryCountsStoreImpl extends AbstractInMemoryCountStore {
 
-    @Override
-    public InMemoryStorageEngineImpl.Builder inMemoryStorageEngineBuilder(
-        DatabaseLayout databaseLayout, TokenHolders tokenHolders
+    public InMemoryCountsStoreImpl(
+        GraphStore graphStore,
+        TokenHolders tokenHolders
     ) {
-        return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders);
+        super(graphStore, tokenHolders);
     }
 
     @Override
-    public CountsStore inMemoryCountsStore(
-        GraphStore graphStore, TokenHolders tokenHolders
+    public void start(
+        CursorContext cursorContext, MemoryTracker memoryTracker
     ) {
-        return new InMemoryCountsStoreImpl(graphStore, tokenHolders);
-    }
 
-    @Override
-    public CommandCreationContext inMemoryCommandCreationContext() {
-        return new InMemoryCommandCreationContextImpl();
     }
 }
