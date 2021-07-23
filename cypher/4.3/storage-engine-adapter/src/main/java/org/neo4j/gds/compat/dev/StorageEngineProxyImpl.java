@@ -20,6 +20,15 @@
 package org.neo4j.gds.compat.dev;
 
 import org.neo4j.gds.compat.StorageEngineProxyApi;
+import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.token.TokenHolders;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
+
+    @Override
+    public InMemoryStorageEngineImpl.Builder inMemoryStorageEngineBuilder(
+        DatabaseLayout databaseLayout, TokenHolders tokenHolders
+    ) {
+        return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders);
+    }
 }

@@ -17,15 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.internal.recordstorage;
+package org.neo4j.gds.compat;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.counts.CountsAccessor;
+import org.neo4j.counts.CountsStore;
 import org.neo4j.exceptions.KernelException;
-import org.neo4j.gds.storageengine.InMemoryCommandCreationContext;
-import org.neo4j.gds.storageengine.InMemoryCountStore;
-import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
-import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -38,8 +35,6 @@ import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.lock.LockGroup;
 import org.neo4j.lock.LockService;
-import org.neo4j.lock.LockTracer;
-import org.neo4j.lock.ResourceLocker;
 import org.neo4j.logging.Log;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.CommandCreationContext;
@@ -61,25 +56,30 @@ import org.neo4j.token.api.NamedToken;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
+public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     private final TokenHolders tokenHolders;
-    private final InMemoryMetaDataProvider metaDataProvider;
     private final GraphStore graphStore;
-    private final InMemoryCountStore countStore;
+    private final BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
+    private final Supplier<CommandCreationContext> commandCreationContextSupplier;
+    private final CountsStore countsStore;
+    private final MetadataProvider metadataProvider;
 
-    public InMemoryStorageEngine(
+    public AbstractInMemoryStorageEngine(
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders,
-        InMemoryMetaDataProvider metaDataProvider
+        BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn,
+        BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
+        MetadataProvider metadataProvider,
+        Supplier<CommandCreationContext> commandCreationContextSupplier
     ) {
         this.tokenHolders = tokenHolders;
-        this.metaDataProvider = metaDataProvider;
-
         this.graphStore = GraphStoreCatalog.getAllGraphStores()
             .filter(graphStoreWithUserNameAndConfig -> graphStoreWithUserNameAndConfig.config().graphName().equals(databaseLayout.getDatabaseName()))
             .findFirst()
@@ -92,9 +92,18 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
                     .collect(Collectors.toList())
             )))
             .graphStore();
+        this.txStateVisitorFn = txStateVisitorFn;
+        this.commandCreationContextSupplier = commandCreationContextSupplier;
         schemaAndTokensLifecycle();
 
-        this.countStore = new InMemoryCountStore(graphStore, tokenHolders);
+        this.countsStore = countsStoreFn.apply(graphStore, tokenHolders);
+        this.metadataProvider = metadataProvider;
+    }
+
+    protected void createCommands(ReadableTransactionState txState) throws KernelException {
+        try (var txStateVisitor = txStateVisitorFn.apply(graphStore, tokenHolders)) {
+            txState.accept(txStateVisitor);
+        }
     }
 
     @Override
@@ -105,24 +114,6 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
     @Override
     public void addIndexUpdateListener(IndexUpdateListener listener) {
 
-    }
-
-    @Override
-    public void createCommands(
-        Collection<StorageCommand> target,
-        ReadableTransactionState txState,
-        StorageReader storageReader,
-        CommandCreationContext creationContext,
-        ResourceLocker locks,
-        LockTracer lockTracer,
-        long lastTransactionIdWhenStarted,
-        TxStateVisitor.Decorator additionalTxStateVisitor,
-        CursorContext cursorContext,
-        MemoryTracker memoryTracker
-    ) throws KernelException {
-        try (var txStateVisitor = new InMemoryTransactionStateVisitor(graphStore, tokenHolders)) {
-            txState.accept(txStateVisitor);
-        }
     }
 
     @Override
@@ -177,7 +168,7 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
 
     @Override
     public StoreId getStoreId() {
-        return metaDataProvider.getStoreId();
+        return metadataProvider.getStoreId();
     }
 
     @Override
@@ -221,7 +212,7 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
 
     @Override
     public CountsAccessor countsAccessor() {
-        return countStore;
+        return countsStore;
     }
 
     @Override
@@ -231,12 +222,12 @@ public class InMemoryStorageEngine implements StorageEngine, Lifecycle {
 
     @Override
     public MetadataProvider metadataProvider() {
-        return metaDataProvider;
+        return metadataProvider;
     }
 
     @Override
     public CommandCreationContext newCommandCreationContext(MemoryTracker memoryTracker) {
-        return new InMemoryCommandCreationContext();
+        return commandCreationContextSupplier.get();
     }
 
     @Override

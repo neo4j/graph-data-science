@@ -19,7 +19,21 @@
  */
 package org.neo4j.gds.compat.dev;
 
+import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
+import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
+import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.token.TokenHolders;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
+    @Override
+    public <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
+        DatabaseLayout databaseLayout, TokenHolders tokenHolders
+    ) {
+        throw cypherUnsupportedException();
+    }
+
+    private UnsupportedOperationException cypherUnsupportedException() {
+        return new UnsupportedOperationException("Cypher is not supported for Neo4j versions <4.3.");
+    }
 }

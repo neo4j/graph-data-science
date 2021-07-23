@@ -19,5 +19,13 @@
  */
 package org.neo4j.gds.compat;
 
+import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.token.TokenHolders;
+
 public interface StorageEngineProxyApi {
+
+    <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
+        DatabaseLayout databaseLayout,
+        TokenHolders tokenHolders
+    );
 }
