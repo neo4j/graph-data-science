@@ -36,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.internal.AuraTestSupport.assertGraph;
 import static org.neo4j.gds.internal.AuraTestSupport.assertGraphs;
 import static org.neo4j.gds.internal.AuraTestSupport.assertModels;
-import static org.neo4j.graphalgo.core.utils.io.file.csv.AutoloadFlagVisitor.AUTOLOAD_FILE_NAME;
 
 class AuraShutdownProcSyncTest extends AuraShutdownBaseProcTest {
 
@@ -44,16 +43,6 @@ class AuraShutdownProcSyncTest extends AuraShutdownBaseProcTest {
     void setup() throws Exception {
         super.setup();
         GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class).register(new AuraShutdownProc(true));
-    }
-
-    @Test
-    void shouldWriteAutoloadFlag() {
-        var shutdownQuery = "CALL gds.internal.shutdown()";
-
-        assertCypherResult(shutdownQuery, List.of(Map.of("submitted", true)));
-
-        assertThat(tempDir.resolve("graphs/first")).isDirectoryContaining("glob:**" + AUTOLOAD_FILE_NAME);
-        assertThat(tempDir.resolve("graphs/second")).isDirectoryContaining("glob:**" + AUTOLOAD_FILE_NAME);
     }
 
     @Test

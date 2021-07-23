@@ -74,7 +74,7 @@ class AuraMaintenanceExtensionTest extends BaseTest {
 
     @Test
     void shouldLoadOnlyAutoloadGraphStores() {
-        assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(1);
+        assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(2);
 
         var expectedGraph = TestSupport.fromGdl(
             "  (n0:A {prop1: 21})" +
@@ -91,7 +91,7 @@ class AuraMaintenanceExtensionTest extends BaseTest {
             ", (n1)-[:REL1]->(n2)-[:REL1]->(n3)"
         );
 
-        var testGraphStore = GraphStoreCatalog.get("UserA", db.databaseId(), "test-graph");
+        var testGraphStore = GraphStoreCatalog.get("UserA", db.databaseId(), "test-graph-1");
         assertThat(testGraphStore).isNotNull();
         assertGraphEquals(expectedGraph, testGraphStore.graphStore().getUnion());
 

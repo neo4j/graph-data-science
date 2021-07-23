@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.utils.io.file.CsvGraphStoreImporter;
 import org.neo4j.graphalgo.core.utils.io.file.GraphStoreExporterUtil;
 import org.neo4j.graphalgo.core.utils.io.file.ImmutableCsvGraphStoreImporterConfig;
 import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
-import org.neo4j.graphalgo.core.utils.io.file.csv.AutoloadFlagVisitor;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.graphalgo.utils.StringFormatting;
@@ -152,18 +151,7 @@ public final class BackupAndRestore {
         return result;
     }
 
-    static void restore(Path storePath, Log log) {
-        var graphsPath = storePath.resolve(GRAPHS_DIR);
-        var modelsPath = storePath.resolve(MODELS_DIR);
-        if (Files.exists(graphsPath) && Files.exists(modelsPath)) {
-            restoreGraphs(graphsPath, log);
-            restoreModels(modelsPath, log);
-        } else {
-            restoreGraphs(storePath, log);
-        }
-    }
-
-    static void restoreAndClear(Path storePath, Path backupPath, Log log) {
+    static void restore(Path storePath, Path backupPath, Log log) {
         var graphsPath = storePath.resolve(GRAPHS_DIR);
         var modelsPath = storePath.resolve(MODELS_DIR);
         if (Files.exists(graphsPath) && Files.exists(modelsPath)) {
@@ -183,8 +171,6 @@ public final class BackupAndRestore {
                     );
                 }
             }
-        } else {
-            restoreGraphs(storePath, log);
         }
     }
 
@@ -209,7 +195,6 @@ public final class BackupAndRestore {
                     var config = ImmutableGraphStoreToFileExporterConfig
                         .builder()
                         .includeMetaData(true)
-                        .autoload(true)
                         .exportName(store.config().graphName())
                         .username(store.userName())
                         .build();
@@ -277,9 +262,7 @@ public final class BackupAndRestore {
 
     private static boolean restoreGraphs(Path storePath, Log log) {
         try {
-            getImportPaths(storePath)
-                .filter(graphDir -> Files.exists(graphDir.resolve(AutoloadFlagVisitor.AUTOLOAD_FILE_NAME)))
-                .forEach(path -> restoreGraph(path, log));
+            getImportPaths(storePath).forEach(path -> restoreGraph(path, log));
             return true;
         } catch (Exception e) {
             log.warn("Restoring graphs failed", e);

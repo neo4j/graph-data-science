@@ -96,7 +96,7 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
         var importDir = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
         var backupDir = neo4jConfig.get(GraphStoreExportSettings.backup_location_setting);
         try {
-            BackupAndRestore.restoreAndClear(importDir, backupDir, userLog);
+            BackupAndRestore.restore(importDir, backupDir, userLog);
         } catch (Exception e) {
             userLog.warn("Graph store loading failed", e);
         }
