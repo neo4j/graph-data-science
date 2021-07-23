@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.functions;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.loading.CatalogRequest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -33,7 +32,6 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
 import org.neo4j.values.storable.DoubleArray;
 import org.neo4j.values.storable.FloatArray;
-import org.neo4j.values.storable.LongArray;
 
 import java.util.Objects;
 
@@ -98,26 +96,28 @@ public class NodePropertyFunc {
             ? graphStore.nodePropertyValues(propertyKey) // builds UnionNodeProperties and returns the first matching property
             : graphStore.nodePropertyValues(NodeLabel.of(nodeLabel), propertyKey);
 
-        if (propertyValues.valueType() == ValueType.DOUBLE) {
-            double propertyValue = propertyValues.doubleValue(internalId);
-            return Double.isNaN(propertyValue) ? null : propertyValue;
-        } else if (propertyValues.valueType() == ValueType.LONG) {
-            long longValue = propertyValues.longValue(internalId);
-            return longValue == DefaultValue.LONG_DEFAULT_FALLBACK ? DefaultValue.DOUBLE_DEFAULT_FALLBACK : (double) longValue;
-        } else if (propertyValues.valueType() == ValueType.LONG_ARRAY) {
-            long[] longArray = ((LongArray)propertyValues.value(internalId)).asObjectCopy();
-            return longArray == null ? new long[] {} : longArray;
-        } else if (propertyValues.valueType() == ValueType.FLOAT_ARRAY) {
-            float[] floatArray = ((FloatArray)propertyValues.value(internalId)).asObjectCopy();
-            return floatArray == null ? new float[] {} : floatArray;
-        } else if (propertyValues.valueType() == ValueType.DOUBLE_ARRAY) {
-            double[] doubleArray = ((DoubleArray)propertyValues.value(internalId)).asObjectCopy();
-            return doubleArray == null ? new double[] {} : doubleArray;
-        } else {
-            throw new UnsupportedOperationException(formatWithLocale(
-                "Cannot retrieve value from a property with type %s",
-                propertyValues.valueType()
-            ));
+        switch (propertyValues.valueType()) {
+            case LONG:
+                long longValue = propertyValues.longValue(internalId);
+                return longValue == DefaultValue.LONG_DEFAULT_FALLBACK ? DefaultValue.DOUBLE_DEFAULT_FALLBACK : (double) longValue;
+            case DOUBLE:
+                double propertyValue = propertyValues.doubleValue(internalId);
+                return Double.isNaN(propertyValue) ? null : propertyValue;
+            case DOUBLE_ARRAY:
+                double[] doubleArray = ((DoubleArray)propertyValues.value(internalId)).asObjectCopy();
+                return doubleArray == null ? new double[] {} : doubleArray;
+            case FLOAT_ARRAY:
+                float[] floatArray = ((FloatArray)propertyValues.value(internalId)).asObjectCopy();
+                return floatArray == null ? new float[] {} : floatArray;
+            case LONG_ARRAY:
+                long[] longArray = propertyValues.longArrayValue(internalId);
+                return longArray == null ? new long[] {} : longArray;
+            case UNKNOWN:
         }
+
+        throw new UnsupportedOperationException(formatWithLocale(
+            "Cannot retrieve value from a property with type %s",
+            propertyValues.valueType()
+        ));
     }
 }
