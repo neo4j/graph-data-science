@@ -23,6 +23,7 @@ import org.neo4j.counts.CountsStore;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.token.TokenHolders;
 
 import java.util.ServiceLoader;
@@ -54,5 +55,9 @@ public final class StorageEngineProxy {
 
     public static CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders) {
         return IMPL.inMemoryCountsStore(graphStore, tokenHolders);
+    }
+
+    public static CommandCreationContext inMemoryCommandCreationContext() {
+        return IMPL.inMemoryCommandCreationContext();
     }
 }

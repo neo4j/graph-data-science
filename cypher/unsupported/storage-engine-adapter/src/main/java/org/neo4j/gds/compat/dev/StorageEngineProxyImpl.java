@@ -25,6 +25,7 @@ import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.token.TokenHolders;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
@@ -39,6 +40,11 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     public CountsStore inMemoryCountsStore(
         GraphStore graphStore, TokenHolders tokenHolders
     ) {
+        throw cypherUnsupportedException();
+    }
+
+    @Override
+    public CommandCreationContext inMemoryCommandCreationContext() {
         throw cypherUnsupportedException();
     }
 

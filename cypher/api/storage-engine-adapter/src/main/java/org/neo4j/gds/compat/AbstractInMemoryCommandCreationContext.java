@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.storageengine;
+package org.neo4j.gds.compat;
 
-import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.lock.LockTracer;
 import org.neo4j.lock.ResourceLocker;
 import org.neo4j.storageengine.api.CommandCreationContext;
@@ -28,13 +27,13 @@ import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class InMemoryCommandCreationContext implements CommandCreationContext {
+public abstract class AbstractInMemoryCommandCreationContext implements CommandCreationContext {
 
     private final AtomicLong schemaTokens;
     private final AtomicInteger propertyTokens;
     private final AtomicInteger labelTokens;
 
-    public InMemoryCommandCreationContext() {
+    public AbstractInMemoryCommandCreationContext() {
         schemaTokens = new AtomicLong(0);
         propertyTokens = new AtomicInteger(0);
         labelTokens = new AtomicInteger(0);
@@ -98,11 +97,6 @@ public class InMemoryCommandCreationContext implements CommandCreationContext {
 
     @Override
     public void close() {
-
-    }
-
-    @Override
-    public void initialize(CursorContext cursorContext) {
 
     }
 }

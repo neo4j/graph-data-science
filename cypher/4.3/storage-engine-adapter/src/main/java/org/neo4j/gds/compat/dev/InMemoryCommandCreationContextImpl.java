@@ -17,22 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat.dev;
 
-import org.neo4j.counts.CountsStore;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.storageengine.api.CommandCreationContext;
-import org.neo4j.token.TokenHolders;
+import org.neo4j.gds.compat.AbstractInMemoryCommandCreationContext;
+import org.neo4j.io.pagecache.context.CursorContext;
 
-public interface StorageEngineProxyApi {
+public class InMemoryCommandCreationContextImpl extends AbstractInMemoryCommandCreationContext {
 
-    <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
-        DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders
-    );
+    @Override
+    public void initialize(CursorContext cursorContext) {
 
-    CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders);
-
-    CommandCreationContext inMemoryCommandCreationContext();
+    }
 }

@@ -20,7 +20,6 @@
 package org.neo4j.internal.recordstorage;
 
 import org.neo4j.gds.compat.StorageEngineProxy;
-import org.neo4j.gds.storageengine.InMemoryCommandCreationContext;
 import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
 import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -40,7 +39,7 @@ public final class InMemoryStorageEngineCompanion {
         storageEngineBuilder.withMetadataProvider(new InMemoryMetaDataProvider());
         storageEngineBuilder.withCountsStoreFn(StorageEngineProxy::inMemoryCountsStore);
         storageEngineBuilder.withTxStateVisitorFn(InMemoryTransactionStateVisitor::new);
-        storageEngineBuilder.withCommandCreationContextSupplier(InMemoryCommandCreationContext::new);
+        storageEngineBuilder.withCommandCreationContextSupplier(StorageEngineProxy::inMemoryCommandCreationContext);
 
         return storageEngineBuilder.build();
     }
