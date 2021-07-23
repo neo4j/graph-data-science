@@ -297,131 +297,124 @@ public class Knn extends Algorithm<Knn, Knn.Result> {
                 // old[v] ∪ Sample(old′[v], ρK)
                 var oldNeighbors = allOldNeighbors.get(nodeId);
                 if (oldNeighbors != null) {
-                    var reverseOldNeighbors = allReverseOldNeighbors.get(nodeId);
-                    if (reverseOldNeighbors != null) {
-                        var numberOfReverseOldNeighbors = reverseOldNeighbors.size();
-                        for (var elem : reverseOldNeighbors) {
-                            if (rng.nextInt(numberOfReverseOldNeighbors) < sampledK) {
-                                // TODO: this could add nodes twice, maybe? should this be a set?
-                                oldNeighbors.add(elem.value);
-                            }
-                        }
-                    }
+                    joinOldNeighbors(rng, sampledK, allReverseOldNeighbors, nodeId, oldNeighbors);
                 }
 
 
                 // new[v] ∪ Sample(new′[v], ρK)
                 var newNeighbors = allNewNeighbors.get(nodeId);
                 if (newNeighbors != null) {
-                    var reverseNewNeighbors = allReverseNewNeighbors.get(nodeId);
-                    if (reverseNewNeighbors != null) {
-                        var numberOfReverseNewNeighbors = reverseNewNeighbors.size();
-                        for (var elem : reverseNewNeighbors) {
-                            if (rng.nextInt(numberOfReverseNewNeighbors) < sampledK) {
-                                // TODO: this could add nodes twice, maybe? should this be a set?
-                                newNeighbors.add(elem.value);
-                            }
-                        }
-                    }
-
-                    var newNeighborElements = newNeighbors.buffer;
-                    var newNeighborsCount = newNeighbors.elementsCount;
-
-                    for (int i = 0; i < newNeighborsCount; i++) {
-                        var elem1 = newNeighborElements[i];
-                        assert elem1 != nodeId;
-
-                        // join(u1, v), this isn't in the paper
-                        updateCount += join(
-                            rng,
-                            computer,
-                            allNeighbors,
-                            n,
-                            k,
-                            elem1,
-                            nodeId
-                        );
-
-                        // join(new_nbd, new_ndb)
-                        for (int j = i + 1; j < newNeighborsCount; j++) {
-                            var elem2 = newNeighborElements[i];
-                            if (elem1 == elem2) {
-                                continue;
-                            }
-
-                            updateCount += join(
-                                rng,
-                                computer,
-                                allNeighbors,
-                                n,
-                                k,
-                                elem1,
-                                elem2
-                            );
-                            updateCount += join(
-                                rng,
-                                computer,
-                                allNeighbors,
-                                n,
-                                k,
-                                elem2,
-                                elem1
-                            );
-                        }
-
-                        // join(new_nbd, old_ndb)
-                        if (oldNeighbors != null) {
-                            for (var oldElemCursor : oldNeighbors) {
-                                var elem2 = oldElemCursor.value;
-
-                                if (elem1 == elem2) {
-                                    continue;
-                                }
-
-                                updateCount += join(
-                                    rng,
-                                    computer,
-                                    allNeighbors,
-                                    n,
-                                    k,
-                                    elem1,
-                                    elem2
-                                );
-                                updateCount += join(
-                                    rng,
-                                    computer,
-                                    allNeighbors,
-                                    n,
-                                    k,
-                                    elem2,
-                                    elem1
-                                );
-                            }
-                        }
-                    }
-                }
-
-                // random_join, this isn't in the paper
-                var randomJoins = this.randomJoins;
-                for (int i = 0; i < randomJoins; i++) {
-                    var randomNodeId = rng.nextLong(n - 1);
-                    if (randomNodeId >= nodeId) {
-                        ++randomNodeId;
-                    }
-                    // random joins are not counted towards the actual update counter
-                    join(
+                    updateCount += joinNewNeighbors(
                         rng,
                         computer,
-                        allNeighbors,
                         n,
                         k,
+                        sampledK,
+                        allNeighbors,
+                        allReverseNewNeighbors,
                         nodeId,
-                        randomNodeId
+                        oldNeighbors,
+                        newNeighbors
                     );
                 }
+
+                // this isn't in the paper
+                randomJoins(rng, computer, n, k, allNeighbors, nodeId, this.randomJoins);
             }
 
             this.updateCount.add(updateCount);
+        }
+
+        private void joinOldNeighbors(
+            SplittableRandom rng,
+            int sampledK,
+            HugeObjectArray<LongArrayList> allReverseOldNeighbors,
+            long nodeId,
+            LongArrayList oldNeighbors
+        ) {
+            var reverseOldNeighbors = allReverseOldNeighbors.get(nodeId);
+            if (reverseOldNeighbors != null) {
+                var numberOfReverseOldNeighbors = reverseOldNeighbors.size();
+                for (var elem : reverseOldNeighbors) {
+                    if (rng.nextInt(numberOfReverseOldNeighbors) < sampledK) {
+                        // TODO: this could add nodes twice, maybe? should this be a set?
+                        oldNeighbors.add(elem.value);
+                    }
+                }
+            }
+        }
+
+        private long joinNewNeighbors(
+            SplittableRandom rng,
+            SimilarityComputer computer,
+            long n,
+            int k,
+            int sampledK,
+            HugeObjectArray<NeighborList> allNeighbors,
+            HugeObjectArray<LongArrayList> allReverseNewNeighbors,
+            long nodeId,
+            LongArrayList oldNeighbors,
+            LongArrayList newNeighbors
+        ) {
+            long updateCount = 0;
+
+            joinOldNeighbors(rng, sampledK, allReverseNewNeighbors, nodeId, newNeighbors);
+
+            var newNeighborElements = newNeighbors.buffer;
+            var newNeighborsCount = newNeighbors.elementsCount;
+
+            for (int i = 0; i < newNeighborsCount; i++) {
+                var elem1 = newNeighborElements[i];
+                assert elem1 != nodeId;
+
+                // join(u1, v), this isn't in the paper
+                updateCount += join(rng, computer, allNeighbors, n, k, elem1, nodeId);
+
+                // join(new_nbd, new_ndb)
+                for (int j = i + 1; j < newNeighborsCount; j++) {
+                    var elem2 = newNeighborElements[i];
+                    if (elem1 == elem2) {
+                        continue;
+                    }
+
+                    updateCount += join(rng, computer, allNeighbors, n, k, elem1, elem2);
+                    updateCount += join(rng, computer, allNeighbors, n, k, elem2, elem1);
+                }
+
+                // join(new_nbd, old_ndb)
+                if (oldNeighbors != null) {
+                    for (var oldElemCursor : oldNeighbors) {
+                        var elem2 = oldElemCursor.value;
+
+                        if (elem1 == elem2) {
+                            continue;
+                        }
+
+                        updateCount += join(rng, computer, allNeighbors, n, k, elem1, elem2);
+                        updateCount += join(rng, computer, allNeighbors, n, k, elem2, elem1);
+                    }
+                }
+            }
+            return updateCount;
+        }
+
+        private void randomJoins(
+            SplittableRandom rng,
+            SimilarityComputer computer,
+            long n,
+            int k,
+            HugeObjectArray<NeighborList> allNeighbors,
+            long nodeId,
+            int randomJoins
+        ) {
+            for (int i = 0; i < randomJoins; i++) {
+                var randomNodeId = rng.nextLong(n - 1);
+                if (randomNodeId >= nodeId) {
+                    ++randomNodeId;
+                }
+                // random joins are not counted towards the actual update counter
+                join(rng, computer, allNeighbors, n, k, nodeId, randomNodeId);
+            }
         }
 
         private long join(
