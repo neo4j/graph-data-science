@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.compat;
 
+import org.neo4j.counts.CountsStore;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.token.TokenHolders;
@@ -48,5 +50,9 @@ public final class StorageEngineProxy {
         TokenHolders tokenHolders
     ) {
         return IMPL.inMemoryStorageEngineBuilder(databaseLayout, tokenHolders);
+    }
+
+    public static CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders) {
+        return IMPL.inMemoryCountsStore(graphStore, tokenHolders);
     }
 }

@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.compat.dev;
 
+import org.neo4j.counts.CountsStore;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.token.TokenHolders;
 
@@ -29,6 +31,13 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout, TokenHolders tokenHolders
+    ) {
+        throw cypherUnsupportedException();
+    }
+
+    @Override
+    public CountsStore inMemoryCountsStore(
+        GraphStore graphStore, TokenHolders tokenHolders
     ) {
         throw cypherUnsupportedException();
     }

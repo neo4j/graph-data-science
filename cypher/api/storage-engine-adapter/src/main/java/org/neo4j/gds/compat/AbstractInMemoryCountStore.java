@@ -17,25 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.storageengine;
+package org.neo4j.gds.compat;
 
 import org.neo4j.annotations.documented.ReporterFactory;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.counts.CountsVisitor;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.io.pagecache.context.CursorContext;
-import org.neo4j.memory.MemoryTracker;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.TokenNotFoundException;
 
 import java.io.IOException;
 
-public class InMemoryCountStore implements CountsStore {
+public abstract class AbstractInMemoryCountStore implements CountsStore {
 
     private final GraphStore graphStore;
     private final TokenHolders tokenHolders;
 
-    public InMemoryCountStore(GraphStore graphStore, TokenHolders tokenHolders) {
+    public AbstractInMemoryCountStore(GraphStore graphStore, TokenHolders tokenHolders) {
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
     }
@@ -66,13 +65,6 @@ public class InMemoryCountStore implements CountsStore {
     ) {
         // TODO: this is quite wrong
         return graphStore.relationshipCount();
-    }
-
-    @Override
-    public void start(
-        CursorContext cursorContext, MemoryTracker memoryTracker
-    ) throws IOException {
-
     }
 
     @Override

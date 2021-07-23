@@ -17,19 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat.dev;
 
-import org.neo4j.counts.CountsStore;
+import org.neo4j.gds.compat.AbstractInMemoryCountStore;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.memory.MemoryTracker;
+import org.neo4j.storageengine.api.cursor.StoreCursors;
 import org.neo4j.token.TokenHolders;
 
-public interface StorageEngineProxyApi {
+public class InMemoryCountsStoreImpl extends AbstractInMemoryCountStore {
 
-    <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
-        DatabaseLayout databaseLayout,
+    public InMemoryCountsStoreImpl(
+        GraphStore graphStore,
         TokenHolders tokenHolders
-    );
+    ) {
+        super(graphStore, tokenHolders);
+    }
 
-    CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders);
+    @Override
+    public void start(
+        CursorContext cursorContext, StoreCursors storeCursors, MemoryTracker memoryTracker
+    ) {
+
+    }
 }
