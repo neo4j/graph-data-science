@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureAppender;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
 import java.util.Map;
@@ -54,54 +53,41 @@ public class HadamardFeatureStep implements LinkFeatureStep {
     }
 
     @Override
-    public void addFeatures(Graph graph, HugeObjectArray<double[]> linkFeatures, int offset) {
-        var currentRelationshipOffset = new MutableLong(0);
+    public LinkFeatureAppender linkFeatureAppender(Graph graph) {
         var properties = featureProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
-
-        graph.forEachNode(nodeId -> {
-            graph.forEachRelationship(nodeId, ((sourceNodeId, targetNodeId) -> {
-                double[] currentFeatures = linkFeatures.get(currentRelationshipOffset.getAndIncrement());
-                addFeature(sourceNodeId, targetNodeId, properties, offset, currentFeatures);
-                return true;
-            }));
-
-            return true;
-        });
-    }
-
-    @Override
-    public void addFeature(long sourceNodeId, long targetNodeId, List<NodeProperties> nodeProperties, int startOffset, double[] linkFeature) {
-        var offset = startOffset;
-        for (NodeProperties props : nodeProperties) {
-            var propertyType = props.valueType();
-            switch (propertyType) {
-                case DOUBLE_ARRAY:
-                case FLOAT_ARRAY: {
-                    var sourceArrayPropValues = props.doubleArrayValue(sourceNodeId);
-                    var targetArrayPropValues = props.doubleArrayValue(targetNodeId);
-                    assert sourceArrayPropValues.length == targetArrayPropValues.length;
-                    for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                        linkFeature[offset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+        return (source, target, linkFeatures, offset) -> {
+            var offset1 = offset;
+            for (NodeProperties props : properties) {
+                var propertyType = props.valueType();
+                switch (propertyType) {
+                    case DOUBLE_ARRAY:
+                    case FLOAT_ARRAY: {
+                        var sourceArrayPropValues = props.doubleArrayValue(source);
+                        var targetArrayPropValues = props.doubleArrayValue(target);
+                        assert sourceArrayPropValues.length == targetArrayPropValues.length;
+                        for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                            linkFeatures[offset1++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                        }
+                        break;
                     }
-                    break;
-                }
-                case LONG_ARRAY: {
-                    var sourceArrayPropValues = props.longArrayValue(sourceNodeId);
-                    var targetArrayPropValues = props.longArrayValue(targetNodeId);
-                    assert sourceArrayPropValues.length == targetArrayPropValues.length;
-                    for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                        linkFeature[offset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                    case LONG_ARRAY: {
+                        var sourceArrayPropValues = props.longArrayValue(source);
+                        var targetArrayPropValues = props.longArrayValue(target);
+                        assert sourceArrayPropValues.length == targetArrayPropValues.length;
+                        for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                            linkFeatures[offset1++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                        }
+                        break;
                     }
-                    break;
+                    case LONG:
+                    case DOUBLE:
+                        linkFeatures[offset1++] = props.doubleValue(source) * props.doubleValue(target);
+                        break;
+                    case UNKNOWN:
+                        throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                 }
-                case LONG:
-                case DOUBLE:
-                    linkFeature[offset++] = props.doubleValue(sourceNodeId) * props.doubleValue(targetNodeId);
-                    break;
-                case UNKNOWN:
-                    throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
             }
-        }
+        };
     }
 
     @Override

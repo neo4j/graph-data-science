@@ -21,10 +21,10 @@ package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
@@ -56,18 +56,13 @@ final class L2LinkFeatureStepTest {
 
     @Test
     public void runL2LinkFeatureStep() {
-        var numRelationships = 6;
-        var expectedLinkDimension = 4;
-        var linkFeatures = HugeObjectArray.newArray(double[].class, numRelationships, AllocationTracker.empty());
-
-        linkFeatures.setAll(x -> new double[expectedLinkDimension]);
 
         var step = LinkFeatureStepFactory.create(
             "L2",
             Map.of("featureProperties", List.of("noise", "z", "array"))
         );
 
-        step.addFeatures(graph, linkFeatures, 0);
+        HugeObjectArray<double[]> linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step));
 
         var delta = 0.0001D;
 

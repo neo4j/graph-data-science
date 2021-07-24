@@ -26,7 +26,6 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
@@ -38,6 +37,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor.extractFeatures;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class FeaturePipeline {
@@ -66,35 +66,12 @@ public class FeaturePipeline {
 
     public HugeObjectArray<double[]> computeFeatures(String graphName, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relationshipTypes) {
         executeProcedureSteps(graphName, nodeLabels, relationshipTypes);
-        return computeLinkFeatures(graphName, nodeLabels, relationshipTypes);
-    }
-
-    private HugeObjectArray<double[]> computeLinkFeatures(String graphName, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relationshipTypes) {
         var graph = GraphStoreCatalog.get(userName, databaseId, graphName)
             .graphStore()
             .getGraph(nodeLabels, relationshipTypes, Optional.empty());
         validate(graph);
 
-        var linkFeatures = HugeObjectArray.newArray(
-            double[].class,
-            graph.relationshipCount(),
-            AllocationTracker.empty()
-        );
-
-        List<Integer> featureSize = linkFeatureSteps.stream().map(step -> step.outputFeatureSize(graph)).collect(Collectors.toList());
-
-        int totalFeatureSize = featureSize.stream().mapToInt(Integer::intValue).sum();
-        linkFeatures.setAll(i -> new double[totalFeatureSize]);
-
-        int featureOffset = 0;
-
-        for (int i = 0; i < linkFeatureSteps.size(); i++) {
-            LinkFeatureStep step = linkFeatureSteps.get(i);
-            step.addFeatures(graph, linkFeatures, featureOffset);
-            featureOffset += featureSize.get(i);
-        }
-
-        return linkFeatures;
+        return extractFeatures(graph, linkFeatureSteps);
     }
 
     private void executeProcedureSteps(

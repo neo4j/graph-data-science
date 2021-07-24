@@ -19,19 +19,12 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
-import org.neo4j.graphalgo.api.Graph;
-
-import java.util.List;
-
-public interface LinkFeatureStep {
-    String FEATURE_PROPERTIES = "featureProperties";
-
-    LinkFeatureAppender linkFeatureAppender(Graph graph);
-
+public interface LinkFeatureAppender {
     /**
-     * The expected size of the feature
+     * Adds additional features to linkFeatures
+     *
+     * @param linkFeatures features for the pair (source, target)
+     * @param offset the start offset in each double[] where the features should be added
      */
-    int outputFeatureSize(Graph graph);
-
-    List<String> inputNodeProperties();
+    void addFeatures(long source, long target, double[] linkFeatures, int offset);
 }

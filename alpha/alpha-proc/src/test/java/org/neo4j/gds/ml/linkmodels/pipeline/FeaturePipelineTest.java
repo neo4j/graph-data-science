@@ -80,12 +80,6 @@ class FeaturePipelineTest extends BaseProcTest {
     // add several linkFeatureSteps + assert that linkFeatures computed correct
     @Test
     void singleLinkFeatureStep() {
-        // a-b
-        // a-c
-        // a-d
-        // a-b
-        // a-c
-        // a-d
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
@@ -114,12 +108,6 @@ class FeaturePipelineTest extends BaseProcTest {
 
     @Test
     void multipleLinkFeatureStep() {
-        // a-b
-        // a-c
-        // a-d
-        // a-b
-        // a-c
-        // a-d
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
