@@ -36,7 +36,7 @@ public class LinkFeatureExtractor {
     private final int featureDimension;
     private final List<Integer> featureDimensions;
 
-    LinkFeatureExtractor(
+    public LinkFeatureExtractor(
         List<LinkFeatureAppender> linkFeatureAppenders,
         int featureDimension,
         List<Integer> featureDimensions
