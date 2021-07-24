@@ -27,19 +27,23 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Responsible for extracting features on a specific graph.
+ * Instances should not be reused between different graphs.
+ */
 public class LinkFeatureExtractor {
     private final List<LinkFeatureAppender> linkFeatureAppenders;
-    private final int totalFeatureSize;
-    private final List<Integer> featureSizes;
+    private final int featureDimension;
+    private final List<Integer> featureDimensions;
 
     LinkFeatureExtractor(
         List<LinkFeatureAppender> linkFeatureAppenders,
-        int totalFeatureSize,
-        List<Integer> featureSizes
+        int featureDimension,
+        List<Integer> featureDimensions
     ) {
         this.linkFeatureAppenders = linkFeatureAppenders;
-        this.totalFeatureSize = totalFeatureSize;
-        this.featureSizes = featureSizes;
+        this.featureDimension = featureDimension;
+        this.featureDimensions = featureDimensions;
     }
 
     public static LinkFeatureExtractor of(Graph graph, List<LinkFeatureStep> linkFeatureSteps) {
@@ -48,10 +52,10 @@ public class LinkFeatureExtractor {
             .map(step -> step.linkFeatureAppender(graph))
             .collect(Collectors.toList());
 
-        var featureSize = linkFeatureSteps.stream().map(step -> step.outputFeatureSize(graph)).collect(
+        var featureDimensions = linkFeatureSteps.stream().map(step -> step.outputFeatureDimension(graph)).collect(
             Collectors.toList());
-        int totalFeatureSize = featureSize.stream().mapToInt(Integer::intValue).sum();
-        return new LinkFeatureExtractor(linkFeatureProducers, totalFeatureSize, featureSize);
+        int featureDimension = featureDimensions.stream().mapToInt(Integer::intValue).sum();
+        return new LinkFeatureExtractor(linkFeatureProducers, featureDimension, featureDimensions);
     }
 
     public static HugeObjectArray<double[]> extractFeatures(Graph graph, List<LinkFeatureStep> linkFeatureSteps) {
@@ -74,14 +78,18 @@ public class LinkFeatureExtractor {
         return linkFeatures;
     }
 
-    private double[] extractFeatures(long source, long target) {
-        var featuresForLink = new double[totalFeatureSize];
+    public double[] extractFeatures(long source, long target) {
+        var featuresForLink = new double[featureDimension];
         int featureOffset = 0;
         for (int i = 0; i < linkFeatureAppenders.size(); i++) {
             var featureProducer = linkFeatureAppenders.get(i);
             featureProducer.appendFeatures(source, target, featuresForLink, featureOffset);
-            featureOffset += featureSizes.get(i);
+            featureOffset += featureDimensions.get(i);
         }
         return featuresForLink;
+    }
+
+    public int featureDimension () {
+        return featureDimension;
     }
 }

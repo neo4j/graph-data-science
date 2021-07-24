@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
+/**
+ * Responsible for appending features given a specific graph.
+ * Instances should not be reused between different graphs.
+ */
 public interface LinkFeatureAppender {
     /**
      * Adds additional features to linkFeatures

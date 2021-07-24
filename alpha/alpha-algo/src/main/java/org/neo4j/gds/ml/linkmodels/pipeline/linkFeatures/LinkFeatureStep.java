@@ -31,7 +31,7 @@ public interface LinkFeatureStep {
     /**
      * The expected size of the feature
      */
-    int outputFeatureSize(Graph graph);
+    int outputFeatureDimension(Graph graph);
 
     List<String> inputNodeProperties();
 }

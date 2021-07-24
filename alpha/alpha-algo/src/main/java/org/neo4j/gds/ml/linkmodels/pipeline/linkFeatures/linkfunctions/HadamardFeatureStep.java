@@ -91,7 +91,7 @@ public class HadamardFeatureStep implements LinkFeatureStep {
     }
 
     @Override
-    public int outputFeatureSize(Graph graph) {
+    public int outputFeatureDimension(Graph graph) {
         return FeatureStepUtil.totalPropertyDimension(graph, featureProperties);
     }
 
