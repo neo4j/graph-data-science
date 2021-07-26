@@ -26,5 +26,5 @@ public interface LinkFeatureAppender {
      * @param linkFeatures features for the pair (source, target)
      * @param offset the start offset in each double[] where the features should be added
      */
-    void addFeatures(long source, long target, double[] linkFeatures, int offset);
+    void appendFeatures(long source, long target, double[] linkFeatures, int offset);
 }

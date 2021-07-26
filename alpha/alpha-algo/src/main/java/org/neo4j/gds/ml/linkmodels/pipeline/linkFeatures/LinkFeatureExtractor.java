@@ -55,7 +55,7 @@ public class LinkFeatureExtractor {
     }
 
     public static HugeObjectArray<double[]> extractFeatures(Graph graph, List<LinkFeatureStep> linkFeatureSteps) {
-        var multiLinkFeatureProducer = of(graph, linkFeatureSteps);
+        var extractor = of(graph, linkFeatureSteps);
 
         var linkFeatures = HugeObjectArray.newArray(
             double[].class,
@@ -66,7 +66,7 @@ public class LinkFeatureExtractor {
         var relationshipOffset = new MutableLong();
         graph.forEachNode(nodeId -> {
             graph.forEachRelationship(nodeId, (source, target) -> {
-                linkFeatures.set(relationshipOffset.getAndIncrement(), multiLinkFeatureProducer.extractFeatures(source, target));
+                linkFeatures.set(relationshipOffset.getAndIncrement(), extractor.extractFeatures(source, target));
                 return true;
             });
             return true;
@@ -79,7 +79,7 @@ public class LinkFeatureExtractor {
         int featureOffset = 0;
         for (int i = 0; i < linkFeatureAppenders.size(); i++) {
             var featureProducer = linkFeatureAppenders.get(i);
-            featureProducer.addFeatures(source, target, featuresForLink, featureOffset);
+            featureProducer.appendFeatures(source, target, featuresForLink, featureOffset);
             featureOffset += featureSizes.get(i);
         }
         return featuresForLink;
