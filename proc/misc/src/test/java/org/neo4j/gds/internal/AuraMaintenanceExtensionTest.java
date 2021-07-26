@@ -91,7 +91,7 @@ class AuraMaintenanceExtensionTest extends BaseTest {
             ", (n1)-[:REL1]->(n2)-[:REL1]->(n3)"
         );
 
-        var testGraphStore = GraphStoreCatalog.get("UserA", db.databaseId(), "test-graph-1");
+        var testGraphStore = GraphStoreCatalog.get("alice", db.databaseId(), "test-graph-1");
         assertThat(testGraphStore).isNotNull();
         assertGraphEquals(expectedGraph, testGraphStore.graphStore().getUnion());
 
@@ -121,7 +121,7 @@ class AuraMaintenanceExtensionTest extends BaseTest {
             var uri = Objects
                 .requireNonNull(getClass().getClassLoader().getResource("AuraMaintenanceExtensionTest"))
                 .toURI();
-            var resourceDirectory = Paths.get(uri);
+            var resourceDirectory = Paths.get(uri).resolve("restore");
             PathUtils.copyDirectory(resourceDirectory, exportLocation);
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);

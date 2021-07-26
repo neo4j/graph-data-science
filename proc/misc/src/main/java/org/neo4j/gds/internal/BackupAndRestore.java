@@ -50,6 +50,7 @@ import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
 import static org.neo4j.graphalgo.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
+import static org.neo4j.graphalgo.core.utils.io.file.CsvGraphStoreImporter.DIRECTORY_IS_READABLE;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class BackupAndRestore {
@@ -60,6 +61,8 @@ public final class BackupAndRestore {
     @ValueClass
     interface BackupResult {
 
+        String username();
+
         String type();
 
         boolean done();
@@ -68,20 +71,20 @@ public final class BackupAndRestore {
 
         long exportMillis();
 
-        static BackupResult successfulGraph(Path path, ProgressTimer timer) {
-            return ImmutableBackupResult.of("graph", true, path.toString(), timer.getDuration());
+        static BackupResult successfulGraph(String username, Path path, ProgressTimer timer) {
+            return ImmutableBackupResult.of(username, "graph", true, path.toString(), timer.getDuration());
         }
 
-        static BackupResult failedGraph() {
-            return ImmutableBackupResult.of("graph", false, null, 0);
+        static BackupResult failedGraph(String username) {
+            return ImmutableBackupResult.of(username, "graph", false, null, 0);
         }
 
-        static BackupResult successfulModel(Path path, ProgressTimer timer) {
-            return ImmutableBackupResult.of("model", true, path.toString(), timer.getDuration());
+        static BackupResult successfulModel(String username, Path path, ProgressTimer timer) {
+            return ImmutableBackupResult.of(username, "model", true, path.toString(), timer.getDuration());
         }
 
-        static BackupResult failedModel() {
-            return ImmutableBackupResult.of("model", false, null, 0);
+        static BackupResult failedModel(String username) {
+            return ImmutableBackupResult.of(username, "model", false, null, 0);
         }
     }
 
@@ -91,7 +94,7 @@ public final class BackupAndRestore {
         Log log,
         long timeoutInSeconds,
         AllocationTracker allocationTracker,
-        String taskName
+        @SuppressWarnings("SameParameterValue") String taskName
     ) {
         return backup(
             backupRoot,
@@ -120,16 +123,33 @@ public final class BackupAndRestore {
         var timer = ProgressTimer.start();
         try (timer) {
             result.addAll(backupGraphStores(
-                backupRoot.resolve(GRAPHS_DIR),
+                backupRoot,
                 graphOnSuccess,
                 log,
                 allocationTracker
             ));
             result.addAll(backupModels(
-                backupRoot.resolve(MODELS_DIR),
+                backupRoot,
                 modelOnSuccess,
                 log
             ));
+
+            for (var backupResult : result) {
+                try {
+                    var userPath = backupRoot.resolve(backupResult.username());
+                    Files.createDirectories(userPath.resolve(GRAPHS_DIR));
+                    Files.createDirectories(userPath.resolve(MODELS_DIR));
+                } catch (IOException e) {
+                    log.error(
+                        formatWithLocale(
+                            "Failed to create %s directory structure for user '%s'",
+                            StringFormatting.toLowerCaseWithLocale(taskName),
+                            backupResult.username()
+                        ),
+                        e
+                    );
+                }
+            }
         }
 
         var elapsedTimeInSeconds = TimeUnit.MILLISECONDS.toSeconds(timer.getDuration());
@@ -151,55 +171,72 @@ public final class BackupAndRestore {
         return result;
     }
 
-    static void restore(Path storePath, Path backupPath, Log log) {
-        var graphsPath = storePath.resolve(GRAPHS_DIR);
-        var modelsPath = storePath.resolve(MODELS_DIR);
-        if (Files.exists(graphsPath) && Files.exists(modelsPath)) {
-            boolean success;
-            success = restoreGraphs(graphsPath, log);
-            success = restoreModels(modelsPath, log) && success;
-            if (success) {
+    static void restore(Path restorePath, Path backupPath, Log log)  {
+        var successfulRestorePaths = subdirectories(restorePath, log)
+            .flatMap(userRestorePath -> {
                 try {
-                    createNewBackupFromRestore(storePath, backupPath);
-                } catch (IOException e) {
-                    log.warn(
-                        formatWithLocale(
-                            "Could not move the restored files to the backup folder '%s'",
-                            backupPath
-                        ),
-                        e
-                    );
+                    restoreForUser(userRestorePath, log);
+                    return Stream.of(userRestorePath);
+                } catch (Exception e) {
+                    log.error(formatWithLocale("Restore failed for user path '%s'", userRestorePath), e);
+                    return Stream.empty();
                 }
+            })
+            .collect(Collectors.toList());
+
+        if (!successfulRestorePaths.isEmpty()) {
+            try {
+                createNewBackupFromRestore(backupPath, successfulRestorePaths);
+            } catch (IOException e) {
+                log.error(
+                    formatWithLocale(
+                        "Could not move the restored files to the backup folder '%s'",
+                        backupPath
+                    ),
+                    e
+                );
             }
         }
     }
 
-    private static void createNewBackupFromRestore(Path storePath, Path backupPath) throws IOException {
+    private static void restoreForUser(Path userRestorePath, Log log) {
+        var graphsPath = userRestorePath.resolve(GRAPHS_DIR);
+        var modelsPath = userRestorePath.resolve(MODELS_DIR);
+        DIRECTORY_IS_READABLE.validate(graphsPath);
+        DIRECTORY_IS_READABLE.validate(modelsPath);
+
+        restoreGraphs(graphsPath, log);
+        restoreModels(modelsPath, log);
+    }
+
+    private static void createNewBackupFromRestore(Path backupPath, Iterable<Path> userPaths) throws IOException {
         var backupName = formatWithLocale("backup-%s-restored", UUID.randomUUID());
         var backupRoot = backupPath.resolve(backupName);
         Files.createDirectories(backupRoot);
-        Files.move(storePath.resolve(GRAPHS_DIR), backupRoot.resolve(GRAPHS_DIR));
-        Files.move(storePath.resolve(MODELS_DIR), backupRoot.resolve(MODELS_DIR));
+        for (Path userPath : userPaths) {
+            Files.move(userPath, backupRoot.resolve(userPath.getFileName()));
+        }
     }
 
     private static List<BackupResult> backupGraphStores(
-        Path graphsDir,
+        Path backupRoot,
         Consumer<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> onSuccess,
         Log log,
         AllocationTracker allocationTracker
     ) {
-        DIRECTORY_IS_WRITABLE.validate(graphsDir);
         return GraphStoreCatalog.getAllGraphStores()
             .flatMap(store -> {
+                var username = store.userName();
                 try {
                     var config = ImmutableGraphStoreToFileExporterConfig
                         .builder()
                         .includeMetaData(true)
                         .exportName(store.config().graphName())
-                        .username(store.userName())
+                        .username(username)
                         .build();
 
-                    var backupPath = GraphStoreExporterUtil.getExportPath(graphsDir, config);
+                    var backupDir = backupRoot.resolve(username).resolve(GRAPHS_DIR);
+                    var backupPath = GraphStoreExporterUtil.getExportPath(backupDir, config);
 
                     var timer = ProgressTimer.start();
                     GraphStoreExporterUtil.runGraphStoreExportToCsv(
@@ -213,61 +250,56 @@ public final class BackupAndRestore {
 
                     onSuccess.accept(store);
 
-                    return Stream.of(BackupResult.successfulGraph(backupPath, timer));
+                    return Stream.of(BackupResult.successfulGraph(username, backupPath, timer));
                 } catch (Exception e) {
-                    log.warn(
+                    log.error(
                         formatWithLocale(
                             "Persisting graph '%s' for user '%s' failed",
                             store.config().graphName(),
-                            store.userName()
+                            username
                         ),
                         e
                     );
-                    return Stream.of(BackupResult.failedGraph());
+                    return Stream.of(BackupResult.failedGraph(username));
                 }
             }).collect(Collectors.toList());
     }
 
     private static List<BackupResult> backupModels(
-        Path modelsDir,
+        Path backupRoot,
         Consumer<Model<?, ?>> onSuccess,
         Log log
     ) {
-        DIRECTORY_IS_WRITABLE.validate(modelsDir);
         return ModelCatalog.getAllModels().flatMap(model -> {
+            var username = model.creator();
             try {
-                var modelRoot = modelsDir.resolve(UUID.randomUUID().toString());
-                Files.createDirectory(modelRoot);
+                var backupDir = backupRoot.resolve(username).resolve(MODELS_DIR);
+                var modelPath = backupDir.resolve(UUID.randomUUID().toString());
+                DIRECTORY_IS_WRITABLE.validate(modelPath);
 
                 var timer = ProgressTimer.start();
-                ModelToFileExporter.toFile(modelRoot, model);
+                ModelToFileExporter.toFile(modelPath, model);
                 timer.stop();
 
                 onSuccess.accept(model);
 
-                return Stream.of(BackupResult.successfulModel(modelRoot, timer));
+                return Stream.of(BackupResult.successfulModel(username, modelPath, timer));
             } catch (Exception e) {
                 log.warn(
                     formatWithLocale(
                         "Persisting model '%s' for user '%s' failed",
                         model.name(),
-                        model.creator()
+                        username
                     ),
                     e
                 );
-                return Stream.of(BackupResult.failedModel());
+                return Stream.of(BackupResult.failedModel(username));
             }
         }).collect(Collectors.toList());
     }
 
-    private static boolean restoreGraphs(Path storePath, Log log) {
-        try {
-            getImportPaths(storePath).forEach(path -> restoreGraph(path, log));
-            return true;
-        } catch (Exception e) {
-            log.warn("Restoring graphs failed", e);
-            return false;
-        }
+    private static void restoreGraphs(Path storePath, Log log) {
+        subdirectories(storePath, log).forEach(path -> restoreGraph(path, log));
     }
 
     private static void restoreGraph(Path path, Log log) {
@@ -286,14 +318,8 @@ public final class BackupAndRestore {
         GraphStoreCatalog.set(createConfig, graphStore.graphStore());
     }
 
-    private static boolean restoreModels(Path storePath, Log log) {
-        try {
-            getImportPaths(storePath).forEach(path -> restoreModel(path, log));
-            return true;
-        } catch (Exception e) {
-            log.warn("Model restore failed", e);
-            return false;
-        }
+    private static void restoreModels(Path storePath, Log log) {
+        subdirectories(storePath, log).forEach(path -> restoreModel(path, log));
     }
 
     private static void restoreModel(Path storedModelPath, Log log) {
@@ -319,10 +345,18 @@ public final class BackupAndRestore {
         }
     }
 
-    private static Stream<Path> getImportPaths(Path storePath) throws IOException {
-        return Files.list(storePath)
-            .filter(not(path -> ExceptionUtil.supply(() -> Files.isHidden(path))))
-            .peek(CsvGraphStoreImporter.DIRECTORY_IS_READABLE::validate);
+    private static Stream<Path> subdirectories(Path path, Log log) {
+        try {
+            return Files.list(path)
+                .filter(not(dir -> ExceptionUtil.supply(() -> Files.isHidden(dir))))
+                .peek(DIRECTORY_IS_READABLE::validate);
+        } catch (IOException e) {
+            log.error(
+                formatWithLocale("Could not traverse subdirectories of '%s'", path),
+                e
+            );
+            return Stream.empty();
+        }
     }
 
     private BackupAndRestore() {}

@@ -145,7 +145,8 @@ class GraphStoreExportProcTest extends BaseProcTest {
             QueryExecutionException.class,
             () -> runQuery(exportQuery)
         );
-        assertThat(rootCause(exception)).hasMessage("The specified export directory already exists.");
+        var pattern = formatWithLocale("The specified export directory '[^']+/%s' already exists\\.", exportName);
+        assertThat(rootCause(exception)).hasMessageMatching(pattern);
     }
 
     @Test
@@ -164,7 +165,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
             QueryExecutionException.class,
             () -> runQuery(exportQuery)
         );
-        
+
         assertThat(rootCause(exception)).hasMessage(
             formatWithLocale(
                 "Illegal parameter value for parameter exportName=../export. It attempts to write into forbidden directory %s.",

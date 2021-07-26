@@ -67,7 +67,7 @@ class AuraShutdownProcSyncTest extends AuraShutdownBaseProcTest {
         assertThat(testLog.getMessages(TestLog.WARN))
             .contains(
                 "Persisting graph 'first' for user 'userA' failed - The specified export directory already exists.")
-            .contains(BackupAndRestore.BackupResult.failedGraph().toString());
+            .contains(BackupAndRestore.BackupResult.failedGraph("userA").toString());
 
         assertThat(first).isEmptyDirectory();
 

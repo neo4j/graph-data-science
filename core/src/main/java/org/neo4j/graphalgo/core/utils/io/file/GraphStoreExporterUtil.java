@@ -98,20 +98,20 @@ public final class GraphStoreExporterUtil {
 
         if (!resolvedExportPath.startsWith(rootPath)) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Illegal parameter value for parameter exportName=%s. It attempts to write into forbidden directory %s.",
+                "Illegal parameter value for parameter exportName=%s. It attempts to write into forbidden directory '%s'.",
                 config.exportName(),
                 resolvedExportPath
             ));
         }
 
         if (Files.exists(resolvedExportPath)) {
-            throw new IllegalArgumentException("The specified export directory already exists.");
+            throw new IllegalArgumentException(formatWithLocale("The specified export directory '%s' already exists.", resolvedExportPath));
         }
 
         try {
             Files.createDirectories(resolvedExportPath);
         } catch (IOException e) {
-            throw new RuntimeException("Could not create import directory", e);
+            throw new RuntimeException("Could not create import directory.", e);
         }
 
         return resolvedExportPath;

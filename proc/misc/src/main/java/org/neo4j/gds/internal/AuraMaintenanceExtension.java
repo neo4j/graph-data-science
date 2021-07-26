@@ -78,8 +78,9 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
                     var jobHandle = jobScheduler.schedule(
                         Group.FILE_IO_HELPER,
                         () -> restorePersistedData(
-                            dependencies.config(),
-                            dependencies.logService()
+                            dependencies.logService(),
+                            exportLocationSetting,
+                            backupLocationSetting
                         )
                     );
                     if (blockOnRestore) {
@@ -91,12 +92,14 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
         return new LifecycleAdapter();
     }
 
-    private static void restorePersistedData(Configuration neo4jConfig, LogService logService) {
+    private static void restorePersistedData(
+        LogService logService,
+        Path restorePath,
+        Path backupPath
+    ) {
         var userLog = logService.getUserLog(AuraMaintenanceExtension.class);
-        var importDir = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
-        var backupDir = neo4jConfig.get(GraphStoreExportSettings.backup_location_setting);
         try {
-            BackupAndRestore.restore(importDir, backupDir, userLog);
+            BackupAndRestore.restore(restorePath, backupPath, userLog);
         } catch (Exception e) {
             userLog.warn("Graph store loading failed", e);
         }

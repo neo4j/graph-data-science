@@ -78,7 +78,7 @@ class BackupAndRestoreTest {
             .builder()
             .gdlGraph(gdlGraph)
             .graphName("first")
-            .username("userA")
+            .username("alice")
             .build();
         GraphStoreCatalog.set(graphConfig, GdlFactory.of(gdlGraph).build().graphStore());
 
@@ -96,14 +96,14 @@ class BackupAndRestoreTest {
             });
 
         assertThat(backupPath)
-            .isDirectoryContaining("glob:**/graphs")
-            .isDirectoryContaining("glob:**/models");
+            .isDirectoryRecursivelyContaining("glob:**/alice/graphs")
+            .isDirectoryRecursivelyContaining("glob:**/alice/models");
     }
 
     @Test
     void shouldCreateGraphsFolderWhenNoGraphsAreInBackup(@TempDir Path tempDir) {
         var model = Model.of(
-            "userA",
+            "alice",
             "firstModel",
             GraphSage.MODEL_TYPE,
             GraphSchema.empty(),
@@ -127,8 +127,8 @@ class BackupAndRestoreTest {
             });
 
         assertThat(backupPath)
-            .isDirectoryContaining("glob:**/graphs")
-            .isDirectoryContaining("glob:**/models");
+            .isDirectoryRecursivelyContaining("glob:**/alice/graphs")
+            .isDirectoryRecursivelyContaining("glob:**/alice/models");
     }
 
     @ParameterizedTest
@@ -168,10 +168,12 @@ class BackupAndRestoreTest {
             .exists()
             .isEmptyDirectory();
         if (hasGraphs) {
-            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/graphs/**");
+            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/alice/graphs/**");
+            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/bob/graphs/**");
         }
         if (hasModels) {
-            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/models/**");
+            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/alice/models/**");
+            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/bob/models/**");
         }
     }
 
@@ -179,10 +181,11 @@ class BackupAndRestoreTest {
         assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(2);
 
         var databaseId = DatabaseIdFactory.from("neo4j", UUID.fromString("26ca2600-2f7a-4e99-acc1-9d976603698c"));
-        var testGraphStore = GraphStoreCatalog.get("UserA", databaseId, "test-graph-1");
-        assertThat(testGraphStore).isNotNull();
 
-        var expectedGraph = TestSupport.fromGdl(
+        var aliceGraphStore = GraphStoreCatalog.get("alice", databaseId, "test-graph-1");
+        assertThat(aliceGraphStore).isNotNull();
+
+        var aliceGraph = TestSupport.fromGdl(
             "  (n0:A {prop1: 21})" +
             ", (n1:A {prop1: 42})" +
             ", (n2:A {prop1: 23})" +
@@ -196,8 +199,13 @@ class BackupAndRestoreTest {
             ", (n0)-[:REL {weight: 1.5, height: 2.2}]->(n1)-[:REL {weight: 4.0, height: 2.3}]->(n2)-[:REL {weight: 4.2, height: 2.4}]->(n3)" +
             ", (n1)-[:REL1]->(n2)-[:REL1]->(n3)"
         );
+        assertGraphEquals(aliceGraph, aliceGraphStore.graphStore().getUnion());
 
-        assertGraphEquals(expectedGraph, testGraphStore.graphStore().getUnion());
+        var bobGraphStore = GraphStoreCatalog.get("bob", databaseId, "test-graph-2");
+        assertThat(bobGraphStore).isNotNull();
+
+        var bobGraph = TestSupport.fromGdl("(n0:C)");
+        assertGraphEquals(bobGraph, bobGraphStore.graphStore().getUnion());
     }
 
     private void assertModelsAreRestored() {
