@@ -23,21 +23,23 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.gds.IterationsConfigProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
-import org.neo4j.graphalgo.IterationsConfigTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeWeightConfigTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.QueryRunner;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
@@ -48,6 +50,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -62,8 +65,14 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
     AlgoBaseProcTest<Knn, CONFIG, Knn.Result>,
     MemoryEstimateTest<Knn, CONFIG, Knn.Result>,
     HeapControlTest<Knn, CONFIG, Knn.Result>,
-    NodeWeightConfigTest<Knn, CONFIG, Knn.Result>,
-    IterationsConfigTest<Knn, CONFIG, Knn.Result> {
+    NodeWeightConfigTest<Knn, CONFIG, Knn.Result> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            IterationsConfigProcTest.test(proc(), createMinimalConfig(CypherMapWrapper.empty()))
+        ).flatMap(Collection::stream);
+    }
 
     static final String GRAPH_NAME = "myGraph";
 
