@@ -21,12 +21,16 @@ package org.neo4j.graphalgo.louvain;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.gds.IterationsConfigProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
-import org.neo4j.graphalgo.IterationsConfigTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.Orientation;
@@ -37,16 +41,16 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
 import org.neo4j.graphalgo.ToleranceConfigTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -58,11 +62,17 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<Louvain, CONFIG, Louvain>,
     SeedConfigTest<Louvain, CONFIG, Louvain>,
-    IterationsConfigTest<Louvain, CONFIG, Louvain>,
     RelationshipWeightConfigTest<Louvain, CONFIG, Louvain>,
     ToleranceConfigTest<Louvain, CONFIG, Louvain>,
     MemoryEstimateTest<Louvain, CONFIG, Louvain>,
     HeapControlTest<Louvain, CONFIG, Louvain> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            IterationsConfigProcTest.test(proc(), createMinimalConfig(CypherMapWrapper.empty()))
+        ).flatMap(Collection::stream);
+    }
 
     static final List<List<Long>> RESULT = Arrays.asList(
         Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 14L),

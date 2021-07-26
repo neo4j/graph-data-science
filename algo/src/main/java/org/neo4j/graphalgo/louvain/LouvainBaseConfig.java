@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;
@@ -43,6 +44,7 @@ public interface LouvainBaseConfig extends
 
     @Value.Default
     @Override
+    @Configuration.IntegerRange(min = 1)
     default int maxIterations() {
         return 10;
     }
