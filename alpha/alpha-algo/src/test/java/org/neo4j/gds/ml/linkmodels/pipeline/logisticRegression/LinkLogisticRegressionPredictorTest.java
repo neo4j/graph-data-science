@@ -73,8 +73,7 @@ class LinkLogisticRegressionPredictorTest {
     @ParameterizedTest
     void computesProbability(String sourceNode, String targetNode, double expectedResult) {
         List<String> featureProperties = List.of("x", "y");
-        var linkFeatureExtractor = new LinkFeatureExtractor(List.of(new HadamardFeatureStep(featureProperties)
-            .linkFeatureAppender(graph)), 4, List.of(1, 3));
+        var linkFeatureExtractor = LinkFeatureExtractor.of(graph, List.of(new HadamardFeatureStep(featureProperties)));
         var modelData = ImmutableLinkLogisticRegressionData.of(new Weights<>(new Matrix(WEIGHTS, 1, WEIGHTS.length)));
 
         var predictor = new LinkLogisticRegressionPredictor(modelData, linkFeatureExtractor);

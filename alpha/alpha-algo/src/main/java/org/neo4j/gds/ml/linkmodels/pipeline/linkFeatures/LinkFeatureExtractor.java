@@ -31,12 +31,12 @@ import java.util.stream.Collectors;
  * Responsible for extracting features on a specific graph.
  * Instances should not be reused between different graphs.
  */
-public class LinkFeatureExtractor {
+public final class LinkFeatureExtractor {
     private final List<LinkFeatureAppender> linkFeatureAppenders;
     private final int featureDimension;
     private final List<Integer> featureDimensions;
 
-    public LinkFeatureExtractor(
+    private LinkFeatureExtractor(
         List<LinkFeatureAppender> linkFeatureAppenders,
         int featureDimension,
         List<Integer> featureDimensions
@@ -89,7 +89,7 @@ public class LinkFeatureExtractor {
         return featuresForLink;
     }
 
-    public int featureDimension () {
+    public int featureDimension() {
         return featureDimension;
     }
 }

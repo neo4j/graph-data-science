@@ -41,7 +41,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.util.List;
 
 public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRegressionData> {
-    protected final LinkLogisticRegressionData modelData;
+    private final LinkLogisticRegressionData modelData;
     private final double penalty;
     private final HugeObjectArray<double[]> linkFeatures;
     private final HugeDoubleArray targets;
@@ -65,10 +65,10 @@ public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRe
 
     @Override
     public Variable<Scalar> loss(Batch relationshipBatch, long trainSize) {
-        var features = features(relationshipBatch, linkFeatures);
-        Variable<Matrix> predictions = predictions(features);
+        Constant<Matrix> features = features(relationshipBatch, linkFeatures);
+        var predictions = new Sigmoid<>(MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights()));
 
-        var targets = makeTargetsArray(relationshipBatch);
+        Constant<Vector> targets = makeTargetsArray(relationshipBatch);
         var penaltyVariable = new ConstantScale<>(new L2NormSquared(modelData.weights()), relationshipBatch.size() * penalty / trainSize);
         var unpenalizedLoss = new LogisticLoss(modelData.weights(), predictions, features, targets);
         return new ElementSum(List.of(unpenalizedLoss, penaltyVariable));
@@ -90,15 +90,11 @@ public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRe
         return new Constant<>(batchedTargets);
     }
 
-    protected Variable<Matrix> predictions(Constant<Matrix> features) {
-        return new Sigmoid<>(MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights()));
-    }
-
     /**
      * @param batch Set of relationship ids
      * @param linkFeatures LinkFeatures for relationships
      */
-    protected Constant<Matrix> features(Batch batch, HugeObjectArray<double[]> linkFeatures) {
+    Constant<Matrix> features(Batch batch, HugeObjectArray<double[]> linkFeatures) {
         assert linkFeatures.size() > 0;
 
         // assume the batch contains relationship ids

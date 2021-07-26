@@ -82,12 +82,12 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
         var predVector = ctx.data(predictions);
         var targetVector = ctx.data(targets);
 
-        var nodeCount = targetVector.length();
+        var numberOfExamples = targetVector.length();
 
         double result = 0;
-        for(int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            var predicted = predVector.dataAt(nodeId);
-            var target = targetVector.dataAt(nodeId);
+        for(int idx = 0; idx < numberOfExamples; idx++) {
+            var predicted = predVector.dataAt(idx);
+            var target = targetVector.dataAt(idx);
             double v1 = target * log(predicted);
             double v2 = (1.0 - target) * log(1.0 - predicted);
 
@@ -101,7 +101,7 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
             }
         }
 
-        return new Scalar(-result / nodeCount);
+        return new Scalar(-result / numberOfExamples);
     }
 
     @Override
@@ -115,12 +115,12 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
             var featuresTensor = ctx.data(features);
             var gradient = weightsVector.createWithSameDimensions();
             int featureCount = weightsVector.cols();
-            int nodeCount = targetVector.length();
+            int numberOfExamples = targetVector.length();
 
-            for (int node = 0; node < nodeCount; node++) {
-                double errorPerNode = (predVector.dataAt(node) - targetVector.dataAt(node)) / nodeCount;
+            for (int idx = 0; idx < numberOfExamples; idx++) {
+                double errorPerNode = (predVector.dataAt(idx) - targetVector.dataAt(idx)) / numberOfExamples;
                 for (int feature = 0; feature < featureCount; feature++) {
-                    gradient.addDataAt(feature, errorPerNode * featuresTensor.dataAt(node * featureCount + feature));
+                    gradient.addDataAt(feature, errorPerNode * featuresTensor.dataAt(idx * featureCount + feature));
                 }
             }
             return gradient;

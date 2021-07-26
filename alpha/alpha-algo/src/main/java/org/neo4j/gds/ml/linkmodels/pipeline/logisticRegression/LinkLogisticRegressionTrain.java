@@ -61,6 +61,6 @@ public class LinkLogisticRegressionTrain {
 
         training.train(objective, queueSupplier, config.concurrency());
 
-        return objective.modelData;
+        return objective.modelData();
     }
 }

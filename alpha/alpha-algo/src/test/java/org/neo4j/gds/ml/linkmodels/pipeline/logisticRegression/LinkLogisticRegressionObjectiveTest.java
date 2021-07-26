@@ -73,8 +73,8 @@ class LinkLogisticRegressionObjectiveTest {
     @Inject
     private Graph graph;
 
-    LinkLogisticRegressionObjective objective;
-    List<String> features = List.of("a", "b");
+    private LinkLogisticRegressionObjective objective;
+    private final List<String> features = List.of("a", "b");
 
     @BeforeEach
     void setup() {
@@ -128,7 +128,7 @@ class LinkLogisticRegressionObjectiveTest {
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
 
-        // zero penalty since weights are zero
+        // weights are zero. penalty part of objective is 0. remaining part of logistic-loss is -Math.log(0.5).
         assertThat(lossValue).isEqualTo(-Math.log(0.5));
     }
 }
