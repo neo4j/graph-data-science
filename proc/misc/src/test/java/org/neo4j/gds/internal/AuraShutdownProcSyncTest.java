@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.internal;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.TestLog;
@@ -42,11 +43,11 @@ class AuraShutdownProcSyncTest extends AuraShutdownBaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         super.setup();
-        GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class).register(new AuraShutdownProc(true));
+        GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class).register(new AuraShutdownProc(tempDir, true));
     }
 
     @Test
-    void shouldPersistGraphStores() throws IOException {
+    void shouldPersistGraphStores() {
         var shutdownQuery = "CALL gds.internal.shutdown()";
 
         assertCypherResult(shutdownQuery, List.of(Map.of("submitted", true)));
@@ -59,19 +60,23 @@ class AuraShutdownProcSyncTest extends AuraShutdownBaseProcTest {
     void shouldCollectErrorsWhenPersistingGraphStores() throws IOException {
         var shutdownQuery = "CALL gds.internal.shutdown()";
 
-        var first = tempDir.resolve("graphs/first");
+        var first = tempDir.resolve("userA/graphs/first");
         Files.createDirectories(first);
 
         assertCypherResult(shutdownQuery, List.of(Map.of("submitted", true)));
 
+        assertThat(testLog.getMessages(TestLog.ERROR))
+            .hasSize(1)
+            .element(0, InstanceOfAssertFactories.STRING)
+            .matches("Persisting graph 'first' for user 'userA' failed - The specified export directory '[^']+' already exists\\.");
+
         assertThat(testLog.getMessages(TestLog.WARN))
-            .contains(
-                "Persisting graph 'first' for user 'userA' failed - The specified export directory already exists.")
+            .hasSize(1)
             .contains(BackupAndRestore.BackupResult.failedGraph("userA").toString());
 
         assertThat(first).isEmptyDirectory();
 
-        assertGraph(tempDir.resolve("graphs/second"));
+        assertGraph(tempDir.resolve("userB/graphs/second"));
     }
 
     @Test

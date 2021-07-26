@@ -38,13 +38,12 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.gdl.ImmutableGraphCreateFromGdlConfig;
+import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -137,21 +136,23 @@ final class AuraTestSupport {
 
     static void assertModel(Path path) {
         assertThat(path)
-            .isDirectoryContaining("glob:**/" + ModelToFileExporter.META_DATA_FILE)
-            .isDirectoryContaining("glob:**/" + ModelToFileExporter.MODEL_DATA_FILE);
+            .satisfies(p -> assertThat(ExceptionUtil.apply(Files::list, p).count()).isEqualTo(1))
+            .isDirectoryRecursivelyContaining("glob:**/models/*/" + ModelToFileExporter.META_DATA_FILE)
+            .isDirectoryRecursivelyContaining("glob:**/models/*/" + ModelToFileExporter.MODEL_DATA_FILE)
+
+        ;
     }
 
     static void assertGraphs(Path root) {
-        assertGraph(root.resolve("graphs/first"));
-        assertGraph(root.resolve("graphs/second"));
+        assertGraph(root.resolve("userA/graphs/first"));
+        assertThat(root.resolve("userA/graphs/second")).doesNotExist();
+        assertGraph(root.resolve("userB/graphs/second"));
+        assertThat(root.resolve("userB/graphs/first")).doesNotExist();
     }
 
-    static void assertModels(Path root) throws IOException {
-        var modelRoot = root.resolve("models");
-        assertThat(modelRoot).isNotEmptyDirectory();
-        var modelPaths = Files.list(modelRoot).collect(Collectors.toList());
-        assertThat(modelPaths).hasSize(2);
-        modelPaths.forEach(AuraTestSupport::assertModel);
+    static void assertModels(Path root) {
+        assertModel(root.resolve("userA/models"));
+        assertModel(root.resolve("userB/models"));
     }
 }
 

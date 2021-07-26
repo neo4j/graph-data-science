@@ -19,12 +19,13 @@
  */
 package org.neo4j.graphalgo.core.utils.io.file;
 
-import org.neo4j.configuration.Config;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.utils.io.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.logging.Log;
 
 import java.io.IOException;
@@ -37,9 +38,11 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class GraphStoreExporterUtil {
 
+    public static final String EXPORT_DIR = "export";
+
     public static ExportToCsvResult runGraphStoreExportToCsv(
         GraphStore graphStore,
-        Config neo4jConfig,
+        Configuration neo4jConfig,
         GraphStoreToFileExporterConfig exportConfig,
         Log log,
         AllocationTracker allocationTracker
@@ -79,12 +82,13 @@ public final class GraphStoreExporterUtil {
         }
     }
 
-    public static Path getExportPath(Config neo4jConfig, GraphStoreToFileExporterConfig config) {
+    private static Path getExportPath(Configuration neo4jConfig, GraphStoreToFileExporterConfig config) {
         var rootPath = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
-        return getExportPath(rootPath, config);
+        var exportPath = rootPath != null ? rootPath.resolve(EXPORT_DIR) : null;
+        return getExportPath(exportPath, config);
     }
 
-    public static Path getExportPath(Path rootPath, GraphStoreToFileExporterConfig config) {
+    public static Path getExportPath(@Nullable Path rootPath, GraphStoreToFileExporterConfig config) {
         if (rootPath == null) {
             throw new RuntimeException(formatWithLocale(
                 "The configuration option '%s' must be set.",
@@ -95,12 +99,12 @@ public final class GraphStoreExporterUtil {
         DIRECTORY_IS_WRITABLE.validate(rootPath);
 
         var resolvedExportPath = rootPath.resolve(config.exportName()).normalize();
+        var resolvedParent = resolvedExportPath.getParent();
 
-        if (!resolvedExportPath.startsWith(rootPath)) {
+        if (resolvedParent == null || !resolvedParent.startsWith(rootPath)) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Illegal parameter value for parameter exportName=%s. It attempts to write into forbidden directory '%s'.",
-                config.exportName(),
-                resolvedExportPath
+                "Illegal parameter value for parameter exportName '%s'. It attempts to write into a forbidden directory.",
+                config.exportName()
             ));
         }
 

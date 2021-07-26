@@ -43,7 +43,7 @@ import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 class AuraMaintenanceExtensionTest extends BaseTest {
 
     @TempDir
-    Path importDir;
+    Path tempDir;
 
     private Path exportLocation;
 
@@ -58,8 +58,8 @@ class AuraMaintenanceExtensionTest extends BaseTest {
     @Override
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        exportLocation = importDir.resolve("export");
-        backupLocation = importDir.resolve("backup");
+        exportLocation = tempDir.resolve("export");
+        backupLocation = tempDir.resolve("backup");
 
         prepareImportDir(exportLocation);
         super.configuration(builder);
@@ -95,7 +95,8 @@ class AuraMaintenanceExtensionTest extends BaseTest {
         assertThat(testGraphStore).isNotNull();
         assertGraphEquals(expectedGraph, testGraphStore.graphStore().getUnion());
 
-        assertThat(exportLocation).isEmptyDirectory();
+        assertThat(exportLocation).isDirectoryContaining("glob:**/restore");
+        assertThat(exportLocation.resolve("restore")).isEmptyDirectory();
         assertThat(backupLocation).isDirectoryContaining("glob:**/backup-*-restored");
     }
 
@@ -112,7 +113,8 @@ class AuraMaintenanceExtensionTest extends BaseTest {
         assertThat(bobModels).hasSize(1);
         assertThat(bobModels.stream().findFirst().get().name()).isEqualTo("modelBob");
 
-        assertThat(exportLocation).isEmptyDirectory();
+        assertThat(exportLocation).isDirectoryContaining("glob:**/restore");
+        assertThat(exportLocation.resolve("restore")).isEmptyDirectory();
         assertThat(backupLocation).isDirectoryContaining("glob:**/backup-*-restored");
     }
 
@@ -121,7 +123,7 @@ class AuraMaintenanceExtensionTest extends BaseTest {
             var uri = Objects
                 .requireNonNull(getClass().getClassLoader().getResource("AuraMaintenanceExtensionTest"))
                 .toURI();
-            var resourceDirectory = Paths.get(uri).resolve("restore");
+            var resourceDirectory = Paths.get(uri);
             PathUtils.copyDirectory(resourceDirectory, exportLocation);
         } catch (URISyntaxException | IOException e) {
             throw new RuntimeException(e);

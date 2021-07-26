@@ -25,8 +25,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphStoreExportProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
@@ -47,6 +45,7 @@ import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.graphalgo.core.utils.io.file.GraphStoreExporterUtil.EXPORT_DIR;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -82,7 +81,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     }
 
     @AfterEach
-   void teardown() {
+    void teardown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
@@ -131,7 +130,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @Test
     void failsWhenTheExportDirectoryAlreadyExists() throws IOException {
         var exportName = "export";
-        Files.createDirectory(tempDir.resolve(exportName));
+        Files.createDirectories(tempDir.resolve(EXPORT_DIR).resolve(exportName));
 
         createGraph();
 
@@ -168,7 +167,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
         assertThat(rootCause(exception)).hasMessage(
             formatWithLocale(
-                "Illegal parameter value for parameter exportName=../export. It attempts to write into forbidden directory %s.",
+                "Illegal parameter value for parameter exportName '../export'. It attempts to write into a forbidden directory.",
                 tempDir.resolve(exportName).normalize()
             )
         );

@@ -42,6 +42,7 @@ import java.nio.file.Path;
 @ServiceProvider
 public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMaintenanceExtension.Dependencies> {
 
+    private static final String RESTORE_DIR = "restore";
     private final boolean blockOnRestore;
 
     @SuppressWarnings("unused - entry point for service loader")
@@ -61,26 +62,29 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
             var config = dependencies.config();
             var log = dependencies.logService().getInternalLog(getClass());
 
-            var exportLocationSetting = pathSetting(config, GraphStoreExportSettings.export_location_setting, log);
-            var backupLocationSetting = pathSetting(config, GraphStoreExportSettings.backup_location_setting, log);
+            var backupPath = pathSetting(config, GraphStoreExportSettings.backup_location_setting, log);
+            var exportPath = pathSetting(config, GraphStoreExportSettings.export_location_setting, log);
+            // We keep it null here so that we can fail lazily from the shutdown proc with a message
+            // that we control and is visible to the user outside of going through the logs
+            var restorePath = exportPath != null ? exportPath.resolve(RESTORE_DIR) : null;
 
             var registry = dependencies.globalProceduresRegistry();
             try {
                 registry.register(new AuraMaintenanceFunction(), false);
-                registry.register(new AuraShutdownProc(), false);
+                registry.register(new AuraShutdownProc(restorePath), false);
             } catch (ProcedureException e) {
                 log.warn(e.getMessage(), e);
             }
 
-            if (exportLocationSetting != null && backupLocationSetting != null) {
+            if (restorePath != null && backupPath != null) {
                 return LifecycleAdapter.onInit(() -> {
                     var jobScheduler = dependencies.jobScheduler();
                     var jobHandle = jobScheduler.schedule(
                         Group.FILE_IO_HELPER,
                         () -> restorePersistedData(
                             dependencies.logService(),
-                            exportLocationSetting,
-                            backupLocationSetting
+                            restorePath,
+                            backupPath
                         )
                     );
                     if (blockOnRestore) {

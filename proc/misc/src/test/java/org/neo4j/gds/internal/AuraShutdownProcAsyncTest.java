@@ -39,7 +39,7 @@ class AuraShutdownProcAsyncTest extends AuraShutdownBaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         super.setup();
-        GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class).register(new AuraShutdownProc());
+        GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class).register(new AuraShutdownProc(tempDir));
     }
 
     @Test

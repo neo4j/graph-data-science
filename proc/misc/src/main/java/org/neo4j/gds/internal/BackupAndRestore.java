@@ -285,7 +285,7 @@ public final class BackupAndRestore {
 
                 return Stream.of(BackupResult.successfulModel(username, modelPath, timer));
             } catch (Exception e) {
-                log.warn(
+                log.error(
                     formatWithLocale(
                         "Persisting model '%s' for user '%s' failed",
                         model.name(),

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.internal;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.RawIterator;
-import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -94,13 +94,15 @@ public class AuraShutdownProc implements CallableProcedure {
         false
     );
 
+    private final @Nullable Path restorePath;
     private final boolean blockOnSubmit;
 
-    AuraShutdownProc() {
-        this(false);
+    AuraShutdownProc(@Nullable Path restorePath) {
+        this(restorePath, false);
     }
 
-    AuraShutdownProc(boolean blockOnSubmit) {
+    AuraShutdownProc(@Nullable Path restorePath, boolean blockOnSubmit) {
+        this.restorePath = restorePath;
         this.blockOnSubmit = blockOnSubmit;
     }
 
@@ -115,9 +117,7 @@ public class AuraShutdownProc implements CallableProcedure {
         AnyValue[] input,
         ResourceTracker resourceTracker
     ) throws ProcedureException {
-        var config = InternalProceduresUtil.resolve(ctx, Config.class);
-        var exportPath = config.get(GraphStoreExportSettings.export_location_setting);
-        if (exportPath == null) {
+        if (restorePath == null) {
             throw new ProcedureException(
                 Status.Procedure.ProcedureCallFailed,
                 "The configuration '%s' needs to be set in order to use '%s'.",
@@ -129,9 +129,9 @@ public class AuraShutdownProc implements CallableProcedure {
         var timeoutInSeconds = ((NumberValue) input[0]).longValue();
         var log = InternalProceduresUtil.lookup(ctx, Log.class);
         var tracker = InternalProceduresUtil.lookup(ctx, AllocationTracker.class);
- 
+
         var future = EXECUTOR_SERVICE.submit(
-            () -> shutdown(exportPath, log, timeoutInSeconds, tracker)
+            () -> shutdown(restorePath, log, timeoutInSeconds, tracker)
         );
 
         if (blockOnSubmit) {
