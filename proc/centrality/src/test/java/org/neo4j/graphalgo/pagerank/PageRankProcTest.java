@@ -21,16 +21,20 @@ package org.neo4j.graphalgo.pagerank;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.IterationsConfigProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.ImmutablePropertyMapping;
-import org.neo4j.graphalgo.IterationsConfigTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -39,8 +43,6 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SourceNodesConfigTest;
 import org.neo4j.graphalgo.ToleranceConfigTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -50,6 +52,7 @@ import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -62,12 +65,18 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcTest implements
     AlgoBaseProcTest<PageRankAlgorithm, CONFIG, PageRankResult>,
-    IterationsConfigTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     RelationshipWeightConfigTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     ToleranceConfigTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     MemoryEstimateTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     SourceNodesConfigTest<PageRankAlgorithm, CONFIG, PageRankResult>,
     HeapControlTest<PageRankAlgorithm, CONFIG, PageRankResult> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            IterationsConfigProcTest.test(proc(), createMinimalConfig(CypherMapWrapper.empty()))
+        ).flatMap(Collection::stream);
+    }
 
     static final double RESULT_ERROR = 1e-5;
 

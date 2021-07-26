@@ -105,6 +105,17 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     Class<? extends AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> getProcedureClazz();
 
+    default AlgoBaseProc<ALGORITHM, RESULT, CONFIG> proc() {
+        try {
+            return getProcedureClazz()
+                .getConstructor()
+                .newInstance();
+        } catch (Exception e) {
+            fail("unable to instantiate procedure", e);
+        }
+        return null;
+    }
+
     default boolean supportsImplicitGraphCreate() {
         return true;
     }
