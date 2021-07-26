@@ -23,6 +23,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.exceptions.KernelException;
+import org.neo4j.function.TriFunction;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -68,6 +69,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
     private final GraphStore graphStore;
     private final BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
     private final Supplier<CommandCreationContext> commandCreationContextSupplier;
+    private final TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
     private final CountsStore countsStore;
     private final MetadataProvider metadataProvider;
 
@@ -77,7 +79,8 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn,
         BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
         MetadataProvider metadataProvider,
-        Supplier<CommandCreationContext> commandCreationContextSupplier
+        Supplier<CommandCreationContext> commandCreationContextSupplier,
+        TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
     ) {
         this.tokenHolders = tokenHolders;
         this.graphStore = GraphStoreCatalog.getAllGraphStores()
@@ -94,6 +97,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
             .graphStore();
         this.txStateVisitorFn = txStateVisitorFn;
         this.commandCreationContextSupplier = commandCreationContextSupplier;
+        this.storageReaderFn = storageReaderFn;
         schemaAndTokensLifecycle();
 
         this.countsStore = countsStoreFn.apply(graphStore, tokenHolders);
@@ -108,7 +112,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     @Override
     public StorageReader newReader() {
-        throw new UnsupportedOperationException();
+        return storageReaderFn.apply(graphStore, tokenHolders, countsStore);
     }
 
     @Override

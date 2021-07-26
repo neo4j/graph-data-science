@@ -20,10 +20,12 @@
 package org.neo4j.gds.compat;
 
 import org.neo4j.counts.CountsStore;
+import org.neo4j.function.TriFunction;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.MetadataProvider;
+import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
 
@@ -39,6 +41,7 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
     protected BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
     protected MetadataProvider metadataProvider;
     protected Supplier<CommandCreationContext> commandCreationContextSupplier;
+    protected TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
 
     protected InMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
@@ -65,6 +68,11 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
 
     public InMemoryStorageEngineBuilder<T> withCommandCreationContextSupplier(Supplier<CommandCreationContext> commandCreationContextSupplier) {
         this.commandCreationContextSupplier = commandCreationContextSupplier;
+        return this;
+    }
+
+    public InMemoryStorageEngineBuilder<T> withStorageReaderFn(TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn) {
+        this.storageReaderFn = storageReaderFn;
         return this;
     }
 
