@@ -19,6 +19,7 @@
  */
 package org.neo4j.internal.recordstorage;
 
+import org.neo4j.gds.storageengine.InMemoryNodeCursor;
 import org.neo4j.storageengine.api.AllNodeScan;
 
 public class InMemoryNodeScan extends BaseRecordScan<InMemoryNodeCursor> implements AllNodeScan {

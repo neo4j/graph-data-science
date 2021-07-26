@@ -22,6 +22,8 @@ package org.neo4j.internal.recordstorage;
 import org.neo4j.common.EntityType;
 import org.neo4j.common.TokenNameLookup;
 import org.neo4j.counts.CountsAccessor;
+import org.neo4j.gds.storageengine.InMemoryNodeCursor;
+import org.neo4j.gds.storageengine.InMemoryRelationshipTraversalCursor;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.internal.schema.ConstraintDescriptor;
 import org.neo4j.internal.schema.IndexDescriptor;
@@ -292,7 +294,7 @@ public class InMemoryStorageReader implements StorageReader {
 
     @Override
     public StorageRelationshipTraversalCursor allocateRelationshipTraversalCursor(CursorContext cursorContext) {
-        return null;
+        return new InMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
     }
 
     @Override
