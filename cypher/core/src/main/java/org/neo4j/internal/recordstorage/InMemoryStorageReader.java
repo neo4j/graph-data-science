@@ -23,6 +23,7 @@ import org.neo4j.common.EntityType;
 import org.neo4j.common.TokenNameLookup;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.gds.storageengine.InMemoryNodeCursor;
+import org.neo4j.gds.storageengine.InMemoryPropertyCursor;
 import org.neo4j.gds.storageengine.InMemoryRelationshipTraversalCursor;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.internal.schema.ConstraintDescriptor;
@@ -319,6 +320,6 @@ public class InMemoryStorageReader implements StorageReader {
     public StoragePropertyCursor allocatePropertyCursor(
         CursorContext cursorContext, MemoryTracker memoryTracker
     ) {
-        return null;
+        return new InMemoryPropertyCursor(graphStore, tokenHolders);
     }
 }
