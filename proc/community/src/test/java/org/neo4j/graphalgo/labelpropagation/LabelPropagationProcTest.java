@@ -21,12 +21,16 @@ package org.neo4j.graphalgo.labelpropagation;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.gds.IterationsConfigProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
-import org.neo4j.graphalgo.IterationsConfigTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
 import org.neo4j.graphalgo.NodeWeightConfigTest;
@@ -36,10 +40,9 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -47,6 +50,7 @@ import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -59,11 +63,17 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<LabelPropagation, CONFIG, LabelPropagation>,
     SeedConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
-    IterationsConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
     NodeWeightConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
     RelationshipWeightConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
     MemoryEstimateTest<LabelPropagation, CONFIG, LabelPropagation>,
     HeapControlTest<LabelPropagation, CONFIG, LabelPropagation> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            IterationsConfigProcTest.test(proc(), createMinimalConfig(CypherMapWrapper.empty()))
+        ).flatMap(Collection::stream);
+    }
 
     static final List<Long> RESULT = Arrays.asList(2L, 7L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L);
     static final String TEST_GRAPH_NAME = "myGraph";
