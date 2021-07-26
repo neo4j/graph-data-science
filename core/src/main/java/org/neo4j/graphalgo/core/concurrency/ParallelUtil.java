@@ -419,7 +419,55 @@ public final class ParallelUtil {
      */
     public static void runWithConcurrency(
         final int concurrency,
-        final Collection<? extends Runnable> tasks,
+        final Iterable<? extends Runnable> tasks,
+        final ExecutorService executor
+    ) {
+        runWithConcurrency(
+            concurrency,
+            tasks.iterator(),
+            executor
+        );
+    }
+
+    /**
+     * Try to run all tasks for their side-effects using at most
+     * {@code concurrency} threads at once.
+     * <p>
+     * If the concurrency is 1 or less, or there is only a single task, or the
+     * provided {@link ExecutorService} has terminated the tasks are run
+     * sequentially on the calling thread until all tasks are finished or the
+     * first Exception is thrown.
+     * <p>
+     * If the tasks are submitted to the {@code executor}, it may happen that
+     * not all tasks are actually executed. If the provided collection creates
+     * the tasks lazily upon iteration, not all elements might actually be
+     * created.
+     * <p>
+     * The calling thread will be always blocked during the execution of the tasks
+     * and is not available for scheduling purposes. If the calling thread is
+     * {@link Thread#interrupt() interrupted} during the execution, running tasks
+     * are cancelled and not-yet-started tasks are abandoned.
+     * <p>
+     * We will try to submit tasks as long as no more than {@code concurrency}
+     * are already started and then continue to submit tasks one-by-one, after
+     * a previous tasks has finished, so that no more than {@code concurrency}
+     * tasks are running in the provided {@code executor}.
+     * <p>
+     * We do not submit all tasks at-once into the worker queue to avoid creating
+     * a large amount of tasks and further support lazily created tasks.
+     * We can support thousands, even millions of tasks without resource exhaustion that way.
+     * <p>
+     * We will try to submit tasks as long as the {@code executor} can
+     * directly start new tasks, that is, we want to avoid creating tasks and put
+     * them into the waiting queue if it may never be executed afterwards.
+     *
+     * @param concurrency how many tasks should be run simultaneous
+     * @param tasks       the tasks to execute
+     * @param executor    the executor to submit the tasks to
+     */
+    public static void runWithConcurrency(
+        final int concurrency,
+        final Iterator<? extends Runnable> tasks,
         final ExecutorService executor
     ) {
         runWithConcurrency(
@@ -470,7 +518,57 @@ public final class ParallelUtil {
      */
     public static void runWithConcurrency(
         final int concurrency,
-        final Collection<? extends Runnable> tasks,
+        final Iterable<? extends Runnable> tasks,
+        final long maxRetries,
+        final ExecutorService executor
+    ) {
+        runWithConcurrency(
+            concurrency,
+            tasks.iterator(),
+            maxRetries,
+            executor
+        );
+    }
+
+     /**
+     * Try to run all tasks for their side-effects using at most
+     * {@code concurrency} threads at once.
+     * <p>
+     * If the concurrency is 1 or less, or there is only a single task, or the
+     * provided {@link ExecutorService} has terminated the tasks are run
+     * sequentially on the calling thread until all tasks are finished or the
+     * first Exception is thrown.
+     * <p>
+     * If the tasks are submitted to the {@code executor}, it may happen that
+     * not all tasks are actually executed. If the provided collection creates
+     * the tasks lazily upon iteration, not all elements might actually be
+     * created.
+     * <p>
+     * The calling thread will be always blocked during the execution of the tasks
+     * and is not available for scheduling purposes. If the calling thread is
+     * {@link Thread#interrupt() interrupted} during the execution, running tasks
+     * are cancelled and not-yet-started tasks are abandoned.
+     * <p>
+     * We will try to submit tasks as long as no more than {@code concurrency}
+     * are already started and then continue to submit tasks one-by-one, after
+     * a previous tasks has finished, so that no more than {@code concurrency}
+     * tasks are running in the provided {@code executor}.
+     * <p>
+     * We do not submit all tasks at-once into the worker queue to avoid creating
+     * a large amount of tasks and further support lazily created tasks.
+     * We can support thousands, even millions of tasks without resource exhaustion that way.
+     * <p>
+     * We will try to submit tasks as long as the {@code executor} can
+     * directly start new tasks, that is, we want to avoid creating tasks and put
+     * them into the waiting queue if it may never be executed afterwards.
+     *
+     * @param concurrency how many tasks should be run simultaneous
+     * @param tasks       the tasks to execute
+     * @param executor    the executor to submit the tasks to
+     */
+    public static void runWithConcurrency(
+        final int concurrency,
+        final Iterator<? extends Runnable> tasks,
         final long maxRetries,
         final ExecutorService executor
     ) {
@@ -527,7 +625,62 @@ public final class ParallelUtil {
      */
     public static void runWithConcurrency(
         final int concurrency,
-        final Collection<? extends Runnable> tasks,
+        final Iterable<? extends Runnable> tasks,
+        final TerminationFlag terminationFlag,
+        final ExecutorService executor
+    ) {
+        runWithConcurrency(
+            concurrency,
+            tasks.iterator(),
+            terminationFlag,
+            executor
+        );
+    }
+
+     /**
+     * Try to run all tasks for their side-effects using at most
+     * {@code concurrency} threads at once.
+     * <p>
+     * If the concurrency is 1 or less, or there is only a single task, or the
+     * provided {@link ExecutorService} has terminated the tasks are run
+     * sequentially on the calling thread until all tasks are finished or the
+     * first Exception is thrown.
+     * <p>
+     * If the tasks are submitted to the {@code executor}, it may happen that
+     * not all tasks are actually executed. If the provided collection creates
+     * the tasks lazily upon iteration, not all elements might actually be
+     * created.
+     * <p>
+     * The calling thread will be always blocked during the execution of the tasks
+     * and is not available for scheduling purposes. If the calling thread is
+     * {@link Thread#interrupt() interrupted} during the execution, running tasks
+     * are cancelled and not-yet-started tasks are abandoned.
+     * <p>
+     * We will try to submit tasks as long as no more than {@code concurrency}
+     * are already started and then continue to submit tasks one-by-one, after
+     * a previous tasks has finished, so that no more than {@code concurrency}
+     * tasks are running in the provided {@code executor}.
+     * <p>
+     * We do not submit all tasks at-once into the worker queue to avoid creating
+     * a large amount of tasks and further support lazily created tasks.
+     * We can support thousands, even millions of tasks without resource exhaustion that way.
+     * <p>
+     * We will try to submit tasks as long as the {@code executor} can
+     * directly start new tasks, that is, we want to avoid creating tasks and put
+     * them into the waiting queue if it may never be executed afterwards.
+     * <p>
+     * The provided {@code terminationFlag} is checked before submitting new
+     * tasks and if it signals termination, running tasks are cancelled and
+     * not-yet-started tasks are abandoned.
+     *
+     * @param concurrency     how many tasks should be run simultaneous
+     * @param tasks           the tasks to execute
+     * @param terminationFlag a flag to check periodically if the execution should be terminated
+     * @param executor        the executor to submit the tasks to
+     */
+    public static void runWithConcurrency(
+        final int concurrency,
+        final Iterator<? extends Runnable> tasks,
         final TerminationFlag terminationFlag,
         final ExecutorService executor
     ) {
@@ -584,7 +737,64 @@ public final class ParallelUtil {
      */
     public static void runWithConcurrency(
         final int concurrency,
-        final Collection<? extends Runnable> tasks,
+        final Iterable<? extends Runnable> tasks,
+        final long waitTime,
+        final TimeUnit timeUnit,
+        final ExecutorService executor
+    ) {
+        runWithConcurrency(
+            concurrency,
+            tasks.iterator(),
+            waitTime,
+            timeUnit,
+            executor
+        );
+    }
+
+    /**
+     * Try to run all tasks for their side-effects using at most
+     * {@code concurrency} threads at once.
+     * <p>
+     * If the concurrency is 1 or less, or there is only a single task, or the
+     * provided {@link ExecutorService} has terminated the tasks are run
+     * sequentially on the calling thread until all tasks are finished or the
+     * first Exception is thrown.
+     * <p>
+     * If the tasks are submitted to the {@code executor}, it may happen that
+     * not all tasks are actually executed. If the provided collection creates
+     * the tasks lazily upon iteration, not all elements might actually be
+     * created.
+     * <p>
+     * The calling thread will be always blocked during the execution of the tasks
+     * and is not available for scheduling purposes. If the calling thread is
+     * {@link Thread#interrupt() interrupted} during the execution, running tasks
+     * are cancelled and not-yet-started tasks are abandoned.
+     * <p>
+     * We will try to submit tasks as long as no more than {@code concurrency}
+     * are already started and then continue to submit tasks one-by-one, after
+     * a previous tasks has finished, so that no more than {@code concurrency}
+     * tasks are running in the provided {@code executor}.
+     * <p>
+     * We do not submit all tasks at-once into the worker queue to avoid creating
+     * a large amount of tasks and further support lazily created tasks.
+     * We can support thousands, even millions of tasks without resource exhaustion that way.
+     * <p>
+     * We will try to submit tasks as long as the {@code executor} can
+     * directly start new tasks, that is, we want to avoid creating tasks and put
+     * them into the waiting queue if it may never be executed afterwards.
+     * <p>
+     * If the pool is full, wait for {@code waitTime} {@code timeUnit}s
+     * and retry submitting the tasks indefinitely.
+     *
+     * @param concurrency how many tasks should be run simultaneous
+     * @param tasks       the tasks to execute
+     * @param waitTime    how long to wait between retries
+     * @param timeUnit    the unit for {@code waitTime}
+     * @param executor    the executor to submit the tasks to
+     */
+    public static void runWithConcurrency(
+        final int concurrency,
+        final Iterator<? extends Runnable> tasks,
         final long waitTime,
         final TimeUnit timeUnit,
         final ExecutorService executor
@@ -647,7 +857,71 @@ public final class ParallelUtil {
      */
     public static void runWithConcurrency(
         final int concurrency,
-        final Collection<? extends Runnable> tasks,
+        final Iterable<? extends Runnable> tasks,
+        final long waitTime,
+        final TimeUnit timeUnit,
+        final TerminationFlag terminationFlag,
+        final ExecutorService executor
+    ) {
+        runWithConcurrency(
+            concurrency,
+            tasks.iterator(),
+            waitTime,
+            timeUnit,
+            terminationFlag,
+            executor
+        );
+    }
+
+      /**
+     * Try to run all tasks for their side-effects using at most
+     * {@code concurrency} threads at once.
+     * <p>
+     * If the concurrency is 1 or less, or there is only a single task, or the
+     * provided {@link ExecutorService} has terminated the tasks are run
+     * sequentially on the calling thread until all tasks are finished or the
+     * first Exception is thrown.
+     * <p>
+     * If the tasks are submitted to the {@code executor}, it may happen that
+     * not all tasks are actually executed. If the provided collection creates
+     * the tasks lazily upon iteration, not all elements might actually be
+     * created.
+     * <p>
+     * The calling thread will be always blocked during the execution of the tasks
+     * and is not available for scheduling purposes. If the calling thread is
+     * {@link Thread#interrupt() interrupted} during the execution, running tasks
+     * are cancelled and not-yet-started tasks are abandoned.
+     * <p>
+     * We will try to submit tasks as long as no more than {@code concurrency}
+     * are already started and then continue to submit tasks one-by-one, after
+     * a previous tasks has finished, so that no more than {@code concurrency}
+     * tasks are running in the provided {@code executor}.
+     * <p>
+     * We do not submit all tasks at-once into the worker queue to avoid creating
+     * a large amount of tasks and further support lazily created tasks.
+     * We can support thousands, even millions of tasks without resource exhaustion that way.
+     * <p>
+     * We will try to submit tasks as long as the {@code executor} can
+     * directly start new tasks, that is, we want to avoid creating tasks and put
+     * them into the waiting queue if it may never be executed afterwards.
+     * <p>
+     * If the pool is full, wait for {@code waitTime} {@code timeUnit}s
+     * and retry submitting the tasks indefinitely.
+     * <p>
+     * The provided {@code terminationFlag} is checked before submitting new
+     * tasks and if it signals termination, running tasks are cancelled and
+     * not-yet-started tasks are abandoned.
+     *
+     * @param concurrency     how many tasks should be run simultaneous
+     * @param tasks           the tasks to execute
+     * @param waitTime        how long to wait between retries
+     * @param timeUnit        the unit for {@code waitTime}
+     * @param terminationFlag a flag to check periodically if the execution should be terminated
+     * @param executor        the executor to submit the tasks to
+     */
+    public static void runWithConcurrency(
+        final int concurrency,
+        final Iterator<? extends Runnable> tasks,
         final long waitTime,
         final TimeUnit timeUnit,
         final TerminationFlag terminationFlag,
@@ -707,7 +981,67 @@ public final class ParallelUtil {
      */
     public static void runWithConcurrency(
         final int concurrency,
-        final Collection<? extends Runnable> tasks,
+        final Iterable<? extends Runnable> tasks,
+        final long maxRetries,
+        final long waitTime,
+        final TimeUnit timeUnit,
+        final ExecutorService executor
+    ) {
+        runWithConcurrency(
+            concurrency,
+            tasks.iterator(),
+            maxRetries,
+            waitTime,
+            timeUnit,
+            executor
+        );
+    }
+
+      /**
+     * Try to run all tasks for their side-effects using at most
+     * {@code concurrency} threads at once.
+     * <p>
+     * If the concurrency is 1 or less, or there is only a single task, or the
+     * provided {@link ExecutorService} has terminated the tasks are run
+     * sequentially on the calling thread until all tasks are finished or the
+     * first Exception is thrown.
+     * <p>
+     * If the tasks are submitted to the {@code executor}, it may happen that
+     * not all tasks are actually executed. If the provided collection creates
+     * the tasks lazily upon iteration, not all elements might actually be
+     * created.
+     * <p>
+     * The calling thread will be always blocked during the execution of the tasks
+     * and is not available for scheduling purposes. If the calling thread is
+     * {@link Thread#interrupt() interrupted} during the execution, running tasks
+     * are cancelled and not-yet-started tasks are abandoned.
+     * <p>
+     * We will try to submit tasks as long as no more than {@code concurrency}
+     * are already started and then continue to submit tasks one-by-one, after
+     * a previous tasks has finished, so that no more than {@code concurrency}
+     * tasks are running in the provided {@code executor}.
+     * <p>
+     * We do not submit all tasks at-once into the worker queue to avoid creating
+     * a large amount of tasks and further support lazily created tasks.
+     * We can support thousands, even millions of tasks without resource exhaustion that way.
+     * <p>
+     * We will try to submit tasks as long as the {@code executor} can
+     * directly start new tasks, that is, we want to avoid creating tasks and put
+     * them into the waiting queue if it may never be executed afterwards.
+     * <p>
+     * If the pool is full, wait for {@code waitTime} {@code timeUnit}s
+     * and retry submitting the tasks at most {@code maxRetries} times.
+     *
+     * @param concurrency how many tasks should be run simultaneous
+     * @param tasks       the tasks to execute
+     * @param maxRetries  how many retries when submitting on a full pool before giving up
+     * @param waitTime    how long to wait between retries
+     * @param timeUnit    the unit for {@code waitTime}
+     * @param executor    the executor to submit the tasks to
+     */
+    public static void runWithConcurrency(
+        final int concurrency,
+        final Iterator<? extends Runnable> tasks,
         final long maxRetries,
         final long waitTime,
         final TimeUnit timeUnit,
@@ -772,7 +1106,74 @@ public final class ParallelUtil {
      */
     public static void runWithConcurrency(
         final int concurrency,
-        final Collection<? extends Runnable> tasks,
+        final Iterable<? extends Runnable> tasks,
+        final long maxRetries,
+        final long waitTime,
+        final TimeUnit timeUnit,
+        final TerminationFlag terminationFlag,
+        final ExecutorService executor
+    ) {
+        runWithConcurrency(
+            concurrency,
+            tasks.iterator(),
+            maxRetries,
+            waitTime,
+            timeUnit,
+            terminationFlag,
+            executor
+        );
+    }
+
+      /**
+     * Try to run all tasks for their side-effects using at most
+     * {@code concurrency} threads at once.
+     * <p>
+     * If the concurrency is 1 or less, or there is only a single task, or the
+     * provided {@link ExecutorService} has terminated the tasks are run
+     * sequentially on the calling thread until all tasks are finished or the
+     * first Exception is thrown.
+     * <p>
+     * If the tasks are submitted to the {@code executor}, it may happen that
+     * not all tasks are actually executed. If the provided collection creates
+     * the tasks lazily upon iteration, not all elements might actually be
+     * created.
+     * <p>
+     * The calling thread will be always blocked during the execution of the tasks
+     * and is not available for scheduling purposes. If the calling thread is
+     * {@link Thread#interrupt() interrupted} during the execution, running tasks
+     * are cancelled and not-yet-started tasks are abandoned.
+     * <p>
+     * We will try to submit tasks as long as no more than {@code concurrency}
+     * are already started and then continue to submit tasks one-by-one, after
+     * a previous tasks has finished, so that no more than {@code concurrency}
+     * tasks are running in the provided {@code executor}.
+     * <p>
+     * We do not submit all tasks at-once into the worker queue to avoid creating
+     * a large amount of tasks and further support lazily created tasks.
+     * We can support thousands, even millions of tasks without resource exhaustion that way.
+     * <p>
+     * We will try to submit tasks as long as the {@code executor} can
+     * directly start new tasks, that is, we want to avoid creating tasks and put
+     * them into the waiting queue if it may never be executed afterwards.
+     * <p>
+     * If the pool is full, wait for {@code waitTime} {@code timeUnit}s
+     * and retry submitting the tasks at most {@code maxRetries} times.
+     * <p>
+     * The provided {@code terminationFlag} is checked before submitting new
+     * tasks and if it signals termination, running tasks are cancelled and
+     * not-yet-started tasks are abandoned.
+     *
+     * @param concurrency     how many tasks should be run simultaneous
+     * @param tasks           the tasks to execute
+     * @param maxRetries      how many retries when submitting on a full pool before giving up
+     * @param waitTime        how long to wait between retries
+     * @param timeUnit        the unit for {@code waitTime}
+     * @param terminationFlag a flag to check periodically if the execution should be terminated
+     * @param executor        the executor to submit the tasks to
+     */
+    public static void runWithConcurrency(
+        final int concurrency,
+        final Iterator<? extends Runnable> tasks,
         final long maxRetries,
         final long waitTime,
         final TimeUnit timeUnit,
@@ -791,14 +1192,15 @@ public final class ParallelUtil {
 
     private static void runWithConcurrency(
         final int concurrency,
-        final Collection<? extends Runnable> tasks,
+        final Iterator<? extends Runnable> tasks,
         final long waitNanos,
         final long maxWaitRetries,
         final TerminationFlag terminationFlag,
         final ExecutorService executor
     ) {
         if (!canRunInParallel(executor) || concurrency <= 1) {
-            for (Runnable task : tasks) {
+            while (tasks.hasNext()) {
+                Runnable task = tasks.next();
                 terminationFlag.assertRunning();
                 task.run();
             }
@@ -809,7 +1211,7 @@ public final class ParallelUtil {
             new CompletionService(executor, concurrency);
 
         PushbackIterator<Runnable> ts =
-            new PushbackIterator<>(tasks.iterator());
+            new PushbackIterator<>(tasks);
 
         Throwable error = null;
         // generally assumes that tasks.size is notably larger than concurrency
