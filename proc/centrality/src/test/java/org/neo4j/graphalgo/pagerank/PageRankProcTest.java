@@ -74,7 +74,7 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
     @TestFactory
     Stream<DynamicTest> configTests() {
         return Stream.of(
-            IterationsConfigProcTest.test(proc(), createMinimalConfig(CypherMapWrapper.empty()))
+            IterationsConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 

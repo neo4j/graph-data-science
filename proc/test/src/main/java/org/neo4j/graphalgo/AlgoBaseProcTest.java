@@ -136,6 +136,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     void assertResultEquals(RESULT result1, RESULT result2);
 
+    default CypherMapWrapper createMinimalConfig() {
+        return createMinimalConfig(CypherMapWrapper.empty());
+    }
+
     default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper;
     }
