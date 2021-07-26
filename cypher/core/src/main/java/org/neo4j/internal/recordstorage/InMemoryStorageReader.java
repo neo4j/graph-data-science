@@ -269,7 +269,7 @@ public class InMemoryStorageReader implements StorageReader {
 
     @Override
     public AllNodeScan allNodeScan() {
-        return null;
+        return new InMemoryNodeScan();
     }
 
     @Override
