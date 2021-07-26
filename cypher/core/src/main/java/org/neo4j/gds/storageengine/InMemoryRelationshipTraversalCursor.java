@@ -28,18 +28,32 @@ import org.neo4j.token.TokenHolders;
 
 public class InMemoryRelationshipTraversalCursor extends InMemoryRelationshipCursor implements StorageRelationshipTraversalCursor, RelationshipVisitor<RuntimeException> {
 
+    private long originNodeReference;
+
     public InMemoryRelationshipTraversalCursor(GraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders, NO_ID);
     }
 
     @Override
     public long neighbourNodeReference() {
-        return 0;
+        final long source = sourceNodeReference(), target = targetNodeReference();
+        if ( source == originNodeReference )
+        {
+            return target;
+        }
+        else if ( target == originNodeReference )
+        {
+            return source;
+        }
+        else
+        {
+            throw new IllegalStateException( "NOT PART OF CHAIN" );
+        }
     }
 
     @Override
     public long originNodeReference() {
-        return 0;
+        return originNodeReference;
     }
 
     @Override
@@ -49,5 +63,6 @@ public class InMemoryRelationshipTraversalCursor extends InMemoryRelationshipCur
             return selection.test(typeId);
         }).toArray(RelationshipType[]::new);
         relationshipCursors = graphStore.getGraph(filteredRelTypes).streamRelationships(nodeReference, Double.NaN).iterator();
+        originNodeReference = nodeReference;
     }
 }
