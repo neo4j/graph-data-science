@@ -21,24 +21,41 @@ package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
+import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions.L2FeatureStep;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
+import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.GdlExtension;
 import org.neo4j.graphalgo.extension.GdlGraph;
 import org.neo4j.graphalgo.extension.Inject;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class LinkLogisticRegressionObjectiveTest {
+
+    private static Stream<Arguments> featureBatches() {
+        return Stream.of(
+            Arguments.of(new LazyBatch(0, 2, 10), new Matrix(new double[]{0, 0, 1, 1}, 2, 2)),
+            Arguments.of(new LazyBatch(4, 3, 10), new Matrix(new double[]{4, 4, 5, 5, 6, 6}, 3, 2))
+        );
+    }
 
     @GdlGraph
     private static final String DB_QUERY =
@@ -81,10 +98,27 @@ class LinkLogisticRegressionObjectiveTest {
         var batch = new LazyBatch(1, 2, graph.relationshipCount());
         var batchedTargets = objective.makeTargetsArray(batch);
 
-        var ctx = new ComputationContext();
-        assertThat(ctx.forward(batchedTargets)).isEqualTo(new Vector(1.0, 0.0));
+        assertThat(batchedTargets.data()).isEqualTo(new Vector(1.0, 0.0));
     }
 
+    @ParameterizedTest
+    @MethodSource("featureBatches")
+    void shouldComputeCorrectFeatures(Batch batch, Tensor<?> expected) {
+        var featureCount = 2;
+
+        var allFeatures = HugeObjectArray.newArray(double[].class, 10, AllocationTracker.empty());
+
+
+        allFeatures.setAll(idx -> {
+            double[] features = new double[featureCount];
+            Arrays.fill(features, idx);
+            return features;
+        });
+
+        Constant<Matrix> batchFeatures = objective.features(batch, allFeatures);
+
+        assertThat(batchFeatures.data()).isEqualTo(expected);
+    }
 
     @Test
     void loss() {

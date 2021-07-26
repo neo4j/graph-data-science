@@ -28,6 +28,8 @@ import org.neo4j.gds.ml.core.functions.ConstantScale;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
 import org.neo4j.gds.ml.core.functions.LogisticLoss;
+import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
@@ -38,7 +40,8 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 
 import java.util.List;
 
-public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase implements Objective<LinkLogisticRegressionData> {
+public class LinkLogisticRegressionObjective implements Objective<LinkLogisticRegressionData> {
+    protected final LinkLogisticRegressionData modelData;
     private final double penalty;
     private final HugeObjectArray<double[]> linkFeatures;
     private final HugeDoubleArray targets;
@@ -49,7 +52,7 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
         HugeObjectArray<double[]> linkFeatures,
         HugeDoubleArray targets
     ) {
-        super(llrData);
+        this.modelData = llrData;
         this.penalty = penalty;
         this.linkFeatures = linkFeatures;
         this.targets = targets;
@@ -85,5 +88,27 @@ public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase 
         );
 
         return new Constant<>(batchedTargets);
+    }
+
+    protected Variable<Matrix> predictions(Constant<Matrix> features) {
+        return new Sigmoid<>(MatrixMultiplyWithTransposedSecondOperand.of(features, modelData.weights()));
+    }
+
+    /**
+     * @param batch Set of relationship ids
+     * @param linkFeatures LinkFeatures for relationships
+     */
+    protected Constant<Matrix> features(Batch batch, HugeObjectArray<double[]> linkFeatures) {
+        assert linkFeatures.size() > 0;
+
+        // assume the batch contains relationship ids
+        int rows = batch.size();
+        int cols = linkFeatures.get(0).length;
+        var batchFeatures = new Matrix(rows, cols);
+        var batchFeaturesOffset = new MutableInt();
+
+        batch.nodeIds().forEach(id -> batchFeatures.setRow(batchFeaturesOffset.getAndIncrement(), linkFeatures.get(id)));
+
+        return new Constant<>(batchFeatures);
     }
 }
