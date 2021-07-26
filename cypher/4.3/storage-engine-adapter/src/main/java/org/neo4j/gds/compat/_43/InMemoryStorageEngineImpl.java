@@ -21,6 +21,7 @@ package org.neo4j.gds.compat._43;
 
 import org.neo4j.counts.CountsStore;
 import org.neo4j.exceptions.KernelException;
+import org.neo4j.function.TriFunction;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -49,7 +50,8 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
         BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn,
         BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
         MetadataProvider metadataProvider,
-        Supplier<CommandCreationContext> commandCreationContextSupplier
+        Supplier<CommandCreationContext> commandCreationContextSupplier,
+        TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
     ) {
         super(
             databaseLayout,
@@ -57,7 +59,8 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
             countsStoreFn,
             txStateVisitorFn,
             metadataProvider,
-            commandCreationContextSupplier
+            commandCreationContextSupplier,
+            storageReaderFn
         );
     }
 
@@ -90,7 +93,8 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
                 countsStoreFn,
                 txStateVisitorFn,
                 metadataProvider,
-                commandCreationContextSupplier
+                commandCreationContextSupplier,
+                storageReaderFn
             );
         }
     }
