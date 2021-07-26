@@ -30,7 +30,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
@@ -49,7 +48,7 @@ abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends B
     @TestFactory
     Stream<DynamicTest> configTests() {
         return Stream.of(
-            IterationsConfigProcTest.test(proc(), createMinimalConfig(CypherMapWrapper.empty()))
+            IterationsConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 
