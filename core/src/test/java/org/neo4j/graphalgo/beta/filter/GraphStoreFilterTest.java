@@ -23,9 +23,13 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
+import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.TestLog;
+import org.neo4j.graphalgo.api.AdjacencyCursor;
+import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
 import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
@@ -34,19 +38,25 @@ import org.neo4j.graphalgo.config.GraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromGraphConfig;
 import org.neo4j.graphalgo.core.concurrency.Pools;
+import org.neo4j.graphalgo.core.loading.CSRGraphStore;
 import org.neo4j.graphalgo.core.loading.CSRGraphStoreUtil;
 import org.neo4j.graphalgo.core.loading.IdMapImplementations;
+import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.TestMethodRunner;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.gdl.GdlFactory;
+import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 import org.neo4j.logging.NullLog;
 import org.neo4j.values.storable.NumberType;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -440,8 +450,8 @@ class GraphStoreFilterTest {
     @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
     void testMultiThreadedFiltering(TestMethodRunner runTest) throws Exception {
         runTest.run(() -> {
-            var labelA = new NodeLabel[] {NodeLabel.of("A")};
-            var labelB = new NodeLabel[] {NodeLabel.of("B")};
+            var labelA = new NodeLabel[]{NodeLabel.of("A")};
+            var labelB = new NodeLabel[]{NodeLabel.of("B")};
 
             var concurrency = 4;
 
@@ -472,13 +482,57 @@ class GraphStoreFilterTest {
         });
     }
 
+    @ParameterizedTest
+    @MethodSource("org.neo4j.graphalgo.core.loading.construction.TestMethodRunner#idMapImplementation")
+    void testNonOverlappingNodeIdSpace(TestMethodRunner runTest) throws Exception {
+        runTest.run(() -> {
+            var nodeCount = 10_000;
+            var maxOriginalId = 100_000;
+            var concurrency = 4;
+            var tracker = AllocationTracker.empty();
+
+            // Create an id map where the original id space
+            // does not overlap with the internal id space.
+            var builder = GraphFactory.initNodesBuilder()
+                .nodeCount(nodeCount)
+                .maxOriginalId(maxOriginalId)
+                .tracker(tracker)
+                .build();
+
+            LongStream.range(maxOriginalId - nodeCount, maxOriginalId).forEach(builder::addNode);
+
+            var graphStore = CSRGraphStore.of(
+                DatabaseIdFactory.from("neo4j", UUID.randomUUID()),
+                builder.build().nodeMapping(),
+                Map.of(),
+                Map.of(
+                    RelationshipType.ALL_RELATIONSHIPS,
+                    Relationships.of(0, Orientation.NATURAL, false, new EmptyAdjacencyList()).topology()
+                ),
+                Map.of(),
+                concurrency,
+                tracker
+            );
+
+            var filteredGraphStore = filter(graphStore, "*", "*", concurrency);
+
+            assertThat(graphStore.nodeCount()).isEqualTo(nodeCount);
+            assertThat(filteredGraphStore.nodeCount()).isEqualTo(nodeCount);
+        });
+    }
+
     private GraphStore filter(GraphStore graphStore, String nodeFilter, String relationshipFilter) throws
         SemanticErrors,
         ParseException {
         return filter(graphStore, nodeFilter, relationshipFilter, 1);
     }
 
-    private GraphStore filter(GraphStore graphStore, String nodeFilter, String relationshipFilter, int concurrency) throws
+    private GraphStore filter(
+        GraphStore graphStore,
+        String nodeFilter,
+        String relationshipFilter,
+        int concurrency
+    ) throws
         ParseException,
         SemanticErrors {
         return GraphStoreFilter.filter(
@@ -488,5 +542,28 @@ class GraphStoreFilterTest {
             NullLog.getInstance(),
             AllocationTracker.empty()
         );
+    }
+
+    private static class EmptyAdjacencyList implements AdjacencyList {
+
+        @Override
+        public int degree(long node) {
+            return 0;
+        }
+
+        @Override
+        public AdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
+            return AdjacencyCursor.EmptyAdjacencyCursor.INSTANCE;
+        }
+
+        @Override
+        public AdjacencyCursor rawAdjacencyCursor() {
+            return AdjacencyCursor.EmptyAdjacencyCursor.INSTANCE;
+        }
+
+        @Override
+        public void close() {
+
+        }
     }
 }
