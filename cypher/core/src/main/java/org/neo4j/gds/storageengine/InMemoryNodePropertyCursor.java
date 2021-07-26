@@ -101,7 +101,7 @@ class InMemoryNodePropertyCursor extends InMemoryPropertyCursor.DelegateProperty
                 .propertyKeyTokens()
                 .getAllTokens()
                 .spliterator(), false)
-                .filter(tokenHolder -> !seenNodeReferences.contains(tokenHolder.id()))
+                .filter(tokenHolder -> !seenNodeReferences.contains(tokenHolder.id()) && propertyPresentOnNode(tokenHolder))
                 .findFirst();
 
             if (maybeNextEntry.isPresent()) {
@@ -113,6 +113,13 @@ class InMemoryNodePropertyCursor extends InMemoryPropertyCursor.DelegateProperty
         } else {
             return false;
         }
+    }
+
+    private boolean propertyPresentOnNode(NamedToken tokenHolder) {
+        return graphStore.hasNodeProperty(
+            graphStore.nodes().nodeLabels(getId()),
+            tokenHolder.name()
+        );
     }
 
     @Override

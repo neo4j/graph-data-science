@@ -133,7 +133,7 @@ public class InMemoryNodeCursor extends NodeRecord implements StorageNodeCursor 
             reset();
             return true;
         }
-        setId(start);
+        next = start;
         highMark = min(stop, max);
         return true;
     }
