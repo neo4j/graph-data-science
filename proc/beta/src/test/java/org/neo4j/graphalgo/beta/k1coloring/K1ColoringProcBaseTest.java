@@ -21,25 +21,37 @@ package org.neo4j.graphalgo.beta.k1coloring;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+import org.neo4j.gds.IterationsConfigProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
-import org.neo4j.graphalgo.IterationsConfigTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends BaseProcTest  implements
+abstract class K1ColoringProcBaseTest<CONFIG extends K1ColoringConfig> extends BaseProcTest implements
     AlgoBaseProcTest<K1Coloring, CONFIG, HugeLongArray>,
-    IterationsConfigTest<K1Coloring, CONFIG, HugeLongArray>,
     MemoryEstimateTest<K1Coloring, CONFIG, HugeLongArray>,
     HeapControlTest<K1Coloring, CONFIG, HugeLongArray> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            IterationsConfigProcTest.test(proc(), createMinimalConfig(CypherMapWrapper.empty()))
+        ).flatMap(Collection::stream);
+    }
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +
