@@ -63,7 +63,7 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
 
     @Override
     public Iterator<IndexDescriptor> indexGetForSchema(SchemaDescriptor descriptor) {
-        return null;
+        return Collections.emptyIterator();
     }
 
     @Override
@@ -72,7 +72,7 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
     }
 
     private IndexDescriptor getLabelIndexDescriptor() {
-        return null;
+        return IndexDescriptor.NO_INDEX;
     }
 
     @Override
@@ -82,12 +82,12 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
 
     @Override
     public IndexDescriptor indexGetForName(String name) {
-        return null;
+        return IndexDescriptor.NO_INDEX;
     }
 
     @Override
     public ConstraintDescriptor constraintGetForName(String name) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
