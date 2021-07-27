@@ -75,6 +75,13 @@ public interface AdjacencyProperties extends AutoCloseable {
         return propertyCursor(node, fallbackValue);
     }
 
+    /**
+     * Create a new uninitialized cursor.
+     *
+     * NOTE: In order to use the returned cursor {@link PropertyCursor#init} must be called.
+     */
+    PropertyCursor rawPropertyCursor();
+
     @Override
     void close();
 }

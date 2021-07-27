@@ -21,10 +21,10 @@ package org.neo4j.graphalgo.beta.pregel.cc;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.graphalgo.GdsCypher;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -135,8 +135,8 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
         runQueryWithRowConsumer(query, r -> {
             assertEquals(10, r.getNumber("nodeCount").longValue());
             assertEquals(9, r.getNumber("relationshipCount").longValue());
-            assertEquals(296_224, r.getNumber("bytesMin").longValue());
-            assertEquals(296_224, r.getNumber("bytesMax").longValue());
+            assertEquals(296_232, r.getNumber("bytesMin").longValue());
+            assertEquals(296_232, r.getNumber("bytesMax").longValue());
         });
     }
 

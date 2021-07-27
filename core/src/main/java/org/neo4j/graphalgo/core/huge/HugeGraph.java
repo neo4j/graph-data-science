@@ -105,7 +105,9 @@ public class HugeGraph implements CSRGraph {
     protected final double defaultPropertyValue;
     protected @Nullable AdjacencyProperties properties;
 
-    private AdjacencyCursor cursorCache;
+    private AdjacencyCursor adjacencyCursorCache;
+
+    private PropertyCursor propertyCursorCache;
 
     private boolean canRelease = true;
 
@@ -159,7 +161,8 @@ public class HugeGraph implements CSRGraph {
         this.properties = properties;
         this.orientation = orientation;
         this.hasRelationshipProperty = hasRelationshipProperty;
-        this.cursorCache = adjacency.rawAdjacencyCursor();
+        this.adjacencyCursorCache = adjacency.rawAdjacencyCursor();
+        this.propertyCursorCache = properties != null ? properties.rawPropertyCursor() : null;
     }
 
     @Override
@@ -399,7 +402,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     private AdjacencyCursor adjacencyCursorForIteration(long sourceNodeId) {
-        return adjacency.adjacencyCursor(cursorCache, sourceNodeId);
+        return adjacency.adjacencyCursor(adjacencyCursorCache, sourceNodeId);
     }
 
     private PropertyCursor propertyCursorForIteration(long sourceNodeId) {
@@ -408,7 +411,7 @@ public class HugeGraph implements CSRGraph {
                 "Can not create property cursor on a graph without relationship property");
         }
 
-        return properties.propertyCursor(sourceNodeId, defaultPropertyValue);
+        return properties.propertyCursor(propertyCursorCache, sourceNodeId, defaultPropertyValue);
     }
 
     @Override
@@ -428,9 +431,13 @@ public class HugeGraph implements CSRGraph {
             properties.close();
             properties = null;
         }
-        if (cursorCache != null) {
-            cursorCache.close();
-            cursorCache = null;
+        if (adjacencyCursorCache != null) {
+            adjacencyCursorCache.close();
+            adjacencyCursorCache = null;
+        }
+        if (propertyCursorCache != null) {
+            propertyCursorCache.close();
+            propertyCursorCache = null;
         }
     }
 

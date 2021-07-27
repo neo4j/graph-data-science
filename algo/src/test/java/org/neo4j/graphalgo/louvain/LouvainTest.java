@@ -325,12 +325,12 @@ class LouvainTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1, 6414145, 23057680),
-            arguments(1, 10, 6414145, 30258040),
-            arguments(4, 1, 6417433, 29057944),
-            arguments(4, 10, 6417433, 36258304),
-            arguments(42, 1, 6459081, 105061288),
-            arguments(42, 10, 6459081, 112261648)
+            arguments(1, 1, 6414145, 23057688),
+            arguments(1, 10, 6414145, 30258048),
+            arguments(4, 1, 6417433, 29057952),
+            arguments(4, 10, 6417433, 36258312),
+            arguments(42, 1, 6459081, 105061296),
+            arguments(42, 10, 6459081, 112261656)
         );
     }
 
