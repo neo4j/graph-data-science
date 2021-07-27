@@ -137,8 +137,9 @@ class GraphStoreExportProcTest extends BaseProcTest {
         var exportQuery = formatWithLocale(
             "CALL gds.beta.graph.export.csv('test-graph', {" +
             "  exportName: '%s'" +
-            "})"
-            , exportName);
+            "})",
+            exportName
+        );
 
         var exception = assertThrows(
             QueryExecutionException.class,
@@ -157,8 +158,9 @@ class GraphStoreExportProcTest extends BaseProcTest {
         var exportQuery = formatWithLocale(
             "CALL gds.beta.graph.export.csv('test-graph', {" +
             "  exportName: '%s'" +
-            "})"
-            , exportName);
+            "})",
+            exportName
+        );
 
         var exception = assertThrows(
             QueryExecutionException.class,
@@ -175,19 +177,16 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
     @Test
     void failIfExportLocationIsNotSet() {
-        var exportName = "export";
-
         createGraph();
 
         GraphDatabaseApiProxy
             .resolveDependency(db, Config.class)
             .set(GraphStoreExportSettings.export_location_setting, null);
 
-        var exportQuery = formatWithLocale(
+        var exportQuery =
             "CALL gds.beta.graph.export.csv('test-graph', {" +
-            "  exportName: '%s'" +
-            "})"
-            , exportName);
+            "  exportName: 'export'" +
+            "})";
 
         var exception = assertThrows(
             QueryExecutionException.class,

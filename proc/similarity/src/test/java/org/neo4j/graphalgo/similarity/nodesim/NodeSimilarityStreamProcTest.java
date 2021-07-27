@@ -81,12 +81,12 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
         EXPECTED_DEGREE_CUTOFF_OUTGOING.add(resultString(0, 1, 2 / 3.0));
         EXPECTED_DEGREE_CUTOFF_OUTGOING.add(resultString(1, 0, 2 / 3.0));
 
-        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(4,5, 3.0 / 3.0));
-        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(5,4 ,3.0 / 3.0));
-        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(4,6 ,1 / 3.0));
-        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(6,4 ,1 / 3.0));
-        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(5,6 ,1 / 3.0));
-        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(6,5 ,1 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(4, 5, 3.0 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(5, 4, 3.0 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(4, 6, 1 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(6, 4, 1 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(5, 6, 1 / 3.0));
+        EXPECTED_DEGREE_CUTOFF_INCOMING.add(resultString(6, 5, 1 / 3.0));
 
         EXPECTED_INCOMING.add(resultString(4, 5, 3.0 / 3.0));
         EXPECTED_INCOMING.add(resultString(4, 6, 1 / 3.0));

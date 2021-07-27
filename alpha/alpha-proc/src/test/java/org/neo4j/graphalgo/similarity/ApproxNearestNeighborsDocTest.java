@@ -108,7 +108,7 @@ public class ApproxNearestNeighborsDocTest extends BaseProcTest {
                                 "| \"Praveena\" | \"Michael\"  | 0.25               |" + NL +
                                 "| \"Zhen\"     | \"Michael\"  | 0.6666666666666666 |" + NL +
                                 "+----------------------------------------------+" + NL +
-                                "11 rows" + NL ;
+                                "11 rows" + NL;
 
         runQueryWithResultConsumer(query, result -> assertEquals(expectedResult, result.resultAsString()));
     }
@@ -135,7 +135,7 @@ public class ApproxNearestNeighborsDocTest extends BaseProcTest {
                                 "+-------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
                                 "| 5     | 13              | \"SIMILAR\"             | \"score\"       | 0.19999980926513672 | 0.6666669845581055 | 0.35277803738911945 | 0.6666669845581055 |" + NL +
                                 "+-------------------------------------------------------------------------------------------------------------------------------------------------------+" + NL +
-                                "1 row" + NL ;
+                                "1 row" + NL;
 
         runQueryWithResultConsumer(query, result -> assertNotEquals(expectedResult, result.resultAsString()));
 

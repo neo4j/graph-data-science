@@ -245,7 +245,7 @@ public final class HugeSparseLongArray {
                     newValueToStore
                 );
                 if (actualCurrentValue == expectedCurrentValue) {
-                    return ;
+                    return;
                 }
                 expectedCurrentValue = actualCurrentValue;
             }

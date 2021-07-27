@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -73,6 +73,6 @@ final class CosineLinkFeatureStepTest {
 
         assertEquals((42 * 1337 + 13 * 0D + 3 * 1D + 2 * 1D) / norm0 / norm1, linkFeatures.get(0)[0], delta);
         assertEquals((42 * 42 + 13 * 2 + 3 * 8 + 2 * 2.3D) / norm0 / norm2, linkFeatures.get(1)[0], delta);
-        assertEquals((42 * 42 + 13 * 9 + 3 * 0.1D + 2 * 91.0D) / norm0 / norm3 , linkFeatures.get(2)[0], delta);
+        assertEquals((42 * 42 + 13 * 9 + 3 * 0.1D + 2 * 91.0D) / norm0 / norm3, linkFeatures.get(2)[0], delta);
     }
 }

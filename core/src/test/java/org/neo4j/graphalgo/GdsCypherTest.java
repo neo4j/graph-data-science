@@ -59,6 +59,7 @@ class GdsCypherTest {
     private static final String STAR_PROJECTION_CYPHER_SYNTAX =
         "{nodeProjection: '*', relationshipProjection: '*'}";
 
+    @SuppressWarnings("checkstyle:NoWhitespaceBefore")
     static Stream<Arguments> testExplicitCreationWithAnyName() {
         //@formatter:off
         return Stream.of(
@@ -578,17 +579,18 @@ class GdsCypherTest {
         assertThat(query).isEqualTo("CALL gds.algoName.write('', {})");
     }
 
+    @SuppressWarnings("checkstyle:NoWhitespaceBefore")
     static Stream<Arguments> placeholders() {
         return Stream.of(
             //@formatter:off
-            arguments("g"               , "$g"),
-            arguments("var"             , "$var"),
-            arguments("graphName"       , "$graphName"),
-            arguments("\"$graphName\""  , "$\"$graphName\""),
-            arguments("'$graphName'"    , "$'$graphName'"),
-            arguments("\"graphName\""   , "$\"graphName\""),
-            arguments("'graphName'"     , "$'graphName'"),
-            arguments("%"               , "$%")
+            arguments("g"             , "$g"),
+            arguments("var"           , "$var"),
+            arguments("graphName"     , "$graphName"),
+            arguments("\"$graphName\"", "$\"$graphName\""),
+            arguments("'$graphName'"  , "$'$graphName'"),
+            arguments("\"graphName\"" , "$\"graphName\""),
+            arguments("'graphName'"   , "$'graphName'"),
+            arguments("%"             , "$%")
             //@formatter:on
         );
     }
@@ -609,11 +611,9 @@ class GdsCypherTest {
 
     static Stream<Arguments> variables() {
         return Stream.of(
-            //@formatter:off
-            arguments("g"               , "g"),
-            arguments("var"             , "var"),
-            arguments("graphName"       , "graphName")
-            //@formatter:on
+            arguments("g", "g"),
+            arguments("var", "var"),
+            arguments("graphName", "graphName")
         );
     }
 

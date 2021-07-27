@@ -111,7 +111,7 @@ class PartitionUtilsTest {
                 Partition.of(30_000, DEFAULT_BATCH_SIZE)
             )),
             Arguments.of(4, 42_000, List.of(
-                Partition.of(0            , DEFAULT_BATCH_SIZE + 500),
+                Partition.of(            0, DEFAULT_BATCH_SIZE + 500),
                 Partition.of(10_000 +  500, DEFAULT_BATCH_SIZE + 500),
                 Partition.of(20_000 + 1000, DEFAULT_BATCH_SIZE + 500),
                 Partition.of(30_000 + 1500, DEFAULT_BATCH_SIZE + 500)

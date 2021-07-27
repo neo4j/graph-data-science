@@ -100,7 +100,7 @@ final class RadixSortTest {
     private static long[] testData() {
         //@formatter:off
         return new long[]{
-                1L << 25 | 25L,  1,  2 , 3,   1L << 16 |  1L,  4,  5,  6,         0L,  7,  8,  9,   1L << 25 | 10L, 11, 12, 13,
+                1L << 25 | 25L,  1,  2,  3,   1L << 16 |  1L,  4,  5,  6,         0L,  7,  8,  9,   1L << 25 | 10L, 11, 12, 13,
                            25L, 14, 15, 16,   1L << 16 | 10L, 17, 18, 19,   1L << 16, 20, 21, 22,              10L, 23, 24, 25,
                 1L << 52 | 25L,  1,  2,  3,   1L << 44 |  1L,  4,  5,  6,   1L << 34,  7,  8,  9,   1L << 52 | 10L, 11, 12, 13,
                 1L << 34 | 25L, 14, 15, 16,   1L << 44 | 10L, 17, 18, 19,   1L << 44, 20, 21, 22,   1L << 34 | 10L, 23, 24, 25,
@@ -110,6 +110,7 @@ final class RadixSortTest {
         //@formatter:on
     }
 
+    @SuppressWarnings("checkstyle:NoWhitespaceBefore")
     private static long[] expectedBySource() {
         //@formatter:off
         return new long[]{
@@ -123,6 +124,7 @@ final class RadixSortTest {
         //@formatter:on
     }
 
+    @SuppressWarnings("checkstyle:NoWhitespaceBefore")
     private static long[] expectedByTarget() {
         //@formatter:off
         return new long[]{

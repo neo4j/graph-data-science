@@ -137,13 +137,13 @@ class PrimTest {
 
     private void assertMinimum(SpanningTree mst) {
         assertEquals(5, mst.effectiveNodeCount);
-        assertEquals(-1 , mst.parent[y]);
-        assertEquals(-1 , mst.parent[z]);
+        assertEquals(-1, mst.parent[y]);
+        assertEquals(-1, mst.parent[z]);
     }
 
     private void assertMaximum(SpanningTree mst) {
         assertEquals(5, mst.effectiveNodeCount);
-        assertEquals(-1 , mst.parent[y]);
-        assertEquals(-1 , mst.parent[z]);
+        assertEquals(-1, mst.parent[y]);
+        assertEquals(-1, mst.parent[z]);
     }
 }

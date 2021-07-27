@@ -367,8 +367,8 @@ final class NodeSimilarityTest {
         assertGraphEquals(
             orientation == REVERSE
                 ? fromGdl("(i1:Item)-[{w: 0.50000D}]->(i3:Item), (i2:Item), (i4:Item), (a:Person), (b:Person), (c:Person), (d:Person)")
-                : fromGdl("(a:Person), (b:Person)-[{w: 0.00000D}]->(c:Person), (d:Person), (i1:Item), (i2:Item), (i3:Item), (i4:Item)")
-            , similarityGraph
+                : fromGdl("(a:Person), (b:Person)-[{w: 0.00000D}]->(c:Person), (d:Person), (i1:Item), (i2:Item), (i3:Item), (i4:Item)"),
+            similarityGraph
         );
     }
 
@@ -424,8 +424,8 @@ final class NodeSimilarityTest {
                           ", (b:Person)-[{w: 0.00000D}]->(c)" +
                           ", (c)-[{w: 0.000000D}]->(b)" +
                           ", (d:Person)-[{w: 0.333333D}]->(c)" +
-                          ", (:Item), (:Item), (:Item), (:Item)")
-            , similarityGraph
+                          ", (:Item), (:Item), (:Item), (:Item)"),
+            similarityGraph
         );
     }
 

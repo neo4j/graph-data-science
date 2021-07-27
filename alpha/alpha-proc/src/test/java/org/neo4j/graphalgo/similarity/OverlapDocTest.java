@@ -77,7 +77,7 @@ public class OverlapDocTest extends BaseProcTest {
     void functionCall() {
         String query = "RETURN gds.alpha.similarity.overlap([1,2,3], [1,2,4,5]) AS similarity";
 
-        runQueryWithRowConsumer(query, row -> assertEquals(0.6666666666666666 ,row.get("similarity")));
+        runQueryWithRowConsumer(query, row -> assertEquals(0.6666666666666666, row.get("similarity")));
     }
 
     @Test

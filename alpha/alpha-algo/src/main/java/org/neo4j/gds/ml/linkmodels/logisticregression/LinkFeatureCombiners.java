@@ -73,7 +73,7 @@ public enum LinkFeatureCombiners implements LinkFeatureCombiner {
     COSINE {
         @Override
         public double[] combine(double[] sourceArray, double[] targetArray) {
-            var result = new double[] { Intersections.cosine(sourceArray, targetArray, sourceArray.length) , 1.0};
+            var result = new double[] { Intersections.cosine(sourceArray, targetArray, sourceArray.length), 1.0};
             if (Double.isNaN(result[0])) {
                 result[0] = 0;
             }

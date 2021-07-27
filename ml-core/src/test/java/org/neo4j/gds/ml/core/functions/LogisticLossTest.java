@@ -40,7 +40,7 @@ class LogisticLossTest implements FiniteDifferenceTest {
         ComputationContext ctx = new ComputationContext();
         double lossValue = ctx.forward(loss).value();
         double expectedValue = -1.0/2.0 * (1.0*log(0.7137567) + 0 + 0 + log(1-0.74732574));
-        assertThat(ctx.data(predictions).data()).containsExactly(new double[]{0.7137567 , 0.74732574}, Offset.offset(1e-6));
+        assertThat(ctx.data(predictions).data()).containsExactly(new double[]{0.7137567, 0.74732574}, Offset.offset(1e-6));
         assertThat(lossValue).isCloseTo(expectedValue, Offset.offset(1e-8));
     }
 

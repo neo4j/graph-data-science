@@ -82,7 +82,7 @@ public interface GraphSageTrainConfig extends
                 .map(Math::toIntExact)
                 .collect(Collectors.toList());
         } catch (ArithmeticException e) {
-            throw new IllegalArgumentException("Sample size must smaller than 2^31" , e);
+            throw new IllegalArgumentException("Sample size must smaller than 2^31", e);
         }
     }
 

@@ -108,8 +108,7 @@ public class EstimationCli implements Runnable {
         SIMILARITY("similarity"),
         PATH_FINDING("path-finding"),
         NODE_EMBEDDING("node-embedding"),
-        MACHINE_LEARNING("machine-learning"),
-        ;
+        MACHINE_LEARNING("machine-learning");
 
         private final String slug;
 

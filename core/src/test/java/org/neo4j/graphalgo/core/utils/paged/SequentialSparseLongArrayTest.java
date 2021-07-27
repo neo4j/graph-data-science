@@ -79,7 +79,7 @@ class SequentialSparseLongArrayTest {
     @ValueSource(ints = {0, 1024, 4096, 5000, 9999})
     void testIdCount(int expectedIdCount) {
         var builder = SparseLongArray.sequentialBuilder(10_000);
-        for (int i = 0; i < expectedIdCount; i ++) {
+        for (int i = 0; i < expectedIdCount; i++) {
             builder.set(i);
         }
         assertEquals(expectedIdCount, builder.build().idCount());

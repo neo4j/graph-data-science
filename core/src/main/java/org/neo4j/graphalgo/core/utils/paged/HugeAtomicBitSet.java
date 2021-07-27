@@ -189,7 +189,7 @@ public final class HugeAtomicBitSet {
     public long cardinality() {
         long setBitCount = 0;
 
-        for (long wordIndex = 0; wordIndex < bits.size() ; wordIndex++) {
+        for (long wordIndex = 0; wordIndex < bits.size(); wordIndex++) {
             setBitCount += Long.bitCount(bits.get(wordIndex));
         }
 

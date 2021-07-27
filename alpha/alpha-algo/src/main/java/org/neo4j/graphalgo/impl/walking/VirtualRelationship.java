@@ -73,9 +73,7 @@ public class VirtualRelationship implements Relationship {
 
     @Override
     public Node[] getNodes() {
-        return new Node[] {
-                startNode, endNode
-        } ;
+        return new Node[]{startNode, endNode};
     }
 
     @Override

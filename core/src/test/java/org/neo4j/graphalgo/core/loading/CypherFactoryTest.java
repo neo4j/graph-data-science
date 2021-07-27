@@ -80,7 +80,7 @@ class CypherFactoryTest extends BaseTest {
                        " RETURN id(n1) AS id1, id(n2) AS id2, id(n3) AS id3";
         runQuery(query);
 
-        String nodes = "MATCH (n) RETURN id(n) AS id, COALESCE(n.partition, 0) AS partition , COALESCE(n.foo, 5.0) AS foo";
+        String nodes = "MATCH (n) RETURN id(n) AS id, COALESCE(n.partition, 0) AS partition, COALESCE(n.foo, 5.0) AS foo";
         String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' " +
                       "RETURN id(n) AS source, id(m) AS target, coalesce(head(collect(r.prop)), 0)";
 
@@ -350,8 +350,8 @@ class CypherFactoryTest extends BaseTest {
         MemoryEstimation memoryEstimation = factory.memoryEstimation();
         MemoryTree estimate = memoryEstimation.estimate(factory.estimationDimensions(), 4);
 
-        assertEquals(min ,estimate.memoryUsage().min);
-        assertEquals(max ,estimate.memoryUsage().max);
+        assertEquals(min, estimate.memoryUsage().min);
+        assertEquals(max, estimate.memoryUsage().max);
     }
 
     private static Stream<Arguments> memoryEstimationVariants() {

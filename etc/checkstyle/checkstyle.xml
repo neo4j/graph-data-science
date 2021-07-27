@@ -113,7 +113,13 @@
     <!--   <property name="fileExtensions" value="java"/> -->
     <!-- </module> -->
 
+    <!-- Enables suppressing warnings with @SuppressWarnings annotation -->
+    <module name="SuppressWarningsFilter"/>
+
     <module name="TreeWalker">
+
+        <!-- Enables suppressing warnings with @SuppressWarnings annotation -->
+        <module name="SuppressWarningsHolder" />
 
         <!-- Checks for Javadoc comments.                     -->
         <!-- See https://checkstyle.org/config_javadoc.html -->

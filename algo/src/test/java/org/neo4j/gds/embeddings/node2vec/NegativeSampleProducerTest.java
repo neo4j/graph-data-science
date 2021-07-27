@@ -45,7 +45,7 @@ class NegativeSampleProducerTest {
             .registerWalk(new long[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
             .registerWalk(new long[]{1});
 
-        RandomWalkProbabilities probabilityComputer = builder.build()  ;
+        RandomWalkProbabilities probabilityComputer = builder.build();
 
         var sampler = new NegativeSampleProducer(probabilityComputer.negativeSamplingDistribution());
 

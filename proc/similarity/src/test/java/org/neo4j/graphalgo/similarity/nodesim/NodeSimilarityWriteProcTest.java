@@ -153,13 +153,13 @@ public class NodeSimilarityWriteProcTest
                         ", (b)-[{w: %f}]->(c)" +
                         ", (b)-[{w: %f}]->(a)" +
                         ", (c)-[{w: %f}]->(a)" +
-                        ", (c)-[{w: %f}]->(b)"
-                        , 2 / 3.0
-                        , 1 / 3.0
-                        , 0.0
-                        , 2 / 3.0
-                        , 1 / 3.0
-                        , 0.0
+                        ", (c)-[{w: %f}]->(b)",
+                        2 / 3.0,
+                        1 / 3.0,
+                        0.0,
+                        2 / 3.0,
+                        1 / 3.0,
+                        0.0
                     )
                 ),
             GraphStoreCatalog.get(getUsername(), namedDatabaseId(), resultGraphName).graphStore().getUnion()

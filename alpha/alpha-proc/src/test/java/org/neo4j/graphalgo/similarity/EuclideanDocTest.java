@@ -84,7 +84,7 @@ public class EuclideanDocTest extends BaseProcTest {
     void functionCall() {
         String query = "RETURN gds.alpha.similarity.euclideanDistance([3,8,7,5,2,9], [10,8,6,6,4,5]) AS similarity";
 
-        runQueryWithRowConsumer(query, row -> assertEquals(8.426149773176359 ,row.get("similarity")));
+        runQueryWithRowConsumer(query, row -> assertEquals(8.426149773176359, row.get("similarity")));
     }
 
     @Test
