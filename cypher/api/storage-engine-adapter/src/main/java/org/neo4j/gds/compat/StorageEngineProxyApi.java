@@ -23,6 +23,7 @@ import org.neo4j.counts.CountsStore;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
 public interface StorageEngineProxyApi {
@@ -35,4 +36,10 @@ public interface StorageEngineProxyApi {
     CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders);
 
     CommandCreationContext inMemoryCommandCreationContext();
+
+    void initRelationshipTraversalCursorForRelType(
+        StorageRelationshipTraversalCursor cursor,
+        long sourceNodeId,
+        int relTypeToken
+    );
 }

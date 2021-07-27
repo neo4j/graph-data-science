@@ -22,8 +22,11 @@ package org.neo4j.gds.compat.dev;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.RelationshipSelection;
+import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
@@ -45,5 +48,18 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public CommandCreationContext inMemoryCommandCreationContext() {
         return new InMemoryCommandCreationContextImpl();
+    }
+
+    @Override
+    public void initRelationshipTraversalCursorForRelType(
+        StorageRelationshipTraversalCursor cursor,
+        long sourceNodeId,
+        int relTypeToken
+    ) {
+        var relationshipSelection = RelationshipSelection.selection(
+            relTypeToken,
+            Direction.OUTGOING
+        );
+        cursor.init(sourceNodeId, -1, relationshipSelection);
     }
 }

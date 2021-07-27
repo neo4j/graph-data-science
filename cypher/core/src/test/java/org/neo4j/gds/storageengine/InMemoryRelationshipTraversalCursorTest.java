@@ -21,6 +21,7 @@ package org.neo4j.gds.storageengine;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -31,9 +32,7 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.recordstorage.InMemoryStorageEngineCompanion;
-import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.token.DelegatingTokenHolder;
 import org.neo4j.token.ReadOnlyTokenCreator;
 import org.neo4j.token.TokenHolders;
@@ -89,11 +88,13 @@ class InMemoryRelationshipTraversalCursorTest extends BaseTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldTraverseRelationships() {
-        var relationshipSelection = RelationshipSelection.selection(
-            tokenHolders.relationshipTypeTokens().getIdByName("REL"),
-            Direction.OUTGOING
+        var relTypeToken = tokenHolders.relationshipTypeTokens().getIdByName("REL");
+
+        StorageEngineProxy.initRelationshipTraversalCursorForRelType(
+            relationshipCursor,
+            idFunction.of("a"),
+            relTypeToken
         );
-        relationshipCursor.init(idFunction.of("a"), -1, relationshipSelection);
 
         assertThat(relationshipCursor.next()).isTrue();
         assertThat(relationshipCursor.sourceNodeReference()).isEqualTo(idFunction.of("a"));

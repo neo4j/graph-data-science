@@ -26,6 +26,7 @@ import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
@@ -45,6 +46,13 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
 
     @Override
     public CommandCreationContext inMemoryCommandCreationContext() {
+        throw cypherUnsupportedException();
+    }
+
+    @Override
+    public void initRelationshipTraversalCursorForRelType(
+        StorageRelationshipTraversalCursor cursor, long sourceNodeId, int relTypeToken
+    ) {
         throw cypherUnsupportedException();
     }
 
