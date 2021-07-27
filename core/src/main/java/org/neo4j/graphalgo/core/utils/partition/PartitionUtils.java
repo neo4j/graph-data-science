@@ -19,12 +19,16 @@
  */
 package org.neo4j.graphalgo.core.utils.partition;
 
+import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.collection.primitive.PrimitiveLongIterator;
+import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -140,5 +144,81 @@ public final class PartitionUtils {
             result.add(taskCreator.apply(Partition.of(i, actualBatchSize)));
         }
         return result;
+    }
+
+    public static <TASK> Iterator<TASK> blockAlignedPartitioning(
+        HugeLongArray sortedIds,
+        int blockShift,
+        Function<Partition, TASK> taskCreator
+    ) {
+        return new BlockAlignedPartitionIterator<>(sortedIds, blockShift, taskCreator);
+    }
+
+    private static class BlockAlignedPartitionIterator<TASK> extends AbstractIterator<TASK> {
+        private final HugeCursor<long[]> cursor;
+        private final long size;
+        private final int blockShift;
+        private final Function<Partition, TASK> taskCreator;
+
+        private int prevBlockId;
+        private long blockStart;
+        private boolean done;
+        private int lastIndex;
+
+        BlockAlignedPartitionIterator(
+            HugeLongArray sortedIds,
+            int blockShift,
+            Function<Partition, TASK> taskCreator
+        ) {
+            this.size = sortedIds.size();
+            this.blockShift = blockShift;
+            this.taskCreator = taskCreator;
+            this.cursor = sortedIds.initCursor(sortedIds.newCursor());
+            this.prevBlockId = 0;
+            this.blockStart = 0L;
+            this.done = false;
+            this.lastIndex = Integer.MAX_VALUE;
+        }
+
+        @Override
+        protected TASK fetch() {
+            if (this.done) {
+                return done();
+            }
+
+            long base = cursor.base;
+            int limit = cursor.limit;
+            long[] array = cursor.array;
+            int prevBlockId = this.prevBlockId;
+            int blockShift = this.blockShift;
+
+            for (int i = lastIndex; i < limit; i++) {
+                long originalId = array[i];
+                int blockId = (int) (originalId >>> blockShift);
+                if (blockId != prevBlockId) {
+                    long internalId = base + i;
+                    prevBlockId = blockId;
+
+                    if (internalId > 0) {
+                        var partition = ImmutablePartition.of(blockStart, internalId - blockStart);
+                        this.blockStart = internalId;
+                        this.prevBlockId = prevBlockId;
+                        this.lastIndex = i;
+                        return taskCreator.apply(partition);
+                    }
+                }
+            }
+
+            if (cursor.next()) {
+                this.prevBlockId = prevBlockId;
+                this.lastIndex = cursor.offset;
+                return fetch();
+            }
+
+            var partition = ImmutablePartition.of(blockStart, size - blockStart);
+            this.done = true;
+
+            return taskCreator.apply(partition);
+        }
     }
 }
