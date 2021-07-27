@@ -107,7 +107,7 @@ class CsvGraphStoreImporterIntegrationTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void withBitIdMap(int concurrency) {
-        TestMethodRunner.runWithBitIdMap(() -> {
+        TestMethodRunner.runWithEEIdMap(() -> {
             var nodeSchema = NodeSchema.builder()
                 .addProperty(NodeLabel.of("A"), "prop1", ValueType.LONG)
                 .addProperty(NodeLabel.of("B"), "prop2", ValueType.DOUBLE)
