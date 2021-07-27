@@ -29,6 +29,8 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
+import org.neo4j.graphalgo.core.utils.partition.ImmutablePartition;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -178,6 +181,38 @@ class PartitionUtilsTest {
         assertEquals(1, partitions.size());
         assertEquals(0, partitions.get(0).startNode());
         assertEquals(3, partitions.get(0).nodeCount());
+    }
+
+    @Test
+    void testBlockAlignedPartitioning() {
+        var blockShift = 3; // 2^3 = 8 ids per block
+
+        var sortedArray = HugeLongArray.of(
+            /* block 0 */ 0, 3, 5,
+            /* block 1 */ 9, 10, 11, 12, 13, 14, 15,
+            /* block 2 */
+            /* block 3 */ 24, 28, 30, 31,
+            /* block 4 */ 32
+        );
+
+        var partitionIterator = PartitionUtils.blockAlignedPartitioning(
+            sortedArray,
+            blockShift,
+            partition -> partition
+        );
+
+        // 😿 Java
+        var partitions = StreamSupport
+            .stream(((Iterable<Partition>) () -> partitionIterator).spliterator(), false)
+            .collect(Collectors.toList());
+
+        assertThat(partitions)
+            .containsExactly(
+                ImmutablePartition.of(0, 3),
+                ImmutablePartition.of(3, 7),
+                ImmutablePartition.of(10, 4),
+                ImmutablePartition.of(14, 1)
+            );
     }
 
     static class TestTask implements Runnable {
