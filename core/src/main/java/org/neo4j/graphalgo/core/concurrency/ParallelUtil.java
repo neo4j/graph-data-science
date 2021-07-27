@@ -391,7 +391,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterable creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -439,7 +439,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterator creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -490,7 +490,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterable creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -530,7 +530,7 @@ public final class ParallelUtil {
         );
     }
 
-     /**
+    /**
      * Try to run all tasks for their side-effects using at most
      * {@code concurrency} threads at once.
      * <p>
@@ -540,7 +540,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterator creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -592,7 +592,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterable creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -647,7 +647,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterator creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -704,7 +704,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterable creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -761,7 +761,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterator creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -819,7 +819,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterable creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -873,7 +873,7 @@ public final class ParallelUtil {
         );
     }
 
-      /**
+    /**
      * Try to run all tasks for their side-effects using at most
      * {@code concurrency} threads at once.
      * <p>
@@ -883,7 +883,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterator creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -947,7 +947,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterable creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -997,7 +997,7 @@ public final class ParallelUtil {
         );
     }
 
-      /**
+    /**
      * Try to run all tasks for their side-effects using at most
      * {@code concurrency} threads at once.
      * <p>
@@ -1007,7 +1007,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterator creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -1067,7 +1067,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterable creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
@@ -1124,7 +1124,7 @@ public final class ParallelUtil {
         );
     }
 
-      /**
+    /**
      * Try to run all tasks for their side-effects using at most
      * {@code concurrency} threads at once.
      * <p>
@@ -1134,7 +1134,7 @@ public final class ParallelUtil {
      * first Exception is thrown.
      * <p>
      * If the tasks are submitted to the {@code executor}, it may happen that
-     * not all tasks are actually executed. If the provided collection creates
+     * not all tasks are actually executed. If the provided iterator creates
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
