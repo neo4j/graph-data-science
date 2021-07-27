@@ -62,7 +62,7 @@ Before running this algorithm, we recommend that you read <<memory-estimation>>.
 [[algorithms-knn-introduction-similarity]]
 === Similarity measures
 
-The similarity measure used in the KNN algorithm depends on the type of the relationship properties.
+The similarity measure used in the KNN algorithm depends on the type of the configured node property.
 KNN supports both scalar numeric values as well as lists of numbers.
 
 Scalar numeric property::
