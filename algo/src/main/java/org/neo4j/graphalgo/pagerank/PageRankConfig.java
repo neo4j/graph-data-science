@@ -46,6 +46,7 @@ public interface PageRankConfig extends
         return 1E-7;
     }
 
+    @Configuration.IntegerRange(min = 1)
     @Value.Default
     @Override
     default int maxIterations() {

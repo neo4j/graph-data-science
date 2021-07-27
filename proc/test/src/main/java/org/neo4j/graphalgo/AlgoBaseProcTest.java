@@ -105,6 +105,17 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
 
     Class<? extends AlgoBaseProc<ALGORITHM, RESULT, CONFIG>> getProcedureClazz();
 
+    default AlgoBaseProc<ALGORITHM, RESULT, CONFIG> proc() {
+        try {
+            return getProcedureClazz()
+                .getConstructor()
+                .newInstance();
+        } catch (Exception e) {
+            fail("unable to instantiate procedure", e);
+        }
+        return null;
+    }
+
     default boolean supportsImplicitGraphCreate() {
         return true;
     }
@@ -124,6 +135,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>
     CONFIG createConfig(CypherMapWrapper mapWrapper);
 
     void assertResultEquals(RESULT result1, RESULT result2);
+
+    default CypherMapWrapper createMinimalConfig() {
+        return createMinimalConfig(CypherMapWrapper.empty());
+    }
 
     default CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
         return mapWrapper;
