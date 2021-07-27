@@ -19,5 +19,20 @@
  */
 package org.neo4j.gds.compat;
 
+import org.neo4j.counts.CountsStore;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.token.TokenHolders;
+
 public interface StorageEngineProxyApi {
+
+    <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
+        DatabaseLayout databaseLayout,
+        TokenHolders tokenHolders
+    );
+
+    CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders);
+
+    CommandCreationContext inMemoryCommandCreationContext();
 }

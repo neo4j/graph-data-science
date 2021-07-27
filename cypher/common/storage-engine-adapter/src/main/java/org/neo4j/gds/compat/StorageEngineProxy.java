@@ -19,11 +19,16 @@
  */
 package org.neo4j.gds.compat;
 
+import org.neo4j.counts.CountsStore;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.token.TokenHolders;
 
 import java.util.ServiceLoader;
 
-public class StorageEngineProxy {
+public final class StorageEngineProxy {
 
     private static final StorageEngineProxyApi IMPL;
 
@@ -37,5 +42,22 @@ public class StorageEngineProxy {
             .findFirst()
             .orElseThrow(() -> new LinkageError("Could not load the " + StorageEngineProxy.class + " implementation for " + neo4jVersion));
         IMPL = storageEngineProxyFactory.load();
+    }
+
+    private StorageEngineProxy() {}
+
+    public static <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
+        DatabaseLayout databaseLayout,
+        TokenHolders tokenHolders
+    ) {
+        return IMPL.inMemoryStorageEngineBuilder(databaseLayout, tokenHolders);
+    }
+
+    public static CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders) {
+        return IMPL.inMemoryCountsStore(graphStore, tokenHolders);
+    }
+
+    public static CommandCreationContext inMemoryCommandCreationContext() {
+        return IMPL.inMemoryCommandCreationContext();
     }
 }

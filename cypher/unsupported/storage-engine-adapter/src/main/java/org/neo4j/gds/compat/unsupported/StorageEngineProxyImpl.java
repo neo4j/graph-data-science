@@ -17,9 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.dev;
+package org.neo4j.gds.compat.unsupported;
 
 import org.neo4j.counts.CountsStore;
+import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
+import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -27,23 +29,26 @@ import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.token.TokenHolders;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
-
     @Override
-    public InMemoryStorageEngineImpl.Builder inMemoryStorageEngineBuilder(
+    public <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout, TokenHolders tokenHolders
     ) {
-        return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders);
+        throw cypherUnsupportedException();
     }
 
     @Override
     public CountsStore inMemoryCountsStore(
         GraphStore graphStore, TokenHolders tokenHolders
     ) {
-        return new InMemoryCountsStoreImpl(graphStore, tokenHolders);
+        throw cypherUnsupportedException();
     }
 
     @Override
     public CommandCreationContext inMemoryCommandCreationContext() {
-        return new InMemoryCommandCreationContextImpl();
+        throw cypherUnsupportedException();
+    }
+
+    private UnsupportedOperationException cypherUnsupportedException() {
+        return new UnsupportedOperationException("Cypher is not supported for Neo4j versions <4.3.");
     }
 }

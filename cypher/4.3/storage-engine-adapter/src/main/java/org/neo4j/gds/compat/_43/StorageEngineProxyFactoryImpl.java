@@ -17,32 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.dev;
+package org.neo4j.gds.compat._43;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.gds.compat.StorageEngineProxyFactory;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
 
-import java.util.List;
-
 @ServiceProvider
 public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory {
 
     @Override
     public boolean canLoad(Neo4jVersion version) {
-        var incompatibleVersions = List.of(
-            Neo4jVersion.V_4_0,
-            Neo4jVersion.V_4_1,
-            Neo4jVersion.V_4_2,
-            Neo4jVersion.V_4_3_drop31,
-            Neo4jVersion.V_4_3_drop40
-        );
-        return incompatibleVersions.contains(version);
+        return version == Neo4jVersion.V_4_3;
     }
 
     @Override
     public StorageEngineProxyApi load() {
-        return null;
+        return new StorageEngineProxyImpl();
     }
 }

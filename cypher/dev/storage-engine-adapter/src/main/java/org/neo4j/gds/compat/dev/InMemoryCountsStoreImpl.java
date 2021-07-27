@@ -19,21 +19,26 @@
  */
 package org.neo4j.gds.compat.dev;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.compat.StorageEngineProxyApi;
-import org.neo4j.gds.compat.StorageEngineProxyFactory;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
+import org.neo4j.gds.compat.AbstractInMemoryCountStore;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.memory.MemoryTracker;
+import org.neo4j.storageengine.api.cursor.StoreCursors;
+import org.neo4j.token.TokenHolders;
 
-@ServiceProvider
-public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory {
+public class InMemoryCountsStoreImpl extends AbstractInMemoryCountStore {
 
-    @Override
-    public boolean canLoad(Neo4jVersion version) {
-        return version == Neo4jVersion.V_Dev;
+    public InMemoryCountsStoreImpl(
+        GraphStore graphStore,
+        TokenHolders tokenHolders
+    ) {
+        super(graphStore, tokenHolders);
     }
 
     @Override
-    public StorageEngineProxyApi load() {
-        return new StorageEngineProxyImpl();
+    public void start(
+        CursorContext cursorContext, StoreCursors storeCursors, MemoryTracker memoryTracker
+    ) {
+
     }
 }

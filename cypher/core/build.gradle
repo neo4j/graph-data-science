@@ -1,15 +1,15 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Storage Engine Adapter API'
+description = 'Neo4j Graph Data Science :: Storage Engine Adapter'
 
 dependencies {
-    annotationProcessor project(':annotations')
+    annotationProcessor group: 'org.immutables', name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
 
     compileOnly project(':annotations')
+    compileOnly         group: 'org.immutables', name: 'builder',            version: ver.'immutables'
     compileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
     compileOnly         group: 'org.jetbrains',  name: 'annotations',        version: ver.'jetbrains-annotations'
-    compileOnly         group: 'org.eclipse.collections', name: 'eclipse-collections', version: ver.'eclipse-collections'
     neodeps.each {
         compileOnly(group: 'org.neo4j', name: it, version: neos.'4.3') {
             transitive = false
@@ -17,6 +17,7 @@ dependencies {
     }
 
     api project(':core')
-    api project(':neo4j-adapter')
-}
+    api project(':storage-engine-adapter')
 
+    testImplementation project(":test-utils")
+}

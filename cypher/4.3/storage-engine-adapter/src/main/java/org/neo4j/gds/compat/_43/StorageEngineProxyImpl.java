@@ -17,9 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.dev;
+package org.neo4j.gds.compat._43;
 
+import org.neo4j.counts.CountsStore;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.token.TokenHolders;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
+
+    @Override
+    public InMemoryStorageEngineImpl.Builder inMemoryStorageEngineBuilder(
+        DatabaseLayout databaseLayout, TokenHolders tokenHolders
+    ) {
+        return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders);
+    }
+
+    @Override
+    public CountsStore inMemoryCountsStore(
+        GraphStore graphStore, TokenHolders tokenHolders
+    ) {
+        return new InMemoryCountsStoreImpl(graphStore, tokenHolders);
+    }
+
+    @Override
+    public CommandCreationContext inMemoryCommandCreationContext() {
+        return new InMemoryCommandCreationContextImpl();
+    }
 }

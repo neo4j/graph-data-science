@@ -19,7 +19,16 @@
  */
 package org.neo4j.gds.compat.dev;
 
-import org.neo4j.gds.compat.StorageEngineProxyApi;
+import org.neo4j.gds.compat.AbstractInMemoryCommandCreationContext;
+import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.storageengine.api.cursor.StoreCursors;
 
-public class StorageEngineProxyImpl implements StorageEngineProxyApi {
+public class InMemoryCommandCreationContextImpl extends AbstractInMemoryCommandCreationContext {
+
+    @Override
+    public void initialize(
+        CursorContext cursorContext, StoreCursors storeCursors
+    ) {
+
+    }
 }
