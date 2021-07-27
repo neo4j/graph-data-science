@@ -27,9 +27,11 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
+import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.internal.recordstorage.InMemoryStorageEngineCompanion;
 import org.neo4j.token.DelegatingTokenHolder;
 import org.neo4j.token.ReadOnlyTokenCreator;
@@ -75,6 +77,11 @@ class InMemoryNodeCursorTest extends BaseTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldScanSingle() {
         nodeCursor.single(0);
         assertThat(nodeCursor.next()).isTrue();
@@ -82,6 +89,11 @@ class InMemoryNodeCursorTest extends BaseTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldScanRange() {
         nodeCursor.scanRange(1, 2);
         nodeCursor.next();
@@ -92,6 +104,11 @@ class InMemoryNodeCursorTest extends BaseTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldScanAll() {
         nodeCursor.scan();
         graphStore.nodes().forEachNode(nodeId -> {
@@ -103,6 +120,11 @@ class InMemoryNodeCursorTest extends BaseTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void testLabels() {
         graphStore.nodes().forEachNode(nodeId -> {
             nodeCursor.single(nodeId);
@@ -116,6 +138,11 @@ class InMemoryNodeCursorTest extends BaseTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldHaveProperties() {
         nodeCursor.next();
         assertThat(nodeCursor.hasProperties()).isTrue();
@@ -123,6 +150,11 @@ class InMemoryNodeCursorTest extends BaseTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldTraverseProperties() throws TokenNotFoundException {
         nodeCursor.next();
         var propertyCursor = new InMemoryNodePropertyCursor(graphStore, tokenHolders);
