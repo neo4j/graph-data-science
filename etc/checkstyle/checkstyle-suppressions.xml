@@ -35,7 +35,6 @@
     <suppress checks="MethodLength" files=".*"/>
     <suppress checks="ParameterNumber" files=".*"/>
     <suppress checks="EmptyForIteratorPad" files=".*"/>
-    <suppress checks="GenericWhitespace" files=".*"/>
     <suppress checks="OperatorWrap" files=".*"/>
     <suppress checks="ParenPad" files=".*"/>
     <suppress checks="TypecastParenPad" files=".*"/>
