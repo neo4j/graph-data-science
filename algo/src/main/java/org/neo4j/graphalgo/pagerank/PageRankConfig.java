@@ -42,6 +42,7 @@ public interface PageRankConfig extends
 {
     @Value.Default
     @Override
+    @Configuration.DoubleRange(min = 0D)
     default double tolerance() {
         return 1E-7;
     }
