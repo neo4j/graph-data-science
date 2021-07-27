@@ -23,6 +23,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Settings;
+import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.io.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.io.GraphStoreInput;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
@@ -58,15 +59,25 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         GraphDatabaseAPI api,
         GraphStoreToDatabaseExporterConfig config
     ) {
-        return new GraphStoreToDatabaseExporter(graphStore, api, config);
+        return new GraphStoreToDatabaseExporter(graphStore, api, null, config);
+    }
+
+    public static GraphStoreToDatabaseExporter newExporter(
+        GraphStore graphStore,
+        GraphDatabaseAPI api,
+        TransactionContext transactionContext,
+        GraphStoreToDatabaseExporterConfig config
+    ) {
+        return new GraphStoreToDatabaseExporter(graphStore, api, transactionContext, config);
     }
 
     private GraphStoreToDatabaseExporter(
         GraphStore graphStore,
         GraphDatabaseAPI api,
+        TransactionContext transactionContext,
         GraphStoreToDatabaseExporterConfig config
     ) {
-        super(graphStore, config);
+        super(transactionContext, graphStore, config);
         this.neo4jHome = Neo4jProxy.homeDirectory(api.databaseLayout());
         this.config = config;
         this.fs = api.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);

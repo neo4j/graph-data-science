@@ -200,6 +200,7 @@ public final class GraphStoreInput implements CompatInput {
 
                     if (hasProperties) {
                         for (var label : labels) {
+                            // TODO getIfPresent
                             if (nodeStore.nodeProperties.containsKey(label)) {
                                 for (var propertyKeyAndValue : nodeStore.nodeProperties.get(label).entrySet()) {
                                     exportProperty(visitor, propertyKeyAndValue);

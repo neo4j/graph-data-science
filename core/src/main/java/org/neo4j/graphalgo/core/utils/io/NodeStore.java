@@ -26,9 +26,9 @@ import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class NodeStore {
 
@@ -99,8 +99,15 @@ public class NodeStore {
     }
 
     static NodeStore of(GraphStore graphStore, AllocationTracker tracker) {
+        return of(graphStore, tracker, new HashMap<>());
+    }
+
+    static NodeStore of(
+        GraphStore graphStore,
+        AllocationTracker tracker,
+        final Map<String, Map<String, NodeProperties>> nodeProperties
+    ) {
         HugeIntArray labelCounts = null;
-        Map<String, Map<String, NodeProperties>> nodeProperties;
 
         var nodeLabels = graphStore.nodes();
 
@@ -118,24 +125,20 @@ public class NodeStore {
             });
         }
 
-        if (graphStore.nodePropertyKeys().isEmpty()) {
-            nodeProperties = null;
-        } else {
-            nodeProperties = graphStore.nodePropertyKeys().entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey().name,
-                entry -> entry.getValue().stream().collect(Collectors.toMap(
-                    propertyKey -> propertyKey,
-                    propertyKey -> graphStore.nodePropertyValues(entry.getKey(), propertyKey)
-                ))
-            ));
-        }
+        graphStore.nodePropertyKeys().forEach((label, propertyKeys) -> {
+            var properties = nodeProperties.computeIfAbsent(label.name, k -> new HashMap<>());
+
+            propertyKeys.forEach(propertyKey -> {
+                properties.put(propertyKey, graphStore.nodePropertyValues(label, propertyKey));
+            });
+        });
 
         return new NodeStore(
             graphStore.nodeCount(),
             labelCounts,
             nodeLabels,
             hasNodeLabels,
-            nodeProperties
+            nodeProperties.isEmpty() ? null : nodeProperties
         );
     }
 }
