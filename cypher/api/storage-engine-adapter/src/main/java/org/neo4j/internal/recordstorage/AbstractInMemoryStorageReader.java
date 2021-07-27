@@ -22,22 +22,15 @@ package org.neo4j.internal.recordstorage;
 import org.neo4j.common.EntityType;
 import org.neo4j.common.TokenNameLookup;
 import org.neo4j.counts.CountsAccessor;
-import org.neo4j.gds.storageengine.InMemoryNodeCursor;
-import org.neo4j.gds.storageengine.InMemoryPropertyCursor;
-import org.neo4j.gds.storageengine.InMemoryRelationshipTraversalCursor;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.internal.schema.ConstraintDescriptor;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.SchemaDescriptor;
 import org.neo4j.internal.schema.constraints.IndexBackedConstraintDescriptor;
 import org.neo4j.io.pagecache.context.CursorContext;
-import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.AllNodeScan;
 import org.neo4j.storageengine.api.AllRelationshipsScan;
-import org.neo4j.storageengine.api.StorageNodeCursor;
-import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageReader;
-import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.storageengine.api.StorageSchemaReader;
 import org.neo4j.token.TokenHolders;
 
@@ -49,15 +42,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public class InMemoryStorageReader implements StorageReader {
+public abstract class AbstractInMemoryStorageReader implements StorageReader {
 
-    private final GraphStore graphStore;
-    private final TokenHolders tokenHolders;
-    private final CountsAccessor counts;
+    protected final GraphStore graphStore;
+    protected final TokenHolders tokenHolders;
+    protected final CountsAccessor counts;
     private final Map<Class<?>,Object> dependantState;
     private boolean closed;
 
-    public InMemoryStorageReader(
+    public AbstractInMemoryStorageReader(
         GraphStore graphStore,
         TokenHolders tokenHolders,
         CountsAccessor counts
@@ -209,11 +202,6 @@ public class InMemoryStorageReader implements StorageReader {
     }
 
     @Override
-    public long relationshipsGetCount() {
-        return graphStore.relationshipCount();
-    }
-
-    @Override
     public int labelCount()
     {
         return graphStore.nodes().availableNodeLabels().size();
@@ -248,23 +236,6 @@ public class InMemoryStorageReader implements StorageReader {
     }
 
     @Override
-    public boolean nodeExists( long id, CursorContext cursorContext )
-    {
-        try {
-            graphStore.nodes().toOriginalNodeId(id);
-            return true;
-        } catch(Exception e) {
-            return false;
-        }
-    }
-
-    @Override
-    public boolean relationshipExists( long id, CursorContext cursorContext )
-    {
-        return true;
-    }
-
-    @Override
     public <T> T getOrCreateSchemaDependantState( Class<T> type, Function<StorageReader,T> factory )
     {
         return type.cast( dependantState.computeIfAbsent( type, key -> factory.apply( this ) ) );
@@ -289,22 +260,6 @@ public class InMemoryStorageReader implements StorageReader {
     }
 
     @Override
-    public StorageNodeCursor allocateNodeCursor(CursorContext cursorContext) {
-        return new InMemoryNodeCursor(graphStore, tokenHolders);
-    }
-
-    @Override
-    public StorageRelationshipTraversalCursor allocateRelationshipTraversalCursor(CursorContext cursorContext) {
-        return new InMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
-    }
-
-    @Override
-    public RecordRelationshipScanCursor allocateRelationshipScanCursor(CursorContext cursorContext )
-    {
-        return new RecordRelationshipScanCursor(null, cursorContext);
-    }
-
-    @Override
     public StorageSchemaReader schemaSnapshot()
     {
         return this;
@@ -314,12 +269,5 @@ public class InMemoryStorageReader implements StorageReader {
     public TokenNameLookup tokenNameLookup()
     {
         return tokenHolders;
-    }
-
-    @Override
-    public StoragePropertyCursor allocatePropertyCursor(
-        CursorContext cursorContext, MemoryTracker memoryTracker
-    ) {
-        return new InMemoryPropertyCursor(graphStore, tokenHolders);
     }
 }

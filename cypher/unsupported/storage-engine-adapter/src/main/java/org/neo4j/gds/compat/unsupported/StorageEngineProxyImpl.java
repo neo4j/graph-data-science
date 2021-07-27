@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat.unsupported;
 
+import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
@@ -26,6 +27,7 @@ import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
@@ -52,6 +54,13 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public void initRelationshipTraversalCursorForRelType(
         StorageRelationshipTraversalCursor cursor, long sourceNodeId, int relTypeToken
+    ) {
+        throw cypherUnsupportedException();
+    }
+
+    @Override
+    public StorageReader inMemoryStorageReader(
+        GraphStore graphStore, TokenHolders tokenHolders, CountsAccessor counts
     ) {
         throw cypherUnsupportedException();
     }

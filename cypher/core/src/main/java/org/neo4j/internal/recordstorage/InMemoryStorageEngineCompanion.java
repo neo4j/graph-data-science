@@ -40,7 +40,7 @@ public final class InMemoryStorageEngineCompanion {
         storageEngineBuilder.withCountsStoreFn(StorageEngineProxy::inMemoryCountsStore);
         storageEngineBuilder.withTxStateVisitorFn(InMemoryTransactionStateVisitor::new);
         storageEngineBuilder.withCommandCreationContextSupplier(StorageEngineProxy::inMemoryCommandCreationContext);
-        storageEngineBuilder.withStorageReaderFn(InMemoryStorageReader::new);
+        storageEngineBuilder.withStorageReaderFn(StorageEngineProxy::inMemoryStorageReader);
 
         return storageEngineBuilder.build();
     }

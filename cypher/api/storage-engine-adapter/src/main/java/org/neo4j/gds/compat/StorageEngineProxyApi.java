@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.compat;
 
+import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
+import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
@@ -41,5 +43,11 @@ public interface StorageEngineProxyApi {
         StorageRelationshipTraversalCursor cursor,
         long sourceNodeId,
         int relTypeToken
+    );
+
+    StorageReader inMemoryStorageReader(
+        GraphStore graphStore,
+        TokenHolders tokenHolders,
+        CountsAccessor counts
     );
 }

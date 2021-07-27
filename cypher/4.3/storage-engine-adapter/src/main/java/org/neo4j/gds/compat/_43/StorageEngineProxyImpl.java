@@ -19,13 +19,16 @@
  */
 package org.neo4j.gds.compat._43;
 
+import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.internal.recordstorage.InMemoryStorageReaderImpl;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.RelationshipSelection;
+import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
@@ -61,5 +64,12 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
             Direction.OUTGOING
         );
         cursor.init(sourceNodeId, -1, relationshipSelection);
+    }
+
+    @Override
+    public StorageReader inMemoryStorageReader(
+        GraphStore graphStore, TokenHolders tokenHolders, CountsAccessor counts
+    ) {
+        return new InMemoryStorageReaderImpl(graphStore, tokenHolders, counts);
     }
 }
