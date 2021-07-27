@@ -26,13 +26,12 @@ import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 
 public interface K1ColoringConfig extends AlgoBaseConfig, IterationsConfig {
-    int DEFAULT_ITERATIONS = 10;
 
     @Override
     @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int maxIterations() {
-        return DEFAULT_ITERATIONS;
+        return 10;
     }
 
     @Value.Default
