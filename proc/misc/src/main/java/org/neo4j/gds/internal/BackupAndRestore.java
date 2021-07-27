@@ -118,6 +118,8 @@ public final class BackupAndRestore {
     ) {
         log.info("Preparing for %s", StringFormatting.toLowerCaseWithLocale(taskName));
 
+        DIRECTORY_IS_WRITABLE.validate(backupRoot);
+
         var result = new ArrayList<BackupResult>();
 
         var timer = ProgressTimer.start();
@@ -134,22 +136,24 @@ public final class BackupAndRestore {
                 log
             ));
 
-            for (var backupResult : result) {
+            // We have the contract that both graphs and models folder exist, even if they do not contain any data
+            result.stream().flatMap(backupResult -> {
+                var userPath = backupRoot.resolve(backupResult.username());
+                return Stream.of(userPath.resolve(GRAPHS_DIR), userPath.resolve(MODELS_DIR));
+            }).distinct().forEach(pathToCreate -> {
                 try {
-                    var userPath = backupRoot.resolve(backupResult.username());
-                    Files.createDirectories(userPath.resolve(GRAPHS_DIR));
-                    Files.createDirectories(userPath.resolve(MODELS_DIR));
+                    Files.createDirectories(pathToCreate);
                 } catch (IOException e) {
                     log.error(
                         formatWithLocale(
-                            "Failed to create %s directory structure for user '%s'",
+                            "Failed to create %s directory '%s'",
                             StringFormatting.toLowerCaseWithLocale(taskName),
-                            backupResult.username()
+                            pathToCreate
                         ),
                         e
                     );
                 }
-            }
+            });
         }
 
         var elapsedTimeInSeconds = TimeUnit.MILLISECONDS.toSeconds(timer.getDuration());

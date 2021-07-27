@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.internal;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -44,6 +45,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -130,19 +132,6 @@ final class AuraTestSupport {
             .isDirectoryContaining("regex:.+/relationships_REL[12]_\\d+\\.csv");
     }
 
-    static void assertModel(String path) {
-        assertModel(Paths.get(path));
-    }
-
-    static void assertModel(Path path) {
-        assertThat(path)
-            .satisfies(p -> assertThat(ExceptionUtil.apply(Files::list, p).count()).isEqualTo(1))
-            .isDirectoryRecursivelyContaining("glob:**/models/*/" + ModelToFileExporter.META_DATA_FILE)
-            .isDirectoryRecursivelyContaining("glob:**/models/*/" + ModelToFileExporter.MODEL_DATA_FILE)
-
-        ;
-    }
-
     static void assertGraphs(Path root) {
         assertGraph(root.resolve("userA/graphs/first"));
         assertThat(root.resolve("userA/graphs/second")).doesNotExist();
@@ -150,9 +139,27 @@ final class AuraTestSupport {
         assertThat(root.resolve("userB/graphs/first")).doesNotExist();
     }
 
+    static void assertModel(String path) {
+        assertModel(Paths.get(path));
+    }
+
+    static void assertModel(Path path) {
+        assertThat(path)
+            .satisfies(p -> assertThat(ExceptionUtil.apply(Files::list, p).count()).isEqualTo(2))
+            .isDirectoryContaining("glob:**/" + ModelToFileExporter.META_DATA_FILE)
+            .isDirectoryContaining("glob:**/" + ModelToFileExporter.MODEL_DATA_FILE);
+    }
+
     static void assertModels(Path root) {
-        assertModel(root.resolve("userA/models"));
-        assertModel(root.resolve("userB/models"));
+        assertBackupModels(root.resolve("userA/models"));
+        assertBackupModels(root.resolve("userB/models"));
+    }
+
+    private static void assertBackupModels(Path path) {
+        assertThat(ExceptionUtil.apply(Files::list, path).collect(Collectors.toList()))
+            .hasSize(1)
+            .element(0, InstanceOfAssertFactories.PATH)
+            .satisfies(AuraTestSupport::assertModel);
     }
 }
 
