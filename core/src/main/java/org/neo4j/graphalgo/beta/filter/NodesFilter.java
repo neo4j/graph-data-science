@@ -19,12 +19,14 @@
  */
 package org.neo4j.graphalgo.beta.filter;
 
+import com.carrotsearch.hppc.AbstractIterator;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.IdMapping;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.api.NodeProperty;
@@ -45,16 +47,17 @@ import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeMergeSort;
-import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import static org.neo4j.graphalgo.core.utils.paged.SparseLongArray.SUPER_BLOCK_SHIFT;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class NodesFilter {
@@ -78,6 +81,13 @@ final class NodesFilter {
         // resolving original and internal ids works different.
         LongToLongFunction originalIdFunction;
         LongToLongFunction internalIdFunction;
+
+        // Partitions over the id space are created depending on the id map
+        // implementation. For the BitIdMap, we need to make sure that the
+        // ranges of original ids in each partition are aligned with the
+        // block size used for creating the BitIdMap. For the regular IdMap,
+        // we use range partitioning.
+        Iterator<Partition> partitions;
 
         var inputNodes = graphStore.nodes();
 
@@ -113,6 +123,15 @@ final class NodesFilter {
             // We signal the nodes builder to use the block-based
             // BitIdMap builder.
             nodesBuilderBuilder.hasDisjointPartitions(true);
+            // Create partitions that are aligned to the blocks that
+            // original ids belong to. We must guarantee, that no two
+            // partitions contain ids that belong to the same block.
+            partitions = PartitionUtils.blockAlignedPartitioning(
+                sortedOriginalIds,
+                SUPER_BLOCK_SHIFT,
+                partition -> partition
+            );
+
             progressLogger.finishSubTask("Prepare node ids");
         } else {
             // If we need to construct a regular IdMap, we can just
@@ -120,32 +139,26 @@ final class NodesFilter {
             // internal id as given.
             originalIdFunction = inputNodes::toOriginalNodeId;
             internalIdFunction = (id) -> id;
+
+            partitions = PartitionUtils
+                .rangePartition(concurrency, graphStore.nodeCount(), partition -> partition, Optional.empty())
+                .iterator();
         }
 
         var nodesBuilder = nodesBuilderBuilder.build();
 
-        var nodeFilterTasks = PartitionUtils.numberAlignedPartitioning(
-            concurrency,
-            graphStore.nodeCount(),
-            // We need to make sure to align the partition size
-            // with the block size in the SLA, which is the main
-            // data structure of the BitIdMap. If partition sizes
-            // are unaligned, wrong internal ids will be generated
-            // during import.
-            SparseLongArray.SUPER_BLOCK_SIZE,
-            partition -> new NodeFilterTask(
-                partition,
-                expression,
-                graphStore,
-                originalIdFunction,
-                internalIdFunction,
-                nodesBuilder,
-                progressLogger
-            )
+        var tasks = NodeFilterTask.of(
+            graphStore,
+            expression,
+            partitions,
+            originalIdFunction,
+            internalIdFunction,
+            nodesBuilder,
+            progressLogger
         );
 
         progressLogger.startSubTask("Nodes").reset(graphStore.nodeCount());
-        ParallelUtil.runWithConcurrency(concurrency, nodeFilterTasks, executorService);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
         progressLogger.finishSubTask("Nodes");
 
         var nodeMappingAndProperties = nodesBuilder.build();
@@ -155,7 +168,6 @@ final class NodesFilter {
         var filteredNodePropertyStores = filterNodeProperties(
             filteredNodeMapping,
             graphStore,
-            executorService,
             concurrency,
             progressLogger
         );
@@ -198,7 +210,6 @@ final class NodesFilter {
     private static Map<NodeLabel, NodePropertyStore> filterNodeProperties(
         NodeMapping filteredNodeMapping,
         GraphStore inputGraphStore,
-        ExecutorService executorService,
         int concurrency,
         ProgressLogger progressLogger
     ) {
@@ -222,7 +233,6 @@ final class NodesFilter {
                         nodeLabel,
                         propertyKeys,
                         concurrency,
-                        executorService,
                         progressLogger
                     );
 
@@ -236,11 +246,10 @@ final class NodesFilter {
 
     private static NodePropertyStore createNodePropertyStore(
         GraphStore inputGraphStore,
-        NodeMapping filteredMapping,
+        IdMapping filteredMapping,
         NodeLabel nodeLabel,
         Collection<String> propertyKeys,
         int concurrency,
-        ExecutorService executorService,
         ProgressLogger progressLogger
     ) {
         var builder = NodePropertyStore.builder();
@@ -383,6 +392,35 @@ final class NodesFilter {
         private final LongToLongFunction originalIdFunction;
         private final LongToLongFunction internalIdFunction;
         private final NodesBuilder nodesBuilder;
+
+        static Iterator<NodeFilterTask> of(
+            GraphStore graphStore,
+            Expression expression,
+            Iterator<Partition> partitions,
+            LongToLongFunction originalIdFunction,
+            LongToLongFunction internalIdFunction,
+            NodesBuilder nodesBuilder,
+            ProgressLogger progressLogger
+        ) {
+            return new AbstractIterator<>() {
+                @Override
+                protected NodeFilterTask fetch() {
+                    if (!partitions.hasNext()) {
+                        return done();
+                    }
+
+                    return new NodeFilterTask(
+                        partitions.next(),
+                        expression,
+                        graphStore,
+                        originalIdFunction,
+                        internalIdFunction,
+                        nodesBuilder,
+                        progressLogger
+                    );
+                }
+            };
+        }
 
         private NodeFilterTask(
             Partition partition,
