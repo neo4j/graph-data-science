@@ -19,20 +19,8 @@
  */
 package org.neo4j.graphalgo.config;
 
-import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
-
 public interface IterationsConfig {
 
-    String MAX_ITERATIONS_KEY = "maxIterations";
-
-    @Configuration.Key(MAX_ITERATIONS_KEY)
     int maxIterations();
 
-    @Value.Check
-    default void validateIterations() {
-        if (maxIterations() < 1) {
-            throw new IllegalArgumentException("`maxIterations` must be greater than 0");
-        }
-    }
 }
