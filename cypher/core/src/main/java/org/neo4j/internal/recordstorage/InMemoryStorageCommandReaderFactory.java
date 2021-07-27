@@ -29,8 +29,7 @@ public class InMemoryStorageCommandReaderFactory implements CommandReaderFactory
 
     @Override
     public CommandReader get(KernelVersion kernelVersion) {
-        switch ( kernelVersion )
-        {
+        switch (kernelVersion) {
             case V2_3:
                 return LogCommandSerializationV3_0_10.INSTANCE;
             case V4_0:
@@ -40,7 +39,7 @@ public class InMemoryStorageCommandReaderFactory implements CommandReaderFactory
             case V4_3_D4:
                 return LogCommandSerializationV4_3_D3.INSTANCE;
             default:
-                throw new IllegalArgumentException( "Unsupported kernel version " + kernelVersion );
+                throw new IllegalArgumentException("Unsupported kernel version " + kernelVersion);
         }
     }
 }

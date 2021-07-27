@@ -142,7 +142,14 @@ public class InMemoryMetaDataProvider implements MetadataProvider {
         long logVersion,
         CursorContext cursorContext
     ) {
-        this.transactionIdStore.setLastCommittedAndClosedTransactionId(transactionId, checksum, commitTimestamp, byteOffset, logVersion, cursorContext);
+        this.transactionIdStore.setLastCommittedAndClosedTransactionId(
+            transactionId,
+            checksum,
+            commitTimestamp,
+            byteOffset,
+            logVersion,
+            cursorContext
+        );
     }
 
     @Override
@@ -156,7 +163,13 @@ public class InMemoryMetaDataProvider implements MetadataProvider {
     public void resetLastClosedTransaction(
         long transactionId, long logVersion, long byteOffset, boolean missingLogs, CursorContext cursorContext
     ) {
-        this.transactionIdStore.resetLastClosedTransaction(transactionId, logVersion, byteOffset, missingLogs, cursorContext);
+        this.transactionIdStore.resetLastClosedTransaction(
+            transactionId,
+            logVersion,
+            byteOffset,
+            missingLogs,
+            cursorContext
+        );
     }
 
     @Override

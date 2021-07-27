@@ -37,7 +37,6 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
         this.tokenHolders = tokenHolders;
     }
 
-
     @Override
     public void visitCreatedNode(long id) {
 

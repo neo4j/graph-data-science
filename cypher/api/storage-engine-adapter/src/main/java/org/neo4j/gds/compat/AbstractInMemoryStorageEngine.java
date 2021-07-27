@@ -84,7 +84,10 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
     ) {
         this.tokenHolders = tokenHolders;
         this.graphStore = GraphStoreCatalog.getAllGraphStores()
-            .filter(graphStoreWithUserNameAndConfig -> graphStoreWithUserNameAndConfig.config().graphName().equals(databaseLayout.getDatabaseName()))
+            .filter(graphStoreWithUserNameAndConfig -> graphStoreWithUserNameAndConfig
+                .config()
+                .graphName()
+                .equals(databaseLayout.getDatabaseName()))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException(formatWithLocale(
                 "No graph with name %s was found in GraphStoreCatalog. Available graph names are %s",
