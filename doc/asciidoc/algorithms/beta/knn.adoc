@@ -69,13 +69,13 @@ Scalar numeric property::
 
 When the property is a scalar number, the similarity is computed as one divided by one plus the absolute difference between the values:
 
-image::equations/knn-scalar-similarity.svg[align="center"]
+image::equations/knn-scalar-similarity.svg[one divided by one plus the absolute difference of ps and pt,align="center"]
 
 List of integers::
 
 When the property is a list of integers, the similarity is computed as one divided by  one plus the number of unequal numbers in the list:
 
-image::equations/knn-integer-list-similarity.svg[align="center"]
+image::equations/knn-integer-list-similarity.svg[one divided by one plus delta of ps and pt,align="center"]
 
 List of floating-point numbers::
 
