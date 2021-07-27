@@ -36,9 +36,9 @@ import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.storageengine.api.cursor.StoreCursors;
 import org.neo4j.token.TokenHolders;
 
-public class InMemoryStorageReaderImpl extends AbstractInMemoryStorageReader {
+public class InMemoryStorageReaderDev extends AbstractInMemoryStorageReader {
 
-    public InMemoryStorageReaderImpl(
+    public InMemoryStorageReaderDev(
         GraphStore graphStore,
         TokenHolders tokenHolders,
         CountsAccessor counts

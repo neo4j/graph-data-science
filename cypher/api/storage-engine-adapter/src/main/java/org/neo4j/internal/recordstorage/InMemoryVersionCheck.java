@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.storageengine;
+package org.neo4j.internal.recordstorage;
 
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.impl.store.MetaDataStore;
@@ -26,8 +26,6 @@ import org.neo4j.storageengine.api.StoreVersionCheck;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.storageengine.InMemoryStoreVersion.STORE_VERSION;
-
 public class InMemoryVersionCheck implements StoreVersionCheck {
 
     public InMemoryVersionCheck() {
@@ -35,7 +33,7 @@ public class InMemoryVersionCheck implements StoreVersionCheck {
 
     @Override
     public Optional<String> storeVersion(CursorContext cursorContext) {
-        return Optional.of(STORE_VERSION);
+        return Optional.of(InMemoryStoreVersion.STORE_VERSION);
     }
 
     @Override
@@ -50,7 +48,7 @@ public class InMemoryVersionCheck implements StoreVersionCheck {
 
     @Override
     public Result checkUpgrade(String desiredVersion, CursorContext cursorContext) {
-        return new StoreVersionCheck.Result(Outcome.ok, STORE_VERSION, null);
+        return new StoreVersionCheck.Result(Outcome.ok, InMemoryStoreVersion.STORE_VERSION, null);
     }
 
     @Override

@@ -22,7 +22,6 @@ package org.neo4j.internal.recordstorage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;

@@ -19,37 +19,20 @@
  */
 package org.neo4j.internal.recordstorage;
 
-import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.configuration.helpers.DatabaseReadOnlyChecker;
-import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
-import org.neo4j.gds.storageengine.InMemoryStoreVersion;
-import org.neo4j.gds.storageengine.InMemoryVersionCheck;
-import org.neo4j.index.internal.gbptree.RecoveryCleanupWorkCollector;
-import org.neo4j.internal.id.IdController;
-import org.neo4j.internal.id.IdGeneratorFactory;
-import org.neo4j.internal.schema.IndexConfigCompleter;
 import org.neo4j.internal.schema.SchemaRule;
-import org.neo4j.internal.schema.SchemaState;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.store.MetaDataStore;
-import org.neo4j.kernel.impl.store.StoreFactory;
-import org.neo4j.kernel.impl.store.StoreType;
-import org.neo4j.lock.LockService;
-import org.neo4j.logging.LogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.MemoryTracker;
-import org.neo4j.monitoring.DatabaseHealth;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.CommandReaderFactory;
-import org.neo4j.storageengine.api.ConstraintRuleAccessor;
 import org.neo4j.storageengine.api.LogVersionRepository;
 import org.neo4j.storageengine.api.MetadataProvider;
-import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.storageengine.api.StorageFilesState;
 import org.neo4j.storageengine.api.StoreId;
@@ -59,7 +42,6 @@ import org.neo4j.storageengine.api.TransactionIdStore;
 import org.neo4j.storageengine.migration.RollingUpgradeCompatibility;
 import org.neo4j.storageengine.migration.SchemaRuleMigrationAccess;
 import org.neo4j.storageengine.migration.StoreMigrationParticipant;
-import org.neo4j.token.TokenHolders;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -68,13 +50,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@ServiceProvider
-public class InMemoryStorageEngineFactory implements StorageEngineFactory {
+public abstract class AbstractInMemoryStorageEngineFactory implements StorageEngineFactory {
 
-    public static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory";
-    private final InMemoryMetaDataProvider metadataProvider;
+    protected final InMemoryMetaDataProvider metadataProvider;
 
-    public InMemoryStorageEngineFactory() {
+    public AbstractInMemoryStorageEngineFactory() {
         metadataProvider = new InMemoryMetaDataProvider();
     }
 
@@ -106,43 +86,6 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
         MemoryTracker memoryTracker
     ) {
         return List.of();
-    }
-
-    @Override
-    public StorageEngine instantiate(
-        FileSystemAbstraction fs,
-        DatabaseLayout databaseLayout,
-        Config config,
-        PageCache pageCache,
-        TokenHolders tokenHolders,
-        SchemaState schemaState,
-        ConstraintRuleAccessor constraintSemantics,
-        IndexConfigCompleter indexConfigCompleter,
-        LockService lockService,
-        IdGeneratorFactory idGeneratorFactory,
-        IdController idController,
-        DatabaseHealth databaseHealth,
-        LogProvider logProvider,
-        RecoveryCleanupWorkCollector recoveryCleanupWorkCollector,
-        PageCacheTracer cacheTracer,
-        boolean createStoreIfNotExists,
-        DatabaseReadOnlyChecker readOnlyChecker,
-        MemoryTracker memoryTracker
-    ) {
-        StoreFactory factory = new StoreFactory(
-            databaseLayout,
-            config,
-            idGeneratorFactory,
-            pageCache,
-            fs,
-            logProvider,
-            cacheTracer,
-            readOnlyChecker
-        );
-
-        factory.openNeoStores(createStoreIfNotExists, StoreType.LABEL_TOKEN);
-
-        return InMemoryStorageEngineCompanion.create(databaseLayout, tokenHolders, metadataProvider);
     }
 
     @Override
@@ -215,11 +158,6 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
 
             }
         };
-    }
-
-    @Override
-    public String name() {
-        return IN_MEMORY_STORAGE_ENGINE_NAME;
     }
 
     @Override

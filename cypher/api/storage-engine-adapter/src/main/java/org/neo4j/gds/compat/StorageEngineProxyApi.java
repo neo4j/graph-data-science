@@ -52,4 +52,6 @@ public interface StorageEngineProxyApi {
         TokenHolders tokenHolders,
         CountsAccessor counts
     );
+
+    String inMemoryStorageEngineFactoryName();
 }

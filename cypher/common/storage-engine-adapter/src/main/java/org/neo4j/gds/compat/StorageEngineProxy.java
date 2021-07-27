@@ -25,8 +25,8 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.CommandCreationContext;
-import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.MetadataProvider;
+import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
@@ -78,5 +78,9 @@ public final class StorageEngineProxy {
         GraphStore graphStore, TokenHolders tokenHolders, CountsAccessor counts
     ) {
         return IMPL.inMemoryStorageReader(graphStore, tokenHolders, counts);
+    }
+
+    public static String inMemoryStorageEngineFactoryName() {
+        return IMPL.inMemoryStorageEngineFactoryName();
     }
 }

@@ -37,7 +37,6 @@ import org.neo4j.token.TokenHolders;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -98,7 +97,7 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
 
     @Override
     public Iterator<IndexDescriptor> indexesGetAll() {
-        return List.of(getLabelIndexDescriptor()).iterator();
+        return Collections.emptyIterator();
     }
 
     @Override
@@ -252,7 +251,6 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
 
     protected boolean nodeExists(long id) {
         var originalId = graphStore.nodes().toOriginalNodeId(id);
-
         return graphStore.nodes().contains(originalId);
     }
 }

@@ -20,7 +20,6 @@
 package org.neo4j.internal.recordstorage;
 
 import org.neo4j.gds.compat.StorageEngineProxy;
-import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
 import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.StorageEngine;

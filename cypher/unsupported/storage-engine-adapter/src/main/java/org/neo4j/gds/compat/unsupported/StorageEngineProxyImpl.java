@@ -67,6 +67,11 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         throw cypherUnsupportedException();
     }
 
+    @Override
+    public String inMemoryStorageEngineFactoryName() {
+        throw cypherUnsupportedException();
+    }
+
     private UnsupportedOperationException cypherUnsupportedException() {
         return new UnsupportedOperationException("Cypher is not supported for Neo4j versions <4.3.");
     }
