@@ -72,7 +72,7 @@ class InMemoryNodeCursorTest extends BaseTest {
             new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
         );
 
-        InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders).schemaAndTokensLifecycle().init();
+        InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders, new InMemoryMetaDataProvider()).schemaAndTokensLifecycle().init();
         this.nodeCursor = new InMemoryNodeCursor(graphStore, tokenHolders);
     }
 

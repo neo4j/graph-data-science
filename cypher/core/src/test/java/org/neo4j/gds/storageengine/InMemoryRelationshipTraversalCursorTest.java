@@ -78,7 +78,7 @@ class InMemoryRelationshipTraversalCursorTest extends BaseTest {
             new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
         );
 
-        InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders).schemaAndTokensLifecycle().init();
+        InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders, new InMemoryMetaDataProvider()).schemaAndTokensLifecycle().init();
         this.relationshipCursor = new InMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
     }
 

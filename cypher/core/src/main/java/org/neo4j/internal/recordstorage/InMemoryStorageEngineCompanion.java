@@ -30,13 +30,17 @@ public final class InMemoryStorageEngineCompanion {
 
     private InMemoryStorageEngineCompanion() {}
 
-    public static StorageEngine create(DatabaseLayout databaseLayout, TokenHolders tokenHolders) {
+    public static StorageEngine create(
+        DatabaseLayout databaseLayout,
+        TokenHolders tokenHolders,
+        InMemoryMetaDataProvider metadataProvider
+    ) {
         var storageEngineBuilder = StorageEngineProxy.inMemoryStorageEngineBuilder(
             databaseLayout,
-            tokenHolders
+            tokenHolders,
+            metadataProvider
         );
 
-        storageEngineBuilder.withMetadataProvider(new InMemoryMetaDataProvider());
         storageEngineBuilder.withCountsStoreFn(StorageEngineProxy::inMemoryCountsStore);
         storageEngineBuilder.withTxStateVisitorFn(InMemoryTransactionStateVisitor::new);
         storageEngineBuilder.withCommandCreationContextSupplier(StorageEngineProxy::inMemoryCommandCreationContext);

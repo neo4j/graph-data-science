@@ -88,8 +88,8 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
     }
 
     public static final class Builder extends InMemoryStorageEngineBuilder<InMemoryStorageEngineImpl> {
-        public Builder(DatabaseLayout databaseLayout, TokenHolders tokenHolders) {
-            super(databaseLayout, tokenHolders);
+        public Builder(DatabaseLayout databaseLayout, TokenHolders tokenHolders, MetadataProvider metadataProvider) {
+            super(databaseLayout, tokenHolders, metadataProvider);
         }
 
         @Override

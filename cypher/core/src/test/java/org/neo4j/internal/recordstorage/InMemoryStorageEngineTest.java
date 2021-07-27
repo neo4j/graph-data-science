@@ -22,6 +22,7 @@ package org.neo4j.internal.recordstorage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.storageengine.InMemoryMetaDataProvider;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;
@@ -74,7 +75,7 @@ class InMemoryStorageEngineTest extends BaseTest {
             new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
         );
 
-        this.storageEngine = InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders);
+        this.storageEngine = InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders, new InMemoryMetaDataProvider());
     }
 
     @AfterEach

@@ -36,19 +36,21 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
 
     protected final DatabaseLayout databaseLayout;
     protected final TokenHolders tokenHolders;
+    protected final MetadataProvider metadataProvider;
 
     protected BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn;
     protected BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
-    protected MetadataProvider metadataProvider;
     protected Supplier<CommandCreationContext> commandCreationContextSupplier;
     protected TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
 
     protected InMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders
+        TokenHolders tokenHolders,
+        MetadataProvider metadataProvider
     ) {
         this.databaseLayout = databaseLayout;
         this.tokenHolders = tokenHolders;
+        this.metadataProvider = metadataProvider;
     }
 
     public InMemoryStorageEngineBuilder<T> withCountsStoreFn(BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn) {
@@ -58,11 +60,6 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
 
     public InMemoryStorageEngineBuilder<T> withTxStateVisitorFn(BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn) {
         this.txStateVisitorFn = txStateVisitorFn;
-        return this;
-    }
-
-    public InMemoryStorageEngineBuilder<T> withMetadataProvider(MetadataProvider metadataProvider) {
-        this.metadataProvider = metadataProvider;
         return this;
     }
 
