@@ -37,8 +37,10 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.RelationshipCursor;
+import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.extension.EphemeralNeo4jLayoutExtension;
@@ -107,12 +109,22 @@ class InMemoryDatabaseCypherTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldHaveStartedSuccessfully() {
         assertThat(db.isAvailable(1000)).isTrue();
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"Foo", "Bar"})
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldReturnNodeForSpecificLabel(String label) {
         String query = formatWithLocale("MATCH (n:%s) RETURN id(n) AS id", label);
 
@@ -136,6 +148,11 @@ class InMemoryDatabaseCypherTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldReturnNodeProperties() {
         var graph = graphStore.getUnion();
 
@@ -153,6 +170,11 @@ class InMemoryDatabaseCypherTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldReturnFilteredNodeProperties() {
         String query = "MATCH (n) WHERE id(n) = 2 RETURN id(n) AS id, n.prop AS prop";
         db.executeTransactionally(query, Map.of(), result -> {
@@ -168,6 +190,11 @@ class InMemoryDatabaseCypherTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldReturnCorrectPropertiesForMultipleIdenticalNodes() {
         String query = "MATCH (a), (b), (c) WHERE id(a) = 0 AND id(b) = 0 AND id(c) = 1 RETURN a.prop, b.prop, c.prop";
         db.executeTransactionally(query, Map.of(), result -> {
@@ -183,6 +210,11 @@ class InMemoryDatabaseCypherTest {
     }
 
     @Test
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_1)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     void shouldFilterRelationshipTypes() {
         var rel1Graph = graphStore.getGraph(RelationshipType.of("REL1"));
         var rel2Graph = graphStore.getGraph(RelationshipType.of("REL2"));
