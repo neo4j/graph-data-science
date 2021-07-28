@@ -71,7 +71,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
         export(graphStoreInput);
 
         long importedNodeProperties = (nodeStore.propertyCount() + neoNodeProperties.size()) * graphStore.nodeCount();
-        long importedRelationshipProperties = relationshipStore.propertyCount() * graphStore.relationshipCount();
+        long importedRelationshipProperties = relationshipStore.propertyCount();
         return ImmutableImportedProperties.of(importedNodeProperties, importedRelationshipProperties);
     }
 

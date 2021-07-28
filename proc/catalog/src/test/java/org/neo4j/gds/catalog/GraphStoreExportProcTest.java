@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
+import org.neo4j.cypherdsl.core.Cypher;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
@@ -56,10 +57,10 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a { prop1: 0, prop2: 42 })" +
-        ", (b { prop1: 1, prop2: 43 })" +
-        ", (c { prop1: 2, prop2: 44 })" +
-        ", (d { prop1: 3 })" +
+        "  (a { prop1: 0, prop2: 42, prop3: 'knock', prop4: 'follow' })" +
+        ", (b { prop1: 1, prop2: 43, prop3: 'knock', prop4: 'the'    })" +
+        ", (c { prop1: 2, prop2: 44, prop3: 'neo',   prop4: 'white'  })" +
+        ", (d { prop1: 3,                            prop4: 'rabbit' })" +
         ", (a)-[:REL1 { weight1: 42}]->(a)" +
         ", (a)-[:REL1 { weight1: 42}]->(b)" +
         ", (b)-[:REL2 { weight2: 42}]->(a)" +
@@ -90,10 +91,15 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportGraph() {
         createGraph();
 
-        var exportQuery =
-            "CALL gds.graph.export('test-graph', {" +
-            "  dbName: 'test-db'" +
-            "})";
+        var exportQuery = Cypher.call("gds.graph.export")
+            .withArgs(
+                Cypher.literalOf("test-graph"),
+                Cypher.mapOf(
+                    "dbName", Cypher.literalOf("test-db")
+                )
+            )
+            .build()
+            .getCypher();
 
 
         runQueryWithRowConsumer(exportQuery, row -> {
@@ -102,7 +108,36 @@ class GraphStoreExportProcTest extends BaseProcTest {
             assertEquals(6, row.getNumber("relationshipCount").longValue());
             assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
             assertEquals(8, row.getNumber("nodePropertyCount").longValue());
-            assertEquals(18, row.getNumber("relationshipPropertyCount").longValue());
+            assertEquals(6, row.getNumber("relationshipPropertyCount").longValue());
+            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(0L);
+        });
+    }
+
+    @Test
+    void exportGraphWithAdditionalNodeProperties() {
+        createGraph();
+
+        var exportQuery = Cypher.call("gds.graph.export")
+            .withArgs(
+                Cypher.literalOf("test-graph"),
+                Cypher.mapOf(
+                    "dbName", Cypher.literalOf("test-db"),
+                    "additionalNodeProperties", Cypher.listOf(
+                        Cypher.mapOf("prop3", Cypher.mapOf("defaultValue", Cypher.literalOf("foo"))),
+                        Cypher.mapOf("prop4", Cypher.mapOf("defaultValue", Cypher.literalOf("bar")))
+                    )
+                )
+            )
+            .build()
+            .getCypher();
+
+        runQueryWithRowConsumer(exportQuery, row -> {
+            assertEquals("test-db", row.getString("dbName"));
+            assertEquals(4, row.getNumber("nodeCount").longValue());
+            assertEquals(6, row.getNumber("relationshipCount").longValue());
+            assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
+            assertEquals(16, row.getNumber("nodePropertyCount").longValue());
+            assertEquals(6, row.getNumber("relationshipPropertyCount").longValue());
             assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(0L);
         });
     }
@@ -111,10 +146,15 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportCsv() {
         createGraph();
 
-        var exportQuery =
-            "CALL gds.beta.graph.export.csv('test-graph', {" +
-            "  exportName: 'export'" +
-            "})";
+        var exportQuery = Cypher.call("gds.beta.graph.export.csv")
+            .withArgs(
+                Cypher.literalOf("test-graph"),
+                Cypher.mapOf(
+                    "exportName", Cypher.literalOf("export")
+                )
+            )
+            .build()
+            .getCypher();
 
         runQueryWithRowConsumer(exportQuery, row -> {
             assertEquals("export", row.getString("exportName"));
@@ -122,10 +162,40 @@ class GraphStoreExportProcTest extends BaseProcTest {
             assertEquals(6, row.getNumber("relationshipCount").longValue());
             assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
             assertEquals(8, row.getNumber("nodePropertyCount").longValue());
-            assertEquals(36, row.getNumber("relationshipPropertyCount").longValue());
+            assertEquals(6, row.getNumber("relationshipPropertyCount").longValue());
             assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(0L);
         });
     }
+
+    @Test
+    void exportCsvWithAdditionalNodeProperties() {
+        createGraph();
+
+        var exportQuery = Cypher.call("gds.beta.graph.export.csv")
+            .withArgs(
+                Cypher.literalOf("test-graph"),
+                Cypher.mapOf(
+                    "exportName", Cypher.literalOf("export"),
+                    "additionalNodeProperties", Cypher.listOf(
+                        Cypher.mapOf("prop3", Cypher.mapOf("defaultValue", Cypher.literalOf("foo"))),
+                        Cypher.mapOf("prop4", Cypher.mapOf("defaultValue", Cypher.literalOf("bar")))
+                    )
+                )
+            )
+            .build()
+            .getCypher();
+
+        runQueryWithRowConsumer(exportQuery, row -> {
+            assertEquals("export", row.getString("exportName"));
+            assertEquals(4, row.getNumber("nodeCount").longValue());
+            assertEquals(6, row.getNumber("relationshipCount").longValue());
+            assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
+            assertEquals(16, row.getNumber("nodePropertyCount").longValue());
+            assertEquals(6, row.getNumber("relationshipPropertyCount").longValue());
+            assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(0L);
+        });
+    }
+
 
     @Test
     void failsWhenTheExportDirectoryAlreadyExists() throws IOException {
