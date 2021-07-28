@@ -116,14 +116,14 @@ class FeaturePipelineTest extends BaseProcTest {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
-            pipeline.addProcedureStep("degree", Map.of("mutateProperty", "degree"));
-            pipeline.addProcedureStep("scaleProperties", Map.of(
+            pipeline.addNodePropertyStep("degree", Map.of("mutateProperty", "degree"));
+            pipeline.addNodePropertyStep("scaleProperties", Map.of(
                 "mutateProperty", "nodeFeatures",
                 "nodeProperties", "degree",
                 "scaler", "MEAN"
             ));
 
-            pipeline.executeProcedureSteps(GRAPH_NAME, NodeLabel.listOf("N"), RelationshipType.of("REL"));
+            pipeline.executeNodePropertySteps(GRAPH_NAME, NodeLabel.listOf("N"), RelationshipType.of("REL"));
 
             assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).contains("degree", "nodeFeatures");
         });
@@ -173,7 +173,7 @@ class FeaturePipelineTest extends BaseProcTest {
 
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
-            pipeline.addProcedureStep("pageRank", Map.of("mutateProperty", "pageRank"));
+            pipeline.addNodePropertyStep("pageRank", Map.of("mutateProperty", "pageRank"));
             pipeline.addLinkFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
                 Map.of("featureProperties", List.of("pageRank"))
@@ -227,7 +227,7 @@ class FeaturePipelineTest extends BaseProcTest {
     }
 
     private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(FeaturePipeline pipeline) {
-        pipeline.executeProcedureSteps(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
+        pipeline.executeNodePropertySteps(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
         return pipeline.computeFeatures(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
     }
 

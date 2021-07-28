@@ -30,11 +30,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ProcedureStep {
+public class NodePropertyStep {
     public final String taskName;
     public final Map<String, Object> config;
 
-    ProcedureStep(String taskName, Map<String, Object> config) {
+    NodePropertyStep(String taskName, Map<String, Object> config) {
         this.taskName = taskName;
         this.config = config;
     }

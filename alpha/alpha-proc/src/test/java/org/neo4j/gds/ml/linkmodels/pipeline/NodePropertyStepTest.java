@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils.applyOnProcedure;
 
-class ProcedureStepTest extends BaseProcTest {
+class NodePropertyStepTest extends BaseProcTest {
 
     @Neo4jGraph
     private static final String GRAPH =
@@ -61,7 +61,7 @@ class ProcedureStepTest extends BaseProcTest {
 
     @Test
     void testInvokeProc() {
-        var step = new ProcedureStep("pageRank", Map.of("mutateProperty", "foo"));
+        var step = new NodePropertyStep("pageRank", Map.of("mutateProperty", "foo"));
         applyOnProcedure(db, proc -> {
             step.execute(proc, "g");
         });

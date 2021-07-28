@@ -94,7 +94,7 @@ public class LinkPredictionTrain
 
         splitRelationships();
 
-        featurePipeline.executeProcedureSteps(
+        featurePipeline.executeNodePropertySteps(
             graphName,
             config.nodeLabelIdentifiers(graphStore),
             RelationshipType.of(FEATURE_INPUT_RELATIONSHIP_TYPE)

@@ -41,7 +41,7 @@ import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtra
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class FeaturePipeline {
-    private List<ProcedureStep> procedureSteps;
+    private List<NodePropertyStep> nodePropertySteps;
     private List<LinkFeatureStep> linkFeatureSteps;
     private final String userName;
     private final NamedDatabaseId databaseId;
@@ -52,15 +52,15 @@ public class FeaturePipeline {
         this.userName = userName;
         this.databaseId = databaseId;
         this.linkFeatureSteps = new ArrayList<>();
-        this.procedureSteps = new ArrayList<>();
+        this.nodePropertySteps = new ArrayList<>();
     }
 
     public void addLinkFeature(String name, Map<String, Object> config) {
         this.linkFeatureSteps.add(LinkFeatureStepFactory.create(name, config));
     }
 
-    public void addProcedureStep(String name, Map<String, Object> config) {
-        this.procedureSteps.add(new ProcedureStep(name, config));
+    public void addNodePropertyStep(String name, Map<String, Object> config) {
+        this.nodePropertySteps.add(new NodePropertyStep(name, config));
     }
 
 
@@ -73,12 +73,12 @@ public class FeaturePipeline {
         return extractFeatures(graph, linkFeatureSteps);
     }
 
-    public void executeProcedureSteps(
+    public void executeNodePropertySteps(
         String graphName,
         Collection<NodeLabel> nodeLabels,
         RelationshipType relationshipType
     ) {
-        for (ProcedureStep step : procedureSteps) {
+        for (NodePropertyStep step : nodePropertySteps) {
             step.execute(caller, graphName, nodeLabels, List.of(relationshipType));
         }
     }
