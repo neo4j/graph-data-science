@@ -19,13 +19,17 @@
  */
 package org.neo4j.gds.compat.unsupported;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.AbstractInMemoryStorageEngine;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageReader;
@@ -70,6 +74,26 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public String inMemoryStorageEngineFactoryName() {
         throw cypherUnsupportedException();
+    }
+
+    @Override
+    public void createInMemoryDatabase(
+        DatabaseManagementService dbms,
+        String dbName,
+        Config config
+    ) {
+    }
+
+    @Override
+    public GraphDatabaseAPI startAndGetInMemoryDatabase(
+        DatabaseManagementService dbms, String dbName
+    ) {
+        return null;
+    }
+
+    @Override
+    public DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(DatabaseManagementServiceBuilder dbmsBuilder) {
+        return dbmsBuilder;
     }
 
     private UnsupportedOperationException cypherUnsupportedException() {

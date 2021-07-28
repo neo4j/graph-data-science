@@ -19,19 +19,26 @@
  */
 package org.neo4j.gds.compat._43;
 
+import org.neo4j.configuration.Config;
+import org.neo4j.configuration.GraphDatabaseInternalSettings;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.internal.recordstorage.InMemoryStorageReader43;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
+
+import static org.neo4j.configuration.GraphDatabaseInternalSettings.storage_engine;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
 
@@ -79,5 +86,28 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public String inMemoryStorageEngineFactoryName() {
         return InMemoryStorageEngineFactory43.IN_MEMORY_STORAGE_ENGINE_NAME_43;
+    }
+
+    @Override
+    public void createInMemoryDatabase(
+        DatabaseManagementService dbms,
+        String dbName,
+        Config config
+    ) {
+        config.set(storage_engine, inMemoryStorageEngineFactoryName());
+        dbms.createDatabase(dbName, config);
+    }
+
+    @Override
+    public GraphDatabaseAPI startAndGetInMemoryDatabase(
+        DatabaseManagementService dbms, String dbName
+    ) {
+        dbms.startDatabase(dbName);
+        return (GraphDatabaseAPI) dbms.database(dbName);
+    }
+
+    @Override
+    public DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(DatabaseManagementServiceBuilder dbmsBuilder) {
+        return dbmsBuilder.setConfig(GraphDatabaseInternalSettings.skip_default_indexes_on_creation, true);
     }
 }

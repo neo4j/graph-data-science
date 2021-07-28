@@ -98,6 +98,7 @@ ext {
         'neo4j-lock',
         'neo4j-diagnostics',
         'neo4j-concurrent',
+        'neo4j',
 
         // more modules to choose from
         // 'cypher-ast-factory',
@@ -139,7 +140,6 @@ ext {
         // 'neo4j-unsafe',
         // 'neo4j-util',
         // 'neo4j-wal',
-        // 'neo4j',
         // 'server-api',
     ]
 }

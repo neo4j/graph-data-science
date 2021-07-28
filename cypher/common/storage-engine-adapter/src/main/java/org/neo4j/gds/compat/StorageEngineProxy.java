@@ -19,11 +19,15 @@
  */
 package org.neo4j.gds.compat;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageReader;
@@ -82,5 +86,21 @@ public final class StorageEngineProxy {
 
     public static String inMemoryStorageEngineFactoryName() {
         return IMPL.inMemoryStorageEngineFactoryName();
+    }
+
+    public static void createInMemoryDatabase(
+        DatabaseManagementService dbms,
+        String dbName,
+        Config config
+    ) {
+        IMPL.createInMemoryDatabase(dbms, dbName, config);
+    }
+
+    public static GraphDatabaseAPI startAndGetInMemoryDatabase(DatabaseManagementService dbms, String dbName) {
+        return IMPL.startAndGetInMemoryDatabase(dbms, dbName);
+    }
+
+    public static DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(DatabaseManagementServiceBuilder dbmsBuilder) {
+        return IMPL.setSkipDefaultIndexesOnCreationSetting(dbmsBuilder);
     }
 }
