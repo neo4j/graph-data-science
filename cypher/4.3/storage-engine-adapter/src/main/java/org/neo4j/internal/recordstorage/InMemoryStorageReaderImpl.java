@@ -49,12 +49,7 @@ public class InMemoryStorageReaderImpl extends AbstractInMemoryStorageReader {
 
     @Override
     public boolean nodeExists(long id, CursorContext cursorContext) {
-        try {
-            graphStore.nodes().toOriginalNodeId(id);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        return super.nodeExists(id);
     }
 
     @Override

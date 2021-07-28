@@ -36,18 +36,14 @@ public class InMemoryRelationshipTraversalCursor extends InMemoryRelationshipCur
 
     @Override
     public long neighbourNodeReference() {
-        final long source = sourceNodeReference(), target = targetNodeReference();
-        if ( source == originNodeReference )
-        {
+        long source = sourceNodeReference();
+        long target = targetNodeReference();
+        if (source == originNodeReference) {
             return target;
-        }
-        else if ( target == originNodeReference )
-        {
+        } else if (target == originNodeReference) {
             return source;
-        }
-        else
-        {
-            throw new IllegalStateException( "NOT PART OF CHAIN" );
+        } else {
+            throw new IllegalStateException("NOT PART OF CHAIN");
         }
     }
 
@@ -62,7 +58,10 @@ public class InMemoryRelationshipTraversalCursor extends InMemoryRelationshipCur
             int typeId = tokenHolders.relationshipTypeTokens().getIdByName(relType.name());
             return selection.test(typeId);
         }).toArray(RelationshipType[]::new);
-        relationshipCursors = graphStore.getGraph(filteredRelTypes).streamRelationships(nodeReference, Double.NaN).iterator();
+        relationshipCursors = graphStore
+            .getGraph(filteredRelTypes)
+            .streamRelationships(nodeReference, Double.NaN)
+            .iterator();
         originNodeReference = nodeReference;
     }
 }

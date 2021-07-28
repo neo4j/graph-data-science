@@ -43,11 +43,13 @@ public class InMemoryNodeCursor extends NodeRecord implements StorageNodeCursor 
 
     private final GraphStore graphStore;
     private final TokenHolders tokenHolders;
+    private final boolean hasProperties;
 
     public InMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID);
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
+        this.hasProperties = !graphStore.nodePropertyKeys().values().stream().allMatch(Set::isEmpty);
     }
 
     @Override
@@ -60,11 +62,8 @@ public class InMemoryNodeCursor extends NodeRecord implements StorageNodeCursor 
 
     @Override
     public boolean hasLabel(int labelId) {
-        return graphStore
-            .nodes()
-            .nodeLabels(getId())
-            .stream()
-            .anyMatch(nodeLabel -> tokenHolders.labelTokens().getIdByName(nodeLabel.name()) == labelId);
+        var nodeLabel = NodeLabel.of(tokenHolders.labelGetName(labelId));
+        return graphStore.nodes().hasLabel(getId(), nodeLabel);
     }
 
     @Override
@@ -134,13 +133,13 @@ public class InMemoryNodeCursor extends NodeRecord implements StorageNodeCursor 
             return true;
         }
         next = start;
-        highMark = min(stop, max);
+        this.highMark = min(stop, max);
         return true;
     }
 
     @Override
     public boolean hasProperties() {
-        return !graphStore.nodePropertyKeys().values().stream().allMatch(Set::isEmpty);
+        return this.hasProperties;
     }
 
     @Override
@@ -169,7 +168,7 @@ public class InMemoryNodeCursor extends NodeRecord implements StorageNodeCursor 
         node(this, getId());
         next++;
 
-        if (next > highMark) {
+        if (next > this.highMark) {
             next = NO_ID;
         }
         return true;
@@ -183,7 +182,7 @@ public class InMemoryNodeCursor extends NodeRecord implements StorageNodeCursor 
     private void resetState() {
         setId(NO_ID);
         next = NO_ID;
-        highMark = NO_ID;
+        this.highMark = NO_ID;
         clear();
     }
 
@@ -201,12 +200,15 @@ public class InMemoryNodeCursor extends NodeRecord implements StorageNodeCursor 
         return graphStore.nodeCount() - 1;
     }
 
-    private void node(NodeRecord record, long nodeId)
-    {
+    private void node(NodeRecord record, long nodeId) {
         record.setId(nodeId);
 
         Set<NodeLabel> nodeLabels = graphStore.nodes().nodeLabels(nodeId);
-        long firstLabelToken = nodeLabels.stream().map(nodeLabel -> tokenHolders.labelTokens().getIdByName(nodeLabel.name())).findFirst().get();
-        record.setLabelField(firstLabelToken, List.of());
+
+        var nodeLabelIterator = nodeLabels.iterator();
+        if (nodeLabelIterator.hasNext()) {
+            var firstLabelToken = tokenHolders.labelTokens().getIdByName(nodeLabelIterator.next().name());
+            record.setLabelField(firstLabelToken, List.of());
+        }
     }
 }

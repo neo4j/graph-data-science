@@ -20,13 +20,14 @@
 package org.neo4j.gds.storageengine;
 
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.StreamSupport;
@@ -35,11 +36,30 @@ class InMemoryNodePropertyCursor extends InMemoryPropertyCursor.DelegateProperty
 
     private String currentNodePropertyKey = null;
 
+    private final Map<String, ValueGroup> propertyKeyToTypeMapping;
     private final Set<Integer> seenNodeReferences;
 
     public InMemoryNodePropertyCursor(GraphStore graphStore, TokenHolders tokenHolders) {
         super(NO_ID, graphStore, tokenHolders);
         this.seenNodeReferences = new HashSet<>();
+        this.propertyKeyToTypeMapping = new HashMap<>();
+        var propertySchemas = graphStore
+            .schema()
+            .nodeSchema()
+            .filter(graphStore.nodeLabels())
+            .properties()
+            .values();
+        graphStore.nodePropertyKeys(graphStore.nodeLabels()).forEach(nodePropertyKey -> {
+            var valueType = propertySchemas
+                .stream()
+                .map(map -> map.get(nodePropertyKey))
+                .findFirst()
+                .get()
+                .valueType();
+            var valueGroup = ValueGroup.valueOf(valueType.cypherName());
+
+            propertyKeyToTypeMapping.put(nodePropertyKey, valueGroup);
+        });
     }
 
     @Override
@@ -69,20 +89,7 @@ class InMemoryNodePropertyCursor extends InMemoryPropertyCursor.DelegateProperty
 
     @Override
     public ValueGroup propertyType() {
-        // TODO: this assumes we are always a node property cursor
-        ValueType valueType = graphStore
-            .schema()
-            .nodeSchema()
-            .filter(graphStore.nodeLabels())
-            .properties()
-            .values()
-            .stream()
-            .map(map -> map.get(currentNodePropertyKey))
-            .findFirst()
-            .get()
-            .valueType();
-
-        return ValueGroup.valueOf(valueType.cypherName());
+        return propertyKeyToTypeMapping.get(currentNodePropertyKey);
     }
 
     @Override
@@ -90,7 +97,8 @@ class InMemoryNodePropertyCursor extends InMemoryPropertyCursor.DelegateProperty
         if (currentNodePropertyKey != null) {
             return graphStore.nodePropertyValues(currentNodePropertyKey).value(getId());
         } else {
-            throw new IllegalStateException("Property cursor is initialized as node and relationship cursor, maybe you forgot to `reset()`?");
+            throw new IllegalStateException(
+                "Property cursor is initialized as node and relationship cursor, maybe you forgot to `reset()`?");
         }
     }
 
@@ -101,7 +109,8 @@ class InMemoryNodePropertyCursor extends InMemoryPropertyCursor.DelegateProperty
                 .propertyKeyTokens()
                 .getAllTokens()
                 .spliterator(), false)
-                .filter(tokenHolder -> !seenNodeReferences.contains(tokenHolder.id()) && propertyPresentOnNode(tokenHolder))
+                .filter(tokenHolder -> !seenNodeReferences.contains(tokenHolder.id()) && propertyPresentOnNode(
+                    tokenHolder))
                 .findFirst();
 
             if (maybeNextEntry.isPresent()) {

@@ -47,7 +47,7 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
     protected final GraphStore graphStore;
     protected final TokenHolders tokenHolders;
     protected final CountsAccessor counts;
-    private final Map<Class<?>,Object> dependantState;
+    private final Map<Class<?>, Object> dependantState;
     private boolean closed;
 
     public AbstractInMemoryStorageReader(
@@ -63,14 +63,12 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
     }
 
     @Override
-    public Iterator<IndexDescriptor> indexGetForSchema( SchemaDescriptor descriptor )
-    {
+    public Iterator<IndexDescriptor> indexGetForSchema(SchemaDescriptor descriptor) {
         return null;
     }
 
     @Override
-    public Iterator<IndexDescriptor> indexesGetForLabel( int labelId )
-    {
+    public Iterator<IndexDescriptor> indexesGetForLabel(int labelId) {
         return Collections.emptyIterator();
     }
 
@@ -79,33 +77,27 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
     }
 
     @Override
-    public Iterator<IndexDescriptor> indexesGetForRelationshipType( int relationshipType )
-    {
+    public Iterator<IndexDescriptor> indexesGetForRelationshipType(int relationshipType) {
         return Collections.emptyIterator();
     }
 
     @Override
-    public IndexDescriptor indexGetForName( String name )
-    {
-
+    public IndexDescriptor indexGetForName(String name) {
         return null;
     }
 
     @Override
-    public ConstraintDescriptor constraintGetForName( String name )
-    {
+    public ConstraintDescriptor constraintGetForName(String name) {
         return null;
     }
 
     @Override
-    public boolean indexExists( IndexDescriptor index )
-    {
+    public boolean indexExists(IndexDescriptor index) {
         return false;
     }
 
     @Override
-    public Iterator<IndexDescriptor> indexesGetAll()
-    {
+    public Iterator<IndexDescriptor> indexesGetAll() {
         return List.of(getLabelIndexDescriptor()).iterator();
     }
 
@@ -124,92 +116,85 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
     }
 
     @Override
-    public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated( long[] labels, int propertyKeyId, EntityType entityType )
-    {
+    public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated(
+        long[] labels,
+        int propertyKeyId,
+        EntityType entityType
+    ) {
         return Collections.emptyList();
     }
 
     @Override
-    public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated( long[] labels, int[] propertyKeyIds, EntityType entityType )
-    {
+    public Collection<IndexBackedConstraintDescriptor> uniquenessConstraintsGetRelated(
+        long[] labels,
+        int[] propertyKeyIds,
+        EntityType entityType
+    ) {
         return Collections.emptyList();
     }
 
     @Override
-    public boolean hasRelatedSchema( long[] labels, int propertyKey, EntityType entityType )
-    {
+    public boolean hasRelatedSchema(long[] labels, int propertyKey, EntityType entityType) {
         return false;
     }
 
     @Override
-    public boolean hasRelatedSchema( int label, EntityType entityType )
-    {
+    public boolean hasRelatedSchema(int label, EntityType entityType) {
         return false;
     }
 
     @Override
-    public Iterator<ConstraintDescriptor> constraintsGetForSchema( SchemaDescriptor descriptor )
-    {
+    public Iterator<ConstraintDescriptor> constraintsGetForSchema(SchemaDescriptor descriptor) {
         return Collections.emptyIterator();
     }
 
     @Override
-    public boolean constraintExists( ConstraintDescriptor descriptor )
-    {
+    public boolean constraintExists(ConstraintDescriptor descriptor) {
         return false;
     }
 
     @Override
-    public Iterator<ConstraintDescriptor> constraintsGetForLabel( int labelId )
-    {
+    public Iterator<ConstraintDescriptor> constraintsGetForLabel(int labelId) {
         return Collections.emptyIterator();
     }
 
     @Override
-    public Iterator<ConstraintDescriptor> constraintsGetForRelationshipType( int typeId )
-    {
+    public Iterator<ConstraintDescriptor> constraintsGetForRelationshipType(int typeId) {
         return Collections.emptyIterator();
     }
 
     @Override
-    public Iterator<ConstraintDescriptor> constraintsGetAll()
-    {
+    public Iterator<ConstraintDescriptor> constraintsGetAll() {
         return Collections.emptyIterator();
     }
 
     @Override
-    public Long indexGetOwningUniquenessConstraintId( IndexDescriptor index )
-    {
+    public Long indexGetOwningUniquenessConstraintId(IndexDescriptor index) {
         return null;
     }
 
     @Override
-    public long countsForNode( int labelId, CursorContext cursorContext )
-    {
+    public long countsForNode(int labelId, CursorContext cursorContext) {
         return counts.nodeCount(labelId, cursorContext);
     }
 
     @Override
-    public long countsForRelationship( int startLabelId, int typeId, int endLabelId, CursorContext cursorContext )
-    {
+    public long countsForRelationship(int startLabelId, int typeId, int endLabelId, CursorContext cursorContext) {
         return counts.relationshipCount(startLabelId, typeId, endLabelId, cursorContext);
     }
 
     @Override
-    public long nodesGetCount( CursorContext cursorContext )
-    {
+    public long nodesGetCount(CursorContext cursorContext) {
         return graphStore.nodeCount();
     }
 
     @Override
-    public int labelCount()
-    {
+    public int labelCount() {
         return graphStore.nodes().availableNodeLabels().size();
     }
 
     @Override
-    public int propertyKeyCount()
-    {
+    public int propertyKeyCount() {
         int nodePropertyCount = graphStore
             .schema()
             .nodeSchema()
@@ -230,15 +215,13 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
     }
 
     @Override
-    public int relationshipTypeCount()
-    {
+    public int relationshipTypeCount() {
         return graphStore.schema().relationshipSchema().properties().keySet().size();
     }
 
     @Override
-    public <T> T getOrCreateSchemaDependantState( Class<T> type, Function<StorageReader,T> factory )
-    {
-        return type.cast( dependantState.computeIfAbsent( type, key -> factory.apply( this ) ) );
+    public <T> T getOrCreateSchemaDependantState(Class<T> type, Function<StorageReader, T> factory) {
+        return type.cast(dependantState.computeIfAbsent(type, key -> factory.apply(this)));
     }
 
     @Override
@@ -247,27 +230,29 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
     }
 
     @Override
-    public AllRelationshipsScan allRelationshipScan()
-    {
+    public AllRelationshipsScan allRelationshipScan() {
         return new RecordRelationshipScan();
     }
 
     @Override
-    public void close()
-    {
+    public void close() {
         assert !closed;
         closed = true;
     }
 
     @Override
-    public StorageSchemaReader schemaSnapshot()
-    {
+    public StorageSchemaReader schemaSnapshot() {
         return this;
     }
 
     @Override
-    public TokenNameLookup tokenNameLookup()
-    {
+    public TokenNameLookup tokenNameLookup() {
         return tokenHolders;
+    }
+
+    protected boolean nodeExists(long id) {
+        var originalId = graphStore.nodes().toOriginalNodeId(id);
+
+        return graphStore.nodes().contains(originalId);
     }
 }
