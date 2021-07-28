@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.io.file.csv.estimation;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -34,6 +35,13 @@ public interface GraphStoreToCsvEstimationConfig extends GraphStoreToFileExporte
     @Configuration.DoubleRange(min = 0.0, max = 1.0)
     default double samplingFactor() {
         return 0.001;
+    }
+
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
+    default PropertyMappings additionalNodeProperties() {
+        return PropertyMappings.of();
     }
 
     static GraphStoreToCsvEstimationConfig of(String username, CypherMapWrapper config) {

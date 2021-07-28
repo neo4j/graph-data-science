@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.core.utils.io;
 
 import org.immutables.value.Value;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.BaseConfig;
@@ -48,4 +49,6 @@ public interface GraphStoreExporterBaseConfig extends BaseConfig {
     default int batchSize() {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
+
+    PropertyMappings additionalNodeProperties();
 }

@@ -22,6 +22,7 @@ package org.neo4j.graphalgo.core.utils.io.db;
 import org.immutables.value.Value;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.configuration.helpers.NormalizedDatabaseName;
+import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
@@ -54,6 +55,13 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     @Value.Check
     default void validate() {
         DatabaseNameValidator.validateExternalDatabaseName(new NormalizedDatabaseName(dbName()));
+    }
+
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
+    default PropertyMappings additionalNodeProperties() {
+        return PropertyMappings.of();
     }
 
     static GraphStoreToDatabaseExporterConfig of(String username, CypherMapWrapper config) {

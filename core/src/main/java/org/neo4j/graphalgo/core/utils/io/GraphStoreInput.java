@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.core.utils.io;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.api.NodeProperties;
 import org.neo4j.graphalgo.compat.CompatInput;
 import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
 import org.neo4j.internal.batchimport.InputIterable;
@@ -38,9 +37,8 @@ import org.neo4j.internal.batchimport.input.ReadableGroups;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Map;
+import java.util.function.LongFunction;
 import java.util.stream.Collectors;
-
-import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
 
 public final class GraphStoreInput implements CompatInput {
 
@@ -202,18 +200,24 @@ public final class GraphStoreInput implements CompatInput {
                         for (var label : labels) {
                             nodeStore.nodeProperties
                                 .getOrDefault(label, Map.of())
-                                .forEach((propertyKey, properties) -> {
-                                    exportProperty(visitor, propertyKey, properties);
-                                });
+                                .forEach((propertyKey, properties) -> exportProperty(
+                                    visitor,
+                                    propertyKey,
+                                    properties::getObject
+                                ));
                         }
                     }
                 } else if (hasProperties) { // no label information, but node properties
                     nodeStore.nodeProperties.forEach((label, nodeProperties) -> {
                         nodeProperties.forEach((propertyKey, properties) -> {
-                            exportProperty(visitor, propertyKey, properties);
+                            exportProperty(visitor, propertyKey, properties::getObject);
                         });
                     });
                 }
+
+                nodeStore.additionalProperties.forEach((propertyKey, propertyFn) -> {
+                    exportProperty(visitor, propertyKey, propertyFn);
+                });
 
                 visitor.endOfEntity();
                 id++;
@@ -222,12 +226,8 @@ public final class GraphStoreInput implements CompatInput {
             return false;
         }
 
-        private void exportProperty(InputEntityVisitor visitor, Map.Entry<String, NodeProperties> propertyKeyAndValue) {
-            exportProperty(visitor, propertyKeyAndValue.getKey(), propertyKeyAndValue.getValue());
-        }
-
-        private void exportProperty(InputEntityVisitor visitor, String propertyKey, NodeProperties nodeProperties) {
-            var value = nodeProperties.getObject(id);
+        private void exportProperty(InputEntityVisitor visitor, String propertyKey, LongFunction<Object> propertyFn) {
+            var value = propertyFn.apply(id);
             if (value != null) {
                 visitor.property(propertyKey, value);
             }

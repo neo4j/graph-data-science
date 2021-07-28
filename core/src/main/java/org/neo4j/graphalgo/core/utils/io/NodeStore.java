@@ -29,10 +29,11 @@ import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.LongFunction;
 
 public class NodeStore {
 
-    static final String[] EMPTY_LABELS = new String[0];
+    private static final String[] EMPTY_LABELS = new String[0];
 
     final long nodeCount;
 
@@ -41,6 +42,7 @@ public class NodeStore {
     final NodeMapping nodeMapping;
 
     final Map<String, Map<String, NodeProperties>> nodeProperties;
+    final Map<String, LongFunction<Object>> additionalProperties;
 
     private final Set<NodeLabel> availableNodeLabels;
 
@@ -51,7 +53,8 @@ public class NodeStore {
         HugeIntArray labelCounts,
         NodeMapping nodeMapping,
         boolean hasLabels,
-        Map<String, Map<String, NodeProperties>> nodeProperties
+        Map<String, Map<String, NodeProperties>> nodeProperties,
+        Map<String, LongFunction<Object>> additionalProperties
     ) {
         this.nodeCount = nodeCount;
         this.labelCounts = labelCounts;
@@ -59,6 +62,7 @@ public class NodeStore {
         this.nodeProperties = nodeProperties;
         this.hasLabels = hasLabels;
         this.availableNodeLabels = nodeMapping.availableNodeLabels();
+        this.additionalProperties = additionalProperties;
     }
 
     boolean hasLabels() {
@@ -98,18 +102,15 @@ public class NodeStore {
         return labels;
     }
 
-    static NodeStore of(GraphStore graphStore, AllocationTracker tracker) {
-        return of(graphStore, tracker, new HashMap<>());
-    }
-
     static NodeStore of(
         GraphStore graphStore,
-        AllocationTracker tracker,
-        final Map<String, Map<String, NodeProperties>> nodeProperties
+        Map<String, LongFunction<Object>> additionalProperties,
+        AllocationTracker tracker
     ) {
         HugeIntArray labelCounts = null;
 
         var nodeLabels = graphStore.nodes();
+        var nodeProperties = new HashMap<String, Map<String, NodeProperties>>();
 
         boolean hasNodeLabels = !graphStore.schema().nodeSchema().containsOnlyAllNodesLabel();
         if (hasNodeLabels) {
@@ -138,7 +139,8 @@ public class NodeStore {
             labelCounts,
             nodeLabels,
             hasNodeLabels,
-            nodeProperties.isEmpty() ? null : nodeProperties
+            nodeProperties.isEmpty() ? null : nodeProperties,
+            additionalProperties
         );
     }
 }
