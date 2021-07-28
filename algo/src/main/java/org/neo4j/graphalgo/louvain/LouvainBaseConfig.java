@@ -38,6 +38,7 @@ public interface LouvainBaseConfig extends
 
     @Value.Default
     @Override
+    @Configuration.DoubleRange(min = 0D)
     default double tolerance() {
         return 0.0001;
     }

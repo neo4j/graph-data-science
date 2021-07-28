@@ -25,6 +25,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.IterationsConfigProcTest;
+import org.neo4j.gds.ToleranceConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
@@ -40,7 +41,6 @@ import org.neo4j.graphalgo.RelationshipProjections;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
 import org.neo4j.graphalgo.SeedConfigTest;
-import org.neo4j.graphalgo.ToleranceConfigTest;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -62,14 +62,14 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
     AlgoBaseProcTest<Louvain, CONFIG, Louvain>,
     SeedConfigTest<Louvain, CONFIG, Louvain>,
     RelationshipWeightConfigTest<Louvain, CONFIG, Louvain>,
-    ToleranceConfigTest<Louvain, CONFIG, Louvain>,
     MemoryEstimateTest<Louvain, CONFIG, Louvain>,
     HeapControlTest<Louvain, CONFIG, Louvain> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {
         return Stream.of(
-            IterationsConfigProcTest.test(proc(), createMinimalConfig())
+            IterationsConfigProcTest.test(proc(), createMinimalConfig()),
+            ToleranceConfigProcTest.test(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 
