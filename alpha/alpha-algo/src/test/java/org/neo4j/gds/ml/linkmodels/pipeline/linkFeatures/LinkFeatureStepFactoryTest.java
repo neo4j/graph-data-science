@@ -31,20 +31,20 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep.FEATURE_PROPERTIES;
+import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep.INPUT_NODE_PROPERTIES;
 
 final class LinkFeatureStepFactoryTest {
 
     @Test
     public void testCreateHadamard() {
-        List<String> featureProperties = List.of("noise", "z", "array");
+        List<String> nodeProperties = List.of("noise", "z", "array");
         var step = LinkFeatureStepFactory.create(
             "hadaMard",
-            Map.of("featureProperties", featureProperties)
+            Map.of("nodeProperties", nodeProperties)
         );
 
         assertThat(step).isInstanceOf(HadamardFeatureStep.class);
-        assertThat(((HadamardFeatureStep) step).featureProperties()).isEqualTo(featureProperties);
+        assertThat(step.inputNodeProperties()).isEqualTo(nodeProperties);
     }
 
     @Test
@@ -52,11 +52,11 @@ final class LinkFeatureStepFactoryTest {
         List<String> featureProperties = List.of("noise", "z", "array");
         var step = LinkFeatureStepFactory.create(
             "coSine",
-            Map.of("featureProperties", featureProperties)
+            Map.of("nodeProperties", featureProperties)
         );
 
         assertThat(step).isInstanceOf(CosineFeatureStep.class);
-        assertThat(((CosineFeatureStep) step).featureProperties()).isEqualTo(featureProperties);
+        assertThat(step.inputNodeProperties()).isEqualTo(featureProperties);
     }
 
     @Test
@@ -64,11 +64,11 @@ final class LinkFeatureStepFactoryTest {
         List<String> featureProperties = List.of("noise", "z", "array");
         var step = LinkFeatureStepFactory.create(
             "L2",
-            Map.of("featureProperties", featureProperties)
+            Map.of("nodeProperties", featureProperties)
         );
 
         assertThat(step).isInstanceOf(L2FeatureStep.class);
-        assertThat(((L2FeatureStep) step).featureProperties()).isEqualTo(featureProperties);
+        assertThat(step.inputNodeProperties()).isEqualTo(featureProperties);
     }
 
     @ParameterizedTest
@@ -76,30 +76,30 @@ final class LinkFeatureStepFactoryTest {
     public void shouldFailOnMissingFeatureProperties(LinkFeatureStepFactory factory) {
         assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of()))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("is missing `featureProperties`");
+            .hasMessageContaining("is missing `nodeProperties`");
     }
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
     public void shouldFailOnEmptyFeatureProperties(LinkFeatureStepFactory factory) {
-        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(FEATURE_PROPERTIES, List.of())))
+        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES, List.of())))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("requires a non-empty list of strings for `featureProperties`");
+            .hasMessageContaining("requires a non-empty list of strings for `nodeProperties`");
     }
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
     public void shouldFailOnNotListFeatureProperties(LinkFeatureStepFactory factory) {
-        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(FEATURE_PROPERTIES, Map.of())))
+        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES, Map.of())))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("expects `featureProperties` to be a list of strings");
+            .hasMessageContaining("expects `nodeProperties` to be a list of strings");
     }
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory#values")
     public void shouldFailOnListOfNonStringsFeatureProperties(LinkFeatureStepFactory factory) {
-        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(FEATURE_PROPERTIES, List.of("foo", 3))))
+        assertThatThrownBy(() -> LinkFeatureStepFactory.create(factory.name(), Map.of(INPUT_NODE_PROPERTIES, List.of("foo", 3))))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("expects `featureProperties` to be a list of strings");
+            .hasMessageContaining("expects `nodeProperties` to be a list of strings");
     }
 }

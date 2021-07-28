@@ -136,11 +136,11 @@ class FeaturePipelineTest extends BaseProcTest {
 
             pipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("featureProperties", List.of("array"))
+                Map.of("nodeProperties", List.of("array"))
             );
             pipeline.addFeature(
                 LinkFeatureStepFactory.COSINE.name(),
-                Map.of("featureProperties", List.of("noise", "z"))
+                Map.of("nodeProperties", List.of("noise", "z"))
             );
 
             var normA = Math.sqrt(42 * 42 + 13 * 13);
@@ -176,7 +176,7 @@ class FeaturePipelineTest extends BaseProcTest {
             pipeline.addNodePropertyStep("pageRank", Map.of("mutateProperty", "pageRank"));
             pipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("featureProperties", List.of("pageRank"))
+                Map.of("nodeProperties", List.of("pageRank"))
             );
 
             var expectedPageRanks = List.of(
@@ -212,11 +212,11 @@ class FeaturePipelineTest extends BaseProcTest {
 
             pipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("featureProperties", List.of("noise", "no-property", "no-prop-2"))
+                Map.of("nodeProperties", List.of("noise", "no-property", "no-prop-2"))
             );
             pipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("featureProperties", List.of("other-no-property"))
+                Map.of("nodeProperties", List.of("other-no-property"))
             );
 
             assertThatThrownBy(() -> computePropertiesAndLinkFeatures(pipeline))

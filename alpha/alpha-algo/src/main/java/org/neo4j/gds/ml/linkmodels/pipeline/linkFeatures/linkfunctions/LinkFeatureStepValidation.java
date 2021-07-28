@@ -28,30 +28,31 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class LinkFeatureStepValidation {
     public static void validateConfig(String taskName, Map<String, Object> config) {
-        if (!config.containsKey(LinkFeatureStep.FEATURE_PROPERTIES)) {
+        if (!config.containsKey(LinkFeatureStep.INPUT_NODE_PROPERTIES)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Configuration for %s is missing `%s`",
                 taskName,
-                LinkFeatureStep.FEATURE_PROPERTIES
+                LinkFeatureStep.INPUT_NODE_PROPERTIES
             ));
         }
-        var featureProperties = config.get(LinkFeatureStep.FEATURE_PROPERTIES);
-        if (featureProperties instanceof List) {
-            if (((List<?>) featureProperties).isEmpty()) {
+
+        var nodeProperties = config.get(LinkFeatureStep.INPUT_NODE_PROPERTIES);
+        if (nodeProperties instanceof List) {
+            if (((List<?>) nodeProperties).isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Configuration for %s requires a non-empty list of strings for `%s`",
                     taskName,
-                    LinkFeatureStep.FEATURE_PROPERTIES
+                    LinkFeatureStep.INPUT_NODE_PROPERTIES
                 ));
             }
-            if (((List<?>) featureProperties).stream().allMatch(elem -> elem instanceof String)) {
+            if (((List<?>) nodeProperties).stream().allMatch(elem -> elem instanceof String)) {
                 return;
             }
         }
         throw new IllegalArgumentException(formatWithLocale(
             "Configuration for %s expects `%s` to be a list of strings",
             taskName,
-            LinkFeatureStep.FEATURE_PROPERTIES
+            LinkFeatureStep.INPUT_NODE_PROPERTIES
         ));
     }
 }

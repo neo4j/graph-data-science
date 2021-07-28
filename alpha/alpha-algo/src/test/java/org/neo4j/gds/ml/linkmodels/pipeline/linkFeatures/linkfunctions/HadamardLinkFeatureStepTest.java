@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -59,7 +59,7 @@ final class HadamardLinkFeatureStepTest {
 
         var step = LinkFeatureStepFactory.create(
             "hadamard",
-            Map.of("featureProperties", List.of("noise", "z", "array"))
+            Map.of("nodeProperties", List.of("noise", "z", "array"))
         );
         HugeObjectArray<double[]> linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step));
 

@@ -59,7 +59,7 @@ final class CosineLinkFeatureStepTest {
 
         var step = LinkFeatureStepFactory.create(
             "cosine",
-            Map.of("featureProperties", List.of("noise", "z", "array"))
+            Map.of("nodeProperties", List.of("noise", "z", "array"))
         );
 
         HugeObjectArray<double[]> linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step));

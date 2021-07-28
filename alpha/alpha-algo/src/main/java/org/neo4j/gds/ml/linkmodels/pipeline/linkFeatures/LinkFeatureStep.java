@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.api.Graph;
 import java.util.List;
 
 public interface LinkFeatureStep {
-    String FEATURE_PROPERTIES = "featureProperties";
+    String INPUT_NODE_PROPERTIES = "nodeProperties";
 
     LinkFeatureAppender linkFeatureAppender(Graph graph);
 

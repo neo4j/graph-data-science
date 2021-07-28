@@ -33,14 +33,14 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CosineFeatureStep implements LinkFeatureStep {
 
-    private final List<String> featureProperties;
+    private final List<String> nodeProperties;
 
-    public CosineFeatureStep(List<String> featureProperties) {
-        this.featureProperties = featureProperties;
+    public CosineFeatureStep(List<String> nodeProperties) {
+        this.nodeProperties = nodeProperties;
     }
 
     public CosineFeatureStep(Map<String, Object> config) {
-        this((List<String>) config.get(LinkFeatureStep.FEATURE_PROPERTIES));
+        this((List<String>) config.get(LinkFeatureStep.INPUT_NODE_PROPERTIES));
     }
 
     public static void validateConfig(Map<String, Object> config) {
@@ -48,13 +48,13 @@ public class CosineFeatureStep implements LinkFeatureStep {
     }
 
     @TestOnly
-    public List<String> featureProperties() {
-        return featureProperties;
+    public List<String> nodeProperties() {
+        return nodeProperties;
     }
 
     @Override
     public LinkFeatureAppender linkFeatureAppender(Graph graph) {
-        var nodeProperties = featureProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
+        var nodeProperties = this.nodeProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
         return (source, target, linkFeatures, offset) -> {
             var sourceSquareNorm = 0.0;
             var targetSquareNorm = 0.0;
@@ -107,6 +107,6 @@ public class CosineFeatureStep implements LinkFeatureStep {
 
     @Override
     public List<String> inputNodeProperties() {
-        return featureProperties;
+        return nodeProperties;
     }
 }

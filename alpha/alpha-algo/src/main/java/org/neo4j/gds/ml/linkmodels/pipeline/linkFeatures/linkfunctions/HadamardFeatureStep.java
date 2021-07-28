@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureAppender;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.graphalgo.api.Graph;
@@ -33,28 +32,23 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class HadamardFeatureStep implements LinkFeatureStep {
 
-    private final List<String> featureProperties;
+    private final List<String> nodeProperties;
 
-    public HadamardFeatureStep(List<String> featureProperties) {
-        this.featureProperties = featureProperties;
+    public HadamardFeatureStep(List<String> nodeProperties) {
+        this.nodeProperties = nodeProperties;
     }
 
     public HadamardFeatureStep(Map<String, Object> config) {
-        this((List<String>) config.get(LinkFeatureStep.FEATURE_PROPERTIES));
+        this((List<String>) config.get(LinkFeatureStep.INPUT_NODE_PROPERTIES));
     }
 
     public static void validateConfig(Map<String, Object> config) {
         LinkFeatureStepValidation.validateConfig("Hadamard link feature", config);
     }
 
-    @TestOnly
-    public List<String> featureProperties() {
-        return featureProperties;
-    }
-
     @Override
     public LinkFeatureAppender linkFeatureAppender(Graph graph) {
-        var properties = featureProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
+        var properties = nodeProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
         return (source, target, linkFeatures, offset) -> {
             var offset1 = offset;
             for (NodeProperties props : properties) {
@@ -92,11 +86,11 @@ public class HadamardFeatureStep implements LinkFeatureStep {
 
     @Override
     public int outputFeatureDimension(Graph graph) {
-        return FeatureStepUtil.totalPropertyDimension(graph, featureProperties);
+        return FeatureStepUtil.totalPropertyDimension(graph, nodeProperties);
     }
 
     @Override
     public List<String> inputNodeProperties() {
-        return featureProperties;
+        return nodeProperties;
     }
 }

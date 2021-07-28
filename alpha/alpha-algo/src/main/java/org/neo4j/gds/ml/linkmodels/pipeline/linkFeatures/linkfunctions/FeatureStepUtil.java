@@ -20,20 +20,19 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.linkfunctions;
 
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.api.NodeProperties;
 
 import java.util.List;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public class FeatureStepUtil {
+public final class FeatureStepUtil {
 
-    static int totalPropertyDimension(Graph graph, List<String> properties) {
-        return properties.stream().mapToInt(property -> FeatureStepUtil.propertyDimension(graph, property)).sum();
+    static int totalPropertyDimension(Graph graph, List<String> nodeProperties) {
+        return nodeProperties.stream().mapToInt(property -> FeatureStepUtil.propertyDimension(graph, property)).sum();
     }
 
-    static int propertyDimension(Graph graph, String property) {
-        NodeProperties nodeProperties = graph.nodeProperties(property);
+    static int propertyDimension(Graph graph, String nodeProperty) {
+        var nodeProperties = graph.nodeProperties(nodeProperty);
 
         int dimension = 0;
         switch (nodeProperties.valueType()) {
@@ -49,7 +48,7 @@ public class FeatureStepUtil {
                 dimension = nodeProperties.longArrayValue(0).length;
                 break;
             case UNKNOWN:
-                throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", property));
+                throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", nodeProperty));
         }
 
         return dimension;
