@@ -126,7 +126,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
 
 
             var featurePipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
-            featurePipeline.addLinkFeature(
+            featurePipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
                 Map.of("featureProperties", List.of("noise", "z", "array"))
             );
@@ -171,7 +171,7 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 .build();
 
             var featurePipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
-            featurePipeline.addLinkFeature(
+            featurePipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
                 Map.of("featureProperties", List.of("noise", "z", "array"))
             );

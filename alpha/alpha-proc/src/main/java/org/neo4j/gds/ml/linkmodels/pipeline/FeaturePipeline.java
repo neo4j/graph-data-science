@@ -55,7 +55,7 @@ public class FeaturePipeline {
         this.nodePropertySteps = new ArrayList<>();
     }
 
-    public void addLinkFeature(String name, Map<String, Object> config) {
+    public void addFeature(String name, Map<String, Object> config) {
         this.linkFeatureSteps.add(LinkFeatureStepFactory.create(name, config));
     }
 

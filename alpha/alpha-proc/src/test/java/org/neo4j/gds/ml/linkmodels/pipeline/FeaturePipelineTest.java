@@ -88,7 +88,7 @@ class FeaturePipelineTest extends BaseProcTest {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
-            pipeline.addLinkFeature(
+            pipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
                 Map.of("featureProperties", List.of("array"))
             );
@@ -134,11 +134,11 @@ class FeaturePipelineTest extends BaseProcTest {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
-            pipeline.addLinkFeature(
+            pipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
                 Map.of("featureProperties", List.of("array"))
             );
-            pipeline.addLinkFeature(
+            pipeline.addFeature(
                 LinkFeatureStepFactory.COSINE.name(),
                 Map.of("featureProperties", List.of("noise", "z"))
             );
@@ -174,7 +174,7 @@ class FeaturePipelineTest extends BaseProcTest {
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
             pipeline.addNodePropertyStep("pageRank", Map.of("mutateProperty", "pageRank"));
-            pipeline.addLinkFeature(
+            pipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
                 Map.of("featureProperties", List.of("pageRank"))
             );
@@ -210,11 +210,11 @@ class FeaturePipelineTest extends BaseProcTest {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
 
-            pipeline.addLinkFeature(
+            pipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
                 Map.of("featureProperties", List.of("noise", "no-property", "no-prop-2"))
             );
-            pipeline.addLinkFeature(
+            pipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
                 Map.of("featureProperties", List.of("other-no-property"))
             );
