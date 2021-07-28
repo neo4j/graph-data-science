@@ -43,8 +43,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.withPrecision;
 
 class FeaturePipelineTest extends BaseProcTest {
-    private static List<NodeLabel> NODE_LABELS = List.of(NodeLabel.of("N"));
-    private static List<RelationshipType> REL_TYPES = List.of(RelationshipType.of("REL"));
 
     @Neo4jGraph
     private static final String GRAPH = "CREATE " +
@@ -96,7 +94,7 @@ class FeaturePipelineTest extends BaseProcTest {
                 new double[]{3 * 8, 2 * 2.3D}, // a-c
                 new double[]{3 * 0.1D, 2 * 91.0D} // a-d
             );
-            var actual = pipeline.computeFeatures("g", NODE_LABELS, REL_TYPES);
+            var actual = computePropertiesAndLinkFeatures(pipeline, "g");
 
             assertThat(actual.size()).isEqualTo(expected.size());
 
@@ -134,7 +132,7 @@ class FeaturePipelineTest extends BaseProcTest {
                 new double[]{3 * 0.1D, 2 * 91.0D, (42 * 42 + 13 * 9) / normA / normD} // a-d
             );
 
-            var actual = pipeline.computeFeatures("g", NODE_LABELS, REL_TYPES);
+            var actual = computePropertiesAndLinkFeatures(pipeline, "g");
 
             assertThat(actual.size()).isEqualTo(expected.size());
 
@@ -172,7 +170,7 @@ class FeaturePipelineTest extends BaseProcTest {
                 new double[]{expectedPageRanks.get(3) * expectedPageRanks.get(0)}
             );
 
-            var actual = pipeline.computeFeatures("g", NODE_LABELS, REL_TYPES);
+            var actual = computePropertiesAndLinkFeatures(pipeline, "g");
 
             assertThat(actual.size()).isEqualTo(expected.size());
 
@@ -196,11 +194,16 @@ class FeaturePipelineTest extends BaseProcTest {
                 Map.of("featureProperties", List.of("other-no-property"))
             );
 
-            assertThatThrownBy(() -> pipeline.computeFeatures("g", NODE_LABELS, REL_TYPES))
+            assertThatThrownBy(() -> computePropertiesAndLinkFeatures(pipeline, "g"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(
                     "Node properties [no-property, no-prop-2, other-no-property] defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline");
         });
+    }
+
+    private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(FeaturePipeline pipeline, String g) {
+        pipeline.executeProcedureSteps(g, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
+        return pipeline.computeFeatures(g, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
     }
 
 }

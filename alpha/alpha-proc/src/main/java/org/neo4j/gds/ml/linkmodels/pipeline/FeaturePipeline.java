@@ -64,23 +64,22 @@ public class FeaturePipeline {
     }
 
 
-    public HugeObjectArray<double[]> computeFeatures(String graphName, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relationshipTypes) {
-        executeProcedureSteps(graphName, nodeLabels, relationshipTypes);
+    public HugeObjectArray<double[]> computeFeatures(String graphName, Collection<NodeLabel> nodeLabels, RelationshipType relationshipType) {
         var graph = GraphStoreCatalog.get(userName, databaseId, graphName)
             .graphStore()
-            .getGraph(nodeLabels, relationshipTypes, Optional.empty());
+            .getGraph(nodeLabels, List.of(relationshipType), Optional.empty());
         validate(graph);
 
         return extractFeatures(graph, linkFeatureSteps);
     }
 
-    private void executeProcedureSteps(
+    public void executeProcedureSteps(
         String graphName,
         Collection<NodeLabel> nodeLabels,
-        Collection<RelationshipType> relationshipTypes
+        RelationshipType relationshipType
     ) {
         for (ProcedureStep step : procedureSteps) {
-            step.execute(caller, graphName, nodeLabels, relationshipTypes);
+            step.execute(caller, graphName, nodeLabels, List.of(relationshipType));
         }
     }
 
