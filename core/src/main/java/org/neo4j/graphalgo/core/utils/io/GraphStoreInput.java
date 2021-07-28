@@ -200,18 +200,19 @@ public final class GraphStoreInput implements CompatInput {
 
                     if (hasProperties) {
                         for (var label : labels) {
-                            // TODO getIfPresent
-                            if (nodeStore.nodeProperties.containsKey(label)) {
-                                for (var propertyKeyAndValue : nodeStore.nodeProperties.get(label).entrySet()) {
-                                    exportProperty(visitor, propertyKeyAndValue);
-                                }
-                            }
+                            nodeStore.nodeProperties
+                                .getOrDefault(label, Map.of())
+                                .forEach((propertyKey, properties) -> {
+                                    exportProperty(visitor, propertyKey, properties);
+                                });
                         }
                     }
                 } else if (hasProperties) { // no label information, but node properties
-                    for (var propertyKeyAndValue : nodeStore.nodeProperties.get(ALL_NODES.name).entrySet()) {
-                        exportProperty(visitor, propertyKeyAndValue);
-                    }
+                    nodeStore.nodeProperties.forEach((label, nodeProperties) -> {
+                        nodeProperties.forEach((propertyKey, properties) -> {
+                            exportProperty(visitor, propertyKey, properties);
+                        });
+                    });
                 }
 
                 visitor.endOfEntity();
@@ -222,9 +223,13 @@ public final class GraphStoreInput implements CompatInput {
         }
 
         private void exportProperty(InputEntityVisitor visitor, Map.Entry<String, NodeProperties> propertyKeyAndValue) {
-            var value = propertyKeyAndValue.getValue().getObject(id);
+            exportProperty(visitor, propertyKeyAndValue.getKey(), propertyKeyAndValue.getValue());
+        }
+
+        private void exportProperty(InputEntityVisitor visitor, String propertyKey, NodeProperties nodeProperties) {
+            var value = nodeProperties.getObject(id);
             if (value != null) {
-                visitor.property(propertyKeyAndValue.getKey(), value);
+                visitor.property(propertyKey, value);
             }
         }
     }
