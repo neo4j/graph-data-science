@@ -39,14 +39,9 @@ public class InMemoryPropertyCursor extends PropertyRecord implements StoragePro
     }
 
     @Override
-    public void initNodeProperties(long reference) {
+    public void initNodeProperties(long reference, long ownerReference) {
         this.delegate = new InMemoryNodePropertyCursor(graphStore, tokenHolders);
         this.delegate.initNodeProperties(reference);
-    }
-
-    @Override
-    public void initNodeProperties(long reference, long ownerReference) {
-
     }
 
     @Override

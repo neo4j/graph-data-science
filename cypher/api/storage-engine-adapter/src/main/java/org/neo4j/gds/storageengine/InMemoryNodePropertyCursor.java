@@ -20,6 +20,7 @@
 package org.neo4j.gds.storageengine;
 
 import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
 import org.neo4j.values.storable.Value;
@@ -56,29 +57,20 @@ class InMemoryNodePropertyCursor extends InMemoryPropertyCursor.DelegateProperty
                 .findFirst()
                 .get()
                 .valueType();
-            var valueGroup = ValueGroup.valueOf(valueType.cypherName());
+
+            var valueGroup = valueGroupFromValueType(valueType);
 
             propertyKeyToTypeMapping.put(nodePropertyKey, valueGroup);
         });
     }
 
     @Override
-    public void initNodeProperties(long reference) {
+    public void initNodeProperties(long reference, long ownerReference) {
         setId(reference);
     }
 
     @Override
-    public void initNodeProperties(long reference, long ownerReference) {
-
-    }
-
-    @Override
     public void initRelationshipProperties(long reference, long ownerReference) {
-
-    }
-
-    @Override
-    public void initRelationshipProperties(long reference) {
 
     }
 
@@ -152,5 +144,19 @@ class InMemoryNodePropertyCursor extends InMemoryPropertyCursor.DelegateProperty
     @Override
     public void close() {
 
+    }
+
+    private static ValueGroup valueGroupFromValueType(ValueType valueType) {
+        switch (valueType) {
+            case DOUBLE:
+            case LONG:
+                return ValueGroup.NUMBER;
+            case LONG_ARRAY:
+            case DOUBLE_ARRAY:
+            case FLOAT_ARRAY:
+                return ValueGroup.NUMBER_ARRAY;
+            default:
+                return ValueGroup.UNKNOWN;
+        }
     }
 }
