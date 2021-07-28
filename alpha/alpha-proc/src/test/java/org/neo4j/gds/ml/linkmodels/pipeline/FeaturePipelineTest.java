@@ -31,6 +31,8 @@ import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.DefaultValue;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 
@@ -56,6 +58,9 @@ class FeaturePipelineTest extends BaseProcTest {
         "(b)-[:IGNORE]->(c), " +
         "(a)-[:REL]->(c), " +
         "(a)-[:REL]->(d)";
+    public static final String GRAPH_NAME = "g";
+
+    private GraphStore graphStore;
 
     @BeforeEach
     void setup() throws Exception {
@@ -69,10 +74,12 @@ class FeaturePipelineTest extends BaseProcTest {
             .withRelationshipType("REL", Orientation.UNDIRECTED)
             .withRelationshipType("IGNORE", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
-            .graphCreate("g")
+            .graphCreate(GRAPH_NAME)
             .yields();
 
         runQuery(createQuery);
+
+        graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
     }
 
     // add several linkFeatureSteps + assert that linkFeatures computed correct
@@ -94,13 +101,31 @@ class FeaturePipelineTest extends BaseProcTest {
                 new double[]{3 * 8, 2 * 2.3D}, // a-c
                 new double[]{3 * 0.1D, 2 * 91.0D} // a-d
             );
-            var actual = computePropertiesAndLinkFeatures(pipeline, "g");
+            var actual = computePropertiesAndLinkFeatures(pipeline);
 
             assertThat(actual.size()).isEqualTo(expected.size());
 
             for (long i = 0; i < actual.size(); i++) {
                 assertThat(actual.get(i)).containsExactly(expected.get(i), withPrecision(1e-4D));
             }
+        });
+    }
+
+    @Test
+    void dependentNodePropertySteps() {
+        ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            var pipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
+
+            pipeline.addProcedureStep("degree", Map.of("mutateProperty", "degree"));
+            pipeline.addProcedureStep("scaleProperties", Map.of(
+                "mutateProperty", "nodeFeatures",
+                "nodeProperties", "degree",
+                "scaler", "MEAN"
+            ));
+
+            pipeline.executeProcedureSteps(GRAPH_NAME, NodeLabel.listOf("N"), RelationshipType.of("REL"));
+
+            assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).contains("degree", "nodeFeatures");
         });
     }
 
@@ -132,7 +157,7 @@ class FeaturePipelineTest extends BaseProcTest {
                 new double[]{3 * 0.1D, 2 * 91.0D, (42 * 42 + 13 * 9) / normA / normD} // a-d
             );
 
-            var actual = computePropertiesAndLinkFeatures(pipeline, "g");
+            var actual = computePropertiesAndLinkFeatures(pipeline);
 
             assertThat(actual.size()).isEqualTo(expected.size());
 
@@ -170,7 +195,7 @@ class FeaturePipelineTest extends BaseProcTest {
                 new double[]{expectedPageRanks.get(3) * expectedPageRanks.get(0)}
             );
 
-            var actual = computePropertiesAndLinkFeatures(pipeline, "g");
+            var actual = computePropertiesAndLinkFeatures(pipeline);
 
             assertThat(actual.size()).isEqualTo(expected.size());
 
@@ -194,16 +219,16 @@ class FeaturePipelineTest extends BaseProcTest {
                 Map.of("featureProperties", List.of("other-no-property"))
             );
 
-            assertThatThrownBy(() -> computePropertiesAndLinkFeatures(pipeline, "g"))
+            assertThatThrownBy(() -> computePropertiesAndLinkFeatures(pipeline))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(
                     "Node properties [no-property, no-prop-2, other-no-property] defined in the LinkFeatureSteps do not exist in the graph or part of the pipeline");
         });
     }
 
-    private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(FeaturePipeline pipeline, String g) {
-        pipeline.executeProcedureSteps(g, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
-        return pipeline.computeFeatures(g, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
+    private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(FeaturePipeline pipeline) {
+        pipeline.executeProcedureSteps(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
+        return pipeline.computeFeatures(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
     }
 
 }
