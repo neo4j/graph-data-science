@@ -58,6 +58,18 @@ public enum GdsFeatureToggles {
         }
     }
 
+    @TestOnly
+    public synchronized <E extends Exception> void disableAndRun(
+        CheckedRunnable<E> code
+    ) throws E {
+        var before = toggle(false);
+        try {
+            code.checkedRun();
+        } finally {
+            toggle(before);
+        }
+    }
+
     private final AtomicBoolean current;
     private final boolean defaultValue;
 

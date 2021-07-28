@@ -30,12 +30,14 @@ public interface TestMethodRunner {
     <E extends Exception> void run(CheckedRunnable<E> code) throws E;
 
     static Stream<TestMethodRunner> idMapImplementation() {
-        TestMethodRunner defaultImpl = CheckedRunnable::checkedRun;
-        TestMethodRunner bitImMapImpl = TestMethodRunner::runWithBitIdMap;
-        return Stream.of(defaultImpl, bitImMapImpl);
+        return Stream.of(TestMethodRunner::runWithCEIdMap, TestMethodRunner::runWithEEIdMap);
     }
 
-    static <E extends Exception> void runWithBitIdMap(CheckedRunnable<E> code) throws E {
+    static <E extends Exception> void runWithEEIdMap(CheckedRunnable<E> code) throws E {
         setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_BIT_ID_MAP.enableAndRun(code));
+    }
+
+    static <E extends Exception> void runWithCEIdMap(CheckedRunnable<E> code) throws E {
+        setToEnterpriseAndRun(() -> GdsFeatureToggles.USE_BIT_ID_MAP.disableAndRun(code));
     }
 }
