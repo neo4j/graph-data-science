@@ -20,51 +20,46 @@
 package org.neo4j.graphalgo.core.utils.io;
 
 import org.neo4j.common.Validator;
-import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.LongFunction;
-import java.util.stream.Collectors;
 
 public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseConfig> {
 
     private final GraphStore graphStore;
+
     protected final CONFIG config;
 
-    private Map<String, LongFunction<Object>> additionalNodeProperties;
+    private final Map<String, LongFunction<Object>> neoNodeProperties;
 
     protected GraphStoreExporter(GraphStore graphStore, CONFIG config) {
-        this(null, graphStore, config);
+        this(graphStore, config, Optional.empty());
     }
 
-    protected GraphStoreExporter(TransactionContext transactionContext, GraphStore graphStore, CONFIG config) {
+    protected GraphStoreExporter(
+        GraphStore graphStore,
+        CONFIG config,
+        Optional<NeoNodeProperties> neoNodeProperties
+    ) {
         this.graphStore = graphStore;
         this.config = config;
-        this.additionalNodeProperties = config.additionalNodeProperties()
-            .stream()
-            .collect(Collectors.toMap(
-                    PropertyMapping::neoPropertyKey,
-                    propertyMapping -> NeoStoreProperties.of(
-                        transactionContext,
-                        graphStore.nodes(),
-                        propertyMapping
-                    )
-                )
-            );
+        this.neoNodeProperties = neoNodeProperties
+            .map(NeoNodeProperties::neoNodeProperties)
+            .orElse(Map.of());
     }
 
     protected abstract void export(GraphStoreInput graphStoreInput);
 
     public ImportedProperties run(AllocationTracker tracker) {
         var metaDataStore = MetaDataStore.of(graphStore);
-        var nodeStore = NodeStore.of(graphStore, additionalNodeProperties, tracker);
+        var nodeStore = NodeStore.of(graphStore, neoNodeProperties, tracker);
         var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
         var graphStoreInput = new GraphStoreInput(
             metaDataStore,
@@ -75,7 +70,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
         export(graphStoreInput);
 
-        long importedNodeProperties = nodeStore.propertyCount() * graphStore.nodes().nodeCount();
+        long importedNodeProperties = (nodeStore.propertyCount() + neoNodeProperties.size()) * graphStore.nodeCount();
         long importedRelationshipProperties = relationshipStore.propertyCount() * graphStore.relationshipCount();
         return ImmutableImportedProperties.of(importedNodeProperties, importedRelationshipProperties);
     }

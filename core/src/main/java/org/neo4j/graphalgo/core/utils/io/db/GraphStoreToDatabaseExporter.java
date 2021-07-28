@@ -23,9 +23,9 @@ import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Settings;
-import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.io.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.io.GraphStoreInput;
+import org.neo4j.graphalgo.core.utils.io.NeoNodeProperties;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.ImportLogic;
@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
@@ -54,30 +55,30 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
     private final GraphStoreToDatabaseExporterConfig config;
     private final FileSystemAbstraction fs;
 
-    public static GraphStoreToDatabaseExporter newExporter(
+    public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
         GraphDatabaseAPI api,
         GraphStoreToDatabaseExporterConfig config
     ) {
-        return new GraphStoreToDatabaseExporter(graphStore, api, null, config);
+        return of(graphStore, api, config, Optional.empty());
     }
 
-    public static GraphStoreToDatabaseExporter newExporter(
+    public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
         GraphDatabaseAPI api,
-        TransactionContext transactionContext,
-        GraphStoreToDatabaseExporterConfig config
+        GraphStoreToDatabaseExporterConfig config,
+        Optional<NeoNodeProperties> neoNodeProperties
     ) {
-        return new GraphStoreToDatabaseExporter(graphStore, api, transactionContext, config);
+        return new GraphStoreToDatabaseExporter(graphStore, api, config, neoNodeProperties);
     }
 
     private GraphStoreToDatabaseExporter(
         GraphStore graphStore,
         GraphDatabaseAPI api,
-        TransactionContext transactionContext,
-        GraphStoreToDatabaseExporterConfig config
+        GraphStoreToDatabaseExporterConfig config,
+        Optional<NeoNodeProperties> neoNodeProperties
     ) {
-        super(transactionContext, graphStore, config);
+        super(graphStore, config, neoNodeProperties);
         this.neo4jHome = Neo4jProxy.homeDirectory(api.databaseLayout());
         this.config = config;
         this.fs = api.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);

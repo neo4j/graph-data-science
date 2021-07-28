@@ -392,13 +392,14 @@ public final class BackupAndRestore {
                         .build();
 
                     var backupDir = backupRoot.resolve(username).resolve(GRAPHS_DIR);
-                    var backupPath = GraphStoreExporterUtil.getExportPath(backupDir, config);
+                    var backupPath = GraphStoreExporterUtil.exportPath(backupDir, config);
 
                     var timer = ProgressTimer.start();
-                    GraphStoreExporterUtil.runGraphStoreExportToCsv(
+                    GraphStoreExporterUtil.export(
                         store.graphStore(),
                         backupPath,
                         config,
+                        Optional.empty(),
                         log,
                         allocationTracker
                     );

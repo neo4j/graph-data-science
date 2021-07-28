@@ -21,9 +21,13 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.graphalgo.BaseProc;
+import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.GraphDimensions;
+import org.neo4j.graphalgo.core.TransactionContext;
+import org.neo4j.graphalgo.core.utils.io.GraphStoreExporterBaseConfig;
+import org.neo4j.graphalgo.core.utils.io.NeoNodeProperties;
 import org.neo4j.graphalgo.core.utils.io.db.GraphStoreToDatabaseExporter;
 import org.neo4j.graphalgo.core.utils.io.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.graphalgo.core.utils.io.file.GraphStoreExporterUtil;
@@ -37,8 +41,10 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.graphalgo.core.utils.io.file.GraphStoreExporterUtil.exportLocation;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStoreExportProc extends BaseProc {
@@ -57,7 +63,12 @@ public class GraphStoreExportProc extends BaseProc {
             "Graph creation failed", () -> {
                 var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
 
-                var exporter = GraphStoreToDatabaseExporter.newExporter(graphStore, api, exportConfig);
+                var exporter = GraphStoreToDatabaseExporter.of(
+                    graphStore,
+                    api,
+                    exportConfig,
+                    neoNodeProperties(exportConfig, graphStore)
+                );
 
                 var start = System.nanoTime();
                 var importedProperties = exporter.run(allocationTracker());
@@ -91,10 +102,12 @@ public class GraphStoreExportProc extends BaseProc {
 
         var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
         var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-        var result = GraphStoreExporterUtil.runGraphStoreExportToCsv(
+
+        var result = GraphStoreExporterUtil.export(
             graphStore,
-            neo4jConfig,
+            exportLocation(neo4jConfig, exportConfig),
             exportConfig,
+            neoNodeProperties(exportConfig, graphStore),
             log,
             allocationTracker()
         );
@@ -135,6 +148,17 @@ public class GraphStoreExportProc extends BaseProc {
         );
 
         return Stream.of(new MemoryEstimateResult(estimate));
+    }
+
+    private Optional<NeoNodeProperties> neoNodeProperties(
+        GraphStoreExporterBaseConfig exportConfig,
+        GraphStore graphStore
+    ) {
+        return NeoNodeProperties.of(
+            graphStore,
+            TransactionContext.of(api, procedureTransaction),
+            exportConfig.additionalNodeProperties()
+        );
     }
 
     @SuppressWarnings("unused")

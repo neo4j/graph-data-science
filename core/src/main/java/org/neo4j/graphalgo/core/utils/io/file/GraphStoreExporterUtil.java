@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.utils.io.GraphStoreExporter;
+import org.neo4j.graphalgo.core.utils.io.NeoNodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.logging.Log;
@@ -31,6 +32,7 @@ import org.neo4j.logging.Log;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static org.neo4j.graphalgo.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
@@ -40,38 +42,23 @@ public final class GraphStoreExporterUtil {
 
     public static final String EXPORT_DIR = "export";
 
-    public static ExportToCsvResult runGraphStoreExportToCsv(
+    public static ExportToCsvResult export(
         GraphStore graphStore,
-        Configuration neo4jConfig,
-        GraphStoreToFileExporterConfig exportConfig,
-        Log log,
-        AllocationTracker allocationTracker
-    ) {
-        return runGraphStoreExportToCsv(
-            graphStore,
-            getExportPath(neo4jConfig, exportConfig),
-            exportConfig,
-            log,
-            allocationTracker
-        );
-    }
-
-    public static ExportToCsvResult runGraphStoreExportToCsv(
-        GraphStore graphStore,
-        Path exportPath,
-        GraphStoreToFileExporterConfig exportConfig,
+        Path path,
+        GraphStoreToFileExporterConfig config,
+        Optional<NeoNodeProperties> neoNodeProperties,
         Log log,
         AllocationTracker allocationTracker
     ) {
         try {
-            var exporter = GraphStoreToFileExporter.csv(graphStore, exportConfig, exportPath);
+            var exporter = GraphStoreToFileExporter.csv(graphStore, config, path, neoNodeProperties);
 
             var start = System.nanoTime();
             var importedProperties = exporter.run(allocationTracker);
             var end = System.nanoTime();
 
             var tookMillis = TimeUnit.NANOSECONDS.toMillis(end - start);
-            log.info("Export completed for '%s' in %s ms", exportConfig.exportName(), tookMillis);
+            log.info("Export completed for '%s' in %s ms", config.exportName(), tookMillis);
             return ImmutableExportToCsvResult.of(
                 importedProperties,
                 tookMillis
@@ -82,13 +69,13 @@ public final class GraphStoreExporterUtil {
         }
     }
 
-    private static Path getExportPath(Configuration neo4jConfig, GraphStoreToFileExporterConfig config) {
+    public static Path exportLocation(Configuration neo4jConfig, GraphStoreToFileExporterConfig config) {
         var rootPath = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
         var exportPath = rootPath != null ? rootPath.resolve(EXPORT_DIR) : null;
-        return getExportPath(exportPath, config);
+        return exportPath(exportPath, config);
     }
 
-    public static Path getExportPath(@Nullable Path rootPath, GraphStoreToFileExporterConfig config) {
+    public static Path exportPath(@Nullable Path rootPath, GraphStoreToFileExporterConfig config) {
         if (rootPath == null) {
             throw new RuntimeException(formatWithLocale(
                 "The configuration option '%s' must be set.",
