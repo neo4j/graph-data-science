@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.internal.recordstorage.InMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.InMemoryStorageEngineCompanion;
 import org.neo4j.token.DelegatingTokenHolder;
 import org.neo4j.token.ReadOnlyTokenCreator;
@@ -73,7 +72,7 @@ class InMemoryNodeCursorTest extends BaseTest {
             new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
         );
 
-        InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders, new InMemoryMetaDataProvider()).schemaAndTokensLifecycle().init();
+        InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders).schemaAndTokensLifecycle().init();
         this.nodeCursor = new InMemoryNodeCursor(graphStore, tokenHolders);
     }
 

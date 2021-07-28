@@ -31,13 +31,12 @@ public final class InMemoryStorageEngineCompanion {
 
     public static StorageEngine create(
         DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders,
-        InMemoryMetaDataProvider metadataProvider
+        TokenHolders tokenHolders
     ) {
         var storageEngineBuilder = StorageEngineProxy.inMemoryStorageEngineBuilder(
             databaseLayout,
             tokenHolders,
-            metadataProvider
+            new InMemoryMetaDataProvider()
         );
 
         storageEngineBuilder.withCountsStoreFn(StorageEngineProxy::inMemoryCountsStore);

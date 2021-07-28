@@ -74,7 +74,7 @@ class InMemoryStorageEngineTest extends BaseTest {
             new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
         );
 
-        this.storageEngine = InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders, new InMemoryMetaDataProvider());
+        this.storageEngine = InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders);
     }
 
     @AfterEach

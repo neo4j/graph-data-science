@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.internal.recordstorage.InMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.InMemoryStorageEngineCompanion;
 import org.neo4j.token.DelegatingTokenHolder;
 import org.neo4j.token.ReadOnlyTokenCreator;
@@ -78,7 +77,7 @@ class InMemoryRelationshipTraversalCursorTest extends BaseTest {
             new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
         );
 
-        InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders, new InMemoryMetaDataProvider()).schemaAndTokensLifecycle().init();
+        InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders).schemaAndTokensLifecycle().init();
         this.relationshipCursor = new InMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
     }
 
