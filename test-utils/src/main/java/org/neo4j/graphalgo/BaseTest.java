@@ -247,7 +247,7 @@ public abstract class BaseTest {
     protected void assertCypherResult(
         @Language("Cypher") String query,
         Map<String, Object> queryParameters,
-        List<Map<String, Object>>expected
+        List<Map<String, Object>> expected
     ) {
         TestSupport.assertCypherResult(db, query, queryParameters, expected);
     }

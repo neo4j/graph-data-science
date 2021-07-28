@@ -58,7 +58,7 @@ public class RelationshipSchemaLoader {
         var schemaBuilder = new RelationshipSchemaBuilderVisitor();
 
         try(var reader = new BufferedReader(new FileReader(relationshipSchemaPath.toFile(), StandardCharsets.UTF_8))) {
-            var linesIterator = objectReader.<SchemaLine> readValues(reader);
+            var linesIterator = objectReader.<SchemaLine>readValues(reader);
             while(linesIterator.hasNext()) {
                 var schemaLine = linesIterator.next();
                 schemaBuilder.relationshipType(schemaLine.relationshipType);

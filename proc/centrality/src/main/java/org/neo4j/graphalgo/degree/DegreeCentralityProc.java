@@ -31,7 +31,7 @@ public final class DegreeCentralityProc {
 
     private DegreeCentralityProc() {}
 
-    static <CONFIG extends  DegreeCentralityConfig>AlgorithmFactory<DegreeCentrality, CONFIG> algorithmFactory() {
+    static <CONFIG extends DegreeCentralityConfig> AlgorithmFactory<DegreeCentrality, CONFIG> algorithmFactory() {
         return new DegreeCentralityFactory<>();
     }
 

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.beta.node2vec;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
@@ -28,7 +29,6 @@ import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.RelationshipWeightConfigTest;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
@@ -39,7 +39,7 @@ public abstract class Node2VecProcTest<CONFIG extends Node2VecBaseConfig> extend
     BaseProcTest implements AlgoBaseProcTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>,
     MemoryEstimateTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>,
     HeapControlTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>,
-    RelationshipWeightConfigTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>>{
+    RelationshipWeightConfigTest<Node2Vec, CONFIG, HugeObjectArray<FloatVector>> {
 
     @Neo4jGraph
     public static final String DB_CYPHER = "CREATE" +

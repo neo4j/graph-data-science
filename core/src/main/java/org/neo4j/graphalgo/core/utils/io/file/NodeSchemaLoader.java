@@ -57,7 +57,7 @@ public class NodeSchemaLoader {
         NodeSchemaBuilderVisitor schemaBuilder = new NodeSchemaBuilderVisitor();
 
         try(var reader = new BufferedReader(new FileReader(nodeSchemaPath.toFile(), StandardCharsets.UTF_8))) {
-            var linesIterator = objectReader.<SchemaLine> readValues(reader);
+            var linesIterator = objectReader.<SchemaLine>readValues(reader);
             while(linesIterator.hasNext()) {
                 var schemaLine = linesIterator.next();
                 schemaBuilder.nodeLabel(schemaLine.label);
