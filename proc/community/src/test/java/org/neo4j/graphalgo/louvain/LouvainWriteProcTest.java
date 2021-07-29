@@ -31,7 +31,6 @@ import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -54,7 +53,6 @@ import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implements
-    WritePropertyConfigTest<Louvain, LouvainWriteConfig, Louvain>,
     ConsecutiveIdsConfigTest<Louvain, LouvainWriteConfig, Louvain> {
 
     @TestFactory

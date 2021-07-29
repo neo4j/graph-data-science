@@ -30,11 +30,11 @@ import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -64,7 +64,7 @@ import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERTIES_KEY;
 
-class NodeClassificationPredictWriteProcTest extends BaseProcTest implements WritePropertyConfigTest<NodeClassificationPredict, NodeClassificationPredictWriteConfig, NodeLogisticRegressionResult> {
+class NodeClassificationPredictWriteProcTest extends BaseProcTest implements AlgoBaseProcTest<NodeClassificationPredict, NodeClassificationPredictWriteConfig, NodeLogisticRegressionResult> {
 
     private static final String DB_CYPHER =
         "CREATE " +
@@ -152,7 +152,7 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Wri
 
     @Override
     public CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper input) {
-        CypherMapWrapper updatedMap = WritePropertyConfigTest.super.createMinimalImplicitConfig(input);
+        CypherMapWrapper updatedMap = AlgoBaseProcTest.super.createMinimalImplicitConfig(input);
         if (updatedMap.containsKey(NODE_PROJECTION_KEY) && !updatedMap.containsKey(NODE_QUERY_KEY)) {
             updatedMap = updatedMap.withEntry(NODE_PROPERTIES_KEY, List.of("a", "b"));
         } else if (!updatedMap.containsKey(NODE_PROJECTION_KEY) && updatedMap.containsKey(NODE_QUERY_KEY)) {

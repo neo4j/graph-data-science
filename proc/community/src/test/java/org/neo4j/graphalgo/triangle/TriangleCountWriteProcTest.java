@@ -26,7 +26,6 @@ import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 
@@ -41,9 +40,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class TriangleCountWriteProcTest
-    extends TriangleCountBaseProcTest<TriangleCountWriteConfig>
-    implements WritePropertyConfigTest<IntersectingTriangleCount, TriangleCountWriteConfig, IntersectingTriangleCount.TriangleCountResult> {
+class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCountWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

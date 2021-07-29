@@ -26,7 +26,6 @@ import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -35,8 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FastRPExtendedWriteProcTest extends FastRPExtendedProcTest<FastRPExtendedWriteConfig>
-    implements WritePropertyConfigTest<FastRP, FastRPExtendedWriteConfig, FastRP.FastRPResult> {
+class FastRPExtendedWriteProcTest extends FastRPExtendedProcTest<FastRPExtendedWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

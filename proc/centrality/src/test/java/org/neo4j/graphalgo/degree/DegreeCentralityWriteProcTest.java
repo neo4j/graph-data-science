@@ -25,7 +25,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Collection;
@@ -38,8 +37,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentralityWriteConfig> implements
-    WritePropertyConfigTest<DegreeCentrality, DegreeCentralityWriteConfig, DegreeCentrality.DegreeFunction> {
+class DegreeCentralityWriteProcTest extends DegreeCentralityProcTest<DegreeCentralityWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

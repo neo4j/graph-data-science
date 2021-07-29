@@ -33,11 +33,11 @@ import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
+import org.neo4j.graphdb.Result;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,7 +52,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropagationWriteConfig> implements
-    WritePropertyConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation>,
     ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation> {
 
     @TestFactory
@@ -464,5 +463,11 @@ class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropag
                 assertEquals(2, row.getNumber("community").intValue());
             });
         }
+    }
+
+    private void checkMillisSet(Result.ResultRow row) {
+        assertTrue(row.getNumber("createMillis").intValue() >= 0, "load time not set");
+        assertTrue(row.getNumber("computeMillis").intValue() >= 0, "compute time not set");
+        assertTrue(row.getNumber("writeMillis").intValue() >= 0, "write time not set");
     }
 }

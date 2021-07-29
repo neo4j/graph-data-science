@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
@@ -43,8 +42,7 @@ import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implements
-    WritePropertyConfigTest<PageRankAlgorithm, PageRankWriteConfig, PageRankResult> {
+class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

@@ -21,10 +21,12 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.config.WritePropertyConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ConfigProcTestHelpers.GRAPH_NAME;
 
@@ -35,7 +37,11 @@ public final class WritePropertyConfigProcTest {
         CypherMapWrapper config
     ) {
         return List.of(
-            unspecifiedWriteProperty(proc, config)
+            unspecifiedWriteProperty(proc, config),
+            nullWriteProperty(proc, config),
+            whitespaceWriteProperty(proc, config),
+            validWriteProperty(proc, config),
+            validWriteConcurrency(proc, config)
         );
     }
 
@@ -52,4 +58,49 @@ public final class WritePropertyConfigProcTest {
         });
     }
 
+    private static DynamicTest nullWriteProperty(
+        AlgoBaseProc<?, ?, ?> proc,
+        CypherMapWrapper config
+    ) {
+        return DynamicTest.dynamicTest("nullWriteProperty", () -> {
+            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, config.withString("writeProperty", null)))
+                .hasMessageContaining("writeProperty")
+                .hasMessageContaining("null")
+                .hasMessageContaining("type")
+                .hasMessageContaining("String");
+        });
+    }
+
+    private static DynamicTest whitespaceWriteProperty(
+        AlgoBaseProc<?, ?, ?> proc,
+        CypherMapWrapper config
+    ) {
+        return DynamicTest.dynamicTest("whitespaceWriteProperty", () -> {
+            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, config.withString("writeProperty", "  ")))
+                .hasMessageContaining("writeProperty")
+                .hasMessageContaining("mandatory");
+        });
+    }
+
+    private static DynamicTest validWriteProperty(
+        AlgoBaseProc<?, ?, ?> proc,
+        CypherMapWrapper config
+    ) {
+        return DynamicTest.dynamicTest("validWriteProperty", () -> {
+            var wpConfig = config.withString("writeProperty", "w");
+            var algoConfig = ((WritePropertyConfig) proc.newConfig(GRAPH_NAME, wpConfig));
+            assertThat(algoConfig.writeProperty()).isEqualTo("w");
+        });
+    }
+
+    private static DynamicTest validWriteConcurrency(
+        AlgoBaseProc<?, ?, ?> proc,
+        CypherMapWrapper config
+    ) {
+        return DynamicTest.dynamicTest("validWriteConcurrency", () -> {
+            var wpConfig = config.withNumber("writeConcurrency", 3L);
+            var algoConfig = ((WritePropertyConfig) proc.newConfig(GRAPH_NAME, wpConfig));
+            assertThat(algoConfig.writeConcurrency()).isEqualTo(3);
+        });
+    }
 }

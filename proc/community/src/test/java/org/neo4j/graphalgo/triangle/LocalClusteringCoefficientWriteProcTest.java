@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Collection;
@@ -40,8 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LocalClusteringCoefficientWriteProcTest
-    extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientWriteConfig>
-    implements WritePropertyConfigTest<LocalClusteringCoefficient, LocalClusteringCoefficientWriteConfig, LocalClusteringCoefficient.Result> {
+    extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {

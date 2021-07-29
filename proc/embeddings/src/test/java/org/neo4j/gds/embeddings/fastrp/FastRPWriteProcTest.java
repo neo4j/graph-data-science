@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Collection;
@@ -41,8 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.anyMatch;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 
-class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig>
-    implements WritePropertyConfigTest<FastRP, FastRPWriteConfig, FastRP.FastRPResult> {
+class FastRPWriteProcTest extends FastRPProcTest<FastRPWriteConfig> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {
