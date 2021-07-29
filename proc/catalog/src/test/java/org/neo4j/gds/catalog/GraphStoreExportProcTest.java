@@ -21,7 +21,6 @@ package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
@@ -34,7 +33,9 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
+import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -86,8 +87,10 @@ class GraphStoreExportProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @Test
-    @Disabled()
     void exportGraph() {
         createGraph();
 
@@ -113,6 +116,9 @@ class GraphStoreExportProcTest extends BaseProcTest {
         });
     }
 
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
+    @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
     @Test
     void exportGraphWithAdditionalNodeProperties() {
         createGraph();
