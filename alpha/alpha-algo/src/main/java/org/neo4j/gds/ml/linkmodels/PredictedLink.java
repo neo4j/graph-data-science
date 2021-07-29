@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.linkmodels;
 import org.neo4j.graphalgo.annotation.ValueClass;
 
 @ValueClass
-interface PredictedLink {
+public interface PredictedLink {
     static PredictedLink of(long sourceId, long targetId, double probability) {
         return ImmutablePredictedLink.of(sourceId, targetId, probability);
     }

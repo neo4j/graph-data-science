@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
+import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
 import org.neo4j.graphalgo.BaseProc;
@@ -63,7 +64,6 @@ public class FeaturePipeline {
         this.nodePropertySteps.add(new NodePropertyStep(name, config));
     }
 
-
     public HugeObjectArray<double[]> computeFeatures(String graphName, Collection<NodeLabel> nodeLabels, RelationshipType relationshipType) {
         var graph = GraphStoreCatalog.get(userName, databaseId, graphName)
             .graphStore()
@@ -73,13 +73,25 @@ public class FeaturePipeline {
         return extractFeatures(graph, linkFeatureSteps);
     }
 
+    public LinkFeatureExtractor linkFeatureExtractor(Graph graph) {
+        return LinkFeatureExtractor.of(graph, linkFeatureSteps);
+    }
+
     public void executeNodePropertySteps(
         String graphName,
         Collection<NodeLabel> nodeLabels,
         RelationshipType relationshipType
     ) {
+            executeNodePropertySteps(graphName, nodeLabels, List.of(relationshipType));
+    }
+
+    public void executeNodePropertySteps(
+        String graphName,
+        Collection<NodeLabel> nodeLabels,
+        Collection<RelationshipType> relationshipTypes
+    ) {
         for (NodePropertyStep step : nodePropertySteps) {
-            step.execute(caller, graphName, nodeLabels, List.of(relationshipType));
+            step.execute(caller, graphName, nodeLabels, relationshipTypes);
         }
     }
 
