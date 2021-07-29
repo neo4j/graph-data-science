@@ -24,9 +24,9 @@ import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.ConfigProcTestHelpers.GRAPH_NAME;
 
 public final class WritePropertyConfigProcTest {
 
@@ -46,7 +46,7 @@ public final class WritePropertyConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("unspecifiedWriteProperty", () -> {
-            assertThatThrownBy(() -> proc.newConfig(Optional.of("ignored"), config.withoutEntry("writeProperty")))
+            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, config.withoutEntry("writeProperty")))
                 .hasMessageContaining("writeProperty")
                 .hasMessageContaining("mandatory");
         });

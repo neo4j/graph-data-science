@@ -25,10 +25,10 @@ import org.neo4j.graphalgo.config.ToleranceConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.ConfigProcTestHelpers.GRAPH_NAME;
 
 public final class ToleranceConfigProcTest {
 
@@ -49,7 +49,7 @@ public final class ToleranceConfigProcTest {
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("invalidTolerance", () -> {
-            assertThatThrownBy(() -> proc.newConfig(Optional.of("foo"), config.withNumber("tolerance", -0.1)))
+            assertThatThrownBy(() -> proc.newConfig(GRAPH_NAME, config.withNumber("tolerance", -0.1)))
                 .hasMessageContaining("tolerance")
                 .hasMessageContaining("-0.1");
         });
@@ -61,7 +61,7 @@ public final class ToleranceConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("validTolerance", () -> {
             var toleranceConfig = config.withNumber("tolerance", 42.42);
-            var algoConfig = ((ToleranceConfig) proc.newConfig(Optional.of("foo"), toleranceConfig));
+            var algoConfig = ((ToleranceConfig) proc.newConfig(GRAPH_NAME, toleranceConfig));
             assertThat(algoConfig.tolerance()).isEqualTo(42.42);
         });
     }

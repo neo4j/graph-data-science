@@ -25,10 +25,10 @@ import org.neo4j.graphalgo.config.IterationsConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.ConfigProcTestHelpers.GRAPH_NAME;
 
 public final class IterationsConfigProcTest {
 
@@ -56,11 +56,11 @@ public final class IterationsConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("invalidMaxIterations", () -> {
             assertThatThrownBy(() -> proc
-                .newConfig(Optional.of("foo"), config.withNumber("maxIterations", 0)))
+                .newConfig(GRAPH_NAME, config.withNumber("maxIterations", 0)))
                 .hasMessageContaining("maxIterations")
                 .hasMessageContaining("0");
             assertThatThrownBy(() -> proc
-                .newConfig(Optional.of("foo"), config.withNumber("maxIterations", -10)))
+                .newConfig(GRAPH_NAME, config.withNumber("maxIterations", -10)))
                 .hasMessageContaining("maxIterations")
                 .hasMessageContaining("-10");
         });
@@ -72,7 +72,7 @@ public final class IterationsConfigProcTest {
     ) {
         return DynamicTest.dynamicTest("validMaxIterations", () -> {
             var iterationsConfig = config.withNumber("maxIterations", 3);
-            var algoConfig = ((IterationsConfig) proc.newConfig(Optional.of("foo"), iterationsConfig));
+            var algoConfig = ((IterationsConfig) proc.newConfig(GRAPH_NAME, iterationsConfig));
             assertThat(algoConfig.maxIterations()).isEqualTo(3);
         });
     }
