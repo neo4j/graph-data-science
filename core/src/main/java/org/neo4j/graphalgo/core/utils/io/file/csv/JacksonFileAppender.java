@@ -61,6 +61,9 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
                 case LONG_ARRAY:
                     csvSchemaBuilder.addArrayColumn(propertySchema.key(), ";");
                     break;
+                case STRING:
+                    csvSchemaBuilder.addColumn(propertySchema.key());
+                    break;
                 case UNKNOWN:
                     break;
             }
@@ -142,6 +145,8 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
             append((long[]) value);
         } else if (value instanceof float[]) {
             append((float[]) value);
+        } else if (value instanceof String) {
+            append((String) value);
         } else if (value == null) {
             appendEmptyField();
         }
