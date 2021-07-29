@@ -92,7 +92,15 @@ abstract class ElementVisitor<
         for (PROPERTY_SCHEMA propertySchema : propertySchemas.get(elementIdentifier())) {
             var propertyPosition = propertyKeyPositions.get(propertySchema.key());
             var propertyValue = currentProperties[propertyPosition];
-            propertyConsumer.accept(propertySchema.key(), propertyValue, propertySchema.valueType());
+            propertyConsumer.accept(propertySchema.key(), propertyValue);
+        }
+    }
+
+    protected void forEachPropertyWithType(PropertyWithTypeConsumer propertyWithTypeConsumer) {
+        for (PROPERTY_SCHEMA propertySchema : propertySchemas.get(elementIdentifier())) {
+            var propertyPosition = propertyKeyPositions.get(propertySchema.key());
+            var propertyValue = currentProperties[propertyPosition];
+            propertyWithTypeConsumer.accept(propertySchema.key(), propertyValue, propertySchema.valueType());
         }
     }
 

@@ -72,7 +72,7 @@ public class CsvNodeVisitor extends NodeVisitor {
             fileAppender.startLine();
             fileAppender.append(id());
             // write properties
-            forEachProperty(((key, value, type) -> {
+            forEachProperty(((key, value) -> {
                 try {
                     fileAppender.appendAny(value);
                 } catch (IOException e) {
@@ -125,7 +125,7 @@ public class CsvNodeVisitor extends NodeVisitor {
             headerAppender.startLine();
             headerAppender.append(ID_COLUMN_NAME);
 
-            forEachProperty(((key, value, type) -> {
+            forEachPropertyWithType(((key, value, type) -> {
                 var propertyHeader = formatWithLocale(
                     "%s:%s",
                     key,

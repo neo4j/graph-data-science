@@ -19,7 +19,9 @@
  */
 package org.neo4j.graphalgo.core.utils.io.file;
 
+import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+
 @FunctionalInterface
-public interface PropertyConsumer {
-    void accept(String key, Object value);
+public interface PropertyWithTypeConsumer {
+    void accept(String key, Object value, ValueType type);
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.graphalgo.core.utils.io.file;
 
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.core.loading.construction.RelationshipsBuilder;
 
 abstract class RelationshipBuilderFromVisitor {
@@ -73,7 +72,7 @@ abstract class RelationshipBuilderFromVisitor {
         }
 
         @Override
-        public void accept(String key, Object value, ValueType type) {
+        public void accept(String key, Object value) {
             delegate.add(visitor.startNode(), visitor.endNode(), Double.parseDouble(value.toString()));
         }
     }
@@ -99,7 +98,7 @@ abstract class RelationshipBuilderFromVisitor {
         }
 
         @Override
-        public void accept(String key, Object value, ValueType type) {
+        public void accept(String key, Object value) {
             propertyValues[propertyIndex++] = Double.parseDouble(value.toString());
         }
     }

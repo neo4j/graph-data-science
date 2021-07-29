@@ -41,7 +41,7 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
     protected void exportElement() {
         NodeLabel[] nodeLabels = labels().stream().map(NodeLabel::of).toArray(NodeLabel[]::new);
         Map<String, Value> props = new HashMap<>();
-        forEachProperty((key, value, type) -> {
+        forEachProperty((key, value) -> {
             props.put(key, Values.of(value));
         });
 
