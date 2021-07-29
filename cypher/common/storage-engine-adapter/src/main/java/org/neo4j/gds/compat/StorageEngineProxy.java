@@ -82,10 +82,6 @@ public final class StorageEngineProxy {
         return IMPL.inMemoryStorageReader(graphStore, tokenHolders, counts);
     }
 
-    public static String inMemoryStorageEngineFactoryName() {
-        return IMPL.inMemoryStorageEngineFactoryName();
-    }
-
     public static void createInMemoryDatabase(
         DatabaseManagementService dbms,
         String dbName,

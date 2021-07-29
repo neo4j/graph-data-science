@@ -83,17 +83,12 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     }
 
     @Override
-    public String inMemoryStorageEngineFactoryName() {
-        return InMemoryStorageEngineFactory43.IN_MEMORY_STORAGE_ENGINE_NAME_43;
-    }
-
-    @Override
     public void createInMemoryDatabase(
         DatabaseManagementService dbms,
         String dbName,
         Config config
     ) {
-        config.set(storage_engine, inMemoryStorageEngineFactoryName());
+        config.set(storage_engine, InMemoryStorageEngineFactory43.IN_MEMORY_STORAGE_ENGINE_NAME_43);
         dbms.createDatabase(dbName, config);
     }
 

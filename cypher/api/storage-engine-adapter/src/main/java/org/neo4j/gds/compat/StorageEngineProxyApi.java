@@ -55,8 +55,6 @@ public interface StorageEngineProxyApi {
         CountsAccessor counts
     );
 
-    String inMemoryStorageEngineFactoryName();
-
     void createInMemoryDatabase(
         DatabaseManagementService dbms,
         String dbName,

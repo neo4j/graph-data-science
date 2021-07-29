@@ -71,11 +71,6 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     }
 
     @Override
-    public String inMemoryStorageEngineFactoryName() {
-        throw cypherUnsupportedException();
-    }
-
-    @Override
     public void createInMemoryDatabase(
         DatabaseManagementService dbms,
         String dbName,
