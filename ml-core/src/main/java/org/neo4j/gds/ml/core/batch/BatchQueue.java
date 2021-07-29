@@ -45,6 +45,15 @@ public class BatchQueue {
         this.currentBatch = 0;
     }
 
+    public BatchQueue(long nodeCount, int minBatchSize, int concurrency) {
+        this(nodeCount,
+            Math.toIntExact(Math.min(
+                Integer.MAX_VALUE,
+                ParallelUtil.adjustedBatchSize(nodeCount, concurrency, minBatchSize)
+            ))
+        );
+    }
+
     public synchronized Optional<Batch> pop() {
         if (currentBatch * batchSize >= nodeCount) {
             return Optional.empty();

@@ -19,6 +19,7 @@ import java.util.function.Consumer;
 import java.util.stream.LongStream;
 
 public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResult> {
+    private static final int MIN_BATCH_SIZE = 100;
 
     private final LinkLogisticRegressionData modelData;
     private final FeaturePipeline featurePipeline;
@@ -26,7 +27,6 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     private final List<NodeLabel> nodeLabels;
     private final List<RelationshipType> relationshipTypes;
     private final Graph graph;
-    private final int batchSize;
     private final int concurrency;
     private final int topN;
     private final double threshold;
@@ -38,7 +38,6 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         List<NodeLabel> nodeLabels,
         List<RelationshipType> relationshipTypes,
         Graph graph,
-        int batchSize,
         int concurrency,
         int topN,
         double threshold,
@@ -51,7 +50,6 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         this.relationshipTypes = relationshipTypes;
         this.graph = graph;
         this.concurrency = concurrency;
-        this.batchSize = batchSize;
         this.topN = topN;
         this.threshold = threshold;
         this.progressTracker = progressTracker;
@@ -73,7 +71,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         progressTracker.beginSubTask();
         var predictor = new LinkLogisticRegressionPredictor(modelData);
         var result = new LinkPredictionResult(topN);
-        var batchQueue = new BatchQueue(graph.nodeCount(), batchSize);
+        var batchQueue = new BatchQueue(graph.nodeCount(), MIN_BATCH_SIZE, concurrency);
         batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
             graph.concurrentCopy(),
             featurePipeline.linkFeatureExtractor(graph),

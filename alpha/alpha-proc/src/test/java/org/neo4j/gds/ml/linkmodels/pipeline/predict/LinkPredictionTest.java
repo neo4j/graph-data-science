@@ -105,7 +105,6 @@ class LinkPredictionTest extends BaseProcTest {
                 List.of(NodeLabel.of("N")),
                 List.of(RelationshipType.of("T")),
                 graph,
-                1,
                 4,
                 topN,
                 0D,
