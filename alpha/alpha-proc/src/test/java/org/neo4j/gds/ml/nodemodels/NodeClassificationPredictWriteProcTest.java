@@ -23,7 +23,11 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.neo4j.gds.WritePropertyConfigProcTest;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionResult;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.BaseProcTest;
@@ -32,7 +36,6 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromCypherConfig;
@@ -44,9 +47,11 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,6 +77,12 @@ class NodeClassificationPredictWriteProcTest extends BaseProcTest implements Wri
     public static final String GRAPH_NAME = "g";
     public static final String MODEL_NAME = "model";
 
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
+        ).flatMap(Collection::stream);
+    }
 
     @BeforeEach
     void setup() throws Exception {
