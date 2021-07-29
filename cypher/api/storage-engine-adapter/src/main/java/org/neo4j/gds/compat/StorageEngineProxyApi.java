@@ -28,7 +28,6 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
-import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
@@ -37,8 +36,7 @@ public interface StorageEngineProxyApi {
 
     <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders,
-        MetadataProvider metadataProvider
+        TokenHolders tokenHolders
     );
 
     CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders);

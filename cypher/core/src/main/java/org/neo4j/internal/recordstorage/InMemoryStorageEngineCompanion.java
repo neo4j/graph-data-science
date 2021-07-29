@@ -35,8 +35,7 @@ public final class InMemoryStorageEngineCompanion {
     ) {
         var storageEngineBuilder = StorageEngineProxy.inMemoryStorageEngineBuilder(
             databaseLayout,
-            tokenHolders,
-            new InMemoryMetaDataProvider()
+            tokenHolders
         );
 
         storageEngineBuilder.withCountsStoreFn(StorageEngineProxy::inMemoryCountsStore);
