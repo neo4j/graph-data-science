@@ -90,7 +90,7 @@ class FeaturePipelineTest extends BaseProcTest {
 
             pipeline.addFeature(
                 LinkFeatureStepFactory.HADAMARD.name(),
-                Map.of("featureProperties", List.of("array"))
+                Map.of("nodeProperties", List.of("array"))
             );
 
             var expected = HugeObjectArray.of(
