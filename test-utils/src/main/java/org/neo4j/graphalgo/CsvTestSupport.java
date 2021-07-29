@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo;
 
-import org.apache.commons.io.FileUtils;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,9 +37,9 @@ public final class CsvTestSupport {
 
     private CsvTestSupport() {}
 
-    public static void assertCsvFiles(Path path, Collection<String> expectedFiles) {
-        for (String expectedFile : expectedFiles) {
-            assertThat(path.toFile()).isDirectoryContaining(file -> file.getName().equals(expectedFile));
+    public static void assertCsvFiles(Path path, Iterable<String> expectedFiles) {
+        for (var expectedFile : expectedFiles) {
+            assertThat(path).isDirectoryContaining("glob:**/" + expectedFile);
         }
     }
 
@@ -60,15 +60,14 @@ public final class CsvTestSupport {
         assertThat(path.resolve(fileName)).hasContent(String.join(",", expectedContent));
     }
 
-    public static void assertDataContent(Path path, String fileName, List<List<String>> data) {
+    public static void assertDataContent(Path path, String fileName, Collection<List<String>> data) {
         var expectedContent = data
             .stream()
             .map(row -> String.join(",", row))
             .collect(Collectors.toList());
 
-        Path file = path.resolve(fileName);
         try {
-            List<String> fileLines = FileUtils.readLines(file.toFile(), StandardCharsets.UTF_8);
+            var fileLines = Files.readAllLines(path.resolve(fileName), StandardCharsets.UTF_8);
             assertThat(fileLines).containsExactlyInAnyOrder(expectedContent.toArray(String[]::new));
         } catch (IOException e) {
             throw new RuntimeException(e);
