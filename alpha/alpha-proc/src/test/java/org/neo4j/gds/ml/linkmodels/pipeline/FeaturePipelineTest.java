@@ -58,6 +58,7 @@ class FeaturePipelineTest extends BaseProcTest {
         "(b)-[:IGNORE]->(c), " +
         "(a)-[:REL]->(c), " +
         "(a)-[:REL]->(d)";
+
     public static final String GRAPH_NAME = "g";
 
     private GraphStore graphStore;
@@ -228,7 +229,7 @@ class FeaturePipelineTest extends BaseProcTest {
 
     private HugeObjectArray<double[]> computePropertiesAndLinkFeatures(FeaturePipeline pipeline) {
         pipeline.executeNodePropertySteps(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
-        return pipeline.computeFeatures(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"));
+        return pipeline.computeFeatures(GRAPH_NAME, List.of(NodeLabel.of("N")), RelationshipType.of("REL"), 4);
     }
 
 }

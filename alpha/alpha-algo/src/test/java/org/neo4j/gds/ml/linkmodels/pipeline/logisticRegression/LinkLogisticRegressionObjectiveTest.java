@@ -83,7 +83,8 @@ class LinkLogisticRegressionObjectiveTest {
 
         var linkFeatures = LinkFeatureExtractor.extractFeatures(
             graph,
-            List.of(new L2FeatureStep(features))
+            List.of(new L2FeatureStep(features)),
+            4
         );
         this.objective = new LinkLogisticRegressionObjective(
             LinkLogisticRegressionData.from(features.size()),

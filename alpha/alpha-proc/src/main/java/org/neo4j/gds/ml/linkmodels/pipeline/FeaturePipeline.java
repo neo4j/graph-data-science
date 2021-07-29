@@ -64,13 +64,18 @@ public class FeaturePipeline {
         this.nodePropertySteps.add(new NodePropertyStep(name, config));
     }
 
-    public HugeObjectArray<double[]> computeFeatures(String graphName, Collection<NodeLabel> nodeLabels, RelationshipType relationshipType) {
+    public HugeObjectArray<double[]> computeFeatures(
+        String graphName,
+        Collection<NodeLabel> nodeLabels,
+        RelationshipType relationshipType,
+        int concurrency
+    ) {
         var graph = GraphStoreCatalog.get(userName, databaseId, graphName)
             .graphStore()
             .getGraph(nodeLabels, List.of(relationshipType), Optional.empty());
         validate(graph);
 
-        return extractFeatures(graph, linkFeatureSteps);
+        return extractFeatures(graph, linkFeatureSteps, concurrency);
     }
 
     public LinkFeatureExtractor linkFeatureExtractor(Graph graph) {

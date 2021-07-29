@@ -19,12 +19,18 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.graphalgo.api.Graph;
+import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
+import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
+import org.neo4j.graphalgo.core.utils.partition.DegreePartition;
+import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -58,7 +64,7 @@ public final class LinkFeatureExtractor {
         return new LinkFeatureExtractor(linkFeatureProducers, featureDimension, featureDimensions);
     }
 
-    public static HugeObjectArray<double[]> extractFeatures(Graph graph, List<LinkFeatureStep> linkFeatureSteps) {
+    public static HugeObjectArray<double[]> extractFeatures(Graph graph, List<LinkFeatureStep> linkFeatureSteps, int concurrency) {
         var extractor = of(graph, linkFeatureSteps);
 
         var linkFeatures = HugeObjectArray.newArray(
@@ -67,14 +73,28 @@ public final class LinkFeatureExtractor {
             AllocationTracker.empty()
         );
 
-        var relationshipOffset = new MutableLong();
-        graph.forEachNode(nodeId -> {
-            graph.forEachRelationship(nodeId, (source, target) -> {
-                linkFeatures.set(relationshipOffset.getAndIncrement(), extractor.extractFeatures(source, target));
-                return true;
-            });
-            return true;
-        });
+        var partitions = PartitionUtils.degreePartition(
+            graph,
+            concurrency,
+            Function.identity(),
+            Optional.of(100)
+        );
+
+        var linkFeatureWriters = new ArrayList<LinkFeatureWriter>();
+        var relationshipOffset = 0L;
+        for (DegreePartition partition : partitions) {
+            linkFeatureWriters.add(new LinkFeatureWriter(
+                extractor,
+                partition,
+                graph.concurrentCopy(),
+                relationshipOffset,
+                linkFeatures
+            ));
+            relationshipOffset += partition.totalDegree();
+        }
+
+        ParallelUtil.runWithConcurrency(concurrency, linkFeatureWriters, Pools.DEFAULT);
+
         return linkFeatures;
     }
 

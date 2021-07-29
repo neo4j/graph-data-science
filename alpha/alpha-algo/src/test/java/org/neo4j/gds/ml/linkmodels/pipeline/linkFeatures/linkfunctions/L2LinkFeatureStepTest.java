@@ -62,7 +62,7 @@ final class L2LinkFeatureStepTest {
             Map.of("nodeProperties", List.of("noise", "z", "array"))
         );
 
-        HugeObjectArray<double[]> linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step));
+        HugeObjectArray<double[]> linkFeatures = LinkFeatureExtractor.extractFeatures(graph, List.of(step), 4);
 
         var delta = 0.0001D;
 

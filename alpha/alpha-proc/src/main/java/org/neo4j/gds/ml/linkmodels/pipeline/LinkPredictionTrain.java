@@ -178,7 +178,8 @@ public class LinkPredictionTrain
         var features = featurePipeline.computeFeatures(
             graphName,
             config.nodeLabelIdentifiers(graphStore),
-            RelationshipType.of(relationshipType)
+            RelationshipType.of(relationshipType),
+            config.concurrency()
         );
         var targets = extractTargets(features.size(), relationshipType);
 
