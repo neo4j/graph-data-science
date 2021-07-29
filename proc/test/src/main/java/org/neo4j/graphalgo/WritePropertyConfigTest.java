@@ -33,22 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public interface WritePropertyConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends WritePropertyConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 
     @Test
-    default void testMissingWritePropertyFails() {
-        CypherMapWrapper mapWrapper =
-            createMinimalConfig(CypherMapWrapper.empty())
-                .withoutEntry("writeProperty");
-
-        IllegalArgumentException exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> createConfig(mapWrapper)
-        );
-        assertEquals(
-            "No value specified for the mandatory configuration parameter `writeProperty`",
-            exception.getMessage()
-        );
-    }
-
-    @Test
     default void testEmptyWritePropertyValues() {
         CypherMapWrapper mapWrapper = CypherMapWrapper.create(MapUtil.map("writeProperty", null));
         assertThrows(IllegalArgumentException.class, () -> createConfig(mapWrapper));

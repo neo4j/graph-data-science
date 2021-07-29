@@ -20,11 +20,14 @@
 package org.neo4j.graphalgo.labelpropagation;
 
 import org.intellij.lang.annotations.Language;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.ConsecutiveIdsConfigTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -37,6 +40,7 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -50,6 +54,13 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 class LabelPropagationWriteProcTest extends LabelPropagationProcTest<LabelPropagationWriteConfig> implements
     WritePropertyConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation>,
     ConsecutiveIdsConfigTest<LabelPropagation, LabelPropagationWriteConfig, LabelPropagation> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
+        ).flatMap(Collection::stream);
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<LabelPropagation, LabelPropagation, LabelPropagationWriteConfig>> getProcedureClazz() {

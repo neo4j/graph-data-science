@@ -19,14 +19,19 @@
  */
 package org.neo4j.graphalgo.triangle;
 
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
@@ -37,6 +42,13 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 class LocalClusteringCoefficientWriteProcTest
     extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientWriteConfig>
     implements WritePropertyConfigTest<LocalClusteringCoefficient, LocalClusteringCoefficientWriteConfig, LocalClusteringCoefficient.Result> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
+        ).flatMap(Collection::stream);
+    }
 
     @Test
     void testWrite() {

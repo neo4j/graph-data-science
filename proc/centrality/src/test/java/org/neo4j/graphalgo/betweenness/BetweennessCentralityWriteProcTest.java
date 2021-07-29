@@ -19,15 +19,20 @@
  */
 package org.neo4j.graphalgo.betweenness;
 
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
@@ -37,6 +42,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class BetweennessCentralityWriteProcTest
     extends BetweennessCentralityProcTest<BetweennessCentralityWriteConfig>
     implements WritePropertyConfigTest<BetweennessCentrality, BetweennessCentralityWriteConfig, HugeAtomicDoubleArray> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
+        ).flatMap(Collection::stream);
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig>> getProcedureClazz() {

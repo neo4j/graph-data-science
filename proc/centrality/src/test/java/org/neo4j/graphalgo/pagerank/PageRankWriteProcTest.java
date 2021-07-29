@@ -19,17 +19,22 @@
  */
 package org.neo4j.graphalgo.pagerank;
 
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
 import org.neo4j.graphalgo.WritePropertyConfigTest;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThan;
@@ -40,6 +45,13 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> implements
     WritePropertyConfigTest<PageRankAlgorithm, PageRankWriteConfig, PageRankResult> {
+
+    @TestFactory
+    Stream<DynamicTest> configTests() {
+        return Stream.of(
+            WritePropertyConfigProcTest.test(proc(), createMinimalConfig())
+        ).flatMap(Collection::stream);
+    }
 
     @Override
     public Class<? extends AlgoBaseProc<PageRankAlgorithm, PageRankResult, PageRankWriteConfig>> getProcedureClazz() {
