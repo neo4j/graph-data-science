@@ -94,6 +94,35 @@ public enum ValueType {
             return DefaultValue.forDouble();
         }
     },
+    STRING {
+        @Override
+        public String cypherName() {
+            return "String";
+        }
+
+        @Override
+        public String csvName() {
+            return "string";
+        }
+
+        @Override
+        public String csvValue(Object value) {
+            if (value == null) {
+                return "";
+            }
+            return value.toString();
+        }
+
+        @Override
+        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
+            throw new UnsupportedOperationException("Unsupported conversion from CSV value to STRING");
+        }
+
+        @Override
+        public DefaultValue fallbackValue() {
+            return DefaultValue.DEFAULT;
+        }
+    },
     DOUBLE_ARRAY {
         @Override
         public String cypherName() {
