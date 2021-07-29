@@ -188,6 +188,11 @@ public final class TransientUncompressedList implements AdjacencyList, Adjacency
         return propertyCursor(node, fallbackValue);
     }
 
+    @Override
+    public PropertyCursor rawPropertyCursor() {
+        return new Cursor(pages);
+    }
+
     public static final class Cursor extends MutableIntValue implements AdjacencyCursor, PropertyCursor {
 
         private long[][] pages;
