@@ -25,7 +25,9 @@ import java.util.List;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
-public final class FeatureStepUtil {
+final class FeatureStepUtil {
+
+    private FeatureStepUtil() {}
 
     static int totalPropertyDimension(Graph graph, List<String> nodeProperties) {
         return nodeProperties.stream().mapToInt(property -> FeatureStepUtil.propertyDimension(graph, property)).sum();
