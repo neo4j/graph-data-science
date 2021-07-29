@@ -1,5 +1,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
@@ -13,7 +14,6 @@ import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.LongStream;
@@ -119,11 +119,11 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         @Override
         public void accept(Batch batch) {
             for (long sourceId : batch.nodeIds()) {
-                var neighbors = neighborSet(sourceId);
+                var largerNeighbors = largerNeighbors(sourceId);
                 // since graph is undirected, only process pairs where sourceId < targetId
                 var smallestTarget = sourceId + 1;
                 LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
-                        if (neighbors.contains(targetId)) return;
+                        if (largerNeighbors.contains(targetId)) return;
                         var features = linkFeatureExtractor.extractFeatures(sourceId, targetId);
                         var probability = predictor.predictedProbability(features);
                         if (probability < threshold) return;
@@ -134,11 +134,11 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
             progressTracker.logProgress(batch.size());
         }
 
-        private HashSet<Long> neighborSet(long sourceId) {
-            var neighbors = new HashSet<Long>();
+        private LongHashSet largerNeighbors(long sourceId) {
+            var neighbors = new LongHashSet();
             graph.forEachRelationship(
                 sourceId, (src, trg) -> {
-                    neighbors.add(trg);
+                    if (src < trg) neighbors.add(trg);
                     return true;
                 }
             );
