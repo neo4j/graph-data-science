@@ -72,34 +72,6 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
         ).build();
 
     @Test
-    default void testDefaultNodeWeightPropertyIsNull() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.empty();
-        CONFIG config = createConfig(createMinimalConfig(mapWrapper));
-        assertNull(config.nodeWeightProperty());
-    }
-
-    @Test
-    default void testTrimmedToNullNodeWeightProperty() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(Map.of());
-        CONFIG config = createConfig(createMinimalConfig(mapWrapper).withString("nodeWeightProperty", "  "));
-        assertNull(config.nodeWeightProperty());
-    }
-
-    @Test
-    default void testNodeWeightPropertyFromConfig() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(Map.of());
-        CONFIG config = createConfig(createMinimalConfig(mapWrapper).withString("nodeWeightProperty", "weight"));
-        assertEquals("weight", config.nodeWeightProperty());
-    }
-
-    @Test
-    default void testEmptyNodeWeightPropertyValues() {
-        CypherMapWrapper mapWrapper = CypherMapWrapper.create(Map.of());
-        CONFIG config = createConfig(createMinimalConfig(mapWrapper).withoutEntry("nodeWeightProperty"));
-        assertNull(config.nodeWeightProperty());
-    }
-
-    @Test
     default void testNodeWeightPropertyValidation() {
         runQuery(graphDb(), "CREATE (:A {a: 1, knn: 2})");
         String graphName = "graph";

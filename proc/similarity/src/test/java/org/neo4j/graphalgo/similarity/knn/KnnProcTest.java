@@ -22,12 +22,12 @@ package org.neo4j.graphalgo.similarity.knn;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.IterationsConfigProcTest;
+import org.neo4j.gds.NodeWeightConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
@@ -70,7 +70,8 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
     @TestFactory
     Stream<DynamicTest> configTests() {
         return Stream.of(
-            IterationsConfigProcTest.test(proc(), createMinimalConfig())
+            IterationsConfigProcTest.test(proc(), createMinimalConfig()),
+            NodeWeightConfigProcTest.mandatoryParameterTest(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 
@@ -168,24 +169,6 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
             .withNumber("randomJoins", 42)
             .withNumber("topK", 1)
             .withEntry("nodeWeightProperty", "knn");
-    }
-
-    @Test
-    @Disabled("KNN always uses a node weight property")
-    @Override
-    public void testDefaultNodeWeightPropertyIsNull() {
-    }
-
-    @Test
-    @Disabled("KNN requires a node weight property")
-    @Override
-    public void testEmptyNodeWeightPropertyValues() {
-    }
-
-    @Test
-    @Disabled("KNN requires a node weight property")
-    @Override
-    public void testTrimmedToNullNodeWeightProperty() {
     }
 
     @Test

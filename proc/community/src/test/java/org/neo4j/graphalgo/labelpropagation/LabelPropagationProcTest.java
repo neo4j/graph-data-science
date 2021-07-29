@@ -25,6 +25,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.IterationsConfigProcTest;
+import org.neo4j.gds.NodeWeightConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.graphalgo.AlgoBaseProcTest;
@@ -70,7 +71,8 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
     @TestFactory
     Stream<DynamicTest> configTests() {
         return Stream.of(
-            IterationsConfigProcTest.test(proc(), createMinimalConfig())
+            IterationsConfigProcTest.test(proc(), createMinimalConfig()),
+            NodeWeightConfigProcTest.defaultTest(proc(), createMinimalConfig())
         ).flatMap(Collection::stream);
     }
 
