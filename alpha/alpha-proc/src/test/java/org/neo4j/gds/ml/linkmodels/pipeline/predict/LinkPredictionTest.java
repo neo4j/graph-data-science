@@ -21,11 +21,12 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.linkmodels.PredictedLink;
 import org.neo4j.gds.ml.linkmodels.pipeline.FeaturePipeline;
 import org.neo4j.gds.ml.linkmodels.pipeline.ProcedureTestUtils;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStepFactory;
@@ -52,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class LinkPredictionTest extends BaseProcTest {
     @Neo4jGraph
     static String GDL = "CREATE " +
-                        "  (n0:N {a: 1.0, b: 0.9, c: 1.0})" +
+                        "  (n0:N {a: 1.0, b: 0.8, c: 1.0})" +
                         ", (n1:N {a: 2.0, b: 1.0, c: 1.0})" +
                         ", (n2:N {a: 3.0, b: 1.5, c: 1.0})" +
                         ", (n3:N {a: 0.0, b: 2.8, c: 1.0})" +
@@ -85,8 +86,8 @@ class LinkPredictionTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {3, 50})
-    void shouldPredictWithTopN(int topN) {
+    @CsvSource(value = {"3, 1", "3, 4", "50, 1", "50, 4"})
+    void shouldPredictWithTopN(int topN, int concurrency) {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
             var featurePipeline = new FeaturePipeline(caller, db.databaseId(), getUsername());
             featurePipeline.addFeature(
@@ -105,7 +106,7 @@ class LinkPredictionTest extends BaseProcTest {
                 List.of(NodeLabel.of("N")),
                 List.of(RelationshipType.of("T")),
                 graph,
-                4,
+                concurrency,
                 topN,
                 0D,
                 ProgressTracker.NULL_TRACKER
@@ -113,9 +114,15 @@ class LinkPredictionTest extends BaseProcTest {
             var predictionResult = linkPrediction.compute();
             var predictedLinks = predictionResult.stream().collect(Collectors.toList());
             assertThat(predictedLinks).hasSize(Math.min(topN, 6));
-            var firstLink = predictedLinks.get(0);
-            assertThat(firstLink.sourceId()).isEqualTo(0);
-            assertThat(firstLink.targetId()).isEqualTo(4);
+            var expectedLinks = List.of(
+                PredictedLink.of(0, 4, 0.49750002083312506),
+                PredictedLink.of(1, 4, 0.11815697780926958),
+                PredictedLink.of(0, 1, 0.11506673204554983),
+                PredictedLink.of(0, 3, 0.0024726231566347774),
+                PredictedLink.of(0, 2, 2.0547103309367397E-4),
+                PredictedLink.of(2, 3, 2.810228605019867E-9)
+            );
+            assertThat(expectedLinks).containsAll(predictedLinks);
         });
     }
 }
