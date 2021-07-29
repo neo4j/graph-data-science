@@ -39,7 +39,8 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders
+        TokenHolders tokenHolders,
+        Config config
     ) {
         throw cypherUnsupportedException();
     }

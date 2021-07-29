@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat._43;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.TriFunction;
@@ -51,7 +52,8 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
         BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
         MetadataProvider metadataProvider,
         Supplier<CommandCreationContext> commandCreationContextSupplier,
-        TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
+        TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn,
+        Config config
     ) {
         super(
             databaseLayout,
@@ -60,7 +62,8 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
             txStateVisitorFn,
             metadataProvider,
             commandCreationContextSupplier,
-            storageReaderFn
+            storageReaderFn,
+            config
         );
     }
 
@@ -81,8 +84,13 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
     }
 
     public static final class Builder extends InMemoryStorageEngineBuilder<InMemoryStorageEngineImpl> {
-        public Builder(DatabaseLayout databaseLayout, TokenHolders tokenHolders, MetadataProvider metadataProvider) {
-            super(databaseLayout, tokenHolders, metadataProvider);
+        public Builder(
+            DatabaseLayout databaseLayout,
+            TokenHolders tokenHolders,
+            MetadataProvider metadataProvider,
+            Config config
+        ) {
+            super(databaseLayout, tokenHolders, metadataProvider, config);
         }
 
         @Override
@@ -94,7 +102,8 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
                 txStateVisitorFn,
                 metadataProvider,
                 commandCreationContextSupplier,
-                storageReaderFn
+                storageReaderFn,
+                config
             );
         }
     }

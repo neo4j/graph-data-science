@@ -83,7 +83,7 @@ public class InMemoryStorageEngineFactory43 extends AbstractInMemoryStorageEngin
 
         factory.openNeoStores(createStoreIfNotExists, StoreType.LABEL_TOKEN);
 
-        return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders, metadataProvider)
+        return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders, metadataProvider, config)
             .withCommandCreationContextSupplier(InMemoryCommandCreationContextImpl::new)
             .withStorageReaderFn(InMemoryStorageReader43::new)
             .withTxStateVisitorFn(InMemoryTransactionStateVisitor::new)

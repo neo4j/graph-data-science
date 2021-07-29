@@ -45,9 +45,10 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public InMemoryStorageEngineImpl.Builder inMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders
+        TokenHolders tokenHolders,
+        Config config
     ) {
-        return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders, new InMemoryMetaDataProvider());
+        return new InMemoryStorageEngineImpl.Builder(databaseLayout, tokenHolders, new InMemoryMetaDataProvider(), config);
     }
 
     @Override

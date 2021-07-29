@@ -19,11 +19,14 @@
  */
 package org.neo4j.internal.recordstorage;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.token.TokenHolders;
+
+import static org.neo4j.gds.storageengine.GraphStoreSettings.graph_name;
 
 public final class InMemoryStorageEngineCompanion {
 
@@ -33,9 +36,12 @@ public final class InMemoryStorageEngineCompanion {
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders
     ) {
+        var config = Config.defaults();
+        config.set(graph_name, databaseLayout.getDatabaseName());
         var storageEngineBuilder = StorageEngineProxy.inMemoryStorageEngineBuilder(
             databaseLayout,
-            tokenHolders
+            tokenHolders,
+            config
         );
 
         storageEngineBuilder.withCountsStoreFn(StorageEngineProxy::inMemoryCountsStore);

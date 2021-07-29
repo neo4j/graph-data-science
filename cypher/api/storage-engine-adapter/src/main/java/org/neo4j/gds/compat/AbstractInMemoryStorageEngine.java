@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.exceptions.KernelException;
@@ -61,6 +62,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.storageengine.GraphStoreSettings.graph_name;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
@@ -80,14 +82,16 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn,
         MetadataProvider metadataProvider,
         Supplier<CommandCreationContext> commandCreationContextSupplier,
-        TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
+        TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn,
+        Config config
     ) {
         this.tokenHolders = tokenHolders;
+        var graphName = config.get(graph_name);
         this.graphStore = GraphStoreCatalog.getAllGraphStores()
             .filter(graphStoreWithUserNameAndConfig -> graphStoreWithUserNameAndConfig
                 .config()
                 .graphName()
-                .equals(databaseLayout.getDatabaseName()))
+                .equals(graphName))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException(formatWithLocale(
                 "No graph with name %s was found in GraphStoreCatalog. Available graph names are %s",
