@@ -40,14 +40,27 @@ public class InMemoryTransactionIdStore implements TransactionIdStore {
         this(1L, -559063315, 0L, 0L, 64L);
     }
 
-    public InMemoryTransactionIdStore(long previouslyCommittedTxId, int checksum, long previouslyCommittedTxCommitTimestamp, long previouslyCommittedTxLogVersion, long previouslyCommittedTxLogByteOffset) {
+    public InMemoryTransactionIdStore(
+        long previouslyCommittedTxId,
+        int checksum,
+        long previouslyCommittedTxCommitTimestamp,
+        long previouslyCommittedTxLogVersion,
+        long previouslyCommittedTxLogByteOffset
+    ) {
         this.committingTransactionId = new AtomicLong();
         this.closedTransactionId = new ArrayQueueOutOfOrderSequence(-1L, 100, new long[1]);
         this.committedTransactionId = new AtomicReference<>(new TransactionId(1L, -559063315, 0L));
 
         assert previouslyCommittedTxId >= 1L : "cannot start from a tx id less than BASE_TX_ID";
 
-        this.setLastCommittedAndClosedTransactionId(previouslyCommittedTxId, checksum, previouslyCommittedTxCommitTimestamp, previouslyCommittedTxLogByteOffset, previouslyCommittedTxLogVersion, CursorContext.NULL);
+        this.setLastCommittedAndClosedTransactionId(
+            previouslyCommittedTxId,
+            checksum,
+            previouslyCommittedTxCommitTimestamp,
+            previouslyCommittedTxLogByteOffset,
+            previouslyCommittedTxLogVersion,
+            CursorContext.NULL
+        );
         this.previouslyCommittedTxId = previouslyCommittedTxId;
         this.initialTransactionChecksum = checksum;
         this.previouslyCommittedTxCommitTimestamp = previouslyCommittedTxCommitTimestamp;
@@ -61,7 +74,12 @@ public class InMemoryTransactionIdStore implements TransactionIdStore {
         return this.committingTransactionId.get();
     }
 
-    public synchronized void transactionCommitted(long transactionId, int checksum, long commitTimestamp, CursorContext cursorContext) {
+    public synchronized void transactionCommitted(
+        long transactionId,
+        int checksum,
+        long commitTimestamp,
+        CursorContext cursorContext
+    ) {
         TransactionId current = this.committedTransactionId.get();
         if (current == null || transactionId > current.transactionId()) {
             this.committedTransactionId.set(new TransactionId(transactionId, checksum, commitTimestamp));
@@ -78,7 +96,11 @@ public class InMemoryTransactionIdStore implements TransactionIdStore {
     }
 
     public TransactionId getUpgradeTransaction() {
-        return new TransactionId(this.previouslyCommittedTxId, this.initialTransactionChecksum, this.previouslyCommittedTxCommitTimestamp);
+        return new TransactionId(
+            this.previouslyCommittedTxId,
+            this.initialTransactionChecksum,
+            this.previouslyCommittedTxCommitTimestamp
+        );
     }
 
     public long getLastClosedTransactionId() {
@@ -89,7 +111,14 @@ public class InMemoryTransactionIdStore implements TransactionIdStore {
         return this.closedTransactionId.get();
     }
 
-    public void setLastCommittedAndClosedTransactionId(long transactionId, int checksum, long commitTimestamp, long byteOffset, long logVersion, CursorContext cursorContext) {
+    public void setLastCommittedAndClosedTransactionId(
+        long transactionId,
+        int checksum,
+        long commitTimestamp,
+        long byteOffset,
+        long logVersion,
+        CursorContext cursorContext
+    ) {
         this.committingTransactionId.set(transactionId);
         this.committedTransactionId.set(new TransactionId(transactionId, checksum, commitTimestamp));
         this.closedTransactionId.set(transactionId, new long[]{logVersion, byteOffset});
@@ -99,7 +128,13 @@ public class InMemoryTransactionIdStore implements TransactionIdStore {
         this.closedTransactionId.offer(transactionId, new long[]{logVersion, byteOffset});
     }
 
-    public void resetLastClosedTransaction(long transactionId, long byteOffset, long logVersion, boolean missingLogs, CursorContext cursorContext) {
+    public void resetLastClosedTransaction(
+        long transactionId,
+        long byteOffset,
+        long logVersion,
+        boolean missingLogs,
+        CursorContext cursorContext
+    ) {
         this.closedTransactionId.set(transactionId, new long[]{logVersion, byteOffset});
     }
 

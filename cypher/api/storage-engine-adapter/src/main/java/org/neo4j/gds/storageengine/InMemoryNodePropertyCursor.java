@@ -109,8 +109,8 @@ class InMemoryNodePropertyCursor extends InMemoryPropertyCursor.DelegateProperty
                 .propertyKeyTokens()
                 .getAllTokens()
                 .spliterator(), false)
-                .filter(tokenHolder -> !seenNodeReferences.contains(tokenHolder.id()) && propertyPresentOnNode(
-                    tokenHolder))
+                .filter(tokenHolder -> !seenNodeReferences.contains(tokenHolder.id()) &&
+                                       propertyPresentOnNode(tokenHolder))
                 .findFirst();
 
             if (maybeNextEntry.isPresent()) {
