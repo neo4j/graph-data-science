@@ -19,20 +19,14 @@
  */
 package org.neo4j.graphalgo.core.utils.io.file.csv;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.graphalgo.CsvTestSupport;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class CsvTest {
 
@@ -40,37 +34,19 @@ public abstract class CsvTest {
     protected Path tempDir;
 
     protected void assertCsvFiles(Collection<String> expectedFiles) {
-        for (String expectedFile : expectedFiles) {
-            assertThat(tempDir.toFile()).isDirectoryContaining(file -> file.getName().equals(expectedFile));
-        }
+        CsvTestSupport.assertCsvFiles(tempDir, expectedFiles);
     }
 
-    protected void assertHeaderFile(String fileName, List<String> mandatoryColumns, Map<String, ? extends PropertySchema> properties) {
-        var expectedContent = new ArrayList<>(mandatoryColumns);
-
-        properties
-            .entrySet()
-            .stream()
-            .sorted(Map.Entry.comparingByKey())
-            .forEach((entry) -> expectedContent.add(entry.getKey() + ":" + entry.getValue().valueType().csvName()));
-
-        assertThat(tempDir.resolve(fileName)).hasContent(String.join(",", expectedContent));
+    void assertHeaderFile(
+        String fileName,
+        List<String> mandatoryColumns,
+        Map<String, ? extends PropertySchema> properties
+    ) {
+        CsvTestSupport.assertHeaderFile(tempDir, fileName, mandatoryColumns, properties);
     }
 
-    protected void assertDataContent(String fileName, List<List<String>> data) {
-        var expectedContent = data
-            .stream()
-            .map(row -> String.join(",", row))
-            .collect(Collectors.toList());
-
-        Path path = tempDir.resolve(fileName);
-        try {
-            List<String> fileLines = FileUtils.readLines(path.toFile(), StandardCharsets.UTF_8);
-            assertThat(fileLines).containsExactlyInAnyOrder(expectedContent.toArray(String[]::new));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+    void assertDataContent(String fileName, List<List<String>> data) {
+        CsvTestSupport.assertDataContent(tempDir, fileName, data);
     }
 }
 
