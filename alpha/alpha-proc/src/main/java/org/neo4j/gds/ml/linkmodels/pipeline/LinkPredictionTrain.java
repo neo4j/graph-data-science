@@ -25,9 +25,9 @@ import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.linkmodels.SignedProbabilities;
 import org.neo4j.gds.ml.linkmodels.metrics.LinkMetric;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionData;
+import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionPredictor;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrain;
 import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression.LinkLogisticRegressionTrainPredictor;
 import org.neo4j.gds.ml.linkmodels.pipeline.procedureutils.ProcedureReflection;
 import org.neo4j.gds.ml.nodemodels.ImmutableModelStats;
 import org.neo4j.gds.ml.nodemodels.MetricData;
@@ -359,14 +359,17 @@ public class LinkPredictionTrain
         BatchQueue evaluationQueue,
         ProgressTracker progressTracker
     ) {
-        var predictor = new LinkLogisticRegressionTrainPredictor(modelData, inputData.features());
-        var signedProbabilities = SignedProbabilities.create(inputData.features().size());
+        progressTracker.setVolume(inputData.size());
 
-        HugeDoubleArray targets = inputData.targets();
+        var predictor = new LinkLogisticRegressionPredictor(modelData);
+        var signedProbabilities = SignedProbabilities.create(inputData.size());
+        var targets = inputData.targets();
+        var features = inputData.features();
+
         evaluationQueue.parallelConsume(config.concurrency(), thread ->
             (batch) -> {
                 for (Long relationshipIdx : batch.nodeIds()) {
-                    double predictedProbability = predictor.predictedProbabilities(relationshipIdx);
+                    double predictedProbability = predictor.predictedProbability(features.get(relationshipIdx));
                     boolean isEdge = targets.get(relationshipIdx) == 1.0D;
 
                     var signedProbability = isEdge ? predictedProbability : -1 * predictedProbability;

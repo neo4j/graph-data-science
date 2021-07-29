@@ -21,28 +21,19 @@ package org.neo4j.gds.ml.linkmodels.pipeline.logisticRegression;
 
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor;
 
-/**
- * Responsible for producing predictions on a specific graph.
- * Instances should not be reused between different graphs.
- */
 public class LinkLogisticRegressionPredictor {
     private final Matrix weights;
-    private final LinkFeatureExtractor extractor;
 
     public LinkLogisticRegressionPredictor(
-        LinkLogisticRegressionData modelData,
-        LinkFeatureExtractor extractor
+        LinkLogisticRegressionData modelData
     ) {
         this.weights = modelData.weights().data();
-        this.extractor = extractor;
     }
 
-    public double predictedProbability(long sourceId, long targetId) {
-        double[] features = extractor.extractFeatures(sourceId, targetId);
+    public double predictedProbability(double[] features) {
         var affinity = 0D;
-        for (int i = 0; i < extractor.featureDimension(); i++) {
+        for (int i = 0; i < features.length; i++) {
             affinity += weights.dataAt(i) * features[i];
         }
         return Sigmoid.sigmoid(affinity);
