@@ -81,23 +81,23 @@ public final class NodeWeightConfigProcTest {
         });
     }
 
-    private static DynamicTest defaultNodeWeightProperty(
-        AlgoBaseProc<?, ?, ?> proc,
+    private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest defaultNodeWeightProperty(
+        AlgoBaseProc<?, ?, C> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("defaultNodeWeightProperty", () -> {
-            var algoConfig = ((NodeWeightConfig) proc.newConfig(GRAPH_NAME, config));
+            var algoConfig = proc.newConfig(GRAPH_NAME, config);
             assertThat(algoConfig.nodeWeightProperty()).isNull();
         });
     }
 
-    private static DynamicTest whitespaceNodeWeightProperty(
-        AlgoBaseProc<?, ?, ?> proc,
+    private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest whitespaceNodeWeightProperty(
+        AlgoBaseProc<?, ?, C> proc,
         CypherMapWrapper config
     ) {
         return DynamicTest.dynamicTest("whitespaceNodeWeightProperty", () -> {
             var nodeWeightConfig = config.withString("nodeWeightProperty", "  ");
-            var algoConfig = ((NodeWeightConfig) proc.newConfig(GRAPH_NAME, nodeWeightConfig));
+            var algoConfig = proc.newConfig(GRAPH_NAME, nodeWeightConfig);
             assertThat(algoConfig.nodeWeightProperty()).isNull();
         });
     }
