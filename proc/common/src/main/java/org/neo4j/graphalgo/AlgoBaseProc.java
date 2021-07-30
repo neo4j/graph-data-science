@@ -171,6 +171,15 @@ public abstract class AlgoBaseProc<
         CONFIG config
     ) {}
 
+    public final void validateConfigWithGraphStore(
+        GraphStore graphStore,
+        GraphCreateConfig graphCreateConfig,
+        CONFIG config
+    ) {
+        GraphStoreValidation.validate(graphStore, config);
+        validateConfigsAfterLoad(graphStore, graphCreateConfig, config);
+    }
+
     protected void validateConfigsAfterLoad(
         GraphStore graphStore,
         GraphCreateConfig graphCreateConfig,
@@ -345,8 +354,7 @@ public abstract class AlgoBaseProc<
         }
 
         var graphStore = graphCandidate.graphStore();
-        GraphStoreValidation.validate(graphStore, config);
-        validateConfigsAfterLoad(graphStore, graphCandidate.config(), config);
+        validateConfigWithGraphStore(graphStore, graphCandidate.config(), config);
         return graphStore;
     }
 

@@ -21,39 +21,65 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.api.GraphStore;
+import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.NodeWeightConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.gdl.GdlFactory;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ConfigProcTestHelpers.GRAPH_NAME;
 
 public final class NodeWeightConfigProcTest {
 
-    public static List<DynamicTest> defaultTest(
-        AlgoBaseProc<?, ?, ?> proc,
+    public static <C extends AlgoBaseConfig & NodeWeightConfig> List<DynamicTest> defaultTest(
+        AlgoBaseProc<?, ?, C> proc,
         CypherMapWrapper config
     ) {
         return List.of(
             defaultNodeWeightProperty(proc, config),
             whitespaceNodeWeightProperty(proc, config),
-            validNodeWeightProperty(proc, config)
+            validNodeWeightProperty(proc, config),
+            validateNodeWeightProperty(proc, config)
         );
     }
 
-    public static List<DynamicTest> mandatoryParameterTest(
-        AlgoBaseProc<?, ?, ?> proc,
+    public static <C extends AlgoBaseConfig & NodeWeightConfig> List<DynamicTest> mandatoryParameterTest(
+        AlgoBaseProc<?, ?, C> proc,
         CypherMapWrapper config
     ) {
         return List.of(
             unspecifiedNodeWeightProperty(proc, config),
-            validNodeWeightProperty(proc, config)
+            validNodeWeightProperty(proc, config),
+            validateNodeWeightProperty(proc, config)
         );
     }
 
     private NodeWeightConfigProcTest() {}
+
+    private static <C extends AlgoBaseConfig> DynamicTest validateNodeWeightProperty(
+        AlgoBaseProc<?, ?, C> proc,
+        CypherMapWrapper config
+    ) {
+        var graphStore = (GraphStore) GdlFactory.of("(:A {a: 1})").build().graphStore();
+        return DynamicTest.dynamicTest("validateNodeWeightProperty", () -> {
+            assertThatThrownBy(() -> proc
+                .validateConfigWithGraphStore(
+                    graphStore,
+                    null,
+                    proc.newConfig(GRAPH_NAME, config.withString("nodeWeightProperty", "notA"))
+                )
+            )
+                .hasMessageContaining("Node weight property")
+                .hasMessageContaining("notA")
+                .hasMessageContaining("A")
+                .hasMessageContaining("a");
+        });
+    }
 
     private static DynamicTest defaultNodeWeightProperty(
         AlgoBaseProc<?, ?, ?> proc,
@@ -87,14 +113,16 @@ public final class NodeWeightConfigProcTest {
         });
     }
 
-    private static DynamicTest validNodeWeightProperty(
-        AlgoBaseProc<?, ?, ?> proc,
+    private static <C extends AlgoBaseConfig & NodeWeightConfig> DynamicTest validNodeWeightProperty(
+        AlgoBaseProc<?, ?, C> proc,
         CypherMapWrapper config
     ) {
+        var graphStore = (GraphStore) GdlFactory.of("(:A {nw: 1})").build().graphStore();
         return DynamicTest.dynamicTest("validNodeWeightProperty", () -> {
             var nodeWeightConfig = config.withString("nodeWeightProperty", "nw");
-            var algoConfig = ((NodeWeightConfig) proc.newConfig(GRAPH_NAME, nodeWeightConfig));
+            var algoConfig = proc.newConfig(GRAPH_NAME, nodeWeightConfig);
             assertThat(algoConfig.nodeWeightProperty()).isEqualTo("nw");
+            assertThatCode(() -> proc.validateConfigWithGraphStore(graphStore, null, algoConfig)).doesNotThrowAnyException();
         });
     }
 }
