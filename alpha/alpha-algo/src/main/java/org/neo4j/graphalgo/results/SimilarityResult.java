@@ -34,7 +34,7 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
     public final boolean bidirectional;
     public final boolean reversed;
 
-    public static SimilarityResult TOMB = new SimilarityResult(-1, -1, -1, -1, -1, -1);
+    public static final SimilarityResult TOMB = new SimilarityResult(-1, -1, -1, -1, -1, -1);
 
     public SimilarityResult(
             long item1,
@@ -108,8 +108,8 @@ public class SimilarityResult implements Comparable<SimilarityResult> {
         }
     }
 
-    public static Comparator<SimilarityResult> ASCENDING = (o1, o2) -> -o1.compareTo(o2);
-    public static Comparator<SimilarityResult> DESCENDING = SimilarityResult::compareTo;
+    public static final Comparator<SimilarityResult> ASCENDING = (o1, o2) -> -o1.compareTo(o2);
+    public static final Comparator<SimilarityResult> DESCENDING = SimilarityResult::compareTo;
 
     @Override
     public String toString() {

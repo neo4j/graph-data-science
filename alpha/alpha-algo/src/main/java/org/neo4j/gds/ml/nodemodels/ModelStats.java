@@ -28,8 +28,7 @@ import java.util.Map;
 
 @ValueClass
 public interface ModelStats<CONFIG extends TrainingConfig> {
-    Comparator<ModelStats> COMPARE_AVERAGE =
-        Comparator.comparingDouble(ModelStats::avg);
+    Comparator<ModelStats<?>> COMPARE_AVERAGE = Comparator.comparingDouble(ModelStats::avg);
 
     /**
      * The input params representing a model candidate

@@ -274,6 +274,7 @@ public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
             return (x + v) ^ w;
         }
 
+        @Override
         protected int next(int bits) {
             return (int) (nextLong() >>> (64-bits));
         }

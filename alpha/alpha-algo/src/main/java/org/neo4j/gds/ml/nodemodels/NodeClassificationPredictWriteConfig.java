@@ -41,12 +41,7 @@ public interface NodeClassificationPredictWriteConfig extends NodeClassification
     }
 
     Optional<String> predictedProbabilityProperty();
-
-    @Value.Default
-    default int batchSize() {
-        return 100;
-    }
-
+    
     static NodeClassificationPredictWriteConfig of(
         String username,
         Optional<String> graphName,

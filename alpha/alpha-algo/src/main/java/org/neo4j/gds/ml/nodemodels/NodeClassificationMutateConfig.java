@@ -35,9 +35,9 @@ public interface NodeClassificationMutateConfig extends NodeClassificationPredic
 
     long serialVersionUID = 0x42L;
 
+    @Override
     @Value.Derived
     @Configuration.Ignore
-    @Override
     default boolean includePredictedProbabilities() {
         return predictedProbabilityProperty().isPresent();
     }

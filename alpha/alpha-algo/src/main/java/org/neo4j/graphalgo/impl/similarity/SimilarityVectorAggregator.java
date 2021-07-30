@@ -31,8 +31,8 @@ import java.util.Map;
 
 public class SimilarityVectorAggregator {
     private final List<Map<String, Object>> vector = new ArrayList<>();
-    public static String CATEGORY_KEY = "category";
-    public static String WEIGHT_KEY = "weight";
+    public static final String CATEGORY_KEY = "category";
+    public static final String WEIGHT_KEY = "weight";
 
     @UserAggregationUpdate
     public void next(

@@ -40,6 +40,7 @@ public interface LinkPredictionPredictWriteConfig extends LinkPredictionPredictB
         return "probability";
     }
 
+    @Override
     @Value.Derived
     @Configuration.Key(WRITE_CONCURRENCY_KEY)
     @Configuration.Ignore

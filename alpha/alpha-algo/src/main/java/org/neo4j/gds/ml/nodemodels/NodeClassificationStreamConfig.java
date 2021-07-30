@@ -32,6 +32,7 @@ import java.util.Optional;
 @SuppressWarnings("immutables:subtype")
 public interface NodeClassificationStreamConfig extends NodeClassificationPredictConfig {
 
+    @Override
     @Value.Default
     default boolean includePredictedProbabilities() {
         return false;
