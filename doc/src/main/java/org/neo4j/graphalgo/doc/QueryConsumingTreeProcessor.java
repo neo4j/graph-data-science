@@ -100,7 +100,7 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
             .stream()
             .map(StructuralNode::getContent)
             .map(Object::toString)
-            .map(this::undoReplacements)
+            .map(QueryConsumingTreeProcessor::undoReplacements)
             .collect(Collectors.toList());
 
     }
@@ -201,10 +201,10 @@ public class QueryConsumingTreeProcessor extends Treeprocessor {
             : table.getHeader().get(0).getCells().stream().map(Cell::getText).collect(Collectors.toList());
     }
 
-    private String undoReplacements(String content) {
+    private static String undoReplacements(String content) {
         return content
-            .replaceAll("&gt;", ">")
-            .replaceAll("&lt;", "<");
+            .replace("&gt;", ">")
+            .replace("&lt;", "<");
     }
 
     @FunctionalInterface

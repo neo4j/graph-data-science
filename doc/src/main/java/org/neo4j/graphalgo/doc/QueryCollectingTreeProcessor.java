@@ -93,7 +93,7 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
             .stream()
             .map(StructuralNode::getContent)
             .map(Object::toString)
-            .map(this::undoReplacements)
+            .map(QueryCollectingTreeProcessor::undoReplacements)
             .collect(Collectors.toList());
 
     }
@@ -140,7 +140,7 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
                         resultRow.getCells()
                             .stream()
                             .map(Cell::getText)
-                            .map(this::undoReplacements)
+                            .map(QueryCollectingTreeProcessor::undoReplacements)
                             .collect(Collectors.toList())
                     );
                 }
@@ -186,9 +186,9 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
             )));
     }
 
-    private String undoReplacements(String content) {
+    private static String undoReplacements(String content) {
         return content
-            .replaceAll("&gt;", ">")
-            .replaceAll("&lt;", "<");
+            .replace("&gt;", ">")
+            .replace("&lt;", "<");
     }
 }
