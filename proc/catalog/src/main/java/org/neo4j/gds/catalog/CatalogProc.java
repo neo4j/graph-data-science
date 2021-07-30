@@ -30,7 +30,7 @@ import java.util.Optional;
 
 public abstract class CatalogProc extends BaseProc {
 
-    @NotNull String validateGraphName(@Nullable String graphName) {
+    protected @NotNull String validateGraphName(@Nullable String graphName) {
         return CypherMapWrapper.failOnBlank("graphName", graphName);
     }
 
