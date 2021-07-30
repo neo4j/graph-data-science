@@ -71,51 +71,6 @@ public interface NodeWeightConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RES
                 .build()
         ).build();
 
-    @Test
-    default void shouldFailWithInvalidNodeWeightPropertyOnFilteredGraph() {
-        runQuery(graphDb(), "MATCH (n) DETACH DELETE n");
-
-        runQuery(graphDb(), "CREATE" +
-                            "  (a:Node)" +
-                            ", (b:Ignore {foo: 42})" +
-                            ", (a)-[:Type]->(b)");
-
-        String loadedGraphName = "loadedGraph";
-
-        GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(graphDb())
-            .graphName(loadedGraphName)
-            .addNodeLabel("Node")
-            .addNodeProjection(NodeProjection.builder()
-                .label("Ignore")
-                .addProperty("foo", "foo", DefaultValue.of(0))
-                .build()
-            ).build();
-
-        GraphStoreCatalog.set(graphLoader.createConfig(), graphLoader.graphStore());
-
-        applyOnProcedure((proc) -> {
-            CypherMapWrapper mapWrapper = CypherMapWrapper.create(Map.of("nodeLabels", List.of("Node")));
-            Map<String, Object> configMap = createMinimalConfig(mapWrapper).toMap();
-            configMap.put("nodeWeightProperty", "foo");
-            String error = "Node weight property `foo` is not present for all requested labels. Requested labels: ['Node']. Labels without the property key: ['Node']. Properties available on all requested labels: []";
-            assertMissingProperty(error, () -> proc.compute(
-                loadedGraphName,
-                configMap
-            ));
-
-            if (supportsImplicitGraphCreate()) {
-                Map<String, Object> implicitConfigMap = createMinimalImplicitConfig(mapWrapper).toMap();
-                implicitConfigMap.put("nodeProperties", "foo");
-                implicitConfigMap.put("nodeWeightProperty", "foo");
-                assertMissingProperty(error, () -> proc.compute(
-                    implicitConfigMap,
-                    emptyMap()
-                ));
-            }
-        });
-    }
-
     @ParameterizedTest
     @CsvSource(value = {"weight1, 0.0", "weight2, 1.0"})
     default void testFilteringOnNodePropertiesOnLoadedGraph(String propertyName, double expectedWeight) {

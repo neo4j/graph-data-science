@@ -44,7 +44,8 @@ public final class NodeWeightConfigProcTest {
             defaultNodeWeightProperty(proc, config),
             whitespaceNodeWeightProperty(proc, config),
             validNodeWeightProperty(proc, config),
-            validateNodeWeightProperty(proc, config)
+            validateNodeWeightProperty(proc, config),
+            validateNodeWeightPropertyFilteredGraph(proc, config)
         );
     }
 
@@ -55,7 +56,8 @@ public final class NodeWeightConfigProcTest {
         return List.of(
             unspecifiedNodeWeightProperty(proc, config),
             validNodeWeightProperty(proc, config),
-            validateNodeWeightProperty(proc, config)
+            validateNodeWeightProperty(proc, config),
+            validateNodeWeightPropertyFilteredGraph(proc, config)
         );
     }
 
@@ -78,6 +80,31 @@ public final class NodeWeightConfigProcTest {
                 .hasMessageContaining("notA")
                 .hasMessageContaining("A")
                 .hasMessageContaining("a");
+        });
+    }
+
+    private static <C extends AlgoBaseConfig> DynamicTest validateNodeWeightPropertyFilteredGraph(
+        AlgoBaseProc<?, ?, C> proc,
+        CypherMapWrapper config
+    ) {
+        var graphStore = (GraphStore) GdlFactory
+            .of("(a:Node), (b:Ignore {foo: 42}), (a)-[:T]->(b)")
+            .build()
+            .graphStore();
+        return DynamicTest.dynamicTest("validateNodeWeightPropertyFilteredGraph", () -> {
+            assertThatThrownBy(() -> proc
+                .validateConfigWithGraphStore(
+                    graphStore,
+                    null,
+                    proc.newConfig(GRAPH_NAME, config
+                        .withString("nodeWeightProperty", "foo")
+                        .withEntry("nodeLabels", List.of("Node"))
+                    )
+                )
+            )
+                .hasMessageContaining("Node weight property")
+                .hasMessageContaining("foo")
+                .hasMessageContaining("Node");
         });
     }
 
