@@ -83,7 +83,7 @@ public class GraphSageEmbeddingsGenerator {
             partition -> createEmbeddings(graph, partition, features, result)
         );
 
-        ParallelUtil.run(tasks, executor);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
 
         progressTracker.endSubTask();
 
