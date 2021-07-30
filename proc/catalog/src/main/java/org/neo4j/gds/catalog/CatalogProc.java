@@ -23,10 +23,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphalgo.BaseProc;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.graphalgo.core.loading.GraphStoreWithConfig;
+
+import java.util.Optional;
 
 public abstract class CatalogProc extends BaseProc {
 
     @NotNull String validateGraphName(@Nullable String graphName) {
         return CypherMapWrapper.failOnBlank("graphName", graphName);
+    }
+
+    GraphStoreWithConfig graphStoreFromCatalog(String graphName) {
+        return GraphStoreCatalog.get(catalogRequest(Optional.empty(), Optional.empty()), graphName);
     }
 }
