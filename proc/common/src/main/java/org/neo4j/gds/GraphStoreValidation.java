@@ -26,8 +26,6 @@ import org.neo4j.gds.config.ConfigurableSeedConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.config.NodeWeightConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.config.SourceNodesConfig;
@@ -37,7 +35,6 @@ import org.neo4j.gds.utils.StringJoining;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -54,12 +51,6 @@ public final class GraphStoreValidation {
         }
         if (config instanceof FeaturePropertiesConfig) {
             validateFeaturesProperties(graphStore, (FeaturePropertiesConfig) config, filterLabels);
-        }
-        if (config instanceof NodeWeightConfig) {
-            validateNodeWeightProperty(graphStore, (NodeWeightConfig) config, filterLabels);
-        }
-        if (config instanceof RelationshipWeightConfig) {
-            validateRelationshipWeightProperty(graphStore, config);
         }
         if (config instanceof MutatePropertyConfig) {
             validateMutateProperty(graphStore, filterLabels, (MutatePropertyConfig) config);
@@ -123,41 +114,6 @@ public final class GraphStoreValidation {
         }
     }
 
-    private static void validateNodeWeightProperty(GraphStore graphStore, NodeWeightConfig config, Collection<NodeLabel> filterLabels) {
-        String weightProperty = config.nodeWeightProperty();
-        if (weightProperty != null && !graphStore.hasNodeProperty(filterLabels, weightProperty)) {
-            var labelsWithMissingProperty = filterLabels
-                .stream()
-                .filter(label -> !graphStore.nodePropertyKeys(label).contains(weightProperty))
-                .map(NodeLabel::name)
-                .collect(Collectors.toList());
-
-            throw new IllegalArgumentException(formatWithLocale(
-                "Node weight property `%s` is not present for all requested labels. Requested labels: %s. Labels without the property key: %s. Properties available on all requested labels: %s",
-                weightProperty,
-                StringJoining.join(filterLabels.stream().map(NodeLabel::name)),
-                StringJoining.join(labelsWithMissingProperty),
-                StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
-            ));
-        }
-    }
-
-    private static void validateRelationshipWeightProperty(GraphStore graphStore, AlgoBaseConfig config) {
-        String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
-        Collection<RelationshipType> internalRelationshipTypes = config.internalRelationshipTypes(graphStore);
-        if (weightProperty != null) {
-            var relTypesWithoutProperty = typesWithoutRelationshipProperty(graphStore, internalRelationshipTypes, weightProperty);
-            if (!relTypesWithoutProperty.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Relationship weight property `%s` not found in relationship types %s. Properties existing on all relationship types: %s",
-                    weightProperty,
-                    StringJoining.join(relTypesWithoutProperty.stream().map(RelationshipType::name)),
-                    StringJoining.join(graphStore.relationshipPropertyKeys(internalRelationshipTypes))
-                ));
-            }
-        }
-    }
-
     private static void validateFeaturesProperties(GraphStore graphStore, FeaturePropertiesConfig config, Collection<NodeLabel> filterLabels) {
         List<String> weightProperties = config.featureProperties();
         List<String> missingProperties;
@@ -217,12 +173,6 @@ public final class GraphStoreValidation {
                 targetNodeId
             ));
         }
-    }
-
-    private static Set<RelationshipType> typesWithoutRelationshipProperty(GraphStore graphStore, Collection<RelationshipType> relTypes, String propertyKey) {
-        return relTypes.stream()
-            .filter(relType -> !graphStore.hasRelationshipProperty(relType, propertyKey))
-            .collect(Collectors.toSet());
     }
 
     private GraphStoreValidation() {}
