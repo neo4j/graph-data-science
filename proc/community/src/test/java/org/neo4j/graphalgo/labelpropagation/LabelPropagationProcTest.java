@@ -34,7 +34,6 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
 import org.neo4j.graphalgo.NodeProjections;
-import org.neo4j.graphalgo.NodeWeightConfigTest;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
@@ -63,7 +62,6 @@ import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<LabelPropagation, CONFIG, LabelPropagation>,
     SeedConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
-    NodeWeightConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
     RelationshipWeightConfigTest<LabelPropagation, CONFIG, LabelPropagation>,
     MemoryEstimateTest<LabelPropagation, CONFIG, LabelPropagation>,
     HeapControlTest<LabelPropagation, CONFIG, LabelPropagation> {

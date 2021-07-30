@@ -34,6 +34,7 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
@@ -270,5 +271,26 @@ class GraphLoaderTest extends BaseTest {
             .graph(factoryType);
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
         log.containsMessage(TestLog.INFO, "Actual memory usage of the loaded graph:");
+    }
+
+    @AllGraphStoreFactoryTypesTest
+    void testNodePropertyDefaultValue(TestSupport.FactoryType factoryType) {
+        String createQuery = "CREATE" +
+                             "  (:Label { weight1: 0.0, weight2: 1.0 })" +
+                             ", (:Label { weight2: 1.0 })" +
+                             ", (:Label { weight1: 0.0 })";
+        runQuery(createQuery);
+        var graph = TestGraphLoader.from(db)
+            .withLabels("Label")
+            .withNodeProperties(PropertyMappings.of(
+                PropertyMapping.of("weight1", 0.0),
+                PropertyMapping.of("weight2", 1.0)
+            )).graph(factoryType);
+
+        graph.forEachNode(nodeId -> {
+            assertEquals(0.0, graph.nodeProperties("weight1").doubleValue(nodeId));
+            assertEquals(1.0, graph.nodeProperties("weight2").doubleValue(nodeId));
+            return true;
+        });
     }
 }

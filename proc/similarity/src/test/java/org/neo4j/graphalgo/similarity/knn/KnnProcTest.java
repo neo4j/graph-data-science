@@ -31,12 +31,10 @@ import org.neo4j.gds.NodeWeightConfigProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
-import org.neo4j.graphalgo.AlgoBaseProcTest;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.HeapControlTest;
 import org.neo4j.graphalgo.MemoryEstimateTest;
-import org.neo4j.graphalgo.NodeWeightConfigTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.QueryRunner;
@@ -62,10 +60,8 @@ import static org.neo4j.graphalgo.config.GraphCreateFromStoreConfig.NODE_PROPERT
 import static org.neo4j.graphalgo.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 
 abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest implements
-    AlgoBaseProcTest<Knn, CONFIG, Knn.Result>,
     MemoryEstimateTest<Knn, CONFIG, Knn.Result>,
-    HeapControlTest<Knn, CONFIG, Knn.Result>,
-    NodeWeightConfigTest<Knn, CONFIG, Knn.Result> {
+    HeapControlTest<Knn, CONFIG, Knn.Result> {
 
     @TestFactory
     Stream<DynamicTest> configTests() {
@@ -150,7 +146,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
 
     @Override
     public CypherMapWrapper createMinimalImplicitConfig(CypherMapWrapper baseMap) {
-        CypherMapWrapper updatedMap = NodeWeightConfigTest.super.createMinimalImplicitConfig(baseMap);
+        CypherMapWrapper updatedMap = MemoryEstimateTest.super.createMinimalImplicitConfig(baseMap);
         if (updatedMap.containsKey(NODE_PROJECTION_KEY) && !updatedMap.containsKey(NODE_QUERY_KEY)) {
             updatedMap = updatedMap.withString(NODE_PROPERTIES_KEY, "knn");
         } else if (!updatedMap.containsKey(NODE_PROJECTION_KEY) && updatedMap.containsKey(NODE_QUERY_KEY)) {
