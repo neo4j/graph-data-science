@@ -105,7 +105,6 @@ public class LinkPredictionTrain
         var trainRelationshipIds = HugeLongArray.newArray(trainData.size(), allocationTracker);
         trainRelationshipIds.setAll(i -> i);
 
-
         var modelSelectResult = modelSelect(trainData, trainRelationshipIds);
         var bestParameters = modelSelectResult.bestParameters();
 
@@ -116,6 +115,7 @@ public class LinkPredictionTrain
         progressTracker.beginSubTask();
         var outerTrainMetrics = computeTrainMetric(trainData, modelData, trainRelationshipIds, progressTracker);
         var testMetrics = computeTestMetric(modelData);
+        progressTracker.endSubTask();
 
         cleanUpGraphStore();
 
@@ -234,14 +234,14 @@ public class LinkPredictionTrain
                 config.validationFolds()
             );
             for (NodeSplit split : splits) {
-                // 3. train each model candidate on the train sets
+                // train each model candidate on the train sets
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
                 // we use a less fine grained progress logging for LP than for NC
                 var modelData = trainModel(trainSet, trainData, modelParams, ProgressTracker.NULL_TRACKER);
                 progressTracker.logProgress();
 
-                // 4. evaluate each model candidate on the train and validation sets
+                // evaluate each model candidate on the train and validation sets
                 computeTrainMetric(trainData, modelData, trainSet, ProgressTracker.NULL_TRACKER)
                     .forEach(trainStatsBuilder::update);
                 computeTrainMetric(trainData, modelData, validationSet, ProgressTracker.NULL_TRACKER)
@@ -344,8 +344,8 @@ public class LinkPredictionTrain
         ProgressTracker progressTracker
     ) {
         progressTracker.beginSubTask();
-
         progressTracker.setVolume(llrConfig.maxEpochs());
+
         var llrTrain = new LinkLogisticRegressionTrain(
             trainSet,
             trainData.features(),
@@ -353,10 +353,11 @@ public class LinkPredictionTrain
             llrConfig,
             progressTracker
         );
+        var model = llrTrain.compute();
 
-        progressTracker.beginSubTask();
+        progressTracker.endSubTask();
 
-        return llrTrain.compute();
+        return model;
     }
 
     private Map<LinkMetric, Double> computeTrainMetric(
