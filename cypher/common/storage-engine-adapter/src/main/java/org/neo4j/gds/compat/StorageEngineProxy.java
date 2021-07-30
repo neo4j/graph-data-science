@@ -24,6 +24,7 @@ import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseManagementServiceBuilder;
+import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -86,8 +87,10 @@ public final class StorageEngineProxy {
     public static void createInMemoryDatabase(
         DatabaseManagementService dbms,
         String dbName,
+        String graphName,
         Config config
     ) {
+        InMemoryDatabaseCreationCatalog.registerDbCreation(dbName, graphName);
         IMPL.createInMemoryDatabase(dbms, dbName, config);
     }
 
