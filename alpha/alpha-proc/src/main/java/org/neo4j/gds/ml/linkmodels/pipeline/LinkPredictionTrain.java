@@ -219,7 +219,7 @@ public class LinkPredictionTrain
         var validationStats = initStatsMap();
 
         config.paramConfigs().forEach(modelParams -> {
-            var trainStatsBuilder = new LinkPredictionTrain.ModelStatsBuilder(
+            var trainStatsBuilder = new ModelStatsBuilder(
                 modelParams,
                 config.validationFolds()
             );
@@ -231,6 +231,7 @@ public class LinkPredictionTrain
                 // train each model candidate on the train sets
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
+                // the below calls intentionally suppress progress logging of individual models
                 var modelData = trainModel(trainSet, trainData, modelParams, ProgressTracker.NULL_TRACKER);
 
                 // evaluate each model candidate on the train and validation sets
