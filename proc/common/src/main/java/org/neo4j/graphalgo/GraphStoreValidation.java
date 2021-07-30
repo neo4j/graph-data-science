@@ -49,152 +49,180 @@ public final class GraphStoreValidation {
     public static void validate(GraphStore graphStore, AlgoBaseConfig config) {
         Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
         if (config instanceof SeedConfig) {
-            String seedProperty = ((SeedConfig) config).seedProperty();
-            if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Seed property `%s` not found in graph with node properties: %s",
-                    seedProperty,
-                    graphStore.nodePropertyKeys().values()
-                ));
-            }
+            validateSeedProperty(graphStore, (SeedConfig) config, filterLabels);
         }
         if (config instanceof ConfigurableSeedConfig) {
-            ConfigurableSeedConfig configurableSeedConfig = (ConfigurableSeedConfig) config;
-            String seedProperty = configurableSeedConfig.seedProperty();
-            if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "`%s`: `%s` not found in graph with node properties: %s",
-                    configurableSeedConfig.propertyNameOverride(),
-                    seedProperty,
-                    graphStore.nodePropertyKeys().values()
-                ));
-            }
+            validateConfigurableSeedProperty(graphStore, (ConfigurableSeedConfig) config, filterLabels);
         }
         if (config instanceof FeaturePropertiesConfig) {
-            var nodePropertiesConfig = (FeaturePropertiesConfig) config;
-            List<String> weightProperties = nodePropertiesConfig.featureProperties();
-            List<String> missingProperties;
-            if (nodePropertiesConfig.propertiesMustExistForEachNodeLabel()) {
-                 missingProperties = weightProperties
-                    .stream()
-                    .filter(weightProperty -> !graphStore.hasNodeProperty(filterLabels, weightProperty))
-                    .collect(Collectors.toList());
-            } else {
-                var availableProperties = filterLabels.stream().flatMap(label -> graphStore.nodePropertyKeys(label).stream()).collect(Collectors.toSet());
-                missingProperties = new ArrayList<>(weightProperties);
-                missingProperties.removeAll(availableProperties);
-            }
-            if (!missingProperties.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The feature properties %s are not present for all requested labels. Requested labels: %s. Properties available on all requested labels: %s",
-                    StringJoining.join(missingProperties),
-                    StringJoining.join(filterLabels.stream().map(NodeLabel::name)),
-                    StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
-                ));
-            }
+            validateFeaturesProperties(graphStore, (FeaturePropertiesConfig) config, filterLabels);
         }
         if (config instanceof NodeWeightConfig) {
-            String weightProperty = ((NodeWeightConfig) config).nodeWeightProperty();
-            if (weightProperty != null && !graphStore.hasNodeProperty(filterLabels, weightProperty)) {
-                var labelsWithMissingProperty = filterLabels
-                    .stream()
-                    .filter(label -> !graphStore.nodePropertyKeys(label).contains(weightProperty))
-                    .map(NodeLabel::name)
-                    .collect(Collectors.toList());
-
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Node weight property `%s` is not present for all requested labels. Requested labels: %s. Labels without the property key: %s. Properties available on all requested labels: %s",
-                    weightProperty,
-                    StringJoining.join(filterLabels.stream().map(NodeLabel::name)),
-                    StringJoining.join(labelsWithMissingProperty),
-                    StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
-                ));
-            }
+            validateNodeWeightProperty(graphStore, (NodeWeightConfig) config, filterLabels);
         }
         if (config instanceof RelationshipWeightConfig) {
-            String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
-            Collection<RelationshipType> internalRelationshipTypes = config.internalRelationshipTypes(graphStore);
-            if (weightProperty != null) {
-                var relTypesWithoutProperty = typesWithoutRelationshipProperty(graphStore, internalRelationshipTypes, weightProperty);
-                if (!relTypesWithoutProperty.isEmpty()) {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "Relationship weight property `%s` not found in relationship types %s. Properties existing on all relationship types: %s",
-                        weightProperty,
-                        StringJoining.join(relTypesWithoutProperty.stream().map(RelationshipType::name)),
-                        StringJoining.join(graphStore.relationshipPropertyKeys(internalRelationshipTypes))
-                    ));
-                }
-            }
+            validateRelationshipWeightProperty(graphStore, config);
         }
-
         if (config instanceof MutatePropertyConfig) {
-            MutatePropertyConfig mutateConfig = (MutatePropertyConfig) config;
-            String mutateProperty = mutateConfig.mutateProperty();
-
-            if (mutateProperty != null && graphStore.hasNodeProperty(filterLabels, mutateProperty)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Node property `%s` already exists in the in-memory graph.",
-                    mutateProperty
-                ));
-            }
+            validateMutateProperty(graphStore, filterLabels, (MutatePropertyConfig) config);
         }
-
         if (config instanceof MutateRelationshipConfig) {
-            String mutateRelationshipType = ((MutateRelationshipConfig) config).mutateRelationshipType();
-            if (mutateRelationshipType != null && graphStore.hasRelationshipType(RelationshipType.of(mutateRelationshipType))) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Relationship type `%s` already exists in the in-memory graph.",
-                    mutateRelationshipType
-                ));
-            }
+            validateMutateRelationships(graphStore, (MutateRelationshipConfig) config);
         }
-
         if (config instanceof SourceNodesConfig) {
-            var nodeMapping = graphStore.nodes();
+            validateSourceNodes(graphStore, (SourceNodesConfig) config);
 
-            var missingNodes = ((SourceNodesConfig) config).sourceNodes().stream()
-                .filter(nodeId -> nodeMapping.toMappedNodeId(nodeId) == NodeMapping.NOT_FOUND)
-                .map(Object::toString)
+        }
+        if (config instanceof SourceNodeConfig) {
+            validateSourceNode(graphStore, (SourceNodeConfig) config);
+        }
+        if (config instanceof TargetNodeConfig) {
+            validateTargetNode(graphStore, (TargetNodeConfig) config);
+        }
+    }
+
+    private static void validateSeedProperty(GraphStore graphStore, SeedConfig config, Collection<NodeLabel> filterLabels) {
+        String seedProperty = config.seedProperty();
+        if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Seed property `%s` not found in graph with node properties: %s",
+                seedProperty,
+                graphStore.nodePropertyKeys().values()
+            ));
+        }
+    }
+
+    private static void validateConfigurableSeedProperty(GraphStore graphStore, ConfigurableSeedConfig config, Collection<NodeLabel> filterLabels) {
+        String seedProperty = config.seedProperty();
+        if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "`%s`: `%s` not found in graph with node properties: %s",
+                config.propertyNameOverride(),
+                seedProperty,
+                graphStore.nodePropertyKeys().values()
+            ));
+        }
+    }
+
+    private static void validateMutateProperty(GraphStore graphStore, Collection<NodeLabel> filterLabels, MutatePropertyConfig mutateConfig) {
+        String mutateProperty = mutateConfig.mutateProperty();
+
+        if (mutateProperty != null && graphStore.hasNodeProperty(filterLabels, mutateProperty)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Node property `%s` already exists in the in-memory graph.",
+                mutateProperty
+            ));
+        }
+    }
+
+    private static void validateMutateRelationships(GraphStore graphStore, MutateRelationshipConfig config) {
+        String mutateRelationshipType = config.mutateRelationshipType();
+        if (mutateRelationshipType != null && graphStore.hasRelationshipType(RelationshipType.of(mutateRelationshipType))) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Relationship type `%s` already exists in the in-memory graph.",
+                mutateRelationshipType
+            ));
+        }
+    }
+
+    private static void validateNodeWeightProperty(GraphStore graphStore, NodeWeightConfig config, Collection<NodeLabel> filterLabels) {
+        String weightProperty = config.nodeWeightProperty();
+        if (weightProperty != null && !graphStore.hasNodeProperty(filterLabels, weightProperty)) {
+            var labelsWithMissingProperty = filterLabels
+                .stream()
+                .filter(label -> !graphStore.nodePropertyKeys(label).contains(weightProperty))
+                .map(NodeLabel::name)
                 .collect(Collectors.toList());
 
-            if (!missingNodes.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Source nodes do not exist in the in-memory graph: %s",
-                    StringJoining.join(missingNodes)
-                ));
-            }
+            throw new IllegalArgumentException(formatWithLocale(
+                "Node weight property `%s` is not present for all requested labels. Requested labels: %s. Labels without the property key: %s. Properties available on all requested labels: %s",
+                weightProperty,
+                StringJoining.join(filterLabels.stream().map(NodeLabel::name)),
+                StringJoining.join(labelsWithMissingProperty),
+                StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
+            ));
         }
+    }
 
-        if (config instanceof SourceNodeConfig) {
-            var sourceNodeId = ((SourceNodeConfig) config).sourceNode();
-
-            if (graphStore.nodes().toMappedNodeId(sourceNodeId) == NodeMapping.NOT_FOUND) {
+    private static void validateRelationshipWeightProperty(GraphStore graphStore, AlgoBaseConfig config) {
+        String weightProperty = ((RelationshipWeightConfig) config).relationshipWeightProperty();
+        Collection<RelationshipType> internalRelationshipTypes = config.internalRelationshipTypes(graphStore);
+        if (weightProperty != null) {
+            var relTypesWithoutProperty = typesWithoutRelationshipProperty(graphStore, internalRelationshipTypes, weightProperty);
+            if (!relTypesWithoutProperty.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "Source node does not exist in the in-memory graph: `%d`",
-                    sourceNodeId
-                ));
-            }
-        }
-
-        if (config instanceof TargetNodeConfig) {
-            var targetNodeId = ((TargetNodeConfig) config).targetNode();
-
-            if (graphStore.nodes().toMappedNodeId(targetNodeId) == NodeMapping.NOT_FOUND) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Target node does not exist in the in-memory graph: `%d`",
-                    targetNodeId
+                    "Relationship weight property `%s` not found in relationship types %s. Properties existing on all relationship types: %s",
+                    weightProperty,
+                    StringJoining.join(relTypesWithoutProperty.stream().map(RelationshipType::name)),
+                    StringJoining.join(graphStore.relationshipPropertyKeys(internalRelationshipTypes))
                 ));
             }
         }
     }
 
-    private static Set<RelationshipType> typesWithoutRelationshipProperty(
-        GraphStore graphStore,
-        Collection<RelationshipType> relTypes,
-        String propertyKey
-    ) {
-        return relTypes
-            .stream()
+    private static void validateFeaturesProperties(GraphStore graphStore, FeaturePropertiesConfig config, Collection<NodeLabel> filterLabels) {
+        List<String> weightProperties = config.featureProperties();
+        List<String> missingProperties;
+        if (config.propertiesMustExistForEachNodeLabel()) {
+            missingProperties = weightProperties
+                .stream()
+                .filter(weightProperty -> !graphStore.hasNodeProperty(filterLabels, weightProperty))
+                .collect(Collectors.toList());
+        } else {
+            var availableProperties = filterLabels
+                .stream().flatMap(label -> graphStore.nodePropertyKeys(label).stream()).collect(Collectors.toSet());
+            missingProperties = new ArrayList<>(weightProperties);
+            missingProperties.removeAll(availableProperties);
+        }
+        if (!missingProperties.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The feature properties %s are not present for all requested labels. Requested labels: %s. Properties available on all requested labels: %s",
+                StringJoining.join(missingProperties),
+                StringJoining.join(filterLabels.stream().map(NodeLabel::name)),
+                StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
+            ));
+        }
+    }
+
+    private static void validateSourceNode(GraphStore graphStore, SourceNodeConfig config) {
+        var sourceNodeId = config.sourceNode();
+
+        if (graphStore.nodes().toMappedNodeId(sourceNodeId) == NodeMapping.NOT_FOUND) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Source node does not exist in the in-memory graph: `%d`",
+                sourceNodeId
+            ));
+        }
+    }
+
+    private static void validateSourceNodes(GraphStore graphStore, SourceNodesConfig config) {
+        var nodeMapping = graphStore.nodes();
+        var missingNodes = config.sourceNodes().stream()
+            .filter(nodeId -> nodeMapping.toMappedNodeId(nodeId) == NodeMapping.NOT_FOUND)
+            .map(Object::toString)
+            .collect(Collectors.toList());
+
+        if (!missingNodes.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Source nodes do not exist in the in-memory graph: %s",
+                StringJoining.join(missingNodes)
+            ));
+        }
+    }
+
+    private static void validateTargetNode(GraphStore graphStore, TargetNodeConfig config) {
+        var targetNodeId = config.targetNode();
+
+        if (graphStore.nodes().toMappedNodeId(targetNodeId) == NodeMapping.NOT_FOUND) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Target node does not exist in the in-memory graph: `%d`",
+                targetNodeId
+            ));
+        }
+    }
+
+    private static Set<RelationshipType> typesWithoutRelationshipProperty(GraphStore graphStore, Collection<RelationshipType> relTypes, String propertyKey) {
+        return relTypes.stream()
             .filter(relType -> !graphStore.hasRelationshipProperty(relType, propertyKey))
             .collect(Collectors.toSet());
     }

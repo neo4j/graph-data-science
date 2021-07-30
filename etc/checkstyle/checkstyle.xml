@@ -224,6 +224,12 @@
             <property name="optional" value="true"/>
         </module>
 
+        <!-- code quality metric to enable -->
+<!--        <module name="CyclomaticComplexity">-->
+<!--            <property name="max" value="12"/>-->
+<!--            <property name="switchBlockAsSingleDecisionPoint" value="true"/>-->
+<!--        </module>-->
+
     </module>
 
 </module>
