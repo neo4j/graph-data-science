@@ -18,5 +18,6 @@ dependencies {
     }
 
     api project(':core')
+    api project(':cypher-core')
     api project(':neo4j-adapter')
 }
