@@ -34,7 +34,7 @@ public class CypherNodeMapping extends NodeMappingAdapter implements NodeLabelUp
 
     private final Map<NodeLabel, BitSet> additionalNodeLabels;
 
-    public CypherNodeMapping(NodeMapping nodeMapping) {
+    CypherNodeMapping(NodeMapping nodeMapping) {
         super(nodeMapping);
         this.additionalNodeLabels = new HashMap<>();
     }
@@ -43,8 +43,9 @@ public class CypherNodeMapping extends NodeMappingAdapter implements NodeLabelUp
     public void addNodeLabel(NodeLabel nodeLabel) {
         if (!super.availableNodeLabels().contains(nodeLabel)) {
             this.additionalNodeLabels.put(nodeLabel, new BitSet(nodeCount()));
+        } else {
+            throw new IllegalArgumentException(formatWithLocale("Node label %s already exists", nodeLabel));
         }
-        throw new IllegalArgumentException(formatWithLocale("Node label %s already exists", nodeLabel));
     }
 
     @Override
@@ -85,7 +86,10 @@ public class CypherNodeMapping extends NodeMappingAdapter implements NodeLabelUp
     public boolean hasLabel(long nodeId, NodeLabel nodeLabel) {
         var hasLoadedLabel = super.hasLabel(nodeId, nodeLabel);
         if (!hasLoadedLabel) {
-            return additionalNodeLabels.get(nodeLabel).get(nodeId);
+            if (additionalNodeLabels.containsKey(nodeLabel)) {
+                return additionalNodeLabels.get(nodeLabel).get(nodeId);
+            }
+            return false;
         }
         return true;
     }
