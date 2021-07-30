@@ -69,7 +69,8 @@ class ConfigurationProcessorTest {
         "CollectingKeys",
         "ToMap",
         "Validation",
-        "RangeValidation"
+        "RangeValidation",
+        "GSValidation"
     })
     void positiveTest(String className) {
         assertContentEquals(className);
@@ -188,6 +189,26 @@ class ConfigurationProcessorTest {
             e("Optional must have a Cypher-supported type as type argument, but found none.", 30, 14),
             e("Optional fields can not to be declared default (Optional.empty is the default).", 32, 30)
         );
+    }
+
+    @Test
+    void invalidGraphStoreValidationChecks() {
+        runNegativeTest("InvalidGSValidation",
+            e("GraphStoreValidation and Checks must accept 3 parameters", 31, 18),
+            e("GraphStoreValidation and Checks must return void", 46, 9)
+        );
+    }
+
+    @Test
+    void onlyOneMethodAllowed() {
+        JavaFileObject file = forResource(String.format(Locale.ENGLISH,"negative/%s.java", "OnlyOneMethod"));
+
+        CompileTester.UnsuccessfulCompilationClause clause = assertAbout(javaSource())
+            .that(file)
+            .processedWith(new ConfigurationProcessor())
+            .failsToCompile();
+
+        clause.withErrorContaining("Only one GraphStoreValidation-annotated method allowed").and().withErrorCount(1);
     }
 
     private void runNegativeTest(String className, ErrorCheck... expectations) {
