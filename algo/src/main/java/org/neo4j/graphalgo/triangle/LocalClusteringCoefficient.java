@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
-import java.util.function.Function;
+import java.util.function.LongToDoubleFunction;
 
 import static org.neo4j.graphalgo.triangle.IntersectingTriangleCount.EXCLUDED_NODE_TRIANGLE_COUNT;
 
@@ -71,7 +71,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         progressTracker.beginSubTask();
         if (null == triangleCountProperty) {
             HugeAtomicLongArray triangleCounts = computeTriangleCounts();
-            calculateCoefficients((nodeId) -> Long.valueOf(triangleCounts.get(nodeId)).doubleValue());
+            calculateCoefficients(triangleCounts::get);
         } else {
             calculateCoefficients(triangleCountProperty::doubleValue);
         }
@@ -83,7 +83,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         );
     }
 
-    private void calculateCoefficients(Function<Long, Double> propertyValueFunction) {
+    private void calculateCoefficients(LongToDoubleFunction propertyValueFunction) {
         long nodeCount = graph.nodeCount();
         localClusteringCoefficients = HugeDoubleArray.newArray(nodeCount, tracker);
 
@@ -91,7 +91,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         DoubleAdder localClusteringCoefficientSum = new DoubleAdder();
         ParallelUtil.parallelForEachNode(graph, concurrency, nodeId -> {
             double localClusteringCoefficient = calculateCoefficient(
-                propertyValueFunction.apply(nodeId),
+                propertyValueFunction.applyAsDouble(nodeId),
                 graph.isMultiGraph() ?
                     concurrentGraphCopy.get().degreeWithoutParallelRelationships(nodeId) :
                     graph.degree(nodeId)
