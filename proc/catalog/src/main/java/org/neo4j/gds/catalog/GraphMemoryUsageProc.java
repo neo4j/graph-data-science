@@ -31,7 +31,6 @@ import org.openjdk.jol.info.GraphWalker;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -43,7 +42,7 @@ public class GraphMemoryUsageProc extends CatalogProc {
     @Procedure(name = "gds.internal.graph.sizeOf", mode = READ)
     public Stream<GraphMemoryUsage> list(@Name(value = "graphName") String graphName) {
         graphName = Objects.requireNonNull(StringUtils.trimToNull(graphName), "graphName must not be empty");
-        var graphStoreWithConfig = graphStoreFromCatalog(graphName, Optional.empty());
+        var graphStoreWithConfig = graphStoreFromCatalog(graphName);
         var memoryUsage = GraphMemoryUsage.of(graphStoreWithConfig);
         return Stream.of(memoryUsage);
     }

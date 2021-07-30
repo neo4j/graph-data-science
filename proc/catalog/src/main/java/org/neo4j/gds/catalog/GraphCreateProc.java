@@ -45,7 +45,6 @@ import org.neo4j.procedure.Procedure;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -176,7 +175,7 @@ public class GraphCreateProc extends CatalogProc {
 
         var procedureConfig = CypherMapWrapper.create(configuration);
 
-        var fromGraphStore = graphStoreFromCatalog(fromGraphName, Optional.empty());
+        var fromGraphStore = graphStoreFromCatalog(fromGraphName);
 
         var graphCreateConfig = GraphCreateFromGraphConfig.of(
             username(),

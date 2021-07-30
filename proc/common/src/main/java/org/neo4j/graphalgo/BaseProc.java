@@ -121,8 +121,8 @@ public abstract class BaseProc {
         return GraphStoreCatalog.get(request, graphName);
     }
 
-    protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, Optional<String> usernameOverride) {
-        return GraphStoreCatalog.get(catalogRequest(usernameOverride, Optional.empty()), graphName);
+    protected GraphStoreWithConfig graphStoreFromCatalog(String graphName) {
+        return GraphStoreCatalog.get(catalogRequest(Optional.empty(), Optional.empty()), graphName);
     }
 
     protected CatalogRequest catalogRequest(Optional<String> usernameOverride, Optional<String> databaseOverride) {
