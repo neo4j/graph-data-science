@@ -213,7 +213,7 @@ public class LinkPredictionTrain
         HugeLongArray trainRelationshipIds
     ) {
 
-        var splits = trainValidationSplits(trainRelationshipIds, trainData.targets());
+        var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.targets());
 
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
@@ -227,7 +227,7 @@ public class LinkPredictionTrain
                 modelParams,
                 config.validationFolds()
             );
-            for (NodeSplit split : splits) {
+            for (NodeSplit split : validationSplits) {
                 // train each model candidate on the train sets
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
