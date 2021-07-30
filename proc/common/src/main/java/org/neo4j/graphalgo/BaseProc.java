@@ -117,15 +117,12 @@ public abstract class BaseProc {
     }
 
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, BaseConfig config) {
-        return GraphStoreCatalog.get(catalogRequest(config, Optional.empty()), graphName);
+        var request = catalogRequest(Optional.ofNullable(config.usernameOverride()), Optional.empty());
+        return GraphStoreCatalog.get(request, graphName);
     }
 
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, Optional<String> usernameOverride) {
         return GraphStoreCatalog.get(catalogRequest(usernameOverride, Optional.empty()), graphName);
-    }
-
-    protected CatalogRequest catalogRequest(BaseConfig config, Optional<String> databaseOverride) {
-        return catalogRequest(Optional.ofNullable(config.usernameOverride()), databaseOverride);
     }
 
     protected CatalogRequest catalogRequest(Optional<String> usernameOverride, Optional<String> databaseOverride) {
