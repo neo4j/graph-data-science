@@ -26,6 +26,7 @@ import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.TriFunction;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCreateConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
