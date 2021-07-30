@@ -24,8 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;

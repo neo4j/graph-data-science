@@ -19,8 +19,6 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;

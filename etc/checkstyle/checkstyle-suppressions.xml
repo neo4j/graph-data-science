@@ -31,7 +31,6 @@
     <suppress checks="StaticVariableName" files=".*"/>
     <suppress checks="TypeName" files=".*"/>
     <suppress checks="IllegalImport" files=".*"/>
-    <suppress checks="RedundantImport" files=".*"/>
     <suppress checks="MethodLength" files=".*"/>
     <suppress checks="ParameterNumber" files=".*"/>
     <suppress checks="EmptyForIteratorPad" files=".*"/>

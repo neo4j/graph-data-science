@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.core.subgraph;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.graphalgo.core.GraphDimensions;
 
 import static org.assertj.core.api.Assertions.assertThat;

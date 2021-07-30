@@ -22,7 +22,6 @@ package org.neo4j.graphalgo.doc.syntax;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.doc.syntax.ProcedureNameExtractor;
 
 import java.util.stream.Stream;
 

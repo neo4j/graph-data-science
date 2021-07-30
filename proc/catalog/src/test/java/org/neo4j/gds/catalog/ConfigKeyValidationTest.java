@@ -22,7 +22,6 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.test.TestProc;
 import org.neo4j.graphdb.QueryExecutionException;
