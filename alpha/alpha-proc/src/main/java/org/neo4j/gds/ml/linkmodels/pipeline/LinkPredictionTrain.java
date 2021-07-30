@@ -91,7 +91,6 @@ public class LinkPredictionTrain
 
     @Override
     public Model<LinkLogisticRegressionData, LinkPredictionTrainConfig> compute() {
-        progressTracker.beginSubTask();
 
         splitRelationships();
 
@@ -112,14 +111,10 @@ public class LinkPredictionTrain
         var modelData = trainModel(trainRelationshipIds, trainData, bestParameters, progressTracker);
 
         // evaluate the best model on the training and test graphs
-        progressTracker.beginSubTask();
         var outerTrainMetrics = computeTrainMetric(trainData, modelData, trainRelationshipIds, progressTracker);
         var testMetrics = computeTestMetric(modelData);
-        progressTracker.endSubTask();
 
         cleanUpGraphStore();
-
-        progressTracker.endSubTask();
 
         return createModel(
             modelSelectResult,
@@ -217,7 +212,6 @@ public class LinkPredictionTrain
         FeaturesAndTargets trainData,
         HugeLongArray trainRelationshipIds
     ) {
-        progressTracker.beginSubTask();
 
         var splits = trainValidationSplits(trainRelationshipIds, trainData.targets());
 
@@ -237,9 +231,7 @@ public class LinkPredictionTrain
                 // train each model candidate on the train sets
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
-                // we use a less fine grained progress logging for LP than for NC
                 var modelData = trainModel(trainSet, trainData, modelParams, ProgressTracker.NULL_TRACKER);
-                progressTracker.logProgress();
 
                 // evaluate each model candidate on the train and validation sets
                 computeTrainMetric(trainData, modelData, trainSet, ProgressTracker.NULL_TRACKER)
@@ -261,13 +253,11 @@ public class LinkPredictionTrain
         var winner = Collections.max(modelStats, COMPARE_AVERAGE);
 
         var bestConfig = winner.params();
-        progressTracker.endSubTask();
 
         return LinkPredictionTrain.ModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
     private Map<LinkMetric, Double> computeTestMetric(LinkLogisticRegressionData modelData) {
-        progressTracker.beginSubTask();
         var testData = extractFeaturesAndTargets(TEST_RELATIONSHIP_TYPE);
 
         var result = computeMetric(
@@ -276,7 +266,6 @@ public class LinkPredictionTrain
             new BatchQueue(testData.size()),
             progressTracker
         );
-        progressTracker.endSubTask();
 
         return result;
     }
@@ -333,7 +322,6 @@ public class LinkPredictionTrain
         ) {
             return ImmutableModelSelectResult.of(bestConfig, trainStats, validationStats);
         }
-
     }
 
 
@@ -343,9 +331,6 @@ public class LinkPredictionTrain
         LinkLogisticRegressionTrainConfig llrConfig,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask();
-        progressTracker.setVolume(llrConfig.maxEpochs());
-
         var llrTrain = new LinkLogisticRegressionTrain(
             trainSet,
             trainData.features(),
@@ -354,8 +339,6 @@ public class LinkPredictionTrain
             progressTracker
         );
         var model = llrTrain.compute();
-
-        progressTracker.endSubTask();
 
         return model;
     }
@@ -366,11 +349,7 @@ public class LinkPredictionTrain
         HugeLongArray evaluationSet,
         ProgressTracker progressTracker
     ) {
-        progressTracker.beginSubTask();
-        var result = computeMetric(trainData, modelData, new HugeBatchQueue(evaluationSet), progressTracker);
-        progressTracker.endSubTask();
-
-        return result;
+        return computeMetric(trainData, modelData, new HugeBatchQueue(evaluationSet), progressTracker);
     }
 
     private Map<LinkMetric, Double> computeMetric(
@@ -382,7 +361,6 @@ public class LinkPredictionTrain
         var predictor = new LinkLogisticRegressionTrainPredictor(modelData, inputData.features());
         var signedProbabilities = SignedProbabilities.create(inputData.features().size());
 
-        progressTracker.setVolume(inputData.features().size());
         HugeDoubleArray targets = inputData.targets();
         evaluationQueue.parallelConsume(config.concurrency(), thread ->
             (batch) -> {
@@ -393,7 +371,6 @@ public class LinkPredictionTrain
                     var signedProbability = isEdge ? predictedProbability : -1 * predictedProbability;
                     signedProbabilities.add(signedProbability);
                 }
-                progressTracker.logProgress(batch.size());
             }
         );
 
