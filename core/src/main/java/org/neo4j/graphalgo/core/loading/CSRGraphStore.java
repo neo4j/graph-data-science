@@ -336,13 +336,22 @@ public class CSRGraphStore implements GraphStore {
     public DeletionResult deleteRelationships(RelationshipType relationshipType) {
         return DeletionResult.of(builder ->
             updateGraphStore(graphStore -> {
-                builder.deletedRelationships(graphStore.relationships.remove(relationshipType).elementCount());
+                var removedTopology = graphStore.relationships.remove(relationshipType);
+                if (removedTopology != null) {
+                    builder.deletedRelationships(removedTopology.elementCount());
+                }
 
-                graphStore.relationshipProperties
-                    .remove(relationshipType)
-                    .relationshipProperties()
-                    .values()
-                    .forEach(property -> builder.putDeletedProperty(property.key(), property.values().elementCount()));
+                var removedProperties = graphStore.relationshipProperties.remove(relationshipType);
+
+                if (removedProperties != null) {
+                    removedProperties
+                        .relationshipProperties()
+                        .values()
+                        .forEach(property -> builder.putDeletedProperty(
+                            property.key(),
+                            property.values().elementCount()
+                        ));
+                }
             })
         );
     }
