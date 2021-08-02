@@ -91,9 +91,6 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
         return dbmsBuilder;
     }
 
-    @Override
-    public void setGraphNameAndIndexCreationSkipping(Config config, String graphName) {}
-
     private UnsupportedOperationException cypherUnsupportedException() {
         return new UnsupportedOperationException("Cypher is not supported for Neo4j versions <4.3.");
     }

@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.storageengine;
+package org.neo4j.gds.compat._43;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.compat.StorageEngineProxy;
+import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
@@ -29,10 +29,13 @@ import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
-@ServiceProvider
-public class GraphStoreNameExtension extends ExtensionFactory<GraphStoreNameExtension.Dependencies> {
+import static org.neo4j.configuration.GraphDatabaseInternalSettings.skip_default_indexes_on_creation;
+import static org.neo4j.gds.storageengine.GraphStoreSettings.graph_name;
 
-    public GraphStoreNameExtension() {
+@ServiceProvider
+public class GraphStoreNameExtension43 extends ExtensionFactory<GraphStoreNameExtension43.Dependencies> {
+
+    public GraphStoreNameExtension43() {
         super(ExtensionType.DATABASE, "gds.graphstore.name");
     }
 
@@ -46,7 +49,8 @@ public class GraphStoreNameExtension extends ExtensionFactory<GraphStoreNameExte
                 var config = dependencies.config();
                 var graphName = InMemoryDatabaseCreationCatalog
                     .getRegisteredDbCreationGraphName(dependencies.databaseLayout().getDatabaseName());
-                StorageEngineProxy.setGraphNameAndIndexCreationSkipping(config, graphName);
+                config.set(graph_name, graphName);
+                config.set(skip_default_indexes_on_creation, true);
             }
 
             @Override

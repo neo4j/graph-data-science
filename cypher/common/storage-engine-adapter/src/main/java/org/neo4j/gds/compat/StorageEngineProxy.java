@@ -101,8 +101,4 @@ public final class StorageEngineProxy {
     public static DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(DatabaseManagementServiceBuilder dbmsBuilder) {
         return IMPL.setSkipDefaultIndexesOnCreationSetting(dbmsBuilder);
     }
-
-    public static void setGraphNameAndIndexCreationSkipping(Config config, String graphName) {
-        IMPL.setGraphNameAndIndexCreationSkipping(config, graphName);
-    }
 }

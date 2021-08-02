@@ -65,6 +65,4 @@ public interface StorageEngineProxyApi {
     GraphDatabaseAPI startAndGetInMemoryDatabase(DatabaseManagementService dbms, String dbName);
 
     DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(DatabaseManagementServiceBuilder dbmsBuilder);
-
-    void setGraphNameAndIndexCreationSkipping(Config config, String graphName);
 }

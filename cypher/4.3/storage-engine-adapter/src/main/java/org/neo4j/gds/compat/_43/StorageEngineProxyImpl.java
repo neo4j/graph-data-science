@@ -38,9 +38,7 @@ import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
-import static org.neo4j.configuration.GraphDatabaseInternalSettings.skip_default_indexes_on_creation;
 import static org.neo4j.configuration.GraphDatabaseInternalSettings.storage_engine;
-import static org.neo4j.gds.storageengine.GraphStoreSettings.graph_name;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
 
@@ -106,11 +104,5 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public DatabaseManagementServiceBuilder setSkipDefaultIndexesOnCreationSetting(DatabaseManagementServiceBuilder dbmsBuilder) {
         return dbmsBuilder.setConfig(GraphDatabaseInternalSettings.skip_default_indexes_on_creation, true);
-    }
-
-    @Override
-    public void setGraphNameAndIndexCreationSkipping(Config config, String graphName) {
-        config.set(graph_name, graphName);
-        config.set(skip_default_indexes_on_creation, true);
     }
 }
