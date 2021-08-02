@@ -32,7 +32,6 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.paged.HugeIntArray;
-import org.neo4j.graphalgo.core.utils.partition.DegreePartition;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
@@ -43,7 +42,6 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /*
@@ -72,7 +70,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
     private final AtomicDoubleArray[] costs;
     private final HugeAtomicDoubleArray nodeToCommunityWeights;
     private final HugeAtomicByteArray swapStatus;
-    private final List<DegreePartition> degreePartition;
+    private final List<Partition> degreePartition;
     private HugeIntArray neighboringSolution;
 
     public ApproxMaxKCut(
@@ -90,14 +88,14 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
 
         // We allocate two arrays in order to be able to compare results between iterations "GRASP style".
-        candidateSolutions = new HugeIntArray[]{
+        this.candidateSolutions = new HugeIntArray[]{
             HugeIntArray.newArray(graph.nodeCount(), tracker),
             HugeIntArray.newArray(graph.nodeCount(), tracker)
         };
 
         // TODO: Should we create a dedicated AtomicDouble class using `AtomicReference` or `VarHandle` to avoid the
         //  extra indirection of the array?
-        costs = new AtomicDoubleArray[]{
+        this.costs = new AtomicDoubleArray[]{
             new AtomicDoubleArray(1),
             new AtomicDoubleArray(1)
         };
@@ -105,15 +103,15 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut, ApproxMaxKCut.CutRes
         // Used by `localSearch()` to keep track of the costs for swapping a node to another community.
         // TODO: If we had pull-based traversal we could have a |V| sized int array here instead of the |V|*k sized
         //  double array.
-        nodeToCommunityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k(), tracker);
+        this.nodeToCommunityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount() * config.k(), tracker);
 
         // Used by `localSearch()` to keep track of whether we can swap a node into another community or not.
-        swapStatus = HugeAtomicByteArray.newArray(graph.nodeCount(), tracker);
+        this.swapStatus = HugeAtomicByteArray.newArray(graph.nodeCount(), tracker);
 
-        degreePartition = PartitionUtils.degreePartition(
+        this.degreePartition = PartitionUtils.degreePartition(
             graph,
             config.concurrency(),
-            Function.identity(),
+            partition -> partition,
             Optional.of(config.minBatchSize())
         );
     }

@@ -200,7 +200,7 @@ public final class PartitionUtils {
                     prevBlockId = blockId;
 
                     if (internalId > 0) {
-                        var partition = ImmutablePartition.of(blockStart, internalId - blockStart);
+                        var partition = Partition.of(blockStart, internalId - blockStart);
                         this.blockStart = internalId;
                         this.prevBlockId = prevBlockId;
                         this.lastIndex = i;
@@ -215,7 +215,7 @@ public final class PartitionUtils {
                 return fetch();
             }
 
-            var partition = ImmutablePartition.of(blockStart, size - blockStart);
+            var partition = Partition.of(blockStart, size - blockStart);
             this.done = true;
 
             return taskCreator.apply(partition);

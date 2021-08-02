@@ -19,13 +19,20 @@
  */
 package org.neo4j.graphalgo.core.utils.partition;
 
-import org.neo4j.graphalgo.annotation.ValueClass;
+public class DegreePartition extends Partition {
 
-@ValueClass
-public interface DegreePartition extends Partition {
-    long totalDegree();
+    private final long totalDegree;
 
-    static DegreePartition of(long startNode, long nodeCount, long degrees) {
-        return ImmutableDegreePartition.of(startNode, nodeCount, degrees);
+    public DegreePartition(long startNode, long nodeCount, long totalDegree) {
+        super(startNode, nodeCount);
+        this.totalDegree = totalDegree;
+    }
+
+    public long totalDegree() {
+        return totalDegree;
+    }
+
+    public static DegreePartition of(long startNode, long nodeCount, long totalDegree) {
+        return new DegreePartition(startNode, nodeCount, totalDegree);
     }
 }

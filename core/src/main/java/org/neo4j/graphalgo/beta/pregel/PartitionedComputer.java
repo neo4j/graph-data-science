@@ -24,11 +24,13 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
@@ -83,37 +85,33 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
 
     @NotNull
     private List<PartitionedComputeStep<CONFIG, ?>> createComputeSteps(HugeAtomicBitSet voteBits) {
+        Function<Partition, PartitionedComputeStep<CONFIG, ?>> partitionFunction = partition -> new PartitionedComputeStep<>(
+            graph.concurrentCopy(),
+            computation,
+            config,
+            0,
+            partition,
+            nodeValues,
+            messenger,
+            voteBits,
+            progressLogger
+        );
+
         switch (config.partitioning()) {
             case RANGE:
                 return PartitionUtils.rangePartition(
                     concurrency,
                     graph.nodeCount(),
-                    partition -> new PartitionedComputeStep<>(
-                        graph.concurrentCopy(),
-                        computation,
-                        config,
-                        0,
-                        partition,
-                        nodeValues,
-                        messenger,
-                        voteBits,
-                        progressLogger
-                    ),
+                    partitionFunction,
                     Optional.empty()
                 );
             case DEGREE:
-                return PartitionUtils.degreePartition(graph, concurrency,
-                    partition -> new PartitionedComputeStep<>(
-                        graph.concurrentCopy(),
-                        computation,
-                        config,
-                        0,
-                        partition,
-                        nodeValues,
-                        messenger,
-                        voteBits,
-                        progressLogger
-                    ), Optional.empty());
+                return PartitionUtils.degreePartition(
+                    graph,
+                    concurrency,
+                    partitionFunction::apply,
+                    Optional.empty()
+                );
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Unsupported partitioning `%s`",

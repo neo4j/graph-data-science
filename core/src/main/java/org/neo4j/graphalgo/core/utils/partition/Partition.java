@@ -19,21 +19,30 @@
  */
 package org.neo4j.graphalgo.core.utils.partition;
 
-import org.neo4j.graphalgo.annotation.ValueClass;
-
 import java.util.function.LongConsumer;
 import java.util.stream.LongStream;
 
-@ValueClass
-public interface Partition {
+public class Partition {
 
-    int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
+    private final long startNode;
+    private final long nodeCount;
 
-    long startNode();
+    static final int MAX_NODE_COUNT = (Integer.MAX_VALUE - 32) >> 1;
 
-    long nodeCount();
+    public Partition(long startNode, long nodeCount) {
+        this.startNode = startNode;
+        this.nodeCount = nodeCount;
+    }
 
-    default void consume(LongConsumer consumer) {
+    public long startNode() {
+        return startNode;
+    }
+
+    public long nodeCount() {
+        return nodeCount;
+    }
+
+    public void consume(LongConsumer consumer) {
         var startNode = startNode();
         long endNode = startNode + nodeCount();
         for (long id = startNode; id < endNode; id++) {
@@ -41,12 +50,12 @@ public interface Partition {
         }
     }
 
-    static Partition of(long startNode, long nodeCount) {
-        return ImmutablePartition.of(startNode, nodeCount);
+    public static Partition of(long startNode, long nodeCount) {
+        return new Partition(startNode, nodeCount);
     }
 
-    default LongStream stream() {
+    public LongStream stream() {
         var start = startNode();
         return LongStream.range(start, start + nodeCount());
-    };
+    }
 }
