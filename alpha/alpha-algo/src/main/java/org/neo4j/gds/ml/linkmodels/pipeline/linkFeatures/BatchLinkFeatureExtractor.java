@@ -24,18 +24,18 @@ import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.partition.DegreePartition;
 
-class LinkFeatureWriter implements Runnable {
+class BatchLinkFeatureExtractor implements Runnable {
     final LinkFeatureExtractor extractor;
     final DegreePartition partition;
     final long relationshipOffset;
     final Graph graph;
     final HugeObjectArray<double[]> linkFeatures;
 
-    LinkFeatureWriter(
-        LinkFeatureExtractor extractor, DegreePartition partition,
+    BatchLinkFeatureExtractor(
+        LinkFeatureExtractor extractor,
+        DegreePartition partition,
         Graph graph,
         long relationshipOffset,
-
         HugeObjectArray<double[]> linkFeatures
     ) {
         this.extractor = extractor;

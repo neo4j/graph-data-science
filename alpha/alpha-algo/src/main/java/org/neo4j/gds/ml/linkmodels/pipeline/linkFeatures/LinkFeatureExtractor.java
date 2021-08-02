@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
+import org.neo4j.gds.ml.TrainingConfig;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -77,13 +78,13 @@ public final class LinkFeatureExtractor {
             graph,
             concurrency,
             Function.identity(),
-            Optional.of(100)
+            Optional.of(TrainingConfig.DEFAULT_BATCH_SIZE)
         );
 
-        var linkFeatureWriters = new ArrayList<LinkFeatureWriter>();
+        var linkFeatureWriters = new ArrayList<BatchLinkFeatureExtractor>();
         var relationshipOffset = 0L;
         for (DegreePartition partition : partitions) {
-            linkFeatureWriters.add(new LinkFeatureWriter(
+            linkFeatureWriters.add(new BatchLinkFeatureExtractor(
                 extractor,
                 partition,
                 graph.concurrentCopy(),
