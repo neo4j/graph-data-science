@@ -61,13 +61,10 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
     }
 
     private void computeNodeProperties() {
-        progressTracker.beginSubTask();
         featurePipeline.executeNodePropertySteps(graphName, nodeLabels, relationshipTypes);
-        progressTracker.endSubTask();
     }
 
     private LinkPredictionResult predictLinks() {
-        progressTracker.beginSubTask();
         var predictor = new LinkLogisticRegressionPredictor(modelData);
         var result = new LinkPredictionResult(topN);
         var batchQueue = new BatchQueue(graph.nodeCount(), BatchQueue.DEFAULT_BATCH_SIZE, concurrency);
@@ -78,7 +75,6 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
             result,
             progressTracker
         ));
-        progressTracker.endSubTask();
         return result;
     }
 
@@ -128,7 +124,6 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
                     }
                 );
             }
-            progressTracker.logProgress(batch.size());
         }
 
         private LongHashSet largerNeighbors(long sourceId) {
