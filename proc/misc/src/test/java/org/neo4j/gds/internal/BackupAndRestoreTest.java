@@ -52,10 +52,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -237,6 +240,89 @@ class BackupAndRestoreTest {
                 backupTime,
                 backupId
             ));
+    }
+
+    @Test
+    void shouldBackupIfPermitted(@TempDir Path tempDir) throws IOException {
+        testBackupLimit(
+            tempDir,
+            // same time
+            time -> time,
+            1,
+            "backup-42", "backup-43", "backup-44", "backup-1337"
+        );
+    }
+
+    @Test
+    void shouldRemoveOlderBackups(@TempDir Path tempDir) throws IOException {
+        testBackupLimit(
+            tempDir,
+            // some time in the past
+            time -> time.minus(1, ChronoUnit.YEARS),
+            "backup-43", "backup-44", "backup-1337"
+        );
+    }
+
+    @Test
+    void shouldNotRemoveNewerBackups(@TempDir Path tempDir) throws IOException {
+        testBackupLimit(
+            tempDir,
+            // some time in the future
+            time -> time.plus(1, ChronoUnit.YEARS),
+            "backup-42", "backup-43", "backup-44"
+        );
+    }
+
+
+    void testBackupLimit(
+        Path tempDir,
+        UnaryOperator<LocalDateTime> travelInTime,
+        String... expectedBackups
+    ) throws IOException {
+        testBackupLimit(tempDir, travelInTime, 0, expectedBackups);
+    }
+
+    void testBackupLimit(
+        Path tempDir,
+        UnaryOperator<LocalDateTime> travelInTime,
+        int additionalAllowedBackups,
+        String... expectedBackups
+    ) throws IOException {
+        int maxAllowedBackups = 3;
+        for (int i = 0; i < maxAllowedBackups; i++) {
+            // just create backup metadata without any actual backup files
+            var backupId = 42 + i;
+            var backupTime = travelInTime.apply(LocalDateTime.now()).toInstant(ZoneOffset.UTC).toEpochMilli();
+
+            var backupDir = tempDir.resolve(formatWithLocale("backup-%d", backupId));
+            Files.createDirectories(backupDir);
+
+            Files.writeString(
+                backupDir.resolve(".backupmetadata"),
+                formatWithLocale("Backup-Time: %d%nBackup-Id: %d%n", backupTime, backupId)
+            );
+        }
+
+        var config = ImmutableBackupConfig
+            .builder()
+            .maxAllowedBackups(maxAllowedBackups + additionalAllowedBackups)
+            .backupsPath(tempDir)
+            .providedBackupId("1337")
+            .timeoutInSeconds(42)
+            .log(new TestLog())
+            .allocationTracker(AllocationTracker.empty())
+            .taskName("Backup")
+            .build();
+
+
+        BackupAndRestore.backup(config);
+
+        var remainingBackups = Files
+            .list(tempDir)
+            .map(path -> tempDir.relativize(path).toString())
+            .collect(Collectors.toList());
+
+        assertThat(remainingBackups).containsExactlyInAnyOrder(expectedBackups);
     }
 
     private void assertGraphsAreRestored() {
