@@ -25,6 +25,7 @@ import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.function.TriFunction;
+import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
@@ -62,11 +63,11 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.storageengine.GraphStoreSettings.graph_name;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
+    private final DatabaseLayout databaseLayout;
     private final TokenHolders tokenHolders;
     private final GraphStore graphStore;
     private final BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
@@ -85,8 +86,9 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         TriFunction<GraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn,
         Config config
     ) {
+        this.databaseLayout = databaseLayout;
         this.tokenHolders = tokenHolders;
-        var graphName = config.get(graph_name);
+        var graphName = InMemoryDatabaseCreationCatalog.getRegisteredDbCreationGraphName(databaseLayout.getDatabaseName());
         this.graphStore = GraphStoreCatalog.getAllGraphStores()
             .filter(graphStoreWithUserNameAndConfig -> graphStoreWithUserNameAndConfig
                 .config()
@@ -147,6 +149,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     @Override
     public void shutdown() {
+        InMemoryDatabaseCreationCatalog.removeDbCreationRegistration(databaseLayout.getDatabaseName());
     }
 
     @Override

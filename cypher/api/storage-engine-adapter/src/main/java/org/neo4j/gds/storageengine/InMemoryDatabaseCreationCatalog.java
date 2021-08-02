@@ -43,4 +43,8 @@ public final class InMemoryDatabaseCreationCatalog {
     public static void removeDbCreationRegistration(String databaseName) {
         CATALOG.remove(databaseName);
     }
+
+    public static void removeAllRegisteredDbCreations() {
+        CATALOG.clear();
+    }
 }

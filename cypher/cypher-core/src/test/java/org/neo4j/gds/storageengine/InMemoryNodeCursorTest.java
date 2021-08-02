@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.storageengine;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.BaseTest;
@@ -74,6 +75,11 @@ class InMemoryNodeCursorTest extends BaseTest {
 
         InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders).schemaAndTokensLifecycle().init();
         this.nodeCursor = new InMemoryNodeCursor(graphStore, tokenHolders);
+    }
+
+    @AfterEach
+    void tearDown() {
+        InMemoryDatabaseCreationCatalog.removeAllRegisteredDbCreations();
     }
 
     @Test
