@@ -54,7 +54,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -88,15 +87,19 @@ class BackupAndRestoreTest {
             .build();
         GraphStoreCatalog.set(graphConfig, GdlFactory.of(gdlGraph).build().graphStore());
 
+        var config = ImmutableBackupConfig
+            .builder()
+            .backupsPath(tempDir)
+            .providedBackupId("1337")
+            .timeoutInSeconds(42)
+            .log(new TestLog())
+            .allocationTracker(AllocationTracker.empty())
+            .taskName("Backup")
+            .build();
+
+        var results = BackupAndRestore.backup(config);
+
         var backupPath = tempDir.resolve("backup-1337");
-        var results = BackupAndRestore.backup(
-            Optional.of("1337"),
-            backupPath,
-            new TestLog(),
-            42,
-            AllocationTracker.empty(),
-            "Backup"
-        );
 
         assertThat(results).hasSize(1)
             .element(0, InstanceOfAssertFactories.type(BackupResult.class))
@@ -105,8 +108,7 @@ class BackupAndRestoreTest {
             .returns(true, BackupResult::done)
             .satisfies(result -> {
                 assertThat(result.exportMillis()).isGreaterThanOrEqualTo(0L);
-                assertThat(result.path()).isNotNull()
-                    .startsWith(backupPath.toString());
+                assertThat(result.path()).isNotNull().startsWith(backupPath.toString());
             });
 
         assertThat(backupPath)
@@ -135,15 +137,19 @@ class BackupAndRestoreTest {
         );
         ModelCatalog.set(model);
 
+        var config = ImmutableBackupConfig
+            .builder()
+            .backupsPath(tempDir)
+            .providedBackupId("42")
+            .timeoutInSeconds(42)
+            .log(new TestLog())
+            .allocationTracker(AllocationTracker.empty())
+            .taskName("Backup")
+            .build();
+
+        var results = BackupAndRestore.backup(config);
+
         var backupPath = tempDir.resolve("backup-42");
-        var results = BackupAndRestore.backup(
-            Optional.of("42"),
-            backupPath,
-            new TestLog(),
-            42,
-            AllocationTracker.empty(),
-            "Backup"
-        );
 
         assertThat(results).hasSize(1)
             .element(0, InstanceOfAssertFactories.type(BackupResult.class))
@@ -188,7 +194,7 @@ class BackupAndRestoreTest {
         assertThat(GraphStoreCatalog.graphStoresCount()).isEqualTo(0);
         assertThat(ModelCatalog.getAllModels().count()).isEqualTo(0);
 
-        BackupAndRestore.restore(restorePath, backupPath, new TestLog());
+        BackupAndRestore.restore(restorePath, backupPath, -1, new TestLog());
 
         if (hasGraphs) {
             assertGraphsAreRestored();

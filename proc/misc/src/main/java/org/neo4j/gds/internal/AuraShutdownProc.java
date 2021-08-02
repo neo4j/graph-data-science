@@ -44,7 +44,6 @@ import org.neo4j.values.storable.Values;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
@@ -159,22 +158,27 @@ public class AuraShutdownProc implements CallableProcedure {
         long timeoutInSeconds,
         AllocationTracker allocationTracker
     ) {
-        var result = BackupAndRestore.backup(
-            Optional.empty(),
-            exportPath,
-            log,
-            timeoutInSeconds,
-            store -> {
+        var config = ImmutableBackupConfig.builder()
+            .backupsPath(exportPath)
+            .timeoutInSeconds(timeoutInSeconds)
+            .taskName("Shutdown")
+            .allocationTracker(allocationTracker)
+            .log(log)
+            .providedBackupPath(exportPath)
+            .maxAllowedBackups(-1)
+            .graphOnSuccess(store -> {
                 var catalogRequest = CatalogRequest.of(store.userName(), store.graphStore().databaseId());
                 GraphStoreCatalog.remove(catalogRequest, store.config().graphName(), graph -> {}, false);
-            },
-            model -> ModelCatalog.drop(model.creator(), model.name(), false),
-            allocationTracker,
-            "Shutdown"
-        );
+            })
+            .modelOnSuccess(model -> {
+                ModelCatalog.drop(model.creator(), model.name(), false);
+            })
+            .build();
+
+        var result = BackupAndRestore.backup(config);
 
         result.forEach(backupResult -> {
-            if(backupResult.done()) {
+            if (backupResult.done()) {
                 log.info(backupResult.toString());
             } else {
                 log.warn(backupResult.toString());

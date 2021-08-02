@@ -103,7 +103,7 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
     ) {
         var userLog = logService.getUserLog(AuraMaintenanceExtension.class);
         try {
-            BackupAndRestore.restore(restorePath, backupPath, userLog);
+            BackupAndRestore.restore(restorePath, backupPath, -1, userLog);
         } catch (Exception e) {
             userLog.warn("Graph store loading failed", e);
         }

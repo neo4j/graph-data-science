@@ -38,10 +38,7 @@ import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Values;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.helpers.collection.Iterators.asRawIterator;
 import static org.neo4j.internal.kernel.api.procs.Neo4jTypes.NTBoolean;
 import static org.neo4j.internal.kernel.api.procs.Neo4jTypes.NTInteger;
@@ -104,27 +101,25 @@ public class AuraBackupProc implements CallableProcedure {
         AnyValue[] input,
         ResourceTracker resourceTracker
     ) throws ProcedureException {
-        var backupId = UUID.randomUUID().toString();
-        var backupName = formatWithLocale("backup-%s", backupId);
 
         var neo4jConfig = InternalProceduresUtil.resolve(ctx, Config.class);
-        var backupRoot = neo4jConfig.get(GraphStoreExportSettings.backup_location_setting).resolve(backupName);
+        var backupsPath = neo4jConfig.get(GraphStoreExportSettings.backup_location_setting);
 
-        long timeoutInSeconds = ((NumberValue) input[0]).longValue();
+        var config = ImmutableBackupConfig.builder()
+            .backupsPath(backupsPath)
+            .timeoutInSeconds(((NumberValue) input[0]).longValue())
+            .taskName("Backup")
+            .allocationTracker(InternalProceduresUtil.lookup(ctx, AllocationTracker.class))
+            .log(InternalProceduresUtil.lookup(ctx, Log.class))
+            .maxAllowedBackups(-1)
+            .build();
 
-        var result = BackupAndRestore.backup(
-            Optional.of(backupId),
-            backupRoot,
-            InternalProceduresUtil.lookup(ctx, Log.class),
-            timeoutInSeconds,
-            InternalProceduresUtil.lookup(ctx, AllocationTracker.class),
-            "Backup"
-        );
+        var result = BackupAndRestore.backup(config);
 
         return asRawIterator(result.stream().map(row -> new AnyValue[]{
             Values.stringValue(row.type()),
             Values.booleanValue(row.done()),
-            Values.stringValue(backupName),
+            Values.stringValue(config.backupName(row.backupId())),
             Values.stringOrNoValue(row.path()),
             Values.longValue(row.exportMillis())
         }));

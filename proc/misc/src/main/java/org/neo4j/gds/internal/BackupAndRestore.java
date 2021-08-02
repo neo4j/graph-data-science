@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.internal;
 
+import org.apache.commons.io.file.PathUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.model.StoredModel;
@@ -34,6 +35,8 @@ import org.neo4j.graphalgo.core.utils.io.file.GraphStoreExporterUtil;
 import org.neo4j.graphalgo.core.utils.io.file.ImmutableCsvGraphStoreImporterConfig;
 import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
+import org.neo4j.graphalgo.utils.CheckedRunnable;
+import org.neo4j.graphalgo.utils.CheckedSupplier;
 import org.neo4j.graphalgo.utils.ExceptionUtil;
 import org.neo4j.graphalgo.utils.StringFormatting;
 import org.neo4j.logging.Log;
@@ -48,17 +51,20 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
 import static org.neo4j.graphalgo.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
 import static org.neo4j.graphalgo.core.utils.io.file.CsvGraphStoreImporter.DIRECTORY_IS_READABLE;
+import static org.neo4j.graphalgo.utils.ExceptionUtil.function;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class BackupAndRestore {
@@ -85,51 +91,107 @@ public final class BackupAndRestore {
         long exportMillis();
     }
 
-    static List<BackupResult> backup(
-        Optional<String> providedBackupId,
-        Path backupRoot,
-        Log log,
-        long timeoutInSeconds,
-        AllocationTracker allocationTracker,
-        @SuppressWarnings("SameParameterValue") String taskName
-    ) {
-        return backup(
-            providedBackupId,
-            backupRoot,
-            log,
-            timeoutInSeconds,
-            ignore -> {},
-            ignore -> {},
-            allocationTracker,
-            taskName
-        );
+    @ValueClass
+    interface BackupConfig {
+
+        Path backupsPath();
+
+        long timeoutInSeconds();
+
+        String taskName();
+
+        AllocationTracker allocationTracker();
+
+        Log log();
+
+        Optional<String> providedBackupId();
+
+        Optional<Path> providedBackupPath();
+
+        @Value.Default
+        default String backupNameTemplate() {
+            return "backup-%s";
+        }
+
+        @Value.Default
+        default int maxAllowedBackups() {
+            return -1;
+        }
+
+        @Value.Default
+        default Consumer<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> graphOnSuccess() {
+            return ignore -> {};
+        }
+
+        @Value.Default
+        default Consumer<Model<?, ?>> modelOnSuccess() {
+            return ignore -> {};
+        }
+
+        default String backupName(String backupId) {
+            return formatWithLocale(backupNameTemplate(), backupId);
+        }
+
+        default Path backupPath(String backupId) {
+            return providedBackupPath().orElseGet(() -> backupsPath().resolve(backupName(backupId)));
+        }
     }
 
-    static List<BackupResult> backup(
-        Optional<String> providedBackupId,
-        Path backupRoot,
-        Log log,
-        long timeoutInSeconds,
-        Consumer<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> graphOnSuccess,
-        Consumer<Model<?, ?>> modelOnSuccess,
-        AllocationTracker allocationTracker,
-        String taskName
-    ) {
-        log.info("Preparing for %s", StringFormatting.toLowerCaseWithLocale(taskName));
-
-        DIRECTORY_IS_WRITABLE.validate(backupRoot);
-
+    static List<BackupResult> backup(BackupConfig backupConfig) {
         var metadataBuilder = ImmutableBackupMetadata.builder();
-        providedBackupId.ifPresent(metadataBuilder::backupId);
+        backupConfig.providedBackupId().ifPresent(metadataBuilder::backupId);
         var metadata = metadataBuilder.build();
 
         try {
-            writeBackupMetadata(backupRoot, metadata);
+            var createBackup = canCreateBackup(backupConfig.backupsPath(), backupConfig.maxAllowedBackups(), metadata);
+            return applyBackup(
+                createBackup,
+                () -> doBackup(
+                    backupConfig.taskName(),
+                    metadata,
+                    backupConfig.backupPath(metadata.backupId()),
+                    backupConfig.graphOnSuccess(),
+                    backupConfig.modelOnSuccess(),
+                    backupConfig.timeoutInSeconds(),
+                    backupConfig.log(),
+                    backupConfig.allocationTracker()
+                ),
+                List::of
+            );
+        } catch (IOException e) {
+            backupConfig.log().error(
+                formatWithLocale(
+                    "Failed to create backup '%s', aborting %s.",
+                    metadata.backupId(),
+                    StringFormatting.toLowerCaseWithLocale(backupConfig.taskName())
+                ),
+                e
+            );
+            return List.of();
+        }
+    }
+
+    private static List<BackupResult> doBackup(
+        String taskName,
+        BackupMetadata metadata,
+        Path backupPath,
+        Consumer<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> graphOnSuccess,
+        Consumer<Model<?, ?>> modelOnSuccess,
+        long timeoutInSeconds,
+        Log log,
+        AllocationTracker allocationTracker
+    ) {
+        log.info("Preparing for %s", StringFormatting.toLowerCaseWithLocale(taskName));
+
+        DIRECTORY_IS_WRITABLE.validate(backupPath);
+
+        try {
+            writeBackupMetadata(backupPath, metadata);
         } catch (IOException e) {
             log.error(
                 formatWithLocale(
                     "Failed to write metadata file '%s', aborting %s.",
-                    backupRoot.resolve(BACKUP_META_DATA_FILE),
+                    backupPath.resolve(BACKUP_META_DATA_FILE),
                     StringFormatting.toLowerCaseWithLocale(taskName)
                 ),
                 e
@@ -144,21 +206,21 @@ public final class BackupAndRestore {
         try (timer) {
             result.addAll(backupGraphStores(
                 factory,
-                backupRoot,
+                backupPath,
                 graphOnSuccess,
                 log,
                 allocationTracker
             ));
             result.addAll(backupModels(
                 factory,
-                backupRoot,
+                backupPath,
                 modelOnSuccess,
                 log
             ));
 
             // We have the contract that both graphs and models folder exist, even if they do not contain any data
             result.stream().flatMap(backupResult -> {
-                var userPath = backupRoot.resolve(backupResult.username());
+                var userPath = backupPath.resolve(backupResult.username());
                 return Stream.of(userPath.resolve(GRAPHS_DIR), userPath.resolve(MODELS_DIR));
             }).distinct().forEach(pathToCreate -> {
                 try {
@@ -195,7 +257,7 @@ public final class BackupAndRestore {
         return result;
     }
 
-    static void restore(Path restorePath, Path backupPath, Log log) {
+    static void restore(Path restorePath, Path backupPath, int maxAllowedBackups, Log log) {
         var successfulRestorePaths = subdirectories(restorePath, log)
             .flatMap(userRestorePath -> {
                 try {
@@ -210,7 +272,7 @@ public final class BackupAndRestore {
 
         if (!successfulRestorePaths.isEmpty()) {
             try {
-                createNewBackupFromRestore(backupPath, restorePath, successfulRestorePaths);
+                createNewBackupFromRestore(backupPath, restorePath, maxAllowedBackups, successfulRestorePaths);
             } catch (IOException e) {
                 log.error(
                     formatWithLocale(
@@ -233,17 +295,82 @@ public final class BackupAndRestore {
         restoreModels(modelsPath, log);
     }
 
-    private static void createNewBackupFromRestore(Path backupPath, Path restorePath, Iterable<Path> userPaths)
+    private static void createNewBackupFromRestore(
+        Path backupPath,
+        Path restorePath,
+        int maxAllowedBackups,
+        Iterable<Path> userPaths
+    )
     throws IOException {
         var metadataFile = restorePath.resolve(BACKUP_META_DATA_FILE);
         var metadata = readBackupMetadata(metadataFile);
-        var backupName = formatWithLocale("backup-%s-restored", metadata.backupId());
-        var backupRoot = backupPath.resolve(backupName);
-        Files.createDirectories(backupRoot);
-        Files.move(metadataFile, backupRoot.resolve(BACKUP_META_DATA_FILE));
-        for (Path userPath : userPaths) {
-            Files.move(userPath, backupRoot.resolve(userPath.getFileName()));
+
+        var createBackup = canCreateBackup(backupPath, maxAllowedBackups, metadata);
+        applyBackup(createBackup, () -> {
+            var backupName = formatWithLocale("backup-%s-restored", metadata.backupId());
+            var backupRoot = backupPath.resolve(backupName);
+            Files.createDirectories(backupRoot);
+            Files.move(metadataFile, backupRoot.resolve(BACKUP_META_DATA_FILE));
+            for (Path userPath : userPaths) {
+                Files.move(userPath, backupRoot.resolve(userPath.getFileName()));
+            }
+        });
+    }
+
+    private static CreateBackup canCreateBackup(Path backupsPath, int maxAllowedBackups, BackupMetadata metadata)
+    throws IOException {
+        var builder = ImmutableCreateBackup.builder().shouldBackup(true);
+
+        if (!Files.exists(backupsPath)) {
+            return builder.build();
         }
+
+        var existingBackups = Files.list(backupsPath)
+            .filter(BackupAndRestore::isBackupDirectory)
+            .map(function(path -> ImmutableBackup.of(readBackupMetadata(path.resolve(BACKUP_META_DATA_FILE)), path)))
+            .collect(Collectors.toList());
+
+        if (maxAllowedBackups >= 0 && existingBackups.size() >= maxAllowedBackups) {
+            var oldestBackup = existingBackups.stream()
+                .filter(entry -> entry.backupTime().isBefore(metadata.backupTime()))
+                .min(Comparator.comparing(Backup::backupTime));
+
+            oldestBackup.ifPresentOrElse(
+                builder::removeBefore,
+                () -> builder.shouldBackup(false)
+            );
+        }
+
+        return builder.build();
+    }
+
+    private static <E extends IOException> void applyBackup(CreateBackup createBackup, CheckedRunnable<E> backupAction)
+    throws IOException {
+        applyBackup(createBackup, () -> {
+            backupAction.run();
+            return null;
+        }, () -> null);
+    }
+
+    private static <T, E extends IOException> T applyBackup(
+        CreateBackup createBackup,
+        CheckedSupplier<T, E> backupAction,
+        Supplier<T> empty
+    )
+    throws IOException {
+        if (createBackup.shouldBackup()) {
+            var removeBefore = createBackup.removeBefore();
+            if (removeBefore.isPresent()) {
+                PathUtils.deleteDirectory(removeBefore.get().location());
+            }
+
+            return backupAction.checkedGet();
+        }
+        return empty.get();
+    }
+
+    private static boolean isBackupDirectory(Path path) {
+        return Files.isDirectory(path) && Files.isReadable(path) && Files.exists(path.resolve(BACKUP_META_DATA_FILE));
     }
 
     private static List<BackupResult> backupGraphStores(
@@ -440,6 +567,34 @@ public final class BackupAndRestore {
         default ZonedDateTime backupTime() {
             return ZonedDateTime.now(Clock.systemUTC());
         }
+    }
+
+    @ValueClass
+    interface Backup {
+        BackupMetadata metadata();
+
+        Path location();
+
+        default ZonedDateTime backupTime() {
+            return metadata().backupTime();
+        }
+    }
+
+    @ValueClass
+    interface CreateBackup {
+        /**
+         * @return false if this backup is not newer than any of the backups found in the backup location
+         *     and the limit on the maximum number of backups is reached.
+         *     true if this backup is later than existing backups or there is
+         *     no limit on the maximum number of backups.
+         */
+        boolean shouldBackup();
+
+        /**
+         * If this returns _some_ backup, that one needs to be deleted before continuing with the backup.
+         * Only relevant if {@link #shouldBackup()} returns true.
+         */
+        Optional<Backup> removeBefore();
     }
 
     private static class BackupResultFactory {
