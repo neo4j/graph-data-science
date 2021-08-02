@@ -62,7 +62,7 @@ public final class AuraMaintenanceExtension extends ExtensionFactory<AuraMainten
             var config = dependencies.config();
             var log = dependencies.logService().getInternalLog(getClass());
 
-            var backupPath = pathSetting(config, GraphStoreExportSettings.backup_location_setting, log);
+            var backupPath = pathSetting(config, AuraMaintenanceSettings.backup_location_setting, log);
             var exportPath = pathSetting(config, GraphStoreExportSettings.export_location_setting, log);
             // We keep it null here so that we can fail lazily from the shutdown proc with a message
             // that we control and is visible to the user outside of going through the logs

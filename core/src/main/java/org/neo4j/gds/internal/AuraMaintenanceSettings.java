@@ -25,8 +25,11 @@ import org.neo4j.configuration.DocumentedDefaultValue;
 import org.neo4j.configuration.SettingsDeclaration;
 import org.neo4j.graphdb.config.Setting;
 
+import java.nio.file.Path;
+
 import static org.neo4j.configuration.SettingImpl.newBuilder;
 import static org.neo4j.configuration.SettingValueParsers.BOOL;
+import static org.neo4j.configuration.SettingValueParsers.PATH;
 
 @ServiceProvider
 public final class AuraMaintenanceSettings implements SettingsDeclaration {
@@ -45,5 +48,12 @@ public final class AuraMaintenanceSettings implements SettingsDeclaration {
         "gds.validate_using_max_memory_estimation",
         BOOL,
         false
+    ).build();
+
+    @Description("Sets the backup location for file based exports.")
+    public static final Setting<Path> backup_location_setting = newBuilder(
+        "gds.backup.location",
+        PATH,
+        null
     ).build();
 }

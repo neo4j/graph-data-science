@@ -21,7 +21,6 @@ package org.neo4j.gds.internal;
 
 import org.neo4j.collection.RawIterator;
 import org.neo4j.configuration.Config;
-import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -103,7 +102,7 @@ public class AuraBackupProc implements CallableProcedure {
     ) throws ProcedureException {
 
         var neo4jConfig = InternalProceduresUtil.resolve(ctx, Config.class);
-        var backupsPath = neo4jConfig.get(GraphStoreExportSettings.backup_location_setting);
+        var backupsPath = neo4jConfig.get(AuraMaintenanceSettings.backup_location_setting);
 
         var config = ImmutableBackupConfig.builder()
             .backupsPath(backupsPath)

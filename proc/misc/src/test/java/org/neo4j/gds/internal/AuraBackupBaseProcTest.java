@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -67,7 +66,7 @@ public abstract class AuraBackupBaseProcTest extends BaseProcTest {
                 return testLog;
             }
         });
-        builder.setConfig(GraphStoreExportSettings.backup_location_setting, getBackupLocation());
+        builder.setConfig(AuraMaintenanceSettings.backup_location_setting, getBackupLocation());
     }
 
     abstract Path getBackupLocation();
