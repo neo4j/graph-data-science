@@ -19,11 +19,8 @@
  */
 package org.neo4j.internal.recordstorage;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
-import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.gds.storageengine.CypherTest;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -32,20 +29,13 @@ import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.storageengine.api.StorageEngine;
-import org.neo4j.token.DelegatingTokenHolder;
-import org.neo4j.token.ReadOnlyTokenCreator;
-import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
-import org.neo4j.token.api.TokenHolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class InMemoryStorageEngineTest extends BaseTest {
+class InMemoryStorageEngineTest extends CypherTest {
 
     @Neo4jGraph
     static String DB_CYPHER = "CREATE" +
@@ -53,36 +43,19 @@ class InMemoryStorageEngineTest extends BaseTest {
                               ", (b:B {prop2: 13.37})" +
                               ", (a)-[:REL]->(b)";
 
-    private GraphStore graphStore;
-    private TokenHolders tokenHolders;
-    private StorageEngine storageEngine;
-
-    @BeforeEach
-    void setup() {
-        this.graphStore = new StoreLoaderBuilder()
+    @Override
+    protected GraphStore graphStore() {
+        return new StoreLoaderBuilder()
             .api(db)
             .addNodeProjection(NodeProjection.of("A", PropertyMappings.of(PropertyMapping.of("prop1"))))
             .addNodeProjection(NodeProjection.of("B", PropertyMappings.of(PropertyMapping.of("prop2"))))
             .addRelationshipProjection(RelationshipProjection.of("REL", Orientation.NATURAL))
             .build()
             .graphStore();
-
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("", db.databaseLayout().getDatabaseName()), graphStore);
-
-        this.tokenHolders = new TokenHolders(
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_PROPERTY_KEY),
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_LABEL),
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
-        );
-
-        this.storageEngine = InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders);
     }
 
-    @AfterEach
-    void tearDown() {
-        GraphStoreCatalog.removeAllLoadedGraphs();
-        InMemoryDatabaseCreationCatalog.removeAllRegisteredDbCreations();
-    }
+    @Override
+    protected void onSetup() {}
 
     @Test
     @DisableForNeo4jVersion(Neo4jVersion.V_4_0)
@@ -90,9 +63,7 @@ class InMemoryStorageEngineTest extends BaseTest {
     @DisableForNeo4jVersion(Neo4jVersion.V_4_2)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop31)
     @DisableForNeo4jVersion(Neo4jVersion.V_4_3_drop40)
-    void shouldPopulateTokenHolders() throws Exception {
-        storageEngine.schemaAndTokensLifecycle().init();
-
+    void shouldPopulateTokenHolders() {
         var labelTokens = tokenHolders.labelTokens().getAllTokens();
         assertThat(labelTokens).extracting(NamedToken::name).containsExactlyInAnyOrder("A", "B");
 

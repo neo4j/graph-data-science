@@ -19,30 +19,21 @@
  */
 package org.neo4j.gds.storageengine;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.StorageEngineProxy;
-import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.IdFunction;
 import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.internal.recordstorage.InMemoryStorageEngineCompanion;
-import org.neo4j.token.DelegatingTokenHolder;
-import org.neo4j.token.ReadOnlyTokenCreator;
-import org.neo4j.token.TokenHolders;
-import org.neo4j.token.api.TokenHolder;
 
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class InMemoryRelationshipTraversalCursorTest extends BaseTest {
+class InMemoryRelationshipTraversalCursorTest extends CypherTest {
 
     @Neo4jGraph
     static final String DB_CYPHER = "CREATE" +
@@ -55,29 +46,21 @@ class InMemoryRelationshipTraversalCursorTest extends BaseTest {
     @Inject
     IdFunction idFunction;
 
-    GraphStore graphStore;
-    TokenHolders tokenHolders;
     InMemoryRelationshipTraversalCursor relationshipCursor;
 
-    @BeforeEach
-    void setup() throws Exception {
-        this.graphStore = new StoreLoaderBuilder()
+    @Override
+    protected GraphStore graphStore() {
+        return new StoreLoaderBuilder()
             .api(db)
             .addNodeLabel("A")
             .addNodeLabel("B")
             .addRelationshipType("REL")
             .build()
             .graphStore();
+    }
 
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("", db.databaseLayout().getDatabaseName()), graphStore);
-
-        this.tokenHolders = new TokenHolders(
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_PROPERTY_KEY),
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_LABEL),
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
-        );
-
-        InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders).schemaAndTokensLifecycle().init();
+    @Override
+    protected void onSetup() {
         this.relationshipCursor = new InMemoryRelationshipTraversalCursor(graphStore, tokenHolders);
     }
 

@@ -19,31 +19,21 @@
  */
 package org.neo4j.gds.storageengine;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.compat.Neo4jVersion;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.internal.recordstorage.InMemoryStorageEngineCompanion;
-import org.neo4j.token.DelegatingTokenHolder;
-import org.neo4j.token.ReadOnlyTokenCreator;
-import org.neo4j.token.TokenHolders;
-import org.neo4j.token.api.TokenHolder;
 import org.neo4j.token.api.TokenNotFoundException;
 import org.neo4j.values.storable.LongValue;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class InMemoryNodeCursorTest extends BaseTest {
+class InMemoryNodeCursorTest extends CypherTest {
 
     @Neo4jGraph
     static final String DB_CYPHER = "CREATE" +
@@ -52,34 +42,21 @@ class InMemoryNodeCursorTest extends BaseTest {
                                     ", (:A)" +
                                     ", (:A)";
 
-    GraphStore graphStore;
-    TokenHolders tokenHolders;
     InMemoryNodeCursor nodeCursor;
 
-    @BeforeEach
-    void setup() throws Exception {
-        this.graphStore = new StoreLoaderBuilder()
+    @Override
+    protected void onSetup() {
+        this.nodeCursor = new InMemoryNodeCursor(graphStore, tokenHolders);
+    }
+
+    @Override
+    protected GraphStore graphStore() {
+        return new StoreLoaderBuilder()
             .api(db)
             .addNodeProjection(NodeProjection.of("A", PropertyMappings.of(PropertyMapping.of("prop1"))))
             .addNodeProjection(NodeProjection.of("B", PropertyMappings.of(PropertyMapping.of("prop2"))))
             .build()
             .graphStore();
-
-        GraphStoreCatalog.set(GraphCreateFromStoreConfig.emptyWithName("", db.databaseLayout().getDatabaseName()), graphStore);
-
-        this.tokenHolders = new TokenHolders(
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_PROPERTY_KEY),
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_LABEL),
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
-        );
-
-        InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders).schemaAndTokensLifecycle().init();
-        this.nodeCursor = new InMemoryNodeCursor(graphStore, tokenHolders);
-    }
-
-    @AfterEach
-    void tearDown() {
-        InMemoryDatabaseCreationCatalog.removeAllRegisteredDbCreations();
     }
 
     @Test
