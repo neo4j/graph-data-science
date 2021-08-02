@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
+import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.Result;
 
@@ -187,7 +187,7 @@ class GraphListProcTest extends BaseProcTest {
                 ),
                 "schema", map(
                     "nodes", map("__ALL__", map()),
-                    "relationships", map("RELATIONSHIP", map()
+                    "relationships", map("REL", map()
                     )
                 ),
                 "nodeQuery", null,

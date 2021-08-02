@@ -49,8 +49,6 @@ import static org.neo4j.procedure.Mode.READ;
 
 public final class GraphGenerateProc extends BaseProc {
 
-    private static final String DUMMY_RELATIONSHIP_NAME = "RELATIONSHIP";
-
     @Procedure(name = "gds.beta.graph.generate", mode = READ)
     @Description(value = "Computes a random graph, which will be stored in the graph catalog.")
     public Stream<GraphGenerationStats> generate(
@@ -102,7 +100,7 @@ public final class GraphGenerateProc extends BaseProc {
             GraphStore graphStore = CSRGraphStoreUtil.createFromGraph(
                 api.databaseId(),
                 graph,
-                DUMMY_RELATIONSHIP_NAME,
+                config.relationshipType().name,
                 relationshipProperty,
                 config.readConcurrency(),
                 allocationTracker()
