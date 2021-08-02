@@ -19,7 +19,6 @@
  */
 package org.neo4j.internal.recordstorage;
 
-import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.storageengine.InMemoryDatabaseCreationCatalog;
 import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
@@ -35,7 +34,6 @@ public final class InMemoryStorageEngineCompanion {
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders
     ) {
-        var config = Config.defaults();
         var databaseName = databaseLayout.getDatabaseName();
         InMemoryDatabaseCreationCatalog.registerDbCreation(
             databaseName,
@@ -43,8 +41,7 @@ public final class InMemoryStorageEngineCompanion {
         );
         var storageEngineBuilder = StorageEngineProxy.inMemoryStorageEngineBuilder(
             databaseLayout,
-            tokenHolders,
-            config
+            tokenHolders
         );
 
         storageEngineBuilder.withCountsStoreFn(StorageEngineProxy::inMemoryCountsStore);

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.configuration.Config;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.function.TriFunction;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -38,7 +37,6 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
     protected final DatabaseLayout databaseLayout;
     protected final TokenHolders tokenHolders;
     protected final MetadataProvider metadataProvider;
-    protected final Config config;
 
     protected BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn;
     protected BiFunction<GraphStore, TokenHolders, TxStateVisitor> txStateVisitorFn;
@@ -48,13 +46,11 @@ public abstract class InMemoryStorageEngineBuilder<T extends AbstractInMemorySto
     protected InMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders,
-        MetadataProvider metadataProvider,
-        Config config
+        MetadataProvider metadataProvider
     ) {
         this.databaseLayout = databaseLayout;
         this.tokenHolders = tokenHolders;
         this.metadataProvider = metadataProvider;
-        this.config = config;
     }
 
     public InMemoryStorageEngineBuilder<T> withCountsStoreFn(BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn) {

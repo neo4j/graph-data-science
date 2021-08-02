@@ -56,10 +56,9 @@ public final class StorageEngineProxy {
 
     public static <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders,
-        Config config
+        TokenHolders tokenHolders
     ) {
-        return IMPL.inMemoryStorageEngineBuilder(databaseLayout, tokenHolders, config);
+        return IMPL.inMemoryStorageEngineBuilder(databaseLayout, tokenHolders);
     }
 
     public static CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders) {

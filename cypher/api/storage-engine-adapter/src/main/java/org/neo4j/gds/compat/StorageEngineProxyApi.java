@@ -36,8 +36,7 @@ public interface StorageEngineProxyApi {
 
     <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
-        TokenHolders tokenHolders,
-        Config config
+        TokenHolders tokenHolders
     );
 
     CountsStore inMemoryCountsStore(GraphStore graphStore, TokenHolders tokenHolders);
