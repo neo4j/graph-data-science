@@ -133,11 +133,12 @@ class LinkPredictionTrainTest {
             CypherMapWrapper.create(Map.<String, Object>of("maxEpochs", 1000, "minEpochs", 10, "concurrency", 1))
         );
 
+        String modelName = "model";
         var config = ImmutableLinkPredictionTrainConfig.builder()
             .trainRelationshipType(RelationshipType.of("TRAIN"))
             .testRelationshipType(RelationshipType.of("TEST"))
             .featureProperties(List.of("z", "array"))
-            .modelName("model")
+            .modelName(modelName)
             .validationFolds(2)
             .randomSeed(1337L)
             .negativeClassWeight(classRatio)
@@ -152,9 +153,15 @@ class LinkPredictionTrainTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var model = linkPredictionTrain.compute();
+        var actualModel = linkPredictionTrain.compute();
 
-        var customInfo = (LinkPredictionModelInfo) model.customInfo();
+        assertThat(actualModel.name()).isEqualTo(modelName);
+        assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrain.MODEL_TYPE);
+        assertThat(actualModel.trainConfig()).isEqualTo(config);
+        // length of the linkFeatures
+        assertThat(actualModel.data().weights().data().totalSize()).isEqualTo(7);
+
+        var customInfo = (LinkPredictionModelInfo) actualModel.customInfo();
         var validationScores = customInfo.metrics().get(LinkMetric.AUCPR).validation();
 
         assertThat(validationScores).hasSize(2);

@@ -59,7 +59,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class LinkPredictionTrain
     extends Algorithm<LinkPredictionTrain, Model<LinkLogisticRegressionData, LinkPredictionTrainConfig>> {
 
-    public static final String MODEL_TYPE = "Link Prediction";
+    public static final String MODEL_TYPE = "Link Prediction - Pipeline";
     public static final String TEST_RELATIONSHIP_TYPE = "_TEST_";
     public static final String TEST_COMPLEMENT_RELATIONSHIP_TYPE = "_TEST_COMPLEMENT_";
     public static final String TRAIN_RELATIONSHIP_TYPE = "_TRAIN_";

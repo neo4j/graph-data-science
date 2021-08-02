@@ -109,10 +109,11 @@ class LinkPredictionTrainTest extends BaseProcTest {
     @Test
     void trainsAModel() {
         ProcedureTestUtils.applyOnProcedure(db, (Consumer<? super AlgoBaseProc<?, ?, ?>>) caller -> {
+            String modelName = "model";
             LinkPredictionTrainConfig config = LinkPredictionTrainConfig
                 .builder()
                 .graphName(GRAPH_NAME)
-                .modelName("model")
+                .modelName(modelName)
                 .negativeClassWeight(1)
                 .holdOutFraction(0.5)
                 .negativeSamplingRatio(1)
@@ -140,8 +141,15 @@ class LinkPredictionTrainTest extends BaseProcTest {
                 caller
             );
 
-            var customInfo = (LinkPredictionModelInfo) linkPredictionTrain.compute().customInfo();
+            var actualModel = linkPredictionTrain.compute();
 
+            assertThat(actualModel.name()).isEqualTo(modelName);
+            assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrain.MODEL_TYPE);
+            assertThat(actualModel.trainConfig()).isEqualTo(config);
+            // length of the linkFeatures
+            assertThat(actualModel.data().weights().data().totalSize()).isEqualTo(7);
+
+            var customInfo = (LinkPredictionModelInfo) actualModel.customInfo();
             assertThat(customInfo.metrics().get(LinkMetric.AUCPR).validation())
                 .hasSize(2)
                 .satisfies(scores ->
