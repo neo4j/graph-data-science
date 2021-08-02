@@ -38,6 +38,7 @@ import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Values;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
@@ -103,12 +104,16 @@ public class AuraBackupProc implements CallableProcedure {
         AnyValue[] input,
         ResourceTracker resourceTracker
     ) throws ProcedureException {
+        var backupId = UUID.randomUUID().toString();
+        var backupName = formatWithLocale("backup-%s", backupId);
+
         var neo4jConfig = InternalProceduresUtil.resolve(ctx, Config.class);
-        var backupName = formatWithLocale("backup-%s", UUID.randomUUID());
         var backupRoot = neo4jConfig.get(GraphStoreExportSettings.backup_location_setting).resolve(backupName);
+
         long timeoutInSeconds = ((NumberValue) input[0]).longValue();
 
         var result = BackupAndRestore.backup(
+            Optional.of(backupId),
             backupRoot,
             InternalProceduresUtil.lookup(ctx, Log.class),
             timeoutInSeconds,

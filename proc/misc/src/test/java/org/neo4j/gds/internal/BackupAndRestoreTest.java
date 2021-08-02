@@ -46,15 +46,18 @@ import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class BackupAndRestoreTest {
 
@@ -83,10 +86,18 @@ class BackupAndRestoreTest {
         GraphStoreCatalog.set(graphConfig, GdlFactory.of(gdlGraph).build().graphStore());
 
         var backupPath = tempDir.resolve("backup-1337");
-        var results = BackupAndRestore.backup(backupPath, new TestLog(), 42, AllocationTracker.empty(), "Backup");
+        var results = BackupAndRestore.backup(
+            Optional.of("1337"),
+            backupPath,
+            new TestLog(),
+            42,
+            AllocationTracker.empty(),
+            "Backup"
+        );
 
         assertThat(results).hasSize(1)
             .element(0, InstanceOfAssertFactories.type(BackupResult.class))
+            .returns("1337", BackupResult::backupId)
             .returns("graph", BackupResult::type)
             .returns(true, BackupResult::done)
             .satisfies(result -> {
@@ -98,6 +109,14 @@ class BackupAndRestoreTest {
         assertThat(backupPath)
             .isDirectoryRecursivelyContaining("glob:**/alice/graphs")
             .isDirectoryRecursivelyContaining("glob:**/alice/models");
+
+        assertThat(backupPath.resolve(".backupmetadata"))
+            .isNotEmptyFile()
+            .usingCharset(StandardCharsets.UTF_8)
+            .hasContent(formatWithLocale(
+                "Backup-Time: %d%nBackup-Id: 1337%n",
+                results.get(0).backupTime().toInstant().toEpochMilli()
+            ));
     }
 
     @Test
@@ -114,10 +133,18 @@ class BackupAndRestoreTest {
         ModelCatalog.set(model);
 
         var backupPath = tempDir.resolve("backup-42");
-        var results = BackupAndRestore.backup(backupPath, new TestLog(), 42, AllocationTracker.empty(), "Backup");
+        var results = BackupAndRestore.backup(
+            Optional.of("42"),
+            backupPath,
+            new TestLog(),
+            42,
+            AllocationTracker.empty(),
+            "Backup"
+        );
 
         assertThat(results).hasSize(1)
             .element(0, InstanceOfAssertFactories.type(BackupResult.class))
+            .returns("42", BackupResult::backupId)
             .returns("model", BackupResult::type)
             .returns(true, BackupResult::done)
             .satisfies(result -> {
@@ -129,6 +156,14 @@ class BackupAndRestoreTest {
         assertThat(backupPath)
             .isDirectoryRecursivelyContaining("glob:**/alice/graphs")
             .isDirectoryRecursivelyContaining("glob:**/alice/models");
+
+        assertThat(backupPath.resolve(".backupmetadata"))
+            .isNotEmptyFile()
+            .usingCharset(StandardCharsets.UTF_8)
+            .hasContent(formatWithLocale(
+                "Backup-Time: %d%nBackup-Id: 42%n",
+                results.get(0).backupTime().toInstant().toEpochMilli()
+            ));
     }
 
     @ParameterizedTest

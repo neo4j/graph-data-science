@@ -38,10 +38,15 @@ import org.neo4j.graphalgo.utils.StringFormatting;
 import org.neo4j.logging.Log;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.Clock;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -57,9 +62,14 @@ public final class BackupAndRestore {
 
     private static final String GRAPHS_DIR = "graphs";
     private static final String MODELS_DIR = "models";
+    private static final String BACKUP_META_DATA_FILE = ".backupmetadata";
 
     @ValueClass
     interface BackupResult {
+
+        String backupId();
+
+        ZonedDateTime backupTime();
 
         String username();
 
@@ -70,26 +80,10 @@ public final class BackupAndRestore {
         @Nullable String path();
 
         long exportMillis();
-
-        static BackupResult successfulGraph(String username, Path path, ProgressTimer timer) {
-            return ImmutableBackupResult.of(username, "graph", true, path.toString(), timer.getDuration());
-        }
-
-        static BackupResult failedGraph(String username) {
-            return ImmutableBackupResult.of(username, "graph", false, null, 0);
-        }
-
-        static BackupResult successfulModel(String username, Path path, ProgressTimer timer) {
-            return ImmutableBackupResult.of(username, "model", true, path.toString(), timer.getDuration());
-        }
-
-        static BackupResult failedModel(String username) {
-            return ImmutableBackupResult.of(username, "model", false, null, 0);
-        }
     }
 
-
     static List<BackupResult> backup(
+        Optional<String> providedBackupId,
         Path backupRoot,
         Log log,
         long timeoutInSeconds,
@@ -97,6 +91,7 @@ public final class BackupAndRestore {
         @SuppressWarnings("SameParameterValue") String taskName
     ) {
         return backup(
+            providedBackupId,
             backupRoot,
             log,
             timeoutInSeconds,
@@ -108,6 +103,7 @@ public final class BackupAndRestore {
     }
 
     static List<BackupResult> backup(
+        Optional<String> providedBackupId,
         Path backupRoot,
         Log log,
         long timeoutInSeconds,
@@ -120,17 +116,27 @@ public final class BackupAndRestore {
 
         DIRECTORY_IS_WRITABLE.validate(backupRoot);
 
+        var backupId = providedBackupId.orElseGet(() -> UUID.randomUUID().toString());
+        var backupTime = ZonedDateTime.now(Clock.systemUTC());
+
+        if (!writeBackupMetadata(backupRoot, log, taskName, backupId, backupTime)) {
+            return List.of();
+        }
+
+        var factory = new BackupResultFactory(backupId, backupTime);
         var result = new ArrayList<BackupResult>();
 
         var timer = ProgressTimer.start();
         try (timer) {
             result.addAll(backupGraphStores(
+                factory,
                 backupRoot,
                 graphOnSuccess,
                 log,
                 allocationTracker
             ));
             result.addAll(backupModels(
+                factory,
                 backupRoot,
                 modelOnSuccess,
                 log
@@ -175,7 +181,37 @@ public final class BackupAndRestore {
         return result;
     }
 
-    static void restore(Path restorePath, Path backupPath, Log log)  {
+    private static boolean writeBackupMetadata(
+        Path backupRoot,
+        Log log,
+        String taskName,
+        String backupId,
+        ZonedDateTime backupTime
+    ) {
+        var metadataFile = backupRoot.resolve(BACKUP_META_DATA_FILE);
+
+        try {
+
+            Files.write(metadataFile, List.of(
+                formatWithLocale("Backup-Time: %d", backupTime.toInstant().toEpochMilli()),
+                formatWithLocale("Backup-Id: %s", backupId)
+            ), StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
+            return true;
+
+        } catch (IOException e) {
+            log.error(
+                formatWithLocale(
+                    "Failed to write metadata file '%s', aborting %s.",
+                    metadataFile,
+                    StringFormatting.toLowerCaseWithLocale(taskName)
+                ),
+                e
+            );
+            return false;
+        }
+    }
+
+    static void restore(Path restorePath, Path backupPath, Log log) {
         var successfulRestorePaths = subdirectories(restorePath, log)
             .flatMap(userRestorePath -> {
                 try {
@@ -223,6 +259,7 @@ public final class BackupAndRestore {
     }
 
     private static List<BackupResult> backupGraphStores(
+        BackupResultFactory factory,
         Path backupRoot,
         Consumer<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> onSuccess,
         Log log,
@@ -254,7 +291,7 @@ public final class BackupAndRestore {
 
                     onSuccess.accept(store);
 
-                    return Stream.of(BackupResult.successfulGraph(username, backupPath, timer));
+                    return Stream.of(factory.successfulGraph(username, backupPath, timer));
                 } catch (Exception e) {
                     log.error(
                         formatWithLocale(
@@ -264,12 +301,13 @@ public final class BackupAndRestore {
                         ),
                         e
                     );
-                    return Stream.of(BackupResult.failedGraph(username));
+                    return Stream.of(factory.failedGraph(username));
                 }
             }).collect(Collectors.toList());
     }
 
     private static List<BackupResult> backupModels(
+        BackupResultFactory factory,
         Path backupRoot,
         Consumer<Model<?, ?>> onSuccess,
         Log log
@@ -287,7 +325,7 @@ public final class BackupAndRestore {
 
                 onSuccess.accept(model);
 
-                return Stream.of(BackupResult.successfulModel(username, modelPath, timer));
+                return Stream.of(factory.successfulModel(username, modelPath, timer));
             } catch (Exception e) {
                 log.error(
                     formatWithLocale(
@@ -297,7 +335,7 @@ public final class BackupAndRestore {
                     ),
                     e
                 );
-                return Stream.of(BackupResult.failedModel(username));
+                return Stream.of(factory.failedModel(username));
             }
         }).collect(Collectors.toList());
     }
@@ -364,4 +402,46 @@ public final class BackupAndRestore {
     }
 
     private BackupAndRestore() {}
+
+    private static class BackupResultFactory {
+        private final String backupId;
+        private final ZonedDateTime backupTime;
+
+        BackupResultFactory(String backupId, ZonedDateTime backupTime) {
+            this.backupId = backupId;
+            this.backupTime = backupTime;
+        }
+
+        private BackupResult successfulGraph(String username, Path path, ProgressTimer timer) {
+            return ImmutableBackupResult.of(
+                backupId,
+                backupTime,
+                username,
+                "graph",
+                true,
+                path.toString(),
+                timer.getDuration()
+            );
+        }
+
+        private BackupResult failedGraph(String username) {
+            return ImmutableBackupResult.of(backupId, backupTime, username, "graph", false, null, 0);
+        }
+
+        private BackupResult successfulModel(String username, Path path, ProgressTimer timer) {
+            return ImmutableBackupResult.of(
+                backupId,
+                backupTime,
+                username,
+                "model",
+                true,
+                path.toString(),
+                timer.getDuration()
+            );
+        }
+
+        private BackupResult failedModel(String username) {
+            return ImmutableBackupResult.of(backupId, backupTime, username, "model", false, null, 0);
+        }
+    }
 }

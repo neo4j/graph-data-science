@@ -44,6 +44,7 @@ import org.neo4j.values.storable.Values;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
@@ -158,6 +159,7 @@ public class AuraShutdownProc implements CallableProcedure {
         AllocationTracker allocationTracker
     ) {
         var result = BackupAndRestore.backup(
+            Optional.empty(),
             exportPath,
             log,
             timeoutInSeconds,
