@@ -19,7 +19,6 @@ import java.util.function.Consumer;
 import java.util.stream.LongStream;
 
 public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResult> {
-    private static final int MIN_BATCH_SIZE = 100;
 
     private final LinkLogisticRegressionData modelData;
     private final FeaturePipeline featurePipeline;
@@ -71,7 +70,7 @@ public class LinkPrediction extends Algorithm<LinkPrediction, LinkPredictionResu
         progressTracker.beginSubTask();
         var predictor = new LinkLogisticRegressionPredictor(modelData);
         var result = new LinkPredictionResult(topN);
-        var batchQueue = new BatchQueue(graph.nodeCount(), MIN_BATCH_SIZE, concurrency);
+        var batchQueue = new BatchQueue(graph.nodeCount(), BatchQueue.DEFAULT_BATCH_SIZE, concurrency);
         batchQueue.parallelConsume(concurrency, ignore -> new LinkPredictionScoreByIdsConsumer(
             graph.concurrentCopy(),
             featurePipeline.linkFeatureExtractor(graph),
