@@ -21,15 +21,13 @@ package org.neo4j.gds.storageengine;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
-
-import static org.neo4j.configuration.GraphDatabaseInternalSettings.skip_default_indexes_on_creation;
-import static org.neo4j.gds.storageengine.GraphStoreSettings.graph_name;
 
 @ServiceProvider
 public class GraphStoreNameExtension extends ExtensionFactory<GraphStoreNameExtension.Dependencies> {
@@ -48,8 +46,7 @@ public class GraphStoreNameExtension extends ExtensionFactory<GraphStoreNameExte
                 var config = dependencies.config();
                 var graphName = InMemoryDatabaseCreationCatalog
                     .getRegisteredDbCreationGraphName(dependencies.databaseLayout().getDatabaseName());
-                config.set(graph_name, graphName);
-                config.set(skip_default_indexes_on_creation, true);
+                StorageEngineProxy.setGraphNameAndIndexCreationSkipping(config, graphName);
             }
 
             @Override
