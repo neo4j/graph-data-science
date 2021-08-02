@@ -50,10 +50,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
@@ -202,14 +205,32 @@ class BackupAndRestoreTest {
         assertThat(restorePath)
             .exists()
             .isEmptyDirectory();
+
+        var backupId = backupName.split("-", 2)[1];
+        var backupLocation = backupPath.resolve(formatWithLocale("backup-%s-restored", backupId));
+
         if (hasGraphs) {
-            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/alice/graphs/**");
-            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/bob/graphs/**");
+            assertThat(backupLocation).isDirectoryRecursivelyContaining("glob:**/alice/graphs/**");
+            assertThat(backupLocation).isDirectoryRecursivelyContaining("glob:**/bob/graphs/**");
         }
         if (hasModels) {
-            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/alice/models/**");
-            assertThat(backupPath).isDirectoryRecursivelyContaining("glob:**/backup-*-restored/bob/models/**");
+            assertThat(backupLocation).isDirectoryRecursivelyContaining("glob:**/alice/models/**");
+            assertThat(backupLocation).isDirectoryRecursivelyContaining("glob:**/bob/models/**");
         }
+
+        var backupTime = LocalDateTime
+            .of(2021, 8, 2, 13, 37, 42, (int) TimeUnit.MILLISECONDS.toNanos(84))
+            .toInstant(ZoneOffset.UTC)
+            .toEpochMilli();
+
+        assertThat(backupLocation.resolve(".backupmetadata"))
+            .isNotEmptyFile()
+            .usingCharset(StandardCharsets.UTF_8)
+            .hasContent(formatWithLocale(
+                "Backup-Time: %d%nBackup-Id: %s%n",
+                backupTime,
+                backupId
+            ));
     }
 
     private void assertGraphsAreRestored() {

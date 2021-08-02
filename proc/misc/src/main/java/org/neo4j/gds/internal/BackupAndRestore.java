@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.internal;
 
+import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.model.StoredModel;
 import org.neo4j.gds.model.storage.ModelToFileExporter;
@@ -43,6 +44,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -116,14 +119,25 @@ public final class BackupAndRestore {
 
         DIRECTORY_IS_WRITABLE.validate(backupRoot);
 
-        var backupId = providedBackupId.orElseGet(() -> UUID.randomUUID().toString());
-        var backupTime = ZonedDateTime.now(Clock.systemUTC());
+        var metadataBuilder = ImmutableBackupMetadata.builder();
+        providedBackupId.ifPresent(metadataBuilder::backupId);
+        var metadata = metadataBuilder.build();
 
-        if (!writeBackupMetadata(backupRoot, log, taskName, backupId, backupTime)) {
+        try {
+            writeBackupMetadata(backupRoot, metadata);
+        } catch (IOException e) {
+            log.error(
+                formatWithLocale(
+                    "Failed to write metadata file '%s', aborting %s.",
+                    backupRoot.resolve(BACKUP_META_DATA_FILE),
+                    StringFormatting.toLowerCaseWithLocale(taskName)
+                ),
+                e
+            );
             return List.of();
         }
 
-        var factory = new BackupResultFactory(backupId, backupTime);
+        var factory = new BackupResultFactory(metadata);
         var result = new ArrayList<BackupResult>();
 
         var timer = ProgressTimer.start();
@@ -181,36 +195,6 @@ public final class BackupAndRestore {
         return result;
     }
 
-    private static boolean writeBackupMetadata(
-        Path backupRoot,
-        Log log,
-        String taskName,
-        String backupId,
-        ZonedDateTime backupTime
-    ) {
-        var metadataFile = backupRoot.resolve(BACKUP_META_DATA_FILE);
-
-        try {
-
-            Files.write(metadataFile, List.of(
-                formatWithLocale("Backup-Time: %d", backupTime.toInstant().toEpochMilli()),
-                formatWithLocale("Backup-Id: %s", backupId)
-            ), StandardCharsets.UTF_8, StandardOpenOption.CREATE_NEW);
-            return true;
-
-        } catch (IOException e) {
-            log.error(
-                formatWithLocale(
-                    "Failed to write metadata file '%s', aborting %s.",
-                    metadataFile,
-                    StringFormatting.toLowerCaseWithLocale(taskName)
-                ),
-                e
-            );
-            return false;
-        }
-    }
-
     static void restore(Path restorePath, Path backupPath, Log log) {
         var successfulRestorePaths = subdirectories(restorePath, log)
             .flatMap(userRestorePath -> {
@@ -226,7 +210,7 @@ public final class BackupAndRestore {
 
         if (!successfulRestorePaths.isEmpty()) {
             try {
-                createNewBackupFromRestore(backupPath, successfulRestorePaths);
+                createNewBackupFromRestore(backupPath, restorePath, successfulRestorePaths);
             } catch (IOException e) {
                 log.error(
                     formatWithLocale(
@@ -249,10 +233,14 @@ public final class BackupAndRestore {
         restoreModels(modelsPath, log);
     }
 
-    private static void createNewBackupFromRestore(Path backupPath, Iterable<Path> userPaths) throws IOException {
-        var backupName = formatWithLocale("backup-%s-restored", UUID.randomUUID());
+    private static void createNewBackupFromRestore(Path backupPath, Path restorePath, Iterable<Path> userPaths)
+    throws IOException {
+        var metadataFile = restorePath.resolve(BACKUP_META_DATA_FILE);
+        var metadata = readBackupMetadata(metadataFile);
+        var backupName = formatWithLocale("backup-%s-restored", metadata.backupId());
         var backupRoot = backupPath.resolve(backupName);
         Files.createDirectories(backupRoot);
+        Files.move(metadataFile, backupRoot.resolve(BACKUP_META_DATA_FILE));
         for (Path userPath : userPaths) {
             Files.move(userPath, backupRoot.resolve(userPath.getFileName()));
         }
@@ -403,19 +391,68 @@ public final class BackupAndRestore {
 
     private BackupAndRestore() {}
 
-    private static class BackupResultFactory {
-        private final String backupId;
-        private final ZonedDateTime backupTime;
+    private static void writeBackupMetadata(Path backupRoot, BackupMetadata metadata) throws IOException {
+        Files.write(
+            backupRoot.resolve(BACKUP_META_DATA_FILE),
+            List.of(
+                formatWithLocale("Backup-Time: %d", metadata.backupTime().toInstant().toEpochMilli()),
+                formatWithLocale("Backup-Id: %s", metadata.backupId())
+            ),
+            StandardCharsets.UTF_8,
+            StandardOpenOption.CREATE_NEW
+        );
+    }
 
-        BackupResultFactory(String backupId, ZonedDateTime backupTime) {
-            this.backupId = backupId;
-            this.backupTime = backupTime;
+    private static BackupMetadata readBackupMetadata(Path metadataFile) throws IOException {
+        var lines = Files.lines(metadataFile, StandardCharsets.UTF_8);
+        try (lines) {
+            return lines.reduce(ImmutableBackupMetadata.builder(), (b, line) -> {
+                var parts = line.split(": ", 2);
+                switch (parts[0]) {
+                    case "Backup-Time":
+                        var epochMillis = Long.parseLong(parts[1], 10);
+                        var instant = Instant.ofEpochMilli(epochMillis);
+                        var backupTime = ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
+                        return b.backupTime(backupTime);
+
+                    case "Backup-Id":
+                        return b.backupId(parts[1]);
+
+                    default:
+                        throw new IllegalStateException(formatWithLocale(
+                            "Unexpected identifier '%s' in the backup metadata at '%s'",
+                            parts[0],
+                            metadataFile
+                        ));
+                }
+            }, (b1, b2) -> b1).build();
+        }
+    }
+
+    @ValueClass
+    interface BackupMetadata {
+        @Value.Default
+        default String backupId() {
+            return UUID.randomUUID().toString();
+        }
+
+        @Value.Default
+        default ZonedDateTime backupTime() {
+            return ZonedDateTime.now(Clock.systemUTC());
+        }
+    }
+
+    private static class BackupResultFactory {
+        private final BackupMetadata metadata;
+
+        BackupResultFactory(BackupMetadata metadata) {
+            this.metadata = metadata;
         }
 
         private BackupResult successfulGraph(String username, Path path, ProgressTimer timer) {
             return ImmutableBackupResult.of(
-                backupId,
-                backupTime,
+                metadata.backupId(),
+                metadata.backupTime(),
                 username,
                 "graph",
                 true,
@@ -425,13 +462,21 @@ public final class BackupAndRestore {
         }
 
         private BackupResult failedGraph(String username) {
-            return ImmutableBackupResult.of(backupId, backupTime, username, "graph", false, null, 0);
+            return ImmutableBackupResult.of(
+                metadata.backupId(),
+                metadata.backupTime(),
+                username,
+                "graph",
+                false,
+                null,
+                0
+            );
         }
 
         private BackupResult successfulModel(String username, Path path, ProgressTimer timer) {
             return ImmutableBackupResult.of(
-                backupId,
-                backupTime,
+                metadata.backupId(),
+                metadata.backupTime(),
                 username,
                 "model",
                 true,
@@ -441,7 +486,15 @@ public final class BackupAndRestore {
         }
 
         private BackupResult failedModel(String username) {
-            return ImmutableBackupResult.of(backupId, backupTime, username, "model", false, null, 0);
+            return ImmutableBackupResult.of(
+                metadata.backupId(),
+                metadata.backupTime(),
+                username,
+                "model",
+                false,
+                null,
+                0
+            );
         }
     }
 }
