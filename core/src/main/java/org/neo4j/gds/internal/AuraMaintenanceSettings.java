@@ -29,6 +29,7 @@ import java.nio.file.Path;
 
 import static org.neo4j.configuration.SettingImpl.newBuilder;
 import static org.neo4j.configuration.SettingValueParsers.BOOL;
+import static org.neo4j.configuration.SettingValueParsers.INT;
 import static org.neo4j.configuration.SettingValueParsers.PATH;
 
 @ServiceProvider
@@ -55,5 +56,12 @@ public final class AuraMaintenanceSettings implements SettingsDeclaration {
         "gds.backup.location",
         PATH,
         null
+    ).build();
+
+    @Description("Sets the maximum number of allowed backups in the backup location.")
+    public static final Setting<Integer> max_number_of_backups = newBuilder(
+        "gds.backup.max_number_of_backups",
+        INT,
+        -1
     ).build();
 }

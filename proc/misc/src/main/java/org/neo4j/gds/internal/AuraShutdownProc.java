@@ -165,6 +165,7 @@ public class AuraShutdownProc implements CallableProcedure {
             .allocationTracker(allocationTracker)
             .log(log)
             .providedBackupPath(exportPath)
+            // NOTE: we don't read the setting here because we always want to create this "backup" during shutdown
             .maxAllowedBackups(-1)
             .graphOnSuccess(store -> {
                 var catalogRequest = CatalogRequest.of(store.userName(), store.graphStore().databaseId());

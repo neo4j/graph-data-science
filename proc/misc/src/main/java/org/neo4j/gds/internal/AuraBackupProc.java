@@ -103,6 +103,7 @@ public class AuraBackupProc implements CallableProcedure {
 
         var neo4jConfig = InternalProceduresUtil.resolve(ctx, Config.class);
         var backupsPath = neo4jConfig.get(AuraMaintenanceSettings.backup_location_setting);
+        var maxAllowedBackups = neo4jConfig.get(AuraMaintenanceSettings.max_number_of_backups);
 
         var config = ImmutableBackupConfig.builder()
             .backupsPath(backupsPath)
@@ -110,7 +111,7 @@ public class AuraBackupProc implements CallableProcedure {
             .taskName("Backup")
             .allocationTracker(InternalProceduresUtil.lookup(ctx, AllocationTracker.class))
             .log(InternalProceduresUtil.lookup(ctx, Log.class))
-            .maxAllowedBackups(-1)
+            .maxAllowedBackups(maxAllowedBackups)
             .build();
 
         var result = BackupAndRestore.backup(config);
