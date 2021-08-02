@@ -187,7 +187,7 @@ class GraphListProcTest extends BaseProcTest {
                 ),
                 "schema", map(
                     "nodes", map("__ALL__", map()),
-                    "relationships", map("RELATIONSHIP", map()
+                    "relationships", map("REL", map()
                     )
                 ),
                 "nodeQuery", null,

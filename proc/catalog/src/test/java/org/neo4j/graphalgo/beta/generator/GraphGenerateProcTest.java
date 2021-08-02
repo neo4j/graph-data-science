@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -192,6 +193,32 @@ class GraphGenerateProcTest extends BaseProcTest {
         PropertyProducer<double[]> actualPropertyProducer = generator.getMaybeRelationshipPropertyProducer().get();
 
         assertEquals(propertyProducer, actualPropertyProducer);
+    }
+
+    @Test
+    void shouldGenerateGraphWithRelationshipProperty() {
+        var query = "CALL gds.beta.graph.generate('test', 10, 3, " +
+                    "{" +
+                    "  relationshipDistribution: 'random'," +
+                    "  relationshipSeed: 42," +
+                    "  relationshipProperty: {" +
+                    "    name:'myProperty'," +
+                    "    type: 'RANDOM'," +
+                    "    min : 40.0," +
+                    "    max : 80.0" +
+                    " }})" +
+                    "YIELD nodes, relationships, relationshipProperty";
+
+        assertCypherResult(
+            query,
+            List.of(Map.of("nodes",
+                10L,
+                "relationships",
+                31L,
+                "relationshipProperty",
+                Map.of("min", 40.0, "max", 80.0, "name", "myProperty", "type", "RANDOM")
+            ))
+        );
     }
 
     @ParameterizedTest(name = "{0}")
