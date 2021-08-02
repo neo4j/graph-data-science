@@ -19,6 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.partition;
 
+import java.util.Objects;
+
 public class DegreePartition extends Partition {
 
     private final long totalDegree;
@@ -34,5 +36,19 @@ public class DegreePartition extends Partition {
 
     public static DegreePartition of(long startNode, long nodeCount, long totalDegree) {
         return new DegreePartition(startNode, nodeCount, totalDegree);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        DegreePartition that = (DegreePartition) o;
+        return totalDegree == that.totalDegree;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), totalDegree);
     }
 }

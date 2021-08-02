@@ -19,6 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.partition;
 
+import java.util.Objects;
 import java.util.function.LongConsumer;
 import java.util.stream.LongStream;
 
@@ -57,5 +58,18 @@ public class Partition {
     public LongStream stream() {
         var start = startNode();
         return LongStream.range(start, start + nodeCount());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Partition partition = (Partition) o;
+        return startNode == partition.startNode && nodeCount == partition.nodeCount;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(startNode, nodeCount);
     }
 }
