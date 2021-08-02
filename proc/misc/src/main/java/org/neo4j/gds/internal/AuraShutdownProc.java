@@ -118,6 +118,7 @@ public class AuraShutdownProc implements CallableProcedure {
         AnyValue[] input,
         ResourceTracker resourceTracker
     ) throws ProcedureException {
+        var restorePath = this.restorePath;
         if (restorePath == null) {
             throw new ProcedureException(
                 Status.Procedure.ProcedureCallFailed,
