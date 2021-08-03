@@ -17,27 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel;
+package org.neo4j.gds.beta.pregel;
 
-import com.squareup.javapoet.MethodSpec;
-import org.neo4j.graphalgo.api.NodeProperties;
+import org.neo4j.graphalgo.beta.pregel.PregelMutateProc;
+import org.neo4j.graphalgo.beta.pregel.PregelMutateResult;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.util.Elements;
 
-import static org.neo4j.graphalgo.beta.pregel.annotation.GDSMode.STREAM;
+class MutateProcedureGenerator extends WriteProcedureGenerator {
 
-class StreamProcedureGenerator extends ProcedureGenerator {
-
-    StreamProcedureGenerator(Elements elementUtils, SourceVersion sourceVersion, PregelValidation.Spec pregelSpec) {
+    MutateProcedureGenerator(
+        Elements elementUtils,
+        SourceVersion sourceVersion,
+        PregelValidation.Spec pregelSpec
+    ) {
         super(elementUtils, sourceVersion, pregelSpec);
     }
 
     @Override
     GDSMode procGdsMode() {
-        return STREAM;
+        return GDSMode.MUTATE;
     }
 
     @Override
@@ -47,24 +48,16 @@ class StreamProcedureGenerator extends ProcedureGenerator {
 
     @Override
     Class<?> procBaseClass() {
-        return PregelStreamProc.class;
+        return PregelMutateProc.class;
     }
 
     @Override
     Class<?> procResultClass() {
-        return PregelStreamResult.class;
+        return PregelMutateResult.class;
     }
 
     @Override
-    MethodSpec procResultMethod() {
-        return MethodSpec.methodBuilder("streamResult")
-            .addAnnotation(Override.class)
-            .addModifiers(Modifier.PROTECTED)
-            .returns(procResultClass())
-            .addParameter(long.class, "originalNodeId")
-            .addParameter(long.class, "internalNodeId")
-            .addParameter(NodeProperties.class, "nodeProperties")
-            .addStatement("throw new $T()", UnsupportedOperationException.class)
-            .build();
+    Class<?> procResultBuilderClass() {
+        return PregelMutateResult.Builder.class;
     }
 }

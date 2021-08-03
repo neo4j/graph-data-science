@@ -17,13 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.beta.pregel;
+package org.neo4j.gds.beta.pregel;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.AlgoBaseProc;
+import org.neo4j.graphalgo.beta.pregel.PregelResult;
+import org.neo4j.graphalgo.beta.pregel.PregelWriteProc;
+import org.neo4j.graphalgo.beta.pregel.PregelWriteResult;
 import org.neo4j.graphalgo.beta.pregel.annotation.GDSMode;
 
 import javax.lang.model.SourceVersion;
