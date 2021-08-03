@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.annotation.SuppressForbidden;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.logging.AbstractLog;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.Logger;

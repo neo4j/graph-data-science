@@ -29,7 +29,7 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Arrays;
 import java.util.Collections;

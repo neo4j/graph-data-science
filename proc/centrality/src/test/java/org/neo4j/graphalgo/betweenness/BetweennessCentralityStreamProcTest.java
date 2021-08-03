@@ -22,9 +22,9 @@ package org.neo4j.graphalgo.betweenness;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.Optional;

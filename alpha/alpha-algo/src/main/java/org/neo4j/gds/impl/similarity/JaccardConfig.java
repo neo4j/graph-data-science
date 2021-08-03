@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.impl.similarity;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.Collections;
 import java.util.List;

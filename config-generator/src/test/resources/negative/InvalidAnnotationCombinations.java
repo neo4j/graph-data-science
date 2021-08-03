@@ -19,9 +19,7 @@
  */
 package negative;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-
-import java.util.Map;
+import org.neo4j.gds.annotation.Configuration;
 
 @Configuration("InvalidAnnotationCombinationsConfig")
 public interface InvalidAnnotationCombinations {

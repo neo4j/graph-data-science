@@ -21,11 +21,11 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.SeedConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 import java.util.Set;

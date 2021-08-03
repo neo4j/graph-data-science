@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core;
+package org.neo4j.gds.core;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.core.ConfigKeyValidation.StringAndScore;
+import org.neo4j.gds.core.ConfigKeyValidation.StringAndScore;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,8 +33,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-
-import static org.neo4j.graphalgo.core.StringSimilarity.similarStringsIgnoreCase;
 
 /**
  * Wrapper around configuration options map
@@ -317,7 +315,7 @@ public final class CypherMapWrapper {
     }
 
     private static String missingValueForMessage(String key, Collection<String> candidates) {
-        List<String> suggestions = similarStringsIgnoreCase(key, candidates);
+        List<String> suggestions = StringSimilarity.similarStringsIgnoreCase(key, candidates);
         return missingValueMessage(key, suggestions);
     }
 
@@ -459,7 +457,7 @@ public final class CypherMapWrapper {
             if (config.containsKey(key)) {
                 hasAtLastOneKey = true;
             } else {
-                List<String> candidates = similarStringsIgnoreCase(key, config.keySet());
+                List<String> candidates = StringSimilarity.similarStringsIgnoreCase(key, config.keySet());
                 candidates.removeAll(List.of(forbiddenSuggestions));
                 String message = missingValueMessage(key, candidates);
                 (candidates.isEmpty()

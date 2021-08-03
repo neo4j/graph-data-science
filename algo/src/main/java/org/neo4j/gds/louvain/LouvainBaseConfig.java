@@ -20,7 +20,7 @@
 package org.neo4j.gds.louvain;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
 import org.neo4j.graphalgo.config.IterationsConfig;

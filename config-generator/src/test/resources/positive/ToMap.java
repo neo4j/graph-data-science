@@ -19,9 +19,8 @@
  */
 package positive;
 
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.gds.annotation.Configuration;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 

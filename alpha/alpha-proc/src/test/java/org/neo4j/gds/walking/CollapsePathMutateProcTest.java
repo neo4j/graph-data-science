@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.walking.CollapsePath;
 import org.neo4j.gds.impl.walking.CollapsePathConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -32,7 +33,6 @@ import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.MutateRelationshipsTest;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Relationships;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 

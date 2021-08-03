@@ -1,2 +1,2 @@
-org.neo4j.graphalgo.annotation.DataClass
-org.neo4j.graphalgo.annotation.ValueClass
+org.neo4j.gds.annotation.DataClass
+org.neo4j.gds.annotation.ValueClass

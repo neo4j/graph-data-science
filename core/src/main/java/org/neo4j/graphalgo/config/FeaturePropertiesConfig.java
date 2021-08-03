@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.gds.annotation.Configuration;
 
 import java.util.List;
 

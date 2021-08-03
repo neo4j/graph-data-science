@@ -28,7 +28,7 @@ import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.LogProvider;

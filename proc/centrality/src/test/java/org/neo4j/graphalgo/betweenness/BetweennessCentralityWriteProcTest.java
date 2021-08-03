@@ -25,9 +25,9 @@ import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 
 import java.util.Collection;

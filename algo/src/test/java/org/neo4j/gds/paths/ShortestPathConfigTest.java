@@ -21,7 +21,7 @@ package org.neo4j.gds.paths;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
 import java.util.Optional;

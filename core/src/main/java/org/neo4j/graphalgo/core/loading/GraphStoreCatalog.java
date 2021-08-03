@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.utils.StringJoining;
@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
+import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class GraphStoreCatalog {

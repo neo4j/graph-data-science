@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle.intersect;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.annotation.ValueClass;
 
 @ValueClass
 public interface RelationshipIntersectConfig {

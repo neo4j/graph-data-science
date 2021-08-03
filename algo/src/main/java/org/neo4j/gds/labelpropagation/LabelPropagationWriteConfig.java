@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.WritePropertyConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.Optional;
 

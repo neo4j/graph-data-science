@@ -21,13 +21,13 @@ package org.neo4j.gds.shortestpaths;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.AlphaAlgorithmFactory;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.msbfs.AllShortestPathsStream;
 import org.neo4j.gds.impl.msbfs.MSBFSASPAlgorithm;
 import org.neo4j.gds.impl.msbfs.MSBFSAllShortestPaths;
 import org.neo4j.gds.impl.msbfs.WeightedAllShortestPaths;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.procedure.Description;

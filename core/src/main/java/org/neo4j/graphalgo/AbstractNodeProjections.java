@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.annotation.DataClass;
+import org.neo4j.gds.annotation.DataClass;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,7 +34,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
-import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @DataClass

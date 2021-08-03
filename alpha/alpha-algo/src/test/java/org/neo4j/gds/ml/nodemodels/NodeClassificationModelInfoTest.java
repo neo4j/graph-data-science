@@ -21,10 +21,10 @@ package org.neo4j.gds.ml.nodemodels;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodemodels.logisticregression.NodeLogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.nodemodels.metrics.AllClassMetric;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.HashMap;
 import java.util.List;

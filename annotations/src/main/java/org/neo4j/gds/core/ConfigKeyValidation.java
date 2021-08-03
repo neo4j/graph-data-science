@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.core;
+package org.neo4j.gds.core;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
-import static org.neo4j.graphalgo.core.StringSimilarity.similarStringsIgnoreCase;
 
 public final class ConfigKeyValidation {
 
@@ -55,7 +53,7 @@ public final class ConfigKeyValidation {
         }
         List<String> suggestions = unexpectedKeys.stream()
             .map(invalid -> {
-                List<String> candidates = similarStringsIgnoreCase(invalid, allowedKeys);
+                List<String> candidates = StringSimilarity.similarStringsIgnoreCase(invalid, allowedKeys);
                 candidates.removeAll(configKeys);
 
                 if (candidates.isEmpty()) {

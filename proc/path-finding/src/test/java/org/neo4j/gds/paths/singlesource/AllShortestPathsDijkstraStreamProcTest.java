@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths.singlesource;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
@@ -28,7 +29,6 @@ import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.List;

@@ -19,9 +19,7 @@
  */
 package positive;
 
-import org.neo4j.graphalgo.annotation.Configuration;
-
-import java.util.Collection;
+import org.neo4j.gds.annotation.Configuration;
 
 @Configuration
 public interface DefaultName {

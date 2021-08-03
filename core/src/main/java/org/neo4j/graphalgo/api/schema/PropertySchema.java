@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.api.schema;
 
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;

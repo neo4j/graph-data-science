@@ -19,7 +19,7 @@
  */
 package negative;
 
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.gds.annotation.Configuration;
 
 @Configuration("BaseClassIsNotAnInterfaceConfig")
 public abstract class BaseClassIsNotAnInterface {

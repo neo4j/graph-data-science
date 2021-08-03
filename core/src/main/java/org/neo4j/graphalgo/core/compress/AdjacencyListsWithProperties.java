@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.compress;
 
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.AdjacencyProperties;
 

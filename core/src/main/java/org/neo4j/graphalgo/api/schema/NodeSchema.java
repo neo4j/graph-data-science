@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.api.schema;
 
 import org.immutables.builder.Builder.AccessibleFields;
 import org.immutables.value.Value;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 

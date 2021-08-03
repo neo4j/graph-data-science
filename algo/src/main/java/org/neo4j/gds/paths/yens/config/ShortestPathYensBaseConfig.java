@@ -20,8 +20,8 @@
 package org.neo4j.gds.paths.yens.config;
 
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")

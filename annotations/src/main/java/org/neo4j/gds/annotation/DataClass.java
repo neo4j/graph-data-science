@@ -17,15 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.annotation;
+package org.neo4j.gds.annotation;
+
+import org.immutables.value.Value;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+@Target({ElementType.PACKAGE, ElementType.TYPE})
 @Retention(RetentionPolicy.CLASS)
-@Target({ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.METHOD, ElementType.TYPE})
-public @interface SuppressForbidden {
-    String reason();
+@Value.Style(
+    allParameters = true,
+    builderVisibility = Value.Style.BuilderVisibility.SAME,
+    clearBuilder = true,
+    deepImmutablesDetection = true,
+    deferCollectionAllocation = true,
+    depluralize = true,
+    headerComments = true,
+    jdkOnly = true,
+    optionalAcceptNullable = true,
+    typeAbstract = "Abstract*",
+    typeImmutable = "*",
+    visibility = Value.Style.ImplementationVisibility.SAME
+)
+public @interface DataClass {
 }

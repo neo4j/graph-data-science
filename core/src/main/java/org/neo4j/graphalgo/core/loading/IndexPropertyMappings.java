@@ -20,10 +20,10 @@
 package org.neo4j.graphalgo.core.loading;
 
 import com.carrotsearch.hppc.IntObjectMap;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.TransactionContext;

@@ -21,9 +21,9 @@ package org.neo4j.graphalgo;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.annotation.DataClass;
+import org.neo4j.gds.annotation.DataClass;
+import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.graphalgo.core.Aggregation;
-import org.neo4j.graphalgo.core.ConfigKeyValidation;
 
 import java.util.List;
 import java.util.Map;

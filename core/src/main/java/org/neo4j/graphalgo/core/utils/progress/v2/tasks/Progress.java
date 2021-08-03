@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.progress.v2.tasks;
 
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.annotation.ValueClass;
 
 @ValueClass
 public interface Progress {

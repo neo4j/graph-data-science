@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.compat;
 
-import org.neo4j.graphalgo.annotation.SuppressForbidden;
+import org.neo4j.gds.annotation.SuppressForbidden;
 
 import java.util.Map;
 

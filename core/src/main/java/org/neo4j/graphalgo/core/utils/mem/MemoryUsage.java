@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.ObjectLongIdentityHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.neo4j.graphalgo.annotation.SuppressForbidden;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.io.NullOutputStream;
 import org.openjdk.jol.info.GraphWalker;

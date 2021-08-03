@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.nodemodels;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.TrainingConfig;
-import org.neo4j.graphalgo.annotation.ValueClass;
 
 import java.util.Comparator;
 import java.util.Map;

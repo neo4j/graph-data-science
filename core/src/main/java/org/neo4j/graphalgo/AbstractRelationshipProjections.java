@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.apache.commons.lang3.StringUtils;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.annotation.DataClass;
+import org.neo4j.gds.annotation.DataClass;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

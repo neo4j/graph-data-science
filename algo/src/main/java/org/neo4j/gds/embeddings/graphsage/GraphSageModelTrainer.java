@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.immutables.value.Value;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -32,7 +33,6 @@ import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.ImmutableRelationshipCursor;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;

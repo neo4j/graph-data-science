@@ -20,12 +20,12 @@
 package org.neo4j.graphalgo.beta.filter.expression;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.List;
 import java.util.Set;
 
-import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
+import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public interface Expression {

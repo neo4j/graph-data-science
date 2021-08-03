@@ -22,7 +22,7 @@ package org.neo4j.graphalgo;
 import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.immutables.builder.Builder.AccessibleFields;
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.DataClass;
+import org.neo4j.gds.annotation.DataClass;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.CollectionUtil;
 

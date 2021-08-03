@@ -20,7 +20,7 @@
 package positive;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.gds.annotation.Configuration;
 
 @Configuration("ValidationConfig")
 public interface Validation {

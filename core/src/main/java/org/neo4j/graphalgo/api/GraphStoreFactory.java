@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.api;
 
 import com.carrotsearch.hppc.ObjectLongMap;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.loading.AdjacencyListWithPropertiesBuilder;

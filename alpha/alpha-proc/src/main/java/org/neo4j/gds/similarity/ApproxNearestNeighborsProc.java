@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfig;
 import org.neo4j.gds.impl.similarity.Computations;
@@ -39,7 +40,6 @@ import org.neo4j.gds.results.ApproxSimilaritySummaryResult;
 import org.neo4j.gds.results.SimilarityExporter;
 import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

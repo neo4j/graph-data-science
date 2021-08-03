@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.similarity;
 
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.impl.similarity.EuclideanAlgorithm;
 import org.neo4j.gds.impl.similarity.EuclideanConfig;
 import org.neo4j.gds.results.SimilarityResult;
 import org.neo4j.gds.results.SimilarityStatsResult;
 import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.EuclideanConfigImpl;
 import org.neo4j.procedure.Description;

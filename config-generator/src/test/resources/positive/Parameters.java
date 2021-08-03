@@ -19,7 +19,7 @@
  */
 package positive;
 
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.gds.annotation.Configuration;
 
 @Configuration("ParametersConfig")
 public interface Parameters {

@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.config;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.api.GraphStore;
 
 import java.util.Collection;

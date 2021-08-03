@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.annotation;
+package org.neo4j.gds.annotation;
 
 import org.immutables.value.Value;
 
@@ -32,15 +32,16 @@ import java.lang.annotation.Target;
     allParameters = true,
     builderVisibility = Value.Style.BuilderVisibility.SAME,
     clearBuilder = true,
-    deepImmutablesDetection = true,
     deferCollectionAllocation = true,
     depluralize = true,
+    forceJacksonPropertyNames = false,
     headerComments = true,
     jdkOnly = true,
     optionalAcceptNullable = true,
-    typeAbstract = "Abstract*",
-    typeImmutable = "*",
-    visibility = Value.Style.ImplementationVisibility.SAME
+    overshadowImplementation = true,
+    typeAbstract = "*",
+    typeImmutable = "Immutable*",
+    visibility = Value.Style.ImplementationVisibility.PUBLIC
 )
-public @interface DataClass {
+public @interface ValueClass {
 }

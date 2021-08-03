@@ -21,8 +21,8 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.BatchSizeConfig;
 import org.neo4j.graphalgo.config.ModelConfig;

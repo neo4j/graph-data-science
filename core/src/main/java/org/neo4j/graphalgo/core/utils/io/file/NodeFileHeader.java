@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core.utils.io.file;
 
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.annotation.ValueClass;
 import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 

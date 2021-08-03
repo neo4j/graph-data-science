@@ -20,9 +20,9 @@
 package org.neo4j.graphalgo.core.utils.io;
 
 import org.immutables.value.Value;
-import org.neo4j.graphalgo.PropertyMappings;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.annotation.Configuration;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;

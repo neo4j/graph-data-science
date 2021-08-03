@@ -31,11 +31,11 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.annotation.Configuration;
-import org.neo4j.graphalgo.annotation.Configuration.ConvertWith;
-import org.neo4j.graphalgo.annotation.Configuration.Parameter;
-import org.neo4j.graphalgo.annotation.ValueClass;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.Configuration.ConvertWith;
+import org.neo4j.gds.annotation.Configuration.Parameter;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import javax.annotation.processing.Messager;
 import javax.lang.model.SourceVersion;

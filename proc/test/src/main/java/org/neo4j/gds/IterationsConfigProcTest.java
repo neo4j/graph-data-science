@@ -20,9 +20,9 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.DynamicTest;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.config.IterationsConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 
 import java.util.List;
 

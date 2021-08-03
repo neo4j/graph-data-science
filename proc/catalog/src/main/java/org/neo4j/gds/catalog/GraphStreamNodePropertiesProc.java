@@ -20,11 +20,11 @@
 package org.neo4j.gds.catalog;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.config.GraphExportNodePropertiesConfig;
 import org.neo4j.graphalgo.config.GraphStreamNodePropertiesConfig;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

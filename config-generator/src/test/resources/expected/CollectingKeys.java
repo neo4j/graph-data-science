@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.graphalgo.core.CypherMapWrapper;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 @Generated("org.neo4j.graphalgo.proc.ConfigurationProcessor")
 public final class CollectingKeysConfig implements CollectingKeys {

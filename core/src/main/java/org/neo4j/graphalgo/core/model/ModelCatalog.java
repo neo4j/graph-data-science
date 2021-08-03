@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.core.StringSimilarity.prettySuggestions;
+import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ModelCatalog {

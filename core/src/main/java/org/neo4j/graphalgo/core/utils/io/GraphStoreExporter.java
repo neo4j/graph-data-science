@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.utils.io;
 
 import org.neo4j.common.Validator;
-import org.neo4j.graphalgo.annotation.ValueClass;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 

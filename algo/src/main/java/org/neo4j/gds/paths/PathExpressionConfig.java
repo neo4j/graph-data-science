@@ -21,7 +21,7 @@ package org.neo4j.gds.paths;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.annotation.Configuration;
+import org.neo4j.gds.annotation.Configuration;
 
 import java.util.Optional;
 

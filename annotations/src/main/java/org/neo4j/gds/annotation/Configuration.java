@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.graphalgo.annotation;
+package org.neo4j.gds.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
