@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 
 import java.util.StringJoiner;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class MemoryValidation {
 

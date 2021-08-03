@@ -42,7 +42,7 @@ import java.util.List;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.core.Is.isA;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.gds.compat.MapUtil.map;
 
 @GdsEditionTest(Edition.EE)
 class ModelPublishProcTest extends ModelProcBaseTest {

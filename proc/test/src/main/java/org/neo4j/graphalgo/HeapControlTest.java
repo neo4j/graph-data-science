@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface HeapControlTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 

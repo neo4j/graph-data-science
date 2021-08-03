@@ -35,7 +35,7 @@ import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
 import static org.neo4j.gds.ml.core.Dimensions.isVector;
 import static org.neo4j.gds.ml.core.Dimensions.scalar;
 import static org.neo4j.gds.ml.core.Dimensions.totalSize;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
    This variable represents the composition of the logistic regression model's prediction function

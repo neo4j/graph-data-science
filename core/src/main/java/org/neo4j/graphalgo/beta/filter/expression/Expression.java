@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface Expression {
     double TRUE = 1.0D;

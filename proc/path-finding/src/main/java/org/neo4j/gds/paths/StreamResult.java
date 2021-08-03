@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.paths.PathFactory.create;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @SuppressWarnings("unused")
 public final class StreamResult {

@@ -26,7 +26,7 @@ import org.neo4j.graphdb.RelationshipType;
 
 import java.nio.file.Path;
 
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
 
 public final class FakeLdbcDataset extends Dataset {
 

@@ -30,8 +30,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public interface NodeFileHeader extends FileHeader<NodeSchema, NodeLabel, PropertySchema> {

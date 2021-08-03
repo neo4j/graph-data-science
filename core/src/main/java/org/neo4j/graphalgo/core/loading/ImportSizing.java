@@ -19,9 +19,9 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.graphalgo.core.utils.BitUtil.previousPowerOfTwo;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ImportSizing {
 

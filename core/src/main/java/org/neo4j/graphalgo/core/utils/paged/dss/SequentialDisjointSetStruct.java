@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.utils.paged.dss;
 import org.neo4j.graphalgo.core.utils.paged.HugeCursor;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * Disjoint-set-struct is a data structure that keeps track of a set

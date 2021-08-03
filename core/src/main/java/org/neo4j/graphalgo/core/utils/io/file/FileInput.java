@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.core.utils.io.file;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.gds.compat.CompatInput;
+import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.graphalgo.ElementIdentifier;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
@@ -28,8 +30,6 @@ import org.neo4j.graphalgo.api.schema.NodeSchema;
 import org.neo4j.graphalgo.api.schema.PropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
-import org.neo4j.graphalgo.compat.CompatInput;
-import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
 import org.neo4j.graphalgo.core.utils.io.file.csv.CsvImportUtil;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;

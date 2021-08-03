@@ -21,8 +21,8 @@ package org.neo4j.gds.internal;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.collection.RawIterator;
+import org.neo4j.gds.compat.GraphStoreExportSettings;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.CatalogRequest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;

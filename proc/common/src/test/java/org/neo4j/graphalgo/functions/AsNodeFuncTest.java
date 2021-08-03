@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.functions;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 

@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.graphalgo.wcc.WccMutateProc;
 
 import static java.util.Collections.singletonList;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.gds.compat.MapUtil.map;
 
 class GraphSchemaWithMutationTest extends BaseProcTest {
 

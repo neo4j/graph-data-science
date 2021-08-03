@@ -69,8 +69,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.NodeLabel.ALL_NODES;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CSRGraphStore implements GraphStore {
 

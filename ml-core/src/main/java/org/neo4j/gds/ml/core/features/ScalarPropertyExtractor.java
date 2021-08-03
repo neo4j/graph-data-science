@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.core.features;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeProperties;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class ScalarPropertyExtractor implements ScalarFeatureExtractor {
     private final Graph graph;

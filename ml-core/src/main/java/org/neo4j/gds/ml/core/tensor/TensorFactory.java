@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.core.tensor;
 
 import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TensorFactory {
 

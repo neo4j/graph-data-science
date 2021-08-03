@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.BaseProcTest;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class ProcedureReflectionTest extends BaseProcTest {
 

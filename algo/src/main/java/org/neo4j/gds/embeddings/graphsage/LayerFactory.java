@@ -25,7 +25,7 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.Random;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class LayerFactory {
     private LayerFactory() {}

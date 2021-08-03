@@ -37,9 +37,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOf;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.utils.StringFormatting.toUpperCaseWithLocale;
 
 public interface MetricSpecification {
     SortedMap<String, Function<Long, Metric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(

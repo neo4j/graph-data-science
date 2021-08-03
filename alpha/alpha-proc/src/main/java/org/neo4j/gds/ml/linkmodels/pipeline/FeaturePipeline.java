@@ -39,7 +39,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureExtractor.extractFeatures;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FeaturePipeline {
     private List<NodePropertyStep> nodePropertySteps;

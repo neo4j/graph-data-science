@@ -22,14 +22,14 @@ package org.neo4j.graphalgo.pagerank;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.pagerank.PageRankAlgorithm;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
 import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.HashMap;

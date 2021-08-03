@@ -31,8 +31,8 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.compat.MapUtil.map;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphExistsProcTest extends BaseProcTest {
     private static final String DB_CYPHER = "CREATE (:A)-[:REL]->(:A)";

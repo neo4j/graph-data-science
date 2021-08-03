@@ -26,11 +26,11 @@ import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import java.util.List;
 import java.util.Objects;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.api.DefaultValueUtil.parseDoubleArrayValue;
 import static org.neo4j.graphalgo.api.DefaultValueUtil.parseFloatArrayValue;
 import static org.neo4j.graphalgo.api.DefaultValueUtil.parseLongArrayValue;
 import static org.neo4j.graphalgo.api.DefaultValueUtil.transformObjectToPrimitiveArray;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.ValueConversion.exactDoubleToLong;
 import static org.neo4j.graphalgo.utils.ValueConversion.exactLongToDouble;
 

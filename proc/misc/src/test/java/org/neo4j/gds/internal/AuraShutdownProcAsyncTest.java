@@ -21,7 +21,7 @@ package org.neo4j.gds.internal;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
 import java.io.IOException;

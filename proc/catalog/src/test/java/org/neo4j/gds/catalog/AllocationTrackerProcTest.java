@@ -21,11 +21,11 @@ package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.graphdb.QueryExecutionException;

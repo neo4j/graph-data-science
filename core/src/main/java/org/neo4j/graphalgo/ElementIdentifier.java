@@ -24,8 +24,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class ElementIdentifier {
 

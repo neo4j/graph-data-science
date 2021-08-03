@@ -21,6 +21,7 @@ package org.neo4j.gds.internal;
 
 import org.neo4j.collection.RawIterator;
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.compat.GraphStoreExportSettings;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.mem.AllocationTracker;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;

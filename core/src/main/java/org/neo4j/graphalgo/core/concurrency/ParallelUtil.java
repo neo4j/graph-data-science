@@ -59,9 +59,9 @@ import java.util.function.Supplier;
 import java.util.stream.BaseStream;
 import java.util.stream.LongStream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.concurrency.Pools.THREAD_NAME_PREFIX;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.throwIfUnchecked;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class ParallelUtil {
 

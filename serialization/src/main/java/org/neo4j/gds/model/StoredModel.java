@@ -38,7 +38,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import static org.neo4j.gds.model.storage.ModelToFileExporter.META_DATA_FILE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class StoredModel implements Model<Object, ModelConfig> {
 

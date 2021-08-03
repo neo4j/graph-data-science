@@ -42,9 +42,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.gds.compat.MapUtil.map;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphStreamNodePropertiesProcTest extends BaseProcTest {
 

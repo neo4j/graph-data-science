@@ -20,10 +20,10 @@
 package org.neo4j.graphalgo.beta.generator;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.NodeMapping;
 import org.neo4j.graphalgo.api.NodeProperties;
@@ -52,7 +52,7 @@ import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class RandomGraphGenerator {
 

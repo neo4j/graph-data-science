@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class PregelComputer<CONFIG extends PregelConfig> {
     final Graph graph;

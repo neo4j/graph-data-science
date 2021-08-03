@@ -29,7 +29,7 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrain;
 import org.neo4j.graphalgo.utils.StringJoining;
 
 import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ModelSerializerFactory {
 

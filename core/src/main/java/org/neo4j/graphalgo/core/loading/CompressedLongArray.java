@@ -24,6 +24,7 @@ import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
 import java.util.Arrays;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.loading.AdjacencyBuilder.IGNORE_VALUE;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
@@ -31,7 +32,6 @@ import static org.neo4j.graphalgo.core.loading.VarLongEncoding.zigZag;
 import static org.neo4j.graphalgo.core.loading.ZigZagLongDecoding.zigZagUncompress;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfByteArray;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class CompressedLongArray {
 

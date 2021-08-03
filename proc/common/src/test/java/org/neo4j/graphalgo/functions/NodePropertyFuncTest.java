@@ -22,14 +22,14 @@ package org.neo4j.graphalgo.functions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import java.util.Arrays;
 
-import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.gds.compat.MapUtil.map;
 
 class NodePropertyFuncTest  extends BaseProcTest {
 

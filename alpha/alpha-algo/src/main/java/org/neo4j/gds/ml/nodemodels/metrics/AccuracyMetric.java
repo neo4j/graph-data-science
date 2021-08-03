@@ -25,7 +25,7 @@ import org.openjdk.jol.util.Multiset;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class AccuracyMetric implements AllClassMetric.MetricStrategy {
 

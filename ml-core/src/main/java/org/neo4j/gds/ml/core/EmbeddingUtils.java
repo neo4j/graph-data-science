@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.DoublePredicate;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class EmbeddingUtils {
 

@@ -24,7 +24,7 @@ import org.neo4j.gds.annotation.Configuration;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface FastRPBaseProductionConfig extends FastRPBaseConfig {
 

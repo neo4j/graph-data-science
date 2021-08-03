@@ -32,9 +32,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 class ScalePropertiesBaseConfigTest {
 

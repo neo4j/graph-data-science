@@ -42,7 +42,7 @@ import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its

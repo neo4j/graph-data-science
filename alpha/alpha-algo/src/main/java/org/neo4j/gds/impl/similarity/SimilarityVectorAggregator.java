@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.impl.similarity;
 
-import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.graphdb.Node;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserAggregationResult;

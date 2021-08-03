@@ -36,8 +36,8 @@ import org.neo4j.values.storable.FloatArray;
 import java.util.Objects;
 
 import static java.util.Collections.singletonList;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 public class NodePropertyFunc {

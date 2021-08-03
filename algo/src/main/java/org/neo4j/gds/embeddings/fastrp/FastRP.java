@@ -48,7 +48,7 @@ import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addI
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addWeightedInPlace;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FastRP extends Algorithm<FastRP, FastRP.FastRPResult> {
 

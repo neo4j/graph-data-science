@@ -27,7 +27,7 @@ import org.neo4j.values.storable.Values;
 
 import java.util.Arrays;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public final class ReadHelper {

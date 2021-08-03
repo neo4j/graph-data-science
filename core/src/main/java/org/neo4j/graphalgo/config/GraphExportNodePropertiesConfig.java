@@ -32,8 +32,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.StringJoining.join;
 
 public interface GraphExportNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {

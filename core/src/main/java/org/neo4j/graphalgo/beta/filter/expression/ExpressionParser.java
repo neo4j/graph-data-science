@@ -24,7 +24,7 @@ import org.opencypher.v9_0.parser.javacc.Cypher;
 import org.opencypher.v9_0.parser.javacc.CypherCharStream;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ExpressionParser {
 

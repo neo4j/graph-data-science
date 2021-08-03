@@ -38,8 +38,8 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.extension.ExtensionUtil.setField;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class Neo4jSupportExtension implements BeforeEachCallback {
 

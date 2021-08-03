@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.config.RelationshipWeightConfig;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")

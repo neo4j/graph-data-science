@@ -50,6 +50,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.TestSupport.graphStoreFromGDL;
 import static org.neo4j.graphalgo.core.utils.io.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
@@ -58,7 +59,6 @@ import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUM
 import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 public class GraphStoreToFileExporterTest extends CsvTest {

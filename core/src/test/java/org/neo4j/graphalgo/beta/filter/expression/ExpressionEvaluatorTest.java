@@ -38,9 +38,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.beta.filter.expression.Expression.FALSE;
 import static org.neo4j.graphalgo.beta.filter.expression.Expression.TRUE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ExpressionEvaluatorTest {
 

@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.beta.filter.expression.ValidationContext.Context.NODE;
 import static org.neo4j.graphalgo.beta.filter.expression.ValidationContext.Context.RELATIONSHIP;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class ExpressionValidationTest {
 

@@ -20,9 +20,9 @@
 package org.neo4j.gds.compat.unsupported;
 
 import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.gds.compat.StorageEngineProxyFactory;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
 
 import java.util.List;
 

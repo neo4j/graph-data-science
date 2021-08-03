@@ -36,9 +36,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.gds.compat.MapUtil.map;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphWriteRelationshipProcTest extends BaseProcTest {
     private static final String TEST_GRAPH_NAME = "testGraph";

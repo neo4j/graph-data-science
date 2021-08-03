@@ -25,7 +25,7 @@ import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
+import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.token.api.TokenNotFoundException;

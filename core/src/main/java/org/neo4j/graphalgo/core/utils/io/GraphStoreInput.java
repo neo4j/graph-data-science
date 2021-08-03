@@ -19,11 +19,11 @@
  */
 package org.neo4j.graphalgo.core.utils.io;
 
+import org.neo4j.gds.compat.CompatInput;
+import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.NodeMapping;
-import org.neo4j.graphalgo.compat.CompatInput;
-import org.neo4j.graphalgo.compat.CompatPropertySizeCalculator;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;

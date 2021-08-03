@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.wcc.WccMutateProc;
 
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.gds.compat.MapUtil.map;
 
 public class RemoveNodePropertiesIntegrationTest extends BaseProcTest {
     private static final String DB_CYPHER =

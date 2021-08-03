@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.Set;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ModelSupport {
     public static final Set<String> SUPPORTED_TYPES = Set.of(

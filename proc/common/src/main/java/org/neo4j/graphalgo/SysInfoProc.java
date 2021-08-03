@@ -21,7 +21,7 @@ package org.neo4j.graphalgo;
 
 import org.apache.commons.text.WordUtils;
 import org.neo4j.configuration.Config;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.utils.mem.GcListenerExtension;

@@ -24,7 +24,7 @@ import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkFeatureStepValidation {
     public static void validateConfig(String taskName, Map<String, Object> config) {

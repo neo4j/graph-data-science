@@ -21,10 +21,10 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;

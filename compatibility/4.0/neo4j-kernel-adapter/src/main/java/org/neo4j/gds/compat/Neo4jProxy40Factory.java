@@ -20,7 +20,6 @@
 package org.neo4j.gds.compat;
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
 
 @ServiceProvider
 public final class Neo4jProxy40Factory implements Neo4jProxyFactory {

@@ -36,8 +36,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.write.NodePropertyExporter.MIN_BATCH_SIZE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class RelationshipStreamExporter extends StatementApi {
 

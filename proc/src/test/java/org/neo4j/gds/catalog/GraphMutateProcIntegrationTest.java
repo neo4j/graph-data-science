@@ -41,10 +41,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.math.L2Norm.l2Norm;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphMutateProcIntegrationTest extends BaseProcTest {
 

@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.core.utils.io.file;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
 import org.neo4j.graphalgo.core.utils.io.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.io.NeoNodeProperties;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -35,8 +35,8 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class GraphStoreExporterUtil {
 

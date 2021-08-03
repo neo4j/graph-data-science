@@ -21,7 +21,7 @@ package org.neo4j.gds.utils;
 
 import org.neo4j.graphalgo.api.Graph;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class InputNodeValidator {
 

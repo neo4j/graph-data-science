@@ -20,13 +20,13 @@
 package org.neo4j.graphalgo;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.AuraMaintenanceSettings;
 import org.neo4j.graphalgo.api.GraphLoaderContext;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.api.ImmutableGraphLoaderContext;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
@@ -64,9 +64,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.util.function.Predicate.isEqual;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.MemoryValidation.validateMemoryUsage;
 import static org.neo4j.graphalgo.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class BaseProc {
 

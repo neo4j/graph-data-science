@@ -41,7 +41,7 @@ import org.neo4j.graphalgo.api.Graph;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkLogisticRegressionObjective extends LinkLogisticRegressionBase implements Objective<LinkLogisticRegressionData> {
     private final Graph graph;

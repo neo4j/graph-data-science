@@ -19,17 +19,17 @@
  */
 package org.neo4j.graphalgo.core.utils.io.file;
 
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.schema.RelationshipPropertySchema;
 import org.neo4j.graphalgo.api.schema.RelationshipSchema;
 
 import java.util.Map;
 import java.util.Set;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public interface RelationshipFileHeader extends FileHeader<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {

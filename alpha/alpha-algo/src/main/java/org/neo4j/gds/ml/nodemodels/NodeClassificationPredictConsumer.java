@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * Consumes a BatchQueue containing long indices into a <code>nodeIds</code> LongArrayAccessor.

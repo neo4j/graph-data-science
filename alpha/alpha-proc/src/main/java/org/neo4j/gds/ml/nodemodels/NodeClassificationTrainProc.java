@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationTrainProc extends TrainProc<NodeClassificationTrain, NodeLogisticRegressionData, NodeClassificationTrainConfig> {
 

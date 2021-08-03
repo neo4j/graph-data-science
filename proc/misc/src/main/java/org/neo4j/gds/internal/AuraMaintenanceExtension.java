@@ -22,7 +22,7 @@ package org.neo4j.gds.internal;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
+import org.neo4j.gds.compat.GraphStoreExportSettings;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.graphdb.config.Setting;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;

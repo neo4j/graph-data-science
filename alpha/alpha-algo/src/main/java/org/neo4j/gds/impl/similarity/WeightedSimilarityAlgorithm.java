@@ -37,9 +37,9 @@ import java.util.function.Supplier;
 
 import static org.neo4j.gds.impl.utils.NumberUtils.getDoubleValue;
 import static org.neo4j.gds.impl.utils.NumberUtils.getLongValue;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public abstract class WeightedSimilarityAlgorithm<ME extends WeightedSimilarityAlgorithm<ME>> extends SimilarityAlgorithm<ME, WeightedInput> {
 

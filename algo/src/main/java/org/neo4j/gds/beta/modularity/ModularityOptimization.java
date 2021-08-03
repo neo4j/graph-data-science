@@ -47,7 +47,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * Implementation of parallel modularity optimization based on:

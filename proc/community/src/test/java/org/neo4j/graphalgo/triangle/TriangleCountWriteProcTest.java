@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class TriangleCountWriteProcTest extends TriangleCountBaseProcTest<TriangleCountWriteConfig> {
 

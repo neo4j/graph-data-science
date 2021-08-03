@@ -36,7 +36,7 @@ import org.neo4j.values.storable.Values;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.LongAdder;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.values.storable.Values.NO_VALUE;
 
 public final class NodePropertiesFromStoreBuilder {

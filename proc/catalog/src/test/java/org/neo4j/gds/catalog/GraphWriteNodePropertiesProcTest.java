@@ -48,10 +48,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
+import static org.neo4j.gds.compat.MapUtil.map;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 

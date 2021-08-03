@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class FastRPMutateProcTest extends FastRPProcTest<FastRPMutateConfig>
     implements MutateNodePropertyTest<FastRP, FastRPMutateConfig, FastRP.FastRPResult> {

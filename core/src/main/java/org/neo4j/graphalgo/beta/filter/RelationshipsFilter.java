@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.beta.filter;
 
-import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.CompositeRelationshipIterator;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -48,8 +48,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.api.AdjacencyCursor.NOT_FOUND;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class RelationshipsFilter {
 

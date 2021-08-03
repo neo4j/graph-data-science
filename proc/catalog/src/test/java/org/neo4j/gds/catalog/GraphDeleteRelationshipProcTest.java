@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.gds.compat.MapUtil.map;
 
 class GraphDeleteRelationshipProcTest extends BaseProcTest {
 

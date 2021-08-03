@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 
 public class ListProc {
 

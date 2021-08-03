@@ -35,7 +35,7 @@ import java.util.Optional;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.isA;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class LocalClusteringCoefficientMutateProcTest
     extends LocalClusteringCoefficientBaseProcTest<LocalClusteringCoefficientMutateConfig>

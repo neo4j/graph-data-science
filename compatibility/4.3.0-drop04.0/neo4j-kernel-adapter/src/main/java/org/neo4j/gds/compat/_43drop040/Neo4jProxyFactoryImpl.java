@@ -22,7 +22,7 @@ package org.neo4j.gds.compat._43drop040;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.Neo4jProxyFactory;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
+import org.neo4j.gds.compat.Neo4jVersion;
 
 @ServiceProvider
 public final class Neo4jProxyFactoryImpl implements Neo4jProxyFactory {

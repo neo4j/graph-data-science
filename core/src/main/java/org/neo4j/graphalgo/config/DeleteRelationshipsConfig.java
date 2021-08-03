@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.api.GraphStore;
 
 import java.util.Set;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration

@@ -24,15 +24,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.GraphStoreExportSettings;
+import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
-import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.compat.GraphStoreExportSettings;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.graphdb.QueryExecutionException;
@@ -46,9 +46,9 @@ import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.utils.io.file.GraphStoreExporterUtil.EXPORT_DIR;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphStoreExportProcTest extends BaseProcTest {
 
@@ -175,7 +175,6 @@ class GraphStoreExportProcTest extends BaseProcTest {
             assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(0L);
         });
     }
-
 
     @Test
     void failsWhenTheExportDirectoryAlreadyExists() throws IOException {

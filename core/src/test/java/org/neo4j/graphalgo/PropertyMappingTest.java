@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.graphalgo.api.DefaultValue;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 
 import static org.hamcrest.CoreMatchers.containsString;

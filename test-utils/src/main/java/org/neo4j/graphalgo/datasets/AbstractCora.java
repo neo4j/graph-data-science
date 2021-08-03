@@ -34,13 +34,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.datasets.CoraSchema.CITES_TYPE;
 import static org.neo4j.graphalgo.datasets.CoraSchema.EXT_ID_NODE_PROPERTY;
 import static org.neo4j.graphalgo.datasets.CoraSchema.PAPER_LABEL;
 import static org.neo4j.graphalgo.datasets.CoraSchema.SUBJECT_NODE_PROPERTY;
 import static org.neo4j.graphalgo.datasets.CoraSchema.TEST_TYPE;
 import static org.neo4j.graphalgo.datasets.CoraSchema.TRAIN_TYPE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public abstract class AbstractCora extends Dataset {
 

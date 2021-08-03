@@ -52,9 +52,9 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class PageRankTest {
 

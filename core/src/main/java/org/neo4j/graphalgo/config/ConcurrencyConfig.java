@@ -24,7 +24,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.graphalgo.core.GdsEdition;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface ConcurrencyConfig {
 

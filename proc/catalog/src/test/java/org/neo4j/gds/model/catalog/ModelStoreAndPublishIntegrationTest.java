@@ -50,8 +50,8 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.core.Is.isA;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.compat.MapUtil.map;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdsEditionTest(Edition.EE)
 class ModelStoreAndPublishIntegrationTest extends ModelProcBaseTest {

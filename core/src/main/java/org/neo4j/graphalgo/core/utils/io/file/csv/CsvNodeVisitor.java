@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class CsvNodeVisitor extends NodeVisitor {
 

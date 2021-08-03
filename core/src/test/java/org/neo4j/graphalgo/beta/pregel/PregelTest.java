@@ -27,11 +27,11 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressEventTracker;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
@@ -60,6 +60,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.DOUBLE_ARRAY_KEY;
@@ -67,7 +68,6 @@ import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputatio
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.LONG_ARRAY_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.CompositeTestComputation.LONG_KEY;
 import static org.neo4j.graphalgo.beta.pregel.PregelTest.TestPregelComputation.KEY;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class PregelTest {

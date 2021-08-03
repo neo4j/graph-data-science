@@ -32,7 +32,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComputer<CONFIG> {
     private final ExecutorService executorService;

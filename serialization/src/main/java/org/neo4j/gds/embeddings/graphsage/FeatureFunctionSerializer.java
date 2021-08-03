@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.embeddings.ddl4j.tensor.TensorSerializer;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.model.proto.GraphSageProto;
 import org.neo4j.graphalgo.core.model.proto.TensorProto;
@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class FeatureFunctionSerializer {
 

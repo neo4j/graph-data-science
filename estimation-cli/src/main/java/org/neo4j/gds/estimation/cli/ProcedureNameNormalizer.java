@@ -21,7 +21,7 @@ package org.neo4j.gds.estimation.cli;
 
 import picocli.CommandLine;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 final class ProcedureNameNormalizer implements CommandLine.ITypeConverter<String> {
     public String convert(String value) {

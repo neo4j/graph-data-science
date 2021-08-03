@@ -38,8 +38,8 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @ExtendWith(SoftAssertionsExtension.class)
 class BatchingProgressLoggerTest {

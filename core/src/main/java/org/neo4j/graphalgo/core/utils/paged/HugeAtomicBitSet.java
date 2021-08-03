@@ -23,9 +23,9 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.graphalgo.core.utils.BitUtil;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.utils.ArrayUtil.MAX_ARRAY_LENGTH;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class HugeAtomicBitSet {
     private static final int NUM_BITS = Long.SIZE;

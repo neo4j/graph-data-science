@@ -21,6 +21,7 @@ package org.neo4j.internal.recordstorage;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.storageengine.CypherTest;
+import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
@@ -28,7 +29,6 @@ import org.neo4j.graphalgo.PropertyMappings;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.token.api.NamedToken;

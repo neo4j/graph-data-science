@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_BIT_ID_MAP;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
@@ -42,7 +43,6 @@ import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PRE_AGGREGATION;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST;
 import static org.neo4j.graphalgo.utils.GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class FeatureToggleProcTest extends BaseProcTest {
 

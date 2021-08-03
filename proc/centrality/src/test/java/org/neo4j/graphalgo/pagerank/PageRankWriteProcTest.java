@@ -24,13 +24,13 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.WritePropertyConfigProcTest;
+import org.neo4j.gds.compat.MapUtil;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.pagerank.PageRankAlgorithm;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
-import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,7 +43,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.isA;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class PageRankWriteProcTest extends PageRankProcTest<PageRankWriteConfig> {
 

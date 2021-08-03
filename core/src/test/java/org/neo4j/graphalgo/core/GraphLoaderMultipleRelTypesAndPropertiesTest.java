@@ -51,23 +51,21 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
 import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
 import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
 import static org.neo4j.graphalgo.TestSupport.crossArguments;
 import static org.neo4j.graphalgo.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.TestSupport.toArguments;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
 import static org.neo4j.graphalgo.core.Aggregation.DEFAULT;
 import static org.neo4j.graphalgo.core.Aggregation.MAX;
 import static org.neo4j.graphalgo.core.Aggregation.MIN;
 import static org.neo4j.graphalgo.core.Aggregation.NONE;
 import static org.neo4j.graphalgo.core.Aggregation.SINGLE;
 import static org.neo4j.graphalgo.core.Aggregation.SUM;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
 

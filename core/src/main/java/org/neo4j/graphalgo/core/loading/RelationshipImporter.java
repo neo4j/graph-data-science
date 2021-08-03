@@ -29,10 +29,10 @@ import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.BATCH_ENTRY_SIZE;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.PROPERTIES_REFERENCE_OFFSET;
 import static org.neo4j.graphalgo.core.loading.RelationshipsBatchBuffer.RELATIONSHIP_REFERENCE_OFFSET;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class RelationshipImporter {
 

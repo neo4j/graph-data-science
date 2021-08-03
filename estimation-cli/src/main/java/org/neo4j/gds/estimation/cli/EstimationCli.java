@@ -68,6 +68,7 @@ import java.util.stream.Stream;
 import static java.util.function.Predicate.not;
 import static java.util.stream.Collectors.joining;
 import static org.neo4j.gds.ml.nodemodels.NodeClassificationTrain.MODEL_TYPE;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.NODE_COUNT_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateConfig.RELATIONSHIP_COUNT_KEY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.NODE_QUERY_KEY;
@@ -80,7 +81,6 @@ import static org.neo4j.graphalgo.config.MutatePropertyConfig.MUTATE_PROPERTY_KE
 import static org.neo4j.graphalgo.config.WritePropertyConfig.WRITE_PROPERTY_KEY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
 import static org.neo4j.graphalgo.utils.CheckedFunction.function;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal", "DefaultAnnotationParam"})
 @SuppressForbidden(reason = "supposed to print")

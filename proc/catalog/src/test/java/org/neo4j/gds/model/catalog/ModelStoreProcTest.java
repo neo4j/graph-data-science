@@ -46,8 +46,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.model.ModelSupport.SUPPORTED_TYPES;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
 
 @GdsEditionTest(Edition.EE)
 class ModelStoreProcTest extends ModelProcBaseTest {

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo;
 
-import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;

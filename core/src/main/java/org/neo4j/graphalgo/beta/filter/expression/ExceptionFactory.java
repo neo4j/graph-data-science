@@ -24,7 +24,7 @@ import org.opencypher.v9_0.ast.factory.ASTExceptionFactory;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ExceptionFactory implements ASTExceptionFactory {
 

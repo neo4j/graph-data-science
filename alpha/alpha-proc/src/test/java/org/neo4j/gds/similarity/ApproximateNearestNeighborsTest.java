@@ -44,7 +44,7 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.neo4j.graphalgo.compat.MapUtil.genericMap;
+import static org.neo4j.gds.compat.MapUtil.genericMap;
 import static org.neo4j.graphalgo.core.loading.ImportSizing.MIN_PAGE_SIZE;
 
 class ApproximateNearestNeighborsTest extends AlgoTestBase {

@@ -24,7 +24,7 @@ import org.openjdk.jol.util.Multiset;
 
 import java.util.Objects;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Precision implements Metric {
 

@@ -26,7 +26,7 @@ import org.neo4j.values.storable.Value;
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface NodeProperties {
 

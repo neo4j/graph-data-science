@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.gds.ml.splitting.DirectedEdgeSplitter.NEGATIVE;
 import static org.neo4j.gds.ml.splitting.DirectedEdgeSplitter.POSITIVE;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {

@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.louvain.LouvainMutateProc;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -29,7 +29,7 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.function.Consumer;
 
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.newKernelTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 
 public final class ProcedureTestUtils {
     public static void applyOnProcedure(GraphDatabaseAPI db, Consumer<? super AlgoBaseProc<?, ?, ?>> func) {

@@ -30,7 +30,7 @@ import org.neo4j.graphalgo.labelpropagation.LabelPropagationStatsProc;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 class FilterOnCypherGraphIntegrationTest extends BaseProcTest {

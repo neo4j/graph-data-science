@@ -21,7 +21,7 @@ package org.neo4j.gds.result;
 
 import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

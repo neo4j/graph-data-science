@@ -28,7 +28,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
  * General heap of feature toggles we have and procedures to toggle them

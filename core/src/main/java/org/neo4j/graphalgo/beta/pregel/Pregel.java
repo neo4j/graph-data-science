@@ -31,7 +31,7 @@ import org.neo4j.graphalgo.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class Pregel<CONFIG extends PregelConfig> {

@@ -22,14 +22,14 @@ package org.neo4j.graphalgo.junit.annotation;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.neo4j.graphalgo.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 
 import java.lang.reflect.AnnotatedElement;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.extension.ConditionEvaluationResult.disabled;
 import static org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.helpers.AnnotationHelper.findAnnotation;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class DisableForNeo4jVersionCondition implements ExecutionCondition {
 

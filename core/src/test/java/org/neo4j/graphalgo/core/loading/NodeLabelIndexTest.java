@@ -20,10 +20,10 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
 import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.graphalgo.extension.Neo4jGraphExtension;
 import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;

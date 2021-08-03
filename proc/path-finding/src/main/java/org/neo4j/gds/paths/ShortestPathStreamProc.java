@@ -28,7 +28,7 @@ import org.neo4j.graphalgo.config.AlgoBaseConfig;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.toLowerCaseWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 public abstract class ShortestPathStreamProc<
     ALGO extends Algorithm<ALGO, DijkstraResult>,

@@ -34,8 +34,8 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.getNodeById;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
 
 final class HugeGraphWeightTest extends BaseTest {
 

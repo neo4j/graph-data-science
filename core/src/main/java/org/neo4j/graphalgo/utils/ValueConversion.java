@@ -27,7 +27,7 @@ import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.LongArray;
 import org.neo4j.values.storable.Value;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class ValueConversion {
 

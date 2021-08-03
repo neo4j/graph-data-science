@@ -27,7 +27,7 @@ import org.neo4j.graphalgo.core.utils.Intersections;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface SimilarityComputer {
 

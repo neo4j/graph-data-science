@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.getNodeById;
 
 public class WalkPath implements Path {
     public static final Path EMPTY = new WalkPath(0);

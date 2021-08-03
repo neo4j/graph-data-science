@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.junit.annotation;
 
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.neo4j.graphalgo.compat.Neo4jVersion;
+import org.neo4j.gds.compat.Neo4jVersion;
 
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;

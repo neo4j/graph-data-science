@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.beta.modularity;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.compat.MapUtil;
 
 import java.util.Map;
 

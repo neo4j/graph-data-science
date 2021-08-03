@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static org.neo4j.graphalgo.compat.MapUtil.map;
+import static org.neo4j.gds.compat.MapUtil.map;
 
 class ModelExistsProcTest extends ModelProcBaseTest {
 

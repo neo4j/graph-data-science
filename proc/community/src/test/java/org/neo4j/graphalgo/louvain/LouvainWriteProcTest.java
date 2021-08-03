@@ -51,9 +51,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
 import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implements
     ConsecutiveIdsConfigTest<Louvain, LouvainWriteConfig, Louvain> {

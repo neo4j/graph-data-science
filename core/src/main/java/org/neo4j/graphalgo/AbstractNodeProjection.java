@@ -27,7 +27,7 @@ import org.neo4j.gds.core.ConfigKeyValidation;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @DataClass
 public abstract class AbstractNodeProjection extends ElementProjection {

@@ -20,6 +20,7 @@
 package org.neo4j.graphalgo.louvain;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.louvain.Louvain;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
@@ -31,7 +32,6 @@ import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
-import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.core.Aggregation;
 
 import java.util.List;

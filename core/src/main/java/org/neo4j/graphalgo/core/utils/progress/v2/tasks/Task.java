@@ -23,7 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Task {
 

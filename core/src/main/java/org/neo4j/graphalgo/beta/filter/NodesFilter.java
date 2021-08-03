@@ -57,8 +57,8 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.utils.paged.SparseLongArray.SUPER_BLOCK_SHIFT;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 final class NodesFilter {
 

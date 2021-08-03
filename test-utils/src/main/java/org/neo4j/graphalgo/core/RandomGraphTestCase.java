@@ -25,8 +25,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.gds.annotation.SuppressForbidden;
+import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.io.PrintWriter;
@@ -35,7 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ExtendWith(RandomGraphTestCase.TestWatcherExtension.class)
 public abstract class RandomGraphTestCase extends BaseTest {

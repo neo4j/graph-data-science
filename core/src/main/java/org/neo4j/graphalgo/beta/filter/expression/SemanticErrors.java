@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.utils.StringJoining;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 
 public final class SemanticErrors extends Exception {

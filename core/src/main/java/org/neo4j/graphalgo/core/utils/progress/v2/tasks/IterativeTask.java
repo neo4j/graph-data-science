@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.core.utils.progress.v2.tasks;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class IterativeTask extends Task {
 

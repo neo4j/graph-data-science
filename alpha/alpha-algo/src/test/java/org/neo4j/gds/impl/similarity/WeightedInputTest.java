@@ -21,7 +21,7 @@ package org.neo4j.gds.impl.similarity;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.results.SimilarityResult;
-import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.gds.compat.MapUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;

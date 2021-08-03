@@ -23,7 +23,7 @@ import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.graphalgo.core.utils.ArrayUtil;
 
 import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Vector extends Tensor<Vector> {
 

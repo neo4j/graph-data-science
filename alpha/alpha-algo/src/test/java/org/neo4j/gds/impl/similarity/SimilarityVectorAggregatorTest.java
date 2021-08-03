@@ -20,7 +20,7 @@
 package org.neo4j.gds.impl.similarity;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.compat.MapUtil;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.graphdb.Node;
 
 import java.util.Arrays;

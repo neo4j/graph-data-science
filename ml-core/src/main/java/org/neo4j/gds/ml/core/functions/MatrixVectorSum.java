@@ -30,7 +30,7 @@ import java.util.List;
 
 import static org.neo4j.gds.ml.core.Dimensions.COLUMNS_INDEX;
 import static org.neo4j.gds.ml.core.Dimensions.ROWS_INDEX;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MatrixVectorSum extends AbstractVariable<Matrix> {
 

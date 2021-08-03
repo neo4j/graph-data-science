@@ -26,7 +26,7 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class ConstantScale<T extends Tensor<T>> extends AbstractVariable<T> {
     private final Variable<T> parent;

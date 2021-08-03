@@ -21,7 +21,7 @@ package org.neo4j.gds.doc.syntax;
 
 import java.util.regex.Pattern;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class ProcedureNameExtractor {
     private static final Pattern PATTERN = Pattern.compile("(\\sgds\\.)(\\w+\\.)+(\\w+)");

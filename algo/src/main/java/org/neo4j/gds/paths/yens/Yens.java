@@ -42,7 +42,7 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class Yens extends Algorithm<Yens, DijkstraResult> {
 

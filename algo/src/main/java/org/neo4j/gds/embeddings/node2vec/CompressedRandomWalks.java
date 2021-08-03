@@ -28,10 +28,10 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.encodedVLongSize;
 import static org.neo4j.graphalgo.core.loading.VarLongEncoding.zigZag;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public class CompressedRandomWalks {
     private final HugeObjectArray<byte[]> compressedWalks;

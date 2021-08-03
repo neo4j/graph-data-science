@@ -30,7 +30,7 @@ import org.neo4j.procedure.Procedure;
 import java.io.IOException;
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ModelLoadProc extends BaseProc {

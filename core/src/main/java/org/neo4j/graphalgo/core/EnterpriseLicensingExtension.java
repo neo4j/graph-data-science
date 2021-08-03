@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ServiceProvider
 public final class EnterpriseLicensingExtension extends ExtensionFactory<EnterpriseLicensingExtension.Dependencies> {

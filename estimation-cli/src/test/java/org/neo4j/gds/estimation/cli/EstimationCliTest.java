@@ -141,10 +141,10 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_NODES_QUERY;
 import static org.neo4j.graphalgo.config.GraphCreateFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.graphalgo.core.utils.mem.MemoryUsage.humanReadable;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 @GdsEditionTest(value = Edition.EE)
 final class EstimationCliTest {

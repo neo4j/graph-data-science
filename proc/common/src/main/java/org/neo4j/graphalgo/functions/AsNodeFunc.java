@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.neo4j.graphalgo.compat.GraphDatabaseApiProxy.getNodeById;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.getNodeById;
 
 public class AsNodeFunc {
 

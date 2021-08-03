@@ -34,7 +34,7 @@ import static org.neo4j.graphalgo.api.nodeproperties.ValueType.DOUBLE_ARRAY;
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.FLOAT_ARRAY;
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.LONG;
 import static org.neo4j.graphalgo.api.nodeproperties.ValueType.LONG_ARRAY;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class UnionNodeProperties implements NodeProperties {
 

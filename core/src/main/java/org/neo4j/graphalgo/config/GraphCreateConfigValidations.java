@@ -25,8 +25,8 @@ import org.neo4j.graphalgo.utils.StringJoining;
 import java.util.Collections;
 
 import static java.util.stream.Collectors.toList;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
 
 public final class GraphCreateConfigValidations {
 

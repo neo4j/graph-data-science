@@ -26,8 +26,8 @@ import org.neo4j.graphalgo.RelationshipType;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.graphalgo.compat.MapUtil.map;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.compat.MapUtil.map;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 public interface GraphSchema {

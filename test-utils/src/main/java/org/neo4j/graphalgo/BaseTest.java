@@ -46,7 +46,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
-import static org.neo4j.graphalgo.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ImpermanentDbmsExtension(configurationCallback = "configuration")
 @Neo4jGraphExtension
