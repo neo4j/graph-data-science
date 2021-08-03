@@ -21,11 +21,11 @@ package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.StringJoining.join;
 
 public interface GraphExportNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
-import org.neo4j.graphalgo.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
 @FunctionalInterface
 public interface PropertyWithTypeConsumer {

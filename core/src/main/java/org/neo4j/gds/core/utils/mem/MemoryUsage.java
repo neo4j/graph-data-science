@@ -41,7 +41,6 @@ import static com.carrotsearch.hppc.Containers.DEFAULT_EXPECTED_ELEMENTS;
 import static com.carrotsearch.hppc.HashContainers.DEFAULT_LOAD_FACTOR;
 import static com.carrotsearch.hppc.HashContainers.MIN_HASH_ARRAY_LENGTH;
 import static java.lang.Integer.numberOfTrailingZeros;
-import static org.neo4j.gds.core.utils.BitUtil.nextHighestPowerOfTwo;
 
 public final class MemoryUsage {
 

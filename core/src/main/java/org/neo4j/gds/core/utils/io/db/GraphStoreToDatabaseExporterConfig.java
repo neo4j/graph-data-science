@@ -59,7 +59,7 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
 
     @Value.Default
     @Value.Parameter(false)
-    @Configuration.ConvertWith("org.neo4j.graphalgo.AbstractPropertyMappings#fromObject")
+    @Configuration.ConvertWith("org.neo4j.gds.AbstractPropertyMappings#fromObject")
     default PropertyMappings additionalNodeProperties() {
         return PropertyMappings.of();
     }

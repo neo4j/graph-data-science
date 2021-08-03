@@ -22,8 +22,6 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.core.utils.BitUtil;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.core.utils.BitUtil.ceilDiv;
-import static org.neo4j.gds.core.utils.BitUtil.previousPowerOfTwo;
 
 public final class ImportSizing {
 

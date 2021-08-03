@@ -21,10 +21,10 @@ package org.neo4j.gds.storageengine;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.neo4j.graphalgo.BaseTest;
-import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
-import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.GraphCreateFromStoreConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.internal.recordstorage.InMemoryStorageEngineCompanion;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.token.DelegatingTokenHolder;

@@ -22,16 +22,16 @@ package org.neo4j.gds.core.huge;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.api.PropertyCursor;
-import org.neo4j.gds.core.loading.BumpAllocator;
-import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
+import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.loading.BumpAllocator;
 import org.neo4j.gds.core.loading.MutableIntValue;
 import org.neo4j.gds.core.utils.ArrayUtil;
+import org.neo4j.gds.core.utils.BitUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -41,7 +41,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.PageUtil;
 
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.core.utils.BitUtil.ceilDiv;
 import static org.neo4j.gds.core.utils.paged.PageUtil.indexInPage;
 import static org.neo4j.gds.core.utils.paged.PageUtil.pageIndex;
 
