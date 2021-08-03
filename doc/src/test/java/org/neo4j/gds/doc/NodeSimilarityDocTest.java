@@ -20,10 +20,10 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityMutateProc;
-import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityStatsProc;
-import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityStreamProc;
-import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityWriteProc;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsProc;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamProc;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteProc;
 
 import java.util.Arrays;
 import java.util.List;

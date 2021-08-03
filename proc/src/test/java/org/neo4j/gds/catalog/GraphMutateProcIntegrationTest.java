@@ -27,6 +27,7 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.gds.louvain.LouvainMutateProc;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.gds.wcc.WccMutateProc;
 import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphalgo.GdsCypher;
@@ -34,7 +35,6 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityMutateProc;
 
 import java.util.Collection;
 import java.util.List;

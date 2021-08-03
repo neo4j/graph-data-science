@@ -17,32 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.catalog.GraphCreateProc;
-import org.neo4j.gds.similarity.knn.KnnMutateProc;
-import org.neo4j.gds.similarity.knn.KnnStatsProc;
-import org.neo4j.gds.similarity.knn.KnnStreamProc;
-import org.neo4j.gds.similarity.knn.KnnWriteProc;
+public final class NodeSimilarityProc {
 
-import java.util.Arrays;
-import java.util.List;
+    static final String NODE_SIMILARITY_DESCRIPTION =
+        "The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to. " +
+        "Two nodes are considered similar if they share many of the same neighbors. " +
+        "Node Similarity computes pair-wise similarities based on the Jaccard metric.";
 
-class KnnDocTest extends DocTestBase {
-
-    @Override
-    List<Class<?>> procedures() {
-        return Arrays.asList(
-            KnnStreamProc.class,
-            KnnWriteProc.class,
-            KnnStatsProc.class,
-            KnnMutateProc.class,
-            GraphCreateProc.class
-        );
-    }
-
-    @Override
-    String adocFile() {
-        return "algorithms/beta/knn.adoc";
-    }
+    private NodeSimilarityProc() {}
 }

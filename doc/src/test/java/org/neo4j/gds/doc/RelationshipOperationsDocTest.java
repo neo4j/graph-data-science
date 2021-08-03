@@ -23,7 +23,7 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphDeleteRelationshipProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
-import org.neo4j.graphalgo.similarity.nodesim.NodeSimilarityMutateProc;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 
 import java.util.List;
 
