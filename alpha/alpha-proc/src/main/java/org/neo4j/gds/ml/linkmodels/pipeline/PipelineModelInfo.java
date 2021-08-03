@@ -22,22 +22,21 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures.LinkFeatureStep;
-import org.neo4j.graphalgo.core.model.Model;
+import org.neo4j.graphalgo.core.model.Model.Mappable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-public class PipelineModelInfo implements Model.Mappable {
+public class PipelineModelInfo implements Mappable {
     private final List<NodePropertyStep> nodePropertySteps;
     private final List<LinkFeatureStep> featureSteps;
-    private Optional<Map<String, Object>> splitConfig;
+    private Map<String, Object> splitConfig;
     // Either list of specific parameter combinations (in the future also a map with value ranges for different parameters will be allowed)
-    private Optional<List<Map<String, Object>>> parameterSpace;
+    private List<Map<String, Object>> parameterSpace;
 
     public static PipelineModelInfo create() {
-        return new PipelineModelInfo(null, null);
+        return new PipelineModelInfo(Map.of(), List.of());
     }
 
     private PipelineModelInfo(
@@ -46,16 +45,16 @@ public class PipelineModelInfo implements Model.Mappable {
     ) {
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
-        this.splitConfig = Optional.ofNullable(splitConfig);
-        this.parameterSpace = Optional.ofNullable(parameterSpace);
+        this.splitConfig = splitConfig;
+        this.parameterSpace = parameterSpace;
     }
 
     @Override
     public Map<String, Object> toMap() {
         return Map.of(
             "featurePipeline", Map.of(
-                "nodePropertySteps", nodePropertySteps,
-                "featureSteps", featureSteps
+                "nodePropertySteps", Mappable.toMap(nodePropertySteps),
+                "featureSteps", Mappable.toMap(featureSteps)
             ),
             "splitConfig", splitConfig,
             "parameterSpace", parameterSpace
@@ -78,19 +77,19 @@ public class PipelineModelInfo implements Model.Mappable {
         featureSteps.add(step);
     }
 
-    Optional<Map<String, Object>> splitConfig() {
+    Map<String, Object> splitConfig() {
         return splitConfig;
     }
 
     void setSplitConfig(@NotNull Map<String, Object> splitConfig) {
-        this.splitConfig = Optional.of(splitConfig);
+        this.splitConfig = splitConfig;
     }
 
-    Optional<List<Map<String, Object>>> parameterSpace() {
+    List<Map<String, Object>> parameterSpace() {
         return parameterSpace;
     }
 
     void setParameterSpace(@NotNull List<Map<String, Object>> parameterList) {
-        this.parameterSpace = Optional.of(parameterList);
+        this.parameterSpace = parameterList;
     }
 }

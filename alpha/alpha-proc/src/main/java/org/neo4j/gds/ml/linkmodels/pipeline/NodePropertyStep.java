@@ -24,13 +24,14 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.core.model.Model;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class NodePropertyStep {
+public class NodePropertyStep implements Model.Mappable {
     public final String taskName;
     public final Map<String, Object> config;
 

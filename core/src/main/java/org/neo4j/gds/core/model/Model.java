@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.TimeUtil;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @ValueClass
 public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
@@ -131,6 +132,10 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig> {
         Map<String, Object> toMap();
 
         Mappable EMPTY = Map::of;
+
+        static <T extends Model.Mappable> List<Map<String, Object>> toMap(List<T> data) {
+            return data.stream().map(Model.Mappable::toMap).collect(Collectors.toList());
+        }
     }
 
     class SerializableMappable implements Mappable {

@@ -20,11 +20,12 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.linkFeatures;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.model.Model;
 
 import java.util.List;
 import java.util.Map;
 
-public interface LinkFeatureStep {
+public interface LinkFeatureStep extends Model.Mappable {
     String INPUT_NODE_PROPERTIES = "nodeProperties";
 
     LinkFeatureAppender linkFeatureAppender(Graph graph);
