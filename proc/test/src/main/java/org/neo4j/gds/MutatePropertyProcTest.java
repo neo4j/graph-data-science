@@ -23,8 +23,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphalgo.NodeLabel;
-import org.neo4j.graphalgo.TestGraphLoader;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
@@ -43,9 +41,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.gds.QueryRunner.runQuery;
+import static org.neo4j.gds.TestSupport.FactoryType.NATIVE;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends MutateConfig & AlgoBaseConfig, RESULT>
     extends MutateProcTest<ALGORITHM, CONFIG, RESULT> {

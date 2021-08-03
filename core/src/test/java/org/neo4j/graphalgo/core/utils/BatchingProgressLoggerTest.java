@@ -24,9 +24,9 @@ import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.eclipse.collections.impl.utility.ListIterate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.TestProgressEventTracker;
-import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 
@@ -38,8 +38,8 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
 
 @ExtendWith(SoftAssertionsExtension.class)
 class BatchingProgressLoggerTest {

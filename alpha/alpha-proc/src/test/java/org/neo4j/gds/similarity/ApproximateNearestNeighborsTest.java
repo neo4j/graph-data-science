@@ -20,14 +20,14 @@
 package org.neo4j.gds.similarity;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.AlgoTestBase;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
 import org.neo4j.gds.impl.similarity.ApproximateNearestNeighborsConfig;
 import org.neo4j.gds.impl.similarity.CategoricalInput;
 import org.neo4j.gds.impl.similarity.JaccardAlgorithm;
 import org.neo4j.gds.impl.similarity.JaccardConfig;
 import org.neo4j.gds.impl.similarity.SimilarityAlgorithmResult;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.impl.similarity.ImmutableApproximateNearestNeighborsConfig;

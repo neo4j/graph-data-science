@@ -22,12 +22,12 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.beta.filter.expression.SemanticErrors;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
@@ -35,8 +35,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 class GraphCreateSubgraphProcTest extends BaseProcTest {
 

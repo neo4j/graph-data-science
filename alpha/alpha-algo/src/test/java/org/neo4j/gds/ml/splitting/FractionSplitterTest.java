@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.junit.annotation.Edition;
-import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
+import org.neo4j.gds.junit.annotation.Edition;
+import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

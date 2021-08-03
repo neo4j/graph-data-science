@@ -24,9 +24,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.Map;
 import java.util.stream.Stream;

@@ -29,8 +29,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestProgressLogger;
-import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.GraphDimensions;
 import org.neo4j.graphalgo.core.ImmutableGraphDimensions;
@@ -42,10 +42,10 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.extension.TestGraph;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -67,11 +67,11 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
 import static org.neo4j.graphalgo.Orientation.REVERSE;
 import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
-import static org.neo4j.graphalgo.TestLog.INFO;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.TestSupport.crossArguments;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
-import static org.neo4j.graphalgo.TestSupport.toArguments;
+import static org.neo4j.gds.TestLog.INFO;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.crossArguments;
+import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.TestSupport.toArguments;
 
 @GdlExtension
 final class NodeSimilarityTest {

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.gds.wcc.WccMutateProc;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
 import static java.util.Collections.singletonList;

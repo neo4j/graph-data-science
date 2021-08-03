@@ -40,9 +40,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.TestSupport.crossArguments;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.crossArguments;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 class GraphFactoryTest {
 

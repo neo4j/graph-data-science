@@ -20,22 +20,22 @@
 package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.Inject;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension
 class CSRGraphStoreUtilTest {

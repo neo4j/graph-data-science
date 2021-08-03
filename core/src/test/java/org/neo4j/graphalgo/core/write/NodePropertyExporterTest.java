@@ -23,18 +23,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.core.huge.DirectIdMapping;
+import org.neo4j.gds.core.huge.DirectIdMapping;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
-import org.neo4j.graphalgo.nodeproperties.LongTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleTestProperties;
+import org.neo4j.gds.nodeproperties.LongTestProperties;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,10 +43,10 @@ import java.util.concurrent.ExecutorService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.TestSupport.assertTransactionTermination;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
-import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.assertTransactionTermination;
+import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class NodePropertyExporterTest extends BaseTest {
 

@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.compat;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.gds.BaseTest;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.internal;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 

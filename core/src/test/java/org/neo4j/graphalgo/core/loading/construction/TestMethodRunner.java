@@ -24,7 +24,7 @@ import org.neo4j.graphalgo.utils.GdsFeatureToggles;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.graphalgo.GdsEditionUtils.setToEnterpriseAndRun;
+import static org.neo4j.gds.GdsEditionUtils.setToEnterpriseAndRun;
 
 public interface TestMethodRunner {
     <E extends Exception> void run(CheckedRunnable<E> code) throws E;

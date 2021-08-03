@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.GdsCypher;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,8 +39,8 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.assertj.ConditionFactory.containsAllEntriesOf;
-import static org.neo4j.graphalgo.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
+import static org.neo4j.gds.assertj.ConditionFactory.containsAllEntriesOf;
+import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
 class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
 

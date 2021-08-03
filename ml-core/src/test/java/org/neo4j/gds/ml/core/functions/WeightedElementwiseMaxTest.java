@@ -26,10 +26,10 @@ import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.RelationshipCursor;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.extension.TestGraph;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.List;
 

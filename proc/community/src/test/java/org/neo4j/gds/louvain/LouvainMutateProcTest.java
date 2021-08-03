@@ -25,7 +25,7 @@ import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.DefaultValue;
@@ -39,8 +39,8 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> implements
     MutateNodePropertyTest<Louvain, LouvainMutateConfig, Louvain>,

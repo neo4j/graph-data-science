@@ -27,7 +27,7 @@ import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.graphalgo.GdsCypher.ModeBuildStage;
+import org.neo4j.gds.GdsCypher.ModeBuildStage;
 
 import java.util.Collection;
 import java.util.List;

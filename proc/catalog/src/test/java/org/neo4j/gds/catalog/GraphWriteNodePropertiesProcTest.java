@@ -26,16 +26,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.TestLog;
+import org.neo4j.gds.TestLog;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.core.IdentityProperties;
+import org.neo4j.gds.core.IdentityProperties;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -51,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class GraphWriteNodePropertiesProcTest extends BaseProcTest {
 

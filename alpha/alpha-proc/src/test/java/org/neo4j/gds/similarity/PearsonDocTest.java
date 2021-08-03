@@ -23,7 +23,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.functions.IsFiniteFunc;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.functions.AsNodeFunc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

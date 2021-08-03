@@ -27,8 +27,6 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 
@@ -37,7 +35,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.graphalgo.math.L2Norm.l2Norm;
+import static org.neo4j.gds.math.L2Norm.l2Norm;
 
 class EmbeddingsIntegrationTest extends BaseProcTest {
 

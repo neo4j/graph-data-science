@@ -26,7 +26,7 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.NodesBuilder;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.extension.GdlSupportExtension;
+import org.neo4j.gds.extension.GdlSupportExtension;
 import org.roaringbitmap.RoaringBitmap;
 
 import static org.hamcrest.MatcherAssert.assertThat;

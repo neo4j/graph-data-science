@@ -41,7 +41,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.gds.QueryRunner.runQuery;
 
 public interface SeedConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends SeedConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 

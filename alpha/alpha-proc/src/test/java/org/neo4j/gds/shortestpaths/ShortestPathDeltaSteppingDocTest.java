@@ -22,7 +22,7 @@ package org.neo4j.gds.shortestpaths;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.graphdb.Result;
 

@@ -25,9 +25,9 @@ import org.junit.jupiter.api.TestFactory;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Collection;
 import java.util.List;

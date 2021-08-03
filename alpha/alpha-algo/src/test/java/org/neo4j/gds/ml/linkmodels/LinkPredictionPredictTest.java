@@ -32,7 +32,7 @@ import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionData
 import org.neo4j.gds.ml.linkmodels.logisticregression.LinkLogisticRegressionPredictor;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.GraphDimensions;
@@ -41,16 +41,16 @@ import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.TestLog.INFO;
-import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.TestLog.INFO;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
 class LinkPredictionPredictTest {

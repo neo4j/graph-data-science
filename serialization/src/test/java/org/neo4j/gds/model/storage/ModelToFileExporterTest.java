@@ -30,7 +30,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
-import org.neo4j.graphalgo.gdl.GdlFactory;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;

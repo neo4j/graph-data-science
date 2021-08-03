@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.gds.AlgoTestBase;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
 import org.neo4j.graphalgo.core.concurrency.Pools;
@@ -29,7 +29,7 @@ import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 
-import static org.neo4j.graphalgo.TestSupport.assertAlgorithmTermination;
+import static org.neo4j.gds.TestSupport.assertAlgorithmTermination;
 
 class NodeSimilarityTerminationTest extends AlgoTestBase {
 

@@ -20,10 +20,10 @@
 package org.neo4j.graphalgo.core.huge;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.Inject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

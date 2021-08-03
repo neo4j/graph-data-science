@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.WriteRelationshipWithPropertyTest;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 
@@ -40,8 +40,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.Orientation.REVERSE;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 public class NodeSimilarityWriteProcTest
     extends NodeSimilarityProcTest<NodeSimilarityWriteConfig>

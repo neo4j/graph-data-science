@@ -24,19 +24,19 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.TestLog;
+import org.neo4j.gds.TestProgressLogger;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.TestProgressLogger;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.mem.MemoryUsage;
 import org.neo4j.graphalgo.core.utils.paged.HugeDoubleArray;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.List;
 import java.util.Map;
@@ -45,10 +45,10 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
-import static org.neo4j.graphalgo.TestSupport.crossArguments;
-import static org.neo4j.graphalgo.TestSupport.toArguments;
-import static org.neo4j.graphalgo.TestSupport.toArgumentsFlat;
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.neo4j.gds.TestSupport.crossArguments;
+import static org.neo4j.gds.TestSupport.toArguments;
+import static org.neo4j.gds.TestSupport.toArgumentsFlat;
 
 @GdlExtension
 final class DegreeCentralityTest {

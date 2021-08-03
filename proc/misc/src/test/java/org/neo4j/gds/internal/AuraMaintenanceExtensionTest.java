@@ -23,9 +23,9 @@ import org.apache.commons.io.file.PathUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.GraphStoreExportSettings;
-import org.neo4j.graphalgo.BaseTest;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -38,7 +38,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 class AuraMaintenanceExtensionTest extends BaseTest {
 

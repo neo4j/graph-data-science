@@ -20,17 +20,17 @@
 package org.neo4j.gds.wcc;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.CommunityHelper;
+import org.neo4j.gds.CommunityHelper;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.graphalgo.core.utils.partition.Partition;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
-import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.ArrayList;
 import java.util.List;

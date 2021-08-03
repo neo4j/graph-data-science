@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.louvain.LouvainMutateProc;
-import org.neo4j.graphalgo.TestLog;
+import org.neo4j.gds.TestLog;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;

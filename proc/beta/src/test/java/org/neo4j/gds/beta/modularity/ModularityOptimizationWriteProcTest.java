@@ -22,7 +22,7 @@ package org.neo4j.gds.beta.modularity;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 
 import java.util.Map;
@@ -30,8 +30,8 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
-import static org.neo4j.graphalgo.GdsCypher.ExecutionModes.WRITE;
+import static org.neo4j.gds.CommunityHelper.assertCommunities;
+import static org.neo4j.gds.GdsCypher.ExecutionModes.WRITE;
 
 class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest {
 

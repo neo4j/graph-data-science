@@ -33,7 +33,7 @@ import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.helper.TensorTestUtils;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -41,10 +41,9 @@ import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
 import org.neo4j.graphalgo.core.utils.partition.PartitionUtils;
 import org.neo4j.graphalgo.core.utils.progress.EmptyProgressEventTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.logging.NullLog;
 
 import java.util.Collections;
@@ -56,9 +55,9 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.neo4j.graphalgo.TestLog.INFO;
-import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
-import static org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph.DUMMY_PROPERTY;
+import static org.neo4j.gds.TestLog.INFO;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph.DUMMY_PROPERTY;
 
 @GdlExtension
 class GraphSageModelTrainerTest {

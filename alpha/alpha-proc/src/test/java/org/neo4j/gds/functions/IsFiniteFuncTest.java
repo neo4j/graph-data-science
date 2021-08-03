@@ -21,7 +21,7 @@ package org.neo4j.gds.functions;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 
 import java.util.Collection;
 import java.util.List;

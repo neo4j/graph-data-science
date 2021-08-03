@@ -25,12 +25,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.QueryRunner;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.QueryRunner;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.junit.annotation.Edition;
-import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
+import org.neo4j.gds.junit.annotation.Edition;
+import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import java.time.ZonedDateTime;
 import java.util.Collections;

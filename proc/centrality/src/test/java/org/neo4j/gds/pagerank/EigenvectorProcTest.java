@@ -24,11 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphCreateProc;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.scaling.ScalarScaler;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.extension.Neo4jGraph;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
 import java.util.List;

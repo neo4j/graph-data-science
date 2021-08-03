@@ -20,15 +20,15 @@
 package org.neo4j.gds.beta.pregel.bfs;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.graphalgo.beta.pregel.Pregel;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.Map;
 

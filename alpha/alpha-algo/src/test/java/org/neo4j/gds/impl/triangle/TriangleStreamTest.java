@@ -21,13 +21,13 @@ package org.neo4j.gds.impl.triangle;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.gds.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
-import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
-import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
+import org.neo4j.gds.graphbuilder.DefaultBuilder;
+import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 

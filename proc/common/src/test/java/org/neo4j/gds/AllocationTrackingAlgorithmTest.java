@@ -25,8 +25,6 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.test.TestAlgorithm;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
@@ -39,7 +37,7 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
 public class AllocationTrackingAlgorithmTest extends AlgoTestBase {

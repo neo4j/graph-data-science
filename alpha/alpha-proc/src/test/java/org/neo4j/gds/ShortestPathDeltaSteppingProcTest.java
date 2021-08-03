@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.shortestpath.ShortestPathDeltaSteppingProc;
-import org.neo4j.graphalgo.BaseProcTest;
 
 import java.util.function.DoubleConsumer;
 

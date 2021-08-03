@@ -21,7 +21,7 @@ package org.neo4j.graphalgo.core.huge;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.Graph;

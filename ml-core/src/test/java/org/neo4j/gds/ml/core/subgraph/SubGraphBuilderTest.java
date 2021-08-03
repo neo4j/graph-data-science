@@ -25,10 +25,10 @@ import org.neo4j.gds.embeddings.graphsage.NeighborhoodSampler;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
-import org.neo4j.graphalgo.extension.Inject;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.Arrays;
 import java.util.List;

@@ -20,6 +20,7 @@
 package org.neo4j.gds.internal;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.embeddings.graphsage.EmptyGraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -31,7 +32,6 @@ import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.PropertyMappings;
-import org.neo4j.graphalgo.QueryRunner;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.schema.GraphSchema;

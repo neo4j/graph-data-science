@@ -25,7 +25,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.core.loading.BitIdMap;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

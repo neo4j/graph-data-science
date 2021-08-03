@@ -22,7 +22,7 @@ package org.neo4j.gds.internal;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.graphalgo.TestLog;
+import org.neo4j.gds.TestLog;
 
 import java.nio.file.Path;
 

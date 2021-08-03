@@ -28,9 +28,9 @@ import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.graphalgo.core.utils.paged.HugeObjectArray;
-import org.neo4j.graphalgo.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

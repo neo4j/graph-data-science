@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.junit.annotation.Edition;
+import org.neo4j.gds.junit.annotation.Edition;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GdsEditionTest {
     @Test
-    @org.neo4j.graphalgo.junit.annotation.GdsEditionTest(Edition.CE)
+    @org.neo4j.gds.junit.annotation.GdsEditionTest(Edition.CE)
     void isCommunity() {
         assertTrue(GdsEdition.instance().isOnCommunityEdition());
         assertFalse(GdsEdition.instance().isOnEnterpriseEdition());
@@ -36,7 +36,7 @@ class GdsEditionTest {
     }
 
     @Test
-    @org.neo4j.graphalgo.junit.annotation.GdsEditionTest(Edition.EE)
+    @org.neo4j.gds.junit.annotation.GdsEditionTest(Edition.EE)
     void isEnterprise() {
         assertFalse(GdsEdition.instance().isOnCommunityEdition());
         assertTrue(GdsEdition.instance().isOnEnterpriseEdition());
@@ -44,7 +44,7 @@ class GdsEditionTest {
     }
 
     @Test
-    @org.neo4j.graphalgo.junit.annotation.GdsEditionTest(Edition.CE)
+    @org.neo4j.gds.junit.annotation.GdsEditionTest(Edition.CE)
     void isInvalidLicense() {
         GdsEdition.instance().setToInvalidLicense("foobar");
         assertEquals("foobar", GdsEdition.instance().errorMessage().get());

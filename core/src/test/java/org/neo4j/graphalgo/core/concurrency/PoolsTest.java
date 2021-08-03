@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.core.concurrency;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.junit.annotation.Edition;
-import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
+import org.neo4j.gds.junit.annotation.Edition;
+import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import java.util.concurrent.ThreadPoolExecutor;
 

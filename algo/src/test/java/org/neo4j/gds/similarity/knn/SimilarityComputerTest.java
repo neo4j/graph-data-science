@@ -32,11 +32,11 @@ import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.nodeproperties.DoubleArrayTestProperties;
-import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
-import org.neo4j.graphalgo.nodeproperties.FloatArrayTestProperties;
-import org.neo4j.graphalgo.nodeproperties.LongArrayTestProperties;
-import org.neo4j.graphalgo.nodeproperties.LongTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleTestProperties;
+import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
+import org.neo4j.gds.nodeproperties.LongArrayTestProperties;
+import org.neo4j.gds.nodeproperties.LongTestProperties;
 
 import java.util.Random;
 import java.util.stream.Stream;

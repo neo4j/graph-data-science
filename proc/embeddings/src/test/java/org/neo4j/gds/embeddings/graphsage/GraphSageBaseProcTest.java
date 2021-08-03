@@ -25,8 +25,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.model.catalog.ModelDropProc;
 import org.neo4j.gds.model.catalog.ModelExistsProc;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.NodeProjection;
 import org.neo4j.graphalgo.NodeProjections;
@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.graphalgo.ElementProjection.PROJECT_ALL;
-import static org.neo4j.graphalgo.TestSupport.crossArguments;
+import static org.neo4j.gds.TestSupport.crossArguments;
 
 class GraphSageBaseProcTest extends BaseProcTest {
 

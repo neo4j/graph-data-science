@@ -21,7 +21,6 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.nodeproperties.LongNodeProperties;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ConsecutiveIdsConfig;
@@ -34,7 +33,7 @@ import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.gds.QueryRunner.runQuery;
 
 public interface ConsecutiveIdsConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>,CONFIG extends ConsecutiveIdsConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 

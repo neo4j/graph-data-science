@@ -23,7 +23,7 @@ import org.HdrHistogram.Histogram;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 
@@ -33,7 +33,7 @@ import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.graphalgo.TestSupport.toArguments;
+import static org.neo4j.gds.TestSupport.toArguments;
 
 class CommunityStatisticsTest {
 

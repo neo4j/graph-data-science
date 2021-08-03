@@ -36,14 +36,14 @@ import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
-import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.graphalgo.config.ConcurrencyConfig;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
-import org.neo4j.graphalgo.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
@@ -60,7 +60,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.utils.SimilarityHelper.assertSimilarityStreamsAreEqual;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.graphalgo.Orientation.NATURAL;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 abstract class NodeSimilarityProcTest<CONFIG extends NodeSimilarityBaseConfig> extends BaseProcTest implements
     AlgoBaseProcTest<NodeSimilarity, CONFIG, NodeSimilarityResult>,

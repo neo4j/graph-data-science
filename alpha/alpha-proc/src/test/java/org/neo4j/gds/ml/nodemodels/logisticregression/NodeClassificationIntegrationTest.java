@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationPredictMutateProc;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainProc;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphCreateProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
@@ -33,7 +33,7 @@ import org.neo4j.gds.functions.AsNodeFunc;
 import java.util.List;
 import java.util.Map;
 
-import static org.neo4j.graphalgo.assertj.ConditionFactory.hasSize;
+import static org.neo4j.gds.assertj.ConditionFactory.hasSize;
 
 class NodeClassificationIntegrationTest extends BaseProcTest {
 

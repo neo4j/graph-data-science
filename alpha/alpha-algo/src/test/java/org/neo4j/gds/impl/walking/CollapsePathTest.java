@@ -20,6 +20,10 @@
 package org.neo4j.gds.impl.walking;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
 import org.neo4j.graphalgo.api.Graph;
@@ -27,16 +31,12 @@ import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.api.Relationships;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
-import org.neo4j.graphalgo.extension.Inject;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 @GdlExtension
 class CollapsePathTest {

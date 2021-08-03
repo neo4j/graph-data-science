@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.TestSupport.crossArguments;
+import static org.neo4j.gds.TestSupport.crossArguments;
 
 class StratifiedKFoldSplitterTest {
 

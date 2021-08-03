@@ -22,7 +22,7 @@ package org.neo4j.gds.doc;
 import org.asciidoctor.Asciidoctor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.procedure.UserFunction;
 import org.reflections.Reflections;

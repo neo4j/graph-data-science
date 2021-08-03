@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.api.NodeMapping;
@@ -34,8 +34,8 @@ import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.extension.IdFunction;
-import org.neo4j.graphalgo.gdl.GdlFactory;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,8 +46,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.TestSupport.crossArguments;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.crossArguments;
 
 class RelationshipsBuilderTest {
 

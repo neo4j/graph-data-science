@@ -20,10 +20,10 @@
 package org.neo4j.gds.model.catalog;
 
 import org.junit.jupiter.api.AfterEach;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.gdl.GdlFactory;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.Map;
 

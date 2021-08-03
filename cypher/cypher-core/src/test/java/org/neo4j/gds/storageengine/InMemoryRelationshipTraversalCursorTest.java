@@ -24,10 +24,10 @@ import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.extension.IdFunction;
-import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.extension.Neo4jGraph;
-import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 
 import java.util.HashSet;
 

@@ -30,10 +30,10 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.config.BaseConfig;
 import org.neo4j.graphalgo.config.ModelConfig;
-import org.neo4j.graphalgo.gdl.GdlFactory;
-import org.neo4j.graphalgo.junit.annotation.Edition;
-import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
-import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
+import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.junit.annotation.Edition;
+import org.neo4j.gds.junit.annotation.GdsEditionTest;
+import org.neo4j.gds.model.catalog.TestTrainConfig;
 
 import java.util.List;
 import java.util.NoSuchElementException;

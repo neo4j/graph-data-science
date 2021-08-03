@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.GdsCypher;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.graphalgo.assertj.ConditionFactory.containsAllEntriesOf;
-import static org.neo4j.graphalgo.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
+import static org.neo4j.gds.assertj.ConditionFactory.containsAllEntriesOf;
+import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
 class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropagationStatsConfig> {
 

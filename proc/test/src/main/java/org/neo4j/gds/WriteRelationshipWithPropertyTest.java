@@ -34,8 +34,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
-import static org.neo4j.graphalgo.QueryRunner.runQueryWithRowConsumer;
+import static org.neo4j.gds.QueryRunner.runQuery;
+import static org.neo4j.gds.QueryRunner.runQueryWithRowConsumer;
 
 public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends WriteConfig & AlgoBaseConfig, RESULT>
     extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {

@@ -20,11 +20,11 @@
 package org.neo4j.gds.triangle.intersect;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.graphalgo.core.huge.HugeGraph;
 import org.neo4j.graphalgo.core.huge.NodeFilteredGraph;
 import org.neo4j.graphalgo.core.huge.UnionGraph;
-import org.neo4j.graphalgo.gdl.GdlFactory;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.Optional;
 

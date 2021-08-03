@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.config.GraphCreateFromStoreConfig;

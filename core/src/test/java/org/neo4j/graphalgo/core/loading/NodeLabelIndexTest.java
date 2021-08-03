@@ -21,16 +21,16 @@ package org.neo4j.graphalgo.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestLog;
-import org.neo4j.graphalgo.extension.Neo4jGraph;
-import org.neo4j.graphalgo.extension.Neo4jGraphExtension;
-import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
+import org.neo4j.gds.TestLog;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.Neo4jGraphExtension;
+import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 @Neo4jGraphExtension
 public class NodeLabelIndexTest extends BaseTest {

@@ -19,19 +19,19 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.graphalgo.CypherLoaderBuilder;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
-import org.neo4j.graphalgo.TestSupport;
-import org.neo4j.graphalgo.TestSupport.AllGraphStoreFactoryTypesTest;
+import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.TestSupport.AllGraphStoreFactoryTypesTest;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.config.GraphCreateFromCypherConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.graphalgo.GraphHelper.assertRelationships;
-import static org.neo4j.graphalgo.TestSupport.FactoryType.CYPHER;
+import static org.neo4j.gds.GraphHelper.assertRelationships;
+import static org.neo4j.gds.TestSupport.FactoryType.CYPHER;
 
 class GraphLoaderDirectionalityTest extends BaseTest {
 

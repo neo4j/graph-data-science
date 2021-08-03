@@ -25,8 +25,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
-import org.neo4j.graphalgo.junit.annotation.EnableForNeo4jVersion;
+import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
+import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
 import org.neo4j.io.ByteUnit;
 
 import java.util.stream.Stream;

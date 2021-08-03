@@ -28,7 +28,7 @@ import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.Arrays;

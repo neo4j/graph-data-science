@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths;
 
-import org.neo4j.graphalgo.extension.IdFunction;
+import org.neo4j.gds.extension.IdFunction;
 
 public final class PathTestUtil {
 

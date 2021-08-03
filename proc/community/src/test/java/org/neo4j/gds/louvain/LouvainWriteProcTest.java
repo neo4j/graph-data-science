@@ -31,7 +31,7 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.WritePropertyConfigProcTest;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;
@@ -49,8 +49,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
-import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
+import static org.neo4j.gds.CommunityHelper.assertCommunities;
+import static org.neo4j.gds.ThrowableRootCauseMatcher.rootCause;
 
 class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> implements
     ConsecutiveIdsConfigTest<Louvain, LouvainWriteConfig, Louvain> {

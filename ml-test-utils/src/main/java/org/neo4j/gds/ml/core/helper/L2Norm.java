@@ -26,7 +26,7 @@ import org.neo4j.gds.ml.core.functions.SingleParentVariable;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
-import static org.neo4j.graphalgo.math.L2Norm.l2Norm;
+import static org.neo4j.gds.math.L2Norm.l2Norm;
 
 public class L2Norm extends SingleParentVariable<Scalar> {
     public L2Norm(Variable<?> parent) {

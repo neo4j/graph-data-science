@@ -24,21 +24,21 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
-import org.neo4j.graphalgo.extension.TestGraph;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.neo4j.gds.TestSupport.crossArguments;
+import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.graphalgo.Orientation.UNDIRECTED;
-import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
-import static org.neo4j.graphalgo.TestSupport.crossArguments;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
 
 class BetweennessCentralityTest {
 

@@ -21,6 +21,8 @@ package org.neo4j.graphalgo;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.TerminateProcedure;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.concurrency.ParallelUtil;
 import org.neo4j.graphalgo.core.concurrency.Pools;

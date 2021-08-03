@@ -21,9 +21,9 @@ package org.neo4j.gds.degree;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.Map;

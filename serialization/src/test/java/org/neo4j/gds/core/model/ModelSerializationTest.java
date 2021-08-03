@@ -31,9 +31,9 @@ import org.neo4j.graphalgo.api.DefaultValue;
 import org.neo4j.graphalgo.api.schema.GraphSchema;
 import org.neo4j.graphalgo.core.model.Model;
 import org.neo4j.graphalgo.core.model.proto.GraphSchemaProto;
-import org.neo4j.graphalgo.embeddings.graphsage.GraphSageTestGraph;
-import org.neo4j.graphalgo.gdl.GdlFactory;
-import org.neo4j.graphalgo.model.catalog.TestTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
+import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.model.catalog.TestTrainConfig;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

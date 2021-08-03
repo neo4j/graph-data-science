@@ -23,7 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.api.NodeProperties;
-import org.neo4j.graphalgo.nodeproperties.DoubleTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleTestProperties;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;

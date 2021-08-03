@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.AlgoTestBase;
+import org.neo4j.gds.AlgoTestBase;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipProjection;
 import org.neo4j.graphalgo.RelationshipType;

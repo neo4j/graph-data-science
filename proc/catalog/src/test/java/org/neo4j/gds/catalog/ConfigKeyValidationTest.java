@@ -22,12 +22,12 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.test.TestProc;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.neo4j.graphalgo.ThrowableRootCauseMatcher.rootCause;
+import static org.neo4j.gds.ThrowableRootCauseMatcher.rootCause;
 
 class ConfigKeyValidationTest extends BaseProcTest {
 

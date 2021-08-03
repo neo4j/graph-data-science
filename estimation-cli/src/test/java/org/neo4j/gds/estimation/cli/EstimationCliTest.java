@@ -54,6 +54,8 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
+import org.neo4j.gds.junit.annotation.Edition;
+import org.neo4j.gds.junit.annotation.GdsEditionTest;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsProc;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamProc;
@@ -115,8 +117,6 @@ import org.neo4j.gds.wcc.WccWriteProc;
 import org.neo4j.graphalgo.config.MutateRelationshipConfig;
 import org.neo4j.graphalgo.config.WriteRelationshipConfig;
 import org.neo4j.graphalgo.core.model.ModelCatalog;
-import org.neo4j.graphalgo.junit.annotation.Edition;
-import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
 import org.neo4j.procedure.Procedure;
 
 import java.io.ByteArrayOutputStream;

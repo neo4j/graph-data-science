@@ -22,8 +22,8 @@ package org.neo4j.gds.internal;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestLog;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.TestLog;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 

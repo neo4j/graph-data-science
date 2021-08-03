@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.gds.QueryRunner.runQuery;
 
 public interface SourceNodesConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends SourceNodesConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 

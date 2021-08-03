@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.TestSupport;
 import org.neo4j.graphalgo.config.AlgoBaseConfig;
 import org.neo4j.graphalgo.config.ImmutableGraphCreateFromStoreConfig;
 import org.neo4j.graphalgo.config.NodeConfig;
@@ -30,7 +29,7 @@ import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 import org.neo4j.internal.recordstorage.RecordStorageEngine;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.gds.QueryRunner.runQuery;
 
 public interface NodeConfigTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends NodeConfig & AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {
 

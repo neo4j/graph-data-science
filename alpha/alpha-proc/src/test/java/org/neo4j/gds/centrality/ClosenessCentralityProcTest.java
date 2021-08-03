@@ -25,10 +25,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
-import org.neo4j.graphalgo.graphbuilder.DefaultBuilder;
-import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.graphbuilder.DefaultBuilder;
+import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 

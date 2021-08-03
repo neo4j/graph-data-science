@@ -22,6 +22,7 @@ package org.neo4j.gds.config;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
@@ -119,14 +120,14 @@ class GraphSageTrainConfigSerializerTest {
     }
 
     private static Stream<Arguments> aggregatorsWithActivationFunctions() {
-        return org.neo4j.graphalgo.TestSupport.crossArguments(
+        return TestSupport.crossArguments(
             () -> Stream.of(Arguments.of(Aggregator.AggregatorType.MEAN), Arguments.of(Aggregator.AggregatorType.POOL)),
             () -> Stream.of(Arguments.of(ActivationFunction.RELU), Arguments.of(ActivationFunction.RELU))
         );
     }
 
     private static Stream<Arguments> nonDefaultParameters() {
-        return org.neo4j.graphalgo.TestSupport.crossArguments(
+        return TestSupport.crossArguments(
             () -> Stream.of(Arguments.of(512)),                         // embeddingDimension
             () -> Stream.of(Arguments.of(List.of(42, 1337))),         // sampleSizes
             () -> Stream.of(Arguments.of(10.1), Arguments.of(0.8)),     // tolerance

@@ -21,8 +21,8 @@ package org.neo4j.gds.results;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseTest;
-import org.neo4j.graphalgo.TestSupport;
+import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
 
 import java.util.List;

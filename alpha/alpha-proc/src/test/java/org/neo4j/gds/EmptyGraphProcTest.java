@@ -31,8 +31,6 @@ import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
 import org.neo4j.gds.spanningtree.KSpanningTreeProc;
 import org.neo4j.gds.spanningtree.SpanningTreeProc;
 import org.neo4j.gds.triangle.TriangleProc;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

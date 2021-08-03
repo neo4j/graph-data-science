@@ -27,7 +27,7 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.core.utils.paged.dss.DisjointSetStruct;
 
 import java.util.Arrays;

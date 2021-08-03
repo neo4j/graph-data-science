@@ -22,7 +22,7 @@ package org.neo4j.gds.compat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.graphalgo.junit.annotation.DisableForNeo4jVersion;
+import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.kernel.internal.Version;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

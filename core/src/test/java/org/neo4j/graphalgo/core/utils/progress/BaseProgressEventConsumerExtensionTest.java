@@ -21,8 +21,8 @@ package org.neo4j.graphalgo.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.graphalgo.BaseTest;
 import org.neo4j.logging.Level;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;

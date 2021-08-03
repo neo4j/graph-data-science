@@ -29,7 +29,7 @@ import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.functions.NodePropertyFunc;
 import org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.graphalgo.api.nodeproperties.ValueType;
 
 import java.util.List;

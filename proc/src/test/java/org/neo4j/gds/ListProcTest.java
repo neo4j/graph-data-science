@@ -126,7 +126,6 @@ import org.neo4j.gds.wcc.WccMutateProc;
 import org.neo4j.gds.wcc.WccStatsProc;
 import org.neo4j.gds.wcc.WccStreamProc;
 import org.neo4j.gds.wcc.WccWriteProc;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphdb.Result;
 
 import java.util.List;

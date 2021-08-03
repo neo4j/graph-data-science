@@ -33,7 +33,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.graphalgo.QueryRunner.runQuery;
+import static org.neo4j.gds.QueryRunner.runQuery;
 import static org.neo4j.graphalgo.utils.ExceptionUtil.rootCause;
 
 public interface OrientationCombinationTest<ALGORITHM extends Algorithm<ALGORITHM, RESULT>, CONFIG extends AlgoBaseConfig, RESULT> extends AlgoBaseProcTest<ALGORITHM, CONFIG, RESULT> {

@@ -22,7 +22,7 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseProcTest;
+import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.graphalgo.core.loading.GraphStoreCatalog;
 

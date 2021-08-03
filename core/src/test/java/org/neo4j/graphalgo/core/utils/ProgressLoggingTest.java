@@ -21,12 +21,12 @@ package org.neo4j.graphalgo.core.utils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.BaseTest;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.graphalgo.PropertyMapping;
 import org.neo4j.graphalgo.StoreLoaderBuilder;
 import org.neo4j.graphalgo.api.GraphStoreFactory;
 import org.neo4j.graphalgo.compat.WriterLogBuilder;
-import org.neo4j.graphalgo.graphbuilder.GraphBuilder;
+import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 

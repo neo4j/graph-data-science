@@ -23,8 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.spanningtree.KSpanningTreeProc;
-import org.neo4j.graphalgo.BaseProcTest;
-import org.neo4j.graphalgo.GdsCypher;
 import org.neo4j.graphalgo.Orientation;
 
 import java.util.HashMap;

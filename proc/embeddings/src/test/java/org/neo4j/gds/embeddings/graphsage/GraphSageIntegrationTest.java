@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
-import org.neo4j.graphalgo.GdsCypher;
+import org.neo4j.gds.GdsCypher;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;

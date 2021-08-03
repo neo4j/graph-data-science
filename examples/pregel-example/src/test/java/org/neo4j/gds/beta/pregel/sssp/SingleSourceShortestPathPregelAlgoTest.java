@@ -25,15 +25,15 @@ import org.neo4j.graphalgo.core.concurrency.Pools;
 import org.neo4j.graphalgo.core.utils.ProgressLogger;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.extension.TestGraph;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Map;
 
 import static org.neo4j.gds.beta.pregel.sssp.SingleSourceShortestPathPregel.DISTANCE;
-import static org.neo4j.graphalgo.TestSupport.assertLongValues;
+import static org.neo4j.gds.TestSupport.assertLongValues;
 
 @GdlExtension
 class SingleSourceShortestPathPregelAlgoTest {

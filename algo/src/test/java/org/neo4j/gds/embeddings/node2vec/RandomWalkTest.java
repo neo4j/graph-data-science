@@ -25,8 +25,8 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.graphalgo.AlgoTestBase;
-import org.neo4j.graphalgo.TestGraphLoader;
+import org.neo4j.gds.AlgoTestBase;
+import org.neo4j.gds.TestGraphLoader;
 import org.neo4j.graphalgo.api.Graph;
 import org.neo4j.graphalgo.beta.generator.PropertyProducer;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGeneratorBuilder;
@@ -46,8 +46,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.TestSupport.FactoryType.NATIVE;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
+import static org.neo4j.gds.TestSupport.FactoryType.NATIVE;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 class RandomWalkTest extends AlgoTestBase {
 

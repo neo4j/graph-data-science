@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestProgressLogger;
+import org.neo4j.gds.TestProgressLogger;
 import org.neo4j.graphalgo.api.GraphStore;
 import org.neo4j.graphalgo.beta.generator.RandomGraphGenerator;
 import org.neo4j.graphalgo.beta.generator.RelationshipDistribution;
@@ -39,12 +39,12 @@ import org.neo4j.graphalgo.core.utils.mem.MemoryTree;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.ProgressTracker;
 import org.neo4j.graphalgo.core.utils.progress.v2.tasks.TaskProgressTracker;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
-import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.junit.annotation.Edition;
-import org.neo4j.graphalgo.junit.annotation.GdsEditionTest;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.junit.annotation.Edition;
+import org.neo4j.gds.junit.annotation.GdsEditionTest;
 
 import java.util.Map;
 import java.util.Optional;
@@ -53,13 +53,13 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.graphalgo.CommunityHelper.assertCommunities;
-import static org.neo4j.graphalgo.CommunityHelper.assertCommunitiesWithLabels;
-import static org.neo4j.graphalgo.TestLog.INFO;
-import static org.neo4j.graphalgo.TestSupport.assertMemoryEstimation;
-import static org.neo4j.graphalgo.TestSupport.ids;
+import static org.neo4j.gds.CommunityHelper.assertCommunities;
+import static org.neo4j.gds.CommunityHelper.assertCommunitiesWithLabels;
+import static org.neo4j.gds.TestLog.INFO;
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.neo4j.gds.TestSupport.ids;
 import static org.neo4j.graphalgo.core.ProcedureConstants.TOLERANCE_DEFAULT;
-import static org.neo4j.graphalgo.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
+import static org.neo4j.gds.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
 @GdlExtension
 class LouvainTest {

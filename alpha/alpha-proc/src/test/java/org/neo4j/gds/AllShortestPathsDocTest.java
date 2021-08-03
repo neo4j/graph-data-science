@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.functions.IsFiniteFunc;
 import org.neo4j.gds.shortestpaths.AllShortestPathsProc;
-import org.neo4j.graphalgo.BaseProcTest;
 import org.neo4j.graphdb.Result;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

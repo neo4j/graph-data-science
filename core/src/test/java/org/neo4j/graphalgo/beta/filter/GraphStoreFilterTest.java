@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.graphalgo.NodeLabel;
 import org.neo4j.graphalgo.Orientation;
 import org.neo4j.graphalgo.RelationshipType;
-import org.neo4j.graphalgo.TestLog;
+import org.neo4j.gds.TestLog;
 import org.neo4j.graphalgo.api.AdjacencyCursor;
 import org.neo4j.graphalgo.api.AdjacencyList;
 import org.neo4j.graphalgo.api.GraphStore;
@@ -44,7 +44,7 @@ import org.neo4j.graphalgo.core.loading.IdMapImplementations;
 import org.neo4j.graphalgo.core.loading.construction.GraphFactory;
 import org.neo4j.graphalgo.core.loading.construction.TestMethodRunner;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.gdl.GdlFactory;
+import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 import org.neo4j.logging.NullLog;
@@ -59,10 +59,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.graphalgo.TestSupport.assertGraphEquals;
-import static org.neo4j.graphalgo.TestSupport.fromGdl;
-import static org.neo4j.graphalgo.TestSupport.graphStoreFromGDL;
-import static org.neo4j.graphalgo.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.TestSupport.graphStoreFromGDL;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class GraphStoreFilterTest {
 

@@ -33,11 +33,11 @@ import org.neo4j.graphalgo.core.loading.construction.TestMethodRunner;
 import org.neo4j.graphalgo.core.utils.io.file.GraphStoreToFileExporter;
 import org.neo4j.graphalgo.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.extension.GdlExtension;
-import org.neo4j.graphalgo.extension.GdlGraph;
-import org.neo4j.graphalgo.extension.IdFunction;
-import org.neo4j.graphalgo.extension.Inject;
-import org.neo4j.graphalgo.gdl.GdlFactory;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.graphalgo.TestSupport.graphStoreFromGDL;
+import static org.neo4j.gds.TestSupport.graphStoreFromGDL;
 import static org.neo4j.graphalgo.core.utils.io.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 import static org.neo4j.graphalgo.core.utils.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
