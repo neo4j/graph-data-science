@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.core.functions.Weights;
@@ -526,11 +527,11 @@ public class EstimationCli implements Runnable {
     }
 
     private static final List<String> PACKAGES_TO_SCAN = List.of(
-        "org.neo4j.gds",
-        "org.neo4j.gds.catalog",
-        "org.neo4j.gds.paths",
-        "org.neo4j.gds.embeddings",
-        "org.neo4j.gds.ml"
+        "org.neo4j.gds"
+    );
+
+    private static final List<String> PACKAGES_BLACKLIST = List.of(
+        "org.neo4j.gds.pregel"
     );
 
     private Method findProcedure(String procedure) {
@@ -569,6 +570,7 @@ public class EstimationCli implements Runnable {
             .flatMap(reflections -> reflections
                 .getMethodsAnnotatedWith(Procedure.class)
                 .stream())
+            .filter(this::isBlacklisted)
             .flatMap(method -> {
                 var annotation = method.getAnnotation(Procedure.class);
                 var valueName = annotation.value();
@@ -581,6 +583,11 @@ public class EstimationCli implements Runnable {
                     .map(name -> ImmutableProcedureMethod.of(name, method));
             })
             .sorted(Comparator.comparing(ProcedureMethod::name, String.CASE_INSENSITIVE_ORDER));
+    }
+
+    private boolean isBlacklisted(Method method) {
+        var packageName = method.getDeclaringClass().getPackageName();
+        return PACKAGES_BLACKLIST.stream().noneMatch(packageName::contains);
     }
 
     private EstimatedProcedure estimateProcedure(
