@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.compat._43;
 
-import org.neo4j.graphalgo.compat.CompatAccessMode;
-import org.neo4j.graphalgo.compat.CustomAccessMode;
+import org.neo4j.gds.compat.CompatAccessMode;
+import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.internal.kernel.api.RelTypeSupplier;
 import org.neo4j.internal.kernel.api.TokenSet;
 

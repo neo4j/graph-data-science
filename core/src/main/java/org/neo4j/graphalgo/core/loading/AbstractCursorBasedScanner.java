@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.compat.StoreScan;
+import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.paged.SparseLongArray;
 import org.neo4j.internal.kernel.api.Cursor;

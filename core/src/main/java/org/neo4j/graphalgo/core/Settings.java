@@ -25,8 +25,8 @@ import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
 import org.neo4j.configuration.helpers.SocketAddress;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphalgo.compat.EnterpriseLicensingSettings;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphdb.config.Setting;
 
 import java.nio.file.Path;

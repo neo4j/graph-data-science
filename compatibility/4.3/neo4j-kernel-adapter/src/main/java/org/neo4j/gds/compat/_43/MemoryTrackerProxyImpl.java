@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.compat._43;
 
-import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
-import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
+import org.neo4j.gds.compat.AllocationTrackerAdapter;
+import org.neo4j.gds.compat.MemoryTrackerProxy;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.MemoryTracker;
 

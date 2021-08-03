@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.compat._43;
 
-import org.neo4j.graphalgo.compat.CompatIndexQuery;
+import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 
 final class CompatIndexQueryImpl implements CompatIndexQuery {

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.compat._43;
 
-import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
+import org.neo4j.gds.compat.AllocationTrackerAdapter;
 import org.neo4j.memory.MemoryTracker;
 
 final class AllocationTrackerAdapterImpl implements AllocationTrackerAdapter {

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.datasets;
 
-import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
+import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 
 import java.nio.file.Path;
 import java.util.Map;

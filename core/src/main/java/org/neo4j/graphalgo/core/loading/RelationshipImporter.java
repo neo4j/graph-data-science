@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphalgo.Orientation;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Aggregation;
 import org.neo4j.graphalgo.core.utils.RawValues;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;

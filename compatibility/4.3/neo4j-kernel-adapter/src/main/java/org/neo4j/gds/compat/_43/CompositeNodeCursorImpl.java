@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.compat._43;
 
-import org.neo4j.graphalgo.compat.CompositeNodeCursor;
+import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 
 import java.util.List;

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.compat._43;
 
-import org.neo4j.graphalgo.compat.CompatUsernameAuthSubject;
+import org.neo4j.gds.compat.CompatUsernameAuthSubject;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 final class CompatUsernameAuthSubjectImpl extends CompatUsernameAuthSubject {

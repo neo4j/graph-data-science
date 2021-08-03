@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.compat.CompositeNodeCursor;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.gds.compat.CompositeNodeCursor;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Read;
 

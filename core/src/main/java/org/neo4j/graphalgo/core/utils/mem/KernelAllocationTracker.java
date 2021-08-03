@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
-import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
+import org.neo4j.gds.compat.AllocationTrackerAdapter;
 
 public final class KernelAllocationTracker implements AllocationTracker {
 

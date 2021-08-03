@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.utils.mem;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphalgo.compat.MemoryTrackerProxy;
+import org.neo4j.gds.compat.MemoryTrackerProxy;
 
 import java.util.function.Supplier;
 

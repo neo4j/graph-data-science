@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
-import org.neo4j.graphalgo.compat.AllocationTrackerAdapter;
+import org.neo4j.gds.compat.AllocationTrackerAdapter;
 
 import java.util.concurrent.atomic.LongAdder;
 

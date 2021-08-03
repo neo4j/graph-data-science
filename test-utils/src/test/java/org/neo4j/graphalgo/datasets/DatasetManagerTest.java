@@ -22,7 +22,7 @@ package org.neo4j.graphalgo.datasets;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
+import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 import org.neo4j.graphalgo.core.GdsEdition;
 
 import java.io.IOException;

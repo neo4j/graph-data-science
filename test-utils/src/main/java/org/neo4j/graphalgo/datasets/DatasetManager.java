@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.datasets;
 
 import org.apache.commons.io.file.PathUtils;
-import org.neo4j.graphalgo.compat.GdsGraphDatabaseAPI;
+import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;

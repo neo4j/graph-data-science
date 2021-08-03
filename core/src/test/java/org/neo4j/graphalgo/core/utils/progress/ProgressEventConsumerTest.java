@@ -20,7 +20,7 @@
 package org.neo4j.graphalgo.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.scheduler.Group;
 import org.neo4j.test.FakeClockJobScheduler;

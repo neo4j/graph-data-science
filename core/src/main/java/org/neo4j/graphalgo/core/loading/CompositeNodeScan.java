@@ -19,8 +19,8 @@
  */
 package org.neo4j.graphalgo.core.loading;
 
-import org.neo4j.graphalgo.compat.CompositeNodeCursor;
-import org.neo4j.graphalgo.compat.StoreScan;
+import org.neo4j.gds.compat.CompositeNodeCursor;
+import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.kernel.api.KernelTransaction;
 

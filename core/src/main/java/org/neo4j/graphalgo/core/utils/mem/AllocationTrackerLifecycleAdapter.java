@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core.utils.mem;
 
-import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;

@@ -19,7 +19,7 @@
  */
 package org.neo4j.graphalgo.core;
 
-import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.SecurityContext;

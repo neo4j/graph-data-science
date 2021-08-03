@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.core.utils.io.db;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphalgo.api.GraphStore;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.core.Settings;
 import org.neo4j.graphalgo.core.utils.io.GraphStoreExporter;
 import org.neo4j.graphalgo.core.utils.io.GraphStoreInput;

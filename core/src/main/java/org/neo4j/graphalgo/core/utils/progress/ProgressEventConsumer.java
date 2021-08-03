@@ -21,9 +21,9 @@ package org.neo4j.graphalgo.core.utils.progress;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.graphalgo.compat.JobPromise;
-import org.neo4j.graphalgo.compat.JobRunner;
-import org.neo4j.graphalgo.compat.Neo4jProxy;
+import org.neo4j.gds.compat.JobPromise;
+import org.neo4j.gds.compat.JobRunner;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.scheduler.Group;
 import org.neo4j.scheduler.JobScheduler;
 
