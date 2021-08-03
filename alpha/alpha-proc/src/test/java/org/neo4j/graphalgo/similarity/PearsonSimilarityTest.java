@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.similarity;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.impl.similarity.SimilarityVectorAggregator;
 import org.neo4j.graphalgo.compat.MapUtil;
-import org.neo4j.graphalgo.impl.similarity.SimilarityVectorAggregator;
 import org.neo4j.graphdb.Node;
 
 import java.util.Arrays;

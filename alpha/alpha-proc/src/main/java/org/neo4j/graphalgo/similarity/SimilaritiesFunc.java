@@ -23,8 +23,8 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
+import org.neo4j.gds.impl.similarity.SimilarityVectorAggregator;
 import org.neo4j.graphalgo.core.utils.Intersections;
-import org.neo4j.graphalgo.impl.similarity.SimilarityVectorAggregator;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserAggregationFunction;
@@ -37,9 +37,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import static org.neo4j.graphalgo.impl.similarity.SimilarityVectorAggregator.CATEGORY_KEY;
-import static org.neo4j.graphalgo.impl.similarity.SimilarityVectorAggregator.WEIGHT_KEY;
-import static org.neo4j.graphalgo.impl.utils.NumberUtils.getDoubleValue;
+import static org.neo4j.gds.impl.similarity.SimilarityVectorAggregator.CATEGORY_KEY;
+import static org.neo4j.gds.impl.similarity.SimilarityVectorAggregator.WEIGHT_KEY;
+import static org.neo4j.gds.impl.utils.NumberUtils.getDoubleValue;
 
 public class SimilaritiesFunc {
 

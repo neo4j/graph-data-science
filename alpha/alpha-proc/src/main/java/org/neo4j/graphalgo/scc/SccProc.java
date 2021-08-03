@@ -20,6 +20,8 @@
 package org.neo4j.graphalgo.scc;
 
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.impl.scc.SccAlgorithm;
+import org.neo4j.gds.impl.scc.SccConfig;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.graphalgo.AlgoBaseProc;
@@ -36,8 +38,6 @@ import org.neo4j.graphalgo.core.utils.TerminationFlag;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
 import org.neo4j.graphalgo.core.utils.paged.HugeLongArray;
 import org.neo4j.graphalgo.core.write.NodePropertyExporter;
-import org.neo4j.graphalgo.impl.scc.SccAlgorithm;
-import org.neo4j.graphalgo.impl.scc.SccConfig;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

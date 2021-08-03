@@ -19,15 +19,15 @@
  */
 package org.neo4j.graphalgo.similarity;
 
+import org.neo4j.gds.impl.similarity.CosineAlgorithm;
+import org.neo4j.gds.impl.similarity.CosineConfig;
+import org.neo4j.gds.results.SimilarityResult;
+import org.neo4j.gds.results.SimilarityStatsResult;
+import org.neo4j.gds.results.SimilaritySummaryResult;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.mem.AllocationTracker;
-import org.neo4j.graphalgo.impl.similarity.CosineAlgorithm;
-import org.neo4j.graphalgo.impl.similarity.CosineConfig;
 import org.neo4j.graphalgo.impl.similarity.CosineConfigImpl;
-import org.neo4j.graphalgo.results.SimilarityResult;
-import org.neo4j.graphalgo.results.SimilarityStatsResult;
-import org.neo4j.graphalgo.results.SimilaritySummaryResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

@@ -20,6 +20,9 @@
 package org.neo4j.graphalgo.spanningtree;
 
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.impl.spanningTrees.Prim;
+import org.neo4j.gds.impl.spanningTrees.SpanningGraph;
+import org.neo4j.gds.impl.spanningTrees.SpanningTree;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
@@ -28,9 +31,6 @@ import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.TransactionContext;
 import org.neo4j.graphalgo.core.utils.ProgressTimer;
 import org.neo4j.graphalgo.core.write.RelationshipExporter;
-import org.neo4j.graphalgo.impl.spanningTrees.Prim;
-import org.neo4j.graphalgo.impl.spanningTrees.SpanningGraph;
-import org.neo4j.graphalgo.impl.spanningTrees.SpanningTree;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;

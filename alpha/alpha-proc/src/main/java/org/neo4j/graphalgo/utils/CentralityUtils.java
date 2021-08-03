@@ -20,8 +20,8 @@
 package org.neo4j.graphalgo.utils;
 
 import org.neo4j.gds.result.CentralityResult;
+import org.neo4j.gds.results.CentralityScore;
 import org.neo4j.graphalgo.api.Graph;
-import org.neo4j.graphalgo.results.CentralityScore;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;

@@ -20,6 +20,10 @@
 package org.neo4j.graphalgo.walking;
 
 import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.impl.walking.RandomWalk;
+import org.neo4j.gds.impl.walking.RandomWalkConfig;
+import org.neo4j.gds.impl.walking.WalkPath;
+import org.neo4j.gds.impl.walking.WalkResult;
 import org.neo4j.graphalgo.AlgoBaseProc;
 import org.neo4j.graphalgo.AlphaAlgorithmFactory;
 import org.neo4j.graphalgo.api.Graph;
@@ -27,10 +31,6 @@ import org.neo4j.graphalgo.compat.Neo4jProxy;
 import org.neo4j.graphalgo.config.GraphCreateConfig;
 import org.neo4j.graphalgo.core.CypherMapWrapper;
 import org.neo4j.graphalgo.core.utils.TerminationFlag;
-import org.neo4j.graphalgo.impl.walking.RandomWalk;
-import org.neo4j.graphalgo.impl.walking.RandomWalkConfig;
-import org.neo4j.graphalgo.impl.walking.WalkPath;
-import org.neo4j.graphalgo.impl.walking.WalkResult;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

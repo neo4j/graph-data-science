@@ -23,11 +23,11 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.impl.similarity.ApproxNearestNeighborsAlgorithm;
+import org.neo4j.gds.impl.similarity.SimilarityConfig;
+import org.neo4j.gds.impl.similarity.SimilarityInput;
 import org.neo4j.graphalgo.compat.MapUtil;
 import org.neo4j.graphalgo.functions.AsNodeFunc;
-import org.neo4j.graphalgo.impl.similarity.ApproxNearestNeighborsAlgorithm;
-import org.neo4j.graphalgo.impl.similarity.SimilarityConfig;
-import org.neo4j.graphalgo.impl.similarity.SimilarityInput;
 
 import java.util.Map;
 
